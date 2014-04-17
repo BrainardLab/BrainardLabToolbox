@@ -21,8 +21,6 @@
 % Plotting               - Support for plotting.
 % Psychometric           - Support for psychometric calculations.
 % PTBSupport             - Do useful things in Psychtoolbox display environment.
-% ReceptorIsolate        - Code to calculate stimuli that isolates receptors.
 % SpectralData           - Misc spectral data.
 % Strings                - String utilities from Matlab Central.  Routine strsplit or something much
 %                          like it appeared in Matlab 2013a.
-% xOld                   - We think these are no longer used.
