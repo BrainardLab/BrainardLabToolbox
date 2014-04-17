@@ -1,0 +1,1 @@
+function UsePsychtoolboxTrunk% UsePsychtoolboxTrunk%% Switch to the "trunk" version of PTB-3%% 10/14/06  dhb  Wrote it.startup('trunk');
