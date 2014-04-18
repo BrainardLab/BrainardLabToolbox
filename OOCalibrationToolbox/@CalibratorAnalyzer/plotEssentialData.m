@@ -44,7 +44,7 @@ function plotChromaticityData(obj, calStruct)
     xyYLocus = XYZToxyY(T_xyz);
     
     % Init figure
-    h = figure('Name', 'Chromaticity Plot', 'NumberTitle', 'off', 'Visible', 'off'); 
+    h = figure('Name', RGB channel chromaticities', 'NumberTitle', 'off', 'Visible', 'off'); 
     clf; hold on;
     
     plot(xyYMon(1,1)',  xyYMon(2,1)','ro','MarkerSize',8,'MarkerFaceColor','r');
