@@ -11,7 +11,8 @@ function SendEmail(recipients, subject, body, sender)
 % Input:
 % recipients (string|cell array) - The email address(es) of the recipients.
 %     Single addresses are specified as a string, whereas multiple
-%     recipients are specified as a cell array of strings.
+%     recipients are specified as a cell array of strings.  If
+%     recipients is empty, the routine does not try to send the email.
 % subject (string) - The subject of the email.
 % body (string) - The body, i.e. main text, of the email message.
 % sender (string) - Email address of the sender.  Default:
@@ -31,8 +32,10 @@ setpref('Internet', 'SMTP_Server', 'smtp-relay.upenn.edu');
 setpref('Internet', 'E_Mail', sender);
 
 % Send the e-mail.
-try
-    sendmail(recipients, subject, body);
-catch e
-    fprintf('\nERROR: `sendmail` command did not succeed. Proceeding anyway.\n');
+if (~isempty(recipients))
+    try
+        sendmail(recipients, subject, body);
+    catch e
+        fprintf('\nERROR: `sendmail` command did not succeed. Proceeding anyway.\n');
+    end
 end
