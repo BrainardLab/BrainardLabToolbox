@@ -23,8 +23,55 @@ function plotEssentialData(obj)
     % 3. Chromaticity data
     plotChromaticityData(obj, calStruct);
 
-
+    % 4. Full the primaries' spectra for all gamma input values (unscaled/scaled)
+    plotFullSpectra(obj, calStruct, 1, 'Red phosphor');
+    plotFullSpectra(obj, calStruct, 2, 'Green phosphor');
+    plotFullSpectra(obj, calStruct, 3, 'Blue phosphor');
+    
 end
+
+
+function plotFullSpectra(obj, calStruct, primaryIndex, primaryName)
+    % Init figure
+    h = figure('Name', sprintf('%s spectra', primaryName), 'NumberTitle', 'off', 'Visible', 'off'); 
+    clf; hold on;
+   
+    % Put measurements into columns of a matrix from raw data in calibration file.
+    fullSpectra   = squeeze(calStruct.rawData.gammaCurveMeanMeasurements(primaryIndex, :,:));
+    scaledSpectra = 0*fullSpectra;
+    
+    %maxSpectra    = repmat(max(fullSpectra,[],2), [1 size(fullSpectra,2)]);
+    %scaledSpectra = fullSpectra./maxSpectra;    
+    maxSpectra = fullSpectra(end,:); 
+    for gammaPoint = 1:calStruct.describe.nMeas
+        scaledSpectra(gammaPoint,:) = (fullSpectra(gammaPoint,:)' * (fullSpectra(gammaPoint,:)' \ maxSpectra'))';
+    end
+    
+    % Compute spectral axis
+    S = calStruct.rawData.S;
+    spectralAxis = SToWls(S);
+    
+    % measured spectra
+    subplot(1,2,1);
+    plot(spectralAxis, fullSpectra);
+    xlabel('Wavelength (nm)', 'Fontweight', 'bold');
+    ylabel('Power', 'Fontweight', 'bold');
+    axis([380,780,-Inf,Inf]);
+    
+    % scaled spectra
+    subplot(1,2,2);
+    plot(spectralAxis, scaledSpectra);
+    xlabel('Wavelength (nm)', 'Fontweight', 'bold');
+    ylabel('Normalized Power', 'Fontweight', 'bold');
+    axis([380,780,-Inf,Inf]);
+        
+    % Finish plot
+    drawnow;
+    
+    % Add figure to the figures group
+    obj.updateFiguresGroup(h);
+end
+
 
 function plotChromaticityData(obj, calStruct)
 
@@ -44,17 +91,19 @@ function plotChromaticityData(obj, calStruct)
     xyYLocus = XYZToxyY(T_xyz);
     
     % Init figure
-    h = figure('Name', 'Chromaticity Plot', 'NumberTitle', 'off', 'Visible', 'off'); 
+    h = figure('Name', 'RGB channel chromaticities', 'NumberTitle', 'off', 'Visible', 'off'); 
     clf; hold on;
     
-    plot(xyYMon(1,1)',  xyYMon(2,1)','ro','MarkerSize',8,'MarkerFaceColor','r');
-    plot(xyYMon(1,2)',  xyYMon(2,2)','go','MarkerSize',8,'MarkerFaceColor','g');
-    plot(xyYMon(1,3)',  xyYMon(2,3)','bo','MarkerSize',8,'MarkerFaceColor','b');
+    plot(xyYMon(1,1)',  xyYMon(2,1)',  'ro','MarkerSize',8,'MarkerFaceColor', [1.0 0.8 0.8]);
+    plot(xyYMon(1,2)',  xyYMon(2,2)',  'go','MarkerSize',8,'MarkerFaceColor', [0.8 1.0 0.8]);
+    plot(xyYMon(1,3)',  xyYMon(2,3)',  'bo','MarkerSize',8,'MarkerFaceColor', [0.8 0.8 1.0]);
+    plot(xyYAmb(1,1)',  xyYAmb(2,1)',  'ks','MarkerSize',8,'MarkerFaceColor', [0.8 0.8 0.8]);
     plot(xyYLocus(1,:)',xyYLocus(2,:)','k');
     
     axis([0 1 0 1]); axis('square');
     xlabel('x chromaticity');
     ylabel('y chromaticity');
+    box 'on'
     
     % Finish plot
     drawnow;
@@ -72,8 +121,9 @@ function plotAmbientData(obj, calStruct)
     % Compute spectral axis
     S = calStruct.rawData.S;
     spectralAxis = SToWls(S);
+    
+    % Plot data
     plot(spectralAxis, calStruct.processedData.P_ambient(:,1),'k');
-
     xlabel('Wavelength (nm)', 'Fontweight', 'bold');
     ylabel('Power', 'Fontweight', 'bold');
     title('Ambient spectra', 'Fontsize', 13, 'Fontname', 'helvetica', 'Fontweight', 'bold');
