@@ -1,80 +1,69 @@
-% Method to generate a plot of the essential data.
-% R,G,B channel gammas -> Fig. 1
-% R,G,B channels SPDs -> Fig. 2
-% Ambient SPD -> Fig. 3
-% Chromaticity plot ->Fig. 4
-%
-function plotEssentialData(obj)
+% Method to generate plots of the essential data.
+function plotEssentialData(obj, figureGroupIndex)
 
     % Get the cal
     calStruct = obj.cal;
     
     % 1. Gamma functions.
-    plotGammaData(obj, calStruct);
+    plotGammaData(obj, calStruct, figureGroupIndex);
 
     % 2. Spectral data
     if (obj.measurementChannelsNum > 3)
         % 2a. SPDs
-        plotSpectralData(obj, calStruct);
+        plotSpectralData(obj, calStruct, figureGroupIndex);
         % 2b. Ambient
-        plotAmbientData(obj, calStruct);
+        plotAmbientData(obj, calStruct, figureGroupIndex);
+        % 2c. Full spectral data for all gamma input values (unscaled/scaled)
+        plotFullSpectra(obj, calStruct, 1, 'Red phosphor', figureGroupIndex);
+        plotFullSpectra(obj, calStruct, 2, 'Green phosphor', figureGroupIndex);
+        plotFullSpectra(obj, calStruct, 3, 'Blue phosphor', figureGroupIndex);
     end
     
-    % 3. Chromaticity data
-    plotChromaticityData(obj, calStruct);
-
-    % 4. Full the primaries' spectra for all gamma input values (unscaled/scaled)
-    plotFullSpectra(obj, calStruct, 1, 'Red phosphor');
-    plotFullSpectra(obj, calStruct, 2, 'Green phosphor');
-    plotFullSpectra(obj, calStruct, 3, 'Blue phosphor');
+    % 3a. Chromaticity data
+    plotChromaticityData(obj, calStruct, figureGroupIndex);
     
+    % 3b. Chromaticity stability
+    plotPhosphorChromaticityStability(obj, calStruct, figureGroupIndex);   
 end
 
 
-function plotFullSpectra(obj, calStruct, primaryIndex, primaryName)
-    % Init figure
-    h = figure('Name', sprintf('%s spectra', primaryName), 'NumberTitle', 'off', 'Visible', 'off'); 
-    clf; hold on;
-   
-    % Put measurements into columns of a matrix from raw data in calibration file.
-    fullSpectra   = squeeze(calStruct.rawData.gammaCurveMeanMeasurements(primaryIndex, :,:));
-    scaledSpectra = 0*fullSpectra;
+function plotPhosphorChromaticityStability(obj, calStruct, figureGroupIndex)
+
+    % Load CIE '31 color matching functions
+    load T_xyz1931
+    T_xyz = SplineCmf(S_xyz1931, 683*T_xyz1931, obj.rawData.S);
     
-    %maxSpectra    = repmat(max(fullSpectra,[],2), [1 size(fullSpectra,2)]);
-    %scaledSpectra = fullSpectra./maxSpectra;    
-    maxSpectra = fullSpectra(end,:); 
-    for gammaPoint = 1:calStruct.describe.nMeas
-        scaledSpectra(gammaPoint,:) = (fullSpectra(gammaPoint,:)' * (fullSpectra(gammaPoint,:)' \ maxSpectra'))';
+    % Init figure
+    h = figure('Name', 'Phosphor Chromaticity', 'NumberTitle', 'off', 'Visible', 'off'); 
+    clf; hold on;
+    
+    for primaryIndex = 1:calStruct.describe.displayPrimariesNum
+        % Put measurements into columns of a matrix from raw data in calibration file.
+        fullSpectra = squeeze(calStruct.rawData.gammaCurveMeanMeasurements(primaryIndex, :,:));
+
+        % Compute phosphor chromaticities
+        xyYMon = XYZToxyY(T_xyz*fullSpectra');
+    
+        % Plot data
+        nDontPlotLowPower = 4;
+        plot(xyYMon(1,1:end)',xyYMon(2,1:end)','k+');
+        plot(xyYMon(1,nDontPlotLowPower+1:end)',xyYMon(2,nDontPlotLowPower+1:end)','r+');
     end
     
-    % Compute spectral axis
-    S = calStruct.rawData.S;
-    spectralAxis = SToWls(S);
+    axis([0 1 0 1]); axis('square');
+    xlabel('x chromaticity');
+    ylabel('y chromaticity');
+    title(sprintf('Lower %d luminances in black',nDontPlotLowPower));
+    box on;
     
-    % measured spectra
-    subplot(1,2,1);
-    plot(spectralAxis, fullSpectra);
-    xlabel('Wavelength (nm)', 'Fontweight', 'bold');
-    ylabel('Power', 'Fontweight', 'bold');
-    axis([380,780,-Inf,Inf]);
-    
-    % scaled spectra
-    subplot(1,2,2);
-    plot(spectralAxis, scaledSpectra);
-    xlabel('Wavelength (nm)', 'Fontweight', 'bold');
-    ylabel('Normalized Power', 'Fontweight', 'bold');
-    axis([380,780,-Inf,Inf]);
-        
     % Finish plot
     drawnow;
     
     % Add figure to the figures group
-    obj.updateFiguresGroup(h);
+    obj.updateFiguresGroup(h, figureGroupIndex);
 end
 
-
-function plotChromaticityData(obj, calStruct)
-
+function plotChromaticityData(obj, calStruct, figureGroupIndex)
     % Load CIE '31 color matching functions
     load T_xyz1931
     T_xyz = SplineCmf(S_xyz1931, 683*T_xyz1931, obj.rawData.S);
@@ -94,6 +83,7 @@ function plotChromaticityData(obj, calStruct)
     h = figure('Name', 'RGB channel chromaticities', 'NumberTitle', 'off', 'Visible', 'off'); 
     clf; hold on;
     
+    % Plot data
     plot(xyYMon(1,1)',  xyYMon(2,1)',  'ro','MarkerSize',8,'MarkerFaceColor', [1.0 0.8 0.8]);
     plot(xyYMon(1,2)',  xyYMon(2,2)',  'go','MarkerSize',8,'MarkerFaceColor', [0.8 1.0 0.8]);
     plot(xyYMon(1,3)',  xyYMon(2,3)',  'bo','MarkerSize',8,'MarkerFaceColor', [0.8 0.8 1.0]);
@@ -109,18 +99,61 @@ function plotChromaticityData(obj, calStruct)
     drawnow;
     
     % Add figure to the figures group
-    obj.updateFiguresGroup(h);
+    obj.updateFiguresGroup(h, figureGroupIndex);
 end
 
 
-function plotAmbientData(obj, calStruct)
-    % Init figure
-    h = figure('Name', 'Ambient SPD', 'NumberTitle', 'off', 'Visible', 'off'); 
-    clf; hold on;
+function plotFullSpectra(obj, calStruct, primaryIndex, primaryName, figureGroupIndex)
+    % Put measurements into columns of a matrix from raw data in calibration file.
+    fullSpectra   = squeeze(calStruct.rawData.gammaCurveMeanMeasurements(primaryIndex, :,:));
+    scaledSpectra = 0*fullSpectra;
+    
+    %maxSpectra    = repmat(max(fullSpectra,[],2), [1 size(fullSpectra,2)]);
+    %scaledSpectra = fullSpectra./maxSpectra;    
+    maxSpectra = fullSpectra(end,:); 
+    for gammaPoint = 1:calStruct.describe.nMeas
+        scaledSpectra(gammaPoint,:) = (fullSpectra(gammaPoint,:)' * (fullSpectra(gammaPoint,:)' \ maxSpectra'))';
+    end
     
     % Compute spectral axis
     S = calStruct.rawData.S;
     spectralAxis = SToWls(S);
+    
+    % Init figure
+    h = figure('Name', sprintf('%s spectra', primaryName), 'NumberTitle', 'off', 'Visible', 'off'); 
+    clf; hold on;
+    
+    % measured spectra
+    subplot(1,2,1);
+    plot(spectralAxis, fullSpectra);
+    xlabel('Wavelength (nm)', 'Fontweight', 'bold');
+    ylabel('Power', 'Fontweight', 'bold');
+    axis([380,780,-Inf,Inf]);
+    
+    % scaled spectra
+    subplot(1,2,2);
+    plot(spectralAxis, scaledSpectra);
+    xlabel('Wavelength (nm)', 'Fontweight', 'bold');
+    ylabel('Normalized Power', 'Fontweight', 'bold');
+    axis([380,780,-Inf,Inf]);
+    box on;
+    
+    % Finish plot
+    drawnow;
+    
+    % Add figure to the figures group
+    obj.updateFiguresGroup(h, figureGroupIndex);
+end
+
+
+function plotAmbientData(obj, calStruct, figureGroupIndex)
+    % Compute spectral axis
+    S = calStruct.rawData.S;
+    spectralAxis = SToWls(S);
+    
+    % Init figure
+    h = figure('Name', 'Ambient SPD', 'NumberTitle', 'off', 'Visible', 'off'); 
+    clf; hold on;
     
     % Plot data
     plot(spectralAxis, calStruct.processedData.P_ambient(:,1),'k');
@@ -128,15 +161,21 @@ function plotAmbientData(obj, calStruct)
     ylabel('Power', 'Fontweight', 'bold');
     title('Ambient spectra', 'Fontsize', 13, 'Fontname', 'helvetica', 'Fontweight', 'bold');
     axis([380,780,-Inf,Inf]);
+    box on;
     
     % Finish plot
     drawnow;
     
     % Add figure to the figures group
-    obj.updateFiguresGroup(h);
+    obj.updateFiguresGroup(h, figureGroupIndex);
 end
 
-function plotSpectralData(obj, calStruct)
+function plotSpectralData(obj, calStruct, figureGroupIndex)
+
+    % Compute spectral axis
+    S = calStruct.rawData.S;
+    spectralAxis = SToWls(S);
+    
     % Init figure
     h = figure('Name', 'Primary SPDs', 'NumberTitle', 'off', 'Visible', 'off'); 
     clf; hold on;
@@ -146,11 +185,7 @@ function plotSpectralData(obj, calStruct)
     if (primariesNum > 3)
         subplot(1,2,1); hold on;
     end
-    
-    % Compute spectral axis
-    S = calStruct.rawData.S;
-    spectralAxis = SToWls(S);
-    
+
     % Plot data
     plot(spectralAxis, calStruct.processedData.P_device(:,1), 'r');
     plot(spectralAxis, calStruct.processedData.P_device(:,2), 'g');
@@ -170,15 +205,16 @@ function plotSpectralData(obj, calStruct)
         title('Phosphor correction', 'Fontsize', 13, 'Fontname', 'helvetica', 'Fontweight', 'bold');
         axis([380,780,-Inf,Inf]);
     end
+    box on;
     
     % Finish plot
     drawnow;
     
     % Add figure to the figures group
-    obj.updateFiguresGroup(h);  
+    obj.updateFiguresGroup(h, figureGroupIndex);  
 end
 
-function plotGammaData(obj, calStruct)
+function plotGammaData(obj, calStruct, figureGroupIndex)
     % Init figure
     h = figure('Name', 'Gamma functions', 'NumberTitle', 'off', 'Visible', 'off'); 
     clf; hold on;
@@ -196,7 +232,6 @@ function plotGammaData(obj, calStruct)
     
     if (primariesNum > 3)
         subplot(1,2,2); hold on;
-        
         % Plot fitted data
         plot(calStruct.processedData.gammaInput, calStruct.processedData.gammaTable(:,4),'r-');
         plot(calStruct.processedData.gammaInput, calStruct.processedData.gammaTable(:,5),'g-');
@@ -251,11 +286,13 @@ function plotGammaData(obj, calStruct)
         axis([0 1 0 1.2]);
     end
      
+    box on;
+    
     % Finish plot
     drawnow;
     
     % Add figure to the figures group
-    obj.updateFiguresGroup(h); 
+    obj.updateFiguresGroup(h, figureGroupIndex); 
 end
 
 

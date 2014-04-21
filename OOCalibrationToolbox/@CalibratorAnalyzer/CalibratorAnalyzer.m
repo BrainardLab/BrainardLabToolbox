@@ -56,7 +56,7 @@ classdef CalibratorAnalyzer < Calibrator
         end
         
         % Method to analyze the loaded calStruct
-        obj = analyze(obj, calStruct);
+        obj = analyze(obj, calStruct, essentialDataGridDims, linearityChecksGridDims);
     end % Public methods
     
     
@@ -82,13 +82,16 @@ classdef CalibratorAnalyzer < Calibrator
         refitData(obj);
         
         % Method to plot all the data
-        plotAllData(obj);
+        plotAllData(obj, essentialDataGridDims, linearityChecksGridDims);
         
-        % Method to plot essential data from a calStruct
-        plotEssentialData(obj);
+        % Method to generate plots of the essential data.
+        plotEssentialData(obj, figureGroupIndex);
+        
+        % Method to generate plots of the linearity check data.
+        plotLinearityCheckData(obj, figureGroupIndex);
         
         % Method to add a figure to the Figures group
-        updateFiguresGroup(obj, figureHandle);
+        updateFiguresGroup(obj, figureHandle, figureGroupIndex);
         
         % Method to dock a figure to a window representing a group of figues
         dockFigureToGroup(obj, figureHandle, groupName)

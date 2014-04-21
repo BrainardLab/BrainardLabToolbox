@@ -1,11 +1,18 @@
-function updateFiguresGroup(obj, figHandle)
+function updateFiguresGroup(obj, figHandle, figureGroupIndex)
+
+    % Unload figureHandlesArray
+    figureHandlesArray = obj.figureHandlesArray{figureGroupIndex};
+    
     % Update figure handles array
-    if isempty(obj.figureHandlesArray)
-        obj.figureHandlesArray = figHandle;
+    if isempty(figureHandlesArray)
+        figureHandlesArray = figHandle;
     else
-        obj.figureHandlesArray = [obj.figureHandlesArray figHandle];
+        figureHandlesArray = [figureHandlesArray figHandle];
     end
     
     % Add figure to the group
-    obj.dockFigureToGroup(figHandle, obj.figureGroupName);
+    obj.dockFigureToGroup(figHandle, obj.figureGroupName{figureGroupIndex});
+    
+    % Reload figureHandlesArray
+    obj.figureHandlesArray{figureGroupIndex} = figureHandlesArray;
 end
