@@ -15,9 +15,14 @@ classdef CalibratorAnalyzer < Calibrator
     
     % Private properties. These must be specified at initialization time
     properties (Access = private)
+        % specific to the display system
         desktopHandle;
         figureGroupName;
         figureHandlesArray;
+        
+        % re-usable quantities
+        T_xyz;
+        spectralAxis;
     end
     
     % Public methods
@@ -80,6 +85,10 @@ classdef CalibratorAnalyzer < Calibrator
 
         % Method to refit the data (if the user so chooses)
         refitData(obj);
+        
+        % Method to compute re-usable quantities, like T_xyz, 
+        % set the sensor color space, etc.
+        computeReusableQuantities(obj);
         
         % Method to plot all the data
         plotAllData(obj, essentialDataGridDims, linearityChecksGridDims);

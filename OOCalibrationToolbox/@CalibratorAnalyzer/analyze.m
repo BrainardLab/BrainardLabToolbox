@@ -16,13 +16,7 @@ function obj = analyze(obj, calStruct, essentialDataGridDims, linearityChecksGri
     end
     
     obj.refitData();
-
-    
-    % The following should be a method, but for now just put it as stray
-    load T_xyz1931
-    T_xyz = SplineCmf(S_xyz1931,683*T_xyz1931,obj.rawData.S);
-    obj.cal = SetSensorColorSpace(obj.cal,T_xyz,obj.rawData.S);
-
+    obj.computeReusableQuantities();
     
     % For old-style routines that expect an old-format calStruct
     % convert calStruct to old-format:

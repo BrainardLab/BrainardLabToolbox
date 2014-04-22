@@ -28,10 +28,6 @@ end
 
 
 function plotPhosphorChromaticityStability(obj, calStruct, figureGroupIndex)
-
-    % Load CIE '31 color matching functions
-    load T_xyz1931
-    T_xyz = SplineCmf(S_xyz1931, 683*T_xyz1931, obj.rawData.S);
     
     % Init figure
     h = figure('Name', 'Phosphor Chromaticity', 'NumberTitle', 'off', 'Visible', 'off'); 
@@ -42,7 +38,7 @@ function plotPhosphorChromaticityStability(obj, calStruct, figureGroupIndex)
         fullSpectra = squeeze(calStruct.rawData.gammaCurveMeanMeasurements(primaryIndex, :,:));
 
         % Compute phosphor chromaticities
-        xyYMon = XYZToxyY(T_xyz*fullSpectra');
+        xyYMon = XYZToxyY(obj.T_xyz*fullSpectra');
     
         % Plot data
         nDontPlotLowPower = 4;
@@ -64,20 +60,17 @@ function plotPhosphorChromaticityStability(obj, calStruct, figureGroupIndex)
 end
 
 function plotChromaticityData(obj, calStruct, figureGroupIndex)
-    % Load CIE '31 color matching functions
-    load T_xyz1931
-    T_xyz = SplineCmf(S_xyz1931, 683*T_xyz1931, obj.rawData.S);
-    
+
     % Compute xyLum of the three primaries
     if (obj.measurementChannelsNum > 3)
-        xyYMon = XYZToxyY(T_xyz * calStruct.processedData.P_device);
-        xyYAmb = XYZToxyY(T_xyz * calStruct.processedData.P_ambient);
+        xyYMon = XYZToxyY(obj.T_xyz * calStruct.processedData.P_device);
+        xyYAmb = XYZToxyY(obj.T_xyz * calStruct.processedData.P_ambient);
     else
         xyYMon = XYZToxyY(calStruct.processedData.P_device);
         xyYAmb = XYZToxyY(calStruct.processedData.P_ambient);
     end
     % Compute the spectral locus
-    xyYLocus = XYZToxyY(T_xyz);
+    xyYLocus = XYZToxyY(obj.T_xyz);
     
     % Init figure
     h = figure('Name', 'RGB channel chromaticities', 'NumberTitle', 'off', 'Visible', 'off'); 
@@ -115,24 +108,20 @@ function plotFullSpectra(obj, calStruct, primaryIndex, primaryName, figureGroupI
         scaledSpectra(gammaPoint,:) = (fullSpectra(gammaPoint,:)' * (fullSpectra(gammaPoint,:)' \ maxSpectra'))';
     end
     
-    % Compute spectral axis
-    S = calStruct.rawData.S;
-    spectralAxis = SToWls(S);
-    
     % Init figure
     h = figure('Name', sprintf('%s spectra', primaryName), 'NumberTitle', 'off', 'Visible', 'off'); 
     clf; hold on;
     
     % measured spectra
     subplot(1,2,1);
-    plot(spectralAxis, fullSpectra);
+    plot(obj.spectralAxis, fullSpectra);
     xlabel('Wavelength (nm)', 'Fontweight', 'bold');
     ylabel('Power', 'Fontweight', 'bold');
     axis([380,780,-Inf,Inf]);
     
     % scaled spectra
     subplot(1,2,2);
-    plot(spectralAxis, scaledSpectra);
+    plot(obj.spectralAxis, scaledSpectra);
     xlabel('Wavelength (nm)', 'Fontweight', 'bold');
     ylabel('Normalized Power', 'Fontweight', 'bold');
     axis([380,780,-Inf,Inf]);
@@ -147,16 +136,12 @@ end
 
 
 function plotAmbientData(obj, calStruct, figureGroupIndex)
-    % Compute spectral axis
-    S = calStruct.rawData.S;
-    spectralAxis = SToWls(S);
-    
     % Init figure
     h = figure('Name', 'Ambient SPD', 'NumberTitle', 'off', 'Visible', 'off'); 
     clf; hold on;
     
     % Plot data
-    plot(spectralAxis, calStruct.processedData.P_ambient(:,1),'k');
+    plot(obj.spectralAxis, calStruct.processedData.P_ambient(:,1),'k');
     xlabel('Wavelength (nm)', 'Fontweight', 'bold');
     ylabel('Power', 'Fontweight', 'bold');
     title('Ambient spectra', 'Fontsize', 13, 'Fontname', 'helvetica', 'Fontweight', 'bold');
@@ -172,10 +157,6 @@ end
 
 function plotSpectralData(obj, calStruct, figureGroupIndex)
 
-    % Compute spectral axis
-    S = calStruct.rawData.S;
-    spectralAxis = SToWls(S);
-    
     % Init figure
     h = figure('Name', 'Primary SPDs', 'NumberTitle', 'off', 'Visible', 'off'); 
     clf; hold on;
@@ -187,9 +168,9 @@ function plotSpectralData(obj, calStruct, figureGroupIndex)
     end
 
     % Plot data
-    plot(spectralAxis, calStruct.processedData.P_device(:,1), 'r');
-    plot(spectralAxis, calStruct.processedData.P_device(:,2), 'g');
-    plot(spectralAxis, calStruct.processedData.P_device(:,3), 'b');
+    plot(obj.spectralAxis, calStruct.processedData.P_device(:,1), 'r');
+    plot(obj.spectralAxis, calStruct.processedData.P_device(:,2), 'g');
+    plot(obj.spectralAxis, calStruct.processedData.P_device(:,3), 'b');
     xlabel('Wavelength (nm)', 'Fontweight', 'bold');
     ylabel('Power', 'Fontweight', 'bold');
     title('Phosphor spectra', 'Fontsize', 13, 'Fontname', 'helvetica', 'Fontweight', 'bold');
@@ -197,9 +178,9 @@ function plotSpectralData(obj, calStruct, figureGroupIndex)
 
     if (primariesNum > 3)
         subplot(1,2,2); hold on;
-        plot(spectralAxis, calStruct.processedData.P_device(:,4), 'r');
-        plot(spectralAxis, calStruct.processedData.P_device(:,5), 'g');
-        plot(spectralAxis, calStruct.processedData.P_device(:,6), 'b');
+        plot(obj.spectralAxis, calStruct.processedData.P_device(:,4), 'r');
+        plot(obj.spectralAxis, calStruct.processedData.P_device(:,5), 'g');
+        plot(obj.spectralAxis, calStruct.processedData.P_device(:,6), 'b');
         xlabel('Wavelength (nm)', 'Fontweight', 'bold');
         ylabel('Power', 'Fontweight', 'bold');
         title('Phosphor correction', 'Fontsize', 13, 'Fontname', 'helvetica', 'Fontweight', 'bold');
