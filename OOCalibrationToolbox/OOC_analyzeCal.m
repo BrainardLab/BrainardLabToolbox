@@ -6,12 +6,13 @@ function OOC_analyzeCal
                     );
     
     % Load a calibration file
-    [calStruct, calFilename] = GetCalibrationStructure('Enter calibration filename','HDRFrontYokedMondrianfull',[]);
+    [calStruct, calFilename] = GetCalibrationStructure('Enter calibration filename','ViewSonicProbe',[]);
     
-    % Analyze the calibration file and display the results in a 4x4 grid
-    essentialDataGridDims = [3 3];
-    linearityChecksGridDims = [3 4];
-    calAnalyzer.analyze(calStruct, essentialDataGridDims, linearityChecksGridDims);
+    % Analyze the calibration file and display the results arranged in different grids
+    calAnalyzer.essentialDataGridDims       = [3 3];
+    calAnalyzer.linearityChecksGridDims     = [2 3];  
+    calAnalyzer.backgroundEffectsGridDims   = [2 3];  
+    calAnalyzer.analyze(calStruct);
     
     % Print cal struct
     calAnalyzer.displayCalStruct();

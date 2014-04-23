@@ -7,6 +7,9 @@
 classdef CalibratorAnalyzer < Calibrator  
     % Public properties
     properties
+        essentialDataGridDims       = [3 3]; % 3 columns x 3 rows
+        linearityChecksGridDims     = [2 3]; % 2 columns x 3 rows
+        backgroundEffectsGridDims   = [2 3]; % 2 columns x 3 rows
     end
     
     properties (SetAccess = private) 
@@ -82,7 +85,6 @@ classdef CalibratorAnalyzer < Calibrator
 
     % Private methods
     methods (Access = private)
-
         % Method to refit the data (if the user so chooses)
         refitData(obj);
         
@@ -103,7 +105,10 @@ classdef CalibratorAnalyzer < Calibrator
         updateFiguresGroup(obj, figureHandle, figureGroupIndex);
         
         % Method to dock a figure to a window representing a group of figues
-        dockFigureToGroup(obj, figureHandle, groupName)
+        dockFigureToGroup(obj, figureHandle, groupName);
+        
+        % Method to generate a shaded (filled) plot
+        makeShadedPlot(obj, x,y, faceColor, edgeColor);
     end  % private methods
     
 end
