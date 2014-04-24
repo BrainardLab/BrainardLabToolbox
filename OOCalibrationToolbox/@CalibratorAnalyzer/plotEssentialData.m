@@ -4,10 +4,10 @@ function plotEssentialData(obj, figureGroupIndex)
     % Get the cal
     calStruct = obj.cal;
     
-    % 1. Gamma functions.
+    % Gamma functions.
     plotGammaData(obj, calStruct, figureGroupIndex);
 
-    % 2. Spectral data
+    % Spectral data
     if (obj.measurementChannelsNum > 3)
         % SPDs
         plotSpectralData(obj, calStruct, figureGroupIndex);
@@ -23,7 +23,7 @@ function plotEssentialData(obj, figureGroupIndex)
     plotChromaticityData(obj, calStruct, figureGroupIndex);
     
     % Chromaticity stability
-    plotPhosphorChromaticityStabilityData(obj, calStruct, figureGroupIndex);
+    plotPrimaryChromaticityStabilityData(obj, calStruct, figureGroupIndex);
     
     % Repeatability 
     if (calStruct.describe.nAverage > 1)
@@ -117,9 +117,9 @@ function plotNulPlot(obj, calStruct, figureGroupIndex)
     obj.updateFiguresGroup(h, figureGroupIndex);
 end
 
-function plotPhosphorChromaticityStabilityData(obj, calStruct, figureGroupIndex)
+function plotPrimaryChromaticityStabilityData(obj, calStruct, figureGroupIndex)
     % Init figure
-    h = figure('Name', 'RGB Primaries Stability', 'NumberTitle', 'off', 'Visible', 'off'); 
+    h = figure('Name', 'RGB Primaries Chromaticity Stability', 'NumberTitle', 'off', 'Visible', 'off'); 
     clf; hold on;
     
     for primaryIndex = 1:calStruct.describe.displayPrimariesNum
@@ -130,18 +130,40 @@ function plotPhosphorChromaticityStabilityData(obj, calStruct, figureGroupIndex)
         xyYMon = XYZToxyY(obj.T_xyz*fullSpectra');
     
         % Plot data
-        nDontPlotLowPower = 4;
-        plot(xyYMon(1,1:end)',xyYMon(2,1:end)','k+');
-        plot(xyYMon(1,nDontPlotLowPower+1:end)',xyYMon(2,nDontPlotLowPower+1:end)','r+');
+        subplot('Position', [0.08 + (primaryIndex-1)*0.32 0.08 0.26 0.9]);
+        plot(xyYMon(1,:), xyYMon(2,:), 'k-');
+        hold on;
+        for k = size(fullSpectra,1):-1:1
+            if (primaryIndex == 1)
+                faceColor = [1.0 1.0 1.0] - (k/size(fullSpectra,1)*[0.2 1.0 1.0]);  
+            elseif (primaryIndex == 2)
+                faceColor = [1.0 1.0 1.0] - (k/size(fullSpectra,1)*[1.0 0.1 1.0]);
+            elseif (primaryIndex == 3)
+                faceColor = [1.0 1.0 1.0] - (k/size(fullSpectra,1)*[1.0 1.0 0.1]);
+            end
+            edgeColor = 'k';
+            plot(xyYMon(1,k), xyYMon(2,k), 's', 'MarkerFaceColor', faceColor, 'MarkerEdgeColor', edgeColor, 'MarkerSize', 6);
+        end
+    
+    
+        xmean = mean(squeeze(xyYMon(1,:)));
+        ymean = mean(squeeze(xyYMon(2,:)));
+        range = 0.05;
+        axis([xmean-range/2.0 xmean+range/2.0 ymean-range/2.0 ymean+range/2.0]); 
+        axis('square');
+        
+        xlabel('x chromaticity', 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);
+        if (primaryIndex == 1)
+            ylabel('y chromaticity', 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);
+        else
+            ylabel('');
+        end
+        set(gca, 'Color', [1.0 1.0 1.0], 'XColor', 'b', 'YColor', 'b');
+        set(gca, 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);
+        %title(sprintf('Lower %d luminances in black',nDontPlotLowPower));
+    box on;
     end
     
-    axis([0 1 0 1]); axis('square');
-    xlabel('x chromaticity', 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);
-    ylabel('y chromaticity', 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);
-    set(gca, 'Color', [1.0 1.0 1.0], 'XColor', 'b', 'YColor', 'b');
-    set(gca, 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);
-    title(sprintf('Lower %d luminances in black',nDontPlotLowPower));
-    box on;
     
     % Finish plot
     drawnow;
@@ -168,11 +190,15 @@ function plotChromaticityData(obj, calStruct, figureGroupIndex)
     clf; hold on;
     
     % Plot data
-    plot(xyYMon(1,1)',  xyYMon(2,1)',  'ro','MarkerSize',8,'MarkerFaceColor', [1.0 0.8 0.8]);
-    plot(xyYMon(1,2)',  xyYMon(2,2)',  'go','MarkerSize',8,'MarkerFaceColor', [0.8 1.0 0.8]);
-    plot(xyYMon(1,3)',  xyYMon(2,3)',  'bo','MarkerSize',8,'MarkerFaceColor', [0.8 0.8 1.0]);
-    plot(xyYAmb(1,1)',  xyYAmb(2,1)',  'ks','MarkerSize',8,'MarkerFaceColor', [0.8 0.8 0.8]);
+    plot(xyYMon(1,1)',  xyYMon(2,1)',  'ro',  'MarkerFaceColor', [1.0 0.5 0.5], 'MarkerSize', 10);
+    plot(xyYMon(1,2)',  xyYMon(2,2)',  'go',  'MarkerFaceColor', [0.5 1.0 0.5], 'MarkerSize', 10);
+    plot(xyYMon(1,3)',  xyYMon(2,3)',  'bo',  'MarkerFaceColor', [0.5 0.5 1.0], 'MarkerSize', 10);
+    plot(xyYAmb(1,1)',  xyYAmb(2,1)',  'ks',  'MarkerFaceColor', [0.8 0.8 0.8], 'MarkerSize', 10);
     plot(xyYLocus(1,:)',xyYLocus(2,:)','k');
+    
+    legendsMatrix= {'Red', 'Green', 'Blue', 'Ambient'};
+    hleg = legend(legendsMatrix, 'Location', 'EastOutside');
+    set(hleg,'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 12);
     
     axis([0 1 0 1]); axis('square');
     xlabel('x chromaticity', 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);
@@ -202,20 +228,41 @@ function plotFullSpectra(obj, calStruct, primaryIndex, primaryName, figureGroupI
     end
     
     % Init figure
-    h = figure('Name', sprintf('%s SPD', primaryName), 'NumberTitle', 'off', 'Visible', 'off'); 
+    h = figure('Name', sprintf('%s SPD stability', primaryName), 'NumberTitle', 'off', 'Visible', 'off'); 
     clf; hold on;
     
     % measured spectra
-    subplot(1,2,1);
+    subplot('Position', [0.10 0.14 0.37 0.85]);
     x = obj.spectralAxis;
     for k = size(fullSpectra,1):-1:1
+        if (primaryIndex == 1)
+            faceColor = [1.0 1.0 1.0] - (k/size(fullSpectra,1)*[0.2 1.0 1.0]);  
+            if (mod(k,3) == 0) 
+                edgeColor = 'none'; %[0.0 0.0 0.0]; 
+            else
+                edgeColor = 'none'; 
+            end
+        elseif (primaryIndex == 2)
+            faceColor = [1.0 1.0 1.0] - (k/size(fullSpectra,1)*[1.0 0.1 1.0]);  
+            if (mod(k,3) == 0) 
+                edgeColor = 'none'; %[0.0 0.0 0.0]; 
+            else
+                edgeColor = 'none'; 
+            end
+        elseif (primaryIndex == 3)
+            faceColor = [1.0 1.0 1.0] - (k/size(fullSpectra,1)*[1.0 1.0 0.1]);  
+            if (mod(k,3) == 0) 
+                edgeColor = 'none'; %[0.0 0.0 0.0]; 
+            else
+                edgeColor = 'none';
+            end
+        end
         y = squeeze(fullSpectra(k,:));
-        faceColor = k/size(fullSpectra,1)*0.75*[1 1 1] + [0.2 0.2 0.2];  edgeColor = 'k';
         obj.makeShadedPlot(x,y, faceColor, edgeColor);
         legendsMatrix{k} = sprintf('%0.2f', calStruct.rawData.gammaInput(size(fullSpectra,1)-k+1));
     end
     hleg = legend(legendsMatrix, 'Location', legendPosition);
-    set(hleg,'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 10)
+    set(hleg,'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 10);
     
     %plot(obj.spectralAxis, fullSpectra);
     xlabel('Wavelength (nm)', 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);
@@ -226,10 +273,18 @@ function plotFullSpectra(obj, calStruct, primaryIndex, primaryName, figureGroupI
     box on;
     
     % scaled spectra
-    subplot(1,2,2);
+    subplot('Position', [0.60 0.14 0.37 0.85]);
     for k = size(scaledSpectra,1):-1:1
         y = squeeze(scaledSpectra(k,:));
-        faceColor = 0.8*[1 1 1] + [0.1 0.1 0.1];  edgeColor = 'k';
+        if (primaryIndex == 1)
+            faceColor = [1.0 0.7 0.7];  
+        elseif (primaryIndex == 2)
+            faceColor = [0.7 1.0 0.7]; 
+        elseif (primaryIndex == 3)
+            faceColor = [0.7 0.7 1.0]; 
+        end
+        
+        edgeColor = 'k';
         obj.makeShadedPlot(x,y, faceColor, edgeColor);
     end
     %plot(obj.spectralAxis, scaledSpectra);

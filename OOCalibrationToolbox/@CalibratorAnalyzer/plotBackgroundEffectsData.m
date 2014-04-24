@@ -18,23 +18,33 @@ function plotSpectra(obj, calStruct, spectra, settings, figureGroupIndex)
 
     % Plot data
     backgroundSettingsNum = size(calStruct.backgroundDependenceSetup.bgSettings,2);
-    lineColors = hsv(backgroundSettingsNum);
-    for backgroundSettingIndex = 1:size(calStruct.backgroundDependenceSetup.bgSettings,2)
-        plot(obj.spectralAxis, squeeze(spectra(backgroundSettingIndex,:)), '-', 'LineWidth', 2.0, 'Color', squeeze(lineColors(backgroundSettingIndex,:)));
+    lineColors = zeros(backgroundSettingsNum,3);
+    
+    for backgroundSettingIndex = 1:backgroundSettingsNum 
+        
+        lineColors(backgroundSettingIndex,:) = (calStruct.backgroundDependenceSetup.bgSettings(:, backgroundSettingIndex))';
+        [xd, yd] = stairs(obj.spectralAxis, squeeze(spectra(backgroundSettingIndex,:)));
+        faceColor = [0.9 0.9 0.9]; edgeColor = squeeze(lineColors(backgroundSettingIndex,:));
+        obj.makeShadedPlot(xd, yd, faceColor, edgeColor);
+        
+        legendsMatrix{backgroundSettingIndex} = sprintf('bg=(%0.2f, %0.2f, %0.2f)', ...
+            calStruct.backgroundDependenceSetup.bgSettings(1,backgroundSettingIndex), ...
+            calStruct.backgroundDependenceSetup.bgSettings(2,backgroundSettingIndex), ...
+            calStruct.backgroundDependenceSetup.bgSettings(3,backgroundSettingIndex));
     end
     
-	% Generate legends
-    for k = 1:backgroundSettingsNum
-        legendsMatrix{k} = sprintf('bg=(%0.2f, %0.2f, %0.2f)', ...
-            calStruct.backgroundDependenceSetup.bgSettings(1,k), ...
-            calStruct.backgroundDependenceSetup.bgSettings(2,k), ...
-            calStruct.backgroundDependenceSetup.bgSettings(3,k));
+    for backgroundSettingIndex = 1:backgroundSettingsNum
+        stairs(obj.spectralAxis, squeeze(spectra(backgroundSettingIndex,:)), 'Color', squeeze(lineColors(backgroundSettingIndex,:)), 'LineWidth', 2.0);
     end
-    legend(legendsMatrix);
-    xlabel('Wavelength (nm)', 'Fontweight', 'bold');
-    ylabel('Power', 'Fontweight', 'bold');
-    axis([380,780,-Inf,Inf]);
+    
+    hleg = legend(legendsMatrix, 'Location', 'NorthEast');
+    set(hleg,'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 12, 'Color', 'none', 'LineWidth', 0.1);
     box on;
+    axis([380,780, 0 1.05 * max(max(spectra))]);
+    set(gca, 'Color', [0.8 0.8 0.8], 'XColor', 'b', 'YColor', 'b');
+    set(gca, 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);
+    xlabel('Wavelength (nm)', 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);
+    ylabel('Power', 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14); 
     
     % Finish plot
     drawnow;
