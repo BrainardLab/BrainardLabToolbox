@@ -1,14 +1,8 @@
-function obj = plotAllData(obj, essentialDataGridDims, linearityChecksGridDims)
+function obj = plotAllData(obj)
 
-    figureGroupNames = {'Essential Data', 'Linearity Checks'};
+    figureGroupNames = {'Essential Data', 'Linearity Checks', 'Background Effects'};
     
-    for figureGroupIndex = 1:2
-        
-        if (figureGroupIndex == 1)
-            gridDims = essentialDataGridDims;
-        else
-            gridDims = linearityChecksGridDims;
-        end
+    for figureGroupIndex = 1:3
             
         % Set a group name for all the generated figures
         obj.figureGroupName{figureGroupIndex} = figureGroupNames{figureGroupIndex};
@@ -24,23 +18,37 @@ function obj = plotAllData(obj, essentialDataGridDims, linearityChecksGridDims)
 
         % Generate plots of the essential data
         if (figureGroupIndex == 1)
+            gridDims = obj.essentialDataGridDims;
             obj.plotEssentialData(figureGroupIndex);
-        else
+        elseif (figureGroupIndex == 2)
+            gridDims = obj.linearityChecksGridDims;
             obj.plotLinearityCheckData(figureGroupIndex);
+        elseif (figureGroupIndex == 3)
+            gridDims = obj.backgroundEffectsGridDims;
+            obj.plotBackgroundEffectsData(figureGroupIndex);
         end
         
         % Undock group
         obj.desktopHandle.setGroupDocked(obj.figureGroupName{figureGroupIndex}, 0);
-
-        % Arrange figures in a grid with dimensions gridDims
-        obj.desktopHandle.setDocumentArrangement(obj.figureGroupName{figureGroupIndex}, 2, java.awt.Dimension(gridDims(1), gridDims(2)));
 
         % Finally, make all figures visible
         figHandles = obj.figureHandlesArray{figureGroupIndex};
         for k = 1:length(figHandles)
             set(figHandles(k),'Visible', 'on'); 
         end
+
+        % Arrange figures in a grid with dimensions gridDims
+        obj.desktopHandle.setDocumentArrangement(obj.figureGroupName{figureGroupIndex}, 2, java.awt.Dimension(1,1));
     
+        % Set the size of the figure group
+        container = obj.desktopHandle.getGroupContainer(figureGroupNames{figureGroupIndex}).getTopLevelAncestor;
+        container.setSize(1900, 1000);
+        container.setLocation(20+(figureGroupIndex-1)*20, 20 + (figureGroupIndex-1)*50);
+        
+        % Arrange figures in a grid with dimensions gridDims
+        obj.desktopHandle.setDocumentArrangement(obj.figureGroupName{figureGroupIndex}, 2, java.awt.Dimension(gridDims(1), gridDims(2)));
+    
+        
     end
     
 end
