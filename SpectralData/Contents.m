@@ -13,3 +13,5 @@
 %                          are real.  They could be if the effective functions result from a linear 
 %                          combination of some other set of all positive functions.
 % T_xyzKleinCIE          - CIE 1931 XYZ functions sent by Klein.
+% den_Hemoglobin         - Estimates of density of hemoglobin (average of
+%                          oxy and deoxy hemoglobin)
