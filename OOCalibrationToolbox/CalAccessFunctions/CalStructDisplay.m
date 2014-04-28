@@ -2,10 +2,16 @@ function CalStructDisplay(calStruct, marginForContents, previousFieldNameFullPat
 
     % Check input arguments
     if (nargin < 1)
-        error('A calStruct must be provided.');
+        error('A calStruct or calStruct filename (in quotes) must be provided.');
     elseif (nargin < 3)
        marginForContents = 100;
        previousFieldNameFullPath = '';
+    end
+    
+    if ischar(calStruct)
+        calFileName = calStruct;
+        calStruct = [];
+        [calStruct, calFilename] = GetCalibrationStructure('Enter calibration filename',calFileName,[]); 
     end
     
     subStruct = 'calStruct';
@@ -14,42 +20,72 @@ function CalStructDisplay(calStruct, marginForContents, previousFieldNameFullPat
     end
 
     level = length(findstr(subStruct, '.'));
-    structFieldNames  = fieldnames(eval(subStruct));
-    
+    structFieldNames = fieldnames(eval(subStruct));
+   
     if (level == 0)
-        fprintf('\ncalStruct:\n');
+        fprintf('\n\n\n');
+        fprintf('<strong><--------- F U L L   P A T H ---------->     <-- F I E L D  N A M E -->       <-- F I E L D   S I Z E  &  T Y P E -->              <---------------- F I E L D  V A L U E  ------------> </strong>\n');
     end
 
-
-    marginForContents = 110;
-    marginForFieldType = 80;
+    marginForContents = 130;
+    marginForFieldType = 90;
     
     for fieldIndex = 1:length(structFieldNames)
         
+        fieldValueHasUnknownClass = false;
+        fieldValueIsObject        = false;
+        
         fieldName       = structFieldNames{fieldIndex};
-        entry           = sprintf('%- 45s.', subStruct);
         fullFieldName   = sprintf('%s.%s', subStruct,fieldName);
-        fieldValue      = eval(fullFieldName);   
-        fieldValueDims  = size(fieldValue);
+        fieldValue      = eval(fullFieldName); 
+        fieldValueDims   = size(fieldValue);
         
-        entry = [entry sprintf('%s',fieldName)];
-        currentLength = length(entry);
-        while currentLength < marginForFieldType
-          entry = [entry ' '];  
-           currentLength = length(entry);
+        if isstruct(fieldValue)
+            entry = sprintf('\n%- 45s.', subStruct); 
+            entry = [entry sprintf('<strong>%s</strong>',fieldName)];
+            currentLength = length(entry);
+            while currentLength < marginForFieldType+5
+              entry = [entry ' '];  
+               currentLength = length(entry);
+            end
+        elseif isobject(fieldValue)
+            entry = sprintf('\n%- 45s.', subStruct); 
+            entry = [entry sprintf('<strong>%s</strong>',fieldName)];
+            currentLength = length(entry);
+            while currentLength < marginForFieldType+5
+              entry = [entry ' '];  
+               currentLength = length(entry);
+            end
+            fieldValueIsObject = true;
+        else
+            entry = sprintf('%- 45s.', subStruct);
+            entry = [entry sprintf('%s',fieldName)];
+            currentLength = length(entry);
+            while currentLength < marginForFieldType
+              entry = [entry ' '];  
+               currentLength = length(entry);
+            end
         end
-            
-        entry = [entry sprintf('%s',' [')];
         
-        for dimIndex = 1:length(fieldValueDims)-1
-           entry = [entry sprintf('% 6d x', fieldValueDims(dimIndex))];
+        
+        if isstruct(fieldValue) || isobject(fieldValue)
+            entry = [entry sprintf('%s',' [')];
+            for dimIndex = 1:length(fieldValueDims)-1
+               entry = [entry sprintf('% d x ', fieldValueDims(dimIndex))];
+            end
+            entry = [entry sprintf('%d] ', fieldValueDims(end))];
+        else
+            entry = [entry sprintf('%s',' [')];
+            for dimIndex = 1:length(fieldValueDims)-1
+               entry = [entry sprintf('%d x ', fieldValueDims(dimIndex))];
+            end
+            entry = [entry sprintf('%d] ', fieldValueDims(end))];
         end
-        entry = [entry sprintf('%- 4d] ', fieldValueDims(end))];
         
         if isstruct(fieldValue)
             entry = [entry sprintf('struct ')];
             if (prod(fieldValueDims) > 1)
-                entry = [entry sprintf(' array.')]; 
+                entry = [entry sprintf(' array (displaying contents of first one only)')]; 
             end
             fprintf('%s\n', entry); 
             entry = [];
@@ -61,16 +97,32 @@ function CalStructDisplay(calStruct, marginForContents, previousFieldNameFullPat
             % Recurse into substruct
             CalStructDisplay(calStruct, marginForContents, updatedFieldNameFullPath);
             
+        elseif isobject(fieldValue)
+            entry = [entry sprintf('object of class @<strong>%s</strong>',class(fieldValue))];
+            if (prod(fieldValueDims) > 1)
+                entry = [entry sprintf(' array')]; 
+            end
+            fprintf(2,'%s\n', entry); 
+            entry = [];
+            
+            if isempty(previousFieldNameFullPath)
+               updatedFieldNameFullPath = sprintf('%s',fieldName);
+            else
+               updatedFieldNameFullPath = sprintf('%s.%s',previousFieldNameFullPath, fieldName);
+            end
+            % Recurse into substruct
+            CalStructDisplay(calStruct, marginForContents, updatedFieldNameFullPath);
+            
         elseif ischar(fieldValue)
             entry = [entry sprintf('char', fieldValue)];
             if (prod(fieldValueDims) > 1)
-                entry = [entry sprintf(' array.')]; 
+                entry = [entry sprintf(' array')]; 
             end
             
         elseif iscell(fieldValue)
             entry = [entry sprintf('cell')];
             if (prod(fieldValueDims) > 1)
-                entry = [entry sprintf(' array.')]; 
+                entry = [entry sprintf(' array')]; 
             end
             
         elseif isnumeric(fieldValue)
@@ -81,16 +133,14 @@ function CalStructDisplay(calStruct, marginForContents, previousFieldNameFullPat
                 entry = [entry sprintf('integer')];
             end
             if (prod(fieldValueDims) > 1)
-                entry = [entry sprintf(' array.')]; 
+                entry = [entry sprintf(' array')]; 
             end
-            
         else
             entry = [entry sprintf('unknown class')];
+            fieldValueHasUnknownClass = true;
         end
         
-        
-        
-        if ~isstruct(fieldValue)
+        if (~isstruct(fieldValue)) && (~isobject(fieldValue))
             % Realign
             currentLength = length(entry);
             while currentLength < marginForContents
@@ -146,9 +196,23 @@ function CalStructDisplay(calStruct, marginForContents, previousFieldNameFullPat
         end
         
         if (~isempty(entry))
-            fprintf('%s\n', entry);  
+            if (fieldValueHasUnknownClass)
+                fprintf(2,'\n%s', entry);
+            else
+                fprintf('%s\n', entry);
+            end
         end
-    end
-
+        
+        if (fieldIndex == length(structFieldNames))
+            fprintf('\n');
+        end
+        
+    end 
     
+end
+
+
+function colorizedstring = colorizestring(color, stringtocolorize)
+%colorizestring wraps the given string in html that colors that text.
+    colorizedstring = ['<font color="', color, '">', stringtocolorize, '</font>'];
 end
