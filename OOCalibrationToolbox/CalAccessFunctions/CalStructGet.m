@@ -101,7 +101,7 @@ function fieldNameFullPath = FieldNameFullPathInNewCalStructForOldStyleFieldName
         fieldNameFullPath = 'processedData.S_ambient';
         
     elseif strcmp(oldStyleCalTargetFieldname, 'M_device_linear')
-        fieldNameFullPath = '.processedData.M_device_linear';
+        fieldNameFullPath = 'processedData.M_device_linear';
         
     elseif strcmp(oldStyleCalTargetFieldname, 'ambient_linear')
         fieldNameFullPath = 'processedData.ambient_linear';
