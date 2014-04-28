@@ -8,6 +8,8 @@ function OOC_analyzeCal
     % Load a calibration file
     [calStruct, calFilename] = GetCalibrationStructure('Enter calibration filename','ViewSonicProbe',[]);
     
+    CalStructDisplay(calStruct, 100, '');
+    
     % Analyze the calibration file and display the results arranged in different grids
     calAnalyzer.essentialDataGridDims       = [3 3];
     calAnalyzer.linearityChecksGridDims     = [2 3];  
