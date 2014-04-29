@@ -14,6 +14,8 @@ if iscell(figType)
             exportfig(figHandle,figName,'FontMode', 'fixed','FontSize', 12,'Width',6,'Height',6, 'color', 'cmyk','Format',figType{i});
         elseif (exist('savefig'))
             savefig(figName,figHandle,figType{i});
+        else
+            saveas(figHangle,figName,figType{i});
         end
     end
 else
@@ -21,5 +23,7 @@ else
         exportfig(figHandle,figName,'FontMode', 'fixed','FontSize', 12,'Width',6,'Height',6, 'color', 'cmyk','Format',figType);
     elseif (exist('savefig'))
         savefig(figName,figHandle,figType);
+    else
+        saveas(figHangle,figName,figType{i});
     end
 end
