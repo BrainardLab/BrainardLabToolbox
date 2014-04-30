@@ -1,5 +1,5 @@
 % Method to find a fieldname's full path within an old-style calStruct
-function fieldNameFullPath = FieldNameFullPathInOldCalStruct(calStruct, targetFieldName, previousFieldNameFullPath)
+function fieldNameFullPath = FieldPathInOldCalStruct(calStruct, targetFieldName, previousFieldNameFullPath)
 %    
     fieldNameFullPath = '';
     debug = false;
@@ -18,7 +18,6 @@ function fieldNameFullPath = FieldNameFullPathInOldCalStruct(calStruct, targetFi
     while ((fieldIndex <= length(structFieldNames)) && (fieldNameWasFound == false))
         fieldName     = structFieldNames{fieldIndex};
         fullFieldName = sprintf('%s.%s', subStruct,fieldName);
-        
         if ~isstruct(eval(fullFieldName))
             if strcmp(fieldName, targetFieldName)
                 if (debug)
@@ -42,7 +41,7 @@ function fieldNameFullPath = FieldNameFullPathInOldCalStruct(calStruct, targetFi
                 if (debug)
                     fprintf('%s is a struct. Will recurse with update path: %s\n', fullFieldName, updatedFieldNameFullPath);
                 end
-                fieldNameFullPath = FieldNameFullPathInOldCalStruct(calStruct, targetFieldName, updatedFieldNameFullPath);
+                fieldNameFullPath = FieldPathInOldCalStruct(calStruct, targetFieldName, updatedFieldNameFullPath);
             end
         end
         fieldIndex = fieldIndex + 1;

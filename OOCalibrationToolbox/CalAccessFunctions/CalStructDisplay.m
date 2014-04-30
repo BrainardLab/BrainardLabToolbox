@@ -1,10 +1,11 @@
-function CalStructDisplay(calStruct, marginForContents, previousFieldNameFullPath)
+function CalStructDisplay(calStruct, marginForFieldType, marginForContents, previousFieldNameFullPath)
 
     % Check input arguments
     if (nargin < 1)
         error('A calStruct or calStruct filename (in quotes) must be provided.');
-    elseif (nargin < 3)
-       marginForContents = 100;
+    elseif (nargin < 4)
+       marginForFieldType = 90;
+       marginForContents = 130;
        previousFieldNameFullPath = '';
     end
     
@@ -26,9 +27,6 @@ function CalStructDisplay(calStruct, marginForContents, previousFieldNameFullPat
         fprintf('\n\n\n');
         fprintf('<strong><--------- F U L L   P A T H ---------->     <-- F I E L D  N A M E -->       <-- F I E L D   S I Z E  &  T Y P E -->              <---------------- F I E L D  V A L U E  ------------> </strong>\n');
     end
-
-    marginForContents = 130;
-    marginForFieldType = 90;
     
     for fieldIndex = 1:length(structFieldNames)
         
@@ -95,7 +93,7 @@ function CalStructDisplay(calStruct, marginForContents, previousFieldNameFullPat
                updatedFieldNameFullPath = sprintf('%s.%s',previousFieldNameFullPath, fieldName);
             end
             % Recurse into substruct
-            CalStructDisplay(calStruct, marginForContents, updatedFieldNameFullPath);
+            CalStructDisplay(calStruct, marginForFieldType, marginForContents, updatedFieldNameFullPath);
             
         elseif isobject(fieldValue)
             entry = [entry sprintf('object of class @<strong>%s</strong>',class(fieldValue))];
@@ -111,7 +109,7 @@ function CalStructDisplay(calStruct, marginForContents, previousFieldNameFullPat
                updatedFieldNameFullPath = sprintf('%s.%s',previousFieldNameFullPath, fieldName);
             end
             % Recurse into substruct
-            CalStructDisplay(calStruct, marginForContents, updatedFieldNameFullPath);
+            CalStructDisplay(calStruct, marginForFieldType, marginForContents,  updatedFieldNameFullPath);
             
         elseif ischar(fieldValue)
             entry = [entry sprintf('char', fieldValue)];
@@ -206,13 +204,5 @@ function CalStructDisplay(calStruct, marginForContents, previousFieldNameFullPat
         if (fieldIndex == length(structFieldNames))
             fprintf('\n');
         end
-        
-    end 
-    
-end
-
-
-function colorizedstring = colorizestring(color, stringtocolorize)
-%colorizestring wraps the given string in html that colors that text.
-    colorizedstring = ['<font color="', color, '">', stringtocolorize, '</font>'];
+    end  
 end
