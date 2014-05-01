@@ -1,5 +1,51 @@
 function setFieldMapping(obj)
     % Contruct an empty map that will hold the values of the different fields
+    obj.fieldMap = containers.Map;
+    
+    
+    % General info
+    obj.fieldMap('computer')        = struct('propertyName',            'describe___computerInfo', ...
+                                             'oldCalPath',              'describe.computer', ...
+                                             'newCalPath',              'describe.computerInfo' ...
+                                             );
+                                         
+    obj.fieldMap('matlabInfo')       = struct('propertyName',           'describe___matlabInfo', ...
+                                             'oldCalPath',              '', ...  % do not export in old-style cal
+                                             'newCalPath',              'describe.matlabInfo' ...
+                                             );
+                                             
+                                                                              
+    obj.fieldMap('svnInfo')         = struct('propertyName',            'describe___svnInfo', ...
+                                             'oldCalPath',              'describe.svnInfo', ...
+                                             'newCalPath',              'describe.svnInfo', ...
+                                             'newToOldConversionFname', @obj.SVNconversion);
+                                         
+    
+%     obj.oldFormatFieldMap('svnInfo')            = obj.retrieveFieldFromStruct('describe', 'svnInfo');
+%     obj.oldFormatFieldMap('monitor')            = obj.retrieveFieldFromStruct('describe', 'monitor');
+%     obj.oldFormatFieldMap('caltype')            = obj.retrieveFieldFromStruct('describe', 'caltype');
+%     obj.oldFormatFieldMap('calibrationType')    = obj.retrieveFieldFromStruct('describe', 'calibrationType');
+%     obj.oldFormatFieldMap('driver')             = obj.retrieveFieldFromStruct('describe', 'driver');
+%     obj.oldFormatFieldMap('who')                = obj.retrieveFieldFromStruct('describe', 'who');
+%     obj.oldFormatFieldMap('promptforname')      = obj.retrieveFieldFromStruct('describe', 'promptforname');
+%     obj.oldFormatFieldMap('date')               = obj.retrieveFieldFromStruct('describe', 'date');
+%     obj.oldFormatFieldMap('program')            = obj.retrieveFieldFromStruct('describe', 'program');
+%     obj.oldFormatFieldMap('comment')            = obj.retrieveFieldFromStruct('describe', 'comment');
+      
+        
+        
+    % Background dependence measurements
+    %                      Unified String
+    obj.fieldMap('bgmeas.bgSettings') = struct('propertyName', 'backgroundDependenceSetup___bgSettings', ...
+                                                        'oldCalPath',   'bgmeas.bgSettings', ...
+                                                        'newCalPath',   'backgroundDependenceSetup.bgSettings' ...
+                                                        );
+                                                        
+        
+end
+
+function OLDsetFieldMapping(obj)
+    % Contruct an empty map that will hold the values of the different fields
     obj.oldFormatFieldMap = containers.Map;
     
     % Contruct an empty map that will hold the struct paths of the different fields

@@ -1,23 +1,20 @@
-% Method to generate a cal struct (of the same format at the inputCal)
+% Method to generate a cal struct (of the old format)
 % by parsing the obj.oldFormatFieldMap.
 function cal = generateUpdatedCal(obj)
 
+    fprintf('Generating cal with old-style format.\n');
     cal = struct();
-    oldStyleFieldNames = keys(obj.calStructPathMap)
     
-    for k = 1:numel(oldStyleFieldNames)
-        fieldName  = oldStyleFieldNames{k};
-        calPath    = obj.calStructPathMap(fieldName);
-        if strcmp(fieldName, 'whichMeterType')
-           calPath 
-        end
+    % Get all the mapped unified field names
+    unifiedFieldNames = keys(obj.fieldMap);
+    
+    for k = 1:numel(unifiedFieldNames)
+        calPath = obj.fieldMap(unifiedFieldNames{k}).oldCalPath;
         if ~isempty(calPath)
-            fieldValue = obj.oldFormatFieldMap(fieldName);
-            eval(sprintf('%s=fieldValue;', calPath));
-            sprintf('%s=fieldValue;', calPath)
+            propertyName  = obj.fieldMap(unifiedFieldNames{k}).propertyName;
+            propertyValue = eval(sprintf('obj.%s;',propertyName));
+            fprintf('%d. Loading cal.%-30s <-- %s\n',k, calPath, propertyName); 
+            eval(sprintf('cal.%s = propertyValue;',calPath));
         end
     end
-    
-    cal
-    
 end

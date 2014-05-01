@@ -9,16 +9,24 @@ function OOC_CalStructStressTest
     % Instantiate a calStruct object to manage controlled and unified 
     % access to fields of both old-style and new-style cal files.
     calStruct = CalStruct(cal);
-
-    reconstructedCal = calStruct.cal
-    
     cal.describe
-    reconstructedCal.describe
+    cal.describe.svnInfo
+    cal.describe.matlabInfo
+    calStruct.get('bgmeas.bgSettings')
+    calStruct.set('bgmeas.bgSettings', ones(2,3));
+    calStruct.set('bgmeas.bgSettings2', ones(2,3));
     pause;
     
-    cal.rawData
-    reconstructedCal.rawData
+    reconstructedCal = calStruct.cal
+    reconstructedCal.describe
+    reconstructedCal.describe.svnInfo
+    reconstructedCal.bgmeas
+    disp('All done');
     pause;
+    return
+    
+    
+    
     
     %pause;
     % Test for incorrect fieldname
