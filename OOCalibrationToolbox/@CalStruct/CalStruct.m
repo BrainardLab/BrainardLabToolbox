@@ -1,3 +1,32 @@
+% Class to manage unified and controlled access to the fields of old-style
+% and new-style cal files. The reason for this class's existence is to allow
+% existing PsychCal functions (e.g., enter name here) to operate on both old-style and new-style cal files
+% via a unified parameter access framework.
+%
+% Example usage:
+%
+% % Import a cal file
+% [cal, ~] = GetCalibrationStructure('Enter calibration filename','ViewSonicProbe',[]);
+% 
+% % Instantiate @CalStruct object to manage the imported cal
+% calStructOBJ = CalStruct(cal, 'verbosity', 1);
+% 
+% % Get a field (the radiometer's serial no)
+% meterSerialNo = calStructOBJ.get('meterSerialNumber');
+%
+% % Set a field (here, the gammaFormat parameter)
+% calStructOBJ.set('gammaFormat', 0);
+%
+% % Get the modified cal
+% cal = calStructOBJ.cal;
+%
+% % Pass the modified cal to a PsychCal routine
+% ....
+% % More examples here
+%
+% 05/02/2014   npc  Wrote it.
+%
+
 classdef CalStruct < handle
 
     % Read-write properties.
@@ -7,13 +36,13 @@ classdef CalStruct < handle
     
     % Read-only properties
     properties (SetAccess = private) 
-        % copy of the modified private property inputCal
+        % the old-style cal that is returned to the user
         cal;
     end
     
     % invisible - to the user properties
     properties (Access = private)
-        % The cal struct that we got during instantiation. 
+        % The cal struct that we receive during instantiation. 
         % This will be modified via calls to calStruct.set(fieldName, fieldValue);
         inputCal;
         
@@ -23,96 +52,140 @@ classdef CalStruct < handle
         % Dictionary for mapping unified field names
         fieldMap;
         
-        % properties holding all the cal fields that can be addressed by a unified field name
+        % properties holding all the cal fields that can be addressed 
+        % by a unified field name. We follow the convention that the
+        % unified name is the same as the one used in the old-style cal,
+        % whereas the (local) properties follow the new-style cal naming.
+        
         % General info
         describe___computerInfo;
         describe___svnInfo;
-        describe___matlabInfo;
+        describe___matlabInfo;                      % only in new-style cal
+        describe___monitor;
+        describe___displayDeviceName;
+        describe___displayDeviceType;
+        describe___calibrationType;                 % only in old-style cal
+        describe___promptForName;                   % only in old-style cal
+        describe___driver;
+        describe___who;
+        describe___date;
+        describe___executiveScriptName;
+        describe___comment;
         
+        % Screen configuration
+        describe___displaysDescription;
+        describe___whichScreen;
+        describe___blankOtherScreen;
+        describe___whichBlankScreen;
+        describe___blankSettings;
+        describe___dacsize;
+        describe___hz;
+        describe___screenSizePixel;
+        describe___HDRProjector;                    % only in old-style cal
+        
+        % Calibration params
+        describe___boxSize;
+        describe___boxOffsetX;
+        describe___boxOffsetY;
+        describe___nAverage;
+        describe___nMeas;
+        describe___bgColor;
+        describe___fgColor;
+        describe___displayPrimariesNum;
+        describe___primaryBasesNum;
+        describe___useBitsPP;
+        
+        % Gamma-fit params
+        describe___gamma;
+        describe___gamma___fitType;
+        describe___gamma___exponents;
+        
+        % Radiometer params
+        describe___leaveRoomTime;
+        describe___meterDistance;
+        describe___meterModel;
+        describe___meterSerialNumber;               % only in new-style cal
+        
+        % RawData (gamma measurements)
+        rawData___S;
+        rawData___gammaInput;
+        rawData___gammaTable;
+        rawData___gammaCurveSortIndices; 
+        rawData___gammaCurveMeasurements; 
+        rawData___gammaCurveMeanMeasurements; 
+                 
+        % RawData (basic linearity measurements)
+        basicLinearitySetup___settings;
+        rawData___basicLinearityMeasurements1;
+        rawData___basicLinearityMeasurements2;
+        
+        % RawData (background-dependence measurements)
+        backgroundDependenceSetup___settings;
         backgroundDependenceSetup___bgSettings;
+        rawData___backgroundDependenceMeasurements;
+        
+        % RawData (ambient measurements)
+        rawData___ambientMeasurements;
+        
+        % ProcessedData
+        processedData___monSVs;
+        processedData___gammaFormat;
+        processedData___gammaInput;
+        processedData___gammaTable;
+        processedData___S_device;
+        processedData___P_device;
+        processedData___T_device;
+        processedData___S_ambient;
+        processedData___P_ambient;
+        processedData___T_ambient; 
     end
     
     
     % Public methods
     methods
         % Constructor
-        function obj = CalStruct(cal)
+        function obj = CalStruct(cal, varargin)
+            
+            parser = inputParser;
+			parser.addParamValue('verbosity', 0);
+            % Execute the parser
+			parser.parse(varargin{:});
+            % Create a standard Matlab structure from the parser results.
+			parserResults = parser.Results;
+            pNames = fieldnames(parserResults);
+            for k = 1:length(pNames)
+                obj.(pNames{k}) = parserResults.(pNames{k}); 
+            end
+
+            % make a private copy
+            obj.inputCal = cal;
+            
+            % set the field mapping
             obj.setFieldMapping();
-            obj.parseInputCal(cal);
+            
+            % detemine the format (old-style or new-style) of the input cal
+            obj.determineInputCalFormat();
+            
+            % parse the input cal
+            obj.parseInputCal();
         end
         
-        % Getter method for cal
+        % Getter method for cal (always in old-style format)
         function cal = get.cal(obj)
             cal = obj.generateUpdatedCal;
         end
         
+        % Getter method for a given unified field name
+        fieldValue = get(obj, unifiedFieldName);
         
-        % Getter method for a passed fieldName
-        function fieldValue = get(obj, unifiedFieldName)
-
-            if (obj.fieldNameIsValid(unifiedFieldName))
-                % Find the corresponding property name
-                propertyName = obj.fieldMap(unifiedFieldName).propertyName;
-
-                % Call the getter for that property
-                fieldValue = eval(sprintf('obj.%s;',propertyName));
-            else
-                fprintf(2, 'Unknown unified field name (''%s''). Cannot get its value.\n', unifiedFieldName);
-                obj.printMappedFieldNames(); 
-            end     
-        end 
-        
-        % Setter method for a passed fieldName
-        function set(obj, unifiedFieldName, fieldValue)
-            
-            if (obj.fieldNameIsValid(unifiedFieldName))
-                % Find the corresponding property name
-                propertyName = obj.fieldMap(unifiedFieldName).propertyName;
-
-                % Call the setter for that property
-                size(eval(sprintf('obj.%s',propertyName)))
-                eval(sprintf('obj.%s = fieldValue;',propertyName));     
-            else
-                fprintf(2, 'Unknown unified field name (''%s''). Cannot set its value.\n', unifiedFieldName);
-                obj.printMappedFieldNames(); 
-            end
-        end     
-        
+        % Setter method for a given unified field name
+        set(obj, unifiedFieldName, fieldValue);   
     end
    
     % Private methods
     methods (Access = private)
-
         % Method to parse the input cal struct
-        function parseInputCal(obj, cal)
-            % make a private copy
-            obj.inputCal = cal;
-            % detemine input cal format
-            obj.determineInputCalFormat();
-            % load all known fields
-            unifiedFieldNames = keys(obj.fieldMap);
-            for k = 1:numel(unifiedFieldNames)
-                % retrieve path in input cal
-                if (obj.inputCalHasNewStyleFormat)
-                    calPath = obj.fieldMap(unifiedFieldNames{k}).newCalPath;
-                else
-                    calPath = obj.fieldMap(unifiedFieldNames{k}).oldCalPath;
-                end
-                % set the corresponding private property
-                propertyName = obj.fieldMap(unifiedFieldNames{k}).propertyName;
-                propertyValue = eval(sprintf('cal.%s;',calPath));
-                eval(sprintf('obj.%s = propertyValue;',propertyName));
-                % Check if we need to convert the property to old-style format
-                if isfield(obj.fieldMap(unifiedFieldNames{k}), 'newToOldConversionFname') && (obj.inputCalHasNewStyleFormat)
-                    conversionFunctionHandle = obj.fieldMap(unifiedFieldNames{k}).newToOldConversionFname;
-                    fprintf('Will convert the value of cal.%s to old-style format. \n', calPath);
-                    propertyValue = conversionFunctionHandle(propertyValue); 
-                end
-                fprintf('%d. Loading %-40s <- cal.%s \n', k, propertyName, calPath);
-                eval(sprintf('obj.%s = propertyValue;',propertyName));
-            end
-            fprintf('Finished parsing input cal.\n');
-        end
+        parseInputCal(obj);
         
         % Method to determine whether the inputCal has new-style format.
         determineInputCalFormat(obj);
@@ -127,37 +200,46 @@ classdef CalStruct < handle
         % Method to print the field names contained in the FieldMap
         printMappedFieldNames(obj);
         
-        % Method to check for the existence of and retrieve the a field's 
-        % value and path in cal.
-        [fieldValue, fieldPath] = retrieveFieldFromStruct(obj, structure, fieldName);
-        
-     
-        
+        % Method to generate a cal struct with the the old-style format,
+        % and which will be returned to routines that rely on that format
+        cal = generateUpdatedCal(obj);
 
-        
         % Method to combine svnInfo and matlabInfo into a single struct
         % as was done in the old-style format
-        [svnInfo, path] = makeOldStyleSVNInfo(obj);
+        svn = SVNconversion(obj, propertyValue);
+        
+        % Method to eliminate the displayDescription of the otherDisplays
+        % as was done in the old-style format
+        displayDescription = DisplaysDescriptionConversion(obj, propertyValue);
         
         % Method to make old-style meter type. In OOC calibration we store
         % the meter model as a string.
-        [meterType, path] = makeOldStyleMeterType(obj);
+        meterID = MeterTypeConversion(obj, propertyValue);
         
-        % Methods to pack the raw data in the old-style way.
-        [monIndex, path]    = makeOldStyleMonIndex(obj);
-        [monSpd, path]      = makeOldStyleMonSpd(obj);
-        [mon, path]         = makeOldStyleMon(obj);
-        [spectra, path]     = makeBgMeasSpectra(obj);
-        [gammaInput, path]  = makeOldStyleRawGammaInput(obj);
+        % Method to generate the old-style monIndex parameter  
+        monIndex = MonIndexConversion(obj, propertyValue);
         
-        cal = generateUpdatedCal(obj);
-
-        function svn = SVNconversion(obj, propertyValue)
-           svn.svnInfo    = obj.describe___svnInfo;
-           svn.matlabInfo = obj.describe___matlabInfo;
-        end
+        % Method to generate the old-style monSpd parameter  
+        monSpd = MonSpdConversion(obj, propertyValue);
         
-         
-    end
-
+        % Method to generate the old-style mon parameter  
+        mon = MonConversion(obj, propertyValue);
+        
+        % Method to generate the old-style rawGammaInput parameter  
+        rawGammaInput = GammaInputConversion(obj, propertyValue);
+        
+        % Method to generate the old-style basic linearity spectra parameter
+        spectra = BasicLinSpectraConversion(obj, propertyValue);
+        
+        % Method to generate the old-style background-dependence spectra parameter
+        bgSpectra = BGspectraConversion(obj, propertyValue);   
+    end  % private methods
+    
+    % Useful static functions
+    methods (Static)
+        
+        % Method to determine if a struct/object contains a field/property with agiven name
+        result = isFieldOrProperty(structOrObject, fieldOrPropertyName);
+        
+    end  % Static functions
 end

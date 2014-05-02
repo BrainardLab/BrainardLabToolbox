@@ -5,22 +5,51 @@ function OOC_CalStructStressTest
     
     % Load a calibration file
     [cal, calFilename] = GetCalibrationStructure('Enter calibration filename','ViewSonicProbe',[]);
+    clc;
+    cal
+    cal.describe
+    %cal.rawData
 
+
+    %cal.basicmeas
+    %cal.bgmeas
+      
     % Instantiate a calStruct object to manage controlled and unified 
     % access to fields of both old-style and new-style cal files.
-    calStruct = CalStruct(cal);
-    cal.describe
-    cal.describe.svnInfo
-    cal.describe.matlabInfo
+    calStruct = CalStruct(cal, 'verbosity', 1);
+
+    meterSerialNo = calStruct.get('meterSerialNumber')
+    pause;
+    
     calStruct.get('bgmeas.bgSettings')
+    S = [380 4 101];
+    calStruct.get(S)
     calStruct.set('bgmeas.bgSettings', ones(2,3));
     calStruct.set('bgmeas.bgSettings2', ones(2,3));
     pause;
+    cal.describe
+    cal.describe.gamma
+
+    exponents = calStruct.get('gamma.exponents')
+    pause
     
     reconstructedCal = calStruct.cal
     reconstructedCal.describe
     reconstructedCal.describe.svnInfo
+    reconstructedCal.describe.gamma
+    reconstructedCal.rawdata
+    reconstructedCal.rawdata.monIndex
+    reconstructedCal.basicmeas
     reconstructedCal.bgmeas
+
+    reconstructedCal.S_device
+    size(reconstructedCal.P_device)
+    size(reconstructedCal.T_device)
+    
+    reconstructedCal.S_ambient
+    size(reconstructedCal.P_ambient)
+    size(reconstructedCal.T_ambient)
+    
     disp('All done');
     pause;
     return
