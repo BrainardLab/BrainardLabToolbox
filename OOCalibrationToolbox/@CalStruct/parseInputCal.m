@@ -5,8 +5,11 @@ function parseInputCal(obj)
     
     % Pass 1: load properties
     if (obj.verbosity > 0)
-        fprintf('Parsing input cal: Phase I\n');
+        fprintf('\n---------------------------------------------------------\n');
+        fprintf('<strong>Parsing input cal: Phase I </strong>\n');
     end
+    
+    validInputFieldsNum = 0;
     
     for k = 1:numel(unifiedFieldNames)
         % current unified name
@@ -29,7 +32,7 @@ function parseInputCal(obj)
             dotIndices  = strfind(calPath,'.');
             if isempty(dotIndices)
                 if ~obj.isFieldOrProperty(subStruct, calPath)   % isfield(subStruct, calPath)
-                    fprintf(2,'>>>> Invalid path for field: %s', calPath);
+                    fprintf(2,'>>>> Invalid path for field: ''%s''.\n', calPath);
                     pathIsValid = false;
                 end
             else
@@ -37,7 +40,7 @@ function parseInputCal(obj)
                 for dotNo = 1:length(dotIndices)
                     subStructFieldName = calPath(p:dotIndices(dotNo)-1);
                     if ~obj.isFieldOrProperty(subStruct, subStructFieldName)
-                        fprintf(2,'>>>> Invalid path for field: %s', subStructFieldName);
+                        fprintf(2,'>>>> Invalid path for field: ''%s''.\n', subStructFieldName);
                         pathIsValid = false;
                         break;
                     end
@@ -53,11 +56,12 @@ function parseInputCal(obj)
             
             if pathIsValid
                 propertyValue = eval(sprintf('obj.inputCal.%s;',calPath));
+                validInputFieldsNum = validInputFieldsNum + 1;
             else
                 propertyValue = [];
                 if (obj.verbosity > 1)
-                    fprintf(2,'>>> inputCal does not contain the path %s. Property %s set to [].\n', calPath, propertyName);
-                    eval('inputCalFields = obj.inputCal');
+                    fprintf(2,'>>>> inputCal does not contain the path ''%s''.\n     Property %s set to [].\n', calPath, propertyName);
+                    %eval('inputCalFields = obj.inputCal');
                     fprintf('Hit enter to continue.\n\n');
                     pause;
                 end
@@ -65,12 +69,13 @@ function parseInputCal(obj)
             
             % and set it
             eval(sprintf('obj.%s = propertyValue;',propertyName));
+            
             if (obj.verbosity > 0)
                 % Feedback on what hapenned
                 if pathIsValid
-                    fprintf('%02d. %-40s <- obj.inputCal.%s \n', k, propertyName, calPath);
+                    fprintf('%02d. %-45s <- obj.inputCal.%s \n', validInputFieldsNum, propertyName, calPath);
                 else
-                    fprintf('%02d. %-40s <- %g \n', k, propertyName, propertyValue);
+                    fprintf('--- %-45s :: Not found in input cal. Set to [].\n',  propertyName);
                 end
             end
         else
@@ -81,8 +86,8 @@ function parseInputCal(obj)
     end
     
     if (obj.verbosity > 0)
-        fprintf('Finished phase I of parsing.\n\n');
-        fprintf('Parsing input cal: Phase II\n');
+        fprintf('<strong>Finished phase I parsing. </strong>\n\n');
+        fprintf('<strong>Parsing input cal: Phase II </strong>\n');
     end
     
     % Pass 2: convert any properties that need conversion
@@ -113,7 +118,7 @@ function parseInputCal(obj)
                 
                 if (obj.verbosity > 0)
                     % feedback to the user
-                    fprintf('Will convert the value of  ''obj.inputCal.%s''  to old-style format. \n', calPath);
+                    fprintf('Converting to old-style format: ''obj.inputCal.%s''\n', calPath);
                 end
                 
                 % obtain its current value
@@ -130,7 +135,8 @@ function parseInputCal(obj)
     end
     
     if (obj.verbosity > 0)
-        fprintf('Finished phase II of parsing.\n\n');
+        fprintf('<strong>Finished phase II parsing.</strong>\n');
+        fprintf('---------------------------------------------------------\n\n');
     end
 end
 

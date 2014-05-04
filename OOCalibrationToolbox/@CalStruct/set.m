@@ -6,7 +6,6 @@ function set(obj, unifiedFieldName, fieldValue)
 
         if strcmp(obj.fieldMap(unifiedFieldName).access,'read_write')
             % Call the setter for that property
-            size(eval(sprintf('obj.%s',propertyName)))
             eval(sprintf('obj.%s = fieldValue;',propertyName)); 
         else
             fprintf(2, '>>> Field name ''%s'' has Read-Only access. Will not set it''s value. <<< \n', unifiedFieldName);

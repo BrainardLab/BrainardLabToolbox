@@ -1,18 +1,71 @@
 function OOC_CalStructStressTest
+    Test2;
+end
+
+function Test1
 % 
+%%  Load a calibration file.
+    clc;
+    clear all;
+    [cal, ~] = GetCalibrationStructure('Enter calibration filename','ViewSonicProbe',[]);
+    clc
+    DescribeMonCal(cal);
+    whos
+    
+%%  Instantiate a @CalStruct object for controlled & unified access to old- and new-style cal structs.
+    % Minimum verbosity
+    calStruct = CalStruct(cal, 'verbosity', 0);
+    whos
+    
+%%  Instantiate a @CalStruct object for controlled & unified access to old- and new-style cal structs.
+    % Medium verbosity
+    calStruct = CalStruct(cal, 'verbosity', 1);
+
+%%  Instantiate a @CalStruct object for controlled & unified access to old- and new-style cal structs.
+    % Max verbosity
+    calStruct = CalStruct(cal, 'verbosity', 2);
+    clear cal
+    whos
+    
+%%  Get a field with a typo, say, 's'
+    s = calStruct.get('s')
+    
+%%  Get the S_Device
+    sDev = calStruct.get('S_device')
+ 
+%%  Set a new S_Device (just for testing)
+%   sDev = [sDev(1) 2 201];
+%   calStruct.set('S_device', sDev);
+    
+%%  Get the S      
+    S = calStruct.get('S')
+
+%%  Get back an old-style cal struct
+    oldStyleCal = calStruct.cal;
+end
+
+function Test2
+%%  Test 5. Read a new-style cal and call old PsyCal routines on it
+    clc;
+    clear all;
+    calFile = 'ViewSonicProbe';
+   % calFile = 'PTB3TestCal';
+    [cal, ~] = GetCalibrationStructure('Enter calibration filename', calFile,[]);
+    clc
+    
+    DescribeMonCal(cal);
+end
+
+
+
+
+function OLD_OOC_CalStructStressTest
     clear; close all
     clc;
     
     % Load a calibration file
     [cal, calFilename] = GetCalibrationStructure('Enter calibration filename','ViewSonicProbe',[]);
     clc;
-    cal
-    cal.describe
-    %cal.rawData
-
-
-    %cal.basicmeas
-    %cal.bgmeas
       
     % Instantiate a calStruct object to manage controlled and unified 
     % access to fields of both old-style and new-style cal files.
@@ -49,6 +102,14 @@ function OOC_CalStructStressTest
     reconstructedCal.S_ambient
     size(reconstructedCal.P_ambient)
     size(reconstructedCal.T_ambient)
+    
+    
+    testNo = 1;
+    fprintf('\n\nStress testing.\n');
+    fprintf('%d. Requesting the ''s'' field (typo). Hit enter to continue.\n', testNo);
+    pause;
+    S = calStruct.get('s')
+    
     
     disp('All done');
     pause;

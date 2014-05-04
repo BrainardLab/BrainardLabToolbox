@@ -2,7 +2,6 @@
 function isValid = fieldNameIsValid(obj, unifiedFieldName)
 %
     isValid = true;
-    
     % make sure fieldname is in the FieldMap
     if (~ismember(unifiedFieldName, keys(obj.fieldMap)))
         isValid = false;

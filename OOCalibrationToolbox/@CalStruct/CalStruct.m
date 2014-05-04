@@ -179,7 +179,35 @@ classdef CalStruct < handle
         fieldValue = get(obj, unifiedFieldName);
         
         % Setter method for a given unified field name
-        set(obj, unifiedFieldName, fieldValue);   
+        set(obj, unifiedFieldName, fieldValue);
+        
+        % Getter methods for select properties over which we want more
+        % controlled access
+        function value = get.rawData___S(obj)
+            % Return S
+            value = obj.rawData___S;
+            % Check if an 'S_device' field exists and if it does that it's
+            % value matches that of S. If not, report an error.
+            if (~isempty(obj.processedData___S_device) & ~isnan(obj.processedData___S_device))
+                if (any(value ~= obj.processedData___S_device))
+                    fprintf(2,'An ''S_device property exists and does not match ''S''.\n');
+                    eval('S_device = obj.processedData___S_device')
+                    eval('S = value')
+                    error('>>>>>>> Mismatched S and S_device ! <<<<');
+                end
+            end
+            % Check if an 'S_ambient' field exists and if it does that it's
+            % value matches that of S. If not, report an error.
+            if (~isempty(obj.processedData___S_ambient) & ~isnan(obj.processedData___S_ambient))
+                if (any(value ~= obj.processedData___S_ambient))
+                    fprintf(2,'An ''S_ambient property exists and does not match ''S''.\n');
+                    eval('S_ambient = obj.processedData___S_ambient')
+                    eval('S = value')
+                    error('>>>>>>> Mismatched S and S_ambient ! <<<<');
+                end
+            end
+        end
+        
     end
    
     % Private methods
@@ -233,6 +261,7 @@ classdef CalStruct < handle
         
         % Method to generate the old-style background-dependence spectra parameter
         bgSpectra = BGspectraConversion(obj, propertyValue);   
+        
     end  % private methods
     
     % Useful static functions
