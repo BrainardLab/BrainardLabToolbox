@@ -3,6 +3,61 @@ function parseInputCal(obj)
     % load all known fields
     unifiedFieldNames = keys(obj.fieldMap);
     
+    % Pass 0: check if fields associated with 'runtimeData__xxx' properties
+    % of calStruct class exist in the inputCal, and if they do not add them
+    % temporarily with empty values so we can do the parsing/mapping in a
+    % unified way.
+    if (obj.verbosity > 0)
+        fprintf('\n---------------------------------------------------------\n');
+        fprintf('<strong>Parsing input cal: Phase 0 (checking for runtime fields) </strong>\n');
+    end
+    
+    for k = 1:numel(unifiedFieldNames)
+        % current unified name
+        unifiedName = unifiedFieldNames{k};
+        
+        % retrieve path in input cal
+        if (obj.inputCalHasNewStyleFormat)
+            calPath = obj.fieldMap(unifiedName).newCalPath;
+        else
+            calPath = obj.fieldMap(unifiedName).oldCalPath;
+        end
+        
+        % Check if the associated property name is a 'runtimeData' property
+        fieldInfo = obj.fieldMap(unifiedName);
+        if ~isempty(strfind(fieldInfo.propertyName, 'runtimeData'))
+            
+            % Check if the runtime field already exists in the inputCal
+            addEmptyField = true;
+            if (obj.inputCalHasNewStyleFormat)
+                dotIndices  = strfind(calPath,'.');
+                subStructFieldName = calPath(dotIndices+1:end);
+                if ((obj.isFieldOrProperty(obj.inputCal, 'runtimeData')) && ...
+                    (obj.isFieldOrProperty(obj.inputCal.runtimeData, subStructFieldName)))
+                    addEmptyField = false;
+                end
+            else
+                if obj.isFieldOrProperty(obj.inputCal, calPath)
+                    addEmptyField = false;
+                end
+            end
+            
+            if addEmptyField
+                % add empty field
+                eval(sprintf('obj.inputCal.%s = [];', calPath));
+                %if (obj.verbosity > 0)
+                   fprintf('Added runtime field: %s\n',  calPath);
+                %end
+            end
+            
+        end
+    end
+    
+    if (obj.verbosity > 0)
+        fprintf('<strong>Finished phase 0 parsing. </strong>\n\n');
+    end
+    
+    
     % Pass 1: load properties
     if (obj.verbosity > 0)
         fprintf('\n---------------------------------------------------------\n');
@@ -10,7 +65,6 @@ function parseInputCal(obj)
     end
     
     validInputFieldsNum = 0;
-    
     for k = 1:numel(unifiedFieldNames)
         % current unified name
         unifiedName = unifiedFieldNames{k};
@@ -31,8 +85,9 @@ function parseInputCal(obj)
             subStruct   = obj.inputCal;
             dotIndices  = strfind(calPath,'.');
             if isempty(dotIndices)
-                if ~obj.isFieldOrProperty(subStruct, calPath)   % isfield(subStruct, calPath)
-                    fprintf(2,'>>>> Invalid path for field: ''%s''.\n', calPath);
+                if ~obj.isFieldOrProperty(subStruct, calPath)
+                    %fprintf(2,'>>>> Invalid path for field: ''%s''.\n', calPath);
+                    error('>>>> Invalid path for field: ''%s''.\n', calPath);
                     pathIsValid = false;
                 end
             else

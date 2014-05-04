@@ -1,5 +1,5 @@
 function OOC_CalStructStressTest
-    Test2;
+    Test1;
 end
 
 function Test1

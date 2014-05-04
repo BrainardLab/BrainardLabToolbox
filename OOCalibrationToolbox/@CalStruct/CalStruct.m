@@ -138,6 +138,17 @@ classdef CalStruct < handle
         processedData___S_ambient;
         processedData___P_ambient;
         processedData___T_ambient; 
+        
+        % RuntimeData
+        runtimeData___T_sensor;
+        runtimeData___S_sensor;
+        runtimeData___T_linear;
+        runtimeData___S_linear;
+        runtimeData___M_device_linear;
+        runtimeData___M_linear_device;
+        runtimeData___M_ambient_linear;
+        runtimeData___ambient_linear;
+        
     end
     
     
