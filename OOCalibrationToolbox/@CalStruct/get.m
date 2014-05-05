@@ -2,10 +2,7 @@
 function fieldValue = get(obj, unifiedFieldName)
 	fieldValue = NaN;
     if (~ischar(unifiedFieldName))
-        fprintf(2,'>>> Field name must be entered in quotes.\n');
-        fprintf(2,'>>> Hit enter to continue.\n\n');
-        pause;
-        return; 
+        error('>>> Field name must be entered in quotes.\n');
     end
     if (obj.fieldNameIsValid(unifiedFieldName))
         % Find the corresponding property name
@@ -15,7 +12,6 @@ function fieldValue = get(obj, unifiedFieldName)
     else
         fprintf(2, '>>> Unknown unified field name (''%s''). Cannot get its value.\n', unifiedFieldName);
         obj.printMappedFieldNames(); 
-        fprintf(2, '>>> Hit enter to continue.\n\n');
-        pause;
+        error('Read denied from unknown field.\n');
     end     
 end 

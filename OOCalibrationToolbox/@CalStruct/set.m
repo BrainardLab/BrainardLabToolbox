@@ -10,13 +10,11 @@ function set(obj, unifiedFieldName, fieldValue)
         else
             fprintf(2, '>>> Field name ''%s'' has Read-Only access. Will not set it''s value. <<< \n', unifiedFieldName);
             obj.printMappedFieldNames();
-            fprintf(2, '>>> Hit enter to continue.\n\n');
-            pause;
+            error('Write denied to R-O field.\n');
         end
     else
         fprintf(2, '>>> Unknown field name: ''%s''. Cannot set it''s value.\n', unifiedFieldName);
         obj.printMappedFieldNames();
-        fprintf(2, '>>> Hit enter to continue.\n\n');
-        pause;
+        error('Write denied to unknown field.\n');
     end
 end    

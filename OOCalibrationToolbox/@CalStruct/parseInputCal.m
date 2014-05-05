@@ -86,8 +86,8 @@ function parseInputCal(obj)
             dotIndices  = strfind(calPath,'.');
             if isempty(dotIndices)
                 if ~obj.isFieldOrProperty(subStruct, calPath)
-                    %fprintf(2,'>>>> Invalid path for field: ''%s''.\n', calPath);
-                    error('>>>> Invalid path for field: ''%s''.\n', calPath);
+                    fprintf(2,'>>>> Field   %-25s not found in input cal.\n', sprintf('''%s''',calPath));
+                    %error('>>>> Invalid path for field: ''%s''.\n', calPath);
                     pathIsValid = false;
                 end
             else
@@ -95,7 +95,7 @@ function parseInputCal(obj)
                 for dotNo = 1:length(dotIndices)
                     subStructFieldName = calPath(p:dotIndices(dotNo)-1);
                     if ~obj.isFieldOrProperty(subStruct, subStructFieldName)
-                        fprintf(2,'>>>> Invalid path for field: ''%s''.\n', subStructFieldName);
+                        fprintf(2,'>>>> Field   %-25s not found in input cal.\n',  sprintf('''%s''',calPath));
                         pathIsValid = false;
                         break;
                     end

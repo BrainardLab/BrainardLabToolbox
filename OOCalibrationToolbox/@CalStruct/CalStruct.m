@@ -192,8 +192,11 @@ classdef CalStruct < handle
         % Setter method for a given unified field name
         set(obj, unifiedFieldName, fieldValue);
         
+        
+        
         % Getter methods for select properties over which we want more
         % controlled access
+        
         function value = get.rawData___S(obj)
             % Return S
             value = obj.rawData___S;
@@ -218,6 +221,21 @@ classdef CalStruct < handle
                 end
             end
         end
+        
+        function value = get.processedData___S_device(obj)
+            % Return S_device
+            value = obj.processedData___S_device;
+            
+            if (obj.verbosity > 1)
+                % warn user that he/she only used the 'S' variable
+                fprintf(2,'Use of the ''S_device'' field is discouraged and will be not allowed in future releases. Use ''S'' instead.\n');         
+            end    
+        end
+        
+        
+        % End of getter methods for select properties over which we want more
+        % controlled access
+        
         
     end
    
