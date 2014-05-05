@@ -31,7 +31,7 @@ classdef CalStruct < handle
 
     % Read-write properties.
     properties 
-        verbosity = 1;
+        verbosity = 0;
     end % Public properties
     
     % Read-only properties
@@ -42,6 +42,7 @@ classdef CalStruct < handle
     
     % invisible - to the user properties
     properties (Access = private)
+        
         % The cal struct that we receive during instantiation. 
         % This will be modified via calls to calStruct.set(fieldName, fieldValue);
         inputCal;
@@ -50,7 +51,9 @@ classdef CalStruct < handle
         inputCalHasNewStyleFormat;
 
         % Dictionary for mapping unified field names
-        fieldMap;
+        fieldMap = [];
+        
+        reportSdev_Samb_warning = true;
         
         % properties holding all the cal fields that can be addressed 
         % by a unified field name. We follow the convention that the
@@ -198,12 +201,12 @@ classdef CalStruct < handle
         
         % Getter methods for select properties over which we want more
         % controlled access
-        
         function value = get.rawData___S(obj)
             % Return S
             value = obj.rawData___S;
             % Check if an 'S_device' field exists and if it does that it's
             % value matches that of S. If not, report an error.
+            obj.reportSdev_Samb_warning = false;
             if (~isempty(obj.processedData___S_device) & ~isnan(obj.processedData___S_device))
                 if (any(value ~= obj.processedData___S_device))
                     fprintf(2,'An ''S_device property exists and does not match ''S''.\n');
@@ -212,6 +215,7 @@ classdef CalStruct < handle
                     error('>>>>>>> Mismatched S and S_device ! <<<<');
                 end
             end
+            obj.reportSdev_Samb_warning = false;
             % Check if an 'S_ambient' field exists and if it does that it's
             % value matches that of S. If not, report an error.
             if (~isempty(obj.processedData___S_ambient) & ~isnan(obj.processedData___S_ambient))
@@ -222,18 +226,27 @@ classdef CalStruct < handle
                     error('>>>>>>> Mismatched S and S_ambient ! <<<<');
                 end
             end
+            
+            obj.reportSdev_Samb_warning = true;
         end
         
         function value = get.processedData___S_device(obj)
             % Return S_device
             value = obj.processedData___S_device;
-            
-            if (obj.verbosity > 1)
-                % warn user that he/she only used the 'S' variable
+            if (obj.reportSdev_Samb_warning)
+                % warn user that he/she must only use the 'S' variable
                 fprintf(2,'Use of the ''S_device'' field is discouraged and will be not allowed in future releases. Use ''S'' instead.\n');         
-            end    
+            end
         end
         
+        function value = get.processedData___S_ambient(obj)
+            % Return S_device
+            value = obj.processedData___S_ambient;
+            if (obj.reportSdev_Samb_warning)
+                % warn user that he/she must only use the 'S' variable
+                fprintf(2,'Use of the ''S_ambient'' field is discouraged and will be not allowed in future releases. Use ''S'' instead.\n');         
+            end    
+        end
         
         % End of getter methods for select properties over which we want more
         % controlled access

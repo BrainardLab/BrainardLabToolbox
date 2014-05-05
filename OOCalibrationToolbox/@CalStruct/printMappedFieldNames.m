@@ -6,7 +6,7 @@ function printMappedFieldNames(obj)
     unifiedFieldNames = keys(obj.fieldMap);
     [~,indices] = sort(lower(unifiedFieldNames));
     
-    fprintf('    The following list contains all mapped field names and their access properties (<strong>r-o</strong> = read-only, <strong>r-w</strong> = read-write).\n');
+    fprintf('    Available unified field names & access properties (<strong>r-o</strong> = read-only, <strong>r-w</strong> = read-write).\n');
     fprintf('    ----------------------------------------------------------------------------------------------------------------------\n');
     colsNum = 3;
     rowsNum = (round(numel(unifiedFieldNames)/colsNum)+1);
