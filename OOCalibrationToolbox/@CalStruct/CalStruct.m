@@ -140,6 +140,8 @@ classdef CalStruct < handle
         processedData___T_ambient; 
         
         % RuntimeData
+        runtimeData___gammaMode;
+        runtimeData___iGammaTable;
         runtimeData___T_sensor;
         runtimeData___S_sensor;
         runtimeData___T_linear;
