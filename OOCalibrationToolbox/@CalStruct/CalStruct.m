@@ -17,7 +17,7 @@
 % % Set a field (here, the gammaFormat parameter)
 % calStructOBJ.set('gammaFormat', 0);
 %
-% % Get the modified cal
+% % Get the modified cal (in old-style format)
 % cal = calStructOBJ.cal;
 %
 % % Pass the modified cal to a PsychCal routine
@@ -84,7 +84,10 @@ classdef CalStruct < handle
         describe___dacsize;
         describe___hz;
         describe___screenSizePixel;
+        
+        % HDR-specific
         describe___HDRProjector;                    % only in old-style cal
+        describe___yokedmethod;                     % only in old-style cal
         
         % Calibration params
         describe___boxSize;
@@ -102,6 +105,9 @@ classdef CalStruct < handle
         describe___gamma;
         describe___gamma___fitType;
         describe___gamma___exponents;
+        describe___gamma___contrastThresh;
+        describe___gamma___fitBreakThresh;
+        describe___gamma___useweight;
         
         % Radiometer params
         describe___leaveRoomTime;
@@ -117,6 +123,10 @@ classdef CalStruct < handle
         rawData___gammaCurveMeasurements; 
         rawData___gammaCurveMeanMeasurements; 
                  
+        % HDR-specific spectra
+        rawData___yokedSpectra;
+        rawData___yokedSettings;
+        
         % RawData (basic linearity measurements)
         basicLinearitySetup___settings;
         rawData___basicLinearityMeasurements1;
@@ -151,9 +161,9 @@ classdef CalStruct < handle
         runtimeData___S_linear;
         runtimeData___M_device_linear;
         runtimeData___M_linear_device;
+        runtimeData___M_linear_device_status;
         runtimeData___M_ambient_linear;
         runtimeData___ambient_linear;
-        
     end
     
     

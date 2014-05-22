@@ -42,12 +42,12 @@ function parseInputCal(obj)
                 end
             end
             
-            if addEmptyField
+            if (addEmptyField) && (~isempty(calPath))
                 % add empty field
                 eval(sprintf('obj.inputCal.%s = [];', calPath));
-                %if (obj.verbosity > 0)
+                if (obj.verbosity > 0)
                    fprintf('Added runtime field: %s\n',  calPath);
-                %end
+                end
             end
             
         end
