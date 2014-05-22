@@ -38,6 +38,9 @@ classdef CalStruct < handle
     properties (SetAccess = private) 
         % the old-style cal that is returned to the user
         cal;
+        
+        % Flag indicating whether the inputCal has new-style format.
+        inputCalHasNewStyleFormat;
     end
     
     % invisible - to the user properties
@@ -46,9 +49,6 @@ classdef CalStruct < handle
         % The cal struct that we receive during instantiation. 
         % This will be modified via calls to calStruct.set(fieldName, fieldValue);
         inputCal;
-        
-        % Flag indicating whether the inputCal has new-style format.
-        inputCalHasNewStyleFormat;
 
         % Dictionary for mapping unified field names
         fieldMap = [];
