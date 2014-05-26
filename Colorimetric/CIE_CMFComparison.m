@@ -5,7 +5,12 @@
 % These are related to CMFs using a linear transformation. See links below.
 %
 % 11/28/13  ms      Wrote it.
+% 05/26/14  dhb     Plots into xTestPlots
 
+%% Clear and close
+clear; close all;
+
+%% Open figure
 theFigure = figure;
 
 %% Load in CIE 1931 xyz and plot
@@ -83,6 +88,10 @@ pbaspect([1 1 1]);
 xlim([-0.05 2.5]); ylim([-0.05 2.5]); plot([-0.05 2.5], [-0.05 2.5], '--k');
 xlabel('Tristimulus value (CIE 1964)'); ylabel('Tristimulus value (CIE 2012)');
 
+if (~exist('xTestPlots','dir'))
+    mkdir('xTestPlots');
+end
+
 set(theFigure, 'PaperPosition', [0 0 15 10]); %Position plot at left hand corner with width 15 and height 6.
 set(theFigure, 'PaperSize', [15 10]); %Set the paper to have width 15 and height 6.
-saveas(theFigure, 'CIE_CMFComparison.pdf', 'pdf');
+FigureSave(fullfile('xTestPlots','CIE_CMFComparison'),theFigure,'pdf');
