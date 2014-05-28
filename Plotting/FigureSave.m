@@ -10,18 +10,18 @@ function FigureSave(figName,figHandle,figType)
 
 if iscell(figType)
     for i = 1:length(figType)
-        if (exist('exportfig'))
+        if (exist('exportfig','file'))
             exportfig(figHandle,figName,'FontMode', 'fixed','FontSize', 12,'Width',6,'Height',6, 'color', 'cmyk','Format',figType{i});
-        elseif (exist('savefig'))
+        elseif (exist('savefig','file'))
             savefig(figName,figHandle,figType{i});
         else
             saveas(figHangle,figName,figType{i});
         end
     end
 else
-    if (exist('exportfig'))
+    if (exist('exportfig','file'))
         exportfig(figHandle,figName,'FontMode', 'fixed','FontSize', 12,'Width',6,'Height',6, 'color', 'cmyk','Format',figType);
-    elseif (exist('savefig'))
+    elseif (exist('savefig','file'))
         savefig(figName,figHandle,figType);
     else
         saveas(figHangle,figName,figType{i});
