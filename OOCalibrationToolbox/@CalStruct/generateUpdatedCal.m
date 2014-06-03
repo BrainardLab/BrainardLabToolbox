@@ -12,6 +12,9 @@ function cal = generateUpdatedCal(obj)
     % Get all the mapped unified field names
     unifiedFieldNames = keys(obj.fieldMap);
     
+    % Do not generate warnings when S_device, S_ambient are accessed
+    obj.reportSdev_Samb_warning = false;
+    
     for k = 1:numel(unifiedFieldNames)
         calPath = obj.fieldMap(unifiedFieldNames{k}).oldCalPath;
         if ~isempty(calPath)
@@ -23,6 +26,9 @@ function cal = generateUpdatedCal(obj)
             eval(sprintf('cal.%s = propertyValue;',calPath));
         end
     end
+    
+    % Start generating warnings when S_device, S_ambient are accessed
+    obj.reportSdev_Samb_warning = true;
     
     % Mark the cal as exported from NewStyleCalStruct
     cal.describe.isExportedFromNewStyleCalStruct = true;  
