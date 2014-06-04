@@ -12,6 +12,9 @@ function parseInputCal(obj)
         fprintf('<strong>Parsing input cal: Phase 0 (checking for runtime fields) </strong>\n');
     end
     
+    % Do not report a warning when accessing S_device, S_ambient
+    obj.reportSdev_Samb_warning = false;
+    
     for k = 1:numel(unifiedFieldNames)
         % current unified name
         unifiedName = unifiedFieldNames{k};
@@ -86,7 +89,9 @@ function parseInputCal(obj)
             dotIndices  = strfind(calPath,'.');
             if isempty(dotIndices)
                 if ~obj.isFieldOrProperty(subStruct, calPath)
-                    fprintf(2,'>>>> Field   %-25s not found in input cal.\n', sprintf('''%s''',calPath));
+                    if (obj.verbosity > 0)
+                        fprintf(2,'>>>> Field   %-25s not found in input cal.\n', sprintf('''%s''',calPath));
+                    end
                     %error('>>>> Invalid path for field: ''%s''.\n', calPath);
                     pathIsValid = false;
                 end
@@ -95,7 +100,9 @@ function parseInputCal(obj)
                 for dotNo = 1:length(dotIndices)
                     subStructFieldName = calPath(p:dotIndices(dotNo)-1);
                     if ~obj.isFieldOrProperty(subStruct, subStructFieldName)
-                        fprintf(2,'>>>> Field   %-25s not found in input cal.\n',  sprintf('''%s''',calPath));
+                        if (obj.verbosity > 0)
+                            fprintf(2,'>>>> Field   %-25s not found in input cal.\n',  sprintf('''%s''',calPath));
+                        end
                         pathIsValid = false;
                         break;
                     end
@@ -193,6 +200,11 @@ function parseInputCal(obj)
         fprintf('<strong>Finished phase II parsing.</strong>\n');
         fprintf('---------------------------------------------------------\n\n');
     end
+    
+    % Start reporting a warning when accessing S_device, S_ambient
+    obj.reportSdev_Samb_warning = true;
+    
+    
 end
 
 
