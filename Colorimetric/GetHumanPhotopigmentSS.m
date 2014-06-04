@@ -97,45 +97,27 @@ nominalLambdaMax = [];
 % still extract the triplet of fractions of pigment bleached, under the
 % assumption that in the input vector, the order is LMS. This is a bit
 % kludge-y, but works.
-for i = 1:length(photoreceptorClasses)
-    switch photoreceptorClasses{i}
-        case 'LCone'
-            fractionBleachedFromIsom(1) = fractionPigmentBleached(i);
-            if length(photoreceptorClasses) == 1
-                fractionBleachedFromIsom(2) = fractionPigmentBleached(i+1);
-                fractionBleachedFromIsom(3) = fractionPigmentBleached(i+2);
-            end
-        case 'MCone'
-            fractionBleachedFromIsom(2) = fractionPigmentBleached(i);
-            if length(photoreceptorClasses) == 1
-                fractionBleachedFromIsom(1) = fractionPigmentBleached(i-1);
-                fractionBleachedFromIsom(3) = fractionPigmentBleached(i+1);
-            end
-        case 'SCone'
-            fractionBleachedFromIsom(3) = fractionPigmentBleached(i);
-            if length(photoreceptorClasses) == 1
-                fractionBleachedFromIsom(1) = fractionPigmentBleached(i-2);
-                fractionBleachedFromIsom(2) = fractionPigmentBleached(i-1);
-            end
-        case 'LConeHemo'
-            fractionBleachedFromIsomHemo(1) = fractionPigmentBleached(i);
-            if length(photoreceptorClasses) == 1
-                fractionBleachedFromIsomHemo(2) = fractionPigmentBleached(i+1);
-                fractionBleachedFromIsomHemo(3) = fractionPigmentBleached(i+2);
-            end
-        case 'MConeHemo'
-            fractionBleachedFromIsomHemo(2) = fractionPigmentBleached(i);
-            if length(photoreceptorClasses) == 1
-                fractionBleachedFromIsomHemo(1) = fractionPigmentBleached(i-1);
-                fractionBleachedFromIsomHemo(3) = fractionPigmentBleached(i+1);
-            end
-        case 'SConeHemo'
-            fractionBleachedFromIsomHemo(3) = fractionPigmentBleached(i);
-            if length(photoreceptorClasses) == 1
-                fractionBleachedFromIsomHemo(1) = fractionPigmentBleached(i-2);
-                fractionBleachedFromIsomHemo(2) = fractionPigmentBleached(i-1);
-            end
+if length(photoreceptorClasses) > 1
+    for i = 1:length(photoreceptorClasses)
+        switch photoreceptorClasses{i}
+            case 'LCone'
+                fractionBleachedFromIsom(1) = fractionPigmentBleached(i);
+            case 'MCone'
+                fractionBleachedFromIsom(2) = fractionPigmentBleached(i);
+            case 'SCone'
+                fractionBleachedFromIsom(3) = fractionPigmentBleached(i);
+            case 'LConeHemo'
+                fractionBleachedFromIsomHemo(1) = fractionPigmentBleached(i);
+            case 'MConeHemo'
+                fractionBleachedFromIsomHemo(2) = fractionPigmentBleached(i);
+            case 'SConeHemo'
+                fractionBleachedFromIsomHemo(3) = fractionPigmentBleached(i);
+        end
     end
+elseif length(photoreceptorClasses) == 1
+    fractionBleachedFromIsom(1) = fractionPigmentBleached(1);
+    fractionBleachedFromIsom(2) = fractionPigmentBleached(2);
+    fractionBleachedFromIsom(3) = fractionPigmentBleached(3);
 end
 
 % Transpose if we can. We do this because the PTB machinery expects this.
