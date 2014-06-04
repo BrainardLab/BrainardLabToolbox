@@ -12,6 +12,9 @@ function parseInputCal(obj)
         fprintf('<strong>Parsing input cal: Phase 0 (checking for runtime fields) </strong>\n');
     end
     
+    % Do not report a warning when accessing S_device, S_ambient
+    obj.reportSdev_Samb_warning = false;
+    
     for k = 1:numel(unifiedFieldNames)
         % current unified name
         unifiedName = unifiedFieldNames{k};
@@ -197,6 +200,11 @@ function parseInputCal(obj)
         fprintf('<strong>Finished phase II parsing.</strong>\n');
         fprintf('---------------------------------------------------------\n\n');
     end
+    
+    % Start reporting a warning when accessing S_device, S_ambient
+    obj.reportSdev_Samb_warning = true;
+    
+    
 end
 
 

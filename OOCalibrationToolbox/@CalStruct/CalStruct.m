@@ -32,6 +32,7 @@ classdef CalStruct < handle
     % Read-write properties.
     properties 
         verbosity = 0;
+        
     end % Public properties
     
     % Read-only properties
@@ -53,6 +54,8 @@ classdef CalStruct < handle
         % Dictionary for mapping unified field names
         fieldMap = [];
         
+        % Flag indicating whether to report a warning when S_device or
+        % S_ambient properties are accessed.
         reportSdev_Samb_warning = true;
         
         % properties holding all the cal fields that can be addressed 
@@ -181,8 +184,8 @@ classdef CalStruct < handle
             pNames = fieldnames(parserResults);
             for k = 1:length(pNames)
                 obj.(pNames{k}) = parserResults.(pNames{k}); 
-            end
-
+            end 
+            
             % make a private copy
             obj.inputCal = cal;
             
@@ -192,8 +195,9 @@ classdef CalStruct < handle
             % detemine the format (old-style or new-style) of the input cal
             obj.determineInputCalFormat();
             
-            % parse the input cal
+            % parse the input cal            
             obj.parseInputCal();
+
         end
         
         % Getter method for cal (always in old-style format)
@@ -216,8 +220,11 @@ classdef CalStruct < handle
             value = obj.rawData___S;
             % Check if an 'S_device' field exists and if it does that it's
             % value matches that of S. If not, report an error.
+            previous_reportSdev_Samb_warning = obj.reportSdev_Samb_warning;
             obj.reportSdev_Samb_warning = false;
+            %fprintf('CalStruct.getS: Will access S_device with no warning\n');
             if (~isempty(obj.processedData___S_device) & ~isnan(obj.processedData___S_device))
+                %fprintf('Accessed S_device\n'); pause;
                 if (any(value ~= obj.processedData___S_device))
                     fprintf(2,'An ''S_device property exists and does not match ''S''.\n');
                     eval('S_device = obj.processedData___S_device')
@@ -226,6 +233,7 @@ classdef CalStruct < handle
                 end
             end
             obj.reportSdev_Samb_warning = false;
+            %fprintf('CalStruct.getS: Will access S_ambient with no warning\n');
             % Check if an 'S_ambient' field exists and if it does that it's
             % value matches that of S. If not, report an error.
             if (~isempty(obj.processedData___S_ambient) & ~isnan(obj.processedData___S_ambient))
@@ -237,7 +245,7 @@ classdef CalStruct < handle
                 end
             end
             
-            obj.reportSdev_Samb_warning = true;
+            obj.reportSdev_Samb_warning = previous_reportSdev_Samb_warning;
         end
         
         function value = get.processedData___S_device(obj)
