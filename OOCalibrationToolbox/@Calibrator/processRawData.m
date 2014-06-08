@@ -1,5 +1,4 @@
 function obj = processRawData(obj)
-
     % reset processData property
     obj.processedData = [];
     

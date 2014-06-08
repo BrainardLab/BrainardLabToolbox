@@ -15,27 +15,10 @@ function oldFormatCalStruct = calStructWithOldFormat(obj, newFormatCalStruct)
 % with the old-style format.
 %
 % Output:
-% calStruct - A cal struct compatible with that expected 
+% calStruct - A cal struct compatible with that expected from the old PsyCal functions
 
-    oldFormatCalStruct = OldFormatCalStructFromNewFormatCalStruct(newFormatCalStruct);
-        
-    % If we are doing calibration, get meter type from @Radiometer
-    if (isa(obj.radiometerObj, 'Radiometer'))
-        meterType = 0;
-        if (strcmp(obj.radiometerObj.deviceModelName, 'PR-650'))
-            meterType = 1;
-        elseif (strcmp(obj.radiometerObj.deviceModelName, 'PR-655'))
-            meterType = 4;
-        elseif (strcmp(obj.radiometerObj.deviceModelName, 'PR-670'))
-            meterType = 5;    
-        end 
-        oldFormatCalStruct.describe.whichMeterType = meterType;
-    end
-    
-    oldFormatCalStruct.describe.HDRProjector  = 0;
-    oldFormatCalStruct.describe.promptforname = 1;
-    oldFormatCalStruct.describe.isExportedFromNewStyleCalStruct = 1; % new field to indicate that this has been exported from new style cal format
-    oldFormatCalStruct.describe.newStyleCalStructRevisionNo = obj.calStructRevisionNo;
-                            
+    [calStructOBJ, ~] = ObjectToHandleCalOrCalStruct(newFormatCalStruct);
+    oldFormatCalStruct = calStructOBJ.cal;
+    clear 'calStructOBJ'
 end
 
