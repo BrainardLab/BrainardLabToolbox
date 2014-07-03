@@ -103,6 +103,7 @@ cal.manual.use = 0;
 while true
     defaultCalibrationType = 'Generic';
     fprintf('Calibration types supported\n');
+    fprintf('\tViewSonicProbe - Nicolas'' office ViewSonic monitor\n');
     fprintf('\tGeneric - any monitor or device\n');
     fprintf('\tEyeTracker - EyeTracker experiments\n');
     fprintf('\tEyeTrackerTest - EyeTracker: testing the bits++ options\n');
@@ -126,7 +127,7 @@ while true
     
     % Make sure it's a valid calibration type.
     switch calibrationType
-        case {'Generic', 'EyeTracker','EyeTrackerTest', 'SquidNEC', 'EyeTrackerLCD', 'FrontRoomLex', 'FrontRoomClass', 'StereoRigRightAchrom', 'StereoRigLeftAchrom', 'HDRBackRGB', 'FrontRoomObjColor', 'StereoRigLeftClass', 'StereoRigRightClass', 'Dummy', 'DummyBits', 'StereoLCDRight','StereoLCDLeft'}
+        case {'ViewSonicProbe', 'Generic', 'EyeTracker','EyeTrackerTest', 'SquidNEC', 'EyeTrackerLCD', 'FrontRoomLex', 'FrontRoomClass', 'StereoRigRightAchrom', 'StereoRigLeftAchrom', 'HDRBackRGB', 'FrontRoomObjColor', 'StereoRigLeftClass', 'StereoRigRightClass', 'Dummy', 'DummyBits', 'StereoLCDRight','StereoLCDLeft'}
             break;
         otherwise
             fprintf('*** Invalid calibration type, try again\n\n');
@@ -682,6 +683,45 @@ switch calibrationType
         cal.nDevices = 3;
         cal.nPrimaryBases = 1;
         beepWhenDone = 1;
+        
+    case 'ViewSonicProbe'
+        whichScreen = 2;
+        cal.describe.whichScreen = whichScreen;
+        cal.describe.blankOtherScreen = 0;
+        cal.describe.whichBlankScreen = 1;
+        cal.describe.blankSettings = [0.3962 0.3787 0.4039];
+        
+        cal.bgColor = [0.3962 0.3787 0.4039];
+        cal.fgColor = cal.bgColor;
+        cal.describe.meterDistance = 0.5;
+        cal.describe.monitor = 'ViewSonicProbe';
+        cal.describe.comment = 'Nicolas office Viewsonic';
+        newFileName = 'ViewSonicProbe_OldFormat';
+        
+        % Properties we think this monitor should have at
+        % calibration time.
+        desired.hz = 60;
+        desired.screenSizePixel = [1920 1200];
+        
+        % Fitting parameters
+        cal.describe.gamma.fitType = 'simplePower';
+        
+        % Bits++?
+        cal.usebitspp = 0;
+        
+        % Other parameters
+        cal.describe.leaveRoomTime = 10;
+        cal.describe.nAverage = 2;
+        cal.describe.nMeas = 15;
+        cal.describe.boxSize = 150;
+        cal.describe.boxOffsetX = 0;
+        cal.describe.boxOffsetY = 0;
+        cal.nDevices = 3;
+        cal.nPrimaryBases = 1;
+        beepWhenDone = 2;
+        emailToStr = GetWithDefault('Enter email address for done notification','cottaris@sas.upenn.edu');
+        setpref('Internet', 'SMTP_Server', 'smtp-relay.upenn.edu');
+        setpref('Internet', 'E_Mail', emailToStr);
         
         
         % Stereo Rig right LCD monitor
