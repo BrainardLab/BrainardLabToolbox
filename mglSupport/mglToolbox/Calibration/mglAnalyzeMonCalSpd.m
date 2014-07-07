@@ -37,6 +37,12 @@
 % 11/26/12 dhb  Add conditionals so this will do something reasonable for an XYZ calibration.
 % 5/28/13  dhb  Make output figures .png and add date.  This makes them more wiki compatible.
 %          dhb  Also format output for easy upload to the wiki.
+% 5/08/14  npc  Modifications for accessing calibration data using a @CalStruct object.
+%               The first input argument can be either a @CalStruct object (new style), or a cal structure (old style).
+%               Passing a @CalStruct object is the preferred way because it results in 
+%               (a) less overhead (@CalStruct objects are passed by reference, not by value), and
+%               (b) better control over how the calibration data are accessed.
+
 
 % Initialize
 clear; close all;
@@ -48,8 +54,27 @@ nDontPlotLowPower = 4;
 fprintf('\n');
 [cal,calFilename] = GetCalibrationStructure('Enter calibration filename','HDRFrontYokedMondrianfull',[]);
 
+% Specify @CalStruct object that will handle all access to the calibration data.
+[calStructOBJ, inputArgIsACalStructOBJ] = ObjectToHandleCalOrCalStruct(cal);
+% Clear cal, so fields are accessed only via get and set methods of calStruct.
+clear 'cal'
+
+% Print out some information from the calibration.
+DescribeMonCal(calStructOBJ);
+
+
+S = calStructOBJ.get('S');                          
+load T_xyz1931
+T_xyz = SplineCmf(S_xyz1931,683*T_xyz1931,S);
+
+% Set color space
+SetSensorColorSpace(calStructOBJ,T_xyz,S);
+
+
+
 % Spectral calibration?
-if (size(cal.T_device,1) > 3)
+T_device = calStructOBJ.get('T_device');
+if (size(T_device,1) > 3)
     ISSPECTRAL = true;
 else
     ISSPECTRAL = false;
@@ -61,13 +86,14 @@ if (ISSPECTRAL)
 else
     DUMPFULLSPECTRA = false;
 end
-if (isfield(cal,'basicmeas'))
+
+if (~isempty(calStructOBJ.get('basicmeas.settings')))
     DUMPBASIC = GetWithDefault('Plot basic linearity data (0 -> no, 1 -> yes)?',0);
 end
-if (isfield(cal,'bgmeas'))
+if (~isempty(calStructOBJ.get('bgmeas.settings')))
     DUMPBG = GetWithDefault('Plot background effect data (0 -> no, 1 -> yes)?',0);
 end
-if (isfield(cal, 'rawdata') && isfield(cal.rawdata,'monSpd'))
+if (~isempty(calStructOBJ.get('monSpd')))
     DUMPNAVERAGE = GetWithDefault('Plot all sets of measures (0 -> no, 1 -> yes)?',0);
 end
 
@@ -83,7 +109,8 @@ if (SAVEBASICFIGS)
     if (~exist(calFilePlotFolder,'dir'))
         unix(['mkdir ' calFilePlotFolder]);
     end
-    thePlotFolder = fullfile(calFilePlotFolder,cal.describe.date(1:11));
+    calDate = calStructOBJ.get('date');
+    thePlotFolder = fullfile(calFilePlotFolder,calDate(1:11));
     if (~exist(thePlotFolder,'dir'))
         unix(['mkdir ' thePlotFolder]);
     end
@@ -92,40 +119,44 @@ end
 % Refit accordingly
 REFIT = GetWithDefault('Refit data [0 -> no,1 -> yes]',0);
 if (REFIT)
-    cal.describe.gamma.fitType = GetWithDefault('Enter gamma fit type (see ''help CalibrateFitGamma'')',cal.describe.gamma.fitType);
+    newFitType = GetWithDefault('Enter gamma fit type (see ''help CalibrateFitGamma'')', calStructOBJ.get('gamma.fitType'));
+    calStructOBJ.set('gamma.fitType', newFitType);
     if (ISSPECTRAL)
-        cal.nPrimaryBases = GetWithDefault('\nEnter number of primary bases',cal.nPrimaryBases);
-        cal = CalibrateFitLinMod(cal);
-        cal = CalibrateFitYoked(cal);
+        % Get new number of primary bases
+        new_nPrimaryBases = GetWithDefault('\nEnter number of primary bases',calStructOBJ.get('nPrimaryBases'));
+        calStructOBJ.set('nPrimaryBases', new_nPrimaryBases);
+        
+        % and fit a linear model to the data
+        CalibrateFitLinMod(calStructOBJ);
+
+        % fit yoked
+        CalibrateFitYoked(calStructOBJ);        
     end
-    cal = CalibrateFitGamma(cal);
 end
-S = cal.describe.S;
+
+S = calStructOBJ.get('S');   
 
 %% Color matching functions
 load T_xyz1931
 T_xyz = SplineCmf(S_xyz1931,683*T_xyz1931,S);
 
 % Set color space
-cal = SetSensorColorSpace(cal,T_xyz,S);
-
-% Print out some information from the calibration.
-DescribeMonCal(cal);
+SetSensorColorSpace(calStructOBJ,T_xyz,S);
 
 % Comptue min/max luminance
-maxXYZ = PrimaryToSensor(cal,[1 1 1]');
-minXYZ = PrimaryToSensor(cal,[0 0 0]');
+maxXYZ = PrimaryToSensor(calStructOBJ,[1 1 1]');
+minXYZ = PrimaryToSensor(calStructOBJ,[0 0 0]');
 fprintf('  * Minimum luminance %0.3f cd/m2; maximum luminance %0.2f cd/m2\n',minXYZ(2),maxXYZ(2));
 
 % Provide information about gamma measurements
 % This is probably not method-independent.
 fprintf('  * Gamma measurements were made at %g levels\n',...
-    size(cal.rawdata.rawGammaInput,1));
+    size(calStructOBJ.get('rawGammaInput'),1));
 fprintf('  * Gamma table available at %g levels\n',...
-    size(cal.gammaInput,1));
+    size(calStructOBJ.get('gammaInput'),1));
 
 %% Check
-if (cal.nDevices ~= 3)
+if (calStructOBJ.get('nDevices') ~= 3)
     error('This program is hard coded on assumption of three device primaries.');
 end
 
@@ -135,31 +166,31 @@ end
 
 % Spectral plot
 if (ISSPECTRAL)
-    CalibratePlotSpectra(cal,figure(1));
+    CalibratePlotSpectra(calStructOBJ,figure(1));
 end
 
 % Gamma plot
-CalibratePlotGamma(cal,figure(2));
+CalibratePlotGamma(calStructOBJ,figure(2));
 
 % Ambient plot for spectral measurements
 if (ISSPECTRAL)
-    CalibratePlotAmbient(cal,figure(3));
+    CalibratePlotAmbient(calStructOBJ,figure(3));
 end
 
 % Chromaticity plot
 if (ISSPECTRAL)
-    xyYMon = XYZToxyY(T_xyz*cal.P_device);
-    xyYAmb = XYZToxyY(T_xyz*cal.P_ambient);
+    xyYMon = XYZToxyY(T_xyz*calStructOBJ.get('P_device'));
+    xyYAmb = XYZToxyY(T_xyz*calStructOBJ.get('P_ambient'));
 else
     % Plot chromaticities of three channels
     % We assume that the data are XYZ in this
     % case, which is a good guess.  Also assume
     % that there are just three channels.
-    if (size(cal.P_device,2) ~= 3)
+    if (size(calStructOBJ.get('P_device'),2) ~= 3)
         error('Plotting code assumes just three channels in device');
     end
-    xyYMon = XYZToxyY(cal.P_device);
-    xyYAmb = XYZToxyY(cal.P_ambient);
+    xyYMon = XYZToxyY(calStructOBJ.get('P_device'));
+    xyYAmb = XYZToxyY(calStructOBJ.get('P_ambient'));
 end
 figure(4); hold on
 xyYLocus = XYZToxyY(T_xyz);
@@ -173,33 +204,42 @@ ylabel('y chromaticity');
 title(sprintf('RGB channel chromaticities',nDontPlotLowPower));
 
 if (SAVEBASICFIGS)
+    calDate = calStructOBJ.get('date');
+    
     if (ISSPECTRAL)
         figure(1);
-        savefig(fullfile(thePlotFolder,['Spectra_' cal.describe.date(1:11)]),gcf,'png');
+        savefig(fullfile(thePlotFolder,['Spectra_' calDate(1:11)]),gcf,'png');
     end
        
     figure(2);
-    savefig(fullfile(thePlotFolder,['Gamma_' cal.describe.date(1:11)]),gcf,'png');
+    savefig(fullfile(thePlotFolder,['Gamma_' calDate(1:11)]),gcf,'png');
     if (ISSPECTRAL)
         figure(3);
-        savefig(fullfile(thePlotFolder,['Ambient_' cal.describe.date(1:11)]),gcf,'png');
+        savefig(fullfile(thePlotFolder,['Ambient_' calDate(1:11)]),gcf,'png');
     end
     figure(4);
-    savefig(fullfile(thePlotFolder,['Chromaticities_' cal.describe.date(1:11)]),gcf,'png');
+    savefig(fullfile(thePlotFolder,['Chromaticities_' calDate(1:11)]),gcf,'png');
 end
     
 % Plot full spectral data for each phosphor
 if (DUMPFULLSPECTRA)
-    figure(4+cal.nDevices+1); clf; hold on;
     
-    for j = 1:cal.nDevices
+    S        = calStructOBJ.get('S');
+    S_device = calStructOBJ.get('S_device');
+    nMeas    = calStructOBJ.get('nMeas');
+    nDevices = calStructOBJ.get('nDevices');
+    mon      = calStructOBJ.get('mon');
+    
+    figure(4+nDevices+1); clf; hold on;
+    
+    for j = 1:nDevices    
         % Get channel measurements into columns of a matrix from raw data in calibration file.
-        tempMon = reshape(cal.rawdata.mon(:,j),cal.describe.S(3),cal.describe.nMeas);
+        tempMon = reshape( mon(:,j), S(3), nMeas);
         
         % Scale each measurement to the maximum spectrum to allow us to compare shapes visually.
         maxSpectrum = tempMon(:,end);
         scaledMon = tempMon;
-        for i = 1:cal.describe.nMeas
+        for i = 1: nMeas
             scaledMon(:,i) = scaledMon(:,i)*(scaledMon(:,i)\maxSpectrum);
         end
         
@@ -209,14 +249,14 @@ if (DUMPFULLSPECTRA)
         % Plot raw spectra
         figure(4+j); clf
         subplot(1,2,1);
-        plot(SToWls(cal.S_device),tempMon);
+        plot(SToWls(S_device),tempMon);
         xlabel('Wavelength (nm)', 'Fontweight', 'bold');
         ylabel('Power', 'Fontweight', 'bold');
         axis([380,780,-Inf,Inf]);
         
         % Plot scaled spectra
         subplot(1,2,2);
-        plot(SToWls(cal.S_device),scaledMon(:,nDontPlotLowPower+1:end));
+        plot(SToWls(S_device),scaledMon(:,nDontPlotLowPower+1:end));
         xlabel('Wavelength (nm)', 'Fontweight', 'bold');
         ylabel('Normalized Power', 'Fontweight', 'bold');
         axis([380,780,-Inf,Inf]);
@@ -226,7 +266,7 @@ if (DUMPFULLSPECTRA)
         monSVs(:,i) = svd(tempMon);
         
         % Plot chromaticities
-        figure(4+cal.nDevices+1); hold on
+        figure(4+nDevices+1); hold on
         plot(xyYMon(1,1:end)',xyYMon(2,1:end)','k+');
         plot(xyYMon(1,nDontPlotLowPower+1:end)',xyYMon(2,nDontPlotLowPower+1:end)','r+');
         axis([0 1 0 1]); axis('square');
@@ -234,23 +274,30 @@ if (DUMPFULLSPECTRA)
         ylabel('y chromaticity');
         title(sprintf('Lower %d luminances in black',nDontPlotLowPower));
         if (SAVEBASICFIGS)
-            savefig(fullfile(thePlotFolder,['PhosphorConstancy_' cal.describe.date(1:11)]),gcf,'png');
+            savefig(fullfile(thePlotFolder,['PhosphorConstancy_' calDate(1:11)]),gcf,'png');
         end
     end
 end
 
+
 % Analyze basic measurements (these are in essence a linearity check)
-if (isfield(cal,'basicmeas'))
+if (~isempty(calStructOBJ.get('basicmeas.settings')))
     if (DUMPBASIC)
         
         % Handle wacky world of how we drive the HDR back projector
-        if (isfield(cal.describe,'HDRProjector') && cal.describe.HDRProjector  == 1)
-            cal.basicmeas.settings = [zeros(size(cal.basicmeas.settings(2,:))) ; cal.basicmeas.settings(2,:) ; zeros(size(cal.basicmeas.settings(2,:)))];
+        HDRprojector = calStructOBJ.get('HDRProjector');
+        settings     = calStructOBJ.get('basicmeas.settings');
+        
+        if (HDRprojector  == 1)
+            newSettings = [zeros(size(settings(2,:))) ; settings(2,:) ; zeros(size(settings(2,:)))];
+            calStructOBJ.set('basicmeas.settings', newSettings);
         end
         
-        basicxyY1 = XYZToxyY(T_xyz*cal.basicmeas.spectra1);
-        basicxyY2 = XYZToxyY(T_xyz*cal.basicmeas.spectra2);
-        nominalxyY = XYZToxyY(SettingsToSensorAcc(cal,cal.basicmeas.settings));
+        spectra1 = calStructOBJ.get('basicmeas.spectra1');
+        spectra2 = calStructOBJ.get('basicmeas.spectra2');
+        basicxyY1 = XYZToxyY(T_xyz*spectra1);
+        basicxyY2 = XYZToxyY(T_xyz*spectra2);
+        nominalxyY = XYZToxyY(SettingsToSensorAcc(calStructOBJ, settings));
         
         % Scatter plot
         figure; clf;
@@ -283,7 +330,7 @@ if (isfield(cal,'basicmeas'))
         ylabel('Measured Y (cd/m2)');
         axis('square');
         if (SAVEBASICFIGS)
-            savefig(fullfile(thePlotFolder,['Linearity_' cal.describe.date(1:11)]),gcf,'png');
+            savefig(fullfile(thePlotFolder,['Linearity_' calDate(1:11)]),gcf,'png');
         end
         
         % Deviation plot
@@ -318,7 +365,8 @@ if (isfield(cal,'basicmeas'))
         title(sprintf('Max abs deviation %0.2f\n',max(abs([deviationsxyY1(3,:) deviationsxyY2(3,:)]))));
 
         if (SAVEBASICFIGS)
-            savefig(fullfile(thePlotFolder,['LinearityDeviations_' cal.describe.date(1:11)]),gcf,'png');
+            calDate = calStructOBJ.get('date');
+            savefig(fullfile(thePlotFolder,['LinearityDeviations_' calDate(1:11)]),gcf,'png');
         end
         
         % Print out some statistics
@@ -330,75 +378,85 @@ if (isfield(cal,'basicmeas'))
             deviationsStd2(1),deviationsStd2(2),deviationsStd2(3));
         
         % These show individual spectral overlaid on linearity predictions
-        ambSpd = cal.P_ambient;
+        ambSpd = calStructOBJ.get('P_ambient');
         figure; clf;
         k=1;
-        plot((cal.basicmeas.spectra1(:,k)-ambSpd),'r-')
+        plot((spectra1(:,k)-ambSpd),'r-')
         hold on
-        plot(((cal.basicmeas.spectra1(:,k+1)-ambSpd)+(cal.basicmeas.spectra1(:,k+2)-ambSpd)+...
-            (cal.basicmeas.spectra1(:,k+3)-ambSpd)),'b-')
-        title(sprintf('Additivity check (%0.2f,%0.2f, %0.2f)',cal.basicmeas.settings(1,k),cal.basicmeas.settings(2,k),cal.basicmeas.settings(3,k)));
+        plot(((spectra1(:,k+1)-ambSpd)+(spectra1(:,k+2)-ambSpd)+...
+            (spectra1(:,k+3)-ambSpd)),'b-')
+        title(sprintf('Additivity check (%0.2f,%0.2f, %0.2f)',settings(1,k),settings(2,k),settings(3,k)));
         
         figure; clf;
         k=5;
-        plot((cal.basicmeas.spectra1(:,k)-ambSpd),'r-')
+        plot((spectra1(:,k)-ambSpd),'r-')
         hold on
-        plot(((cal.basicmeas.spectra1(:,k+1)-ambSpd)+(cal.basicmeas.spectra1(:,k+2)-ambSpd)+...
-            (cal.basicmeas.spectra1(:,k+3)-ambSpd)),'b-')
-        title(sprintf('Additivity check (%0.2f,%0.2f, %0.2f)',cal.basicmeas.settings(1,k),cal.basicmeas.settings(2,k),cal.basicmeas.settings(3,k)));
+        plot(((spectra1(:,k+1)-ambSpd)+(spectra1(:,k+2)-ambSpd)+...
+            (spectra1(:,k+3)-ambSpd)),'b-')
+        title(sprintf('Additivity check (%0.2f,%0.2f, %0.2f)',settings(1,k),settings(2,k),settings(3,k)));
         
         figure; clf;
         k=9;
-        plot((cal.basicmeas.spectra1(:,k)-ambSpd),'r-')
+        plot((spectra1(:,k)-ambSpd),'r-')
         hold on
-        plot(((cal.basicmeas.spectra1(:,k+1)-ambSpd)+(cal.basicmeas.spectra1(:,k+2)-ambSpd)+...
-            (cal.basicmeas.spectra1(:,k+3)-ambSpd)),'b-')
-        title(sprintf('Additivity check (%0.2f,%0.2f, %0.2f)',cal.basicmeas.settings(1,k),cal.basicmeas.settings(2,k),cal.basicmeas.settings(3,k)));
+        plot(((spectra1(:,k+1)-ambSpd)+(spectra1(:,k+2)-ambSpd)+...
+            (spectra1(:,k+3)-ambSpd)),'b-')
+        title(sprintf('Additivity check (%0.2f,%0.2f, %0.2f)',settings(1,k),settings(2,k),settings(3,k)));
         
         figure; clf;
         k=13;
-        plot((cal.basicmeas.spectra1(:,k)-ambSpd),'r-')
+        plot((spectra1(:,k)-ambSpd),'r-')
         hold on
-        plot(((cal.basicmeas.spectra1(:,k+1)-ambSpd)+(cal.basicmeas.spectra1(:,k+2)-ambSpd)+...
-            (cal.basicmeas.spectra1(:,k+3)-ambSpd)),'b-')
-        title(sprintf('Additivity check (%0.2f,%0.2f, %0.2f)',cal.basicmeas.settings(1,k),cal.basicmeas.settings(2,k),cal.basicmeas.settings(3,k)));
+        plot(((spectra1(:,k+1)-ambSpd)+(spectra1(:,k+2)-ambSpd)+...
+            (spectra1(:,k+3)-ambSpd)),'b-')
+        title(sprintf('Additivity check (%0.2f,%0.2f, %0.2f)',settings(1,k),settings(2,k),settings(3,k)));
         xlabel('Wavelength (nm)'); ylabel('Power');
     end
 end
+
 
 %% Repeat measurements
 %
 % This is added to plot the measurments for gamma curves that are now taken
 % twice during the calibration.
-if (cal.describe.nAverage > 1 && isfield(cal, 'rawdata') && isfield(cal.rawdata,'monSpd'))
+nMeas    = calStructOBJ.get('nMeas');
+nAverage = calStructOBJ.get('nAverage');
+nDevices = calStructOBJ.get('nDevices');
+monSpd   = calStructOBJ.get('monSpd');
+S        = calStructOBJ.get('S');
+
+if (nAverage > 1 && (~isempty(monSpd)))
     if (DUMPNAVERAGE)
         % First convert the set of measurments to xyY; then plot it
-        for a=1:cal.describe.nAverage
-            for i=1:cal.nDevices
-                tempMonSpd{a,i} = reshape(cal.rawdata.monSpd{a,i},cal.describe.S(3),cal.describe.nMeas);
+        for a=1:nAverage
+            for i=1:nDevices
+                tempMonSpd{a,i} = reshape(monSpd{a,i}, S(3), nMeas);
             end
         end
-        cal.rawdata.monSpd=tempMonSpd;
-        for a = 1:cal.describe.nAverage
-            for i = 1:cal.nDevices
-                monxyY{a,i}=XYZToxyY(T_xyz*cal.rawdata.monSpd{a,i});
+        
+        calStructOBJ.set('monSpd', tempMonSpd);
+        monSpd   = calStructOBJ.get('monSpd');
+        
+        for a = 1:nAverage
+            for i = 1:nDevices
+                monxyY{a,i}=XYZToxyY(T_xyz*monSpd{a,i});
             end
         end
         
         % Plot Y for all the measures and all the guns
         figure; clf;
         subplot(1,3,1); hold on
-        for a=1:cal.describe.nAverage
+        for a=1:nAverage
             plot(monxyY{a,1}(3,:),'r-');
             plot(monxyY{a,2}(3,:),'g-');
             plot(monxyY{a,3}(3,:),'b-');
         end
-        axis([1 cal.describe.nMeas 0 450]);
+        axis([1 nMeas 0 450]);
         xlabel('Measures');
         ylabel('Measured Luminance in cd/m2');
         % Plot y for all the measures and all the guns
         subplot(1,3,2); hold on
-        for a=1:cal.describe.nAverage
+        for a=1:nAverage
             plot(monxyY{a,1}(1,:),'r-');
             plot(monxyY{a,2}(1,:),'g-');
             plot(monxyY{a,3}(1,:),'b-');
@@ -406,27 +464,33 @@ if (cal.describe.nAverage > 1 && isfield(cal, 'rawdata') && isfield(cal.rawdata,
         axis([1 length(monxyY{a,1}(:,3)) 0 300]);
         xlabel('Measures');
         ylabel('Measured x-chromaticity');
-        axis([1 cal.describe.nMeas 0 1]);
+        axis([1 nMeas 0 1]);
         % Plot x for all the measures and all the guns
         subplot(1,3,3); hold on
-        for a=1:cal.describe.nAverage
+        for a=1:nAverage
             plot(monxyY{a,1}(2,:),'r-');
             plot(monxyY{a,2}(2,:),'g-');
             plot(monxyY{a,3}(2,:),'b-');
         end
-        axis([1 cal.describe.nMeas 0 1]);
+        axis([1 nMeas 0 1]);
         xlabel('Measures');
         ylabel('Measured y-chromaticity');
         %axis('square');
     end
 end
 
+
 %% Analyze background measurements
-if (isfield(cal,'bgmeas'))
+if (~isempty(calStructOBJ.get('bgmeas.settings')))
     if (DUMPBG)
         % Handle wacky world of how we drive the HDR back projector
-        if (isfield(cal.describe,'HDRProjector') && cal.describe.HDRProjector == 1)
-            cal.bgmeas.settings = [zeros(size(cal.bgmeas.settings(2,:))) ; cal.bgmeas.settings(2,:) ; zeros(size(cal.bgmeas.settings(2,:)))];
+        HDRprojector = calStructOBJ.get('HDRProjector');
+        settings     = calStructOBJ.get('bgmeas.settings');
+        spectra      = calStructOBJ.get('bgmeas.spectra');
+        
+        if (~isempty(HDRprojector)) && (HDRprojector == 1)
+            newSettings = [zeros(size(settings(2,:))) ; settings(2,:) ; zeros(size(settings(2,:)))];
+            calStructOBJ.set('bgmeas.settings', newSettings);
         end
         
         % The calibration code measures a set of spectra for a set of background
@@ -435,21 +499,21 @@ if (isfield(cal,'bgmeas'))
         % set of settings that the background cycles through.
         %
         % For each background setting, the measured spectra are in the corresponding
-        % entry of the cell array cal.bgmeas.spectra.
+        % entry of the cell array spectra.
         fprintf('  * Effect of background on ambient\n');
-        for j = 1:size(cal.bgmeas.settings,2)
-            %fprintf('Target settings %0.2f %0.2f %0.2f\n',cal.bgmeas.settings(1,j),cal.bgmeas.settings(2,j),cal.bgmeas.settings(3,j));
+        for j = 1:size(settings,2)
+            %fprintf('Target settings %0.2f %0.2f %0.2f\n',settings(1,j),settings(2,j),settings(3,j));
             figure; clf; hold on
-            for bg = 1:size(cal.bgmeas.settings,2)
-                plot(SToWls(cal.describe.S),cal.bgmeas.spectra{bg}(:,j))
+            for bg = 1:size(settings,2)
+                plot(SToWls(S),spectra{bg}(:,j))
             end
             xlabel('Wavelength (nm)'); ylabel('Power');
-            title(sprintf('BG effect on (%0.2f,%0.2f, %0.2f)',cal.bgmeas.settings(1,j),cal.bgmeas.settings(2,j),cal.bgmeas.settings(3,j)));
-            if (~any(cal.bgmeas.settings(:,j) ~= 0))
-                for bg = 1:size(cal.bgmeas.settings,2)  
-                    tempxyY = XYZToxyY(T_xyz*cal.bgmeas.spectra{bg}(:,j));
+            title(sprintf('BG effect on (%0.2f,%0.2f, %0.2f)',settings(1,j),settings(2,j),settings(3,j)));
+            if (~any(settings(:,j) ~= 0))
+                for bg = 1:size(settings,2)  
+                    tempxyY = XYZToxyY(T_xyz*spectra{bg}(:,j));
                     fprintf('    * Background settings = %0.2f %0.2f, %0.2f, ambient xyY = %0.3f, %0.3f, %0.3f cd/m2\n',...
-                        cal.bgmeas.settings(1,bg),cal.bgmeas.settings(2,bg),cal.bgmeas.settings(3,bg), ...
+                        settings(1,bg),settings(2,bg),settings(3,bg), ...
                         tempxyY(1),tempxyY(2),tempxyY(3));
                 end
             end
