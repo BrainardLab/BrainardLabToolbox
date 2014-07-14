@@ -1,6 +1,6 @@
-function savefig(fname, varargin)
+function savefigghost(fname, varargin)
 	
-% Usage: savefig(filename, fighdl, options)
+% Usage: savefig(ghostfilename, fighdl, options)
 %
 % Saves a pdf, eps, png, jpeg, and/or tiff of the contents of the fighandle's (or current) figure.
 % It saves an eps of the figure and the uses Ghostscript to convert to the other formats.
@@ -100,6 +100,9 @@ function savefig(fname, varargin)
 % INSPIRATION:  eps2pdf (5782), eps2xxx (6858)
 %
 % REQUIREMENTS: Works in Matlab 6.5.1 (R13SP1) (maybe in 6.5 too).
+%
+% 7/14/14  dhb  Renamed to savefigghost because Matlab R2014b has its own
+%               savefig.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	
