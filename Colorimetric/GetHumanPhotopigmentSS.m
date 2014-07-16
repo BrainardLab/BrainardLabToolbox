@@ -114,10 +114,36 @@ if length(photoreceptorClasses) > 1
                 fractionBleachedFromIsomHemo(3) = fractionPigmentBleached(i);
         end
     end
+    % If only one cone class is passed, which can happen in splatter
+    % calculations, we set the fraction pigment bleached for the pigments that
+    % are not passed to be 0. This is because PTB machinery expects triplets.
 elseif length(photoreceptorClasses) == 1
-    fractionBleachedFromIsom(1) = fractionPigmentBleached(1);
-    fractionBleachedFromIsom(2) = fractionPigmentBleached(2);
-    fractionBleachedFromIsom(3) = fractionPigmentBleached(3);
+    switch photoreceptorClasses{1}
+        case 'LCone'
+            fractionBleachedFromIsom(1) = fractionPigmentBleached;
+            fractionBleachedFromIsom(2) = 0;
+            fractionBleachedFromIsom(3) = 0;
+        case 'MCone'
+            fractionBleachedFromIsom(1) = 0;
+            fractionBleachedFromIsom(2) = fractionPigmentBleached;
+            fractionBleachedFromIsom(3) = 0;
+        case 'SCone'
+            fractionBleachedFromIsom(1) = 0;
+            fractionBleachedFromIsom(2) = 0;
+            fractionBleachedFromIsom(3) = fractionPigmentBleached;
+        case 'LConeHemo'
+            fractionBleachedFromIsomHemo(1) = fractionPigmentBleached;
+            fractionBleachedFromIsomHemo(2) = 0;
+            fractionBleachedFromIsomHemo(3) = 0;
+        case 'MConeHemo'
+            fractionBleachedFromIsomHemo(1) = 0;
+            fractionBleachedFromIsomHemo(2) = fractionPigmentBleached;
+            fractionBleachedFromIsomHemo(3) = 0;
+        case 'SConeHemo'
+            fractionBleachedFromIsomHemo(1) = 0;
+            fractionBleachedFromIsomHemo(2) = 0;
+            fractionBleachedFromIsomHemo(3) = fractionPigmentBleached;
+    end
 end
 
 % Transpose if we can. We do this because the PTB machinery expects this.
@@ -363,15 +389,13 @@ for i = 1:length(photoreceptorClasses)
         case 'MelanopsinLegacy'
             % Construct the melanopsin receptor
             whichNomogram = 'StockmanSharpe';
-            lambdaMax = [558.9, 530.3, 480];
-            ageInYears = 32;
-            pupilSize = 3;
-            fieldSize = 10;
+            lambdaMax = [558.9, 530.3, 480+lambdaMaxShift];
             
             % Make a call to ComputeCIEConeFundamentals() which makes appropriate calls
-            T_quanta_tmp = ComputeCIEConeFundamentals(S,fieldSize,ageInYears,pupilSize,lambdaMax,whichNomogram);
+            T_quanta_tmp = ComputeCIEConeFundamentals(S,10,ageInYears,3,lambdaMax,whichNomogram);
             T_energyNormalized = [T_energyNormalized ; EnergyToQuanta(S,T_quanta_tmp(3,:)')'];
             T_quantalIsomerizations = [T_quantalIsomerizations ; NaN*ones(size(T_quanta))];
+            nominalLambdaMax = [nominalLambdaMax 480];
         case 'RodsLegacy'
             whichNomogram = 'StockmanSharpe';
             lambdaMax = [558.9, 530.3, 480];
