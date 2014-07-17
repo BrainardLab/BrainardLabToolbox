@@ -79,8 +79,10 @@ if isempty(lambdaMaxShift)
     lambdaMaxShift = 0;
 end
 
-if (isempty(fractionPigmentBleached))
+if (isempty(fractionPigmentBleached)) && length(photoreceptorClasses) > 1
     fractionPigmentBleached = zeros(3,1);
+else
+    fractionPigmentBleached = 0;
 end
 
 % Assign empty vectors
