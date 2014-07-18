@@ -42,7 +42,7 @@
 %               Passing a @CalStruct object is the preferred way because it results in 
 %               (a) less overhead (@CalStruct objects are passed by reference, not by value), and
 %               (b) better control over how the calibration data are accessed.
-
+% 7/17/14  npc  Replaced all instances of savefig() with FigureSave().
 
 % Initialize
 clear; close all;
