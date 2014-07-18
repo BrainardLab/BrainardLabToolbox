@@ -35,6 +35,7 @@ function obj = plotAllData(obj)
         figHandles = obj.figureHandlesArray{figureGroupIndex};
         for k = 1:length(figHandles)
             set(figHandles(k),'Visible', 'on'); 
+            set(figHandles(k),'toolbar','none');
         end
 
         % Arrange figures in a grid with dimensions gridDims
