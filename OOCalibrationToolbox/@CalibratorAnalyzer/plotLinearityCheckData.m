@@ -1,34 +1,35 @@
 % Method to generate plots of the linearity check data.
 function plotLinearityCheckData(obj, figureGroupIndex)
-    % Get the cal
-    calStruct = obj.cal;
    
     % Basic linearity tests from two measurements
-    plotBasicLinearityData(obj, calStruct, figureGroupIndex);
+    plotBasicLinearityData(obj, figureGroupIndex);
     
     % Plot deviations in xyY of measured from nominal values
-    plotDeviationData(obj, calStruct, figureGroupIndex);
+    plotDeviationData(obj, figureGroupIndex);
     
     % Plot nominal and measured spectra
-    plotSpectralAditivityData(obj, calStruct, figureGroupIndex);
+    plotSpectralAditivityData(obj, figureGroupIndex);
 end
 
-function plotSpectralAditivityData(obj, calStruct, figureGroupIndex)
+function plotSpectralAditivityData(obj, figureGroupIndex)
 %
-    ambSpd = calStruct.rawData.ambientMeasurements;
+    ambSpd = obj.newStyleCal.rawData.ambientMeasurements;
 %
+    % Compute spectral axis
+    spectralAxis = SToWls(obj.calStructOBJ.get('S'));
+    
     kValues = [1 5 9 13];
     for k = 1:length(kValues)
         kk = kValues(k);
-        measuredSpd  = calStruct.rawData.basicLinearityMeasurements1(kk,:) - ambSpd; 
-        predictedSpd = (calStruct.rawData.basicLinearityMeasurements1(kk+1,:)-ambSpd) + ...
-                       (calStruct.rawData.basicLinearityMeasurements1(kk+2,:)-ambSpd) + ...
-                       (calStruct.rawData.basicLinearityMeasurements1(kk+3,:)-ambSpd);
+        measuredSpd  = obj.newStyleCal.rawData.basicLinearityMeasurements1(kk,:) - ambSpd; 
+        predictedSpd = (obj.newStyleCal.rawData.basicLinearityMeasurements1(kk+1,:)-ambSpd) + ...
+                       (obj.newStyleCal.rawData.basicLinearityMeasurements1(kk+2,:)-ambSpd) + ...
+                       (obj.newStyleCal.rawData.basicLinearityMeasurements1(kk+3,:)-ambSpd);
 
         figName = sprintf('Additivity check (%0.2f,%0.2f, %0.2f)', ...
-            calStruct.basicLinearitySetup.settings(1,kk), ...
-            calStruct.basicLinearitySetup.settings(2,kk), ...
-            calStruct.basicLinearitySetup.settings(3,kk));
+            obj.newStyleCal.basicLinearitySetup.settings(1,kk), ...
+            obj.newStyleCal.basicLinearitySetup.settings(2,kk), ...
+            obj.newStyleCal.basicLinearitySetup.settings(3,kk));
 
         % Init figure
         h = figure('Name', figName, 'NumberTitle', 'off', 'Visible', 'off'); 
@@ -38,12 +39,12 @@ function plotSpectralAditivityData(obj, calStruct, figureGroupIndex)
         hold on
         
         % Plot predicted spectrum as filled line plot
-        [xd, yd] = stairs(obj.spectralAxis, predictedSpd);
+        [xd, yd] = stairs(spectralAxis, predictedSpd);
         faceColor = [0.7 0.7 0.7]; edgeColor = 'none';
         obj.makeShadedPlot(xd, yd, faceColor, edgeColor);
      
         % Plot measured as a line plot on top
-        stairs(obj.spectralAxis, measuredSpd, 'Color', 'r', 'LineWidth', 2.0);
+        stairs(spectralAxis, measuredSpd, 'Color', 'r', 'LineWidth', 2.0);
         
         set(gca, 'XLim', [380,780], 'YLim', [0 1.05*max([max(predictedSpd) max(measuredSpd)])]);
         box on;
@@ -63,11 +64,15 @@ function plotSpectralAditivityData(obj, calStruct, figureGroupIndex)
 end
 
 
-function plotDeviationData(obj, calStruct, figureGroupIndex)
+function plotDeviationData(obj, figureGroupIndex)
+
+    % Get T_ensor data
+    T_sensor = obj.calStructOBJ.get('T_sensor');
+    
     % Compute measured and nominal xyY values
-    basicxyY1  = XYZToxyY(obj.T_xyz * calStruct.rawData.basicLinearityMeasurements1');
-    basicxyY2  = XYZToxyY(obj.T_xyz * calStruct.rawData.basicLinearityMeasurements2');
-    nominalxyY = XYZToxyY(SettingsToSensorAcc(calStruct, calStruct.basicLinearitySetup.settings));
+    basicxyY1  = XYZToxyY(T_sensor * obj.newStyleCal.rawData.basicLinearityMeasurements1');
+    basicxyY2  = XYZToxyY(T_sensor * obj.newStyleCal.rawData.basicLinearityMeasurements2');
+    nominalxyY = XYZToxyY(SettingsToSensorAcc(obj.calStructOBJ, obj.newStyleCal.basicLinearitySetup.settings));
     
     % compute deviations of measured from nominal xyY values
     deviationsxyY1 = basicxyY1-nominalxyY;
@@ -130,12 +135,15 @@ function plotDeviationData(obj, calStruct, figureGroupIndex)
 end
 
 
-function plotBasicLinearityData(obj, calStruct, figureGroupIndex)
+function plotBasicLinearityData(obj, figureGroupIndex)
 %
+    % Get T_ensor data
+    T_sensor = obj.calStructOBJ.get('T_sensor');
+    
     % Compute measured and nominal xyY values
-    basicxyY1  = XYZToxyY(obj.T_xyz * calStruct.rawData.basicLinearityMeasurements1');
-    basicxyY2  = XYZToxyY(obj.T_xyz * calStruct.rawData.basicLinearityMeasurements2');
-    nominalxyY = XYZToxyY(SettingsToSensorAcc(calStruct, calStruct.basicLinearitySetup.settings));
+    basicxyY1  = XYZToxyY(T_sensor * obj.newStyleCal.rawData.basicLinearityMeasurements1');
+    basicxyY2  = XYZToxyY(T_sensor * obj.newStyleCal.rawData.basicLinearityMeasurements2');
+    nominalxyY = XYZToxyY(SettingsToSensorAcc(obj.calStructOBJ, obj.newStyleCal.basicLinearitySetup.settings));
         
     % Init figure
     h = figure('Name', 'Basic Linearity Tests', 'NumberTitle', 'off', 'Visible', 'off'); 
