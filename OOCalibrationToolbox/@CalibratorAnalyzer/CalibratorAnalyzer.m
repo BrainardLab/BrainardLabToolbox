@@ -28,12 +28,15 @@ classdef CalibratorAnalyzer < handle
         
         % the imported cal
         newStyleCal;
+        
+        % where to save plots
+        plotsExportsFolder;
     end
     
     % Public methods
     methods
         % Constructor
-        function obj = CalibratorAnalyzer(cal)
+        function obj = CalibratorAnalyzer(cal, calFileName)
             
             % Generate CalStructOBJ to handle the (new-style) cal struct
             [obj.calStructOBJ, ~] = ObjectToHandleCalOrCalStruct(cal);
@@ -41,6 +44,23 @@ classdef CalibratorAnalyzer < handle
             if (obj.calStructOBJ.inputCalHasNewStyleFormat)
                 % Make a copy of the imported cal
                 obj.newStyleCal = cal;
+                
+                calFolder = CalDataFolder([],calFileName);
+                calPlotFolder = fullfile(calFolder,'Plots');
+                if (~exist(calPlotFolder,'dir'))
+                    unix(['mkdir ' calPlotFolder]);
+                end
+                calFilePlotFolder = fullfile(calPlotFolder,calFileName);
+                if (~exist(calFilePlotFolder,'dir'))
+                    unix(['mkdir ' calFilePlotFolder]);
+                end
+                calDate = obj.calStructOBJ.get('date');
+                thePlotFolder = fullfile(calFilePlotFolder,calDate(1:11));
+                if (~exist(thePlotFolder,'dir'))
+                    unix(['mkdir ' thePlotFolder]);
+                end
+    
+                obj.plotsExportsFolder = thePlotFolder;
             else
                 fprintf('The imported cal struct has an old-style format.\n');
                 error('Use ''mglAnalyzeMonCalSpd'' for analysis, instead.\n');
@@ -77,6 +97,9 @@ classdef CalibratorAnalyzer < handle
         
         % Method to generate a shaded (filled) plot
         makeShadedPlot(obj, x,y, faceColor, edgeColor);
+        
+        % Method to export a plot
+        SaveFigure_Callback(obj, hObject, eventdata, current_gcf, fileDir, fileName)
     end  % private methods
     
 end

@@ -4,7 +4,7 @@ function OOC_analyzeCal
     [cal, calFilename] = GetCalibrationStructure('Enter calibration filename','ViewSonicProbe',[]);
     
     % Instantiate a @CalAnalyzer object
-    calAnalyzer = CalibratorAnalyzer(cal);
+    calAnalyzer = CalibratorAnalyzer(cal, calFilename);
     
     
     % Analyze the calibration file and display the results arranged in different grids
