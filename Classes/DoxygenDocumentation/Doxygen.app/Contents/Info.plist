@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist SYSTEM "file://localhost/System/Library/DTDs/PropertyList.dtd">
+<plist version="0.9">
+<dict>
+        <key>CFBundleIdentifier</key>
+        <string>org.doxygen</string>
+	<key>CFBundleIconFile</key>
+	<string>Doxygen.icns</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+        <key>CFBundleGetInfoString</key>
+	<string>1.8.2, Copyright (c) 1997-2011 by Dimitri van Heesch</string>
+	<key>CFBundleSignature</key>
+	<string>Doxy</string>
+	<key>CFBundleExecutable</key>
+	<string>Doxywizard</string>
+        <key>CFBundleShortVersionString</key>
+        <string>1.8.2</string>
+</dict>
+</plist>
