@@ -81,8 +81,20 @@ end
 
 if (isempty(fractionPigmentBleached)) && length(photoreceptorClasses) > 1
     fractionPigmentBleached = zeros(3,1);
-else
+elseif (isempty(fractionPigmentBleached)) && length(photoreceptorClasses) == 1
     fractionPigmentBleached = 0;
+end
+
+% If the passed observer age is <20 or >80, we assume that the observer is
+% 20, and 80, which are the maximum ages given by the CIE standard.
+if ageInYears < 20
+    ageInYears = 20;
+    fprintf('Observer age truncated at 20\n');
+end
+
+if ageInYears > 80
+    ageInYears = 80
+    fprintf('Observer age truncated at 80\n');
 end
 
 % Assign empty vectors
