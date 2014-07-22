@@ -42,7 +42,7 @@
 %               Passing a @CalStruct object is the preferred way because it results in 
 %               (a) less overhead (@CalStruct objects are passed by reference, not by value), and
 %               (b) better control over how the calibration data are accessed.
-
+% 7/17/14  npc  Replaced all instances of savefig() with FigureSave().
 
 % Initialize
 clear; close all;
@@ -208,24 +208,23 @@ if (SAVEBASICFIGS)
     
     if (ISSPECTRAL)
         figure(1);
-        savefig(fullfile(thePlotFolder,['Spectra_' calDate(1:11)]),gcf,'png');
+        FigureSave(fullfile(thePlotFolder,['Spectra_' calDate(1:11)]),gcf,'png');
     end
        
     figure(2);
-    savefig(fullfile(thePlotFolder,['Gamma_' calDate(1:11)]),gcf,'png');
+    FigureSave(fullfile(thePlotFolder,['Gamma_' calDate(1:11)]),gcf,'png');
     if (ISSPECTRAL)
         figure(3);
-        savefig(fullfile(thePlotFolder,['Ambient_' calDate(1:11)]),gcf,'png');
+        FigureSave(fullfile(thePlotFolder,['Ambient_' calDate(1:11)]),gcf,'png');
     end
     figure(4);
-    savefig(fullfile(thePlotFolder,['Chromaticities_' calDate(1:11)]),gcf,'png');
+    FigureSave(fullfile(thePlotFolder,['Chromaticities_' calDate(1:11)]),gcf,'png');
 end
     
 % Plot full spectral data for each phosphor
 if (DUMPFULLSPECTRA)
     
-    S        = calStructOBJ.get('S');
-    S_device = calStructOBJ.get('S_device');
+    S        = calStructOBJ.get('S')
     nMeas    = calStructOBJ.get('nMeas');
     nDevices = calStructOBJ.get('nDevices');
     mon      = calStructOBJ.get('mon');
@@ -249,14 +248,14 @@ if (DUMPFULLSPECTRA)
         % Plot raw spectra
         figure(4+j); clf
         subplot(1,2,1);
-        plot(SToWls(S_device),tempMon);
+        plot(SToWls(S),tempMon);
         xlabel('Wavelength (nm)', 'Fontweight', 'bold');
         ylabel('Power', 'Fontweight', 'bold');
         axis([380,780,-Inf,Inf]);
         
         % Plot scaled spectra
         subplot(1,2,2);
-        plot(SToWls(S_device),scaledMon(:,nDontPlotLowPower+1:end));
+        plot(SToWls(S),scaledMon(:,nDontPlotLowPower+1:end));
         xlabel('Wavelength (nm)', 'Fontweight', 'bold');
         ylabel('Normalized Power', 'Fontweight', 'bold');
         axis([380,780,-Inf,Inf]);
@@ -274,7 +273,7 @@ if (DUMPFULLSPECTRA)
         ylabel('y chromaticity');
         title(sprintf('Lower %d luminances in black',nDontPlotLowPower));
         if (SAVEBASICFIGS)
-            savefig(fullfile(thePlotFolder,['PhosphorConstancy_' calDate(1:11)]),gcf,'png');
+            FigureSave(fullfile(thePlotFolder,['PhosphorConstancy_' calDate(1:11)]),gcf,'png');
         end
     end
 end
@@ -330,7 +329,7 @@ if (~isempty(calStructOBJ.get('basicmeas.settings')))
         ylabel('Measured Y (cd/m2)');
         axis('square');
         if (SAVEBASICFIGS)
-            savefig(fullfile(thePlotFolder,['Linearity_' calDate(1:11)]),gcf,'png');
+            FigureSave(fullfile(thePlotFolder,['Linearity_' calDate(1:11)]),gcf,'png');
         end
         
         % Deviation plot
@@ -366,7 +365,7 @@ if (~isempty(calStructOBJ.get('basicmeas.settings')))
 
         if (SAVEBASICFIGS)
             calDate = calStructOBJ.get('date');
-            savefig(fullfile(thePlotFolder,['LinearityDeviations_' calDate(1:11)]),gcf,'png');
+            FigureSave(fullfile(thePlotFolder,['LinearityDeviations_' calDate(1:11)]),gcf,'png');
         end
         
         % Print out some statistics

@@ -4,7 +4,7 @@
 % 4/10/2014  npc   Wrote it.
 %
 
-classdef CalibratorAnalyzer < Calibrator  
+classdef CalibratorAnalyzer < handle
     % Public properties
     properties
         essentialDataGridDims       = [3 3]; % 3 columns x 3 rows
@@ -23,74 +23,62 @@ classdef CalibratorAnalyzer < Calibrator
         figureGroupName;
         figureHandlesArray;
         
-        % re-usable quantities
-        T_xyz;
-        spectralAxis;
+        % calStructOBJ to access imported cal data in unified way
+        calStructOBJ;
+        
+        % the imported cal
+        newStyleCal;
+        
+        % where to save plots
+        plotsExportsFolder;
     end
     
     % Public methods
     methods
         % Constructor
-        function obj = CalibratorAnalyzer(varargin)  
-            % Call the super-class constructor, with 
-            obj = obj@Calibrator( ...
-                    'executiveScriptName',      [], ...
-                    'radiometerObj',            [], ...
-                    'screenToCalibrate',        [], ...
-                    'desiredScreenSizePixel',   [], ...
-                    'desiredRefreshRate',       [], ...
-                    'displayPrimariesNum',      [], ...
-                    'displayDeviceType',        [], ...
-                    'displayDeviceName',        [], ...
-                    'calibrationFile',          [], ...
-                    'comment',                  [] ...
-                 );
+        function obj = CalibratorAnalyzer(cal, calFileName)
             
-            % Configure an inputParser to examine whether the options passed to us are valid
-            parser = inputParser;
-            parser.addParamValue('analysisScriptName', obj.analysisScriptName);
-            
-            % Execute the parser
-            parser.parse(varargin{:});
-            % Create a standard Matlab structure from the parser results.
-            parserResults = parser.Results;
-            pNames = fieldnames(parserResults);
-            for k = 1:length(pNames)
-                obj.(pNames{k}) = parserResults.(pNames{k}); 
+            % Generate CalStructOBJ to handle the (new-style) cal struct
+            [obj.calStructOBJ, ~] = ObjectToHandleCalOrCalStruct(cal);
+    
+            if (obj.calStructOBJ.inputCalHasNewStyleFormat)
+                % Make a copy of the imported cal
+                obj.newStyleCal = cal;
+                
+                calFolder = CalDataFolder([],calFileName);
+                calPlotFolder = fullfile(calFolder,'Plots');
+                if (~exist(calPlotFolder,'dir'))
+                    unix(['mkdir ' calPlotFolder]);
+                end
+                calFilePlotFolder = fullfile(calPlotFolder,calFileName);
+                if (~exist(calFilePlotFolder,'dir'))
+                    unix(['mkdir ' calFilePlotFolder]);
+                end
+                calDate = obj.calStructOBJ.get('date');
+                thePlotFolder = fullfile(calFilePlotFolder,calDate(1:11));
+                if (~exist(thePlotFolder,'dir'))
+                    unix(['mkdir ' thePlotFolder]);
+                end
+    
+                obj.plotsExportsFolder = thePlotFolder;
+            else
+                fprintf('The imported cal struct has an old-style format.\n');
+                error('Use ''mglAnalyzeMonCalSpd'' for analysis, instead.\n');
             end
-            
+    
             % Get the desktop's Java handle
             obj.desktopHandle = com.mathworks.mde.desk.MLDesktop.getInstance;
         end
         
         % Method to analyze the loaded calStruct
-        obj = analyze(obj, calStruct, essentialDataGridDims, linearityChecksGridDims);
+        obj = analyze(obj, essentialDataGridDims, linearityChecksGridDims);
     end % Public methods
     
     
-    % Implementations of required -- Public -- Abstract methods defined in the @Calibrator interface   
-    methods
-        % Empty implementation of calibrate() method. Not needed.
-        function obj = calibrate(obj)
-            % do nothing
-        end
-        % Empty implementation of verifyScreenParamValues() method. Not needed.
-        function obj = verifyScreenParamValues(obj)
-        end
-        
-        % Method to shutdown the CalibratorAnalyzer
-        function obj = shutdown(obj)
-        end
-    end % Implementations of required -- Public -- Abstract methods defined in the @Calibrator interface
-
     % Private methods
     methods (Access = private)
         % Method to refit the data (if the user so chooses)
         refitData(obj);
-        
-        % Method to compute re-usable quantities, like T_xyz, 
-        % set the sensor color space, etc.
-        computeReusableQuantities(obj);
         
         % Method to plot all the data
         plotAllData(obj, essentialDataGridDims, linearityChecksGridDims);
@@ -109,6 +97,9 @@ classdef CalibratorAnalyzer < Calibrator
         
         % Method to generate a shaded (filled) plot
         makeShadedPlot(obj, x,y, faceColor, edgeColor);
+        
+        % Method to export a plot
+        SaveFigure_Callback(obj, hObject, eventdata, current_gcf, fileDir, fileName)
     end  % private methods
     
 end

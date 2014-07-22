@@ -30,25 +30,27 @@ function obj = plotAllData(obj)
         
         % Undock group
         obj.desktopHandle.setGroupDocked(obj.figureGroupName{figureGroupIndex}, 0);
-
-        % Finally, make all figures visible
+         
+        % Make all figures visible
         figHandles = obj.figureHandlesArray{figureGroupIndex};
         for k = 1:length(figHandles)
             set(figHandles(k),'Visible', 'on'); 
+            set(figHandles(k),'MenuBar','none');    % Hide standard menu bar menus.
+            set(figHandles(k),'ToolBar','none');    % Hide standard menu bar menus.
         end
-
-        % Arrange figures in a grid with dimensions gridDims
-        obj.desktopHandle.setDocumentArrangement(obj.figureGroupName{figureGroupIndex}, 2, java.awt.Dimension(1,1));
     
         % Set the size of the figure group
         container = obj.desktopHandle.getGroupContainer(figureGroupNames{figureGroupIndex}).getTopLevelAncestor;
-        container.setSize(1900, 1000);
+        container.setSize(1900, 1200);
         container.setLocation(20+(figureGroupIndex-1)*20, 20 + (figureGroupIndex-1)*50);
         
         % Arrange figures in a grid with dimensions gridDims
         obj.desktopHandle.setDocumentArrangement(obj.figureGroupName{figureGroupIndex}, 2, java.awt.Dimension(gridDims(1), gridDims(2)));
-    
-        
+
+        % Arrange figures in a grid with dimensions gridDims
+        %obj.desktopHandle.setDocumentArrangement(obj.figureGroupName{figureGroupIndex}, 2, java.awt.Dimension(gridDims(1), gridDims(2)));
+        %obj.desktopHandle.setDocumentArrangement(obj.figureGroupName{figureGroupIndex}, 2, java.awt.Dimension(1,1));
+  
     end
     
 end
