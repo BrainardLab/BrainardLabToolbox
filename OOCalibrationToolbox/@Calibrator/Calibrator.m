@@ -234,10 +234,7 @@ classdef Calibrator < handle
         
         % Setter method for property cal.
         % Used to reset the object state of the @Calibrator (usually to re-analyze the data)
-        function set.cal(obj, newCal)  
-            %
-            fprintf('In cal setter.\n');
-            
+        function set.cal(obj, newCal)      
             % Set private copy of cal
             obj.privateCal = newCal;
             
@@ -303,9 +300,7 @@ classdef Calibrator < handle
         
         % Getter method for dependent property 'cal'
         function cal = get.cal(obj)   
-            %
-            fprintf('In cal getter.\n');
-            
+
             % Generate cal struct
             calDescriptor = struct( ...
                 'who',                      obj.options.whoIsDoingTheCalibration, ...
