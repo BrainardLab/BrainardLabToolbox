@@ -17,4 +17,4 @@
 %                               and the theoretical vs. predicted responses.
 %
 % TEST/DEMO
-% MLDSColorSelectionTest.m      Tests the MLDS with a data sample. Provides template for using the routines. 
+% MLDSColorSelectionDemo.m      Tests the MLDS with a data sample. Provides template for using the routines. 

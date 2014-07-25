@@ -29,11 +29,13 @@ f = figure; clf;
 if (SCATTERPLOT)
     subplot(1,2,1);  hold on
 end
-set(gca,  'FontSize', 16);
-axis([0 6 0 1]);
+set(gca,  'FontSize', 10);
+axis([0 6 0 max(targetCompetitorFit)]);
 plot(1:length(targetCompetitorFit(2:end)),targetCompetitorFit(2:end),'ro','MarkerSize',6,'MarkerFaceColor','r');
 plot(1:length(targetCompetitorFit(2:end)),targetCompetitorFit(1)*ones(size(targetCompetitorFit(2:end))),'k','LineWidth',2);
-title(sprintf('Target'));
+title(sprintf('Inferred Target Position'));
+xlabel('Competitor #');
+ylabel('Representation');
 axis('square');
 
 % Compute the probabilities from the data.  
@@ -41,16 +43,16 @@ axis('square');
 if (SCATTERPLOT)
     subplot(1,2,2); hold on
     theDataProb = theResponses./ nTrialsPerPair;
-    plot(theDataProb,predictedResponses,'ro','MarkerSize',8,'MarkerFaceColor','r');
+    plot(theDataProb,predictedResponses,'ro','MarkerSize',6,'MarkerFaceColor','r');
     plot([0 1],[0 1],'k');
     axis('square')
     axis([0 1 0 1]);
-    set(gca,  'FontSize', 16);
-    
+    set(gca,  'FontSize', 10);
+    title(sprintf('Quality of MLDS model'));
     xlabel('Measured probabilities');
     ylabel('Predicted probabilities');
 end
-if savefig
+if saveFig
     savefig('MLDSOutput', f, 'pdf');
 end
 end
