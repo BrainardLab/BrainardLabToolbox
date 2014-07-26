@@ -1,4 +1,4 @@
-function h=error_ellipse(varargin)
+function [h, xreturn, yreturn] =error_ellipse(varargin)
 % ERROR_ELLIPSE - plot an error ellipse, or ellipsoid, defining confidence region
 %    ERROR_ELLIPSE(C22) - Given a 2x2 covariance matrix, plot the
 %    associated error ellipse, at the origin. It returns a graphics handle
@@ -134,6 +134,8 @@ elseif r==2 & c==2
 
   [x,y,z] = getpoints(C,prop.clip);
   h1=plot(scale*(x0+k*x),scale*(y0+k*y),prop.style);
+  xreturn = scale*(x0+k*x);
+  yreturn = scale*(y0+k*y);
   set(h1,'zdata',z+1)
   if nargout
     h=h1;
