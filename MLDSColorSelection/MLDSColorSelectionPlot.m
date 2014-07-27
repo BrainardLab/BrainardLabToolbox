@@ -8,7 +8,8 @@ function MLDSColorSelectionPlot(thePairs,theResponses,nTrialsPerPair,targetCompe
 %
 % 5/3/12  dhb  Optional scatterplot of theory against measurements.
 % 6/12/13 ar   Changed function names and added comments. 
-% 4/07/14 ar  Option to save the figures. 
+% 4/07/14 ar   Option to save the figures. 
+% 7/27/14 dhb  Update savefig to use more portable FigureSave.
 
 % Plot theoretical vs. actual probabilities? 
 if (nargin < 5 || isempty(predictedResponses))
@@ -53,6 +54,6 @@ if (SCATTERPLOT)
     ylabel('Predicted probabilities');
 end
 if saveFig
-    savefig('MLDSOutput', f, 'pdf');
+    FigureSave('MLDSOutput', f, 'pdf');
 end
 end

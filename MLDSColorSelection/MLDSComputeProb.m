@@ -1,5 +1,6 @@
 function p = MLDSComputeProb(x,y1,y2,sigma,mapFunction)
 % function p = MLDSComputeProb(x,y1,y2,sigma,mapFunction)
+%
 % Computes the probability of the first competitor being chosen given the  
 % inferred position of the target and the two competitors in the pair. 
 %
