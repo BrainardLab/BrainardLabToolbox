@@ -5,7 +5,7 @@ function obj = verifyScreenParamValues(obj)
     obj.displaysDescription = a;
     
     if (length(a) < obj.screenToCalibrate)
-        error('System has %d attached screen. The screenID (%d) for calibration is out of range !\n', length(a), obj.screenToCalibrate);
+        error('System has %d attached screen. The screenID specified for calibration (%d) is out of range !\n', length(a), obj.screenToCalibrate);
     end
     obj.screenInfo = a(obj.screenToCalibrate);
 

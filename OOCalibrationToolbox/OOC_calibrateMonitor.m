@@ -92,9 +92,7 @@ function OOC_calibrateMonitor
         calibratorOBJ.shutDown();
     
     catch err
-        % Shutdown DBLab_Radiometer object
-        calibratorOBJ.shutDown();
-        
+        % Shutdown DBLab_Radiometer object  
         if (~isempty(calibratorOBJ))
             % Shutdown calibratorOBJ
             calibratorOBJ.shutDown();
