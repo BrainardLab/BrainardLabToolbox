@@ -19,9 +19,9 @@ classdef MGLcalibrator < Calibrator
     % Public methods
     methods
         % Constructor
-        function obj = MGLcalibrator(varargin)  
+        function obj = MGLcalibrator(initParams)  
             % Call the super-class constructor.
-            obj = obj@Calibrator(varargin{:});
+            obj = obj@Calibrator(initParams);
             
             obj.graphicsEngine = 'MGL';
             
@@ -48,11 +48,12 @@ classdef MGLcalibrator < Calibrator
         % Method to set the initial state of the displays
         setDisplaysInitialState(obj, userPrompt);
         
-        % Method to load the background and target indices of the current LUT and 
-        % subsequently conduct a single radiometric measurement by calling the corresponding
-        % method of the attached @Radiometer object.
+        % Method to update eh LUT and conduct a single radiometric measurement 
+        % by calling the corresponding method of the attached @Radiometer object.
         [measurement, S] = loadClutAndMeasure(obj, bgSettings, targetSettings, useBitsPP);
         
+        % Method to load the background and target indices of the current LUT.
+        loadClut(obj, bgSettings, targetSettings, useBitsPP);
     end  % Private methods 
     
 end % classdef

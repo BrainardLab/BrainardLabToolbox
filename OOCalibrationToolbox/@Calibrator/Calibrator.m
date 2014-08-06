@@ -142,7 +142,7 @@ classdef Calibrator < handle
     methods
         
         % Constructor
-        function obj = Calibrator(varargin) 
+        function obj = Calibrator(initParams) 
             % Configure an inputParser to examine whether the options passed to us are valid
             parser = inputParser;
             parser.addParamValue('executiveScriptName',             obj.executiveScriptName);
@@ -156,7 +156,7 @@ classdef Calibrator < handle
             parser.addParamValue('displayDeviceName',               obj.displayDeviceName);
             parser.addParamValue('comment',                         obj.comment);
             % Execute the parser
-            parser.parse(varargin{:});
+            parser.parse(initParams{:});
             % Create a standard Matlab structure from the parser results.
             parserResults = parser.Results;
             pNames = fieldnames(parserResults);

@@ -3,6 +3,11 @@ function obj = analyze(obj)
  
     DescribeMonCal(obj.calStructOBJ);
     
+    % Print some more information
+    if (obj.calStructOBJ.inputCalHasNewStyleFormat)
+        fprintf('  * Graphics Driver: %s - based\n\n', obj.newStyleCal.describe.graphicsEngine);
+    end
+    
     obj.refitData(); 
     obj.plotAllData();
     
