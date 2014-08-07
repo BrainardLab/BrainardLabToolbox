@@ -1,7 +1,6 @@
-% Method to load the background and target indices of the current LUT and 
-% subsequently conduct a single radiometric measurement by calling the corresponding
-% method of the attached @Radiometer object.
-function [measurement, S] = loadClutAndMeasure(obj, bgSettings, targetSettings, useBitsPP)
+% Method to update the stimulus and conduct a single radiometric measurement by 
+% calling the corresponding method of the attached @Radiometer object.
+function [measurement, S] = updateStimulusAndMeasure(obj, bgSettings, targetSettings, useBitsPP)
 %
 
     if (obj.options.verbosity > 1)
@@ -9,7 +8,7 @@ function [measurement, S] = loadClutAndMeasure(obj, bgSettings, targetSettings, 
         fprintf('        Target settings    : %2.3f %2.3f %2.3f\n\n', targetSettings(1), targetSettings(2), targetSettings(3));
     end
     
-    % update clut
+    % update background and target stimuli
     obj.updateBackgroundAndTarget(bgSettings, targetSettings, useBitsPP);
 
     % then measure 

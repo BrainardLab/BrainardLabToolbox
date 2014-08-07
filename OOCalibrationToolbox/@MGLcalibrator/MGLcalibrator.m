@@ -48,9 +48,9 @@ classdef MGLcalibrator < Calibrator
         % Method to set the initial state of the displays
         setDisplaysInitialState(obj, userPrompt);
         
-        % Method to update eh LUT and conduct a single radiometric measurement 
-        % by calling the corresponding method of the attached @Radiometer object.
-        [measurement, S] = loadClutAndMeasure(obj, bgSettings, targetSettings, useBitsPP);
+        % Method to update the stimulus and conduct a single radiometric measurement by 
+        % calling the corresponding method of the attached @Radiometer object.
+        [measurement, S] = updateStimulusAndMeasure(obj, bgSettings, targetSettings, useBitsPP);
         
         % Method to load the background and target indices of the current LUT.
         loadClut(obj, bgSettings, targetSettings, useBitsPP);

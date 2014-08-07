@@ -47,7 +47,7 @@ function obj = calibrate(obj)
         for settingsIndex = 1:settingsNumToBeMeasured
             settingsToTest = calStruct.basicLinearitySetup.settings(:,settingsIndex);
             [obj.rawData.basicLinearityMeasurements1(settingsIndex,:), obj.rawData.S] = ...
-                obj.loadClutAndMeasure(backgroundSettings, settingsToTest, calStruct.describe.useBitsPP);
+                obj.updateStimulusAndMeasure(backgroundSettings, settingsToTest, calStruct.describe.useBitsPP);
         end % for settingsIndex
     end  % if (~isempty(calStruct.basicLinearitySetup))
    
@@ -89,7 +89,7 @@ function obj = calibrate(obj)
                 
            % take first ambient reading
            fprintf('   Testing ambient #1: ...\n');
-           [darkAmbient1, obj.rawData.S] = obj.loadClutAndMeasure(backgroundSettings, ambientSettings, calStruct.describe.useBitsPP);
+           [darkAmbient1, obj.rawData.S] = obj.updateStimulusAndMeasure(backgroundSettings, ambientSettings, calStruct.describe.useBitsPP);
                 
            % measure full gamma in random order
            randomIndices = randperm(calStruct.describe.nMeas);
@@ -102,12 +102,12 @@ function obj = calibrate(obj)
                % measure the target
                targetSettings = targetSettingsArray(:,randomGammaPointIndex); 
                [obj.rawData.gammaCurveMeasurements(repeatIndex, currentPrimaryIndex, randomGammaPointIndex, :), obj.rawData.S] = ...
-                   obj.loadClutAndMeasure(backgroundSettings, targetSettings, calStruct.describe.useBitsPP);
+                   obj.updateStimulusAndMeasure(backgroundSettings, targetSettings, calStruct.describe.useBitsPP);
            end  % for gammaPointIndex
            
            % take second ambient reading
            fprintf('   Testing ambient #2: ...\n');
-           [darkAmbient2, obj.rawData.S] = obj.loadClutAndMeasure(backgroundSettings, ambientSettings, calStruct.describe.useBitsPP);
+           [darkAmbient2, obj.rawData.S] = obj.updateStimulusAndMeasure(backgroundSettings, ambientSettings, calStruct.describe.useBitsPP);
                 
            % average the two
            darkAmbient = 0.5*(darkAmbient1+darkAmbient2);
@@ -138,7 +138,7 @@ function obj = calibrate(obj)
         for settingsIndex = 1:settingsNumToBeMeasured
             settingsToTest = calStruct.basicLinearitySetup.settings(:,settingsIndex);
             [obj.rawData.basicLinearityMeasurements2(settingsIndex,:), obj.rawData.S] = ...
-                obj.loadClutAndMeasure(backgroundSettings, settingsToTest, calStruct.describe.useBitsPP);
+                obj.updateStimulusAndMeasure(backgroundSettings, settingsToTest, calStruct.describe.useBitsPP);
         end % for settingsIndex
     end  % if (~isempty(calStruct.basicLinearitySetup))
     
@@ -158,7 +158,7 @@ function obj = calibrate(obj)
             for settingsIndex = 1:settingsNumToBeMeasured
                 settingsToTest = calStruct.backgroundDependenceSetup.settings(:,settingsIndex);
                 [obj.rawData.backgroundDependenceMeasurements(bgIndex, settingsIndex,:), obj.rawData.S] = ...
-                    obj.loadClutAndMeasure(backgroundSettings, settingsToTest, calStruct.describe.useBitsPP);
+                    obj.updateStimulusAndMeasure(backgroundSettings, settingsToTest, calStruct.describe.useBitsPP);
             end
         end
     end
@@ -172,7 +172,7 @@ function obj = calibrate(obj)
     settingsToTest      = [0.0 0.0 0.0]';
     
     for repeatIndex = 1:calStruct.describe.nAverage
-        [ambientMeasurement, obj.rawData.S]  = obj.loadClutAndMeasure(backgroundSettings, settingsToTest, calStruct.describe.useBitsPP);
+        [ambientMeasurement, obj.rawData.S]  = obj.updateStimulusAndMeasure(backgroundSettings, settingsToTest, calStruct.describe.useBitsPP);
         if (repeatIndex == 1)
             obj.rawData.ambientMeasurements = ambientMeasurement;
         else

@@ -30,13 +30,20 @@ function updateBackgroundAndTarget(obj, bgSettings, targetSettings, useBitsPP)
             targetRGBstimMatrix(:,:,k) = targetSettings(k);
         end
         targetTexturePtr = Screen('MakeTexture', obj.masterWindowPtr, targetRGBstimMatrix, optimizeForDrawAngle, specialFlags, floatprecision);
+        
         % update the list of existing texture pointers
         obj.texturePointers = [obj.texturePointers targetTexturePtr ];
 
-        % DrawTextures 
+        % Draw Background texture
         sourceRect = []; destRect = []; rotationAngle = 0; filterMode = []; globalAlpha = 1.0;
-        Screen('DrawTexture', obj.masterWindowPtr, backgroundTexturePtr, sourceRect, destRect, rotationAngle, filterMode, globalAlpha); % background
-        Screen('DrawTexture', obj.masterWindowPtr, targetTexturePtr, sourceRect, destRect, rotationAngle, filterMode, globalAlpha); % foreground
+        Screen('DrawTexture', obj.masterWindowPtr, backgroundTexturePtr, sourceRect, destRect, rotationAngle, filterMode, globalAlpha);       % background
+        
+        % Draw Target texture
+        targetDestRect = CenterRectOnPointd(...
+            [0 0 obj.calibrationRect.size(1) obj.calibrationRect.size(2)], ...
+            obj.calibrationRect.x0, obj.calibrationRect.y0...
+            );
+        Screen('DrawTexture', obj.masterWindowPtr, targetTexturePtr, sourceRect, targetDestRect, rotationAngle, filterMode, globalAlpha);     % foreground
 
         % Flip master display
         Screen('Flip', obj.masterWindowPtr);  

@@ -13,7 +13,7 @@ function OOC_calibrateMonitor
     calibratorOBJ  = [];
     
     % List of available @Calibrator objects
-    calibratorTypes = {'MGL-based', 'PsychImaging-based'};
+    calibratorTypes = {'MGL-based', 'PsychImaging-based (8-bit)'};
     calibratorsNum  = numel(calibratorTypes);
     
     % Ask the user to select a calibrator type
@@ -22,7 +22,7 @@ function OOC_calibrateMonitor
         fprintf('\t[%3d]. %s\n', k, calibratorTypes{k});
     end
     defaultCalibratorIndex = 1;
-    calibratorIndex   = input(sprintf('\tSelect a calibrator type (1-%d) [%d]: ', calibratorsNum, defaultCalibratorIndex));
+    calibratorIndex = input(sprintf('\tSelect a calibrator type (1-%d) [%d]: ', calibratorsNum, defaultCalibratorIndex));
     if isempty(calibratorIndex) || (calibratorIndex < 1) || (calibratorIndex > calibratorsNum)
         calibratorIndex = defaultCalibratorIndex;
     end
@@ -66,8 +66,8 @@ function OOC_calibrateMonitor
         'nAverage',                         1, ...                          % number of repeated measurements for averaging
         'nMeas',                            5, ...                          % samples along gamma curve
         'boxSize',                          150, ...                        % size of calibration stimulus
-        'boxOffsetX',                       0, ...                          % x-offset from center of screen         
-        'boxOffsetY',                       0, ...                          % y-offset from center of screen
+        'boxOffsetX',                       0, ...                          % x-offset from center of screen (neg: leftwards, pos:rightwards)         
+        'boxOffsetY',                       0, ...                        % y-offset from center of screen (neg: upwards, pos: downwards)
         'primaryBasesNum',                  1, ...                          
         'gamma',                            struct( ...
                                                 'fitType',          'crtPolyLinear', ...
@@ -90,7 +90,7 @@ function OOC_calibrateMonitor
         if strcmp(selectedCalibratorType, 'MGL-based')
             calibratorOBJ = MGLcalibrator(calibratorInitParams);
             
-        elseif strcmp(selectedCalibratorType, 'PsychImaging-based')
+        elseif strcmp(selectedCalibratorType, 'PsychImaging-based (8-bit)')
             calibratorOBJ = PsychImagingCalibrator(calibratorInitParams);
         end
 
@@ -99,7 +99,7 @@ function OOC_calibrateMonitor
         
         if (beVerbose)
             % Optionally, display the cal struct before measurement
-            calibratorOBJ.displayCalStruct()
+            calibratorOBJ.displayCalStruct();
         end
         
         % Calibrate !
