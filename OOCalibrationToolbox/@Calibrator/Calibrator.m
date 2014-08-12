@@ -142,7 +142,7 @@ classdef Calibrator < handle
     methods
         
         % Constructor
-        function obj = Calibrator(varargin) 
+        function obj = Calibrator(initParams) 
             % Configure an inputParser to examine whether the options passed to us are valid
             parser = inputParser;
             parser.addParamValue('executiveScriptName',             obj.executiveScriptName);
@@ -156,7 +156,7 @@ classdef Calibrator < handle
             parser.addParamValue('displayDeviceName',               obj.displayDeviceName);
             parser.addParamValue('comment',                         obj.comment);
             % Execute the parser
-            parser.parse(varargin{:});
+            parser.parse(initParams{:});
             % Create a standard Matlab structure from the parser results.
             parserResults = parser.Results;
             pNames = fieldnames(parserResults);
@@ -334,7 +334,7 @@ classdef Calibrator < handle
                 'nMeas',                    obj.options.nMeas, ...                   % number of samples in the [0..1] range (RGB settings)
                 'boxSize',                  obj.options.boxSize, ...                 % adjust to the size of the target.
                 'boxOffsetX',               obj.options.boxOffsetX, ...              % x offset (in pixels) of square on screen (used to check off-axis monitor properties)
-                'boxOffsetY',               obj.options.boxOffsetX, ...              % y offset (in pixels) of square on screen (used to check off-axis monitor properties)
+                'boxOffsetY',               obj.options.boxOffsetY, ...              % y offset (in pixels) of square on screen (used to check off-axis monitor properties)
                 'bgColor',                  obj.options.bgColor, ...
                 'fgColor',                  obj.options.fgColor, ...
                 'primaryBasesNum',          obj.options.primaryBasesNum, ...

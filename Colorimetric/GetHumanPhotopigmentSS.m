@@ -89,12 +89,12 @@ end
 % 20, and 80, which are the maximum ages given by the CIE standard.
 if ageInYears < 20
     ageInYears = 20;
-    fprintf('Observer age truncated at 20\n');
+    %fprintf('Observer age truncated at 20\n');
 end
 
 if ageInYears > 80
     ageInYears = 80
-    fprintf('Observer age truncated at 80\n');
+    %fprintf('Observer age truncated at 80\n');
 end
 
 % Assign empty vectors

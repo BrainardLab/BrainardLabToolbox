@@ -32,20 +32,18 @@ function setDisplaysInitialState(obj, userPrompt)
         
         bgSettings     = calStruct.describe.blankSettings';
         targetSettings = bgSettings;
-        obj.loadClut(bgSettings, targetSettings);
+        obj.loadClut(bgSettings, targetSettings, calStruct.describe.useBitsPP);
         
         % If foreground settings for the blanked display have been set,
         % then draw a box of the test size into the frame buffer and
         % set it to the specified settings.
         if (~isempty(calStruct.describe.blankSettings))
-            % Draw a box to measure at
-            mglFillRect(obj.calibrationRect.x0, obj.calibrationRect.y0, obj.calibrationRect.size, obj.calibrationRect.RGB);
-            mglFlush;
-            
             % Update LUT
             bgSettings     = calStruct.describe.blankSettings';
             targetSettings = [1 1 1]';
-            obj.loadClut(bgSettings, targetSettings);
+            obj.loadClut(bgSettings, targetSettings, calStruct.describe.useBitsPP);
+            
+            mglFlush;
         end
 	
         % Make sure the cursor is displayed.

@@ -2,6 +2,8 @@
 function plotBasicMeasurements(obj)
     cal = obj.cal;
     
+    close all
+    
     figure(1); clf;
     hold on
     plot(SToWls(cal.rawData.S), cal.processedData.P_device(:,1), 'r-');
@@ -11,6 +13,7 @@ function plotBasicMeasurements(obj)
     ylabel('Power', 'Fontweight', 'bold');
     title('Phosphor spectra', 'Fontsize', 13, 'Fontname', 'helvetica', 'Fontweight', 'bold');
     axis([380, 780, -Inf, Inf]);
+    drawnow;
 
     figure(2); clf;
     hold on
@@ -25,6 +28,5 @@ function plotBasicMeasurements(obj)
     plot(cal.processedData.gammaInput, cal.processedData.gammaTable(:,3), 'b-');
     
     hold off
-    figure(gcf);
     drawnow;
 end
