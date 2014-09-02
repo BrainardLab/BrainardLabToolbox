@@ -10,6 +10,9 @@
 % 10/20/11 tyl, cgb Changed "cal.describe.dacsize =
 %                   ScreenDacBits(cal.describe.whichScreen-1);" to "cal.describe.dacsize =
 %                   8;" in order to work with 64-bit MATLAB
+% 7/03/14  npc  Modifications for accessing calibration data using a @CalStruct object.
+%               This was required only at the very end, where plotting data are directly accessed.
+%
 
 % Get dacsize
 if (cal.usebitspp)
@@ -95,21 +98,35 @@ cal = mglCalibrateAmbDrvr(cal, 0, whichMeterType);
 fprintf(1, '\nSaving to %s.mat\n', newFileName);
 SaveCalFile(cal, newFileName);
 
+
+
+% Specify @CalStruct object that will handle all access to the calibration data.
+[calStructOBJ, inputArgIsACalStructOBJ] = ObjectToHandleCalOrCalStruct(cal);
+clear 'cal';
+
+% From this point onward, all access to the calibration data is accomplised via the calStructOBJ.
+S             = calStructOBJ.get('S');
+P_device      = calStructOBJ.get('P_device');
+rawGammaInput = calStructOBJ.get('rawGammaInput');
+rawGammaTable = calStructOBJ.get('rawGammaTable'); 
+gammaInput    = calStructOBJ.get('gammaInput');
+gammaTable    = calStructOBJ.get('gammaTable');
+
 % Put up a plot of the essential data
 figure(1); clf;
-plot(SToWls(cal.S_device), cal.P_device);
+plot(SToWls(S), P_device);
 xlabel('Wavelength (nm)', 'Fontweight', 'bold');
 ylabel('Power', 'Fontweight', 'bold');
 title('Phosphor spectra', 'Fontsize', 13, 'Fontname', 'helvetica', 'Fontweight', 'bold');
 axis([380, 780, -Inf, Inf]);
 
 figure(2); clf;
-plot(cal.rawdata.rawGammaInput, cal.rawdata.rawGammaTable, '+');
+plot(rawGammaInput, rawGammaTable, '+');
 xlabel('Input value', 'Fontweight', 'bold');
 ylabel('Normalized output', 'Fontweight', 'bold');
 title('Gamma functions', 'Fontsize', 13, 'Fontname', 'helvetica', 'Fontweight', 'bold');
 hold on
-plot(cal.gammaInput, cal.gammaTable);
+plot(gammaInput, gammaTable);
 
 hold off
 figure(gcf);

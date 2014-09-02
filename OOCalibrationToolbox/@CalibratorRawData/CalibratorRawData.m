@@ -64,7 +64,7 @@ classdef CalibratorRawData
         % Constructor
         function obj = CalibratorRawData(varargin)
             % do nothing
-            fprintf('New @CalibratorRawData object generated.\n');
+            % fprintf('New @CalibratorRawData object generated.\n');
         end
     end
     

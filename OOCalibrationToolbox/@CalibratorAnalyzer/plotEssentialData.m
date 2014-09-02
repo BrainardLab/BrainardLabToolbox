@@ -1,46 +1,53 @@
 % Method to generate plots of the essential data.
 function plotEssentialData(obj, figureGroupIndex)
-
-    % Get the cal
-    calStruct = obj.cal;
     
     % Gamma functions.
-    plotGammaData(obj, calStruct, figureGroupIndex);
+    plotGammaData(obj, figureGroupIndex);
 
+    % Get data
+    P_device = obj.calStructOBJ.get('P_device');
+    
     % Spectral data
-    if (obj.measurementChannelsNum > 3)
+    if (size(P_device, 1) > 3)
         % SPDs
-        plotSpectralData(obj, calStruct, figureGroupIndex);
+        plotSpectralData(obj,  figureGroupIndex);
         % Ambient SPD
-        plotAmbientData(obj, calStruct, figureGroupIndex);
+        plotAmbientData(obj,  figureGroupIndex);
         % Full spectral data for all gamma input values (unscaled/scaled)
-        plotFullSpectra(obj, calStruct, 1, 'Red primary', figureGroupIndex, 'NorthWest');
-        plotFullSpectra(obj, calStruct, 2, 'Green primary', figureGroupIndex, 'NorthEast');
-        plotFullSpectra(obj, calStruct, 3, 'Blue primary', figureGroupIndex, 'NorthEast');
+        plotFullSpectra(obj,  1, 'Red primary', figureGroupIndex, 'NorthWest');
+        plotFullSpectra(obj,  2, 'Green primary', figureGroupIndex, 'NorthEast');
+        plotFullSpectra(obj,  3, 'Blue primary', figureGroupIndex, 'NorthEast');
     end
     
     % Chromaticity data
-    plotChromaticityData(obj, calStruct, figureGroupIndex);
+    plotChromaticityData(obj, figureGroupIndex);
     
     % Chromaticity stability
-    plotPrimaryChromaticityStabilityData(obj, calStruct, figureGroupIndex);
+    plotPrimaryChromaticityStabilityData(obj, figureGroupIndex);
     
     % Repeatability 
-    if (calStruct.describe.nAverage > 1)
-        plotRepeatibilityData(obj, calStruct, figureGroupIndex);
+    if (obj.calStructOBJ.get('nAverage') > 1)
+        plotRepeatibilityData(obj,  figureGroupIndex);
     else
-        plotNulPlot(obj, calStruct, figureGroupIndex)
+        plotNulPlot(obj, figureGroupIndex);
     end
     
 end
 
-function plotRepeatibilityData(obj, calStruct, figureGroupIndex)
+function plotRepeatibilityData(obj, figureGroupIndex)
+
+    nAverages    = obj.calStructOBJ.get('nAverage');
+    primariesNum = obj.calStructOBJ.get('nDevices');
+    nMeasures    = obj.calStructOBJ.get('nMeas');
+    T_sensor     = obj.calStructOBJ.get('T_sensor');
+    gammaInput   = obj.newStyleCal.rawData.gammaInput;
+    
     % Convert the set of measurments to xyY
-    primary_xyY = zeros(calStruct.describe.nAverage, calStruct.describe.displayPrimariesNum, 3, calStruct.describe.nMeas);
-    for trialIndex = 1:calStruct.describe.nAverage
-        for primaryIndex = 1:calStruct.describe.displayPrimariesNum
+    primary_xyY = zeros(nAverages, primariesNum, 3, nMeasures);
+    for trialIndex = 1:nAverages
+        for primaryIndex = 1:primariesNum
             primary_xyY(trialIndex, primaryIndex, :, :) = ...
-                XYZToxyY(obj.T_xyz  * (squeeze(calStruct.rawData.gammaCurveMeasurements(trialIndex, primaryIndex, :, :)))');
+                XYZToxyY(T_sensor  * (squeeze(obj.newStyleCal.rawData.gammaCurveMeasurements(trialIndex, primaryIndex, :, :)))');
         end
     end
     xChromaIndex   = 1;
@@ -57,10 +64,10 @@ function plotRepeatibilityData(obj, calStruct, figureGroupIndex)
     % Luminance of RGB primaries as a function of gamma input value
     subplot(1,3,1); hold on
     lumIndex = 3;
-    for trialIndex = 1:calStruct.describe.nAverage
-        plot(calStruct.rawData.gammaInput, squeeze(primary_xyY(trialIndex, 1, lumIndex, :)), 'r.-');
-        plot(calStruct.rawData.gammaInput, squeeze(primary_xyY(trialIndex, 2, lumIndex, :)), 'g.-');
-        plot(calStruct.rawData.gammaInput, squeeze(primary_xyY(trialIndex, 3, lumIndex, :)), 'b.-');
+    for trialIndex = 1:nAverages
+        plot(gammaInput, squeeze(primary_xyY(trialIndex, 1, lumIndex, :)), 'r.-');
+        plot(gammaInput, squeeze(primary_xyY(trialIndex, 2, lumIndex, :)), 'g.-');
+        plot(gammaInput, squeeze(primary_xyY(trialIndex, 3, lumIndex, :)), 'b.-');
     end
     axis([0 1 0 maxLum]);
     box on;
@@ -71,10 +78,10 @@ function plotRepeatibilityData(obj, calStruct, figureGroupIndex)
     
     % x-chromaticity of RGB primaries as a function of gamma input value
     subplot(1,3,2); hold on
-    for trialIndex = 1:calStruct.describe.nAverage
-        plot(calStruct.rawData.gammaInput, squeeze(primary_xyY(trialIndex, 1, xChromaIndex, :)), 'r.-');
-        plot(calStruct.rawData.gammaInput, squeeze(primary_xyY(trialIndex, 2, xChromaIndex, :)), 'g.-');
-        plot(calStruct.rawData.gammaInput, squeeze(primary_xyY(trialIndex, 3, xChromaIndex, :)), 'b.-');
+    for trialIndex = 1:nAverages
+        plot(gammaInput, squeeze(primary_xyY(trialIndex, 1, xChromaIndex, :)), 'r.-');
+        plot(gammaInput, squeeze(primary_xyY(trialIndex, 2, xChromaIndex, :)), 'g.-');
+        plot(gammaInput, squeeze(primary_xyY(trialIndex, 3, xChromaIndex, :)), 'b.-');
     end
     axis([0 1 0 1]);
     box on;
@@ -85,10 +92,10 @@ function plotRepeatibilityData(obj, calStruct, figureGroupIndex)
     
     % y-chromaticity of RGB primaries as a function of gamma input value
     subplot(1,3,3); hold on
-    for trialIndex = 1:calStruct.describe.nAverage
-        plot(calStruct.rawData.gammaInput, squeeze(primary_xyY(trialIndex, 1, yChromaIndex, :)), 'r.-');
-        plot(calStruct.rawData.gammaInput, squeeze(primary_xyY(trialIndex, 2, yChromaIndex, :)), 'g.-');
-        plot(calStruct.rawData.gammaInput, squeeze(primary_xyY(trialIndex, 3, yChromaIndex, :)), 'b.-');
+    for trialIndex = 1:nAverages
+        plot(gammaInput, squeeze(primary_xyY(trialIndex, 1, yChromaIndex, :)), 'r.-');
+        plot(gammaInput, squeeze(primary_xyY(trialIndex, 2, yChromaIndex, :)), 'g.-');
+        plot(gammaInput, squeeze(primary_xyY(trialIndex, 3, yChromaIndex, :)), 'b.-');
     end
     axis([0 1 0 1]);
     box on;
@@ -99,12 +106,22 @@ function plotRepeatibilityData(obj, calStruct, figureGroupIndex)
     % Finish plot
     drawnow;
     
+    uicontrol(h,  ...
+                        'Units',    'normalized',  ...
+                        'Position',  [0.01 0.01 0.1 0.1], ...
+                        'String',   ' Export ', ...
+                        'Fontsize',  14, ...      
+                        'FontWeight','Bold', ...
+                        'ForegroundColor',     [0.2 0.2 0.2], ...
+                        'Callback',  {@obj.SaveFigure_Callback, gcf, get(h, 'Name')} ...
+                );
+            
     % Add figure to the figures group
     obj.updateFiguresGroup(h, figureGroupIndex);
 end
 
 
-function plotNulPlot(obj, calStruct, figureGroupIndex)
+function plotNulPlot(obj, figureGroupIndex)
     % Init figure
     h = figure('Name', '(null)', 'NumberTitle', 'off', 'Visible', 'off'); 
     clf; 
@@ -113,27 +130,52 @@ function plotNulPlot(obj, calStruct, figureGroupIndex)
     % Finish plot
     drawnow;
     
+    uicontrol(h,  ...
+                        'Units',    'normalized',  ...
+                        'Position',  [0.01 0.01 0.1 0.1], ...
+                        'String',   ' Export ', ...
+                        'Fontsize',  14, ...      
+                        'FontWeight','Bold', ...
+                        'ForegroundColor',     [0.2 0.2 0.2], ...
+                        'Callback',  {@obj.SaveFigure_Callback, gcf,  get(h, 'Name')} ...
+                );
+            
     % Add figure to the figures group
     obj.updateFiguresGroup(h, figureGroupIndex);
 end
 
-function plotPrimaryChromaticityStabilityData(obj, calStruct, figureGroupIndex)
+function plotPrimaryChromaticityStabilityData(obj, figureGroupIndex)
     % Init figure
     h = figure('Name', 'RGB Primaries Chromaticity Stability', 'NumberTitle', 'off', 'Visible', 'off'); 
     clf; hold on;
     
-    for primaryIndex = 1:calStruct.describe.displayPrimariesNum
+    % Get number of calibrated primaries
+    primariesNum = obj.calStructOBJ.get('nDevices');
+    
+    % Get T_ensor data
+    T_sensor = obj.calStructOBJ.get('T_sensor');
+    
+    primaryNames = {'red', 'green', 'blue'};
+    
+    for primaryIndex = 1:primariesNum
         % Put measurements into columns of a matrix from raw data in calibration file.
-        fullSpectra = squeeze(calStruct.rawData.gammaCurveMeanMeasurements(primaryIndex, :,:));
+        fullSpectra = squeeze(obj.newStyleCal.rawData.gammaCurveMeanMeasurements(primaryIndex, :,:));
 
         % Compute phosphor chromaticities
-        xyYMon = XYZToxyY(obj.T_xyz*fullSpectra');
+        xyYMon = XYZToxyY(T_sensor*fullSpectra');
     
         % Plot data
         subplot('Position', [0.08 + (primaryIndex-1)*0.32 0.08 0.26 0.9]);
-        plot(xyYMon(1,:), xyYMon(2,:), 'k-');
+        T_sensor  = obj.calStructOBJ.get('T_sensor');
+
+        % Compute the spectral locus
+        xyYLocus = XYZToxyY(T_sensor);
+        plot(xyYLocus(1,:)',xyYLocus(2,:)','k');
         hold on;
-        for k = size(fullSpectra,1):-1:1
+        
+        plot(xyYMon(1,:), xyYMon(2,:), 'k-');
+        
+        for k = 1:size(fullSpectra,1)
             if (primaryIndex == 1)
                 faceColor = [1.0 1.0 1.0] - (k/size(fullSpectra,1)*[0.2 1.0 1.0]);  
             elseif (primaryIndex == 2)
@@ -141,15 +183,14 @@ function plotPrimaryChromaticityStabilityData(obj, calStruct, figureGroupIndex)
             elseif (primaryIndex == 3)
                 faceColor = [1.0 1.0 1.0] - (k/size(fullSpectra,1)*[1.0 1.0 0.1]);
             end
-            edgeColor = 'k';
-            plot(xyYMon(1,k), xyYMon(2,k), 's', 'MarkerFaceColor', faceColor, 'MarkerEdgeColor', edgeColor, 'MarkerSize', 6);
+            edgeColor = faceColor;
+            plot(xyYMon(1,k), xyYMon(2,k), 's', 'MarkerFaceColor', faceColor, 'MarkerEdgeColor', edgeColor, 'MarkerSize', 8);
         end
     
-    
-        xmean = mean(squeeze(xyYMon(1,:)));
-        ymean = mean(squeeze(xyYMon(2,:)));
-        range = 0.05;
-        axis([xmean-range/2.0 xmean+range/2.0 ymean-range/2.0 ymean+range/2.0]); 
+        %xmean = mean(squeeze(xyYMon(1,:)));
+        %ymean = mean(squeeze(xyYMon(2,:)));
+        
+        axis([0 1 0 1]);
         axis('square');
         
         xlabel('x chromaticity', 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);
@@ -160,30 +201,43 @@ function plotPrimaryChromaticityStabilityData(obj, calStruct, figureGroupIndex)
         end
         set(gca, 'Color', [1.0 1.0 1.0], 'XColor', 'b', 'YColor', 'b');
         set(gca, 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);
-        %title(sprintf('Lower %d luminances in black',nDontPlotLowPower));
-    box on;
+        title(sprintf('%s primary',primaryNames{primaryIndex}));
+        box on;
     end
-    
-    
+
     % Finish plot
     drawnow;
     
+    uicontrol(h,  ...
+                        'Units',    'normalized',  ...
+                        'Position',  [0.01 0.01 0.1 0.1], ...
+                        'String',   ' Export ', ...
+                        'Fontsize',  14, ...      
+                        'FontWeight','Bold', ...
+                        'ForegroundColor',     [0.2 0.2 0.2], ...
+                        'Callback',  {@obj.SaveFigure_Callback, gcf,  get(h, 'Name')} ...
+                );
+            
     % Add figure to the figures group
     obj.updateFiguresGroup(h, figureGroupIndex);
 end
 
-function plotChromaticityData(obj, calStruct, figureGroupIndex)
-
-    % Compute xyLum of the three primaries
-    if (obj.measurementChannelsNum > 3)
-        xyYMon = XYZToxyY(obj.T_xyz * calStruct.processedData.P_device);
-        xyYAmb = XYZToxyY(obj.T_xyz * calStruct.processedData.P_ambient);
+function plotChromaticityData(obj, figureGroupIndex)
+    % Get data
+    P_device  = obj.calStructOBJ.get('P_device');
+    P_ambient = obj.calStructOBJ.get('P_ambient');
+    T_sensor  = obj.calStructOBJ.get('T_sensor');
+   
+    % Spectral data
+    if (size(P_device, 1) > 3)
+        xyYMon = XYZToxyY(T_sensor * P_device);
+        xyYAmb = XYZToxyY(T_sensor * P_ambient);
     else
-        xyYMon = XYZToxyY(calStruct.processedData.P_device);
-        xyYAmb = XYZToxyY(calStruct.processedData.P_ambient);
+        xyYMon = XYZToxyY(P_device);
+        xyYAmb = XYZToxyY(P_ambient);
     end
     % Compute the spectral locus
-    xyYLocus = XYZToxyY(obj.T_xyz);
+    xyYLocus = XYZToxyY(T_sensor);
     
     % Init figure
     h = figure('Name', 'RGB primaries chromaticities', 'NumberTitle', 'off', 'Visible', 'off'); 
@@ -210,20 +264,38 @@ function plotChromaticityData(obj, calStruct, figureGroupIndex)
     % Finish plot
     drawnow;
     
+    uicontrol(h,  ...
+                        'Units',    'normalized',  ...
+                        'Position',  [0.01 0.01 0.1 0.1], ...
+                        'String',   ' Export ', ...
+                        'Fontsize',  14, ...      
+                        'FontWeight','Bold', ...
+                        'ForegroundColor',     [0.2 0.2 0.2], ...
+                        'Callback',  {@obj.SaveFigure_Callback, gcf,  get(h, 'Name')} ...
+                );
+            
     % Add figure to the figures group
     obj.updateFiguresGroup(h, figureGroupIndex);
 end
 
 
-function plotFullSpectra(obj, calStruct, primaryIndex, primaryName, figureGroupIndex, legendPosition)
+function plotFullSpectra(obj, primaryIndex, primaryName, figureGroupIndex, legendPosition)
+
+    % Compute spectral axis
+    spectralAxis = SToWls(obj.calStructOBJ.get('S'));
+    
+    rawGammaInput = obj.calStructOBJ.get('rawGammaInput');
+    
     % Put measurements into columns of a matrix from raw data in calibration file.
-    fullSpectra   = squeeze(calStruct.rawData.gammaCurveMeanMeasurements(primaryIndex, :,:));
+    gammaCurveMeanMeasurements = obj.newStyleCal.rawData.gammaCurveMeanMeasurements;
+    fullSpectra   = squeeze(gammaCurveMeanMeasurements(primaryIndex, :,:));
     scaledSpectra = 0*fullSpectra;
     
+
     %maxSpectra    = repmat(max(fullSpectra,[],2), [1 size(fullSpectra,2)]);
     %scaledSpectra = fullSpectra./maxSpectra;    
     maxSpectra = fullSpectra(end,:); 
-    for gammaPoint = 1:calStruct.describe.nMeas
+    for gammaPoint = 1:obj.calStructOBJ.get('nMeas')
         scaledSpectra(gammaPoint,:) = (fullSpectra(gammaPoint,:)' * (fullSpectra(gammaPoint,:)' \ maxSpectra'))';
     end
     
@@ -233,7 +305,7 @@ function plotFullSpectra(obj, calStruct, primaryIndex, primaryName, figureGroupI
     
     % measured spectra
     subplot('Position', [0.10 0.14 0.37 0.85]);
-    x = obj.spectralAxis;
+    x = spectralAxis;
     for k = size(fullSpectra,1):-1:1
         if (primaryIndex == 1)
             faceColor = [1.0 1.0 1.0] - (k/size(fullSpectra,1)*[0.2 1.0 1.0]);  
@@ -259,7 +331,7 @@ function plotFullSpectra(obj, calStruct, primaryIndex, primaryName, figureGroupI
         end
         y = squeeze(fullSpectra(k,:));
         obj.makeShadedPlot(x,y, faceColor, edgeColor);
-        legendsMatrix{k} = sprintf('%0.2f', calStruct.rawData.gammaInput(size(fullSpectra,1)-k+1));
+        legendsMatrix{k} = sprintf('%0.2f', rawGammaInput(size(fullSpectra,1)-k+1));
     end
     hleg = legend(legendsMatrix, 'Location', legendPosition);
     set(hleg,'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 10);
@@ -298,19 +370,35 @@ function plotFullSpectra(obj, calStruct, primaryIndex, primaryName, figureGroupI
     % Finish plot
     drawnow;
     
+    uicontrol(h,  ...
+                        'Units',    'normalized',  ...
+                        'Position',  [0.01 0.01 0.1 0.1], ...
+                        'String',   ' Export ', ...
+                        'Fontsize',  14, ...      
+                        'FontWeight','Bold', ...
+                        'ForegroundColor',     [0.2 0.2 0.2], ...
+                        'Callback',  {@obj.SaveFigure_Callback, gcf,  get(h, 'Name')} ...
+                );
+            
     % Add figure to the figures group
     obj.updateFiguresGroup(h, figureGroupIndex);
 end
 
 
-function plotAmbientData(obj, calStruct, figureGroupIndex)
+function plotAmbientData(obj,  figureGroupIndex)
     % Init figure
     h = figure('Name', 'Ambient SPD', 'NumberTitle', 'off', 'Visible', 'off'); 
     clf; hold on;
     
+    % Compute spectral axis
+    spectralAxis = SToWls(obj.calStructOBJ.get('S'));
+    
+    % Get data
+    P_ambient = obj.calStructOBJ.get('P_ambient');
+    
     % Plot data
-    x = obj.spectralAxis;
-    y = squeeze(calStruct.processedData.P_ambient(:,1));
+    x = spectralAxis;
+    y = squeeze(P_ambient(:,1));
     faceColor = [0.9 0.9 0.9]; edgeColor = [0.3 0.3 0.3];
     obj.makeShadedPlot(x,y, faceColor, edgeColor);
     set(gca, 'Color', [1.0 1.0 1.0], 'XColor', 'b', 'YColor', 'b');
@@ -324,42 +412,59 @@ function plotAmbientData(obj, calStruct, figureGroupIndex)
     % Finish plot
     drawnow;
     
+    uicontrol(h,  ...
+                        'Units',    'normalized',  ...
+                        'Position',  [0.01 0.01 0.1 0.1], ...
+                        'String',   ' Export ', ...
+                        'Fontsize',  14, ...      
+                        'FontWeight','Bold', ...
+                        'ForegroundColor',     [0.2 0.2 0.2], ...
+                        'Callback',  {@obj.SaveFigure_Callback, gcf,  get(h, 'Name')} ...
+                );
+            
     % Add figure to the figures group
     obj.updateFiguresGroup(h, figureGroupIndex);
 end
 
-function plotSpectralData(obj, calStruct, figureGroupIndex)
+function plotSpectralData(obj, figureGroupIndex)
     % Init figure
     h = figure('Name', 'Primary SPDs', 'NumberTitle', 'off', 'Visible', 'off'); 
     clf; hold on;
     
+    
+    % Compute spectral axis
+    spectralAxis = SToWls(obj.calStructOBJ.get('S'));
+    
+    % Get data
+    P_device = obj.calStructOBJ.get('P_device');
+    
     % Get number of calibrated primaries
-    primariesNum = size(obj.rawData.gammaTable,2);
+    primariesNum = obj.calStructOBJ.get('nDevices');
     if (primariesNum > 3)
         subplot(1,2,1); hold on;
     end
 
     % Plot data
-    x = obj.spectralAxis;
-    y = squeeze(calStruct.processedData.P_device(:,1));
+    x = spectralAxis;
+    y = squeeze(P_device(:,1));
     faceColor = [1.0 0.7 0.7]; edgeColor = 'r';
     obj.makeShadedPlot(x,y, faceColor, edgeColor);
     
-    y = squeeze(calStruct.processedData.P_device(:,2));
+    y = squeeze(P_device(:,2));
     faceColor = [0.7 1.0 0.7]; edgeColor = 'g';
     obj.makeShadedPlot(x,y, faceColor, edgeColor);
     
-    y = squeeze(calStruct.processedData.P_device(:,3));
+    y = squeeze(P_device(:,3));
     faceColor = [0.7 0.7 1.0]; edgeColor = 'b';
     obj.makeShadedPlot(x,y, faceColor, edgeColor);
 
-    y = squeeze(calStruct.processedData.P_device(:,1));
+    y = squeeze(P_device(:,1));
     plot(x,y, 'r-');
     
-    y = squeeze(calStruct.processedData.P_device(:,2));
+    y = squeeze(P_device(:,2));
     plot(x,y, 'g-');
     
-    y = squeeze(calStruct.processedData.P_device(:,3));
+    y = squeeze(P_device(:,3));
     plot(x,y, 'b-');
     
     set(gca, 'Color', [1.0 1.0 1.0], 'XColor', 'b', 'YColor', 'b');
@@ -372,9 +477,9 @@ function plotSpectralData(obj, calStruct, figureGroupIndex)
 
     if (primariesNum > 3)
         subplot(1,2,2); hold on;
-        plot(obj.spectralAxis, calStruct.processedData.P_device(:,4), 'r');
-        plot(obj.spectralAxis, calStruct.processedData.P_device(:,5), 'g');
-        plot(obj.spectralAxis, calStruct.processedData.P_device(:,6), 'b');
+        plot(spectralAxis, P_device(:,4), 'r');
+        plot(spectralAxis, P_device(:,5), 'g');
+        plot(spectralAxis, P_device(:,6), 'b');
         xlabel('Wavelength (nm)', 'Fontweight', 'bold');
         ylabel('Power', 'Fontweight', 'bold');
         %title('Phosphor correction', 'Fontsize', 13, 'Fontname', 'helvetica', 'Fontweight', 'bold');
@@ -386,53 +491,69 @@ function plotSpectralData(obj, calStruct, figureGroupIndex)
     % Finish plot
     drawnow;
     
+    % Add export button
+    uicontrol(h,  ...
+                        'Units',    'normalized',  ...
+                        'Position',  [0.01 0.01 0.1 0.1], ...
+                        'String',   ' Export ', ...
+                        'Fontsize',  14, ...      
+                        'FontWeight','Bold', ...
+                        'ForegroundColor',     [0.2 0.2 0.2], ...
+                        'Callback',  {@obj.SaveFigure_Callback, gcf,  get(h, 'Name')} ...
+                );
+            
     % Add figure to the figures group
     obj.updateFiguresGroup(h, figureGroupIndex);  
 end
 
-function plotGammaData(obj, calStruct, figureGroupIndex)
+function plotGammaData(obj, figureGroupIndex)
     % Init figure
     h = figure('Name', 'Gamma functions', 'NumberTitle', 'off', 'Visible', 'off'); 
     clf; hold on;
     
+    % Get data
+    rawGammaInput   = obj.newStyleCal.rawData.gammaInput;
+    rawGammaTable   = obj.newStyleCal.rawData.gammaTable;
+    gammaInput      = obj.newStyleCal.processedData.gammaInput;
+    gammaTable      = obj.newStyleCal.processedData.gammaTable;
+    
     % Get number of calibrated primaries
-    primariesNum = size(obj.rawData.gammaTable,2);
+    primariesNum = size(gammaTable,2);
     if (primariesNum > 3)
         subplot(1,2,1); hold on;
     end
     
     % Plot fitted data
-    plot(calStruct.processedData.gammaInput, calStruct.processedData.gammaTable(:,1),'r-');
-    plot(calStruct.processedData.gammaInput, calStruct.processedData.gammaTable(:,2),'g-');
-    plot(calStruct.processedData.gammaInput, calStruct.processedData.gammaTable(:,3),'b-');
+    plot(gammaInput, gammaTable(:,1),'r-');
+    plot(gammaInput, gammaTable(:,2),'g-');
+    plot(gammaInput, gammaTable(:,3),'b-');
     
     if (primariesNum > 3)
         subplot(1,2,2); hold on;
         % Plot fitted data
-        plot(calStruct.processedData.gammaInput, calStruct.processedData.gammaTable(:,4),'r-');
-        plot(calStruct.processedData.gammaInput, calStruct.processedData.gammaTable(:,5),'g-');
-        plot(calStruct.processedData.gammaInput, calStruct.processedData.gammaTable(:,6),'b-');
-    
+        plot(gammaInput, gammaTable(:,4),'r-');
+        plot(gammaInput, gammaTable(:,5),'g-');
+        plot(gammaInput, gammaTable(:,6),'b-');
     end
     
     % Plot measured data
-    if (size(calStruct.rawData.gammaInput,1) == 1)
-        plot(calStruct.rawData.gammaInput, calStruct.rawData.gammaTable(:,1), ...
+    if (size(rawGammaInput,1) == 1)
+        plot(rawGammaInput, rawGammaTable(:,1), ...
             'rs', 'MarkerFaceColor', [1.0 0.8 0.8], 'MarkerEdgeColor', [1 0 0]);
-        plot(calStruct.rawData.gammaInput, calStruct.rawData.gammaTable(:,2), ...
+        plot(rawGammaInput, rawGammaTable(:,2), ...
             'gs', 'MarkerFaceColor', [0.8 1.0 0.8], 'MarkerEdgeColor', [0 1 0]);
-        plot(calStruct.rawData.gammaInput, calStruct.rawData.gammaTable(:,3), ...
+        plot(rawGammaInput, rawGammaTable(:,3), ...
             'bs', 'MarkerFaceColor', [1.0 1.0 0.8], 'MarkerEdgeColor', [0 0 1]);
     else
-        plot(calStruct.rawData.gammaInput(1,:), calStruct.rawData.gammaTable(:,1), ...
+        plot(rawGammaInput(1,:), rawGammaTable(:,1), ...
             'rs', 'MarkerFaceColor', [1.0 0.8 0.8], 'MarkerEdgeColor', [1 0 0]);
-        plot(calStruct.rawData.gammaInput(2,:), calStruct.rawData.gammaTable(:,2), ...
+        plot(rawGammaInput(2,:), rawGammaTable(:,2), ...
             'gs', 'MarkerFaceColor', [0.8 1.0 0.8], 'MarkerEdgeColor', [0 1 0]);
-        plot(calStruct.rawData.gammaInput(3,:), calStruct.rawData.gammaTable(:,3), ...
+        plot(rawGammaInput(3,:), rawGammaTable(:,3), ...
             'bs', 'MarkerFaceColor', [1.0 1.0 0.8], 'MarkerEdgeColor', [0 0 1]);
     end
     
-    xlabel('Settingsvalue', 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);
+    xlabel('Settings value', 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);
     ylabel('Normalized output', 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);
     %title('Gamma functions', 'Fontsize', 13, 'Fontname', 'helvetica', 'Fontweight', 'bold');
     axis([0 1 0 1.2]);
@@ -440,19 +561,19 @@ function plotGammaData(obj, calStruct, figureGroupIndex)
     if (primariesNum > 3)
         subplot(1,2,2); hold on;
         % Plot measured data
-        if (size(calStruct.rawData.gammaInput,1) == 1)
-            plot(calStruct.rawData.gammaInput, calStruct.rawData.gammaTable(:,4), ...
+        if (size(rawGammaInput,1) == 1)
+            plot(rawGammaInput, rawGammaTable(:,4), ...
                 'rs', 'MarkerFaceColor', [1.0 0.8 0.8], 'MarkerEdgeColor', [1 0 0]);
-            plot(calStruct.rawData.gammaInput, calStruct.rawData.gammaTable(:,5), ...
+            plot(rawGammaInput, rawGammaTable(:,5), ...
                 'gs', 'MarkerFaceColor', [0.8 1.0 0.8], 'MarkerEdgeColor', [0 1 0]);
-            plot(calStruct.rawData.gammaInput, calStruct.rawData.gammaTable(:,6), ...
+            plot(rawGammaInput, rawGammaTable(:,6), ...
                 'bs', 'MarkerFaceColor', [1.0 1.0 0.8], 'MarkerEdgeColor', [0 0 1]);
         else
-            plot(calStruct.rawData.gammaInput(1,:), calStruct.rawData.gammaTable(:,4), ...
+            plot(rawGammaInput(1,:), rawGammaTable(:,4), ...
                 'rs', 'MarkerFaceColor', [1.0 0.8 0.8], 'MarkerEdgeColor', [1 0 0]);
-            plot(calStruct.rawData.gammaInput(2,:), calStruct.rawData.gammaTable(:,5), ...
+            plot(rawGammaInput(2,:), rawGammaTable(:,5), ...
                 'gs', 'MarkerFaceColor', [0.8 1.0 0.8], 'MarkerEdgeColor', [0 1 0]);
-            plot(calStruct.rawData.gammaInput(3,:), calStruct.rawData.gammaTable(:,6), ...
+            plot(rawGammaInput(3,:), rawGammaTable(:,6), ...
                 'bs', 'MarkerFaceColor', [1.0 1.0 0.8], 'MarkerEdgeColor', [0 0 1]);
         end
     
@@ -461,7 +582,7 @@ function plotGammaData(obj, calStruct, figureGroupIndex)
         %title('Gamma functions', 'Fontsize', 13, 'Fontname', 'helvetica', 'Fontweight', 'bold');
         axis([0 1 0 1.2]);
     end
-     
+    
     set(gca, 'Color', [1.0 1.0 1.0], 'XColor', 'b', 'YColor', 'b');
     set(gca, 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);
     box on;
@@ -469,9 +590,18 @@ function plotGammaData(obj, calStruct, figureGroupIndex)
     % Finish plot
     drawnow;
     
+    % Add export button
+    uicontrol(h,  ...
+                        'Units',    'normalized',  ...
+                        'Position',  [0.01 0.01 0.1 0.1], ...
+                        'String',   ' Export ', ...
+                        'Fontsize',  14, ...      
+                        'FontWeight','Bold', ...
+                        'ForegroundColor',     [0.2 0.2 0.2], ...
+                        'Callback',  {@obj.SaveFigure_Callback, gcf,  get(h, 'Name')} ...
+                );
+  
     % Add figure to the figures group
     obj.updateFiguresGroup(h, figureGroupIndex); 
 end
-
-
 

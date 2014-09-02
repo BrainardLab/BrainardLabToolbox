@@ -10,7 +10,6 @@ function Test1
     newStyleCalFileName = 'ViewSonicProbe';
     oldStyleCalFileName = 'StereoLCDLeft';
     [cal, ~] = GetCalibrationStructure('Enter calibration filename',oldStyleCalFileName,[]);
-    %cal.S_device = cal.describe.S*2;
     fprintf('Hit enter to continue ...\n');
     pause
     
@@ -23,6 +22,11 @@ function Test1
     pause;
     calStructVerbosity = 1;
     calStruct = CalStruct(cal, 'verbosity', calStructVerbosity);
+    DescribeMonCal(cal)
+    pause
+    DescribeMonCal(calStruct)
+    calStruct.get('gammaMode')
+    pause;
     clear 'cal'
     fprintf('\n------------------------------------------------------------------');
     fprintf('\nWorkspace contents\n');
@@ -31,15 +35,92 @@ function Test1
     
     fprintf('Hit enter to continue ...\n');
     pause
+    try
+        fprintf('\n------------------------------------------------------------------\n');
+        fprintf('<strong>Unit test0: Calling SetSensorColorSpace (old way).</strong>\n');
+        fprintf('------------------------------------------------------------------\n');
+        fprintf('Hit enter to continue ...\n');
+        fprintf('Testing SetSensorSpace ...\n');
+        S = calStruct.get('S');                          
+        load T_xyz1931
+        T_xyz = SplineCmf(S_xyz1931,683*T_xyz1931,S);
+
+        % Set color space
+        [cal, errorRet] = SetSensorColorSpace(calStruct.cal,T_xyz,S);
+        M_linear_device_status = calStruct.get('M_linear_device_status');
+        fprintf('***M_linear_device_status: %d\n', M_linear_device_status);
+        
+    catch err
+        fprintf(2,'An error was raised. This is unexpected.\n');
+        fprintf(2,'The exception raised was: %s\n', err.message);
+        fprintf('Hit enter to continue ...\n');
+        rethrow(err)
+        pause;
+    end
+
+
+    fprintf('Hit enter to continue ...\n');
+    pause
+    try
+        fprintf('\n------------------------------------------------------------------\n');
+        fprintf('<strong>Unit test00: Calling [cal, errorRet] = SetSensorColorSpace (new way, invalid syntax).</strong>\n');
+        fprintf('------------------------------------------------------------------\n');
+        fprintf('Hit enter to continue ...\n');
+        fprintf('Testing SetSensorSpace ...\n');
+        S = calStruct.get('S');                          
+        load T_xyz1931
+        T_xyz = SplineCmf(S_xyz1931,683*T_xyz1931,S);
+
+        % Set color space
+        [cal, errorRet] = SetSensorColorSpace(calStruct,T_xyz,S);
+        M_linear_device_status = calStruct.get('M_linear_device_status');
+        fprintf('***M_linear_device_status: %d\n', M_linear_device_status);
+        cal
+        
+    catch err
+        fprintf(2,'Indeed, an exception was raised, due to invalid calling of SetSensorColorSpace, which we captured.\n');
+        fprintf(2,'The exception raised was: %s\n', err.message);
+        fprintf('Hit enter to continue ...\n');
+        pause;
+    end
+    
+    
+    fprintf('Hit enter to continue ...\n');
+    pause
+    try
+        fprintf('\n------------------------------------------------------------------\n');
+        fprintf('<strong>Unit test000: Calling SetSensorColorSpace (new way, valid syntax).</strong>\n');
+        fprintf('------------------------------------------------------------------\n');
+        fprintf('Hit enter to continue ...\n');
+        fprintf('Testing SetSensorSpace ...\n');
+        S = calStruct.get('S');                          
+        load T_xyz1931
+        T_xyz = SplineCmf(S_xyz1931,683*T_xyz1931,S);
+
+        % Set color space
+        SetSensorColorSpace(calStruct,T_xyz,S);
+        M_linear_device_status = calStruct.get('M_linear_device_status');
+        fprintf('***M_linear_deice_status: %d\n', M_linear_device_status);
+        
+    catch
+        fprintf(2,'Indeed, an exception was raised, due to invalid calling of SetSensorColorSpace, which we captured.\n');
+        fprintf(2,'The exception raised was: %s\n', err.message);
+        fprintf('Hit enter to continue ...\n');
+        pause;
+    end
+    
     
 %%  Get a field with a typo, say, 's'
-    if (true)
+    try
         fprintf('\n------------------------------------------------------------------\n');
         fprintf('<strong>Unit test1: Typo in field  name to access.</strong>\n');
         fprintf('------------------------------------------------------------------\n');
         fprintf('Hit enter to continue ...\n');
         pause;
         s = calStruct.get('s')
+    catch err
+        fprintf(2,'Indeed, an exception was raised, due to typo in the field name, which we captured.\n');
+        fprintf(2,'The exception raised was: %s\n', err.message);
         fprintf('Hit enter to continue ...\n');
         pause;
     end
@@ -63,7 +144,7 @@ function Test1
         fprintf('------------------------------------------------------------------\n');
         fprintf('Hit enter to continue ...\n');
         pause;
-        s_Device = calStruct.get('S_device')
+        S_Device = calStruct.get('S_device')
         fprintf('Hit enter to continue ...\n');
         pause;
     end
@@ -75,20 +156,23 @@ function Test1
         fprintf('------------------------------------------------------------------\n');
         fprintf('Hit enter to continue ...\n');
         pause;
-        s_ambient = calStruct.get('S_ambient')
+        S_ambient = calStruct.get('S_ambient')
         fprintf('Hit enter to continue ...\n');
         pause;
     end
     
 %%  Set a new S_Device (just for testing)
-    if (true)
+    try
         fprintf('\n------------------------------------------------------------------\n');
         fprintf('<strong>Unit test3: Overwriting ''S_device''.</strong>\n');
         fprintf('------------------------------------------------------------------\n');
         fprintf('Hit enter to continue ...\n');
         pause;
-        sDev = [380 2 201];
-        calStruct.set('S_device', sDev);
+        newS_device = [380 2 201];
+        calStruct.set('S_device', newS_device);
+    catch err
+        fprintf(2,'Indeed, an exception was raised, due to trying to set a read-only property, which we captured.\n');
+        fprintf(2,'The exception raised was: %s\n', err.message);
         fprintf('Hit enter to continue ...\n');
         pause;
     end

@@ -1,0 +1,16 @@
+Install_LabJack_OSX
+MH, August 2012
+
+Steps for Using LabJack with MATLAB on Mac OS X
+
+1) Install Xcode
+Note: Only the command line tools are required; but not all Xcode versions offer the "command-line only" option. If you do not wish to use Xcode, you can delete all of the Xcode-related files (e.g. /Developer/Documentation) after installation.
+For OS X 10.6, any version of Xcode up to 4.1 is fine
+For OS X 10.7, any version of Xcode 4+ is fine. You can use the command-line tools installer for 4.3.3, for example. You must also apply this fix for MATLAB:
+http://www.mathworks.com/support/solutions/en/data/1-FR6LXJ/
+
+2) Install the LabJack "Exodriver":
+http://labjack.com/support/linux-and-mac-os-x-drivers
+You can use the "pre-built" installer on OS X 10.6 and 10.7, which includes libusb.
+
+3) Get the MATLAB code. This code has been tested on MATLAB R2012, but it should run fine on older releases up to R2009. Put the MATLAB code in a directory that is on the MATLAB path.

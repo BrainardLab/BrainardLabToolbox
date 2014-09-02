@@ -8,7 +8,8 @@ function MLDSColorSelectionPlot(thePairs,theResponses,nTrialsPerPair,targetCompe
 %
 % 5/3/12  dhb  Optional scatterplot of theory against measurements.
 % 6/12/13 ar   Changed function names and added comments. 
-% 4/07/14 ar  Option to save the figures. 
+% 4/07/14 ar   Option to save the figures. 
+% 7/27/14 dhb  Update savefig to use more portable FigureSave.
 
 % Plot theoretical vs. actual probabilities? 
 if (nargin < 5 || isempty(predictedResponses))
@@ -29,11 +30,13 @@ f = figure; clf;
 if (SCATTERPLOT)
     subplot(1,2,1);  hold on
 end
-set(gca,  'FontSize', 16);
-axis([0 6 0 1]);
+set(gca,  'FontSize', 10);
+axis([0 6 0 max(targetCompetitorFit)]);
 plot(1:length(targetCompetitorFit(2:end)),targetCompetitorFit(2:end),'ro','MarkerSize',6,'MarkerFaceColor','r');
 plot(1:length(targetCompetitorFit(2:end)),targetCompetitorFit(1)*ones(size(targetCompetitorFit(2:end))),'k','LineWidth',2);
-title(sprintf('Target'));
+title(sprintf('Inferred Target Position'));
+xlabel('Competitor #');
+ylabel('Representation');
 axis('square');
 
 % Compute the probabilities from the data.  
@@ -41,16 +44,16 @@ axis('square');
 if (SCATTERPLOT)
     subplot(1,2,2); hold on
     theDataProb = theResponses./ nTrialsPerPair;
-    plot(theDataProb,predictedResponses,'ro','MarkerSize',8,'MarkerFaceColor','r');
+    plot(theDataProb,predictedResponses,'ro','MarkerSize',6,'MarkerFaceColor','r');
     plot([0 1],[0 1],'k');
     axis('square')
     axis([0 1 0 1]);
-    set(gca,  'FontSize', 16);
-    
+    set(gca,  'FontSize', 10);
+    title(sprintf('Quality of MLDS model'));
     xlabel('Measured probabilities');
     ylabel('Predicted probabilities');
 end
-if savefig
-    savefig('MLDSOutput', f, 'pdf');
+if saveFig
+    FigureSave('MLDSOutput', f, 'pdf');
 end
 end

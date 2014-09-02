@@ -18,7 +18,6 @@ function [logLikely, predictedResponses] = MLDSComputeLogLikelihood(thePairs,the
 % 05/03/12  dhb  Store and return predicted probabilities.
 % 06/13/13  ar   Added more comments. 
 
-
 nPairs = size(thePairs,1);
 logLikely = 0;
 for i = 1:nPairs

@@ -8,6 +8,7 @@ function [lRate,mRate,sRate] = IsomerizationsInEyeFunction(spd,S_spd)
 % some detail each time it is called.
 %
 % 12/13/09  dhb  Wrote it, once again since original was lost.
+% 05/24/14  dhb  Updated but did not test.  
 
 %% Set some photoreceptor properties.  Here are is the parameter
 % info filled in:
@@ -80,10 +81,10 @@ irradianceQuanta = EnergyToQuanta(S,irradianceWatts);
 % set(xlabel('Wavelength (nm)'),'FontSize',12);
 % set(ylabel('Quanta/sec-um^2-wlinterval'),'FontSize',12);
 % subplot(1,2,2); hold on
-% set(plot(SToWls(S),photoreceptors.isomerizationAbsorbtance(1,:),'r'),'LineWidth',2);
-% set(plot(SToWls(S),photoreceptors.isomerizationAbsorbtance(2,:),'g'),'LineWidth',2);
-% set(plot(SToWls(S),photoreceptors.isomerizationAbsorbtance(3,:),'b'),'LineWidth',2);
-% set(title('Isomerization Absorbtance'),'FontSize',14);
+% set(plot(SToWls(S),photoreceptors.isomerizationAbsorptance(1,:),'r'),'LineWidth',2);
+% set(plot(SToWls(S),photoreceptors.isomerizationAbsorptance(2,:),'g'),'LineWidth',2);
+% set(plot(SToWls(S),photoreceptors.isomerizationAbsorptance(3,:),'b'),'LineWidth',2);
+% set(title('Isomerization Absorptance'),'FontSize',14);
 % set(xlabel('Wavelength (nm)'),'FontSize',12);
 % set(ylabel('Probability'),'FontSize',12);
 % axis([300 800 0 1]);
@@ -106,12 +107,20 @@ irradianceQuanta = EnergyToQuanta(S,irradianceWatts);
 % fprintf('______________________________________________________________________________________\n');
 % fprintf('\n');
 % fprintf('Lambda max                     |\t%8.1f\t%8.1f\t%8.1f\t nm\n',photoreceptors.nomogram.lambdaMax);
-% fprintf('Outer Segment Length           |\t%8.1f\t%8.1f\t%8.1f\t um\n',photoreceptors.OSlength.value);
+% if (isfield(photoreceptors,'OSlength') & ~isempty(photoreceptors.OSlength.value))
+%     fprintf('Outer Segment Length           |\t%8.1f\t%8.1f\t%8.1f\t um\n',photoreceptors.OSlength.value);
+% end
+% if (isfield(photoreceptors,'OSdiameter') & ~isempty(photoreceptors.OSdiameter.value))
+%     fprintf('Outer Segment Diameter         |\t%8.1f\t%8.1f\t%8.1f\t um\n',photoreceptors.OSdiameter.value);
+% end
 % fprintf('Inner Segment Diameter         |\t%8.1f\t%8.1f\t%8.1f\t um\n',photoreceptors.ISdiameter.value);
 % fprintf('\n');
-% fprintf('Axial Specific Density         |\t%8.3f\t%8.3f\t%8.3f\t /um\n',photoreceptors.specificDensity.value);
+% if (isfield(photoreceptors,'specificDensity') & ~isempty(photoreceptors.specificDensity.value))
+%     fprintf('Axial Specific Density         |\t%8.3f\t%8.3f\t%8.3f\t /um\n',photoreceptors.specificDensity.value);
+% end
 % fprintf('Axial Optical Density          |\t%8.3f\t%8.3f\t%8.3f\n',photoreceptors.axialDensity.value);
-% fprintf('Peak isomerization prob.       |\t%8.3f\t%8.3f\t%8.3f\n',max(photoreceptors.isomerizationAbsorbtance,[],2));
+% fprintf('Bleached Axial Optical Density |\t%8.3f\t%8.3f\t%8.3f\n',photoreceptors.axialDensity.bleachedValue);
+% fprintf('Peak isomerization prob.       |\t%8.3f\t%8.3f\t%8.3f\n',max(photoreceptors.isomerizationAbsorptance,[],2));
 % fprintf('______________________________________________________________________________________\n');
 % fprintf('\n');
 % fprintf('Absorption Rate                |\t%4.2e\t%4.2e\t%4.2e\t quanta/photoreceptor-sec\n',...
