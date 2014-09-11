@@ -3,16 +3,25 @@ function obj = establishCommunication(obj)
     if (obj.verbosity > 9)
         fprintf('In PR650obj.establishCommunication() method\n');
     end
-    
+  
     % Attempt to open the port
     handshakeCode = 'Lenient DontFlushOnWrite=1 FlowControl=None ';
     if (isempty(obj.portHandle)) 
         % Open the port
         oldverbo = IOPort('Verbosity', 2);
         hPort = IOPort('OpenSerialPort', obj.portString, handshakeCode);
+        if (obj.verbosity > 9)
+            fprintf('\n\t1.Opened port %s\n', obj.portString);
+        end
         IOPort('Close', hPort);
+        if (obj.verbosity > 9)
+            fprintf('\t2.Closed port %s\n', obj.portString);
+        end
         WaitSecs(0.5);
         hPort = IOPort('OpenSerialPort', obj.portString, handshakeCode);
+        if (obj.verbosity > 9)
+            fprintf('\t3.Re-opened port %s\n', obj.portString);
+        end
         IOPort('Verbosity', oldverbo);
         obj.portHandle = hPort;
         % Check port validity
@@ -26,15 +35,15 @@ function obj = establishCommunication(obj)
         status = attemptContact(obj.portHandle);
         % Check to see if the device is responding.
         if ((isempty(status)) || (status == -1))
-            fprintf('Failed to communicate with %s during attempt %d. If the device is off, turn it on; if it is on, turn it off and then on.\n', obj.modelName, attemptsNum);
+            fprintf('Failed to communicate with device at ''%s'' (port handle: %d) during attempt %d. If the device is off, turn it on; if it is on, turn it off and then on.\n',  obj.portString, obj.portHandle, attemptsNum);
         end
     end
     
     % Report result
     if ((isempty(status)) || (status == -1))
-        error(sprintf('Failed to communicate with %s after %d attempts. If the device is off, turn it on; if it is on, turn it off and then on.\n', obj.modelName, attemptsNum));
+        error(sprintf('Failed to communicate with device at ''%s'' (port handle: %d) after %d attempts. If the device is off, turn it on; if it is on, turn it off and then on.\n', obj.portString, obj.portHandle, attemptsNum));
     else
-        fprintf('Established communication during attempt %d.\n', attemptsNum);
+        fprintf('Established communication with device at ''%s'' during attempt %d.\n', obj.portString, attemptsNum);
     end      
 end
 
