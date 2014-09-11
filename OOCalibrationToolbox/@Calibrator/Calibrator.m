@@ -63,7 +63,14 @@ classdef Calibrator < handle
         % Expected screen refresh rate (Hz).
         % Specified during object instantiation only.
         desiredRefreshRate = 60;
-        
+
+        % David Hoffman's addition for 240Hz Samsung panel
+        % If it is set to 4, it will use the 10 bit temporal dither
+        % available on the 240Hz OLED display
+        % Defaults to single frame (no temporal dither)
+        displayTemporalDither=1;
+
+
         % Type of display device, e.g., 'monitor', 'projector', etc.
         % Specified during object instantiation only.
         displayDeviceType = 'unspecified';
@@ -150,6 +157,7 @@ classdef Calibrator < handle
             parser.addParamValue('radiometerObj',                   obj.radiometerObj);
             parser.addParamValue('screenToCalibrate',               obj.screenToCalibrate);
             parser.addParamValue('desiredRefreshRate',              obj.desiredRefreshRate);
+            parser.addParamValue('displayTemporalDither',           obj.displayTemporalDither);
             parser.addParamValue('desiredScreenSizePixel',          obj.desiredScreenSizePixel);
             parser.addParamValue('displayDeviceType',               obj.displayDeviceType);
             parser.addParamValue('displayPrimariesNum',             obj.displayPrimariesNum);
