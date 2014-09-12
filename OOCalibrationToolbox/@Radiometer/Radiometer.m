@@ -78,6 +78,12 @@ classdef Radiometer < handle
         % Method to conduct a single native measurement;
         result = measure(obj);
         
+        % Functions to separate the measure() command into two separate components:
+        % triggerMeasure() and getMeasuredData().
+        % This is useful if we want to have more than one radiometers measure simulteneously
+        triggerMeasure(obj);
+        result = getMeasuredData(obj);
+        
         % Method to shutdown the Radiometer
         shutDown(obj);
     end

@@ -1,5 +1,7 @@
 function displayTargetRects(obj, leftTargetSize, rightTargetSize, leftTargetPos, rightTargetPos)
 
+
+
     leftGrayLevel = 0.2;
     rightGrayLevel = 0.8;
     bkgnd = 0.5;
@@ -37,12 +39,26 @@ function displayTargetRects(obj, leftTargetSize, rightTargetSize, leftTargetPos,
     rightTargetDitheringMatrix = SamsungOLEDCalibrator.generateMatrixDitherOffsets(temporalDitheringMode, rightTarget.height, rightTarget.width);
     backDropDitheringMatrix    = SamsungOLEDCalibrator.generateMatrixDitherOffsets(temporalDitheringMode, backDrop.height, backDrop.width);
     
-        
+    
+    obj.stimDataMatrices     = {};
+    obj.stimDestinationRects = {};
+    obj.ditheringMatrices    = {};
+    
+    obj.stimDataMatrices{1} = backDrop.data;
+    obj.stimDataMatrices{2} = leftTarget.data;
+    obj.stimDataMatrices{3} = rightTarget.data;
+    
+    obj.stimDestinationRects{1} = backDropRect;
+    obj.stimDestinationRects{2} = leftTargetRect;
+    obj.stimDestinationRects{3} = rightTargetRect;
+    
+    obj.ditheringMatrices{1} = backDropDitheringMatrix;
+    obj.ditheringMatrices{2} = leftTargetDitheringMatrix;
+    obj.ditheringMatrices{3} = rightTargetDitheringMatrix;
+     
     % Render stimulus
-    obj.display3Rects(backDrop.data, leftTarget.data, rightTarget.data, ...
-        backDropRect, leftTargetRect, rightTargetRect, ...
-        backDropDitheringMatrix, leftTargetDitheringMatrix, rightTargetDitheringMatrix);
-        
+    obj.displayMultiRectPattern();
+       
 end
 
 
@@ -56,5 +72,4 @@ function m = DiskMatrix(height, width, target, bkgnd)
     m(:,:,1)    = z;
     m(:,:,2)    = z;
     m(:,:,3)    = z;
-    size(m)
 end

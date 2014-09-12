@@ -69,6 +69,12 @@ classdef PR650dev < Radiometer
         % Method to conduct a single native measurent. For the PR-650 this is an SPD measurement.
         result = measure(obj, varargin);    
         
+        % Functions to separate the measure() command into two separate components:
+        % triggerMeasure() and getMeasuredData().
+        % This is useful if we want to have more than one radiometers measure simulteneously
+        triggerMeasure(obj);
+        result = getMeasuredData(obj);
+         
         function obj = shutDown(obj)
             obj = obj.shutDownDevice();
         end

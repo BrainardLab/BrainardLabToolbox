@@ -2,7 +2,9 @@ classdef SamsungOLEDCalibrator < handle
     % Public access. All Calibrator subclasses inherit these properties.
     % Subclass users can set these properties, so these are public.
     properties
-        
+        stimDataMatrices     = {};
+    	stimDestinationRects = {};
+    	ditheringMatrices    = {};
     end % Public properties
     
     
@@ -150,6 +152,7 @@ classdef SamsungOLEDCalibrator < handle
         end  % Constructor
         
         % Method to generate calibration rectangles
+        generateStimulus(obj, stabilizerGray, bkgndGray, biasGray, leftTargetGray, rightTargetGray, biasOri);
         displayTargetRects(obj, leftTargetSize, rightTargetSize, leftTargetPos, rightTargetPos);
         
     end % Public methods
@@ -170,9 +173,7 @@ classdef SamsungOLEDCalibrator < handle
         setDisplaysInitialState(obj);
         
         % Method to display three rects
-        display3Rects(obj, stim1, stim2, stim3, stim1Rect, stim2Rect, stim3Rect, ditherOffsets1, ditherOffsets2, ditherOffsets3);
-        
-        
+        displayMultiRectPattern(obj);
     end  % private methods
     
     % Public static methods.  These are useful functions that can be called
