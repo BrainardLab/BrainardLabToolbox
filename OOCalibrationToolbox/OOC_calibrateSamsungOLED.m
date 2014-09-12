@@ -50,17 +50,87 @@ function OOC_calibrateSamsungOLED
             'comment',               'test' ...
             );
         
-        % Show target rects, so that we can center the radiometers
-        leftTargetSize      = 100;
-        rightTargetSize     = 100;
-        leftTargetPos       = [1920/2-300 1080/2];
-        rightTargetPos      = [1920/2+300 1080/2]; 
+        if (1==2)
+            % Show target rects, so that we can center the radiometers
+            leftTargetSize      = 100;
+            rightTargetSize     = 100;
+            leftTargetPos       = [1920/2-300 1080/2];
+            rightTargetPos      = [1920/2+300 1080/2]; 
+
+            calibratorOBJ.displayTargetRects(leftTargetSize, rightTargetSize, leftTargetPos, rightTargetPos);
+
+            Speak('Pausing');
+            pause(1.0);
+        end
         
-        calibratorOBJ.displayTargetRects(leftTargetSize, rightTargetSize, leftTargetPos, rightTargetPos);
+        stabilizerGrays     = [0.25 0.75]; % [0.25 : 0.25 : 1.0];
+        bkgndGrays          = [0.3]; % [0.2 0.5 0.8];
+        biasGrays           = [0.0 : 0.5 : 1.0];
+        targetGrays         = [0.8];
+        biasOris            = [0 90];
         
-        Speak('Pausing');
-        pause(1.0);
+        cond = 0;
+        for i = 1:numel(stabilizerGrays);
+            stabilizerGray = stabilizerGrays(i);  
+            for j = 1:numel(bkgndGrays)   
+                bkgndGray = bkgndGrays(j);
+                for k = 1:numel(biasGrays)  
+                    biasGray = biasGrays(k);
+                    for l = 1:numel(targetGrays)
+                        for m = 1:numel(biasOris)
+                            biasOri = biasOris(m);
+                            leftTargetGray  = targetGrays(l);
+                            rightTargetGray  = targetGrays(l);
+                            tic
+                            calibratorOBJ.generateStimulus(stabilizerGray, bkgndGray, biasGray, leftTargetGray, rightTargetGray, biasOri);
+                            % Measure SPD
+                            
+                            % This takes too long. Have to wait for one to
+                            % finish.
+                            %leftRadiometerOBJ.measure();
+                            %rightRadiometerOBJ.measure();
+                            % Store data
+                            %cond = cond + 1;
+                            %leftSPD(cond,:)  = leftRadiometerOBJ.measurement.energy;
+                            %rightSPD(cond,:) = rightRadiometerOBJ.measurement.energy;
+                            
+                            
+                            % Instead
+                            % Start measurements
+                            leftRadiometerOBJ.triggerMeasure();
+                            rightRadiometerOBJ.triggerMeasure();
+                            
+                            % Get data
+                            leftResult = leftRadiometerOBJ.getMeasuredData();
+                            rightResult = rightRadiometerOBJ.getMeasuredData();
+                            
+                            % Store data
+                            cond = cond + 1;
+                            leftSPD(cond,:)  = leftResult;
+                            rightSPD(cond,:) = rightResult;
+                            
+                            toc
+                        end
+                        
+                    end
+                end
+            end
+        end
+        
+        
         sca;
+        
+        size(leftSPD)
+        size(rightSPD)
+        
+        figure(1);
+        clf
+        subplot(1,2,1);
+        plot(leftSPD','r.-');
+        
+        subplot(1,2,2);
+        plot(rightSPD','b.-');
+        
         
     catch err
         
