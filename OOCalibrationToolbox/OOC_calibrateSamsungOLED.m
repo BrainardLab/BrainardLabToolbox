@@ -64,50 +64,59 @@ function OOC_calibrateSamsungOLED
         end
         
         stabilizerGrays     = [0.25 0.75]; % [0.25 : 0.25 : 1.0];
-        bkgndGrays          = [0.3]; % [0.2 0.5 0.8];
-        biasGrays           = [0.0 : 0.5 : 1.0];
-        targetGrays         = [0.8];
+        bkgndGrays          = [0.5]; % [0.2 0.5 0.8];
+        biasGrays           = [1.0];
+        targetGrays         = [0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0];
         biasOris            = [0 90];
         
         cond = 0;
         for i = 1:numel(stabilizerGrays);
-            stabilizerGray = stabilizerGrays(i);  
+            stabilizerGray = stabilizerGrays(i); 
+            
             for j = 1:numel(bkgndGrays)   
                 bkgndGray = bkgndGrays(j);
+                
                 for k = 1:numel(biasGrays)  
                     biasGray = biasGrays(k);
+                    
                     for l = 1:numel(targetGrays)
+                        leftTargetGray  = targetGrays(l);
+                        rightTargetGray  = targetGrays(l);
+                        
                         for m = 1:numel(biasOris)
                             biasOri = biasOris(m);
-                            leftTargetGray  = targetGrays(l);
-                            rightTargetGray  = targetGrays(l);
+                            
                             tic
+                            % Generate and display stimulus
                             calibratorOBJ.generateStimulus(stabilizerGray, bkgndGray, biasGray, leftTargetGray, rightTargetGray, biasOri);
-                            % Measure SPD
                             
-                            % This takes too long. Have to wait for one to
-                            % finish.
-                            %leftRadiometerOBJ.measure();
-                            %rightRadiometerOBJ.measure();
-                            % Store data
-                            %cond = cond + 1;
-                            %leftSPD(cond,:)  = leftRadiometerOBJ.measurement.energy;
-                            %rightSPD(cond,:) = rightRadiometerOBJ.measurement.energy;
-                            
-                            
-                            % Instead
-                            % Start measurements
-                            leftRadiometerOBJ.triggerMeasure();
-                            rightRadiometerOBJ.triggerMeasure();
-                            
-                            % Get data
-                            leftResult = leftRadiometerOBJ.getMeasuredData();
-                            rightResult = rightRadiometerOBJ.getMeasuredData();
-                            
-                            % Store data
+                            % Update condition no
                             cond = cond + 1;
-                            leftSPD(cond,:)  = leftResult;
-                            rightSPD(cond,:) = rightResult;
+                            
+                            % Measure SPD                         
+                            if (1==2)
+                                % Sequential component measurements- slow
+                                leftRadiometerOBJ.measure();
+                                rightRadiometerOBJ.measure();
+                                
+                                % Store data
+                                leftSPD(cond,:)  = leftRadiometerOBJ.measurement.energy;
+                                rightSPD(cond,:) = rightRadiometerOBJ.measurement.energy;
+                            else
+                                % Simultaneous measurements - faster
+                                
+                                % Start measurements
+                                leftRadiometerOBJ.triggerMeasure();
+                                rightRadiometerOBJ.triggerMeasure();
+
+                                % Read data from device
+                                leftResult  = leftRadiometerOBJ.getMeasuredData();
+                                rightResult = rightRadiometerOBJ.getMeasuredData();
+
+                                % Store data
+                                leftSPD(cond,:)  = leftResult;
+                                rightSPD(cond,:) = rightResult;
+                            end
                             
                             toc
                         end
@@ -120,6 +129,9 @@ function OOC_calibrateSamsungOLED
         
         sca;
         
+        save('calib1.mat', 'leftSPD', 'rightSPD');
+        
+        % Plot data
         size(leftSPD)
         size(rightSPD)
         
