@@ -33,6 +33,9 @@ classdef SamsungOLEDCalibrator < handle
         % Comment relevant to the instantiated calibrator object
         comment = 'none';
         
+        % operation mode
+        runMode = false;
+        
     end
     
     
@@ -143,16 +146,20 @@ classdef SamsungOLEDCalibrator < handle
                 end
             end   
             
-            % Verify validity of screen params values
-            obj.verifyScreenParamValues(); 
-            
-            % Set initial state
-            obj.setDisplaysInitialState();
+            if (~isempty(varargin))
+                % Verify validity of screen params values
+                obj.verifyScreenParamValues(); 
+
+                % Set initial state
+                obj.setDisplaysInitialState();
+                
+                obj.runMode = true;
+            end
             
         end  % Constructor
         
         % Method to generate calibration rectangles
-        generateStimulus(obj, stabilizerGray, bkgndGray, biasGray, leftTargetGray, rightTargetGray, biasOri);
+        demoFrame = generateStimulus(obj, stabilizerGray, bkgndGray, biasGray, leftTargetGray, rightTargetGray, biasOri);
         displayTargetRects(obj, leftTargetSize, rightTargetSize, leftTargetPos, rightTargetPos);
         
     end % Public methods
