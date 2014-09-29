@@ -1,4 +1,4 @@
-function demoFrame = generateStimulus(obj, stabilizerGray, bkgndGray, biasGray, biasSize, leftTargetGray, rightTargetGray, stabilizerText, sceneText)
+function demoFrame = generateStimulus(obj, stabilizerGray, bkgndGray, biasGray, biasSize, leftTargetGray, rightTargetGray, sceneIsDynamic)
 
     % Targets
     targetSize      = 100;
@@ -34,6 +34,11 @@ function demoFrame = generateStimulus(obj, stabilizerGray, bkgndGray, biasGray, 
     sceneRows          = 20;
     sceneCols          = 40;
     zoom               = round(0.5*(scene.height/sceneRows + scene.width/sceneCols)+0.5);
+    if (~sceneIsDynamic)
+        % initialize the generator using a seed of 1 to make random number
+        % generation repeatable
+        rng(1);
+    end
     lowResMatrix       = randn(sceneRows,sceneCols)/3.3;
     lowResMatrix       = bkgndGray+bkgndMaxDev*lowResMatrix;
     hiResMatrix        = kron(lowResMatrix, ones(zoom));

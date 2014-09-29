@@ -1,7 +1,8 @@
 function OOC_analyzeCal
 
     % Load a calibration file
-    [cal, calFilename] = GetCalibrationStructure('Enter calibration filename','ViewSonicProbe',[]);
+    defaultCalFile = '240OLED_SDAL2';
+    [cal, calFilename] = GetCalibrationStructure('Enter calibration filename',defaultCalFile,[]);
     
     % Instantiate a @CalAnalyzer object
     calAnalyzer = CalibratorAnalyzer(cal, calFilename);

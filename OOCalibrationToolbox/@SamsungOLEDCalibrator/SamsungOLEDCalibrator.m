@@ -156,10 +156,13 @@ classdef SamsungOLEDCalibrator < handle
                 obj.runMode = true;
             end
             
+            % Initialize the random number generator
+            rng('default');
+            
         end  % Constructor
         
         % Method to generate calibration rectangles
-        demoFrame = generateStimulus(obj, stabilizerGray, bkgndGray, biasGray, leftTargetGray, rightTargetGray, biasOri);
+        demoFrame = generateStimulus(obj, stabilizerGray, bkgndGray, biasGray, biasSize, leftTargetGray, rightTargetGray, sceneIsDynamic);
         displayTargetRects(obj, leftTargetSize, rightTargetSize, leftTargetPos, rightTargetPos);
         
     end % Public methods
