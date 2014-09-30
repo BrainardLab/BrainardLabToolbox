@@ -6,29 +6,62 @@ function OOC_calibrateSamsungOLED
     clc
     
     % Close all open ports
-    IOPort('CloseAll')
+    IOPort('CloseAll');
     
     leftRadiometerOBJ   = [];
     rightRadiometerOBJ  = [];
     calibratorOBJ       = [];
     
+    % Data file where all data structs are appended
+    calibrationFileName = '/Users/Shared/Matlab/Toolboxes/BrainardLabToolbox/OOCalibrationToolbox/SamsungOLED_calib.mat';
+            
+            
     runMode = true;     % True for collecting spectroradiometer data, false for video generation of the stimulus;
-        
+     
+    % Targets
+    leftTarget = struct(...
+        'width', 100, ...
+    	'height', 100, ...
+    	'x0', 1920/2 + 200, ...
+    	'y0', 1080/2);
+    
+    rightTarget = struct(...
+        'width', 100, ...
+    	'height', 100, ...
+    	'x0', 1920/2 + 600, ...
+    	'y0', 1080/2+250);
+    
+    
+    % No effect with these, but re-run them
+    stabilizerBorderWidth = 0;
+    biasSampleStep = 160;
+    
+    % No effect with these, but re-run them
+    stabilizerBorderWidth = 300;
+    biasSampleStep = 160;
+    
+    %stabilizerBorderWidth = 250;
+    %biasSampleStep = 100;
+    
     runParams = struct(...
-            'stabilizerGrays',      [0.0, 0.45, 0.9], ...         % modulation levels for stabilizing region
+            'leftTarget',           leftTarget, ...
+            'rightTarget',          rightTarget, ...
+            'stabilizerBorderWidth', stabilizerBorderWidth, ...                     % width of the stabilizer region in pixels,
+            'stabilizerGrays',      [0.0 0.33 0.66 0.99], ...         % modulation levels for stabilizing region
             'stabilizerTexts',      {{'no stabilizer', 'low stabilizer', 'medium stabilizer', 'high stabilizer', 'max stabilizer'}}, ...  % only relevant when runMode = false (demo)
-            'sceneGrays',           [0.5], ...          % mean of the scene region
+            'sceneGrays',           [0.0], ...          % mean of the scene region
             'sceneTexts',           {{'low brightness scene', 'average brightness scene', 'high brightness scene'}}, ...   % only relevant when runMode = false (demo)
             'biasGrays',            [1.0], ...                  % modulation levels for bias region
-            'biasSampleStep',       160, ...                     % step in pixels by which to change the bias region
+            'biasSampleStep',       biasSampleStep, ...                     % step in pixels by which to change the bias region
             'biasHorizontalSamples',0, ...         
             'biasVerticalSamples',  0, ...
-            'biasSquareSamples',    3, ...
+            'biasSquareSamples',    2, ...
             'biasSizes',            [], ...
-            'targetGrays',          [0.0: 0.1: 1.0], ...        % The gamma input values
+            'targetGrays',          [0.0: 0.1: 1.0], ... % [0.0: 0.1: 1.0], ...        % The gamma input values
             'sceneIsDynamic',       false, ...                   % Flag indicating whether to generate new stochasic scene for each measurement
-            'useTwinSpectroRadiometers', false ...              % Flag indicating whether to use two radiometers. If false we only use one.
-            );
+            'useTwinSpectroRadiometers', false, ...              % Flag indicating whether to use two radiometers. If false we only use one.
+            'datePerformed',        datestr(now) ...
+        );
         
        
     KbName('UnifyKeyNames');
@@ -86,22 +119,6 @@ function OOC_calibrateSamsungOLED
            writerObj.Quality = 100;
            open(writerObj);
         end
-        
-        
-        if (1==2)
-            % Show target rects, so that we can center the radiometers
-            leftTargetSize      = 100;
-            rightTargetSize     = 100;
-            leftTargetPos       = [1920/2-300 1080/2];
-            rightTargetPos      = [1920/2+300 1080/2]; 
-
-            calibratorOBJ.displayTargetRects(leftTargetSize, rightTargetSize, leftTargetPos, rightTargetPos);
-
-            Speak('Pausing');
-            pause(1.0);
-        end
-        
-        
         
         
         
@@ -178,6 +195,8 @@ function OOC_calibrateSamsungOLED
                             runData = struct( ...
                                 'leftSPD',              [], ...
                                 'rightSPD',             [], ...
+                                'leftS',                [], ...
+                                'rightS',               [], ...
                                 'stabilizerGrayIndex',  stabilizerGrayIndex, ...
                                 'sceneGrayIndex',       sceneGrayIndex, ...
                                 'biasGrayIndex',        biasGrayIndex, ...
@@ -185,32 +204,38 @@ function OOC_calibrateSamsungOLED
                                 'leftTargetGrayIndex',  leftTargetGrayIndex, ...
                                 'rightTargetGrayIndex', rightTargetGrayIndex ...
                                 );
-                            
-                            [ keyIsDown, seconds, keyCode ] = KbCheck;
-                            if keyIsDown
-                                if keyCode(escapeKey)
-                                    ListenChar(0);
-                                    sca;
-                                    error('User aborted');
-                                end
-                            end
-                
-                            Speak(sprintf('%d of %d\n', cond+1, conditionsNum));
-                            
-                            [ keyIsDown, seconds, keyCode ] = KbCheck;
-                            if keyIsDown
-                                if keyCode(escapeKey)
-                                    ListenChar(0);
-                                    sca;
-                                    error('User aborted');
-                                end
-                            end
-                            
+                                
                             tic
                             % Generate and display stimulus
-                            demoFrame  = calibratorOBJ.generateStimulus(stabilizerGray, sceneGray, biasGray, biasSize, leftTargetGray, rightTargetGray, runParams.sceneIsDynamic);
+                            demoFrame  = calibratorOBJ.generateStimulus(...
+                                            runParams.leftTarget, ...
+                                            runParams.rightTarget, ...
+                                            runParams.stabilizerBorderWidth, ...
+                                            stabilizerGray, ...
+                                            sceneGray, ...
+                                            biasGray, ...
+                                            biasSize, ...
+                                            leftTargetGray, ...
+                                            rightTargetGray, ...
+                                            runParams.sceneIsDynamic...
+                                );
+                            
+                            % Save stimulus at 1/4 resolution
+                            runData.demoFrame = single(demoFrame(1:2:end, 1:2:end,:));
 
                             if (runMode) 
+                                
+                                Speak(sprintf('%d of %d\n', cond+1, conditionsNum));
+
+                                [ keyIsDown, seconds, keyCode ] = KbCheck;
+                                if keyIsDown
+                                    if keyCode(escapeKey)
+                                        ListenChar(0);
+                                        sca;
+                                        error('User aborted');
+                                    end
+                                end
+                            
                                 % Measure SPD   
                                 if (runParams.useTwinSpectroRadiometers)
                                     % Simultaneous measurements - faster
@@ -221,12 +246,21 @@ function OOC_calibrateSamsungOLED
                                     % Read data from device and store it
                                     runData.leftSPD  = leftRadiometerOBJ.getMeasuredData();
                                     runData.rightSPD = rightRadiometerOBJ.getMeasuredData();
+                                    runData.leftS    = leftRadiometerOBJ.nativeS;
+                                    runData.rightS   = rightRadiometerOBJ.nativeS;
                                 else   
                                     % use only one radiometer
                                     leftRadiometerOBJ.measure();
                                  
                                     % Store data
                                     runData.leftSPD = leftRadiometerOBJ.measurement.energy;
+                                    runData.leftS   = leftRadiometerOBJ.nativeS;
+                                    
+                                    if ((isempty(runData.leftSPD)) || (isempty(runData.leftS)))
+                                        runData.leftSPD
+                                        runData.leftS 
+                                       error('Radiometer object returned empty values'); 
+                                    end
                                 end
                             else
                                 % in demo mode, so just add frame to video writer
@@ -253,13 +287,26 @@ function OOC_calibrateSamsungOLED
         if (runMode)
             % Exit PTB and restore luts
             sca;
-        
             ListenChar(0);
             
-            % Save data
-            save('/Users/Shared/Matlab/Toolboxes/BrainardLabToolbox/OOCalibrationToolbox/SamsungOLED_calib.mat', 'runParams', 'allCondsData');
+            % Saved data struct
+            calibrationDataSet.runParams = runParams;
+            calibrationDataSet.allCondsData = allCondsData;
         
-            condNo = 1;
+            
+            % Create a MAT-file object that supports partial loading and saving.
+            matOBJ = matfile(calibrationFileName, 'Writable', true);
+            % get current variables
+            varList = who(matOBJ);
+            
+            % add new variable with new validation data
+            calParamName = sprintf('calibrationRun_%05d', length(varList)+1);
+            eval(sprintf('matOBJ.%s = calibrationDataSet;', calParamName)); 
+            fprintf('\nSaved current validation data data to ''%s'' as %s.\n', calibrationFileName, calParamName);
+        
+        
+            % Display something
+            condNo = numel(allCondsData);
             leftSPD = allCondsData{condNo}.leftSPD;
             rightSPD = allCondsData{condNo}.rightSPD;
             
@@ -275,6 +322,7 @@ function OOC_calibrateSamsungOLED
             subplot(1,2,2);
             plot(rightSPD','b.-');
         else
+            ListenChar(0);
            % close video writer
            close(writerObj); 
         end

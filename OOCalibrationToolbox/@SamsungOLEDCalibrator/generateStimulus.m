@@ -1,29 +1,20 @@
-function demoFrame = generateStimulus(obj, stabilizerGray, bkgndGray, biasGray, biasSize, leftTargetGray, rightTargetGray, sceneIsDynamic)
-
-    % Targets
-    targetSize      = 100;
-    leftTarget.x0   = 1920/2 - 200;
-    leftTarget.y0   = 1080/2;
-    rightTarget.x0  = 1920/2 + 600;
-    rightTarget.y0  = 1080/2+250;
-    
+function demoFrame = generateStimulus(obj, leftTarget, rightTarget, stabilizerBorderWidth, stabilizerGray, sceneGray, biasGray, biasSize, leftTargetGray, rightTargetGray, sceneIsDynamic)
     
     bkgndMaxDev     = 0.3;
-
     
     % 1. Stabilizer
     stabilizer.width        = 1920;
     stabilizer.height       = 1080;
-    stabilizer.borderWidth  = 180;
+    stabilizer.borderWidth  = stabilizerBorderWidth;
     stabilizer.x0           = 1920/2;
     stabilizer.y0           = 1080/2;
     stabilizerRect          = CenterRectOnPointd([0 0 stabilizer.width stabilizer.height], stabilizer.x0, stabilizer.y0);
     stabilizer.data         = repmat(ones(stabilizer.height,stabilizer.width)*stabilizerGray, [1 1 3]);
       
-    if (~obj.runMode)
-        % update demo frame
-        demoFrame = stabilizer.data;
-    end
+    
+    % update demo frame
+    demoFrame = stabilizer.data;
+   
     
     % 2. Scene
     scene.width        = stabilizer.width  - 2*stabilizer.borderWidth;
@@ -40,19 +31,39 @@ function demoFrame = generateStimulus(obj, stabilizerGray, bkgndGray, biasGray, 
         rng(1);
     end
     lowResMatrix       = randn(sceneRows,sceneCols)/3.3;
-    lowResMatrix       = bkgndGray+bkgndMaxDev*lowResMatrix;
-    hiResMatrix        = kron(lowResMatrix, ones(zoom));
-    actualHeight       = size(hiResMatrix,1);
-    actualWidth        = size(hiResMatrix,2);
-    hiResMatrix        = hiResMatrix(1:min([scene.height actualHeight]), 1:min([scene.width actualWidth]));
-    scene.height       = size(hiResMatrix,1);
-    scene.width        = size(hiResMatrix,2);
-    scene.data         = repmat(hiResMatrix, [1 1 3]);
+    lowResMatrix       = sceneGray+bkgndMaxDev*lowResMatrix;
+    tmpHiResMatrix     = kron(lowResMatrix, ones(zoom));
+    actualHeight       = size(tmpHiResMatrix,1);
+    actualWidth        = size(tmpHiResMatrix,2);
     
-    if (~obj.runMode)
-        % update demo frame
-        demoFrame = UpdateDemoFrame(demoFrame, scene);
+    hiResMatrix        = zeros(scene.height, scene.width) + sceneGray;
+    
+    if (actualHeight >= scene.height)
+        sourceHeightIndices = 1:scene.height;
+        destinationHeightIndices = 1:scene.height;
+    else
+        offset = round(scene.height-actualHeight)/2;
+        sourceHeightIndices = 1:actualHeight;
+        destinationHeightIndices = offset + (1:actualHeight);
     end
+    
+    if (actualWidth >= scene.width)
+        sourceWidthIndices = 1:scene.width;
+        destinationWidthIndices = 1:scene.width;
+    else
+        offset = round(scene.width-actualWidth)/2;
+        sourceWidthIndices = 1:actualWidth;
+        destinationWidthIndices = offset + (1:actualWidth);
+    end
+    
+    hiResMatrix(destinationHeightIndices, destinationWidthIndices) = tmpHiResMatrix(sourceHeightIndices, sourceWidthIndices);
+    scene.height = size(hiResMatrix,1);
+    scene.width  = size(hiResMatrix,2);
+    scene.data   = repmat(hiResMatrix, [1 1 3]);
+
+    
+   % update demo frame
+    demoFrame = UpdateDemoFrame(demoFrame, scene);
     
     % 3. Bias pattern (centered on left target)
     bias.width  = biasSize(1);
@@ -63,33 +74,29 @@ function demoFrame = generateStimulus(obj, stabilizerGray, bkgndGray, biasGray, 
     biasRect                = CenterRectOnPointd([0 0 bias.width bias.height], bias.x0, bias.y0);
     bias.data               = repmat(ones(bias.height,bias.width)*biasGray, [1 1 3]);
     
-    if (~obj.runMode)
-        % update demo frame
-        demoFrame = UpdateDemoFrame(demoFrame, bias);
-    end
+
+    % update demo frame
+    demoFrame = UpdateDemoFrame(demoFrame, bias);
+
     
     
     % 4. Left target
-    leftTarget.width        = targetSize;
-    leftTarget.height       = targetSize;
     leftTargetRect          = CenterRectOnPointd([0 0 leftTarget.width leftTarget.height], leftTarget.x0, leftTarget.y0);
     leftTarget.data         = DiskMatrix(leftTarget.height, leftTarget.width, leftTargetGray, biasGray);
     
-    if (~obj.runMode)
-        % update demo frame
-        demoFrame = UpdateDemoFrame(demoFrame, leftTarget);
-    end
+    
+    % update demo frame
+    demoFrame = UpdateDemoFrame(demoFrame, leftTarget);
+
     
     % 5. Right target
-    rightTarget.width       = targetSize;
-    rightTarget.height      = targetSize;
     rightTargetRect         = CenterRectOnPointd([0 0 rightTarget.width rightTarget.height], rightTarget.x0, rightTarget.y0);
-    rightTarget.data        = DiskMatrix(rightTarget.height, rightTarget.width, rightTargetGray, bkgndGray);
+    rightTarget.data        = DiskMatrix(rightTarget.height, rightTarget.width, rightTargetGray, sceneGray);
     
-    if (~obj.runMode)
-        % update demo frame
-        demoFrame = UpdateDemoFrame(demoFrame, rightTarget);
-    end
+
+    % update demo frame
+    demoFrame = UpdateDemoFrame(demoFrame, rightTarget);
+
     
     
     % Generate dithering matrices
@@ -123,10 +130,6 @@ function demoFrame = generateStimulus(obj, stabilizerGray, bkgndGray, biasGray, 
 
         % Render stimulus
         obj.displayMultiRectPattern();
-        
-        % no demoFrame
-        demoFrame = []; 
-
     end
     
 end
