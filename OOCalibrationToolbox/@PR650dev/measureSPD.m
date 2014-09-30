@@ -18,7 +18,7 @@ function measureSPD(obj)
         serialData = [serialData obj.readSerialPortData()];
     end
     if (isempty(serialData))
-        fprintf('Raw SPD measurement timed-out after %2.1f seconds.\n', timeOutPeriodInSeconds);
+        error('Raw SPD measurement timed-out after %2.1f seconds.\n', timeOutPeriodInSeconds);
     else
         % Get the data
         IOPort('write', obj.portHandle, ['d5' char(10)]);
@@ -28,7 +28,7 @@ function measureSPD(obj)
             serialData = [serialData obj.readSerialPortData()];
         end
         if (isempty(serialData))
-            fprintf('Could not get data. Timed out after %2.1f seconds.\n', timeOutPeriodInSeconds);
+            error('Could not get data. Timed out after %2.1f seconds.\n', timeOutPeriodInSeconds);
         else
             if (obj.verbosity > 9)
                 fprintf('Raw SPD data obtained: ');
@@ -38,12 +38,17 @@ function measureSPD(obj)
             % Parse data 
             qual = sscanf(serialData,'%f',1);
             if ((qual == 7) || (qual == 8))
-                fprintf('>>>Quality code:%f\n', qual);
+                error('>>>Quality code:%f\n', qual);
+                
             elseif ((qual == -1) || (qual == 10))
                 fprintf('>>> Quality code: %f. Low light level!\n', qual);
+                % return zeros
+                nativeSamples = obj.nativeS(3);
+                obj.nativeMeasurement.spectralAxis = zeros(1,nativeSamples);
+                obj.nativeMeasurement.energy = zeros(1,nativeSamples);
+                
             elseif ((qual == 18) || (qual == 0))
                 start = findstr(serialData,'0380.');
-                
                 nativeSamples = obj.nativeS(3);
                 obj.nativeMeasurement.spectralAxis = zeros(1,nativeSamples);
                 obj.nativeMeasurement.energy = zeros(1,nativeSamples);
