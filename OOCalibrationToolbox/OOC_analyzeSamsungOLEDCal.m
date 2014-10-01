@@ -43,15 +43,23 @@ function OOC_analyzeSamsungOLEDCal
         
  
     
-    load T_xyz1931
     
     runParams
+    stabilizerBorderWidth   = runParams.stabilizerBorderWidth;
     stabilizerGrayLevelNum  = numel(runParams.stabilizerGrays);
     sceneGrayLevelNum       = numel(runParams.sceneGrays);
     biasLevelNum            = numel(runParams.biasGrays);
     biasSizesNum            = size(runParams.biasSizes,1);
     gammaInputValuesNum     = numel(runParams.targetGrays);
-        
+    
+    
+    % Load CIE 1931 CMFs
+    load T_xyz1931
+    vLambda1931_originalSampling = squeeze(T_xyz1931(2,:));
+    desiredS = [380 1 401];
+    
+    printCalibrationFrames = false
+    
     
     fprintf('\n\n'); 
     fprintf('\nStabilizer gray levels: ');
@@ -79,7 +87,7 @@ function OOC_analyzeSamsungOLEDCal
                     biasLevelNum, ...
                     biasSizesNum, ...
                     gammaInputValuesNum, ...
-                    numel(allCondsData{1}.leftSPD));
+                    desiredS(3));
            
     rightSPD = leftSPD;
     
@@ -97,43 +105,59 @@ function OOC_analyzeSamsungOLEDCal
         biasSizeIndex = conditionData.biasSizeIndex;
         leftTargetGrayIndex = conditionData.leftTargetGrayIndex;
         rightTargetGrayIndex = conditionData.rightTargetGrayIndex;
-        figure(99);
-        imshow(conditionData.demoFrame);
-        colormap(gray(256));
-        set(gca, 'CLim', [0 1]);
-        axis 'image'
+        
+        if (printCalibrationFrames)
+            h0 = figure(99);
+            set(h0, 'Position', [100 100 754 453]);
+            imshow(conditionData.demoFrame);
+            hold on;
+            plot([1 size(conditionData.demoFrame,2) size(conditionData.demoFrame,2) 1 1], ...
+                 [1 1 size(conditionData.demoFrame,1) size(conditionData.demoFrame,1)  1], 'k-');
+            hold off;
+            colormap(gray(256));
+            set(gca, 'CLim', [0 1]);
+            axis 'image'
+            drawnow;
+
+            % Print frame as pdf
+            set(h0,'PaperOrientation','landscape');
+            set(h0,'PaperUnits','normalized');
+            set(h0,'PaperPosition', [0 0 1 1]);
+            print(gcf, '-dpdf', sprintf('Cond_%d.pdf', condIndex));
+        end
+        
+    
+        if (condIndex == 1)
+            nativeS = conditionData.leftS;
+            vLambda = 683*SplineCmf(S_xyz1931, vLambda1931_originalSampling, desiredS);
+            wave = SToWls(desiredS);
+        end
         
         % get SPD data 
+        spd = conditionData.leftSPD;
+        % interpolate to desiredS
+        spd = SplineSpd(nativeS, spd', desiredS);
+        
         leftSPD(stabilizerGrayIndex, ...
                 sceneGrayIndex, ...
                 biasGrayIndex, ...
                 biasSizeIndex, ...
                 leftTargetGrayIndex, ...
-                :) = conditionData.leftSPD;
-        
-        if (condIndex == 1)
-            nativeS = conditionData.leftS;
-            vLambdaLeft = 683*SplineCmf(S_xyz1931,T_xyz1931(2,:), nativeS);
-            waveLeft = SToWls(nativeS);
-            vLambdaRight = [];
-            waveRight = [];
-        end
+                :) = spd;
         
         if ~isempty(conditionData.rightSPD)
+            
+            % get SPD data 
+            spd = conditionData.rightSPD;
+            % interpolate to desiredS
+            spd = SplineSpd(nativeS, spd', desiredS);
+        
             rightSPD(stabilizerGrayIndex, ...
                     sceneGrayIndex, ...
                     biasGrayIndex, ...
                     biasSizeIndex, ...
                     rightTargetGrayIndex, ...
-                    :) = conditionData.rightSPD;
-                
-            if (condIndex == 1)
-                nativeS = conditionData.rightS;
-                if ~isempty(nativeS)
-                    vLambdaRight = 683*SplineCmf(S_xyz1931,T_xyz1931(2,:), nativeS);
-                    waveRight = SToWls(nativeS);
-                end
-            end
+                    :) = spd;
         end % ~isempty(conditionData.rightSPD)
         
     end % cond Index
@@ -151,16 +175,9 @@ function OOC_analyzeSamsungOLEDCal
     biasGray       = runParams.biasGrays(biasGrayIndex);
     
     
-    maxSPD = max(leftSPD(:));
-    
-    figure(1);
-    clf;
-    
-    
     gammaOutputLeft = zeros(stabilizerGrayLevelNum, biasSizesNum, gammaInputValuesNum);
     gammaOutputRight = zeros(stabilizerGrayLevelNum, biasSizesNum, gammaInputValuesNum);
-    vLeft  = repmat(vLambdaLeft, [gammaInputValuesNum 1]);
-    vRight = repmat(vLambdaRight, [gammaInputValuesNum 1]);
+    vLambda  = repmat(vLambda, [gammaInputValuesNum 1]);
     
     for stabilizerGrayIndex = 1:stabilizerGrayLevelNum
         for biasSizeIndex = 1: biasSizesNum
@@ -170,11 +187,14 @@ function OOC_analyzeSamsungOLEDCal
                         biasSizeIndex, ...
                         1:gammaInputValuesNum, ...
                         :));
-            gammaOutputLeft(stabilizerGrayIndex, biasSizeIndex, :) = sum(spd.*vLeft,2); 
+            luminance = sum(spd.*vLambda,2);
+            gammaOutputLeft(stabilizerGrayIndex, biasSizeIndex, :) = luminance; 
         end
     end
     
-    if ~isempty(waveRight)
+    
+    
+    if ~isempty(rightSPD)
         for stabilizerGrayIndex = 1:stabilizerGrayLevelNum
             for biasSizeIndex = 1: biasSizesNum
                 spd = squeeze(rightSPD(stabilizerGrayIndex, ...
@@ -183,7 +203,8 @@ function OOC_analyzeSamsungOLEDCal
                             biasSizeIndex, ...
                             1:gammaInputValuesNum, ...
                             :));
-                gammaOutputRight(stabilizerGrayIndex, biasSizeIndex, :) = sum(spd.*vRight,2); 
+                luminance = sum(spd.*vLambda,2);
+                gammaOutputRight(stabilizerGrayIndex, biasSizeIndex, :) = luminance; 
             end
         end
     end
@@ -192,21 +213,190 @@ function OOC_analyzeSamsungOLEDCal
     
     gammaInput  = runParams.targetGrays;
     maxGammaOutputLeft = max(gammaOutputLeft(:));
+    
+    h1 = figure(1);
+    figXo = 2560;
+    figYo = 360;
+    figWidth = 700;
+    figHeight = 860;
+    set(h1, 'Position', [figXo figYo figWidth figHeight]);
+    clf;
+    
+    lineColors = lines(stabilizerGrayLevelNum*biasSizesNum);
+    
+    width = 0.85/(biasSizesNum+1);
+    height = 0.7/(stabilizerGrayLevelNum+1);
+    marginX = 0.02;
+    marginY = 0.05;
+    
+	% First scan
+    referenceBiasSizeIndex = biasSizesNum;
+    
     for stabilizerGrayIndex = 1:stabilizerGrayLevelNum
+        
         stabilizerGray = runParams.stabilizerGrays(stabilizerGrayIndex);
+        referenceGammaCurve = squeeze(gammaOutputLeft(stabilizerGrayIndex, referenceBiasSizeIndex,:));
+        referenceBiasSizeX  = runParams.biasSizes(referenceBiasSizeIndex,1);
+        referenceBiasSizeY  = runParams.biasSizes(referenceBiasSizeIndex,2);
+        
+        legendMatrix = {};
         for biasSizeIndex = 1: biasSizesNum
+            
             biasSizeX = runParams.biasSizes(biasSizeIndex, 1);
             biasSizeY = runParams.biasSizes(biasSizeIndex, 2);
-            subplot(stabilizerGrayLevelNum, biasSizesNum, (stabilizerGrayIndex-1)* biasSizesNum + biasSizeIndex);
-            plot(gammaInput, squeeze(gammaOutputLeft(stabilizerGrayIndex, biasSizeIndex, :)), 'ks-', 'MarkerFaceColor', [1 0.8 0.8]);
-            title(sprintf('stabilizer:%2.2f; biasSize: %2.0fx%2.0f', stabilizerGray, biasSizeX, biasSizeY));
+        
+            gammaCurve       = squeeze(gammaOutputLeft(stabilizerGrayIndex, biasSizeIndex, :));
+            scalingFactor    = gammaCurve \ referenceGammaCurve;
+            scaledGammaCurve = gammaCurve * scalingFactor;
+            
+            left = 3*marginX + (biasSizeIndex-1)*(width+marginX);
+            bottom = 1-stabilizerGrayIndex*(height+marginY);
+            subplot('Position', [left bottom width height]);   
+            
+            condIndex = (stabilizerGrayIndex-1)* biasSizesNum + biasSizeIndex;
+            lineColor = lineColors(condIndex,:);
+            
+            plot(gammaInput, gammaCurve, 'ks-', 'LineWidth', 1.5, 'MarkerSize', 8, 'MarkerFaceColor', [0.8 0.8 0.8], 'Color', lineColor, 'LineWidth', 1.5);
+            set(gca, 'FontName', 'Helvetica', 'FontSize', 8);
+            grid on;
+            box on
+            
             set(gca, 'YLim', [0 maxGammaOutputLeft]);
             set(gca, 'XTick', [0:0.2:1.0], 'YTick', [0:100:1000]);
-            axis 'square'
-            axis 'xy'
-            grid on;
+            
+            if (biasSizeIndex == 1)
+               ylabel('luminance (cd/m2)', 'FontName', 'Helvetica', 'FontSize', 10, 'FontWeight', 'bold');
+               set(gca, 'YTickLabel', [0:100:1000]);
+            else
+               ylabel(''); 
+               set(gca, 'YTickLabel', []);
+            end
+            xlabel('');
+            
+            title(sprintf('Stabilizer gray = %2.2f; \nBias WxH = %2.0fx%2.0f pxls.', stabilizerGray, biasSizeX, biasSizeY), 'FontName', 'Helvetica', 'FontSize', 10);
+            
+            % The scaled gamma curves for the CurrentStabilizerGray
+            left = 3*marginX + biasSizesNum*(width+marginX);
+            subplot('Position', [left bottom width height]);
+            
+            hold on;
+            plot(gammaInput, scaledGammaCurve, 'k-', 'LineWidth', 1.5, 'MarkerSize', 8, 'MarkerFaceColor', [0.8 0.8 0.8], 'Color', lineColors(condIndex,:), 'LineWidth', 1.5);
+            legendMatrix{biasSizeIndex} = sprintf('BiasWxH: %2.0fx%2.0f (scale: %2.2f)', biasSizeX, biasSizeY, 1.0/scalingFactor);     
         end
+        
+        xlabel('');
+        ylabel('');
+        set(gca, 'YTickLabel', []);
+        set(gca, 'YLim', [0 maxGammaOutputLeft]);
+        set(gca, 'XTick', [0:0.2:1.0], 'YTick', [0:100:1000]);
+        set(gca, 'FontName', 'Helvetica', 'FontSize', 8);
+        grid on;
+        box on
+            
+        % legend and title
+        legend_handle = legend(legendMatrix, 'FontName', 'Helvetica', 'FontSize', 6, 'Location', 'Best');
+        set(legend_handle, 'Box', 'off')
+        title(sprintf('Scaled gamma w/r to:\nBiasWxH = %2.2f x %2.2f pxls', referenceBiasSizeX, referenceBiasSizeY), 'FontName', 'Helvetica', 'FontSize', 10, 'BackgroundColor',[.99 .99 .48], 'EdgeColor', [0 0 0]);
     end
     
+   
+    % Second scan
+    referenceStabilizerGrayIndex = 1;
+    for biasSizeIndex = 1: biasSizesNum
+        referenceGammaCurve = squeeze(gammaOutputLeft(referenceStabilizerGrayIndex, biasSizeIndex,:));
+        referenceStabilizerGray  = runParams.stabilizerGrays(referenceStabilizerGrayIndex);
         
+        legendMatrix = {};
+        for stabilizerGrayIndex = 1:stabilizerGrayLevelNum
+            stabilizerGray   = runParams.stabilizerGrays(stabilizerGrayIndex);
+            gammaCurve       = squeeze(gammaOutputLeft(stabilizerGrayIndex, biasSizeIndex, :));
+            scalingFactor    = gammaCurve \ referenceGammaCurve;
+            scaledGammaCurve = gammaCurve * scalingFactor;
+            
+            left = 3*marginX + (biasSizeIndex-1)*(width+marginX);
+            bottom = 1-(stabilizerGrayLevelNum+1)*(height+marginY);
+            subplot('Position', [left bottom width height]);   
+            
+            condIndex = (stabilizerGrayIndex-1)* biasSizesNum + biasSizeIndex;
+            lineColor = lineColors(condIndex,:);
+            
+            hold on;
+            plot(gammaInput, scaledGammaCurve, 'k-', 'LineWidth', 1.5, 'MarkerSize', 8, 'MarkerFaceColor', [0.8 0.8 0.8], 'Color', lineColors(condIndex,:), 'LineWidth', 1.5);
+            legendMatrix{stabilizerGrayIndex} = sprintf('Stabil. gray = %2.2f (scale: %2.2f)', stabilizerGray, 1.0/scalingFactor);
+        end
+        
+        xlabel('settings value', 'FontName', 'Helvetica', 'FontSize', 10, 'FontWeight', 'bold');
+        if (biasSizeIndex == 1)
+               ylabel('luminance (cd/m2)', 'FontName', 'Helvetica', 'FontSize', 10, 'FontWeight', 'bold');
+               set(gca, 'YTickLabel', [0:100:1000]);
+        else
+               ylabel(''); 
+               set(gca, 'YTickLabel', []);
+        end
+            
+        set(gca, 'YLim', [0 maxGammaOutputLeft]);
+        set(gca, 'XTick', [0:0.2:1.0], 'YTick', [0:100:1000]);
+        set(gca, 'FontName', 'Helvetica', 'FontSize', 8);
+        grid on;
+        box on
+        
+        % legend and title
+        legend_handle = legend(legendMatrix, 'FontName', 'Helvetica', 'FontSize', 6, 'Location', 'Best');
+        set(legend_handle, 'Box', 'off')
+        title(sprintf('Scaled gamma w/r to:\nStabilizerGray = %2.2f', referenceStabilizerGray), 'FontName', 'Helvetica', 'FontSize', 10, 'BackgroundColor',[.99 .99 .48], 'EdgeColor', [0 0 0]);
+    end % biasSizeIndex
+    
+
+    % Third scan (all curves)
+    referenceGammaCurve = squeeze(gammaOutputLeft(referenceStabilizerGrayIndex, referenceBiasSizeIndex,:));
+    referenceStabilizerGray   = runParams.stabilizerGrays(referenceStabilizerGrayIndex);
+    referenceBiasSizeX = runParams.biasSizes(referenceBiasSizeIndex, 1);
+    referenceBiasSizeY = runParams.biasSizes(referenceBiasSizeIndex, 2);
+            
+    condIndex = 0;
+    legendMatrix = {};
+    
+    left = 3*marginX + biasSizesNum*(width+marginX);
+    bottom = 1-(stabilizerGrayLevelNum+1)*(height+marginY);
+    subplot('Position', [left bottom width height]);   
+    hold on;
+    
+    for stabilizerGrayIndex = 1:stabilizerGrayLevelNum
+        for biasSizeIndex = 1: biasSizesNum
+            gammaCurve       = squeeze(gammaOutputLeft(stabilizerGrayIndex, biasSizeIndex, :));
+            scalingFactor    = gammaCurve \ referenceGammaCurve;
+            scaledGammaCurve = gammaCurve * scalingFactor;
+            
+            condIndex = (stabilizerGrayIndex-1)* biasSizesNum + biasSizeIndex;
+            lineColor = lineColors(condIndex,:);
+            plot(gammaInput, scaledGammaCurve, 'k-', 'LineWidth', 1.5, 'MarkerSize', 8, 'MarkerFaceColor', [0.8 0.8 0.8], 'Color', lineColors(condIndex,:), 'LineWidth', 1.5);
+            legendMatrix{condIndex} = sprintf('scale: %2.2f', 1.0/scalingFactor);
+        end       
+    end % biasSizeIndex
+    
+    xlabel('settings value', 'FontName', 'Helvetica', 'FontSize', 10, 'FontWeight', 'bold');
+    ylabel('');
+    set(gca, 'YTickLabel', []);
+    set(gca, 'YLim', [0 maxGammaOutputLeft]);
+    set(gca, 'XTick', [0:0.2:1.0], 'YTick', [0:100:1000]);
+    set(gca, 'FontName', 'Helvetica', 'FontSize', 8);
+    grid on;
+    box on
+    
+    % legend and title
+    legend_handle = legend(legendMatrix, 'FontName', 'Helvetica', 'FontSize', 6, 'Location', 'Best');
+    set(legend_handle, 'Box', 'off')
+    title(sprintf('Sc. gamma w/r to Stab. Gray = %2.2f:\nBias WxH = %2.0fx%2.0f pxls.', referenceStabilizerGray, referenceBiasSizeX, referenceBiasSizeY), 'FontName', 'Helvetica', 'FontSize', 10, 'BackgroundColor',[.99 .99 .48], 'EdgeColor', [0 0 0]);
+
+        
+    
+    % Print figure
+    set(h1,'PaperOrientation','Portrait');
+    set(h1,'PaperUnits','normalized');
+    set(h1,'PaperPosition', [0 0 1 1]);
+    print(gcf, '-dpdf', '-r600', 'Fig1.pdf');
+        
+    
+     
+    
 end

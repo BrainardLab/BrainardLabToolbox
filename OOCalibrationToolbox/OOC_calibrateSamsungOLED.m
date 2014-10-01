@@ -16,7 +16,7 @@ function OOC_calibrateSamsungOLED
     calibrationFileName = '/Users/Shared/Matlab/Toolboxes/BrainardLabToolbox/OOCalibrationToolbox/SamsungOLED_calib.mat';
             
             
-    runMode = true;     % True for collecting spectroradiometer data, false for video generation of the stimulus;
+    runMode = false; %true;     % True for collecting spectroradiometer data, false for video generation of the stimulus;
      
     % Targets
     leftTarget = struct(...
