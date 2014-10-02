@@ -56,7 +56,7 @@ function OOC_calibrateSamsungOLED
             'stabilizerBorderWidth', stabilizerBorderWidth, ...                     % width of the stabilizer region in pixels,
             'stabilizerGrays',      [0.0 0.33 0.66 0.99], ...         % modulation levels for stabilizing region
             'stabilizerTexts',      {{'no stabilizer', 'low stabilizer', 'medium stabilizer', 'max stabilizer'}}, ...  % only relevant when runMode = false (demo)
-            'sceneGrays',           [0.0], ...          % mean of the scene region
+            'sceneGrays',           [0.5], ...          % mean of the scene region
             'sceneTexts',           {{'low brightness scene', 'average brightness scene', 'high brightness scene'}}, ...   % only relevant when runMode = false (demo)
             'biasGrays',            [1.0], ...                  % modulation levels for bias region
             'biasSampleStep',       biasSampleStep, ...                     % step in pixels by which to change the bias region
@@ -142,7 +142,7 @@ function OOC_calibrateSamsungOLED
         
         if (runParams.biasHorizontalSamples > 0)
             % horizontally-enlarged bias region
-            biasSizes1(:,1)      = targetSize+(runParams.biaHorizontalSamples:-1:0)*runParams.biasSampleStep;
+            biasSizes1(:,1)      = targetSize+(0:1:runParams.biaHorizontalSamples)*runParams.biasSampleStep;
             biasSizes1(:,2)      = ones(runParams.biaHorizontalSamples+1,1)*300;
             runParams.biasSizes  = [runParams.biasSizes; biasSizes1];
         end
@@ -150,13 +150,13 @@ function OOC_calibrateSamsungOLED
         if (runParams.biasVerticalSamples > 0)
             % vertically-enlarged bias region
             biasSizes2(:,1)      = (ones(runParams.biasVerticalSamples+1,1)*300);
-            biasSizes2(:,2)      = (targetSize+(runParams.biasVerticalSamples:-1:0)*runParams.biasSampleStep);
+            biasSizes2(:,2)      = (targetSize+(0:1:runParams.biasVerticalSamples)*runParams.biasSampleStep);
             runParams.biasSizes  = [runParams.biasSizes; biasSizes2];
         end
         
         if (runParams.biasSquareSamples > 0)
             % squarely-enlarged bias region
-            biasSizes3(:,1)      = targetSize+(runParams.biasSquareSamples:-1:0)*runParams.biasSampleStep;
+            biasSizes3(:,1)      = targetSize+(0:1:runParams.biasSquareSamples)*runParams.biasSampleStep;
             biasSizes3(:,2)      = biasSizes3(:,1);
             runParams.biasSizes  = [runParams.biasSizes; biasSizes3];
         end
