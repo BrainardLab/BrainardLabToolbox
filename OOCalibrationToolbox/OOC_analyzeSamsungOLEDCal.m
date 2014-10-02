@@ -50,8 +50,8 @@ function OOC_analyzeSamsungOLEDCal
     sceneGrayLevelNum       = numel(runParams.sceneGrays);
     biasLevelNum            = numel(runParams.biasGrays);
     biasSizesNum            = size(runParams.biasSizes,1);
-    gammaInputValuesNum     = numel(runParams.targetGrays);
-    
+    gammaInputValuesNum     = numel(runParams.leftTargetGrays);
+   
     
     % Load CIE 1931 CMFs
     load T_xyz1931
@@ -77,11 +77,16 @@ function OOC_analyzeSamsungOLEDCal
     fprintf('\nBias region sizes (y): ');
     fprintf('%2.2f ', runParams.biasSizes(:, 2));
     
-    fprintf('\nGamma input values: ');
-    fprintf('%2.3f ', runParams.targetGrays);
+    fprintf('\nGamma input values (left) : ');
+    fprintf('%2.3f ', runParams.leftTargetGrays);
+    
+    fprintf('\nGamma input values (right): ');
+    fprintf('%2.3f ', runParams.rightTargetGrays);
     
     fprintf('\n\n');
     
+    
+    % Preallocate memory for spds
     leftSPD = zeros(stabilizerGrayLevelNum, ...
                     sceneGrayLevelNum, ...
                     biasLevelNum, ...
@@ -210,8 +215,8 @@ function OOC_analyzeSamsungOLEDCal
     end
     
     
-    
-    gammaInput  = runParams.targetGrays;
+
+    gammaInputLeft  = runParams.leftTargetGrays;
     maxGammaOutputLeft = max(gammaOutputLeft(:));
     
     h1 = figure(1);
@@ -234,7 +239,7 @@ function OOC_analyzeSamsungOLEDCal
     
     for stabilizerGrayIndex = 1:stabilizerGrayLevelNum
         
-        stabilizerGray = runParams.stabilizerGrays(stabilizerGrayIndex);
+        stabilizerGray      = runParams.stabilizerGrays(stabilizerGrayIndex);
         referenceGammaCurve = squeeze(gammaOutputLeft(stabilizerGrayIndex, referenceBiasSizeIndex,:));
         referenceBiasSizeX  = runParams.biasSizes(referenceBiasSizeIndex,1);
         referenceBiasSizeY  = runParams.biasSizes(referenceBiasSizeIndex,2);
@@ -256,7 +261,7 @@ function OOC_analyzeSamsungOLEDCal
             condIndex = (stabilizerGrayIndex-1)* biasSizesNum + biasSizeIndex;
             lineColor = lineColors(condIndex,:);
             
-            plot(gammaInput, gammaCurve, 'ks-', 'LineWidth', 1.5, 'MarkerSize', 8, 'MarkerFaceColor', [0.8 0.8 0.8], 'Color', lineColor, 'LineWidth', 1.5);
+            plot(gammaInputLeft, gammaCurve, 'ks-', 'LineWidth', 1.5, 'MarkerSize', 8, 'MarkerFaceColor', [0.8 0.8 0.8], 'Color', lineColor, 'LineWidth', 1.5);
             set(gca, 'FontName', 'Helvetica', 'FontSize', 8);
             grid on;
             box on
@@ -280,7 +285,7 @@ function OOC_analyzeSamsungOLEDCal
             subplot('Position', [left bottom width height]);
             
             hold on;
-            plot(gammaInput, scaledGammaCurve, 'k-', 'LineWidth', 1.5, 'MarkerSize', 8, 'MarkerFaceColor', [0.8 0.8 0.8], 'Color', lineColors(condIndex,:), 'LineWidth', 1.5);
+            plot(gammaInputLeft, scaledGammaCurve, 'k-', 'LineWidth', 1.5, 'MarkerSize', 8, 'MarkerFaceColor', [0.8 0.8 0.8], 'Color', lineColors(condIndex,:), 'LineWidth', 1.5);
             legendMatrix{biasSizeIndex} = sprintf('BiasWxH: %2.0fx%2.0f (scale: %2.2f)', biasSizeX, biasSizeY, 1.0/scalingFactor);     
         end
         
@@ -321,7 +326,7 @@ function OOC_analyzeSamsungOLEDCal
             lineColor = lineColors(condIndex,:);
             
             hold on;
-            plot(gammaInput, scaledGammaCurve, 'k-', 'LineWidth', 1.5, 'MarkerSize', 8, 'MarkerFaceColor', [0.8 0.8 0.8], 'Color', lineColors(condIndex,:), 'LineWidth', 1.5);
+            plot(gammaInputLeft, scaledGammaCurve, 'k-', 'LineWidth', 1.5, 'MarkerSize', 8, 'MarkerFaceColor', [0.8 0.8 0.8], 'Color', lineColors(condIndex,:), 'LineWidth', 1.5);
             legendMatrix{stabilizerGrayIndex} = sprintf('Stabil. gray = %2.2f (scale: %2.2f)', stabilizerGray, 1.0/scalingFactor);
         end
         
@@ -369,7 +374,7 @@ function OOC_analyzeSamsungOLEDCal
             
             condIndex = (stabilizerGrayIndex-1)* biasSizesNum + biasSizeIndex;
             lineColor = lineColors(condIndex,:);
-            plot(gammaInput, scaledGammaCurve, 'k-', 'LineWidth', 1.5, 'MarkerSize', 8, 'MarkerFaceColor', [0.8 0.8 0.8], 'Color', lineColors(condIndex,:), 'LineWidth', 1.5);
+            plot(gammaInputLeft, scaledGammaCurve, 'k-', 'LineWidth', 1.5, 'MarkerSize', 8, 'MarkerFaceColor', [0.8 0.8 0.8], 'Color', lineColors(condIndex,:), 'LineWidth', 1.5);
             legendMatrix{condIndex} = sprintf('scale: %2.2f', 1.0/scalingFactor);
         end       
     end % biasSizeIndex
