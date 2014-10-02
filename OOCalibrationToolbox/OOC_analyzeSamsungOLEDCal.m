@@ -58,7 +58,7 @@ function OOC_analyzeSamsungOLEDCal
     vLambda1931_originalSampling = squeeze(T_xyz1931(2,:));
     desiredS = [380 1 401];
     
-    printCalibrationFrames = false
+    printCalibrationFrames = false;
     
     
     fprintf('\n\n'); 
@@ -235,7 +235,7 @@ function OOC_analyzeSamsungOLEDCal
     marginY = 0.05;
     
 	% First scan
-    referenceBiasSizeIndex = biasSizesNum;
+    referenceBiasSizeIndex = 1;
     
     for stabilizerGrayIndex = 1:stabilizerGrayLevelNum
         
@@ -261,7 +261,7 @@ function OOC_analyzeSamsungOLEDCal
             condIndex = (stabilizerGrayIndex-1)* biasSizesNum + biasSizeIndex;
             lineColor = lineColors(condIndex,:);
             
-            plot(gammaInputLeft, gammaCurve, 'ks-', 'LineWidth', 1.5, 'MarkerSize', 8, 'MarkerFaceColor', [0.8 0.8 0.8], 'Color', lineColor, 'LineWidth', 1.5);
+            plot(gammaInputLeft, gammaCurve, 'ks-', 'LineWidth', 3.0, 'MarkerSize', 8, 'MarkerFaceColor', [0.8 0.8 0.8], 'Color', lineColor);
             set(gca, 'FontName', 'Helvetica', 'FontSize', 8);
             grid on;
             box on
@@ -278,14 +278,14 @@ function OOC_analyzeSamsungOLEDCal
             end
             xlabel('');
             
-            title(sprintf('Stabilizer gray = %2.2f; \nBias WxH = %2.0fx%2.0f pxls.', stabilizerGray, biasSizeX, biasSizeY), 'FontName', 'Helvetica', 'FontSize', 10);
+            title(sprintf('Stabilizer gray = %2.2f; \nBias WxH = %2.0fx%2.0f pxls.', stabilizerGray, biasSizeX, biasSizeY), 'FontName', 'Helvetica', 'FontSize', 8);
             
             % The scaled gamma curves for the CurrentStabilizerGray
             left = 3*marginX + biasSizesNum*(width+marginX);
             subplot('Position', [left bottom width height]);
             
             hold on;
-            plot(gammaInputLeft, scaledGammaCurve, 'k-', 'LineWidth', 1.5, 'MarkerSize', 8, 'MarkerFaceColor', [0.8 0.8 0.8], 'Color', lineColors(condIndex,:), 'LineWidth', 1.5);
+            plot(gammaInputLeft, scaledGammaCurve, 'k-', 'LineWidth', 3.0, 'MarkerSize', 8, 'MarkerFaceColor', [0.8 0.8 0.8], 'Color', lineColors(condIndex,:));
             legendMatrix{biasSizeIndex} = sprintf('BiasWxH: %2.0fx%2.0f (scale: %2.2f)', biasSizeX, biasSizeY, 1.0/scalingFactor);     
         end
         
@@ -301,7 +301,7 @@ function OOC_analyzeSamsungOLEDCal
         % legend and title
         legend_handle = legend(legendMatrix, 'FontName', 'Helvetica', 'FontSize', 6, 'Location', 'Best');
         set(legend_handle, 'Box', 'off')
-        title(sprintf('Scaled gamma w/r to:\nBiasWxH = %2.2f x %2.2f pxls', referenceBiasSizeX, referenceBiasSizeY), 'FontName', 'Helvetica', 'FontSize', 10, 'BackgroundColor',[.99 .99 .48], 'EdgeColor', [0 0 0]);
+        title(sprintf('Scaled gammas w/r to:\nBiasWxH = %2.2f x %2.2f pxls', referenceBiasSizeX, referenceBiasSizeY), 'FontName', 'Helvetica', 'FontSize', 8, 'BackgroundColor',[.99 .99 .48], 'EdgeColor', [0 0 0]);
     end
     
    
@@ -326,7 +326,7 @@ function OOC_analyzeSamsungOLEDCal
             lineColor = lineColors(condIndex,:);
             
             hold on;
-            plot(gammaInputLeft, scaledGammaCurve, 'k-', 'LineWidth', 1.5, 'MarkerSize', 8, 'MarkerFaceColor', [0.8 0.8 0.8], 'Color', lineColors(condIndex,:), 'LineWidth', 1.5);
+            plot(gammaInputLeft, scaledGammaCurve, 'k-', 'LineWidth', 3.0, 'MarkerSize', 8, 'MarkerFaceColor', [0.8 0.8 0.8], 'Color', lineColors(condIndex,:));
             legendMatrix{stabilizerGrayIndex} = sprintf('Stabil. gray = %2.2f (scale: %2.2f)', stabilizerGray, 1.0/scalingFactor);
         end
         
@@ -348,7 +348,7 @@ function OOC_analyzeSamsungOLEDCal
         % legend and title
         legend_handle = legend(legendMatrix, 'FontName', 'Helvetica', 'FontSize', 6, 'Location', 'Best');
         set(legend_handle, 'Box', 'off')
-        title(sprintf('Scaled gamma w/r to:\nStabilizerGray = %2.2f', referenceStabilizerGray), 'FontName', 'Helvetica', 'FontSize', 10, 'BackgroundColor',[.99 .99 .48], 'EdgeColor', [0 0 0]);
+        title(sprintf('Scaled gammas w/r to:\nStabilizerGray = %2.2f', referenceStabilizerGray), 'FontName', 'Helvetica', 'FontSize', 8, 'BackgroundColor',[.99 .99 .48], 'EdgeColor', [0 0 0]);
     end % biasSizeIndex
     
 
@@ -374,7 +374,7 @@ function OOC_analyzeSamsungOLEDCal
             
             condIndex = (stabilizerGrayIndex-1)* biasSizesNum + biasSizeIndex;
             lineColor = lineColors(condIndex,:);
-            plot(gammaInputLeft, scaledGammaCurve, 'k-', 'LineWidth', 1.5, 'MarkerSize', 8, 'MarkerFaceColor', [0.8 0.8 0.8], 'Color', lineColors(condIndex,:), 'LineWidth', 1.5);
+            plot(gammaInputLeft, scaledGammaCurve, 'k-', 'LineWidth', 3.0, 'MarkerSize', 8, 'MarkerFaceColor', [0.8 0.8 0.8], 'Color', lineColors(condIndex,:));
             legendMatrix{condIndex} = sprintf('scale: %2.2f', 1.0/scalingFactor);
         end       
     end % biasSizeIndex
@@ -389,9 +389,9 @@ function OOC_analyzeSamsungOLEDCal
     box on
     
     % legend and title
-    legend_handle = legend(legendMatrix, 'FontName', 'Helvetica', 'FontSize', 6, 'Location', 'Best');
+    legend_handle = legend(legendMatrix, 'FontName', 'Helvetica', 'FontSize', 6, 'Location', 'NorthWest');
     set(legend_handle, 'Box', 'off')
-    title(sprintf('Sc. gamma w/r to Stab. Gray = %2.2f:\nBias WxH = %2.0fx%2.0f pxls.', referenceStabilizerGray, referenceBiasSizeX, referenceBiasSizeY), 'FontName', 'Helvetica', 'FontSize', 10, 'BackgroundColor',[.99 .99 .48], 'EdgeColor', [0 0 0]);
+    title(sprintf('Scaled gammas w/r to:\nStab.Gray=%2.2f, BiasWxH=%2.0fx%2.0f pxls.', referenceStabilizerGray, referenceBiasSizeX, referenceBiasSizeY), 'FontName', 'Helvetica', 'FontSize', 8, 'BackgroundColor',[.99 .99 .48], 'EdgeColor', [0 0 0]);
 
         
     
