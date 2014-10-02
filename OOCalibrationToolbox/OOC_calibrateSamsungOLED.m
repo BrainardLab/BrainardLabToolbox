@@ -16,18 +16,20 @@ function OOC_calibrateSamsungOLED
     calibrationFileName = '/Users/Shared/Matlab/Toolboxes/BrainardLabToolbox/OOCalibrationToolbox/SamsungOLED_calib.mat';
             
             
-    runMode = false; %true;     % True for collecting spectroradiometer data, false for video generation of the stimulus;
+    runMode = true;     % True for collecting spectroradiometer data, false for video generation of the stimulus;
      
+    targetSize = 75;
+    
     % Targets
     leftTarget = struct(...
-        'width', 50, ...
-    	'height', 50, ...
+        'width', targetSize, ...
+    	'height', targetSize, ...
     	'x0', 1920/2 + 200, ...
     	'y0', 1080/2);
     
     rightTarget = struct(...
-        'width', 50, ...
-    	'height', 50, ...
+        'width', targetSize, ...
+    	'height', targetSize, ...
     	'x0', 1920/2 + 600, ...
     	'y0', 1080/2+250);
     
@@ -40,7 +42,15 @@ function OOC_calibrateSamsungOLED
     % gamma curve sampling
     gammaSampling = (0.0:0.1:1.0);
     
+    % Generate dithering matrices
+    % temporalDitheringMode = '10BitPlusNoise';
+    % temporalDitheringMode = '10BitNoNoise';
+
+    % 8 bit for LUT calibration
+    temporalDitheringMode = '8Bit';
+                            
     runParams = struct(...
+            'temporalDitheringMode', temporalDitheringMode, ...
             'leftTarget',           leftTarget, ...
             'rightTarget',          rightTarget, ...
             'stabilizerBorderWidth', stabilizerBorderWidth, ...                     % width of the stabilizer region in pixels,
@@ -132,7 +142,7 @@ function OOC_calibrateSamsungOLED
         
         if (runParams.biasHorizontalSamples > 0)
             % horizontally-enlarged bias region
-            biasSizes1(:,1)      = 50+(runParams.biaHorizontalSamples:-1:0)*runParams.biasSampleStep;
+            biasSizes1(:,1)      = targetSize+(runParams.biaHorizontalSamples:-1:0)*runParams.biasSampleStep;
             biasSizes1(:,2)      = ones(runParams.biaHorizontalSamples+1,1)*300;
             runParams.biasSizes  = [runParams.biasSizes; biasSizes1];
         end
@@ -140,13 +150,13 @@ function OOC_calibrateSamsungOLED
         if (runParams.biasVerticalSamples > 0)
             % vertically-enlarged bias region
             biasSizes2(:,1)      = (ones(runParams.biasVerticalSamples+1,1)*300);
-            biasSizes2(:,2)      = (50+(runParams.biasVerticalSamples:-1:0)*runParams.biasSampleStep);
+            biasSizes2(:,2)      = (targetSize+(runParams.biasVerticalSamples:-1:0)*runParams.biasSampleStep);
             runParams.biasSizes  = [runParams.biasSizes; biasSizes2];
         end
         
         if (runParams.biasSquareSamples > 0)
             % squarely-enlarged bias region
-            biasSizes3(:,1)      = 50+(runParams.biasSquareSamples:-1:0)*runParams.biasSampleStep;
+            biasSizes3(:,1)      = targetSize+(runParams.biasSquareSamples:-1:0)*runParams.biasSampleStep;
             biasSizes3(:,2)      = biasSizes3(:,1);
             runParams.biasSizes  = [runParams.biasSizes; biasSizes3];
         end
@@ -210,9 +220,12 @@ function OOC_calibrateSamsungOLED
                                 'rightTargetGrayIndex', targetGrayIndex ...
                                 );
                                 
+
+    
                             tic
                             % Generate and display stimulus
                             demoFrame  = calibratorOBJ.generateStimulus(...
+                                            runParams.temporalDitheringMode, ...
                                             runParams.leftTarget, ...
                                             runParams.rightTarget, ...
                                             runParams.stabilizerBorderWidth, ...
