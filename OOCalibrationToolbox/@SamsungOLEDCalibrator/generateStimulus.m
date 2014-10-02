@@ -23,7 +23,7 @@ function demoFrame = generateStimulus(obj, temporalDitheringMode, leftTarget, ri
     scene.y0           = 1080/2;
     sceneRect          = CenterRectOnPointd([0 0 scene.width scene.height], scene.x0, scene.y0);
     sceneRows          = 20;
-    sceneCols          = 40;
+    sceneCols          = 50;
     zoom               = round(0.5*(scene.height/sceneRows + scene.width/sceneCols)+0.5);
     if (~sceneIsDynamic)
         % initialize the generator using a seed of 1 to make random number
