@@ -5,7 +5,10 @@ function OOC_analyzeSamsungOLEDCal
     clear classes
     clc
     
-
+    % Set following flag to true to export all calibration frames as pdfs
+    printCalibrationFrames = false;
+    
+    
     % Data file where all data structs are appended
     calibrationFileName = '/Users/Shared/Matlab/Toolboxes/BrainardLabToolbox/OOCalibrationToolbox/SamsungOLED_calib.mat';
     
@@ -52,36 +55,49 @@ function OOC_analyzeSamsungOLEDCal
     biasSizesNum            = size(runParams.biasSizes,1);
     gammaInputValuesNum     = numel(runParams.leftTargetGrays);
    
+    runParams.leftTarget
+    runParams.rightTarget
     
     % Load CIE 1931 CMFs
     load T_xyz1931
     vLambda1931_originalSampling = squeeze(T_xyz1931(2,:));
     desiredS = [380 1 401];
     
-    printCalibrationFrames = false;
     
     
     fprintf('\n\n'); 
-    fprintf('\nStabilizer gray levels: ');
+    fprintf('\n%-30s: %s', 'Temporal dithering mode', runParams.temporalDitheringMode);
+    
+    fprintf('\n%-30s: %d pixels', 'Stabilizer border width', runParams.stabilizerBorderWidth);
+   
+    fprintf('\n%-30s: ', 'Stabilizer gray levels');
     fprintf('%2.2f ', runParams.stabilizerGrays);
     
-    fprintf('\nScene gray levels: ');
+    fprintf('\n%-30s: ', 'Scene gray levels');
     fprintf('%2.2f ', runParams.sceneGrays);
     
-    fprintf('\nBias gray levels: ');
+    fprintf('\n%-30s: ', 'Bias gray levels');
     fprintf('%2.2f ', runParams.biasGrays);
     
-    fprintf('\nBias region sizes (x): ');
+    fprintf('\n%-30s: ', 'Bias region sizes (x)');
     fprintf('%2.2f ', runParams.biasSizes(:, 1));
     
-    fprintf('\nBias region sizes (y): ');
+    fprintf('\n%-30s: ', 'Bias region sizes (y)');
     fprintf('%2.2f ', runParams.biasSizes(:, 2));
     
-    fprintf('\nGamma input values (left) : ');
+    fprintf('\n%-30s: ', 'Gamma input values (left)');
     fprintf('%2.3f ', runParams.leftTargetGrays);
     
-    fprintf('\nGamma input values (right): ');
+    fprintf('\n%-30s: ', 'Gamma input values (right)');
     fprintf('%2.3f ', runParams.rightTargetGrays);
+    
+    fprintf('\n%-30s: (%dx%d)', 'Left Target position', runParams.leftTarget.x0, runParams.leftTarget.y0);
+    fprintf('\n%-30s: (%dx%d)', 'Left Target size', runParams.leftTarget.width, runParams.leftTarget.height);
+    
+    
+    fprintf('\n%-30s: (%dx%d)', 'Right Target position', runParams.rightTarget.x0, runParams.rightTarget.y0);
+    fprintf('\n%-30s: (%dx%d)', 'Right Target size', runParams.rightTarget.width, runParams.rightTarget.height);
+    
     
     fprintf('\n\n');
     
