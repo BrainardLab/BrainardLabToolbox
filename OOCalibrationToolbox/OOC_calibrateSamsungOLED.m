@@ -20,35 +20,32 @@ function OOC_calibrateSamsungOLED
      
     % Targets
     leftTarget = struct(...
-        'width', 100, ...
-    	'height', 100, ...
+        'width', 50, ...
+    	'height', 50, ...
     	'x0', 1920/2 + 200, ...
     	'y0', 1080/2);
     
     rightTarget = struct(...
-        'width', 100, ...
-    	'height', 100, ...
+        'width', 50, ...
+    	'height', 50, ...
     	'x0', 1920/2 + 600, ...
     	'y0', 1080/2+250);
     
     
-    % No effect with these, but re-run them
-    stabilizerBorderWidth = 0;
-    biasSampleStep = 160;
     
     % No effect with these, but re-run them
     stabilizerBorderWidth = 300;
-    biasSampleStep = 160;
+    biasSampleStep = 200;
     
-    %stabilizerBorderWidth = 250;
-    %biasSampleStep = 100;
+    % gamma curve sampling
+    gammaSampling = (0.0:0.1:1.0);
     
     runParams = struct(...
             'leftTarget',           leftTarget, ...
             'rightTarget',          rightTarget, ...
             'stabilizerBorderWidth', stabilizerBorderWidth, ...                     % width of the stabilizer region in pixels,
             'stabilizerGrays',      [0.0 0.33 0.66 0.99], ...         % modulation levels for stabilizing region
-            'stabilizerTexts',      {{'no stabilizer', 'low stabilizer', 'medium stabilizer', 'high stabilizer', 'max stabilizer'}}, ...  % only relevant when runMode = false (demo)
+            'stabilizerTexts',      {{'no stabilizer', 'low stabilizer', 'medium stabilizer', 'max stabilizer'}}, ...  % only relevant when runMode = false (demo)
             'sceneGrays',           [0.0], ...          % mean of the scene region
             'sceneTexts',           {{'low brightness scene', 'average brightness scene', 'high brightness scene'}}, ...   % only relevant when runMode = false (demo)
             'biasGrays',            [1.0], ...                  % modulation levels for bias region
@@ -57,13 +54,20 @@ function OOC_calibrateSamsungOLED
             'biasVerticalSamples',  0, ...
             'biasSquareSamples',    2, ...
             'biasSizes',            [], ...
-            'targetGrays',          [0.0: 0.1: 1.0], ... % [0.0: 0.1: 1.0], ...        % The gamma input values
+            'leftTargetGrays',      [gammaSampling  ], ...       % The gamma input values for the left target
+            'rightTargetGrays',     [0*gammaSampling+0.5 ], ... % The gamma input values for the left target
             'sceneIsDynamic',       false, ...                   % Flag indicating whether to generate new stochasic scene for each measurement
             'useTwinSpectroRadiometers', false, ...              % Flag indicating whether to use two radiometers. If false we only use one.
+            'leftRadiometerID',     [], ...
+            'rightRadiometerID',    [], ...
             'datePerformed',        datestr(now) ...
         );
         
        
+    if (numel(runParams.leftTargetGrays) ~= numel(runParams.leftTargetGrays))
+        error('Left and right target gray levels must be of equal numerosity');
+    end
+    
     KbName('UnifyKeyNames');
     escapeKey = KbName('ESCAPE');
     ListenChar(2);
@@ -76,7 +80,9 @@ function OOC_calibrateSamsungOLED
                 'verbosity',        1, ...                           % 1 -> minimum verbosity
                 'devicePortString', '/dev/cu.USA19QW3d1P1.1' ...      % empty -> automatic port detection
                 );
-
+            
+            runParams.leftRadiometerID.model    = leftRadiometerOBJ.deviceModelName;
+            runParams.leftRadiometerID.serialNo = leftRadiometerOBJ.deviceSerialNum;
             fprintf('\nLeft Radiometer: %s with serial no:%s\n', leftRadiometerOBJ.deviceModelName, leftRadiometerOBJ.deviceSerialNum);
 
             % Set various PR-650 specific optional parameters
@@ -91,6 +97,8 @@ function OOC_calibrateSamsungOLED
                     'verbosity',        1, ...                          % 1 -> minimum verbosity
                     'devicePortString',  '/dev/cu.USA19H1a2P1.1' ...   % empty -> automatic port detection
                     );
+                runParams.rightRadiometerID.model    = rightRadiometerOBJ.deviceModelName;
+                runParams.rightRadiometerID.serialNo = rightRadiometerOBJ.deviceSerialNum;
                 fprintf('\nRight Radiometer: %s with serial no:%s\n', rightRadiometerOBJ.deviceModelName, rightRadiometerOBJ.deviceSerialNum);
 
                 % Set various PR-650 specific optional parameters
@@ -124,7 +132,7 @@ function OOC_calibrateSamsungOLED
         
         if (runParams.biasHorizontalSamples > 0)
             % horizontally-enlarged bias region
-            biasSizes1(:,1)      = 100+(runParams.biaHorizontalSamples:-1:0)*runParams.biasSampleStep;
+            biasSizes1(:,1)      = 50+(runParams.biaHorizontalSamples:-1:0)*runParams.biasSampleStep;
             biasSizes1(:,2)      = ones(runParams.biaHorizontalSamples+1,1)*300;
             runParams.biasSizes  = [runParams.biasSizes; biasSizes1];
         end
@@ -132,13 +140,13 @@ function OOC_calibrateSamsungOLED
         if (runParams.biasVerticalSamples > 0)
             % vertically-enlarged bias region
             biasSizes2(:,1)      = (ones(runParams.biasVerticalSamples+1,1)*300);
-            biasSizes2(:,2)      = (100+(runParams.biasVerticalSamples:-1:0)*runParams.biasSampleStep);
+            biasSizes2(:,2)      = (50+(runParams.biasVerticalSamples:-1:0)*runParams.biasSampleStep);
             runParams.biasSizes  = [runParams.biasSizes; biasSizes2];
         end
         
         if (runParams.biasSquareSamples > 0)
             % squarely-enlarged bias region
-            biasSizes3(:,1)      = 100+(runParams.biasSquareSamples:-1:0)*runParams.biasSampleStep;
+            biasSizes3(:,1)      = 50+(runParams.biasSquareSamples:-1:0)*runParams.biasSampleStep;
             biasSizes3(:,2)      = biasSizes3(:,1);
             runParams.biasSizes  = [runParams.biasSizes; biasSizes3];
         end
@@ -148,7 +156,7 @@ function OOC_calibrateSamsungOLED
         conditionsNum = conditionsNum * numel(runParams.sceneGrays);
         conditionsNum = conditionsNum * numel(runParams.biasGrays);
         conditionsNum = conditionsNum * size(runParams.biasSizes,1);
-        conditionsNum = conditionsNum * numel(runParams.targetGrays);
+        conditionsNum = conditionsNum * numel(runParams.leftTargetGrays);
         fprintf('Conditions num to be tested: %d\n', conditionsNum);
         
         
@@ -181,16 +189,13 @@ function OOC_calibrateSamsungOLED
                         biasSize = runParams.biasSizes(biasSizeIndex,:);
 
                         % randomly access all targetGrays (gamma in values)
-                        randomLeftTargetIndices  = randperm(numel(runParams.targetGrays));
-                        randomRightTargetIndices = randperm(numel(runParams.targetGrays));
+                        randomTargetIndices  = randperm(numel(runParams.leftTargetGrays));
                         
-                        for l = 1:numel(randomLeftTargetIndices)
+                        for l = 1:numel(randomTargetIndices)
                             
-                            leftTargetGrayIndex  = randomLeftTargetIndices(l);
-                            rightTargetGrayIndex = randomRightTargetIndices(l);
-                            
-                            leftTargetGray  = runParams.targetGrays(leftTargetGrayIndex);
-                            rightTargetGray = runParams.targetGrays(rightTargetGrayIndex);
+                            targetGrayIndex  = randomTargetIndices(l);
+                            leftTargetGray  = runParams.leftTargetGrays(targetGrayIndex);
+                            rightTargetGray = runParams.rightTargetGrays(targetGrayIndex);
  
                             runData = struct( ...
                                 'leftSPD',              [], ...
@@ -201,8 +206,8 @@ function OOC_calibrateSamsungOLED
                                 'sceneGrayIndex',       sceneGrayIndex, ...
                                 'biasGrayIndex',        biasGrayIndex, ...
                                 'biasSizeIndex',        biasSizeIndex, ...
-                                'leftTargetGrayIndex',  leftTargetGrayIndex, ...
-                                'rightTargetGrayIndex', rightTargetGrayIndex ...
+                                'leftTargetGrayIndex',  targetGrayIndex, ...
+                                'rightTargetGrayIndex', targetGrayIndex ...
                                 );
                                 
                             tic
