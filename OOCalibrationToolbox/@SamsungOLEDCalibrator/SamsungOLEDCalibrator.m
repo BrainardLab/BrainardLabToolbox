@@ -161,7 +161,7 @@ classdef SamsungOLEDCalibrator < handle
         end  % Constructor
         
         % Method to generate calibration rectangles
-        demoFrame = generateStimulus(obj, leftTarget, rightTarget, stabilizerBorderWidth, stabilizerGray, bkgndGray, biasGray, biasSize, leftTargetGray, rightTargetGray, sceneIsDynamic);
+        demoFrame = generateStimulus(obj, temporalDitheringMode, leftTarget, rightTarget, stabilizerBorderWidth, stabilizerGray, bkgndGray, biasGray, biasSize, leftTargetGray, rightTargetGray, sceneIsDynamic);
         displayTargetRects(obj, leftTargetSize, rightTargetSize, leftTargetPos, rightTargetPos);
         
     end % Public methods

@@ -1,4 +1,4 @@
-function demoFrame = generateStimulus(obj, leftTarget, rightTarget, stabilizerBorderWidth, stabilizerGray, sceneGray, biasGray, biasSize, leftTargetGray, rightTargetGray, sceneIsDynamic)
+function demoFrame = generateStimulus(obj, temporalDitheringMode, leftTarget, rightTarget, stabilizerBorderWidth, stabilizerGray, sceneGray, biasGray, biasSize, leftTargetGray, rightTargetGray, sceneIsDynamic)
     
     bkgndMaxDev     = 0.3;
     
@@ -97,13 +97,7 @@ function demoFrame = generateStimulus(obj, leftTarget, rightTarget, stabilizerBo
     % update demo frame
     demoFrame = UpdateDemoFrame(demoFrame, rightTarget);
 
-    
-    
-    % Generate dithering matrices
-    % temporalDitheringMode = '10BitPlusNoise';
-    temporalDitheringMode = '10BitNoNoise';
-    % temporalDitheringMode = '8Bit';
-    
+
     if (obj.runMode)
         obj.stimDataMatrices     = {};
         obj.stimDestinationRects = {};
