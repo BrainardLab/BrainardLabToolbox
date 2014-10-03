@@ -31,9 +31,15 @@ function result = getMeasuredData(obj, varargin)
             % Parse data 
             qual = sscanf(serialData,'%f',1);
             if ((qual == 7) || (qual == 8))
-                fprintf('>>>Quality code:%f\n', qual);
+                error('>>>Quality code:%f\n', qual);
+                
             elseif ((qual == -1) || (qual == 10))
-                fprintf('>>> Quality code: %f. Low light level!\n', qual);
+                fprintf('>>> Quality code: %f. Low light level!. Returning zeros\n', qual);
+                % return zeros
+                nativeSamples = obj.nativeS(3);
+                obj.nativeMeasurement.spectralAxis = zeros(1,nativeSamples);
+                obj.nativeMeasurement.energy = zeros(1,nativeSamples);
+            
             elseif ((qual == 18) || (qual == 0))
                 start = findstr(serialData,'0380.');
                 
