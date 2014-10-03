@@ -19,6 +19,7 @@ function OOC_calibrateSamsungOLED
     runMode = true;     % True for collecting spectroradiometer data, false for video generation of the stimulus;
      
     targetSize = 100;
+    useTwinSpectroRadiometers = true;
     
     % Targets
     leftTarget = struct(...
@@ -67,7 +68,7 @@ function OOC_calibrateSamsungOLED
             'leftTargetGrays',      [gammaSampling  ], ...       % The gamma input values for the left target
             'rightTargetGrays',     [0*gammaSampling+0.5 ], ... % The gamma input values for the left target
             'sceneIsDynamic',       false, ...                   % Flag indicating whether to generate new stochasic scene for each measurement
-            'useTwinSpectroRadiometers', false, ...              % Flag indicating whether to use two radiometers. If false we only use one.
+            'useTwinSpectroRadiometers', useTwinSpectroRadiometers, ...              % Flag indicating whether to use two radiometers. If false we only use one.
             'leftRadiometerID',     [], ...
             'rightRadiometerID',    [], ...
             'datePerformed',        datestr(now) ...
@@ -170,6 +171,45 @@ function OOC_calibrateSamsungOLED
         fprintf('Conditions num to be tested: %d\n', conditionsNum);
         
         
+        % Present stimuli for aligning the radiometers.
+        biasSize = targetSize * [1 1];
+        leftTargetGray = 0.9;
+        rightTargetGray = 0.9;
+                                        
+        demoFrame  = calibratorOBJ.generateStimulus(...
+                                            runParams.temporalDitheringMode, ...
+                                            runParams.leftTarget, ...
+                                            runParams.rightTarget, ...
+                                            runParams.stabilizerBorderWidth, ...
+                                            runParams.stabilizerGrays(1), ...
+                                            runParams.sceneGrays(1), ...
+                                            runParams.biasGrays(1), ...
+                                            biasSize, ...
+                                            leftTargetGray, ...
+                                            rightTargetGray, ...
+                                            runParams.sceneIsDynamic...
+                                );
+                            
+        Speak('Align radiometers on targets. Hit enter to continue, or ESCAPE to exit.'); 
+        keyIsDown = false;
+        while ~keyIsDown
+            [ keyIsDown, seconds, keyCode ] = KbCheck;
+            any(keyCode)
+            pause(0.1);
+        end
+        if keyCode(escapeKey)
+            ListenChar(0);
+            sca;
+            disp('User aborted');
+            return;
+        end
+
+        Speak('Pausing for 2 seconds. Leave the room now');
+        pause(2.0);
+        
+                                
+        
+        % Start the calibration
         cond = 0;
         allCondsData = {};
         
