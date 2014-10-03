@@ -57,7 +57,7 @@ function OOC_calibrateSamsungOLED
             'stabilizerBorderWidth', stabilizerBorderWidth, ...                     % width of the stabilizer region in pixels,
             'stabilizerGrays',      [0.0 0.33 0.66 0.99], ...         % modulation levels for stabilizing region
             'stabilizerTexts',      {{'no stabilizer', 'low stabilizer', 'medium stabilizer', 'max stabilizer'}}, ...  % only relevant when runMode = false (demo)
-            'sceneGrays',           [0.0], ...          % mean of the scene region
+            'sceneGrays',           [0.5], ...          % mean of the scene region
             'sceneTexts',           {{'low brightness scene', 'average brightness scene', 'high brightness scene'}}, ...   % only relevant when runMode = false (demo)
             'biasGrays',            [1.0], ...                  % modulation levels for bias region
             'biasSampleStep',       biasSampleStep, ...                     % step in pixels by which to change the bias region
@@ -360,9 +360,13 @@ function OOC_calibrateSamsungOLED
             % add new variable with new validation data
             calParamName = sprintf('calibrationRun_%05d', length(varList)+1);
             eval(sprintf('matOBJ.%s = calibrationDataSet;', calParamName)); 
-            fprintf('\nSaved current validation data data to ''%s'' as %s.\n', calibrationFileName, calParamName);
+            resultString = sprintf('\nSaved current validation data data to ''%s'' as %s.\n', calibrationFileName, calParamName);
+            disp(resultString);
         
-        
+            setpref('Internet', 'SMTP_Server', 'smtp-relay.upenn.edu');
+            setpref('Internet', 'E_Mail', 'cottaris@sas.upenn.edu');
+            sendmail('cottaris@sas.upenn.edu', 'Samsung OLED calibration run finished !', resultString);
+            
             % Display something
             condNo = numel(allCondsData);
             leftSPD = allCondsData{condNo}.leftSPD;
