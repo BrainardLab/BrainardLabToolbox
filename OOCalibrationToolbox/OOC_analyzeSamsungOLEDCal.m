@@ -41,22 +41,15 @@ function OOC_analyzeSamsungOLEDCal
     eval(sprintf('calibrationDataSet = matOBJ.%s;',varList{dataSetIndex}));
     
     % Retrieve data
-    runParams = calibrationDataSet.runParams;
     allCondsData = calibrationDataSet.allCondsData;
-        
- 
+    runParams = calibrationDataSet.runParams
     
-    
-    runParams
     stabilizerBorderWidth   = runParams.stabilizerBorderWidth;
     stabilizerGrayLevelNum  = numel(runParams.stabilizerGrays);
     sceneGrayLevelNum       = numel(runParams.sceneGrays);
     biasLevelNum            = numel(runParams.biasGrays);
     biasSizesNum            = size(runParams.biasSizes,1);
     gammaInputValuesNum     = numel(runParams.leftTargetGrays);
-   
-    runParams.leftTarget
-    runParams.rightTarget
     
     % Load CIE 1931 CMFs
     load T_xyz1931
@@ -156,6 +149,7 @@ function OOC_analyzeSamsungOLEDCal
         
         % get SPD data 
         spd = conditionData.leftSPD;
+        
         % interpolate to desiredS
         spd = SplineSpd(nativeS, spd', desiredS);
         
@@ -166,8 +160,7 @@ function OOC_analyzeSamsungOLEDCal
                 leftTargetGrayIndex, ...
                 :) = spd;
         
-        if ~isempty(conditionData.rightSPD)
-            
+        if ~isempty(conditionData.rightSPD) 
             % get SPD data 
             spd = conditionData.rightSPD;
             % interpolate to desiredS
@@ -179,12 +172,13 @@ function OOC_analyzeSamsungOLEDCal
                     biasSizeIndex, ...
                     rightTargetGrayIndex, ...
                     :) = spd;
-        end % ~isempty(conditionData.rightSPD)
-        
+        else % ~isempty(conditionData.rightSPD)
+            rightSPD = [];
+        end
     end % cond Index
     
     
-    % plot subset of data 
+    % plot data 
     
     stabilizerGrayIndex = 1;
     sceneGrayIndex = 1;
@@ -231,34 +225,48 @@ function OOC_analyzeSamsungOLEDCal
     end
     
     
-
+ 
+    
+    
     gammaInputLeft  = runParams.leftTargetGrays;
     maxGammaOutputLeft = max(gammaOutputLeft(:));
     
+    if isempty(rightSPD)
+        gammaInputRight = [];
+    else
+        gammaInputRight  = runParams.rightTargetGrays;
+        maxGammaInputRight = max(gammaInputRight(:));
+        minGammaInputRight = min(gammaInputRight(:));
+    end
+    
+    
+    
+    
+    
     h1 = figure(1);
-    figXo = 2560;
-    figYo = 360;
-    figWidth = 700;
-    figHeight = 860;
+    figXo = 2560;   figYo = 360;
+    figWidth = 700; figHeight = 860;
     set(h1, 'Position', [figXo figYo figWidth figHeight]);
     clf;
     
     lineColors = lines(stabilizerGrayLevelNum*biasSizesNum);
     
+    % Subplot panel sizes and margins
     width = 0.85/(biasSizesNum+1);
     height = 0.7/(stabilizerGrayLevelNum+1);
     marginX = 0.02;
     marginY = 0.05;
     
-	% First scan
+	
     referenceBiasSizeIndex = 1;
-    
+    referenceBiasSizeX  = runParams.biasSizes(referenceBiasSizeIndex,1);
+    referenceBiasSizeY  = runParams.biasSizes(referenceBiasSizeIndex,2);
+        
+    % First scan (all condition curves plus scaled curves for left to right conditions)
     for stabilizerGrayIndex = 1:stabilizerGrayLevelNum
         
         stabilizerGray      = runParams.stabilizerGrays(stabilizerGrayIndex);
         referenceGammaCurve = squeeze(gammaOutputLeft(stabilizerGrayIndex, referenceBiasSizeIndex,:));
-        referenceBiasSizeX  = runParams.biasSizes(referenceBiasSizeIndex,1);
-        referenceBiasSizeY  = runParams.biasSizes(referenceBiasSizeIndex,2);
         
         legendMatrix = {};
         for biasSizeIndex = 1: biasSizesNum
@@ -266,9 +274,9 @@ function OOC_analyzeSamsungOLEDCal
             biasSizeX = runParams.biasSizes(biasSizeIndex, 1);
             biasSizeY = runParams.biasSizes(biasSizeIndex, 2);
         
-            gammaCurve       = squeeze(gammaOutputLeft(stabilizerGrayIndex, biasSizeIndex, :));
-            scalingFactor    = gammaCurve \ referenceGammaCurve;
-            scaledGammaCurve = gammaCurve * scalingFactor;
+            gammaCurveLeft   = squeeze(gammaOutputLeft(stabilizerGrayIndex, biasSizeIndex, :));
+            scalingFactor    = gammaCurveLeft \ referenceGammaCurve;
+            scaledGammaCurve = gammaCurveLeft * scalingFactor;
             
             left = 3*marginX + (biasSizeIndex-1)*(width+marginX);
             bottom = 1-stabilizerGrayIndex*(height+marginY);
@@ -277,7 +285,27 @@ function OOC_analyzeSamsungOLEDCal
             condIndex = (stabilizerGrayIndex-1)* biasSizesNum + biasSizeIndex;
             lineColor = lineColors(condIndex,:);
             
-            plot(gammaInputLeft, gammaCurve, 'ks-', 'LineWidth', 3.0, 'MarkerSize', 8, 'MarkerFaceColor', [0.8 0.8 0.8], 'Color', lineColor);
+            plot(gammaInputLeft, gammaCurveLeft, 'ks-', 'LineWidth', 3.0, 'MarkerSize', 8, 'MarkerFaceColor', [0.8 0.8 0.8], 'Color', lineColor);
+            
+            if (~isempty(gammaInputRight))
+                gammaCurveRight = squeeze(gammaOutputRight(stabilizerGrayIndex, biasSizeIndex, :));
+                if (maxGammaInputRight == minGammaInputRight)
+                    gammaInput = gammaInputLeft;
+                else
+                    gammaInput = gammaInputRight;
+                end
+                
+                hold on;
+                plot(gammaInput, gammaCurveRight, 'k.-', 'LineWidth', 3.0, 'MarkerSize', 8);
+                if (maxGammaInputRight == minGammaInputRight)
+                    plot([minGammaInputRight, maxGammaInputRight], [0 mean(gammaCurveRight)], 'k-', 'LineWidth', 3.0);
+                    plot(minGammaInputRight, 0, 'kv', 'LineWidth', 2.0, 'MarkerFaceColor', [0.6 0.6 0.6]);
+                end
+                hold off;
+                legend_handle = legend({'Left', 'Right'}, 'FontName', 'Helvetica', 'FontSize', 6, 'Location', 'NorthWest');
+                set(legend_handle, 'Box', 'off')
+            end
+            
             set(gca, 'FontName', 'Helvetica', 'FontSize', 8);
             grid on;
             box on
@@ -321,7 +349,7 @@ function OOC_analyzeSamsungOLEDCal
     end
     
    
-    % Second scan
+    % Second scan  (scaled curves for top-to-bottom conditions)
     referenceStabilizerGrayIndex = 1;
     for biasSizeIndex = 1: biasSizesNum
         referenceGammaCurve = squeeze(gammaOutputLeft(referenceStabilizerGrayIndex, biasSizeIndex,:));
@@ -368,11 +396,9 @@ function OOC_analyzeSamsungOLEDCal
     end % biasSizeIndex
     
 
-    % Third scan (all curves)
+    % Third scan (all scaled curves)
     referenceGammaCurve = squeeze(gammaOutputLeft(referenceStabilizerGrayIndex, referenceBiasSizeIndex,:));
     referenceStabilizerGray   = runParams.stabilizerGrays(referenceStabilizerGrayIndex);
-    referenceBiasSizeX = runParams.biasSizes(referenceBiasSizeIndex, 1);
-    referenceBiasSizeY = runParams.biasSizes(referenceBiasSizeIndex, 2);
             
     condIndex = 0;
     legendMatrix = {};
@@ -416,8 +442,5 @@ function OOC_analyzeSamsungOLEDCal
     set(h1,'PaperUnits','normalized');
     set(h1,'PaperPosition', [0 0 1 1]);
     print(gcf, '-dpdf', '-r600', 'Fig1.pdf');
-        
-    
-     
     
 end
