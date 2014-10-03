@@ -41,7 +41,7 @@ function measureSPD(obj)
                 error('>>>Quality code:%f\n', qual);
                 
             elseif ((qual == -1) || (qual == 10))
-                fprintf('>>> Quality code: %f. Low light level!\n', qual);
+                fprintf('>>> Quality code: %f. Low light level!. Returning zeros\n', qual);
                 % return zeros
                 nativeSamples = obj.nativeS(3);
                 obj.nativeMeasurement.spectralAxis = zeros(1,nativeSamples);
