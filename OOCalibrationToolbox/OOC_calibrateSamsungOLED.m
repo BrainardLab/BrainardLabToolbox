@@ -13,7 +13,7 @@ function OOC_calibrateSamsungOLED
     calibratorOBJ       = [];
     
     % Data file where all data structs are appended
-    calibrationFileName = '/Users/Shared/Matlab/Toolboxes/BrainardLabToolbox/OOCalibrationToolbox/SamsungOLED_calib.mat';
+    calibrationFileName = '/Users/Shared/Matlab/Toolboxes/BrainardLabToolbox/OOCalibrationToolbox/SamsungOLED_DoubleTargetCalib1.mat';
             
             
     runMode = true;     % True for collecting spectroradiometer data, false for video generation of the stimulus;
@@ -37,7 +37,7 @@ function OOC_calibrateSamsungOLED
     
     
     % No effect with these, but re-run them
-    stabilizerBorderWidth = 100;
+    stabilizerBorderWidth = 300;
     biasSampleStep = 160; % 200;
     
     % gamma curve sampling
@@ -57,7 +57,7 @@ function OOC_calibrateSamsungOLED
             'stabilizerBorderWidth', stabilizerBorderWidth, ...                     % width of the stabilizer region in pixels,
             'stabilizerGrays',      [0.0 0.33 0.66 0.99], ...         % modulation levels for stabilizing region
             'stabilizerTexts',      {{'no stabilizer', 'low stabilizer', 'medium stabilizer', 'max stabilizer'}}, ...  % only relevant when runMode = false (demo)
-            'sceneGrays',           [0.5], ...          % mean of the scene region
+            'sceneGrays',           [0.0], ...          % mean of the scene region
             'sceneTexts',           {{'low brightness scene', 'average brightness scene', 'high brightness scene'}}, ...   % only relevant when runMode = false (demo)
             'biasGrays',            [1.0], ...                  % modulation levels for bias region
             'biasSampleStep',       biasSampleStep, ...                     % step in pixels by which to change the bias region
@@ -66,7 +66,7 @@ function OOC_calibrateSamsungOLED
             'biasSquareSamples',    2, ...
             'biasSizes',            [], ...
             'leftTargetGrays',      [gammaSampling  ], ...       % The gamma input values for the left target
-            'rightTargetGrays',     [0*gammaSampling+0.5 ], ... % The gamma input values for the left target
+            'rightTargetGrays',     [gammaSampling ], ... % The gamma input values for the left target
             'sceneIsDynamic',       false, ...                   % Flag indicating whether to generate new stochasic scene for each measurement
             'useTwinSpectroRadiometers', useTwinSpectroRadiometers, ...              % Flag indicating whether to use two radiometers. If false we only use one.
             'leftRadiometerID',     [], ...
