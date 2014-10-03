@@ -18,7 +18,7 @@ function OOC_calibrateSamsungOLED
             
     runMode = true;     % True for collecting spectroradiometer data, false for video generation of the stimulus;
      
-    targetSize = 75;
+    targetSize = 100;
     
     % Targets
     leftTarget = struct(...
@@ -30,21 +30,21 @@ function OOC_calibrateSamsungOLED
     rightTarget = struct(...
         'width', targetSize, ...
     	'height', targetSize, ...
-    	'x0', 1920/2 + 600, ...
-    	'y0', 1080/2+250);
+    	'x0', 1920/2 + 550, ...
+    	'y0', 1080/2+180);
     
     
     
     % No effect with these, but re-run them
-    stabilizerBorderWidth = 300;
-    biasSampleStep = 200;
+    stabilizerBorderWidth = 100;
+    biasSampleStep = 160; % 200;
     
     % gamma curve sampling
     gammaSampling = (0.0:0.1:1.0);
     
     % Generate dithering matrices
     % temporalDitheringMode = '10BitPlusNoise';
-    % temporalDitheringMode = '10BitNoNoise';
+    %temporalDitheringMode = '10BitNoNoise';
 
     % 8 bit for LUT calibration
     temporalDitheringMode = '8Bit';
