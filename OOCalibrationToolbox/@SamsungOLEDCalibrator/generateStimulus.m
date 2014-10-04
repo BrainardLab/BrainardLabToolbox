@@ -149,5 +149,7 @@ function demoFrame = UpdateDemoFrame(oldDemoFrame, stim)
     demoFrame = oldDemoFrame;
     ii = stim.y0 - round(stim.height/2) + (1:stim.height);
     jj = stim.x0 - round(stim.width/2) + (1:stim.width);
+    stim.data(find(stim.data<0)) = 0;
+    stim.data(find(stim.data>1)) = 1;
     demoFrame(ii,jj,:) = stim.data;    
 end
