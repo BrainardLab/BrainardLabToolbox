@@ -279,7 +279,10 @@ function OOC_calibrateSamsungOLED
                                 );
                             
                             % Save stimulus at 1/4 resolution
-                            runData.demoFrame = single(demoFrame(1:2:end, 1:2:end,:));
+                            %runData.demoFrame = single(demoFrame(1:2:end, 1:2:end,:));
+                            % Save full resolution stimulus at 8-bit
+                            runData.demoFrame = uint8(demoFrame*255.0)
+
 
                             if (runMode) 
                                 
