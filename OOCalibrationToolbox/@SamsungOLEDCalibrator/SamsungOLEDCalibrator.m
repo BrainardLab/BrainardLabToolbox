@@ -160,8 +160,13 @@ classdef SamsungOLEDCalibrator < handle
             
         end  % Constructor
         
-        % Method to generate calibration rectangles
+        % Method to generate calibration rectangles with stabilizer region,
+        % bias region, dynamic scene, and targets
         demoFrame = generateStimulus(obj, temporalDitheringMode, leftTarget, rightTarget, stabilizerBorderWidth, stabilizerGray, bkgndGray, biasGray, biasSize, leftTargetGray, rightTargetGray, sceneIsDynamic);
+        
+        % Method to generate calibration stimulus with arbitrary scene pattern and targets
+        demoFrame = generateArbitraryStimulus(obj, temporalDitheringMode, leftTarget, rightTarget, leftTargetGray, rightTargetGray, stimulationPattern);
+        
         displayTargetRects(obj, leftTargetSize, rightTargetSize, leftTargetPos, rightTargetPos);
         
     end % Public methods
