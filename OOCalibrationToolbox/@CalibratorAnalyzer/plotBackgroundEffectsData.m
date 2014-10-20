@@ -21,30 +21,39 @@ function plotSpectra(obj, spectra, settings, figureGroupIndex)
     lineColors = zeros(backgroundSettingsNum,3);
     
     for backgroundSettingIndex = 1:backgroundSettingsNum 
-        
+        bgSettings = obj.newStyleCal.backgroundDependenceSetup.bgSettings(:, backgroundSettingIndex);
+        if (sum(bgSettings) == 0)
+           zeroBackgroundSPD = squeeze(spectra(backgroundSettingIndex,:));
+        end
+    end
+    
+    maxSPDdiff = zeros(1, backgroundSettingsNum);
+    
+    for backgroundSettingIndex = 1:backgroundSettingsNum 
         lineColors(backgroundSettingIndex,:) = (obj.newStyleCal.backgroundDependenceSetup.bgSettings(:, backgroundSettingIndex))';
-        [xd, yd] = stairs(spectralAxis, squeeze(spectra(backgroundSettingIndex,:)));
-        faceColor = [0.9 0.9 0.9]; edgeColor = squeeze(lineColors(backgroundSettingIndex,:));
-        obj.makeShadedPlot(xd, yd, faceColor, edgeColor);
+        lineColors(find(lineColors > 0.75)) = 0.75;
+        spdDiff = (squeeze(spectra(backgroundSettingIndex,:)) - zeroBackgroundSPD);
+        maxSPDdiff(backgroundSettingIndex) = max(abs(spdDiff));
+        edgeColor = squeeze(lineColors(backgroundSettingIndex,:));
+        plot(spectralAxis, spdDiff, '-', 'Color', edgeColor, 'LineWidth', 2.0);
         
         legendsMatrix{backgroundSettingIndex} = sprintf('bg=(%0.2f, %0.2f, %0.2f)', ...
             obj.newStyleCal.backgroundDependenceSetup.bgSettings(1,backgroundSettingIndex), ...
             obj.newStyleCal.backgroundDependenceSetup.bgSettings(2,backgroundSettingIndex), ...
             obj.newStyleCal.backgroundDependenceSetup.bgSettings(3,backgroundSettingIndex));
     end
+    maxSPDdiff = max(maxSPDdiff);
     
-    for backgroundSettingIndex = 1:backgroundSettingsNum
-        stairs(spectralAxis, squeeze(spectra(backgroundSettingIndex,:)), 'Color', squeeze(lineColors(backgroundSettingIndex,:)), 'LineWidth', 2.0);
-    end
-    
-    hleg = legend(legendsMatrix, 'Location', 'NorthEast');
+    [hleg, objh,outh,outm] = legend(legendsMatrix, 'Location', 'NorthEast');
+    set(objh,'linewidth',2);
+
     set(hleg,'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 12, 'Color', 'none', 'LineWidth', 0.1);
     box on;
-    axis([380,780, 0 1.05 * max(max(spectra))]);
-    set(gca, 'Color', [0.8 0.8 0.8], 'XColor', 'b', 'YColor', 'b');
+    axis([380,780, -0.01 0.01]);
+    set(gca, 'Color', [1 1 1], 'XColor', 'b', 'YColor', 'b');
     set(gca, 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);
     xlabel('Wavelength (nm)', 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);
-    ylabel('Power', 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14); 
+    ylabel('SPD(lambda | bg) - SPD(lambda | bg=(0,0,0))', 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14); 
     
     % Finish plot
     drawnow;

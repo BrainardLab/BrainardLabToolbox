@@ -78,6 +78,12 @@ classdef Radiometer < handle
         % Method to conduct a single native measurement;
         result = measure(obj);
         
+        % Functions to separate the measure() command into two separate components:
+        % triggerMeasure() and getMeasuredData().
+        % This is useful if we want to have more than one radiometers measure simulteneously
+        triggerMeasure(obj);
+        result = getMeasuredData(obj);
+        
         % Method to shutdown the Radiometer
         shutDown(obj);
     end
@@ -85,18 +91,25 @@ classdef Radiometer < handle
     % Public methods
     methods
         % Constructor
-        function obj = Radiometer(verbosity)
+        function obj = Radiometer(verbosity, devPortString)
+            
             obj.verbosity = verbosity;
+            if ~isempty(devPortString)
+                obj.portString = devPortString;
+            else
+                obj = obj.privateGetPortString();
+            end
+            
             if (obj.verbosity > 9)
                 fprintf('In Radiometer.constructor() method\n');
             end
-            obj = obj.privateGetPortString();
+
         end
         
         % Setter method for property verbosity
         function set.verbosity(obj, new_verbosity)
             obj.verbosity = obj.privateSetVerbosity(new_verbosity);
-            fprintf('New verbosity level: %d\n', obj.verbosity);
+            fprintf('\nNew verbosity level: %d\n', obj.verbosity);
         end
         
         % Getter method for property hostInfo

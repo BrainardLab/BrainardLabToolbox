@@ -23,15 +23,20 @@ classdef PR650dev < Radiometer
         
         % Constructor
         function obj = PR650dev(varargin)  
-            verbosity = 1;
-            if (nargin >= 1)
-                verbosity = varargin{1};
-                if (nargin > 1)
-                    disp('Ignoring extra arguments in PR650 constructor !!');
-                end
-            end
+            
+            parser = inputParser;
+            parser.addParamValue('verbosity',   1);
+            parser.addParamValue('devicePortString',  []);
+            
+            % Execute the parser
+            parser.parse(varargin{:});
+            % Create a standard Matlab structure from the parser results.
+            p = parser.Results;
+            verbosity       = p.verbosity;
+            devPortString   = p.devicePortString;
+            
             % Call the super-class constructor.
-            obj = obj@Radiometer(verbosity);
+            obj = obj@Radiometer(verbosity, devPortString);
             
             if (obj.verbosity > 9)
                 fprintf('In PR650dev.constructor() method\n');
@@ -64,6 +69,12 @@ classdef PR650dev < Radiometer
         % Method to conduct a single native measurent. For the PR-650 this is an SPD measurement.
         result = measure(obj, varargin);    
         
+        % Functions to separate the measure() command into two separate components:
+        % triggerMeasure() and getMeasuredData().
+        % This is useful if we want to have more than one radiometers measure simulteneously
+        triggerMeasure(obj);
+        result = getMeasuredData(obj);
+         
         function obj = shutDown(obj)
             obj = obj.shutDownDevice();
         end

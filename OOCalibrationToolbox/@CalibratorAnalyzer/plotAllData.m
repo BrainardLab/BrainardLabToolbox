@@ -35,8 +35,8 @@ function obj = plotAllData(obj)
         figHandles = obj.figureHandlesArray{figureGroupIndex};
         for k = 1:length(figHandles)
             set(figHandles(k),'Visible', 'on'); 
-            set(figHandles(k),'MenuBar','none');    % Hide standard menu bar menus.
-            set(figHandles(k),'ToolBar','none');    % Hide standard menu bar menus.
+           % set(figHandles(k),'MenuBar','none');    % Hide standard menu bar menus.
+           % set(figHandles(k),'ToolBar','none');    % Hide standard menu bar menus.
         end
     
         % Set the size of the figure group
