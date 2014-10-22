@@ -21,9 +21,9 @@ end
 % Display data and the fits. 
 theData = [thePairs theResponses./nTrialsPerPair];
 fprintf('\n Target data set\n');
-disp(theData); 
+%disp(theData); 
 fprintf('\n Target fits\n');
-disp(targetCompetitorFit);  
+%disp(targetCompetitorFit);  
 
 % Plot the inferred position of the target and the competitors. 
 f = figure; clf;
