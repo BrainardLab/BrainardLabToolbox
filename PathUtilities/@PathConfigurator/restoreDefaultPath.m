@@ -6,4 +6,6 @@ function restoreDefaultPath()
     % Run the default startup
     pause(0.1);
     matlabrc
+    
+    run('/Users/Shared/Matlab/Toolboxes/BrainardLabStartup/startup.m');
 end
