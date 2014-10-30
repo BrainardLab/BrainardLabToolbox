@@ -61,6 +61,18 @@ function SwitchPathConfig
             % do nothing PathConfig.restoreDefaultPath();
     end
     
+    PathConfig.rehash();
+    PathConfig.getListOfInstalledToolboxes(1);
+    
+    checkISETBIOvalidationScripts = false;
+    if checkISETBIOvalidationScripts
+        % Check whether isetbio validation scripts run to completion
+        v_oi
+        v_ISETBIO
+        PathConfig.rehash();
+        PathConfig.getListOfInstalledToolboxes(1);
+    end
+    
     while (1)
         functionName = input('\nEnter function name for which to check toolbox dependencies: ', 's');
         PathConfig.findToolboxDependencies(functionName)

@@ -13,11 +13,12 @@ function findToolboxDependencies(functionName)
     
     
     fprintf('\nWorking. Plese be patient ...');
-    [fList,pList] = matlab.codetools.requiredFilesAndProducts(functionName);
+    [requiredFilesList, productsList] = matlab.codetools.requiredFilesAndProducts(functionName);
     
-    fprintf('\n Function ''%s'' has the following %d dependencies:\n', which(functionName), numel(pList));
-    for k = 1:numel(pList)
-        fprintf('\t[%d]: %s\n', k, char(pList(k).Name));
+    fprintf('\n Function ''%s'' requires %3d files to run', which(functionName), numel(requiredFilesList));
+    fprintf('\n and it has the following %3d dependencies:\n', numel(productsList));
+    for k = 1:numel(productsList)
+        fprintf('\t[%d]: %s\n', k, char(productsList(k).Name));
     end
     
 end

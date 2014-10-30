@@ -17,7 +17,7 @@ classdef PathConfig
         removeNonNativeToolboxes(toolboxPath);
     
         % Method that returns a cell array with the directories corresponding to the installed native Matlab toolboxes
-        toolboxDirs = getListOfInstalledToolboxes();
+        s = getListOfInstalledToolboxes(beVerbose);
         
         % Method that returns a cell array with the directories of a user-selected list of native toolboxes
         nativeToolboxesDirList = getSelectNativeToolboxesDirList()

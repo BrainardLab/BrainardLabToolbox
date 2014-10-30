@@ -3,7 +3,8 @@ function removeNativeToolboxes(list)
 
     if isempty(list)
         % Get list of installed native toolboxes
-        list = PathConfig.getListOfInstalledToolboxes();
+        s = PathConfig.getListOfInstalledToolboxes();
+        list = s.tooboxLocalDirs;
     end
     
     fprintf('\nRemoving MATLAB native toolboxes. Be patient ...');
