@@ -11,7 +11,6 @@ function findToolboxDependencies(functionName)
         return;
     end
     
-    
     fprintf('\nWorking. Plese be patient ...');
     [requiredFilesList, productsList] = matlab.codetools.requiredFilesAndProducts(functionName);
     
@@ -20,5 +19,4 @@ function findToolboxDependencies(functionName)
     for k = 1:numel(productsList)
         fprintf('\t[%d]: %s\n', k, char(productsList(k).Name));
     end
-    
 end
