@@ -5,6 +5,8 @@ function OOC_calibrateSamsungOLED2
     clear classes
     clc
     
+    global calibrationDataSet
+    
     % Close all open ports
     IOPort('CloseAll');
     
@@ -24,7 +26,7 @@ function OOC_calibrateSamsungOLED2
     runMode = true;     % True for collecting spectroradiometer data, false for video generation of the stimulus;
      
     targetSize = 100;
-    useTwinSpectroRadiometers = false;
+    useTwinSpectroRadiometers = true;
     
     % Targets
     leftTarget = struct(...
@@ -37,7 +39,7 @@ function OOC_calibrateSamsungOLED2
         'width', targetSize, ...
     	'height', targetSize, ...
     	'x0', 1920/2 + 550, ...
-    	'y0', 1080/2+400);
+    	'y0', 1080/2-100);
     
     
     % Generate dithering matrices
@@ -48,7 +50,7 @@ function OOC_calibrateSamsungOLED2
     temporalDitheringMode = '8Bit';
       
     % gamma curve sampling
-    gammaSampling = [0.74 1.0];
+    gammaSampling = [1.0];
        
     runParams = struct(...
             'temporalDitheringMode', temporalDitheringMode, ...
@@ -60,7 +62,7 @@ function OOC_calibrateSamsungOLED2
             'stimulusFileName',     stimulusFileName, ...
             'stimParams',           stimParams, ...
             'leftTargetGrays',      gammaSampling, ...       % The gamma input values for the left target
-            'rightTargetGrays',     gammaSampling*0+0.5, ...
+            'rightTargetGrays',     gammaSampling, ...
             'datePerformed',        datestr(now) ...
         );
         
@@ -92,7 +94,7 @@ function OOC_calibrateSamsungOLED2
                 % Instantiate the right Radiometer object, here a PR650obj.
                 rightRadiometerOBJ = PR650dev(...
                     'verbosity',        1, ...                          % 1 -> minimum verbosity
-                    'devicePortString',  '/dev/cu.USA19H1a2P1.1' ...   % empty -> automatic port detection
+                    'devicePortString',  '/dev/cu.USA19H3d1P1.1' ...   % empty -> automatic port detection
                     );
                 runParams.rightRadiometerID.model    = rightRadiometerOBJ.deviceModelName;
                 runParams.rightRadiometerID.serialNo = rightRadiometerOBJ.deviceSerialNum;
@@ -165,25 +167,19 @@ function OOC_calibrateSamsungOLED2
             pause(2.0);
         end
         
-
-       
-       sequence = stimuli{1,1}.imageSequence;
-       conditionsNum = numel(stimParams.exponentOfOneOverFArray) * ...
-                         numel(stimParams.oriBiasArray) * ...
-                         size(sequence,1) * ...
-                         size(sequence, 2) * ...
-                         numel(runParams.leftTargetGrays);
-         
+ 
         % Start the calibration sequence
-        cond = 0;
         allCondsData = {};
         presentedStimuli = 0;
         totalStimuli = size(stimuli,1)*size(stimuli,2)*size(stimuli,3)*size(stimuli,4);
     
+        
         for exponentOfOneOverFIndex = 1:numel(stimParams.exponentOfOneOverFArray)
             for oriBiasIndex = 1:numel(stimParams.oriBiasArray)
                 for orientationIndex = 1:numel(stimParams.orientationsArray)
                     sequence = squeeze(stimuli(exponentOfOneOverFIndex, oriBiasIndex,orientationIndex, :,:,:));
+                    
+                    visited = zeros(1,size(sequence,1));
                     
                     % Randomize frame index
                     randomFrameIndices = randperm(8);
@@ -195,98 +191,121 @@ function OOC_calibrateSamsungOLED2
                         
                         for l = 1:numel(randomConditionIndices)
                             randomConditionIndex = randomConditionIndices(l);
-                            kk = (randomFrameIndex-1)*9*2 + randomConditionIndex;
-                            visited(kk) = visited(kk) + 1;
-                            stimulationPattern = double(squeeze(imageSequence(kk,:,:)))/255.0;
                             
-                    
-                            for targetGrayIndex = 1: numel(runParams.leftTargetGrays)
-                                leftTargetGray  = runParams.leftTargetGrays(targetGrayIndex);
-                                rightTargetGray = runParams.rightTargetGrays(targetGrayIndex);
-                          
-                                runData = struct( ...
-                                    'leftSPD',              [], ...
-                                    'rightSPD',             [], ...
-                                    'leftS',                [], ...
-                                    'rightS',               [], ...
-                                    'exponentOfOneOverFIndex',  exponentOfOneOverFIndex, ...
-                                    'oriBiasIndex',       oriBiasIndex, ...
-                                    'frameIndex',        frameIndex, ...
-                                    'patternIndex',        patternIndex, ...
-                                    'leftTargetGrayIndex',  targetGrayIndex, ...
-                                    'rightTargetGrayIndex', targetGrayIndex ...
-                                    );
-                        
-                                demoFrame  = calibratorOBJ.generateArbitraryStimulus(...
-                                                runParams.temporalDitheringMode, ...
-                                                runParams.leftTarget, ...
-                                                runParams.rightTarget, ...
-                                                leftTargetGray, ...
-                                                rightTargetGray, ...
-                                                stimulationPattern ...
-                                    );
-                            
-                                runData.demoFrame = uint8(demoFrame*255.0);
-                            
-                         
-                                if (runMode)
-                                    Speak(sprintf('%d of %d\n', cond+1, conditionsNum));
-
-                                    [ keyIsDown, seconds, keyCode ] = KbCheck;
-                                    if keyIsDown
-                                        if keyCode(escapeKey)
-                                            ListenChar(0);
-                                            sca;
-                                            error('User aborted');
-                                        end
-                                    end
-
-                                    % Measure SPD   
-                                    if (runParams.useTwinSpectroRadiometers)
-                                        % Simultaneous measurements - faster
-                                        % Start measurements
-                                        leftRadiometerOBJ.triggerMeasure();
-                                        rightRadiometerOBJ.triggerMeasure();
-                                        % Read data from device and store it
-                                        runData.leftSPD  = leftRadiometerOBJ.getMeasuredData();
-                                        runData.rightSPD = rightRadiometerOBJ.getMeasuredData();
-                                        runData.leftS    = leftRadiometerOBJ.nativeS;
-                                        runData.rightS   = rightRadiometerOBJ.nativeS;
-                                    else
-                                        % use only one radiometer
-                                        leftRadiometerOBJ.measure();
-
-                                        % Store data
-                                        runData.leftSPD = leftRadiometerOBJ.measurement.energy;
-                                        runData.leftS   = leftRadiometerOBJ.nativeS;
-
-                                        if ((isempty(runData.leftSPD)) || (isempty(runData.leftS)))
-                                            runData.leftSPD
-                                            runData.leftS 
-                                           error('Radiometer object returned empty values'); 
-                                        end
-                                    end   
+                            for polarity = 1:2
+                                if (polarity == 1)
+                                    kk = (randomFrameIndex-1)*9*2 + randomConditionIndex;
                                 else
-                                    % in demo mode, so just add frame to video writer
-                                    figure(1);
-                                    imshow(demoFrame(1:2:end, 1:2:end,:));
-                                    frame = getframe;
-                                    writeVideo(writerObj,frame);
-                                end % runMode
-                        
-                        
-                                % Update condition no
-                                cond = cond + 1;
-
-                                % Store data for this condition
-                                allCondsData{cond} = runData;
+                                    kk = (randomFrameIndex-1)*9*2 + randomConditionIndex + 9;
+                                end
                             
-                            end  % target GrayIndex
+                                visited(kk) = visited(kk) + 1;
+                                
+                                stimulationPattern = double(squeeze(sequence(kk,:,:)))/255.0;
+                                presentedStimuli = presentedStimuli + 1;
+                                
+                                if (mod(presentedStimuli, 20) == 0)
+                                    Speak(sprintf('%d of %d', presentedStimuli, totalStimuli));
+                                end
+                        
+                                
+                                for targetGrayIndex = 1: numel(runParams.leftTargetGrays)
+                                    leftTargetGray  = runParams.leftTargetGrays(targetGrayIndex);
+                                    rightTargetGray = runParams.rightTargetGrays(targetGrayIndex);
+
+                                    runData = struct( ...
+                                        'leftSPD',              [], ...
+                                        'rightSPD',             [], ...
+                                        'leftS',                [], ...
+                                        'rightS',               [], ...
+                                        'exponentOfOneOverFIndex',  exponentOfOneOverFIndex, ...
+                                        'oriBiasIndex',       oriBiasIndex, ...
+                                        'orientationIndex',   orientationIndex, ...
+                                        'frameIndex',        randomFrameIndex, ...
+                                        'conditionIndex',        randomConditionIndex, ...
+                                        'polarity',           polarity, ...
+                                        'leftTargetGrayIndex',  targetGrayIndex, ...
+                                        'rightTargetGrayIndex', targetGrayIndex ...
+                                        );
+                        
+                                    demoFrame  = calibratorOBJ.generateArbitraryStimulus(...
+                                                    runParams.temporalDitheringMode, ...
+                                                    runParams.leftTarget, ...
+                                                    runParams.rightTarget, ...
+                                                    leftTargetGray, ...
+                                                    rightTargetGray, ...
+                                                    stimulationPattern ...
+                                        );
+                            
+                                    runData.demoFrame = uint8(demoFrame*255.0);
+
+
+                                    if (runMode)  
+
+                                        [ keyIsDown, seconds, keyCode ] = KbCheck;
+                                        if keyIsDown
+                                            if keyCode(escapeKey)
+                                                ListenChar(0);
+                                                sca;
+                                                error('User aborted');
+                                            end
+                                        end
+
+                                        % Measure SPD   
+                                        if (runParams.useTwinSpectroRadiometers)
+                                            % Simultaneous measurements - faster
+                                            % Start measurements
+                                            leftRadiometerOBJ.triggerMeasure();
+                                            rightRadiometerOBJ.triggerMeasure();
+                                            % Read data from device and store it
+                                            runData.leftSPD  = leftRadiometerOBJ.getMeasuredData();
+                                            runData.rightSPD = rightRadiometerOBJ.getMeasuredData();
+                                            runData.leftS    = leftRadiometerOBJ.nativeS;
+                                            runData.rightS   = rightRadiometerOBJ.nativeS;
+                                        else
+                                            % use only one radiometer
+                                            leftRadiometerOBJ.measure();
+
+                                            % Store data
+                                            runData.leftSPD = leftRadiometerOBJ.measurement.energy;
+                                            runData.leftS   = leftRadiometerOBJ.nativeS;
+
+                                            if ((isempty(runData.leftSPD)) || (isempty(runData.leftS)))
+                                                runData.leftSPD
+                                                runData.leftS 
+                                               error('Radiometer object returned empty values'); 
+                                            end
+                                        end   
+                                    else
+                                        % in demo mode, so just add frame to video writer
+                                        figure(1);
+                                        imshow(demoFrame(1:2:end, 1:2:end,:));
+                                        frame = getframe;
+                                        writeVideo(writerObj,frame);
+                                    end % runMode
+
+
+                                    % Store data for this condition
+                                    allCondsData{exponentOfOneOverFIndex, ...
+                                                oriBiasIndex, ...
+                                                orientationIndex, ...
+                                                randomFrameIndex, ...
+                                                randomConditionIndex, ...
+                                                polarity, ...
+                                                targetGrayIndex} = runData;
+
+                                end  % target GrayIndex
+                            end % polarity
                         end % for l = 1:numel(randomConditionIndices)
                     end % for k = 1:numel(randomFrameIndices);
-                end
-            end
-        end
+                    
+                    if (any(visited ~= 1))
+                        Visited
+                        error('Visited is not correct');
+                    end
+                end  % orientationIndex
+            end % oriBiasIndex
+        end % exponentIndex
     
         
         if (runMode)
