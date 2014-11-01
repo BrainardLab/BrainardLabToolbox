@@ -237,6 +237,9 @@ function OOC_calibrateSamsungOLED2
                                                     stimulationPattern ...
                                         );
                             
+                                    % ONLY SAVE THE RED COMPONENT TO SAVE
+                                    % SPACE. THIS IS OK FOR GRAYLEVEL
+                                    % STIMULI
                                     runData.demoFrame = uint8(squeeze(demoFrame(:,:,1))*255.0);
 
 
