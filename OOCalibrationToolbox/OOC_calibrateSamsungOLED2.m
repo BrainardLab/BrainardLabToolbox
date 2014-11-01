@@ -237,7 +237,7 @@ function OOC_calibrateSamsungOLED2
                                                     stimulationPattern ...
                                         );
                             
-                                    runData.demoFrame = uint8(demoFrame*255.0);
+                                    runData.demoFrame = uint8(squeeze(demoFrame(:,:,1))*255.0);
 
 
                                     if (runMode)  
