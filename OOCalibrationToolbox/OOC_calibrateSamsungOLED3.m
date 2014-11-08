@@ -221,11 +221,13 @@ function OOC_calibrateSamsungOLED3
                                                     stimulationPattern ...
                                         );
                             
-                                    % ONLY SAVE THE RED COMPONENT TO SAVE
-                                    % SPACE. THIS IS OK FOR GRAYLEVEL
-                                    % STIMULI
-                                    runData.demoFrame = uint8(squeeze(demoFrame(:,:,1))*255.0);
-
+                                    if (repeat == 1)
+                                        % ONLY SAVE THE demoFrame for repeat = 1
+                                        % ONLY SAVE THE RED COMPONENT TO SAVE
+                                        % SPACE. THIS IS OK FOR GRAYLEVEL  STIMULI
+                                        runData.demoFrame = uint8(squeeze(demoFrame(:,:,1))*255.0);
+                                    end
+                                    
                                     if (runMode)  
                                         [ keyIsDown, seconds, keyCode ] = KbCheck;
                                         if keyIsDown
