@@ -133,13 +133,12 @@ function OOC_calibrateSamsungOLED3
             leftTargetGray  = 0.5;
             rightTargetGray = 0.5;
 
-            repeat            = 1;
             exponentOfOneOverFIndex = 1;
             oriBiasIndex      = 1;
             orientationIndex  = 1;
             patternIndex      = 1;
             
-            stimulationPattern = double(squeeze(stimuli(repeat,exponentOfOneOverFIndex, oriBiasIndex,orientationIndex, patternIndex,:,:)))/255.0;
+            stimulationPattern = double(squeeze(stimuli(exponentOfOneOverFIndex, oriBiasIndex,orientationIndex, patternIndex,:,:)))/255.0;
 
             demoFrame  = calibratorOBJ.generateArbitraryStimulus(...
                                                 runParams.temporalDitheringMode, ...
@@ -172,14 +171,14 @@ function OOC_calibrateSamsungOLED3
         % Start the calibration sequence
         allCondsData = {};
         presentedStimuli = 0;
-        totalStimuli = size(stimuli,1)*size(stimuli,2)*size(stimuli,3)*size(stimuli,4)*size(stimuli,5);
+        totalStimuli = stimParams.repeats * size(stimuli,1) * size(stimuli,2) * size(stimuli,3) * size(stimuli,4);
     
         tic
         for repeat = 1:stimParams.repeats
             for exponentOfOneOverFIndex = 1:numel(stimParams.exponentOfOneOverFArray)
                 for oriBiasIndex = 1:numel(stimParams.oriBiasArray)
                     for orientationIndex = 1:numel(stimParams.orientationsArray)
-                        sequence = squeeze(stimuli(repeat, exponentOfOneOverFIndex, oriBiasIndex,orientationIndex, :,:,:));
+                        sequence = squeeze(stimuli(exponentOfOneOverFIndex, oriBiasIndex,orientationIndex, :,:,:));
                         kk = 0;
                         for frameIndex = 1:stimParams.motionFramesNum
                             for variantIndex = 1:stimParams.variants
