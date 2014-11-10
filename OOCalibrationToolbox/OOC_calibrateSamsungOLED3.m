@@ -14,12 +14,14 @@ function OOC_calibrateSamsungOLED3
     rightRadiometerOBJ  = [];
     calibratorOBJ       = [];
     
-    % Data file where all data structs are appended
-    calibrationFileName = '/Users/Shared/Matlab/Toolboxes/BrainardLabToolbox/OOCalibrationToolbox/SamsungOLED_CloudsCalib3.mat';
+    % Stimulus file
+    stimulusFileName = 'PixelOLEDprobes4.mat';
+    % Calibration file
+    calibrationFileName = '/Users/Shared/Matlab/Toolboxes/BrainardLabToolbox/OOCalibrationToolbox/SamsungOLED_CloudsCalib4.mat';
             
     % Load pre-computed calibration patterns
     fprintf('Loading stimuli. Please wait ...');
-    stimulusFileName = 'PixelOLEDprobes3.mat';
+    
     load(stimulusFileName);  %loads 'stimParams', 'stimuli'
     fprintf('Loaded all stimuli');
     
