@@ -15,9 +15,9 @@ function OOC_calibrateSamsungOLED3
     calibratorOBJ       = [];
     
     % Stimulus file
-    stimulusFileName = 'PixelOLEDprobes4.mat';
+    stimulusFileName = 'PixelOLEDprobes5.mat';
     % Calibration file
-    calibrationFileName = '/Users/Shared/Matlab/Toolboxes/BrainardLabToolbox/OOCalibrationToolbox/SamsungOLED_CloudsCalib4.mat';
+    calibrationFileName = '/Users/Shared/Matlab/Toolboxes/BrainardLabToolbox/OOCalibrationToolbox/SamsungOLED_CloudsCalib5.mat';
             
     % Load pre-computed calibration patterns
     fprintf('Loading stimuli. Please wait ...');
