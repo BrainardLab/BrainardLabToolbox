@@ -1,7 +1,23 @@
-% Class with static methods with various plot utilities
+% Static class with methods for re-nicing plots
+% 
+% Example usage:
 %
+% (1) Set font sizes for axes, labels, legends, and titles to a base size of 12
+% NicePlot.setFontSizes(figureHandle, 'FontSize', 12);
+%
+% (2) Get position vectors for subplots with desired margins
+% subplotPosVectors = NicePlot.getSubPlotPosVectors(...
+%        'rowsNum', 2, ...
+%        'colsNum', 3, ...
+%        'heighthMargin',  0.06, ...
+%        'widthMargin',    0.05, ...
+%        'leftMargin',     0.07, ...
+%        'bottomMargin',   0.15, ...
+%        'topMargin',      0.1);
+%    
 % 11/14/2014  npc Wrote it.
 %
+
 classdef NicePlot
     
     methods (Static = true)
