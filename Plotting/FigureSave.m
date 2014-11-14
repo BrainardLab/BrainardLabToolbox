@@ -51,7 +51,7 @@ else
                 figType = 'epsc';
         end
         if (strcmp(figType,'epsc') || strcmp(figType,'pdf'))
-            print(figHandle,['-d' figType{i}],'-loose',figName);
+            print(figHandle,['-d' figType],'-loose',figName);
         else
             saveas(figHandle,figName,figType);
         end
