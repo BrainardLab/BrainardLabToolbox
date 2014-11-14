@@ -1,6 +1,8 @@
 function makeShadedPlot(obj, x,y, faceColor, edgeColor)
-    px = [0, reshape(x, [1 length(x)]), x(end)]; % make closed patch
-    py = [0, reshape(y, [1 length(y)]), 0];
-    pz = -10*eps*ones(1,length(x)+2);
+    px = reshape(x, [1 numel(x)]);
+    py = reshape(y, [1 numel(y)]);
+    px = [px(1) px px(end)];
+    py = [1*eps py 2*eps];
+    pz = -10*eps*ones(size(py)); 
     patch(px,py,pz,'FaceColor',faceColor,'EdgeColor',edgeColor);
 end
