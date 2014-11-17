@@ -21,22 +21,39 @@ function setFontSizes(figHandle, varargin)
     
     labelHandles = get(axisHandle,'xlabel');
     for k = 1:numel(labelHandles)
-        set(labelHandles{k}, 'fontName', self.fontName, 'fontSize', round(self.fontSize*1.30), 'fontWeight', 'b');
+        if iscell(labelHandles)
+            set(labelHandles{k}, 'fontName', self.fontName, 'fontSize', round(self.fontSize*1.30), 'fontWeight', 'b');
+        else
+             set(labelHandles(k), 'fontName', self.fontName, 'fontSize', round(self.fontSize*1.30), 'fontWeight', 'b');
+        end
     end
     
     labelHandles = get(axisHandle,'ylabel');
     for k = 1:numel(labelHandles)
-        set(labelHandles{k}, 'fontName', self.fontName, 'fontSize', round(self.fontSize*1.30), 'fontWeight', 'b');
+        if iscell(labelHandles)
+            set(labelHandles{k}, 'fontName', self.fontName, 'fontSize', round(self.fontSize*1.30), 'fontWeight', 'b');
+        else
+            set(labelHandles(k), 'fontName', self.fontName, 'fontSize', round(self.fontSize*1.30), 'fontWeight', 'b');
+        end
     end
     
     labelHandles = get(axisHandle,'title');
     for k = 1:numel(labelHandles)
-        set(labelHandles{k}, 'fontName', self.fontName, 'fontSize', round(self.fontSize*1.50), 'fontWeight', 'b');
+        if iscell(labelHandles)
+            set(labelHandles{k}, 'fontName', self.fontName, 'fontSize', round(self.fontSize*1.50), 'fontWeight', 'b');
+        else
+            set(labelHandles(k), 'fontName', self.fontName, 'fontSize', round(self.fontSize*1.50), 'fontWeight', 'b');
+        end
     end
         
     legendHandles = findobj(figHandle,'Tag','legend');
     for k = 1:numel(legendHandles)
-        set(legendHandles(k), 'fontName', self.fontName, 'fontSize', round(self.fontSize*1.0), 'fontWeight', 'b', ...
+        if iscell(legendHandles)
+            et(legendHandles{k}, 'fontName', self.fontName, 'fontSize', round(self.fontSize*1.0), 'fontWeight', 'b', ...
             'Color', [0.8 0.8 0.7], 'EdgeColor', 'none');
+        else
+            set(legendHandles(k), 'fontName', self.fontName, 'fontSize', round(self.fontSize*1.0), 'fontWeight', 'b', ...
+            'Color', [0.8 0.8 0.7], 'EdgeColor', 'none');
+        end
     end
 end

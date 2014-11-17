@@ -31,7 +31,7 @@ function posVectors = getSubPlotPosVectors(varargin)
     plotHeight = ((1.0-self.bottomMargin-self.topMargin) - self.heightMargin*(self.rowsNum-1) - 0.01)/self.rowsNum;
     
     for row = 1:self.rowsNum
-        yo = 0.99 - self.topMargin - (row)*(plotHeight+self.heightMargin);
+        yo = 0.99 - self.topMargin - (row)*(plotHeight+self.heightMargin) + self.heightMargin;
         for col = 1:self.colsNum
             xo = self.leftMargin + (col-1)*(plotWidth+self.widthMargin);
             posVectors(row,col).v = [xo yo plotWidth plotHeight];
