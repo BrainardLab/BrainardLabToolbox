@@ -1,0 +1,8 @@
+function makeShadedPlot(obj, x,y, faceColor, edgeColor)
+    px = reshape(x, [1 numel(x)]);
+    py = reshape(y, [1 numel(y)]);
+    px = [px(1) px px(end)];
+    py = [1*eps py 2*eps];
+    pz = -10*eps*ones(size(py)); 
+    patch(px,py,pz,'FaceColor',faceColor,'EdgeColor',edgeColor);
+end

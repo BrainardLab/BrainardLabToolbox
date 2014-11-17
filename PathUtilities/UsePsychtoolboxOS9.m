@@ -1,0 +1,1 @@
+function UsePsychtoolboxOS9% UsePsychtoolboxOS9%% Switch to the OS 9 version of PTB-3%% 10/14/06  dhb  Wrote it.startup('os9');
