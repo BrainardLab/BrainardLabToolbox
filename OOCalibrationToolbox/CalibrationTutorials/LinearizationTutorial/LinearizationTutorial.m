@@ -58,56 +58,73 @@ function LinearizationTutorial
     SetGammaMethod(calStructOBJ, gammaInversionMethod);
 
     % 2. Reshape stimInPrimaries matrix (MxNx3) into a [3 x (MxN)] matrix for efficient computation
-    [calFormatStimInPrimaryValues,nX,nY] = ImageToCalFormat(desiredStimInPrimaryValues);
+    [calFormatDesiredStimInPrimaryValues,nX,nY] = ImageToCalFormat(desiredStimInPrimaryValues);
 
     % 3. Compute stimulus in settings. 
-    calFormatStimInSettingsValues = PrimaryToSettings(calStructOBJ, calFormatStimInPrimaryValues);
+    calFormatDesiredStimInSettingsValues = PrimaryToSettings(calStructOBJ, calFormatDesiredStimInPrimaryValues);
 
     % Reshape back to image coordinates, i.e., MxNx3. This is the stimulus that
     % should be delivered to the frame buffer for display.
-    stimInSettingsValues = CalFormatToImage(calFormatStimInSettingsValues,nX,nY);
+    frameBufferStim = CalFormatToImage(calFormatDesiredStimInSettingsValues,nX,nY);
 
     %% Plot the gamma-in and gamma-out versions of the stimulus
-    PlotStimuli(stimInSettingsValues, desiredStimInPrimaryValues);
+    PlotStimuli(frameBufferStim, desiredStimInPrimaryValues);
 
     %% Check that the stimulus is indeed linearized
-    % Invert the stimulus in settings values to get the stimulus in primary
-    % values
-    calFormatInvertedStimInPrimaryValues = SettingsToPrimary(calStructOBJ,calFormatStimInSettingsValues);
-    invertedStimInPrimaryValues = CalFormatToImage(calFormatInvertedStimInPrimaryValues,nX,nY);
+    % Invert the stimulus in settings values to get the stimulus in primary values
+    calFormatDesiredStimInPrimaryValues2 = SettingsToPrimary(calStructOBJ,calFormatDesiredStimInSettingsValues);
 
     % Plot the desired vs the inverted stimulus
-    PlotCorrespondence(invertedStimInPrimaryValues(:), desiredStimInPrimaryValues(:));
+    PlotCorrespondence(calFormatDesiredStimInPrimaryValues, calFormatDesiredStimInPrimaryValues2);
 end
 
 
-function PlotCorrespondence(invertedStim, desiredStim)
+function PlotCorrespondence(desiredStim, deliveredStim)
     global figNum
     figNum = figNum + 1;
     
     % Steup subplot position vectors
     subplotPosVectors = NicePlot.getSubPlotPosVectors(...
         'rowsNum',      1, ...
-        'colsNum',      1, ...
-        'heightMargin', 0.01, ...
-        'widthMargin',  0.01, ...
-        'leftMargin',   0.1, ...
-        'bottomMargin', 0.1, ...
-        'topMargin',    0.02);
+        'colsNum',      size(desiredStim,1), ...
+        'widthMargin',  0.05, ...
+        'leftMargin',   0.07, ...
+        'bottomMargin', 0.15, ...
+        'topMargin',    0.1);
+    
+    % Specify line colors, here for 3 primaries
+    lineColors = [...
+        1.0 0.0 0.0;
+        0.0 1.0 0.0;
+        0.0 0.0 1.0 ];
+    
     
     hFig = figure(figNum);
-    set(hFig, 'Position', [100 100 1000 1000]);
+    set(hFig, 'Position', [100 100 1000 275]);
     
-    minVal = min([min(invertedStim) min(desiredStim)]);
-    maxVal = max([max(invertedStim) max(desiredStim)]);
+    minVal = min([min(desiredStim(:)) min(deliveredStim(:))]);
+    maxVal = max([max(desiredStim(:)) max(deliveredStim(:))]);
     
-    subplot('Position', subplotPosVectors(1,1).v);
-    plot(invertedStim(1:10:end), desiredStim(1:10:end), 'k.');
-    hold on;
-    axis 'square'
-    xlabel('inverted stimulus');
-    ylabel('desired stimulus');
-     % Set fonts for all axes, legends, and titles
+    titles = {'red component', 'green component', 'blue component'};
+    
+    for primaryIndex = 1:size(desiredStim,1)
+        % generate subplot
+        subplot('Position', subplotPosVectors(1,primaryIndex).v);
+        plot(desiredStim(primaryIndex,:), deliveredStim(primaryIndex,:), '.', 'Color', lineColors(primaryIndex,:));
+        axis 'square'
+        set(gca, 'XLim', [minVal maxVal], 'YLim', [minVal maxVal], 'XTick', [0:0.2:1.0], 'YTick', [0:0.2:1.0]);
+        
+        box on; grid on;
+        
+        % set plot labels
+        xlabel('desired stimulus'); 
+        ylabel('delivered stimulus');
+
+        % set titles
+        title(titles{primaryIndex});
+    end
+    
+    % Set fonts for all axes, legends, and titles
     NicePlot.setFontSizes(hFig, 'FontSize', 12); 
 
 end
