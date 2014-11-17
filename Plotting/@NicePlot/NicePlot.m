@@ -26,5 +26,9 @@ classdef NicePlot
         
         % Method to set the fonts for the axes, labels
         setFontSizes(figHandle, varargin);
+        
+        % Method to export fig in figHandle to a PDF doc that looks just
+        % like the screen figure
+        exportFigToPDF(pdfFileName,figHandle,dpi);
     end
 end
