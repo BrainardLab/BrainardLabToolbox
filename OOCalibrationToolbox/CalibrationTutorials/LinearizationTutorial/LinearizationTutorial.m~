@@ -70,16 +70,16 @@ function LinearizationTutorial
 
     %% Check that the delivered stimulus will produce an indentical copy of the desired stimulus
     %%% Invert the stimulus in settings values to get the stimulus in primary values
-    calFormatDeliveredStimInPrimaryValues = SettingsToPrimary(calStructOBJ,calFormatDesiredStimInSettingsValues);
+    calFormatDesiredStimInPrimaryValues2 = SettingsToPrimary(calStructOBJ,calFormatDesiredStimInSettingsValues);
 
-    %%% Plot the correspondence between desired and the delivered stimulus
-    PlotCorrespondence(calFormatDesiredStimInPrimaryValues, calFormatDeliveredStimInPrimaryValues);
+    %%% Plot the correspondence between desired and the inverted stimulus
+    PlotCorrespondence(calFormatDesiredStimInPrimaryValues, calFormatDesiredStimInPrimaryValues2);
 end
 
 
 %% Helper plotting methods
 
-function PlotCorrespondence(desiredStim, deliveredStim)
+function PlotCorrespondence(deliveredStim, desiredStim)
     global figNum
     figNum = figNum + 1;
     
@@ -117,8 +117,8 @@ function PlotCorrespondence(desiredStim, deliveredStim)
         box on; grid on;
         
         % set plot labels
-        xlabel('desired stimulus (primary values)'); 
-        ylabel(sprintf('delivered stimulus\n(primary values)'));
+        xlabel('desired stimulus'); 
+        ylabel('delivered stimulus');
 
         % set titles
         title(titles{primaryIndex});
@@ -366,7 +366,7 @@ function CSF = MakeContrastSensitivityStimulus
         else
             gain = 200;
         end
-        for row = [60 120 240 480 720 960]
+        for row = [60 120 240 480 960]
             slice = -(CSF(row,1:colsNum)-0.5);
             if (displayNormalizedSlices)
                 slice = slice/max(abs(slice(:)));
