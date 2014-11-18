@@ -1,6 +1,9 @@
 function LinearizationTutorial
 %
-% 11/17/2014  npc  Wrote it.
+% Demonstrates how to access data in calibration files via @CalStruct objects 
+% and how to generate stimuli with a linerized gamma u
+%
+% 11/17/2014  npc   Wrote it.
 %
 
     %% Initialize state
@@ -69,17 +72,17 @@ function LinearizationTutorial
     PlotStimuli(frameBufferStim, desiredStimInPrimaryValues);
 
     %% Check that the delivered stimulus will produce an indentical copy of the desired stimulus
-    %%% Invert the stimulus in settings values to get the stimulus in primary values
-    calFormatDesiredStimInPrimaryValues2 = SettingsToPrimary(calStructOBJ,calFormatDesiredStimInSettingsValues);
+    %%% 1. Invert the stimulus in settings values to get the stimulus in primary values
+    calFormatDeliveredStimInPrimaryValues = SettingsToPrimary(calStructOBJ,calFormatDesiredStimInSettingsValues);
 
-    %%% Plot the correspondence between desired and the inverted stimulus
-    PlotCorrespondence(calFormatDesiredStimInPrimaryValues, calFormatDesiredStimInPrimaryValues2);
+    %%% 2. Plot the correspondence between desired and the delivered stimulus
+    PlotCorrespondence(calFormatDesiredStimInPrimaryValues, calFormatDeliveredStimInPrimaryValues);
 end
 
 
 %% Helper plotting methods
 
-function PlotCorrespondence(deliveredStim, desiredStim)
+function PlotCorrespondence(desiredStim, deliveredStim)
     global figNum
     figNum = figNum + 1;
     
@@ -117,8 +120,8 @@ function PlotCorrespondence(deliveredStim, desiredStim)
         box on; grid on;
         
         % set plot labels
-        xlabel('desired stimulus'); 
-        ylabel('delivered stimulus');
+        xlabel('desired stimulus (primary values)'); 
+        ylabel(sprintf('delivered stimulus\n(primary values)'));
 
         % set titles
         title(titles{primaryIndex});
@@ -366,7 +369,7 @@ function CSF = MakeContrastSensitivityStimulus
         else
             gain = 200;
         end
-        for row = [60 120 240 480 960]
+        for row = [60 120 240 480 720 960]
             slice = -(CSF(row,1:colsNum)-0.5);
             if (displayNormalizedSlices)
                 slice = slice/max(abs(slice(:)));
