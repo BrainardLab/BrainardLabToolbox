@@ -15,6 +15,7 @@ function FigureSave(figName,figHandle,figType)
 %              stuff.
 % 8/3/14  dhb  Fix eps color issue in 2014b by forcing type -> epsc.
 %              Trying to get Matlab native to crop output properly.
+% 11/14/14 npc Removed {i} from figType{i} in line 53 which was causing a crash.
 
 if iscell(figType)
     for i = 1:length(figType)
