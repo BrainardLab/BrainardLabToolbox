@@ -66,7 +66,7 @@ classdef CalibratorAnalyzer < handle
                 error('Use ''mglAnalyzeMonCalSpd'' for analysis, instead.\n');
             end
     
-            % Turn off JavaFrame will become obsolete warning
+            % Turn off "JavaFrame will become obsolete" warning
             warning('off','MATLAB:HandleGraphics:ObsoletedProperty:JavaFrame');
             
             % Get the desktop's Java handle
