@@ -75,7 +75,7 @@ function LinearizationTutorial
     %%% 1. Invert the stimulus in settings values to get the stimulus in primary values
     calFormatDeliveredStimInPrimaryValues = SettingsToPrimary(calStructOBJ,calFormatDesiredStimInSettingsValues);
 
-    %%% 2. Plot the correspondence between desired and the delivered stimulus
+    %%% 2. Plot correspondence between desired and delivered stimuli
     PlotCorrespondence(calFormatDesiredStimInPrimaryValues, calFormatDeliveredStimInPrimaryValues);
 end
 
@@ -195,7 +195,7 @@ function PlotGammaTables(rawGammaInput, rawGammaTable, gammaInput, gammaTable)
     titles = {'red primary', 'green primary', 'blue primary'};
     
     % Specify no legends
-    legends = {'raw gamma', 'interpolated gamma'};
+    legends = {'interpolated gamma', 'raw gamma (measured)'};
     
     hFig = figure(figNum);
     set(hFig, 'Position', [100 100 1000 275]);
