@@ -6,8 +6,7 @@ function OOC_analyzeCal
     
     % Instantiate a @CalAnalyzer object
     calAnalyzer = CalibratorAnalyzer(cal, calFilename);
-    
-    
+
     % Analyze the calibration file and display the results arranged in different grids
     calAnalyzer.essentialDataGridDims       = [3 3];
     calAnalyzer.linearityChecksGridDims     = [2 3];  % columns rows
