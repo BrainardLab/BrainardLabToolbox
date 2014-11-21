@@ -28,12 +28,12 @@ end
 
 % Specify @CalStruct objects that will handle all access to the calibration data.
 [calStruct1OBJ, inputArg1IsACalStructOBJ] = ObjectToHandleCalOrCalStruct(calOrCalStruct1);
-if (~input1ArgIsACalStructOBJ)
+if (~inputArg1IsACalStructOBJ)
      % The input (calOrCalStruct) is a cal struct. Clear it to avoid  confusion.
     clear 'calOrCalStruct1';
 end
 [calStruct2OBJ, inputArg2IsACalStructOBJ] = ObjectToHandleCalOrCalStruct(calOrCalStruct2);
-if (~input2ArgIsACalStructOBJ)
+if (~inputArg2IsACalStructOBJ)
      % The input (calOrCalStruct) is a cal struct. Clear it to avoid  confusion.
     clear 'calOrCalStruct2';
 end

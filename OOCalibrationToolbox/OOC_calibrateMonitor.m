@@ -43,14 +43,14 @@ function OOC_calibrateMonitor
     calibratorInitParams = { ...
         'executiveScriptName',      mfilename, ...              % name of the executive script (this file)
         'radiometerObj',            radiometerOBJ, ...          % name of the radiometer object
-        'screenToCalibrate',        2, ...                      % second display
+        'screenToCalibrate',        1, ...                      % second display
         'desiredScreenSizePixel',   [1920 1080], ...            % width and height of display to be calibrated
-        'desiredRefreshRate',       60, ...                     % refresh rate in Hz
+        'desiredRefreshRate',       [], ...                     % refresh rate in Hz. If empty, no check is done
         'displayPrimariesNum',      3, ...                      % i.e., R,G,B guns
         'displayDeviceType',        'monitor', ...  
-        'displayDeviceName',        'NicolasViewSonic', ...     % a name for the display, could be anything
-        'calibrationFile',          'ViewSonicProbe', ...       % name of file on which the calibration data will be saved
-        'comment',                  'Office ViewSonic' ...      % a comment, could be anything
+        'displayDeviceName',        'SamsungOLED', ...     % a name for the display, could be anything
+        'calibrationFile',          'SamsungOLED_MirrorScreen', ...       % name of file on which the calibration data will be saved
+        'comment',                  'In 8-bit, Mirrored screen mode' ...      % a comment, could be anything
         };
     
     
@@ -68,11 +68,11 @@ function OOC_calibrateMonitor
         'fgColor',                          [0.3962 0.3787 0.4039], ...     % color of the foreground
         'meterDistance',                    0.5, ...                        % distance between radiometer and screen
         'leaveRoomTime',                    1, ...                          % seconds allowed to leave room
-        'nAverage',                         1, ...                          % number of repeated measurements for averaging
-        'nMeas',                            5, ...                          % samples along gamma curve
+        'nAverage',                         15, ...                          % number of repeated measurements for averaging
+        'nMeas',                            13, ...                          % samples along gamma curve
         'boxSize',                          150, ...                        % size of calibration stimulus
         'boxOffsetX',                       0, ...                          % x-offset from center of screen (neg: leftwards, pos:rightwards)         
-        'boxOffsetY',                       0, ...                        % y-offset from center of screen (neg: upwards, pos: downwards)
+        'boxOffsetY',                       0, ...                          % y-offset from center of screen (neg: upwards, pos: downwards)
         'primaryBasesNum',                  1, ...                          
         'gamma',                            struct( ...
                                                 'fitType',          'crtPolyLinear', ...

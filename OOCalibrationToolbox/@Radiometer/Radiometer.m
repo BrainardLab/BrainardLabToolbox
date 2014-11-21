@@ -61,7 +61,7 @@ classdef Radiometer < handle
     % Private properties
     properties (Access = private)
         % List of serial port devices to look for.
-        portDeviceNames = { lower('keyserial1'), lower('usbmodem'), lower('usbserial') };
+        portDeviceNames = { lower('keyserial1'), lower('usbmodem'), lower('usbserial'), lower('cu.USA') };
     
         % Enumerate cu* devices - they correspond to serial ports:
         portDeviceFiles = dir('/dev/cu*');
