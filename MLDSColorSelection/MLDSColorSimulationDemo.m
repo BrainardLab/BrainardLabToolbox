@@ -29,6 +29,7 @@ thePairs = nchoosek(1:nCompetitors,2);
 nPairs = size(thePairs,1);
 nTrials = nTrials.*ones(nPairs,1);
 
+<<<<<<< Updated upstream
 for trySpacing = 1:length(spacingRange)
     % create competitor pairs for a given set of competitors. 
     % spacing range is from 1 to 1+ range (rather than from 0).
@@ -53,6 +54,16 @@ for trySpacing = 1:length(spacingRange)
                     if (MLDSSimulateResponse(targets(whichTarget),y(thePairs(i,1)),y(thePairs(i,2)),sigma,@MLDSIdentityMap))
                         n1 = n1 + 1;
                     end
+=======
+for whichTarget = 1:lengthLinY;
+    for whichSim = 1:nSimulations
+        % Simulate responses
+        for i = 1:length(thePairs)
+            n1 = 0;
+            for j = 1:nTrials(i) %nSimulatePerPair
+                if (MLDSSimulateResponse(linY(whichTarget),y(thePairs(i,1)),y(thePairs(i,2)),sigma,@MLDSIdentityMap))
+                    n1 = n1 + 1;
+>>>>>>> Stashed changes
                 end
                 theResponses(i) = n1;
             end
