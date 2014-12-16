@@ -17,7 +17,7 @@ function OOC_calibrateSamsungOLED3
     % Stimulus file
     stimulusFileName = 'PixelOLEDprobes5.mat';
     % Calibration file
-    calibrationFileName = '/Users/Shared/Matlab/Toolboxes/BrainardLabToolbox/OOCalibrationToolbox/SamsungOLED_CloudsCalib5.mat';
+    calibrationFileName = '/Users/Shared/Matlab/Toolboxes/BrainardLabToolbox/OOCalibrationToolbox/SamsungOLED_CloudsCalib10.mat';
             
     % Load pre-computed calibration patterns
     fprintf('Loading stimuli. Please wait ...');
@@ -85,7 +85,8 @@ function OOC_calibrateSamsungOLED3
             runParams.leftRadiometerID.model    = leftRadiometerOBJ.deviceModelName;
             runParams.leftRadiometerID.serialNo = leftRadiometerOBJ.deviceSerialNum;
             fprintf('\nLeft Radiometer: %s with serial no:%s\n', leftRadiometerOBJ.deviceModelName, leftRadiometerOBJ.deviceSerialNum);
-
+            Speak(sprintf('Left %s :%s', leftRadiometerOBJ.deviceModelName, leftRadiometerOBJ.deviceSerialNum));
+            
             % Set various PR-650 specific optional parameters
             leftRadiometerOBJ.setOptions(...
                 'syncMode',     'OFF', ...
@@ -101,7 +102,7 @@ function OOC_calibrateSamsungOLED3
                 runParams.rightRadiometerID.model    = rightRadiometerOBJ.deviceModelName;
                 runParams.rightRadiometerID.serialNo = rightRadiometerOBJ.deviceSerialNum;
                 fprintf('\nRight Radiometer: %s with serial no:%s\n', rightRadiometerOBJ.deviceModelName, rightRadiometerOBJ.deviceSerialNum);
-
+                Speak(sprintf('Right %s:%s', rightRadiometerOBJ.deviceModelName, rightRadiometerOBJ.deviceSerialNum));
                 % Set various PR-650 specific optional parameters
                 rightRadiometerOBJ.setOptions(...
                     'syncMode',     'OFF', ...
@@ -116,7 +117,7 @@ function OOC_calibrateSamsungOLED3
                 'rightRadiometerOBJ',    rightRadiometerOBJ, ...
                 'calibrationFile',       'SamsungOLED_240Hz_10bit', ...         % name of file on which the calibration data will be saved
                 'displayTemporalDither', 4, ...                                 % 240 Hz: 4 frame interlace for 10 - bit resolution
-                'comment',               'test' ...
+                'comment',               'Second run with backup panel. Now using the backup powerboard.' ...
                 );
         else
            % demoMode
@@ -132,8 +133,8 @@ function OOC_calibrateSamsungOLED3
         
         if (runMode)
             % Present stimulus for aligning the radiometers.
-            leftTargetGray  = 0.5;
-            rightTargetGray = 0.5;
+            leftTargetGray  = 0.99;
+            rightTargetGray = 0.99;
 
             exponentOfOneOverFIndex = 1;
             oriBiasIndex      = 1;
