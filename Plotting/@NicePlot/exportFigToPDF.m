@@ -45,4 +45,5 @@ function exportFigToPDF(pdfFileName,figHandle,dpi)
     set(figHandle,'Units',preUnits);
     set(figHandle,'PaperPosition',prePaperPosition);
     set(figHandle,'PaperSize',prePaperSize);
+
 end

@@ -26,7 +26,7 @@ function plotEssentialData(obj, figureGroupIndex)
     plotPrimaryChromaticityStabilityData(obj, figureGroupIndex);
     
     % Repeatability 
-    if (obj.calStructOBJ.get('nAverage') > 1)
+    if (obj.calStructOBJ.get('nAverage') > 0)
         plotRepeatibilityData(obj,  figureGroupIndex);
     else
         plotNulPlot(obj, figureGroupIndex);
