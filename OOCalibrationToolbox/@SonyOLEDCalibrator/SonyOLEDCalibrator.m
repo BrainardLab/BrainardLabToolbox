@@ -82,11 +82,10 @@ classdef SonyOLEDCalibrator < handle
     % Public methods
     methods 
         % Constructor
-        function obj = SamsungOLEDCalibrator(varargin) 
+        function obj = SonyOLEDCalibrator(varargin) 
             % Configure an inputParser to examine whether the options passed to us are valid
             parser = inputParser;
             parser.addParamValue('executiveScriptName',     obj.executiveScriptName);
-            parser.addParamValue('calibrationFile',         obj.calibrationFile);
             parser.addParamValue('leftRadiometerObj',       obj.leftRadiometerObj);
             parser.addParamValue('rightRadiometerObj',      obj.rightRadiometerObj);
             
