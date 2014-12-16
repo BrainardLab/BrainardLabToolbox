@@ -1,7 +1,7 @@
 function OOC_analyzeCal
 
     % Load a calibration file
-    defaultCalFile = '240OLED_SDAL2';
+    defaultCalFile = 'Right_SONY_PVM_OLED';
     [cal, calFilename] = GetCalibrationStructure('Enter calibration filename',defaultCalFile,[]);
     
     % Instantiate a @CalAnalyzer object
