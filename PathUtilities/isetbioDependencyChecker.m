@@ -11,7 +11,8 @@ function isetbioDependencyChecker
 
     % Will add the isetbio toolbox
     listOfNonNativeToolboxesToAdd = { ...
-        isetbioRootPath() ...
+        {isetbioRootPath(), '-end'} ...
+        {'/Volumes/SDXC_64GB/Matlab/Toolboxes/BrainardLabToolbox/PathUtilities/@PathConfig', '-begin'} ...
         };
 
     % Get list of currently installed toolboxes
@@ -19,6 +20,10 @@ function isetbioDependencyChecker
 
     % Remove everything
     restoredefaultpath();
+    
+    % add the PathUtilities
+    addpath('/Users/Shared/Matlab/Toolboxes/BrainardLabToolbox/PathUtilities');
+    
     PathConfig.removeNativeToolboxes({});
             
     % Add what we want.
