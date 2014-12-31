@@ -14,7 +14,7 @@ function nativeToolboxesDirList = getSelectNativeToolboxesDirList()
     
     nativeToolboxesDirList = {};
     for k = 1:numel(indicesForRemoval)
-        nativeToolboxesDirList{k} = s.tooboxLocalDirs{indicesForRemoval(k)};
+        nativeToolboxesDirList{k} = s.toolboxLocalDirs{indicesForRemoval(k)};
     end
     
 end

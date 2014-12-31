@@ -13,6 +13,12 @@ classdef PathConfig
         % Method to remove all native Matlab toolboxes from the current path
         removeNativeToolboxes(toolboxPathsList);
         
+        % Method to add select native toolboxes
+        addNativeToolboxes(s, listOfToolboxesToAdd);
+        
+        % Method to add select non-native toolboxes
+        addNonNativeToolboxes(listOfToolboxesToAdd);
+        
         % Method to remove all non-native Matlab toolboxes from the current path
         removeNonNativeToolboxes(toolboxPath);
     

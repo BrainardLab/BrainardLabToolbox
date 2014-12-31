@@ -9,7 +9,7 @@ function s = getListOfInstalledToolboxes(beVerbose)
     notRelevantToolboxDirs = {'.', '..', 'matlab', 'local', 'shared', 'hdlcoder'};
     
     s.toolboxNames = {};
-    s.tooboxLocalDirs = {};
+    s.toolboxLocalDirs = {};
     includedToolboxes = 0;
     
     if (nargin == 1) && (~isempty(beVerbose)) && (beVerbose == 1)
@@ -26,9 +26,9 @@ function s = getListOfInstalledToolboxes(beVerbose)
             end
             includedToolboxes = includedToolboxes + 1;
             s.toolboxNames{includedToolboxes} = toolboxInfo.Name;
-            s.tooboxLocalDirs{includedToolboxes} = sprintf('%s/%s', toolboxdir(''), toolboxLocalDirs(k).name);
+            s.toolboxLocalDirs{includedToolboxes} = sprintf('%s/%s', toolboxdir(''), toolboxLocalDirs(k).name);
             if (nargin == 1) && (~isempty(beVerbose)) && (beVerbose == 1)
-                fprintf('\n[%2d]. %-40s %s', includedToolboxes, s.toolboxNames{includedToolboxes}, s.tooboxLocalDirs{includedToolboxes})
+                fprintf('\n[%2d]. %-40s %s', includedToolboxes, s.toolboxNames{includedToolboxes}, s.toolboxLocalDirs{includedToolboxes})
             end
         end
     end

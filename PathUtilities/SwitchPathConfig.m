@@ -4,16 +4,17 @@ function SwitchPathConfig
     PathConfig.restoreDefaultPath();
     
     fprintf('\nSelect from the following configurations:');
-    fprintf('\n\t[0]. Standard Brainad lab config');
-    fprintf('\n\t[1]. Matlab-main only');
-    fprintf('\n\t[2]. No select native Matlab toolboxes');
-    fprintf('\n\t[3]. No native Matlab toolboxes whatsoever');
-    fprintf('\n\t[4]. No public BrainardLabToolbox');
-    fprintf('\n\t[5]. No private BrainardLabToolbox');
-    fprintf('\n\t[6]. No public or private BrainardLabToolbox');
-    fprintf('\n\t[7]. No Psychtoolbox');
-    fprintf('\n\t[8]. No public or private BrainardLabToolbox, no Psychtoolbox');
-    fprintf('\n\t[9]. No ISETBIO');
+    fprintf('\n\t [0]. Standard Brainad lab config');
+    fprintf('\n\t [1]. Matlab-main only');
+    fprintf('\n\t [2]. No select native Matlab toolboxes');
+    fprintf('\n\t [3]. No native Matlab toolboxes whatsoever');
+    fprintf('\n\t [4]. No public BrainardLabToolbox');
+    fprintf('\n\t [5]. No private BrainardLabToolbox');
+    fprintf('\n\t [6]. No public or private BrainardLabToolbox');
+    fprintf('\n\t [7]. No Psychtoolbox');
+    fprintf('\n\t [8]. No public or private BrainardLabToolbox, no Psychtoolbox');
+    fprintf('\n\t [9]. No ISETBIO');
+    fprintf('\n\t[10]. ISETBIO, Matlab, Signal Processing, Image Processing');
     
     pathSelection = input('\nSelect a configuration [default = 0]: ');
     if (isempty(pathSelection))
@@ -57,26 +58,34 @@ function SwitchPathConfig
         case 9
             PathConfig.removeNonNativeToolboxes('/Users/Shared/Matlab/Toolboxes/isetbio');
             
+        case 10
+            
+            listOfNativeToolboxesToAdd = { ...
+                'Image Processing' ...
+             %   'Signal Processing' ...
+                };
+            
+            listOfNonNativeToolboxesToAdd = { ...
+                isetbioRootPath() ...
+                };
+            
+            % Get list of currently installed toolboxes
+            s = PathConfig.getListOfInstalledToolboxes;
+        
+            % Remove everything
+            restoredefaultpath();
+            PathConfig.removeNativeToolboxes({});
+            
+            % Add what we want.
+            PathConfig.addNativeToolboxes(s, listOfNativeToolboxesToAdd);
+            PathConfig.addNonNativeToolboxes(listOfNonNativeToolboxesToAdd);
+            
         otherwise
             % do nothing PathConfig.restoreDefaultPath();
     end
     
     PathConfig.rehash();
-    PathConfig.getListOfInstalledToolboxes(1);
-    
-    checkISETBIOvalidationScripts = false;
-    if checkISETBIOvalidationScripts
-        % Check whether isetbio validation scripts run to completion
-        v_oi
-        v_ISETBIO
-        PathConfig.rehash();
-        PathConfig.getListOfInstalledToolboxes(1);
-    end
-    
-    while (1)
-        functionName = input('\nEnter function name for which to check toolbox dependencies: ', 's');
-        PathConfig.findToolboxDependencies(functionName)
-    end
+    PathConfig.getListOfInstalledToolboxes(1);   
     
 end
 
