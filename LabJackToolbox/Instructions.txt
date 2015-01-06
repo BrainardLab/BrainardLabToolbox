@@ -2,17 +2,17 @@ Step 0. Make sure you have xCode developer's tools and command line tools instal
 
 Step 1. Installing the LibUSB driver
 Open Terminal.app
-cd $LabJackOscilloscope/LibUSB/libusb-1.0.19
+cd /Users/Shared/Matlab/Toolboxes/BrainardLabToolbox/LabJackToolbox/LibUSB/libusb-1.0.19
 ./configure
 make
 sudo make install
 
 Step 2. Installing the LabJack driver
-cd $LabJackOscilloscope/LabJackExoDriver
+cd /Users/Shared/Matlab/Toolboxes/BrainardLabToolbox/LabJackToolbox/LabJackExoDriver
 sudo sh install.sh
 
 Step 3. Test
 Open Matlab
-cd $LabJackOscilloscope
-ssessSignalTiming
+cd /Users/Shared/Matlab/Toolboxes/BrainardLabToolbox/LabJackToolbox
+run LabJackDemo
 
