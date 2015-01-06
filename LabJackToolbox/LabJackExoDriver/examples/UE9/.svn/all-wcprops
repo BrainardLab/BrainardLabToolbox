@@ -1,0 +1,83 @@
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/labjack/exodriver.git/!svn/ver/161/trunk/examples/UE9
+END
+ue9Stream.c
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/labjack/exodriver.git/!svn/ver/118/trunk/examples/UE9/ue9Stream.c
+END
+ue9EFunctions.c
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/labjack/exodriver.git/!svn/ver/77/trunk/examples/UE9/ue9EFunctions.c
+END
+ue9.c
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/labjack/exodriver.git/!svn/ver/140/trunk/examples/UE9/ue9.c
+END
+ue9TimerCounter.c
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/labjack/exodriver.git/!svn/ver/77/trunk/examples/UE9/ue9TimerCounter.c
+END
+ue9allio.c
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/labjack/exodriver.git/!svn/ver/77/trunk/examples/UE9/ue9allio.c
+END
+ue9LJTDAC.c
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/labjack/exodriver.git/!svn/ver/77/trunk/examples/UE9/ue9LJTDAC.c
+END
+ue9BasicCommConfig.c
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/labjack/exodriver.git/!svn/ver/161/trunk/examples/UE9/ue9BasicCommConfig.c
+END
+ue9.h
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/labjack/exodriver.git/!svn/ver/98/trunk/examples/UE9/ue9.h
+END
+ue9Feedback.c
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/labjack/exodriver.git/!svn/ver/134/trunk/examples/UE9/ue9Feedback.c
+END
+ue9ControlConfig.c
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/labjack/exodriver.git/!svn/ver/77/trunk/examples/UE9/ue9ControlConfig.c
+END
+Makefile
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/labjack/exodriver.git/!svn/ver/90/trunk/examples/UE9/Makefile
+END
+ue9SingleIO.c
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/labjack/exodriver.git/!svn/ver/77/trunk/examples/UE9/ue9SingleIO.c
+END
+ue9EthernetExample.c
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/labjack/exodriver.git/!svn/ver/46/trunk/examples/UE9/ue9EthernetExample.c
+END
