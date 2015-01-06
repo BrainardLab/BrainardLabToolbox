@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 41
+/labjack/exodriver.git/!svn/ver/165/trunk
+END
+INSTALL.MacOSX
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/labjack/exodriver.git/!svn/ver/130/trunk/INSTALL.MacOSX
+END
+install.sh
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/labjack/exodriver.git/!svn/ver/155/trunk/install.sh
+END
+INSTALL.Linux
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/labjack/exodriver.git/!svn/ver/144/trunk/INSTALL.Linux
+END
+.gitignore
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/labjack/exodriver.git/!svn/ver/126/trunk/.gitignore
+END
+README
+K 25
+svn:wc:ra_dav:version-url
+V 48
+/labjack/exodriver.git/!svn/ver/162/trunk/README
+END
+10-labjack.rules
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/labjack/exodriver.git/!svn/ver/127/trunk/10-labjack.rules
+END
