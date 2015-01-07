@@ -8,24 +8,24 @@ function LabJackDemo
 
     addpath(genpath(pwd));
     
-    % Instantiate a LabJack object to handle communication with the device
+    % Instantiate a LabJack object 
     labjackOBJ = LabJackU6('verbosity', 1);
     
     % Set up sampling parameters
     samplingParams = struct(...
-        'channelIDs', [1], ...         % list of  channels to aquire from (AIN1, AIN2, AIN3)
-        'frequencyInHz', 7*1000 ...    % using an 7 KHz sampling rate
+        'channelIDs', [1], ...     % sample from channels AIN1, AIN2, AIN3
+        'frequencyInHz', 7*1000 ...    % using an 8 KHz sampling rate
         );
     
     try
         % Configure analog input sampling
         labjackOBJ.configureAnalogDataStream(samplingParams.channelIDs, samplingParams.frequencyInHz);
 
-        % Loop for ever
+        
+        % Aquire for ever
         while (1)
-            % 2 second aquisitions
+        
             durationInSeconds = 2;
-            
             % Aquire the data
             labjackOBJ.startDataStreamingForSpecifiedDuration(durationInSeconds);
 
@@ -40,6 +40,7 @@ function LabJackDemo
             set(gca, 'YLim', 5*[-1 1]);
             ylabel('input signal (volts)');
             xlabel('time (seconds)');
+        end
         end
         
         % Close-up shop
