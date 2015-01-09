@@ -1,0 +1,59 @@
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/labjack/exodriver.git/!svn/ver/161/trunk/examples/U3
+END
+u3Stream.c
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/labjack/exodriver.git/!svn/ver/99/trunk/examples/U3/u3Stream.c
+END
+u3EFunctions.c
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/labjack/exodriver.git/!svn/ver/99/trunk/examples/U3/u3EFunctions.c
+END
+u3.c
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/labjack/exodriver.git/!svn/ver/134/trunk/examples/U3/u3.c
+END
+u3BasicConfigU3.c
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/labjack/exodriver.git/!svn/ver/161/trunk/examples/U3/u3BasicConfigU3.c
+END
+u3allio.c
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/labjack/exodriver.git/!svn/ver/99/trunk/examples/U3/u3allio.c
+END
+u3LJTDAC.c
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/labjack/exodriver.git/!svn/ver/99/trunk/examples/U3/u3LJTDAC.c
+END
+Makefile
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/labjack/exodriver.git/!svn/ver/90/trunk/examples/U3/Makefile
+END
+u3.h
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/labjack/exodriver.git/!svn/ver/99/trunk/examples/U3/u3.h
+END
+u3Feedback.c
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/labjack/exodriver.git/!svn/ver/99/trunk/examples/U3/u3Feedback.c
+END

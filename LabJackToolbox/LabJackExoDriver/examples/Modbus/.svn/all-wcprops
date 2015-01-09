@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/labjack/exodriver.git/!svn/ver/133/trunk/examples/Modbus
+END
+modbus.h
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/labjack/exodriver.git/!svn/ver/57/trunk/examples/Modbus/modbus.h
+END
+writeModbusExample.c
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/labjack/exodriver.git/!svn/ver/57/trunk/examples/Modbus/writeModbusExample.c
+END
+readModbusExample.c
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/labjack/exodriver.git/!svn/ver/57/trunk/examples/Modbus/readModbusExample.c
+END
+testModbusFunctions.c
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/labjack/exodriver.git/!svn/ver/57/trunk/examples/Modbus/testModbusFunctions.c
+END
+modbus.c
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/labjack/exodriver.git/!svn/ver/133/trunk/examples/Modbus/modbus.c
+END
+Makefile
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/labjack/exodriver.git/!svn/ver/90/trunk/examples/Modbus/Makefile
+END
