@@ -36,6 +36,7 @@ function exportFigToPDF(pdfFileName,figHandle,dpi)
     set(figHandle,'PaperPosition',[0,0,position(3:4)]);
     set(figHandle,'PaperSize',position(3:4));
 
+    set(figHandle,'InvertHardCopy','off')
     % Save the pdf (this is the same method used by "saveas")
     print(figHandle,'-dpdf',pdfFileName,sprintf('-r%d',dpi))
 
