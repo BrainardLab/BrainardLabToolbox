@@ -4,6 +4,7 @@ function addNonNativeToolboxes(listOfToolboxesToAdd)
     for k = 1:numel(listOfToolboxesToAdd)
         toolboxPath = listOfToolboxesToAdd{k}{1};
         position = listOfToolboxesToAdd{k}{2};
-        addpath(genpath(toolboxPath), position); 
+        fprintf('\nAdding non-native toolbox: %s\n', toolboxPath);
+        addpath(genpath(toolboxPath), position);
     end
 end
