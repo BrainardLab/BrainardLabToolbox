@@ -4,7 +4,7 @@ function addNativeToolboxes(s, listOfToolboxesToAdd)
     for k = 1:numel(listOfToolboxesToAdd)
         for l = 1:numel(s.toolboxNames)
            if (~isempty(strfind(s.toolboxNames{l}, listOfToolboxesToAdd{k})))
-              fprintf('\nAdding %s', s.toolboxNames{l});
+              fprintf('\nAdding native toolbox: %s\n', s.toolboxNames{l});
               addpath(genpath(s.toolboxLocalDirs{l})); 
            end
         end
