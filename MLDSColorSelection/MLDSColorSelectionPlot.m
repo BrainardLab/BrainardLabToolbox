@@ -44,7 +44,7 @@ axis('square');
 if (SCATTERPLOT)
     subplot(1,2,2); hold on
     theDataProb = theResponses./ nTrialsPerPair;
-    plot(theDataProb,predictedResponses,'ro','MarkerSize',6,'MarkerFaceColor','r');
+    plot(theDataProb,predictedResponses,'ro','MarkerSize',10,'MarkerFaceColor','r');
     plot([0 1],[0 1],'k');
     axis('square')
     axis([0 1 0 1]);
