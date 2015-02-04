@@ -494,7 +494,7 @@ classdef LabJackU6 < handle
                self.deviceHandle = [];
                self.isInitialized = false;
                
-               fprintf('Ciao bambino ...\n');
+               %fprintf('Ciao bambino ...\n');
            else
               fprintf('LabJack object has not yet been initialized\n'); 
            end
