@@ -17,7 +17,7 @@ function OOC_calibrateSamsungOLED3
     % Stimulus file
     stimulusFileName = 'PixelOLEDprobes5.mat';
     % Calibration file
-    calibrationFileName = '/Users/Shared/Matlab/Toolboxes/BrainardLabToolbox/OOCalibrationToolbox/SamsungOLED_CloudsCalib10.mat';
+    calibrationFileName = '/Users/Shared/Matlab/Toolboxes/BrainardLabToolbox/OOCalibrationToolbox/SamsungOLED_CloudsCalib11.mat';
             
     % Load pre-computed calibration patterns
     fprintf('Loading stimuli. Please wait ...');
@@ -117,7 +117,7 @@ function OOC_calibrateSamsungOLED3
                 'rightRadiometerOBJ',    rightRadiometerOBJ, ...
                 'calibrationFile',       'SamsungOLED_240Hz_10bit', ...         % name of file on which the calibration data will be saved
                 'displayTemporalDither', 4, ...                                 % 240 Hz: 4 frame interlace for 10 - bit resolution
-                'comment',               'Second run with backup panel. Now using the backup powerboard.' ...
+                'comment',               'First run with backup panel, powerboard and Tcon.' ...
                 );
         else
            % demoMode
