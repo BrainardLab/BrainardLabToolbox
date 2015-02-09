@@ -5,10 +5,6 @@
 
 function OOC_calibrateMonitor
     
-    clear classes
-    clc
-    
-    
     % Instantiate a Radiometer object, here a PR650obj.
     radiometerOBJ = PR650dev(...
         'verbosity',        10, ...      % 1 -> minimum verbosity
