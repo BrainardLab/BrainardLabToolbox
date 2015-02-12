@@ -339,7 +339,7 @@ classdef LabJackU6 < handle
                                 'Period', self.streamReadingIntervalInSeconds, ...
                                 'TasksToExecute', Inf, ...
                                 'TimerFcn',{@readDataStream, self}, ...
-                                'StartDelay',0.01); % StartDelay allows other parts of the gui to execute
+                                'StartDelay',0.1); % StartDelay allows other parts of the gui to execute
     
             % create timer object which will do the plotting
             self.completionTimer = timer('Name','CompletionTimer','ExecutionMode','fixedRate',...
@@ -460,11 +460,11 @@ classdef LabJackU6 < handle
                     elseif (self.samplingRateInHz > 1000)
                         self.streamReadingIntervalInSeconds = 0.04;
                     elseif (self.samplingRateInHz > 500)
-                        self.streamReadingIntervalInSeconds = 0.1;
+                        self.streamReadingIntervalInSeconds = 0.25;
                     else
                         self.streamReadingIntervalInSeconds = 0.50;
                     end
-                    self.streamReadingIntervalInSeconds = 0.001;
+                    
                 else
                     fprintf(1,'configureAnalogDataStream returned error %d\n',errorCode);
                     self.analogInputStreamingConfiguredOK = false;
