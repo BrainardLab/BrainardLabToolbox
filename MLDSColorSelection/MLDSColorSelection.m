@@ -27,6 +27,7 @@ function [targetCompetitorFit, logLikelyFit, predictedResponses] = MLDSColorSele
 %
 % 5/3/12  dhb  Capture predicted probabilities and pass them along.
 % 6/13/13 ar   Added comments. 
+% 2/12/15 dhb, ar Enforce sigma spacing for first found competitor position.
 
 %% Set fixed parameters
 %
@@ -113,7 +114,10 @@ for k1 = 1:length(trySpacings)
         % Get reasonable upper and lower bound. These are most easily computed from the initial parameters.
         % We enforce that the competitor solutions head off in the positive direction, but the target can
         % be anywhere.  (We take 100 times the maximum value in the intial parameters to equal 'anyware');
-        vlb = zeros(size(initialParams));
+        % 
+        % Because the first competitor is at 0, the rest cannot be lower
+        % than sigma/sigmaFactor.
+        vlb = (sigma/sigmaFactor)*ones(size(initialParams));
         vub = 100*max(abs(initialParams))*ones(size(initialParams));
         vlb(1) = -vub(1);
         
