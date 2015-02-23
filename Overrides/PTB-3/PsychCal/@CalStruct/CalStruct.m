@@ -87,6 +87,7 @@ classdef CalStruct < handle
         describe___dacsize;
         describe___hz;
         describe___screenSizePixel;
+        describe___screenSizeMM;
         
         % HDR-specific
         describe___HDRProjector;                    % only in old-style cal
@@ -269,6 +270,8 @@ classdef CalStruct < handle
         % End of getter methods for select properties over which we want more
         % controlled access
         
+        % Method to print the field names contained in the FieldMap
+        printMappedFieldNames(obj);
         
     end
    
@@ -286,9 +289,6 @@ classdef CalStruct < handle
         
         % Method to check the validity of the requested unified field name.
         isValid = fieldNameIsValid(obj, unifiedFieldName);
-        
-        % Method to print the field names contained in the FieldMap
-        printMappedFieldNames(obj);
         
         % Method to generate a cal struct with the the old-style format,
         % and which will be returned to routines that rely on that format
