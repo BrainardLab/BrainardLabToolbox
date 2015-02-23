@@ -1,3 +1,4 @@
+
 function [targetCompetitorFit, logLikelyFit, predictedResponses] = MLDSColorSelection(thePairs,theResponses,nTrialsPerPair, numberOfCompetitors)
 % function [targetCompetitorFit, logLikelyFit, predictedResponses] = MLDSColorSelection(thePairs,theResponses,nTrialsPerPair, numberOfCompetitors)
 %
@@ -7,7 +8,7 @@ function [targetCompetitorFit, logLikelyFit, predictedResponses] = MLDSColorSele
 %   thePairs -            competitor pairs. 
 %   theResponses -        set of responses for this pair (number of times first
 %                         competitor is chosen. 
-%   nTrialsPerPair -      total number of trials run. 
+%   nTrialsPerPair -      total number of trials run. Vector of same size as theResponses.
 %   numberOfCompetitors - number of competitors in the set. 
 %
 % Output: 
@@ -28,6 +29,16 @@ function [targetCompetitorFit, logLikelyFit, predictedResponses] = MLDSColorSele
 % 5/3/12  dhb  Capture predicted probabilities and pass them along.
 % 6/13/13 ar   Added comments. 
 % 2/12/15 dhb, ar Enforce sigma spacing for first found competitor position.
+% 2/23/15 dhb, ar More comments.  And add an input arg error check.
+
+%% The number of responses in theResponses cannot ever exceed nTrialsPerPair.
+% Check this and throw error message if it does not hold.
+if (length(theResponses(:)) ~= length(nTrialsPerPair(:)))
+    error('Passed theResponses and nTrialsPerPair must be of same length');
+end
+if (any(theResponses > nTrialsPerPair))
+    error('An entry of input theResponses exceeds passed nTrialsPerPair.  No good!');
+end
 
 %% Set fixed parameters
 %
@@ -36,7 +47,8 @@ function [targetCompetitorFit, logLikelyFit, predictedResponses] = MLDSColorSele
 sigma = 0.1;
 
 % Determine minimum size of interval between
-% solution elements, relative to sigma
+% solution elements, relative to sigma.  That
+% is, the minimum spacing will be sigma/sigmaFactor.
 sigmaFactor = 4;
 
 %% Set up parameters for search.
@@ -44,14 +56,19 @@ sigmaFactor = 4;
 % Enforce constraint that competitor portion of
 % the solution is monotonic with
 % respect to the nominal target positions, with
-% a reasonable separation (in sigma units).  We
+% a reasonable separation (in sigma units).
+%
+% For the second through last competitor, we
 % do this using the linear constraint feature
 % that fmincon is set up to use, by generating
 % a matrix A that takes the differences between
 % adjacent entries of the solution vector.  
 % By requiring that Ax < b, we enforce that
 % each difference in the solution is at
-% least -b.]
+% least -b.  That is, the first entry of
+% A computes C2-C3, which then enforces
+% C2-C3 < -b => C3-C2 > b, which is what
+% we want.
 %
 % Because the target is the first entry of
 % the solution, it has no constraint.  We
@@ -63,7 +80,8 @@ for i = 1:numberOfCompetitors-2
     A(i,i+2) = -1;
 end
 
-% This is the minimum interval size.
+% This is the minimum interval size for use with the
+% the A matrix above.
 b = -sigma/sigmaFactor*ones(numberOfCompetitors-2,1);
 
 % Set spacings for initializing the search.  
@@ -116,9 +134,16 @@ for k1 = 1:length(trySpacings)
         % be anywhere.  (We take 100 times the maximum value in the intial parameters to equal 'anyware');
         % 
         % Because the first competitor is at 0, the rest cannot be lower
-        % than sigma/sigmaFactor.
+        % than sigma/sigmaFactor.  This has the effect of enforcing C2 >
+        % sigma/sigmaFactor.  And since C3 > C2 etc, using this as a lower
+        % bound for C3 etc is OK.
         vlb = (sigma/sigmaFactor)*ones(size(initialParams));
         vub = 100*max(abs(initialParams))*ones(size(initialParams));
+        
+        % Remember that the searched vector is [T C2 C3 ...].  We don't
+        % want a strong lower bound constraint on the target, so we make
+        % this the negative our our large upper bound.  This lets the
+        % target, in effect, go anywhere.  That's what we want.
         vlb(1) = -vub(1);
         
         % Run the search
