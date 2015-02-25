@@ -1,0 +1,45 @@
+function  [leftCal, rightCal] = importStereoRGBCalibrationFiles(calFnames, leftScreenCalFile, rightScreenCalFile, displaysAttached, checkForScreenSize)
+% Check calibration files
+
+   for leftright = 1:2
+      % Read in calibration file
+      cal = LoadCalFile(calFnames{leftright});
+
+      % Check calibration age and print warnings if it is too old
+      calWarningDays = 14;
+      calErrorDays   = 35;
+      calAge = GetCalibrationAge(cal);
+      if (calAge < calWarningDays)
+         fprintf('Spectral Calibration was last done %d days ago \n',calAge);
+      elseif (calAge < calErrorDays)
+         fprintf('WARNING: Spectral Calibration is %d days old, recalibrate soon!\n',calAge);
+      else
+         fprintf('Spectral Calibration is %d days old, recalibrate now!\n',calAge);
+      end
+
+      % Check screen resolution/refresh rate if we are running on the Stereo Rig.
+      % If we are not, do not bother checking, it is attached displays are
+      % not going to match the dimensions of those in the calibration file
+      if (checkForScreenSize)
+
+           % Check screen resolution
+           if ~((cal.describe.screenSizePixel(1) == displaysAttached(leftright).screenSizePixel(1)) && ...
+                (cal.describe.screenSizePixel(2) == displaysAttached(leftright).screenSizePixel(2)))
+                   fprintf('Error: Calibrated screen resolution different than current resolution.');
+                   % error('Error: Calibrated screen resolution different than current resolution.');
+           end
+           % Check refresh rate
+           if (cal.describe.hz ~= displaysAttached(leftright).refreshRate)
+               fprintf('Error: Calibrated refresh rate different than current refresh rate.');
+               %error('Error: Calibrated refresh rate different than current refresh rate.');
+           end
+      end
+
+      % Set Gamma Method
+      if (leftright == 1)
+          leftCal  = SetGammaMethod(cal, 0);
+      else
+          rightCal = SetGammaMethod(cal, 0);
+      end
+   end  % leftright
+end
