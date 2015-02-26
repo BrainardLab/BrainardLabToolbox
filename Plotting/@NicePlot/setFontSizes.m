@@ -49,11 +49,11 @@ function setFontSizes(figHandle, varargin)
     legendHandles = findobj(figHandle,'Tag','legend');
     for k = 1:numel(legendHandles)
         if iscell(legendHandles)
-            et(legendHandles{k}, 'fontName', self.fontName, 'fontSize', round(self.fontSize*1.0), 'fontWeight', 'b', ...
-            'Color', [0.8 0.8 0.7], 'EdgeColor', 'none');
+            set(legendHandles{k}, 'fontName', self.fontName, 'fontSize', round(self.fontSize*1.0), 'fontWeight', 'b', ...
+            'Color', [0.95 0.95 0.8], 'EdgeColor', [0 0 0]);
         else
             set(legendHandles(k), 'fontName', self.fontName, 'fontSize', round(self.fontSize*1.0), 'fontWeight', 'b', ...
-            'Color', [0.8 0.8 0.7], 'EdgeColor', 'none');
+            'Color', [0.95 0.95 0.8], 'EdgeColor', [0 0 0]);
         end
     end
 end

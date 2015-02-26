@@ -282,6 +282,9 @@ classdef StereoViewController < handle
         end
         
         
+        function setCursorVisibility(obj, state)
+            mglDisplayCursor(double(state));
+        end
         
         
         % Method that adds a @ref stereoPair element to the drawing pipeline. 
