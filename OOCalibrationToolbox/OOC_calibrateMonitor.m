@@ -5,104 +5,26 @@
 
 function OOC_calibrateMonitor
     
-    % Instantiate a Radiometer object, here a PR650obj.
-    radiometerOBJ = PR650dev(...
-        'verbosity',        10, ...      % 1 -> minimum verbosity
-        'devicePortString', [] ...      % empty -> automatic port detection
-        );
+    % Generate the Radiometer object, here a PR650obj.
+    radiometerOBJ = generateRadiometerObject();
     
-    calibratorOBJ  = [];
+    % Generate configuration for display at hand
+    [displaySettings, calibratorOptions] = generateConfigurationForDisplayAtHand();
     
-    % List of available @Calibrator objects
-    calibratorTypes = {'MGL-based', 'PsychImaging-based (8-bit)'};
-    calibratorsNum  = numel(calibratorTypes);
+    % Generate the calibrator object
+    calibratorOBJ = generateCalibratorObject(displaySettings, radiometerOBJ, mfilename);
     
-    % Ask the user to select a calibrator type
-    fprintf('\n\n Available calibrator types:\n');
-    for k = 1:calibratorsNum
-        fprintf('\t[%3d]. %s\n', k, calibratorTypes{k});
-    end
-    defaultCalibratorIndex = 1;
-    calibratorIndex = input(sprintf('\tSelect a calibrator type (1-%d) [%d]: ', calibratorsNum, defaultCalibratorIndex));
-    if isempty(calibratorIndex) || (calibratorIndex < 1) || (calibratorIndex > calibratorsNum)
-        calibratorIndex = defaultCalibratorIndex;
-    end
-    fprintf('\n\t-------------------------\n');
-    selectedCalibratorType = calibratorTypes{calibratorIndex};
-    fprintf('Will employ an %s calibrator object [%d].\n', selectedCalibratorType, calibratorIndex);
-    
-    
-    % Specify the @Calibrator's initialization params. 
-    % Users should tailor these according to their display specs. 
-    % These can be set once only, when the @Calibrator object is
-    % instantiated.
-    calibratorInitParams = { ...
-        'executiveScriptName',      mfilename, ...              % name of the executive script (this file)
-        'radiometerObj',            radiometerOBJ, ...          % name of the radiometer object
-        'screenToCalibrate',        2, ...                      % second display
-        'desiredScreenSizePixel',   [1920 1080], ...            % width and height of display to be calibrated
-        'desiredRefreshRate',       60, ...                     % refresh rate in Hz
-        'displayPrimariesNum',      3, ...                      % i.e., R,G,B guns
-        'displayDeviceType',        'monitor', ...  
-        'displayDeviceName',        'NicolasViewSonic', ...     % a name for the display, could be anything
-        'calibrationFile',          'ViewSonicProbe', ...       % name of file on which the calibration data will be saved
-        'comment',                  'Office ViewSonic' ...      % a comment, could be anything
-        };
-    
-    
-    % Specify the @Calibrator's optional params using a CalibratorOptions class
-    % To see what options are available type: doc CalibratorOptions
-    % Users should tailor these according to their experimental needs.
-    calibratorOptions = CalibratorOptions( ...
-        'verbosity',                        2, ...
-        'whoIsDoingTheCalibration',         input('Enter your name: ','s'), ...
-        'emailAddressForDoneNotification',  GetWithDefault('Enter email address for done notification',  'cottaris@sas.upenn.edu'), ...
-        'blankOtherScreen',                 0, ...                          % whether to blank the other display (1=yes, 0 = no), ...
-        'whichBlankScreen',                 1, ...                          % screen number of the display to be blanked
-        'blankSettings',                    [0.25 0.25 0.25], ...           % color of the whichBlankScreen 
-        'bgColor',                          [0.3962 0.3787 0.4039], ...     % color of the background  
-        'fgColor',                          [0.3962 0.3787 0.4039], ...     % color of the foreground
-        'meterDistance',                    0.5, ...                        % distance between radiometer and screen
-        'leaveRoomTime',                    1, ...                          % seconds allowed to leave room
-        'nAverage',                         1, ...                          % number of repeated measurements for averaging
-        'nMeas',                            5, ...                          % samples along gamma curve
-        'boxSize',                          150, ...                        % size of calibration stimulus
-        'boxOffsetX',                       0, ...                          % x-offset from center of screen (neg: leftwards, pos:rightwards)         
-        'boxOffsetY',                       0, ...                        % y-offset from center of screen (neg: upwards, pos: downwards)
-        'primaryBasesNum',                  1, ...                          
-        'gamma',                            struct( ...
-                                                'fitType',          'crtPolyLinear', ...
-                                                'contrastThresh',   0.001, ...
-                                                'fitBreakThresh',   0.02 ...
-                                            ) ...  
-        );
-    
-    
+    % Set the calibrator options
+    calibratorOBJ.options = calibratorOptions;
+        
+    % display calStruct if so desired ?
     beVerbose = false;
-    
-    try
-        % Set various PR-650 specific optional parameters
-        radiometerOBJ.setOptions(...
-        	'syncMode',     'OFF', ...
-        	'verbosity',     0 ...
-        );
-    
-        % Instantiate an Calibrator object with the required configration variables.
-        if strcmp(selectedCalibratorType, 'MGL-based')
-            calibratorOBJ = MGLcalibrator(calibratorInitParams);
-            
-        elseif strcmp(selectedCalibratorType, 'PsychImaging-based (8-bit)')
-            calibratorOBJ = PsychImagingCalibrator(calibratorInitParams);
-        end
-
-        % Set the optional parameters
-        calibratorOBJ.options = calibratorOptions;
+    if (beVerbose)
+        % Optionally, display the cal struct before measurement
+        calibratorOBJ.displayCalStruct();
+    end
         
-        if (beVerbose)
-            % Optionally, display the cal struct before measurement
-            calibratorOBJ.displayCalStruct();
-        end
-        
+    try 
         % Calibrate !
         calibratorOBJ.calibrate();
             
@@ -133,4 +55,118 @@ function OOC_calibrateMonitor
     end % end try/catch
 end
 
+
+% Users should copy and adapt this function to adapt it to their setup
+function [displaySettings, calibratorOptions] = generateConfigurationForDisplayAtHand()
+
+    % Specify where to send the 'Calibration Done' notification email
+    emailAddressForNotification = 'cottaris@sas.upenn.edu';
+    
+    % Specify the @Calibrator's initialization params. 
+    % Users should tailor these according to their hardware specs. 
+    % These can be set once only, at the time the @Calibrator object is instantiated.
+    displaySettings = { ...
+        'screenToCalibrate',        2, ...                          % which display to calibrate. main screen = 1, second display = 2
+        'desiredScreenSizePixel',   [1920 1080], ...                % pixels along the width and height of the display to be calibrated
+        'desiredRefreshRate',       60, ...                         % refresh rate in Hz
+        'displayPrimariesNum',      3, ...                          % for regular displays this is always 3 (RGB) 
+        'displayDeviceType',        'monitor', ...                  % this should always be set to 'monitor' for now
+        'displayDeviceName',        'ViewSonicProbe', ...           % a name for the display been calibrated
+        'calibrationFile',          'ViewSonicProbe', ...           % name of calibration file to be generated
+        'comment',                  'Scallops display' ...          % some comment, could be anything
+        };
+    
+    % Specify the @Calibrator's optional params using a CalibratorOptions object
+    % To see what options are available type: doc CalibratorOptions
+    % Users should tailor these according to their experimental needs.
+    calibratorOptions = CalibratorOptions( ...
+        'verbosity',                        2, ...
+        'whoIsDoingTheCalibration',         input('Enter your name: ','s'), ...
+        'emailAddressForDoneNotification',  GetWithDefault('Enter email address for done notification',  emailAddressForNotification), ...
+        'blankOtherScreen',                 0, ...                          % whether to blank other displays attached to the host computer (1=yes, 0 = no), ...
+        'whichBlankScreen',                 1, ...                          % screen number of the display to be blanked  (main screen = 1, second display = 2)
+        'blankSettings',                    [0.25 0.25 0.25], ...           % color of the whichBlankScreen 
+        'bgColor',                          [0.3962 0.3787 0.4039], ...     % color of the background  
+        'fgColor',                          [0.3962 0.3787 0.4039], ...     % color of the foreground
+        'meterDistance',                    0.5, ...                        % distance between radiometer and screen in meters
+        'leaveRoomTime',                    1, ...                          % seconds allowed to leave room
+        'nAverage',                         3, ...                          % number of repeated measurements for averaging
+        'nMeas',                            11, ...                         % samples along gamma curve
+        'boxSize',                          150, ...                        % size of calibration stimulus in pixels
+        'boxOffsetX',                       0, ...                          % x-offset from center of screen (neg: leftwards, pos:rightwards)         
+        'boxOffsetY',                       0 ...                           % y-offset from center of screen (neg: upwards, pos: downwards)                      
+    );
+end
+
+
+% Function to generate the calibrator object.
+% Users should not modify this function unless they know what they are doing.
+function calibratorOBJ = generateCalibratorObject(displaySettings, radiometerOBJ, execScriptFileName)
+
+    % set init params
+    calibratorInitParams = displaySettings;
+    
+    % add radiometerOBJ
+    calibratorInitParams{numel(calibratorInitParams)+1} = 'radiometerObj';
+    calibratorInitParams{numel(calibratorInitParams)+1} = radiometerOBJ;
+    
+    % add executive script name
+    calibratorInitParams{numel(calibratorInitParams)+1} ='executiveScriptName';
+    calibratorInitParams{numel(calibratorInitParams)+1} = execScriptFileName;
+        
+    % Select and instantiate the calibrator object
+    calibratorOBJ = selectAndInstantiateCalibrator(calibratorInitParams);
+end
+
+
+function radiometerOBJ = generateRadiometerObject()
+    radiometerOBJ = PR650dev(...
+        'verbosity',        1, ...       % 1 -> minimum verbosity
+        'devicePortString', [] ...       % empty -> automatic port detection
+        );
+    
+end
+
+% Function to select and instantiate a particular calibrator type
+% Currently either MGL-based or PTB-3 based.
+% Users should not modify this function unless they know what they are doing.
+function calibratorOBJ = selectAndInstantiateCalibrator(calibratorInitParams)
+    % List of available @Calibrator objects
+    calibratorTypes = {'MGL-based', 'PsychImaging-based (8-bit)'};
+    calibratorsNum  = numel(calibratorTypes);
+    
+    % Ask the user to select a calibrator type
+    fprintf('\n\n Available calibrator types:\n');
+    for k = 1:calibratorsNum
+        fprintf('\t[%3d]. %s\n', k, calibratorTypes{k});
+    end
+    defaultCalibratorIndex = 1;
+    calibratorIndex = input(sprintf('\tSelect a calibrator type (1-%d) [%d]: ', calibratorsNum, defaultCalibratorIndex));
+    if isempty(calibratorIndex) || (calibratorIndex < 1) || (calibratorIndex > calibratorsNum)
+        calibratorIndex = defaultCalibratorIndex;
+    end
+    fprintf('\n\t-------------------------\n');
+    selectedCalibratorType = calibratorTypes{calibratorIndex};
+    fprintf('Will employ an %s calibrator object [%d].\n', selectedCalibratorType, calibratorIndex);
+    
+    calibratorOBJ = [];
+    try
+        % Instantiate an Calibrator object with the required configration variables.
+        if strcmp(selectedCalibratorType, 'MGL-based')
+            calibratorOBJ = MGLcalibrator(calibratorInitParams);
+            
+        elseif strcmp(selectedCalibratorType, 'PsychImaging-based (8-bit)')
+            calibratorOBJ = PsychImagingCalibrator(calibratorInitParams);
+        end
+        
+    catch err
+        % Shutdown DBLab_Radiometer object  
+        if (~isempty(calibratorOBJ))
+            % Shutdown calibratorOBJ
+            calibratorOBJ.shutDown();
+        end
+        
+        rethrow(err)
+    end % end try/catch
+end
 
