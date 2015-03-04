@@ -126,6 +126,7 @@ classdef CalStruct < handle
         rawData___gammaCurveSortIndices; 
         rawData___gammaCurveMeasurements; 
         rawData___gammaCurveMeanMeasurements; 
+        rawData___gammaCurveMeasurementsInNewFormat;
                  
         % HDR-specific spectra
         rawData___yokedSpectra;
