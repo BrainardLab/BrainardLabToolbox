@@ -165,7 +165,7 @@ function plotPrimaryChromaticityStabilityData(obj, figureGroupIndex)
         xyYMon = XYZToxyY(T_sensor*fullSpectra');
     
         % Plot data
-        subplot('Position', [0.08 + (primaryIndex-1)*0.32 0.08 0.26 0.9]);
+        %subplot('Position', [0.08 + (primaryIndex-1)*0.32 0.08 0.26 0.9]);
         T_sensor  = obj.calStructOBJ.get('T_sensor');
 
         % Compute the spectral locus
@@ -173,18 +173,21 @@ function plotPrimaryChromaticityStabilityData(obj, figureGroupIndex)
         plot(xyYLocus(1,:)',xyYLocus(2,:)','k');
         hold on;
         
-        plot(xyYMon(1,:), xyYMon(2,:), 'k-');
+        plot(xyYMon(1,:), xyYMon(2,:), 'k-', 'LineWidth', 2.0);
         
         for k = 1:size(fullSpectra,1)
             if (primaryIndex == 1)
                 faceColor = [1.0 1.0 1.0] - (k/size(fullSpectra,1)*[0.2 1.0 1.0]);  
+                edgeColor = [1 0 0];
             elseif (primaryIndex == 2)
                 faceColor = [1.0 1.0 1.0] - (k/size(fullSpectra,1)*[1.0 0.1 1.0]);
+                edgeColor = [0 1 0];
             elseif (primaryIndex == 3)
                 faceColor = [1.0 1.0 1.0] - (k/size(fullSpectra,1)*[1.0 1.0 0.1]);
+                edgeColor = [0 0 1];
             end
-            edgeColor = faceColor;
-            plot(xyYMon(1,k), xyYMon(2,k), 's', 'MarkerFaceColor', faceColor, 'MarkerEdgeColor', edgeColor, 'MarkerSize', 8);
+            %edgeColor = faceColor;
+            plot(xyYMon(1,k), xyYMon(2,k), 's', 'MarkerFaceColor', faceColor, 'MarkerEdgeColor', edgeColor, 'MarkerSize', 12);
         end
     
         %xmean = mean(squeeze(xyYMon(1,:)));
@@ -193,15 +196,15 @@ function plotPrimaryChromaticityStabilityData(obj, figureGroupIndex)
         axis([0 1 0 1]);
         axis('square');
         
-        xlabel('x chromaticity', 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);
-        if (primaryIndex == 1)
-            ylabel('y chromaticity', 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);
-        else
-            ylabel('');
-        end
+        xlabel('x chromaticity', 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 18);
+        %if (primaryIndex == 1)
+            ylabel('y chromaticity', 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 18);
+        %else
+        %    ylabel('');
+        %end
         set(gca, 'Color', [1.0 1.0 1.0], 'XColor', 'b', 'YColor', 'b');
-        set(gca, 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);
-        title(sprintf('%s primary',primaryNames{primaryIndex}));
+        set(gca, 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 18);
+        %title(sprintf('%s primary',primaryNames{primaryIndex}));
         box on;
     end
 
