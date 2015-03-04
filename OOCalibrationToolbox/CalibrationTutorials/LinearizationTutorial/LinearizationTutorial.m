@@ -56,7 +56,8 @@ function LinearizationTutorial
     % * gammaMode = 2 - exhaustive search
     % * If gammaMode == 1, then you may specify the precision of the inverse table.  The default is 1000 levels.
     %
-    gammaInversionMethod = 0;
+    gammaInversionMethod = 1;
+    nInputValues = 256;
     SetGammaMethod(calStructOBJ, gammaInversionMethod);
 
     %%% 2. Reshape the desiredStimInPrimaryValues matrix [M x N x 3] into a [3 x (MxN)] matrix for efficient primary-to-settings computation
@@ -136,33 +137,25 @@ end
 
 function PlotStimuli(stimInSettings, stimInPrimaries)
     global figNum
+    
     figNum = figNum + 1;
-    
-    % Steup subplot position vectors
-    subplotPosVectors = NicePlot.getSubPlotPosVectors(...
-        'rowsNum',      2, ...
-        'colsNum',      1, ...
-        'heightMargin', 0.07, ...
-        'widthMargin',  0.01, ...
-        'leftMargin',   0.02, ...
-        'bottomMargin', 0.02, ...
-        'topMargin',    0.02);
-    
-    hFig = figure(figNum);
-    set(hFig, 'Position', [100 100 1000 1210]);
-    
+    h1 = figure(figNum);
     % generate subplot with stim in settings
-    subplot('Position', subplotPosVectors(1,1).v);
     imshow(stimInSettings);
     title('frame buffer stimulus (specified in settings, or gamma in, values)');
+    truesize;
+    h1
+    NicePlot.exportFigToPDF('CSF_FrameBuffer', h1, 300);
     
+    figNum = figNum + 1;
+    h2 = figure(figNum);
     % generate subplot with stim in primaries
-    subplot('Position', subplotPosVectors(2,1).v);
     imshow(stimInPrimaries)
     title('desired stimulus (specified in primary, or gamma out, values)');
+    truesize
+    h2
+    NicePlot.exportFigToPDF('CSF_Primaries', h2, 300);
     
-    % Set fonts for all axes, legends, and titles
-    NicePlot.setFontSizes(hFig, 'FontSize', 12);   
 end
 
 
@@ -291,12 +284,12 @@ end
 
 function CSF = MakeContrastSensitivityStimulus
 
-    rowsNum = 1080;
-    colsNum = 1920;    
+    rowsNum = 768;
+    colsNum = 1024;    
     CSF = zeros(rowsNum, colsNum);
 
     lowestSF =  1.0;
-    highestSF = 50.0;
+    highestSF = 60.0;
     lowestContrast = 0.003;
     highestContrast = 1.0;
     
@@ -323,7 +316,7 @@ function CSF = MakeContrastSensitivityStimulus
     end % row
     
     % add some noise to reduce contrast quantization effects (no noise when levels = 0)
-    levels = 6;
+    levels = 16;
     CSF = CSF + 1/255.0*(mod(round(rand(rowsNum,colsNum)*levels),levels)-(levels/2));
     
     % normalize to [0..1]
@@ -369,7 +362,7 @@ function CSF = MakeContrastSensitivityStimulus
         else
             gain = 200;
         end
-        for row = [60 120 240 480 720 960]
+        for row = [60 120 240 480 720]
             slice = -(CSF(row,1:colsNum)-0.5);
             if (displayNormalizedSlices)
                 slice = slice/max(abs(slice(:)));

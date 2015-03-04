@@ -16,6 +16,7 @@ function rawSPSstutorial
     % Retrieve the SPD data measured at all different gamma samples
     gammaSPDs = calStructOBJ.get('gammaSPD');
     [repsNum, channelsNum, gammaSamples, lambdaSamples] = size(gammaSPDs);
+    gammaSPDs(gammaSPDs<0) = 0;
     
     % Average over trials
     gammaSPDs = squeeze(mean(gammaSPDs, 1));
@@ -28,18 +29,24 @@ function rawSPSstutorial
     
     % Plot everything
     settingsInput = calStructOBJ.get('rawGammaInput');
+    dS = settingsInput(2)-settingsInput(1);
     spectralAxis  = SToWls(S);
-    h = figure(1); clf; set(h, 'Position', [10 10 1180 290]);
+    h = figure(1); clf; set(h, 'Position', [10 10 1100 1090]);
     for channelIndex = 1:channelsNum
-        subplot(1,channelsNum,channelIndex)
-        imagesc(spectralAxis, settingsInput, squeeze(normGammaSPD(channelIndex,:,:))); axis 'square', axis 'xy'; colormap(gray(256));
+        subplot(2,2,channelIndex)
+        imagesc(spectralAxis, settingsInput-dS/2, squeeze(normGammaSPD(channelIndex,:,:))); axis 'square', axis 'xy'; colormap(gray(256));
         hold on;
         plot(spectralAxis, squeeze(normGammaSPD(1,end,:)), 'r-', 'LineWidth', 2.0);
         plot(spectralAxis, squeeze(normGammaSPD(2,end,:)), 'g-', 'LineWidth', 2.0);
         plot(spectralAxis, squeeze(normGammaSPD(3,end,:)), 'b-', 'LineWidth', 2.0);
-        set(gca, 'XLim', [spectralAxis(1) spectralAxis(end)], 'YLim', [0 1], 'XTick', [0:50:1000]);
-        grid on; box off
+        hold off;
+        set(gca, 'XLim', [spectralAxis(1) spectralAxis(end)], 'YLim', [0 1], 'XTick', [0:50:1000], 'YTick', str2num(num2str(settingsInput-dS/2, '%1.02f')), 'YTickLabel', num2str(settingsInput-dS/2, '%1.02f'));
+        set(gca, 'FontName', 'Helvetica', 'FontSize', 18); xlabel('wavelength (nm)'); ylabel('settings value');
+        set(gca, 'XColor', 'y');  set(gca, 'YColor', 'y');   set(h, 'Color', 'none');
+        grid on; box on
     end
+    
+    NicePlot.exportFigToPDF('gammaSPD',h,300);
     
     h = figure(2); clf; set(h, 'Position', [10 300 1180 290]);
     for channelIndex = 1:channelsNum
