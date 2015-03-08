@@ -2,14 +2,26 @@
 %
 % 3/27/2014  npc   Wrote it.
 % 8/05/2014  npc   Added option to conduct PsychImaging - based calibration
+% 3/02/2015  npc   Re-organized script so that settings and options are set in 
+%                  a single function.
 
 function OOC_calibrateMonitor
     
     % Generate the Radiometer object, here a PR650obj.
     radiometerOBJ = generateRadiometerObject();
     
-    % Generate configuration for display at hand
-    [displaySettings, calibratorOptions] = generateConfigurationForDisplayAtHand();
+    % Select a calibration configuration name
+    calibrationConfig = 'ViewSonicProbe';
+
+    % Generate calibration options and settings
+    switch calibrationConfig
+        case 'ViewSonicProbe'
+            configFunctionHandle = @generateConfigurationForViewSonicProbe;
+
+        default
+            configFunctionHandle = @generateConfigurationForViewSonicProbe;
+    end
+    [displaySettings, calibratorOptions] = configFunctionHandle();
     
     % Generate the calibrator object
     calibratorOBJ = generateCalibratorObject(displaySettings, radiometerOBJ, mfilename);
@@ -17,7 +29,7 @@ function OOC_calibrateMonitor
     % Set the calibrator options
     calibratorOBJ.options = calibratorOptions;
         
-    % display calStruct if so desired ?
+    % display calStruct if so desired
     beVerbose = false;
     if (beVerbose)
         % Optionally, display the cal struct before measurement
@@ -56,8 +68,8 @@ function OOC_calibrateMonitor
 end
 
 
-% Users should copy and adapt this function to adapt it to their setup
-function [displaySettings, calibratorOptions] = generateConfigurationForDisplayAtHand()
+% configuration function for ViewSonicProbe
+function [displaySettings, calibratorOptions] = generateConfigurationForViewSonicProbe()
 
     % Specify where to send the 'Calibration Done' notification email
     emailAddressForNotification = 'cottaris@sas.upenn.edu';
