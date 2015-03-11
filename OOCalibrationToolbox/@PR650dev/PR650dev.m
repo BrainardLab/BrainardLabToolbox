@@ -84,10 +84,10 @@ classdef PR650dev < Radiometer
         
     methods (Access = private)     
         % Method to initialize communication with the device
-        obj = initCommunication(obj);    
+        obj = establishCommunication(obj)
         
         % Method to obtain device-speficic properties of PR-650
-        deviceSerialNum = getDeviceSerialNumber(obj);
+        deviceSerialNum = getDeviceSerialNumber(obj)
         
         % Method to read all serial port data
         serialData = readSerialPortData(obj) 
@@ -104,7 +104,7 @@ classdef PR650dev < Radiometer
         measureSPD(obj)
         
         % Method to shutdown the device
-        obj = shutDownDevice(obj);
+        obj = shutDownDevice(obj)
     end  % Private methods 
     
 end

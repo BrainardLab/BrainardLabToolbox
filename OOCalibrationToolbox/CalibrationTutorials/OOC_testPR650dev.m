@@ -14,7 +14,7 @@ function OOC_testPR650dev
     % Load the standard CIE '31 color matching functions.
     load T_xyz1931;
 
-    % Set a desired commong sampling for all measurements
+    % Set a desired common sampling for all measurements
     desiredS = [380 1 401];
 
     % Convert spectral sampling of all fundamentals to the desired sampling
@@ -22,13 +22,12 @@ function OOC_testPR650dev
     T_melanopsin = SplineCmf(S_melanopsin, T_melanopsin, desiredS);
     T_xyz        = SplineCmf(S_xyz1931,    T_xyz1931,    desiredS);
 
-     % Assemble big T_sensor matrix
+    % Assemble big T_sensor matrix
     T_allSensors = [T_cones; T_melanopsin; T_xyz];
     sensorNames  = {'Lcone', 'Mcone', 'Scone', 'Melan', 'CIE31 X', 'CIE31 Y', 'CIE31 Z'};
     sensorColors = [0.9 0.5 0.7;  0.4 0.9 0.7;  0.8 0.6 0.9; ...
                     0.24 0.5 0.99; 1 0.1 0; 0.1 1.0 0; 0 0.1 1];
-                    
-                
+       
     DB_PR650obj = [];
     
     try

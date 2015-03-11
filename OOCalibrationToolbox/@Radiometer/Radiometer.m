@@ -35,7 +35,7 @@ classdef Radiometer < handle
         % form [FirstSample SampleIntervalInNm NspectralSamples], e.g. [380 4 101]
         nativeS   
         
-        % the native spectral SPD matrix (Msensors x NspectralSamles)
+        % the native sensor matrix (Msensors x NspectralSamles)
         % e.g., 101 x 101 for a radiometer, 3 x 101 for an XYZ colorimeter 
         nativeT       
         
@@ -45,7 +45,7 @@ classdef Radiometer < handle
         % user-specified spectral sampling
         userS
         
-        % user-specified spectral SPD matrix
+        % user-specified spectral sensor matrix
         userT
         
         % the last measurement after application of userS, userT to the last native measurement

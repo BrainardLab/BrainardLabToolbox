@@ -70,7 +70,6 @@ classdef Calibrator < handle
         % Defaults to single frame (no temporal dither)
         displayTemporalDither=1;
 
-
         % Type of display device, e.g., 'monitor', 'projector', etc.
         % Specified during object instantiation only.
         displayDeviceType = 'unspecified';
