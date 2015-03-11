@@ -9,7 +9,22 @@ function obj = establishCommunication(obj)
     if (isempty(obj.portHandle)) 
         % Open the port
         oldverbo = IOPort('Verbosity', 2);
-        hPort = IOPort('OpenSerialPort', obj.portString, handshakeCode);
+        
+        tryToOpen = true;
+        attempts = 0;
+        maxAttempts = 5;
+        while (tryToOpen) && (attempts < maxAttempts)
+            try
+                hPort = IOPort('OpenSerialPort', obj.portString, handshakeCode);
+                attempts = attempts + 1;
+                tryToOpen = false;
+            catch err
+                fprintf('Could not open port. Will try again\n');
+                IOPort('CloseAll');
+                pause(0.2);
+            end
+        end
+        
         if (obj.verbosity > 9)
             fprintf('\n\t1.Opened port %s\n', obj.portString);
         end
