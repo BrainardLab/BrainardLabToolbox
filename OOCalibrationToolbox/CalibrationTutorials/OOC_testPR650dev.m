@@ -5,6 +5,30 @@
 
 function OOC_testPR650dev
 
+    % Load the Stockman-Sharpe (2000) 2-degree cone fundamentals
+    load T_cones_ss2;
+
+    % Load the melanopsin fundamental
+    load 'T_melanopsin'
+
+    % Load the standard CIE '31 color matching functions.
+    load T_xyz1931;
+
+    % Set a desired commong sampling for all measurements
+    desiredS = [380 1 401];
+
+    % Convert spectral sampling of all fundamentals to the desired sampling
+    T_cones      = SplineCmf(S_cones_ss2,  T_cones_ss2,  desiredS);
+    T_melanopsin = SplineCmf(S_melanopsin, T_melanopsin, desiredS);
+    T_xyz        = SplineCmf(S_xyz1931,    T_xyz1931,    desiredS);
+
+     % Assemble big T_sensor matrix
+    T_allSensors = [T_cones; T_melanopsin; T_xyz];
+    sensorNames  = {'Lcone', 'Mcone', 'Scone', 'Melan', 'CIE31 X', 'CIE31 Y', 'CIE31 Z'};
+    sensorColors = [0.9 0.5 0.7;  0.4 0.9 0.7;  0.8 0.6 0.9; ...
+                    0.24 0.5 0.99; 1 0.1 0; 0.1 1.0 0; 0 0.1 1];
+                    
+                
     DB_PR650obj = [];
     
     try
@@ -23,30 +47,6 @@ function OOC_testPR650dev
         DB_PR650obj.deviceModelName
         DB_PR650obj.hostInfo
 
-        
-        % Load the Stockman-Sharpe (2000) 2-degree cone fundamentals
-        load T_cones_ss2;
-        
-        % Load the melanopsin fundamental
-        load 'T_melanopsin'
-        
-        % Load the standard CIE '31 color matching functions.
-        load T_xyz1931;
-        
-        % Set a desired commong sampling for all measurements
-        desiredS = [380 1 401];
-        
-        % Convert spectral sampling of all fundamentals to the desired sampling
-        T_cones      = SplineCmf(S_cones_ss2,  T_cones_ss2,  desiredS);
-        T_melanopsin = SplineCmf(S_melanopsin, T_melanopsin, desiredS);
-        T_xyz        = SplineCmf(S_xyz1931,    T_xyz1931,    desiredS);
-        
-         % Assemble big T_sensor matrix
-        T_allSensors = [T_cones; T_melanopsin; T_xyz];
-        sensorNames  = {'Lcone', 'Mcone', 'Scone', 'Melan', 'CIE31 X', 'CIE31 Y', 'CIE31 Z'};
-        sensorColors = [0.9 0.5 0.7;  0.4 0.9 0.7;  0.8 0.6 0.9; ...
-                        0.24 0.5 0.99; 1 0.1 0; 0.1 1.0 0; 0 0.1 1];
-        
         % userT showcase
         sensorActivations = DB_PR650obj.measure('userS', desiredS, 'userT', T_allSensors);
         
