@@ -1,9 +1,6 @@
 % Method for executing a standard calibration protocol
 function obj = calibrate(obj)
 %
-    if (obj.options.verbosity > 9)
-        fprintf('In mglCalibrator.calibrate() method\n');
-    end
     
     % Make a local copy of obj.cal so we do not keep calling it and regenerating it
     calStruct = obj.cal;
@@ -168,10 +165,6 @@ function obj = calibrate(obj)
     % Re-initialize states of the screens
     fprintf('5. Ambient light measurements ...\n');
     
-    % Reset display
-    userPrompt = 0;
-    obj.setDisplaysInitialState(userPrompt);
-    
     backgroundSettings  = calStruct.describe.bgColor';
     settingsToTest      = [0.0 0.0 0.0]';
     
@@ -212,21 +205,3 @@ function obj = calibrate(obj)
     % Let user know it's done
     obj.promptUserThatCalibrationIsDone(beepWhenDone);      
 end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

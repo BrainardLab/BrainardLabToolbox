@@ -5,18 +5,18 @@ function loadClut(obj, bgSettings, targetSettings, useBitsPP)
     if (useBitsPP)
         theClut = obj.identityGammaForBitsPP; 
     else 
-        theClut = zeros(256,3);
+        theClut = zeros(obj.screenInfo.gammaTableLength,3);
         % Set lower half of LUT to background entry
-        theClut(1:128,:) = repmat(bgSettings', [128 1]);
+        theClut(1:obj.screenInfo.gammaTableLength/2,:) = repmat(bgSettings', [obj.screenInfo.gammaTableLength/2 1]);
         % Set upper half of LUT to foreground entry
-        theClut(129:end,:) = repmat(targetSettings', [128 1]);  
+        theClut(obj.screenInfo.gammaTableLength/2+1:end,:) = repmat(targetSettings', [obj.screenInfo.gammaTableLength/2 1]);  
     end
-
+    
     % Load modified LUT
     if (useBitsPP)  
         mglBitsPlusSetClut(theClut);
     else
-        mglSetGammaTable(theClut');
+        mglSetGammaTable(theClut);
     end
     
 end

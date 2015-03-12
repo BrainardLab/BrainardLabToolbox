@@ -129,9 +129,14 @@ classdef Calibrator < handle
     % Abstract -- public -- methods. Each subclass has to implenent its own
     % version. If it does not, it cannot instantiate objects.
     methods(Abstract)
-        % Method to conduct a calibration sequency
-        obj = calibrate(obj)  
     
+        % Method to set the initial state of the displays
+        setDisplaysInitialState(obj, userPrompt);
+
+        % Method to update the stimulus and conduct a single radiometric measurement by 
+        % calling the corresponding method of the attached @Radiometer object.
+        [measurement, S] = updateStimulusAndMeasure(obj, bgSettings, targetSettings, useBitsPP);
+
         % Method to ensure that the parameters of the screen match those specified by the user
         obj = verifyScreenParamValues(obj)
         
@@ -361,6 +366,9 @@ classdef Calibrator < handle
                       
                 cal = obj.privateCal;
         end  
+        
+        % Method to conduct a calibration sequency
+        calibrate(obj);
         
         % Method to display the cal struct
         displayCalStruct(obj);
