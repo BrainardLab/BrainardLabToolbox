@@ -9,11 +9,12 @@ function OOC_calibrateMonitor
     
     
     % Select a calibration configuration name
-    AvailableCalibrationConfigs = {  'ViewSonicProbe' 
-                            'BOLDscreen'
-                            'Left_SONY_PVM2541A'
-                            'Right_SONY_PVM2541A'
-                            };
+    AvailableCalibrationConfigs = {  ...
+        'ViewSonicProbe' 
+        'BOLDscreen'
+        'Left_SONY_PVM2541A'
+        'Right_SONY_PVM2541A'
+    };
     
     defaultCalibrationConfig = AvailableCalibrationConfigs{1};
     while (true)
@@ -22,15 +23,15 @@ function OOC_calibrateMonitor
             fprintf('\t %s\n', AvailableCalibrationConfigs{k});
         end
         calibrationConfig = input(sprintf('Select a calibration config [%s]: ', defaultCalibrationConfig),'s');
+        if isempty(calibrationConfig)
+            calibrationConfig = defaultCalibrationConfig;
+        end
         if (ismember(calibrationConfig, AvailableCalibrationConfigs))
             break;
         else
            fprintf(2,'** %s ** is not an available calibration configuration. Try again. \n\n', calibrationConfig);
         end
     end
-    
-    calibrationConfig
-    pause;
     
     % Generate calibration options and settings
     runtimeParams = [];
