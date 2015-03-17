@@ -65,6 +65,10 @@ classdef Radiometer < handle
     
         % Enumerate cu* devices - they correspond to serial ports:
         portDeviceFiles = dir('/dev/cu*');
+        
+        % Private Verbosity
+        privateVerbosity;
+        
     end % private properties
     
     % Abstract, public methods. Each subclass *must* implenent its own
@@ -108,9 +112,15 @@ classdef Radiometer < handle
         
         % Setter method for property verbosity
         function set.verbosity(obj, new_verbosity)
-            obj.verbosity = obj.privateSetVerbosity(new_verbosity);
-            fprintf('\nNew verbosity level: %d\n', obj.verbosity);
+            obj.privateSetVerbosity(new_verbosity);
+            %fprintf('\nNew verbosity level: %d\n', obj.verbosity);
         end
+        
+        % Getter method for property verbosity
+        function verbosity = get.verbosity(obj)
+            verbosity = obj.privateVerbosity;
+        end
+        
         
         % Getter method for property hostInfo
         function hostInfo = get.hostInfo(obj)
