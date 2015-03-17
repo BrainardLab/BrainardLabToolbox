@@ -266,10 +266,51 @@ end
 
 
 function radiometerOBJ = generateRadiometerObject()
-    radiometerOBJ = PR650dev(...
-        'verbosity',        1, ...       % 1 -> minimum verbosity
-        'devicePortString', [] ...       % empty -> automatic port detection
+
+    % List of available @Radiometer objects
+    radiometerTypes = {'PR650dev', 'PR670dev'};
+    radiometersNum  = numel(radiometerTypes);
+    
+    % Ask the user to select a calibrator type
+    fprintf('\n\n Available radiometer types:\n');
+    for k = 1:radiometersNum
+        fprintf('\t[%3d]. %s\n', k, radiometerTypes{k});
+    end
+    defaultRadiometerIndex = 1;
+    radiometerIndex = input(sprintf('\tSelect a radiometer type (1-%d) [%d]: ', radiometersNum, defaultRadiometerIndex));
+    if isempty(radiometerIndex) || (radiometerIndex < 1) || (radiometerIndex > radiometersNum)
+        radiometerIndex = defaultRadiometerIndex;
+    end
+    fprintf('\n\t-------------------------\n');
+    selectedRadiometerType = radiometerTypes{radiometerIndex};
+    fprintf('Will employ an %s radiometer object [%d].\n', selectedRadiometerType, radiometerIndex);
+    
+    if (strcmp(selectedRadiometerType, 'PR650dev'))
+        radiometerOBJ = PR650dev(...
+            'verbosity',        1, ...       % 1 -> minimum verbosity
+            'devicePortString', [] ...       % empty -> automatic port detection
+            );
+    elseif (strcmp(selectedRadiometerType, 'PR670dev'))
+        radiometerOBJ = PR670dev(...
+            'verbosity',        1, ...       % 1 -> minimum verbosity
+            'devicePortString', [] ...       % empty -> automatic port detection
+            );
+        
+        % Specify extra properties
+        desiredSyncMode = 'OFF';
+        desiredCyclesToAverage = 1;
+        desiredSensitivityMode = 'STANDARD';
+        desiredApertureSize = '1 DEG';
+        
+        radiometerOBJ.setOptions(...
+        	'syncMode',         desiredSyncMode, ...
+            'cyclesToAverage',  desiredCyclesToAverage, ...
+            'sensitivityMode',  desiredSensitivityMode, ...
+            'apertureSize',     desiredApertureSize ...
         );
+    
+    end
+    
     
 end
 
