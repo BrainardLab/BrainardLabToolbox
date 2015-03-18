@@ -300,7 +300,7 @@ function radiometerOBJ = generateRadiometerObject()
         desiredSyncMode = 'OFF';
         desiredCyclesToAverage = 1;
         desiredSensitivityMode = 'STANDARD';
-        desiredApertureSize = '1 DEG';
+        desiredApertureSize = '1/4 DEG';
         
         radiometerOBJ.setOptions(...
         	'syncMode',         desiredSyncMode, ...
