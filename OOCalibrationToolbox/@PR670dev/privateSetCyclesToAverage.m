@@ -5,6 +5,11 @@ function obj = privateSetCyclesToAverage(obj, newCyclesToAverage)
         fprintf('In privateSetCyclesToAverage\n');
     end
     
+    % determine if new value is different than its private counterpart
+    if (obj.valuesAreSame(newCyclesToAverage, obj.privateCyclesToAverage))
+        return;
+    end
+    
     timeoutInSeconds = 10;
     
     % Flushing buffers

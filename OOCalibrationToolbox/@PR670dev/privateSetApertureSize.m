@@ -4,6 +4,11 @@ function obj = privateSetApertureSize(obj, newApertureSize)
         fprintf('In privateSetApertureSize\n');
     end
     
+    % determine if new value is different than its private counterpart
+    if (obj.valuesAreSame(newApertureSize, obj.privateApertureSize))
+        return;
+    end
+    
     timeoutInSeconds = 10;
     
     % Flushing buffers

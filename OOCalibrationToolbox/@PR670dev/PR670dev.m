@@ -11,16 +11,18 @@ classdef PR670dev < Radiometer
         % sensitivityMode: see obj.validSensitivityModes
         sensitivityMode;
         
+        % exposureTime (in milliseconds)
+        exposureTime;
+        
         % apertureSize; see: obj.validApertureSizes
         apertureSize;
     end
     
     properties (SetAccess = private)
-        validSyncModes          = {'OFF', 'AUTO', [20 400]};
-        validCyclesToAverage    = [1 99];
-        validSensitivityModes   = {'STANDARD', 'EXTENDED'};  % 'STANDARD' (exposure range: 6 - 6,000 msec, 'EXTENDED' exposure range: 6 - 30,000 msec
-        validApertureSizes      = {'1 DEG', '1/2 DEG', '1/4 DEG', '1/8 DEG'};
+        % struct with current configuration as reported by the PR670
+        currentConfiguration = struct();
     end
+    
     
     % --- PRIVATE PROPERTIES ----------------------------------------------
     properties (Access = private)              
@@ -29,6 +31,13 @@ classdef PR670dev < Radiometer
        
         % Device files that are known to be for other devices than the PR670
         invalidPortStrings = { 'cu.usbserial-KU000000', 'unspecified' };
+        
+        % valid ranges for user-settable properties
+        validSyncModes          = {'OFF', 'AUTO', [20 400]};
+        validCyclesToAverage    = [1 99];
+        validSensitivityModes   = {'STANDARD', 'EXTENDED'};  % 'STANDARD' (exposure range: 6 - 6,000 msec, 'EXTENDED' exposure range: 6 - 30,000 msec
+        validExposureTimes      = {'ADAPTIVE', [1 6000], [1 30000]};  % 'ADAPTIVE' is for adaptive exposure, [1-6,000] is for 'STANDARD' sensitivity mode, [1 30000] for the 'EXTENDED' sensitivity mode
+        validApertureSizes      = {'1 DEG', '1/2 DEG', '1/4 DEG', '1/8 DEG'};
         
         % Private syncMode
         privateSyncMode;
@@ -39,8 +48,14 @@ classdef PR670dev < Radiometer
         % Private sensitivityMode
         privateSensitivityMode;
         
-        % Private sapertureSize
+        % Private exposureTime
+        privateExposureTime;
+        
+        % Private apertureSize
         privateApertureSize;
+        
+        % Private currentConfiguration
+        privateCurrentConfiguration;
     end
     % --- END OF PRIVATE PROPERTIES ---------------------------------------
     
@@ -81,18 +96,27 @@ classdef PR670dev < Radiometer
             obj.userT               = obj.nativeT;
             obj.measurement         = [];
             
-            % Initialize default options
+            % Initialize private properties
             obj.privateSyncMode         = obj.validSyncModes{1}; 
             obj.privateCyclesToAverage  = obj.validCyclesToAverage(1);
             obj.privateSensitivityMode  = obj.validSensitivityModes{1};
+            obj.privateExposureTime     = obj.validExposureTimes{1};
             obj.privateApertureSize     = obj.validApertureSizes{1};
+            
+            % Initialize protected properties
+            obj.availableConfigurationOptionNames       = {'syncMode',        'cyclesToAverage',        'sensitivityMode',         'exposureTime',         'apertureSize'};
+            obj.availableConfigurationOptionValidValues = {obj.validSyncModes, obj.validCyclesToAverage, obj.validSensitivityModes, obj.validExposureTimes, obj.validApertureSizes};
+        
+            % Get current configuration
+            obj.privateCurrentConfiguration = obj.getConfiguration();
         end % Constructor
         
     end % Public methods
     
     % Implementations of required -- Public -- Abstract methods defined in the Radiometer interface   
     methods
-        % Set PR670-specific options
+        
+        % PR670-specific configuration options
         obj = setOptions(obj, varargin);
         
         % Method to conduct a single native measurent. For the PR-650 this is an SPD measurement.
@@ -109,6 +133,7 @@ classdef PR670dev < Radiometer
     
     % Public utility methods 
     methods
+        
         % Method to set the backlight level
         setBacklightLevel(obj, level);
         
@@ -146,10 +171,22 @@ classdef PR670dev < Radiometer
             obj.privateSetSensitivityMode(newSensitivityMode);
         end
         
-        % Getter method for property cyclesToAverage
+        % Getter method for property sensitivityMode
         function value = get.sensitivityMode(obj)
             value = obj.privateSensitivityMode;
         end
+        
+        
+        % Setter method for property exposureTime
+        function set.exposureTime(obj, newExposureTime)
+            obj.privateSetExposureTime(newExposureTime);
+        end
+        
+        % Getter method for property exposureTime
+        function value = get.exposureTime(obj)
+            value = obj.privateExposureTime;
+        end
+        
         
        
         % Setter method for property apertureSize
@@ -161,6 +198,13 @@ classdef PR670dev < Radiometer
         function value = get.apertureSize(obj)
             value = obj.privateApertureSize;
         end
+        
+        
+        % Getter method for property currentConfiguration
+        function value = get.currentConfiguration(obj)
+           value = obj.privateCurrentConfiguration;
+        end
+        
     end
     
     
@@ -189,8 +233,11 @@ classdef PR670dev < Radiometer
         measureSPD(obj);
         
         % Method to read the configuration of the PR670
-        config = getConfiguration(obj);
+        response = getConfiguration(obj);
 
+        % Method to updat ehe obj.privateCurrentConfiguration from the raw response
+        generateConfigStruct(obj,response)
+        
         % Method to read a response from the PR670 or timeout after timeoutInSeconds
         response = getResponseOrTimeOut(obj, timeoutInSeconds, timeoutString);
         
@@ -202,6 +249,9 @@ classdef PR670dev < Radiometer
         
         % Method to set a new value for the sensitivityMode property
         obj = privateSetSensitivityMode(obj, newSensitivityMode);
+        
+        % Method to set a new value for the exposureTime property
+        obj = privateSetExposureTime(obj, newExposureTime);
         
         % Method to set a new value for the apertureSize property
         obj = privateSetApertureSize(obj, newApertureSize);

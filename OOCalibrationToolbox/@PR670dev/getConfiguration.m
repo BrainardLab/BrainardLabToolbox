@@ -1,4 +1,4 @@
-function config = getConfiguration(obj)
+function PR670config = getConfiguration(obj)
     % Flushing buffers
     dumpStr = '0';
     while ~isempty(dumpStr)
@@ -6,10 +6,12 @@ function config = getConfiguration(obj)
     end
   
     % Write command to export the configuration
-    obj.writeSerialPortCommand('commandString', 'D601');
+    obj.writeSerialPortCommand('commandString', 'D602');
   
     % Read the configuration
     timeoutInSeconds = 5;
-    config = obj.getResponseOrTimeOut(timeoutInSeconds);
-
+    response = obj.getResponseOrTimeOut(timeoutInSeconds, 'Timedout during ''D602'' (configuration) command');
+    obj.generateConfigStruct(response);
+    
+    PR670config = obj.currentConfiguration;
 end

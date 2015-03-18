@@ -5,7 +5,6 @@ function obj = shutDown(obj)
     end
     
     if (~isempty(obj.portHandle))
-        % Exit remote control
         pause(2.0);
         obj.writeSerialPortCommand('commandString', 'Q', 'appendCR', false);
         pause(5.0);

@@ -5,6 +5,11 @@ function obj = privateSetSyncMode(obj, newSyncMode)
         fprintf('In privateSetSyncMode\n');
     end
     
+    % determine if new value is different than its private counterpart
+    if (obj.valuesAreSame(newSyncMode, obj.privateSyncMode))
+        return;
+    end
+    
     timeoutInSeconds = 10;
     
     % Flushing buffers

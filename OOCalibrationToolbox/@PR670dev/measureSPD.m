@@ -10,7 +10,7 @@ function measureSPD(obj)
         dumpStr = obj.readSerialPortData;
     end
     
-    % Make the measurement
+    % Send the measurement command
     obj.writeSerialPortCommand('commandString', 'M5');
 
     % Read back the data

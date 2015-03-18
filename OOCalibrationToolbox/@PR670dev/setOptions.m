@@ -13,6 +13,7 @@ function obj = setOptions(obj, varargin)
         parser.addParamValue('syncMode',        obj.privateSyncMode);
         parser.addParamValue('cyclesToAverage', obj.privateCyclesToAverage);
         parser.addParamValue('sensitivityMode', obj.privateSensitivityMode);
+        parser.addParamValue('exposureTime',    obj.privateExposureTime);
         parser.addParamValue('apertureSize',    obj.privateApertureSize);
         
         % Execute the parser
@@ -22,21 +23,25 @@ function obj = setOptions(obj, varargin)
         pNames = fieldnames(parserResults);
         
         % Read the old FULL configuration
-        oldConfig = obj.getConfiguration();
         if (obj.verbosity > 1)
-           fprintf('Old config: ''%s'' \n', oldConfig); 
+            previousConfig = obj.getConfiguration()
         end
     
         % Set the options
+        % Make sure we set the sensitivity mode first
+        % because the exposureTime depends appropriate setting of the sensitivityMode
+        obj.sensitivityMode = parserResults.sensitivityMode;
+        
+        % Then set all the others
         for k = 1:length(pNames)
-            obj.(pNames{k}) = parserResults.(pNames{k});
+            if ~(strcmp(pNames{k}, 'sensitivityMode'))
+                obj.(pNames{k}) = parserResults.(pNames{k});
+            end
         end
         
-        % Read the new FULL configuration
-        newConfig = obj.getConfiguration();
         if (obj.verbosity > 1)
-            fprintf('New config: ''%s'' \n', newConfig); 
+            updatedConfig = obj.getConfiguration()
         end
-    
+        
     end
 end

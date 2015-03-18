@@ -19,9 +19,9 @@ function response = getResponseOrTimeOut(obj, timeoutInSeconds, timeoutString)
         response = [response inStr]; 
     end
 
-    % Parse the return and make sure we got a 0.  Any other value means an
-    % error occured.
+    % Parse the return and make sure we got a 0.  Any other value means an error occured.
     qual = sscanf(response, '%d', 1);
+    
     if qual ~= 0
         error('PR670setsyncfreq:Received error code: %d', qual);
     end
