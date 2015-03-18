@@ -4,6 +4,7 @@ function obj = privateGetPortString(obj)
     % For each serial type in the portDeviceNames cell array, see if any attached serial
     % devices names match.
     indices = [];
+    
     for i = 1:length(obj.portDeviceNames)
         for j = 1:length(obj.portDeviceFiles)
             if (~isempty(strfind(lower(obj.portDeviceFiles(j).name), obj.portDeviceNames{i})))
@@ -13,6 +14,8 @@ function obj = privateGetPortString(obj)
     end
 
     if (isempty(indices))
+        obj.portDeviceNames
+        obj.portDeviceFiles
         error('No devices found. Make sure that your radiometer is plugged in.');
     end
 

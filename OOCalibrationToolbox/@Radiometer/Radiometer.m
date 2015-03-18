@@ -56,6 +56,11 @@ classdef Radiometer < handle
     properties (SetAccess = protected, GetAccess = protected)
         % The port string, i.e. /dev/cu.KeySerial1 
         portString;
+        
+        % Names and valid values for the user-settable configurations of
+        % the radiometer - these are hardware-specific, so they are set by the subclasses
+        availableConfigurationOptionNames;
+        availableConfigurationOptionValidValues;
     end
     
     % Private properties
@@ -76,7 +81,7 @@ classdef Radiometer < handle
     % it cannot instantiate any objects.
     methods(Abstract)
         
-        % Method to set device-specific options
+        % Method to set device-specific configuration options
         obj = setOptions(obj, varargin);
         
         % Method to conduct a single native measurement;
@@ -125,7 +130,11 @@ classdef Radiometer < handle
         % Getter method for property hostInfo
         function hostInfo = get.hostInfo(obj)
             hostInfo = obj.privateGetHostInfo();
-        end         
+        end    
+        
+        % Method to list the avaible configuration options and their valid ranges
+        listConfigurationOptions(obj);
+        
     end % public methods
      
 
@@ -134,8 +143,11 @@ classdef Radiometer < handle
         % Method to check the validity of the selected port
         invalidPort = checkPortValidity(obj, invalidPortStrings)   
         
-        % Method to transform a native measurement according to user-supplied S and T matrices
-        measurement = transformMeasurement(obj, applyUserS, applyUserT)
+        % Method to transform a native measurement according to params passed
+        measurement = adjustMeasurement(obj, varargin);
+        
+        % Method to check if two values are same
+        isTrue = valuesAreSame(obj,newValue, oldValue);
     end % methods (Access = protected)
     
     
