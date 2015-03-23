@@ -58,7 +58,7 @@ function measureSPD(obj)
             end
 
             % update nativeS (in case it was incorrectly set in the constructor)
-            obj.nativeS = WlsToS(obj.nativeMeasurement.spectralAxis);
+            obj.nativeS = WlsToS((obj.nativeMeasurement.spectralAxis)');
                 
             % Convert to our units standard, i.e., multiply by sampling interval
             obj.nativeMeasurement.energy = obj.nativeS(2) * obj.nativeMeasurement.energy;
