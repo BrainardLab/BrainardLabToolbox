@@ -6,8 +6,10 @@ function obj = privateGetPortString(obj)
     indices = [];
     
     for i = 1:length(obj.portDeviceNames)
+        stringPattern = obj.portDeviceNames{i};
         for j = 1:length(obj.portDeviceFiles)
-            if (~isempty(strfind(lower(obj.portDeviceFiles(j).name), obj.portDeviceNames{i})))
+            fprintf('Looking for pattern ''%s'' in string ''%s'' .\n', stringPattern, lower(obj.portDeviceFiles(j).name));
+            if (~isempty(strfind(lower(obj.portDeviceFiles(j).name), stringPattern)))
                 indices = [indices j];
             end
         end
@@ -15,7 +17,9 @@ function obj = privateGetPortString(obj)
 
     if (isempty(indices))
         obj.portDeviceNames
-        obj.portDeviceFiles
+        for j = 1:length(obj.portDeviceFiles)
+            obj.portDeviceFiles(j).name
+        end
         error('No devices found. Make sure that your radiometer is plugged in.');
     end
 

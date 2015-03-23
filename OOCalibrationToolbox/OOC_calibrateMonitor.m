@@ -12,7 +12,7 @@ function OOC_calibrateMonitor
     AvailableCalibrationConfigs = {  ...
         'ViewSonicProbe' 
         'BOLDscreen'
-        'Samsung OLD panel'
+        'SamsungOLEDpanel'
         'Left_SONY_PVM2541A'
         'Right_SONY_PVM2541A'
     };
@@ -44,7 +44,7 @@ function OOC_calibrateMonitor
         case 'BOLDscreen'
             configFunctionHandle = @generateConfigurationForBOLDScreen;
 
-        case 'Samsung OLD panel'
+        case 'SamsungOLEDpanel'
             configFunctionHandle = @generateConfigurationForSamsungOLED;
             
         case 'Left_SONY_PVM2541A'
@@ -283,8 +283,8 @@ function [displaySettings, calibratorOptions] = generateConfigurationForSamsungO
         'fgColor',                          [0.3962 0.3787 0.4039], ...     % color of the foreground
         'meterDistance',                    0.5, ...                        % distance between radiometer and screen in meters
         'leaveRoomTime',                    1, ...                          % seconds allowed to leave room
-        'nAverage',                         3, ...                          % number of repeated measurements for averaging
-        'nMeas',                            11, ...                         % samples along gamma curve
+        'nAverage',                         2, ...                          % number of repeated measurements for averaging
+        'nMeas',                            21, ...                         % samples along gamma curve
         'boxSize',                          150, ...                        % size of calibration stimulus in pixels
         'boxOffsetX',                       0, ...                          % x-offset from center of screen (neg: leftwards, pos:rightwards)         
         'boxOffsetY',                       0 ...                           % y-offset from center of screen (neg: upwards, pos: downwards)                      
@@ -347,15 +347,17 @@ function radiometerOBJ = generateRadiometerObject()
         
         % Specify extra properties
         desiredSyncMode = 'OFF';
-        desiredCyclesToAverage = 1;
+        desiredCyclesToAverage = 3;
         desiredSensitivityMode = 'STANDARD';
-        desiredApertureSize = '1/4 DEG';
+        desiredApertureSize = '1 DEG';
+        desiredExposureTime =  'ADAPTIVE';
         
         radiometerOBJ.setOptions(...
         	'syncMode',         desiredSyncMode, ...
             'cyclesToAverage',  desiredCyclesToAverage, ...
             'sensitivityMode',  desiredSensitivityMode, ...
-            'apertureSize',     desiredApertureSize ...
+            'apertureSize',     desiredApertureSize, ...
+            'exposureTime',     desiredExposureTime ...
         );
     
     end
