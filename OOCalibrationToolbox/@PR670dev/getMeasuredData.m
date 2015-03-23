@@ -47,11 +47,17 @@ function result = getMeasuredData(obj, varargin)
                 obj.nativeMeasurement.energy(k) = D{2};
             end
 
+            % update nativeS (in case it was incorrectly set in the constructor)
+            obj.nativeS = WlsToS(obj.nativeMeasurement.spectralAxis);
+                
+            % Convert to our units standard, i.e., multiply by sampling interval
+            obj.nativeMeasurement.energy = obj.nativeS(2) * obj.nativeMeasurement.energy;
+
         case -8 % Too dark
             fprintf('>>> Quality code: %d. Low light level!. Returning zeros.\n', qual);
             % return zeros
             nativeSamples = obj.nativeS(3);
-            obj.nativeMeasurement.spectralAxis = zeros(1,nativeSamples);
+            obj.nativeMeasurement.spectralAxis = StoWls(obj.nativeS);
             obj.nativeMeasurement.energy = zeros(1,nativeSamples);
             
         case {-1, -10}  % Light source sync failure
