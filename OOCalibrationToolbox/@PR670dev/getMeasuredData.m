@@ -57,7 +57,7 @@ function result = getMeasuredData(obj, varargin)
             fprintf('>>> Quality code: %d. Low light level!. Returning zeros.\n', qual);
             % return zeros
             nativeSamples = obj.nativeS(3);
-            obj.nativeMeasurement.spectralAxis = StoWls(obj.nativeS);
+            obj.nativeMeasurement.spectralAxis = SToWls(obj.nativeS);
             obj.nativeMeasurement.energy = zeros(1,nativeSamples);
             
         case {-1, -10}  % Light source sync failure
