@@ -37,7 +37,7 @@ function result = getMeasuredData(obj, varargin)
                 fprintf('>>> Quality code: %f. Low light level!. Returning zeros\n', qual);
                 % return zeros
                 nativeSamples = obj.nativeS(3);
-                obj.nativeMeasurement.spectralAxis = zeros(1,nativeSamples);
+                obj.nativeMeasurement.spectralAxis = SToWls(obj.nativeS);
                 obj.nativeMeasurement.energy = zeros(1,nativeSamples);
             
             elseif ((qual == 18) || (qual == 0))
@@ -54,12 +54,11 @@ function result = getMeasuredData(obj, varargin)
                 end
 
                 % update nativeS (in case it was incorrectly set in the constructor)
-                obj.nativeS = [obj.nativeMeasurement.spectralAxis(1) ...
-                               obj.nativeMeasurement.spectralAxis(2)-obj.nativeMeasurement.spectralAxis(1) ...
-                               length(obj.nativeMeasurement.spectralAxis)];
+                % obj.nativeS = WlsToS((obj.nativeMeasurement.spectralAxis)');
 
-                % Convert to our units standard.
-                obj.nativeMeasurement.energy = 4 * obj.nativeMeasurement.energy;
+                % Convert to our units standard, i.e., multiply by sampling interval
+                obj.nativeMeasurement.energy = obj.nativeS(2) * obj.nativeMeasurement.energy;
+
             else
                 error('Bad return code %g from meter', qual);
             end
@@ -67,52 +66,15 @@ function result = getMeasuredData(obj, varargin)
         end
     end
     
-    
     % By default, the measurement is the native measurement
     obj.measurement = obj.nativeMeasurement;
-    applyUserS      = false;
-    applyUserT      = false;
-
-    % Parse any additional inputs ( userS and/or userT)
+    
+    % Adjust measurement, if we have additional argsin
     if (~isempty(varargin))
-        % Configure an inputParser to examine whether the options passed to us are valid
-        parser = inputParser;
-        parser.addParamValue('userS', []);
-        parser.addParamValue('userT', []);
-        % Execute the parser
-        parser.parse(varargin{:});
-        % Create a standard Matlab structure from the parser results.
-        parserResults = parser.Results;
-        pNames = fieldnames(parserResults);
-        for k = 1:length(pNames)
-            obj.(pNames{k}) = parserResults.(pNames{k}); 
-        end
-
-        if (strcmp(obj.userS, 'native') || isempty(obj.userS))
-            obj.userS = obj.nativeS;
-        else
-           applyUserS = true; 
-        end
-
-        if (strcmp(obj.userT, 'native') || isempty(obj.userT))
-            obj.userT = obj.nativeT;
-        else
-           applyUserT = true;
-        end
+        obj.measurement = obj.adjustMeasurement(varargin);
     end
-
-    if (applyUserS || applyUserT)
-        if (obj.verbosity > 5)
-            fprintf('>>> Measurement transformation was requested <<<\n');
-        end
-        obj.measurement = obj.transformMeasurement(applyUserS, applyUserT);
-    else
-        if (obj.verbosity > 5)
-            fprintf('>>> Native measurement was requested <<<\n');
-        end
-        obj.measurement = obj.nativeMeasurement;
-    end
-
+    
+    % return the measurement
     if (isfield(obj.measurement, 'energy'))
         result = obj.measurement.energy;
     else

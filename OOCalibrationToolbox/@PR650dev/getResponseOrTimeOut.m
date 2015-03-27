@@ -1,4 +1,4 @@
-% Method to read a response from the PR670 or timeout after timeoutInSeconds
+% Method to read a response from the PR650 or timeout after timeoutInSeconds
 function response = getResponseOrTimeOut(obj, timeoutInSeconds, timeoutString)
 
     waited = 0;
@@ -18,13 +18,4 @@ function response = getResponseOrTimeOut(obj, timeoutInSeconds, timeoutString)
         inStr = obj.readSerialPortData;
         response = [response inStr]; 
     end
-
-    % Parse the return and make sure we got a 0.  Any other value means an error occured.
-    qual = sscanf(response, '%d', 1);
-    
-    if qual ~= 0
-        error('PR670dev.getResponseOrTimeOut received bad code: %d', qual);
-    end
-        
 end
-

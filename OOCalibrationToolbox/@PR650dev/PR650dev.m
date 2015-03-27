@@ -2,10 +2,9 @@ classdef PR650dev < Radiometer
    
     % Public properties (specific to the PR650dev) 
     properties
-        % Sync-Mode, 'ON' or 'OFF'
+        % Sync-Mode
         syncMode;
     end
-    
     
     % --- PRIVATE PROPERTIES ----------------------------------------------
     properties (Access = private)              
@@ -14,8 +13,14 @@ classdef PR650dev < Radiometer
        
         % device files that are known to be for other devices than the PR650
         invalidPortStrings = { 'cu.usbserial-KU000000', 'unspecified' };
+        
+        % valid ranges for user-settable properties
+        validSyncModes  = {'OFF', 'ON'};  
     end
     % --- END OF PRIVATE PROPERTIES ---------------------------------------
+    
+    
+
     
     
     % Public methods
@@ -50,12 +55,16 @@ classdef PR650dev < Radiometer
             obj.deviceProvidesSpectralMeasurements = true;
             obj.deviceSerialNum     = obj.getDeviceSerialNumber();
             obj.nativeS             = [380 4 101];
-            obj.nativeT             = eye(101);
+            obj.nativeT             = eye(obj.nativeS(3));
             obj.nativeMeasurement   = struct('energy', [], 'spectralAxis', []);
             obj.userS               = obj.nativeS;
             obj.userT               = obj.nativeT;
             obj.measurement         = [];
             obj.syncMode            = 'OFF';
+            
+            % Initialize protected properties
+            obj.availableConfigurationOptionNames  = {'syncMode'};
+            obj.availableConfigurationOptionValidValues = {obj.validSyncModes}; 
         end
   
     end % Public methods
@@ -63,7 +72,8 @@ classdef PR650dev < Radiometer
     
     % Implementations of required -- Public -- Abstract methods defined in the Radiometer interface   
     methods
-        % Set PR650-specific options
+        
+        % PR650-specific configuration options
         obj = setOptions(obj, varargin);
         
         % Method to conduct a single native measurent. For the PR-650 this is an SPD measurement.
@@ -92,6 +102,9 @@ classdef PR650dev < Radiometer
         % Method to read all serial port data
         serialData = readSerialPortData(obj) 
 
+        % Method to read a response or timeout after timeoutInSeconds
+        response = getResponseOrTimeOut(obj, timeoutInSeconds, timeoutString);
+        
         % Method to measure sync frequency for source.
         syncFreq = measureSyncFreq(obj)
         

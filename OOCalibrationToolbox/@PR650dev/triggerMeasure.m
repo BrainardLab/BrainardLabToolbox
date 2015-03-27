@@ -2,8 +2,8 @@ function triggerMeasure(obj)
 %
     % Configure syncMode
     if (strcmp(obj.syncMode, 'ON'))
-        if (obj.verbosity > 5)
-            disp('Measure with synMode ON');
+        if (obj.verbosity > 9)
+            disp('Measure with syncMode ON');
         end
         syncFreq = obj.measureSyncFreq();
         if (~isempty(syncFreq))
@@ -21,6 +21,6 @@ function triggerMeasure(obj)
     % Flush buffers.
     serialData = obj.readSerialPortData();
 
-    % Send command
+    % Send the measurement command
     IOPort('write', obj.portHandle, ['m0' char(10)]);
 end 

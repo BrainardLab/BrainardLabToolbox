@@ -3,6 +3,7 @@ function serialData = readSerialPortData(obj)
         fprintf('In PR650obj.readSerialPortData() method\n');
     end
 
+    % Look for any data on the serial port.
     data = IOPort('Read', obj.portHandle);
     serialData = char(data);
 

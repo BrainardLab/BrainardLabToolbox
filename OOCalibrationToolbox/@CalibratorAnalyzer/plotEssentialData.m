@@ -171,9 +171,9 @@ function plotPrimaryChromaticityStabilityData(obj, figureGroupIndex)
         % Compute the spectral locus
         xyYLocus = XYZToxyY(T_sensor);
         plot(xyYLocus(1,:)',xyYLocus(2,:)','k');
-        hold on;
         
         plot(xyYMon(1,:), xyYMon(2,:), 'k-', 'LineWidth', 2.0);
+        
         
         for k = 1:size(fullSpectra,1)
             if (primaryIndex == 1)
@@ -187,6 +187,7 @@ function plotPrimaryChromaticityStabilityData(obj, figureGroupIndex)
                 edgeColor = [0 0 1];
             end
             %edgeColor = faceColor;
+            
             plot(xyYMon(1,k), xyYMon(2,k), 's', 'MarkerFaceColor', faceColor, 'MarkerEdgeColor', edgeColor, 'MarkerSize', 12);
         end
     
@@ -349,6 +350,7 @@ function plotFullSpectra(obj, primaryIndex, primaryName, figureGroupIndex, legen
     
     % scaled spectra
     subplot('Position', [0.60 0.14 0.37 0.85]);
+    hold on;
     for k = size(scaledSpectra,1):-1:1
         y = squeeze(scaledSpectra(k,:));
         if (primaryIndex == 1)
@@ -359,8 +361,9 @@ function plotFullSpectra(obj, primaryIndex, primaryName, figureGroupIndex, legen
             faceColor = [0.7 0.7 1.0]; 
         end
         
-        edgeColor = 'k';
-        obj.makeShadedPlot(x,y, faceColor, edgeColor);
+        % edgeColor = 'k';
+        % obj.makeShadedPlot(x,y, faceColor, edgeColor);
+        plot(x,y, 'k-');
     end
     %plot(obj.spectralAxis, scaledSpectra);
     xlabel('Wavelength (nm)', 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);

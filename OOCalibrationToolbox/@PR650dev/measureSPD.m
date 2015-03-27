@@ -44,7 +44,7 @@ function measureSPD(obj)
                 fprintf('>>> Quality code: %f. Low light level!. Returning zeros\n', qual);
                 % return zeros
                 nativeSamples = obj.nativeS(3);
-                obj.nativeMeasurement.spectralAxis = zeros(1,nativeSamples);
+                obj.nativeMeasurement.spectralAxis = SToWls(obj.nativeS);
                 obj.nativeMeasurement.energy = zeros(1,nativeSamples);
                 
             elseif ((qual == 18) || (qual == 0))
@@ -60,12 +60,10 @@ function measureSPD(obj)
                 end
 
                 % update nativeS (in case it was incorrectly set in the constructor)
-                obj.nativeS = [obj.nativeMeasurement.spectralAxis(1) ...
-                               obj.nativeMeasurement.spectralAxis(2)-obj.nativeMeasurement.spectralAxis(1) ...
-                               length(obj.nativeMeasurement.spectralAxis)];
+                % obj.nativeS = WlsToS((obj.nativeMeasurement.spectralAxis)');
 
-                % Convert to our units standard.
-                obj.nativeMeasurement.energy = 4 * obj.nativeMeasurement.energy;
+                % Convert to our units standard, i.e., multiply by sampling interval
+                obj.nativeMeasurement.energy = obj.nativeS(2) * obj.nativeMeasurement.energy;
             else
                 error('Bad return code %g from meter', qual);
             end
