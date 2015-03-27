@@ -241,7 +241,7 @@ function [displaySettings, calibratorOptions] = generateConfigurationForViewSoni
         'meterDistance',                    0.5, ...                        % distance between radiometer and screen in meters
         'leaveRoomTime',                    1, ...                          % seconds allowed to leave room
         'nAverage',                         3, ...                          % number of repeated measurements for averaging
-        'nMeas',                            11, ...                         % samples along gamma curve
+        'nMeas',                            11, ...                          % samples along gamma curve
         'boxSize',                          150, ...                        % size of calibration stimulus in pixels
         'boxOffsetX',                       0, ...                          % x-offset from center of screen (neg: leftwards, pos:rightwards)         
         'boxOffsetY',                       0 ...                           % y-offset from center of screen (neg: upwards, pos: downwards)                      
@@ -347,10 +347,10 @@ function radiometerOBJ = generateRadiometerObject()
         
         % Specify extra properties
         desiredSyncMode = 'OFF';
-        desiredCyclesToAverage = 3;
+        desiredCyclesToAverage = 1;
         desiredSensitivityMode = 'STANDARD';
         desiredApertureSize = '1 DEG';
-        desiredExposureTime =  'ADAPTIVE';
+        desiredExposureTime =  1000;  % 'ADAPTIVE' or range [1-6000 msec] or [1-30000 msec]
         
         radiometerOBJ.setOptions(...
         	'syncMode',         desiredSyncMode, ...
