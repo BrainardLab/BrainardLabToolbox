@@ -15,10 +15,11 @@ function SwitchPathConfig
     fprintf('\n\t [8]. No public or private BrainardLabToolbox, no Psychtoolbox');
     fprintf('\n\t [9]. No ISETBIO');
     fprintf('\n\t[10]. ISETBIO, Matlab, Signal Processing, Image Processing');
-    fprintf('\n\t[11]. All native toolboxes + Psychtoolbox only');
-    fprintf('\n\t[12]. All native toolboxes + Psychtoolbox + BrainardLabToolbox only');
-    fprintf('\n\t[13]. Image + Signal + Stats + Optimization + Psychtoolbox only');
-    fprintf('\n\t[14]. Image + Signal + Stats + Optimization + Psychtoolbox + BrainardLabToolbox only');
+    fprintf('\n\t[11]. Matlab + Psychtoolbox only');
+    fprintf('\n\t[12]. All native toolboxes + Psychtoolbox only');
+    fprintf('\n\t[13]. All native toolboxes + Psychtoolbox + BrainardLabToolbox only');
+    fprintf('\n\t[14]. Image + Signal + Stats + Optimization + Psychtoolbox only');
+    fprintf('\n\t[15]. Image + Signal + Stats + Optimization + Psychtoolbox + BrainardLabToolbox only');
     
     pathSelection = input('\nSelect a configuration [default = 0]: ');
     if (isempty(pathSelection))
@@ -90,7 +91,29 @@ function SwitchPathConfig
             PathConfig.addNativeToolboxes(s, listOfNativeToolboxesToAdd);
             PathConfig.addNonNativeToolboxes(listOfNonNativeToolboxesToAdd);
     
-        case 11
+        case 11 
+
+            % Will add the isetbio toolbox
+            listOfNonNativeToolboxesToAdd = { ...
+                {'/Users/Shared/Matlab/Toolboxes/Psychtoolbox-3', '-end'} ...
+                };
+            
+            % Get list of currently installed toolboxes
+            s = PathConfig.getListOfInstalledToolboxes;
+        
+            % Remove everything
+            restoredefaultpath();
+            
+            % add the PathUtilities
+            addpath('/Users/Shared/Matlab/Toolboxes/BrainardLabToolbox/PathUtilities');
+    
+            PathConfig.removeNativeToolboxes({});
+            
+            % Add what we want.
+            PathConfig.addNonNativeToolboxes(listOfNonNativeToolboxesToAdd);
+            
+            
+        case 12
             % Native toolboxes + Psychtoolbox only
             % remove all the non-native toolboxes
             PathConfig.removeNonNativeToolboxes('/Users/Shared/Matlab/Toolboxes');
@@ -103,7 +126,7 @@ function SwitchPathConfig
                 };
             PathConfig.addNonNativeToolboxes(listOfNonNativeToolboxesToAdd);
             
-         case 12
+         case 13
             % Native toolboxes + Psychtoolbox + BrainardLabToolbox only
             % remove all the non-native toolboxes
             PathConfig.removeNonNativeToolboxes('/Users/Shared/Matlab/Toolboxes');
@@ -116,7 +139,7 @@ function SwitchPathConfig
                 };
             PathConfig.addNonNativeToolboxes(listOfNonNativeToolboxesToAdd);
             
-        case 13   
+        case 14 
             % image and signal processing toolboxes ONLY + Psychtoolbox
             listOfNativeToolboxesToAdd = { ...
                 'Image Processing Toolbox' ...
@@ -146,7 +169,7 @@ function SwitchPathConfig
             PathConfig.addNativeToolboxes(s, listOfNativeToolboxesToAdd);
             PathConfig.addNonNativeToolboxes(listOfNonNativeToolboxesToAdd);
             
-        case 14  
+        case 15  
             % image and signal processing toolboxes ONLY + Psychtoolbox + BrainardLabToolbox
             listOfNativeToolboxesToAdd = { ...
                 'Image Processing Toolbox' ...
@@ -175,7 +198,8 @@ function SwitchPathConfig
             % Add what we want.
             PathConfig.addNativeToolboxes(s, listOfNativeToolboxesToAdd);
             PathConfig.addNonNativeToolboxes(listOfNonNativeToolboxesToAdd);
-            
+        
+        
         otherwise
             % do nothing PathConfig.restoreDefaultPath();
     end
