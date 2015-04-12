@@ -32,9 +32,13 @@ classdef MGLcalibrator < Calibrator
     
     % Implementations of required -- Public -- Abstract methods defined in the @Calibrator interface   
     methods
-        % Method to conduct an mgl-based calibration sequence
-        obj = calibrate(obj);
-        
+        % Method to set the initial state of the displays
+        setDisplaysInitialState(obj, userPrompt);
+
+        % Method to update the stimulus and conduct a single radiometric measurement by 
+        % calling the corresponding method of the attached @Radiometer object.
+        [measurement, S] = updateStimulusAndMeasure(obj, bgSettings, targetSettings, useBitsPP);
+
         % Method to ensure that the parameters of the screen match those specified by the user
         obj = verifyScreenParamValues(obj);
         
@@ -45,12 +49,6 @@ classdef MGLcalibrator < Calibrator
     
     % Private methods that only the MGLcalibrator object can call
     methods (Access = private)  
-        % Method to set the initial state of the displays
-        setDisplaysInitialState(obj, userPrompt);
-        
-        % Method to update the stimulus and conduct a single radiometric measurement by 
-        % calling the corresponding method of the attached @Radiometer object.
-        [measurement, S] = updateStimulusAndMeasure(obj, bgSettings, targetSettings, useBitsPP);
         
         % Method to load the background and target indices of the current LUT.
         loadClut(obj, bgSettings, targetSettings, useBitsPP);

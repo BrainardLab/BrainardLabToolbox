@@ -35,7 +35,7 @@ classdef Radiometer < handle
         % form [FirstSample SampleIntervalInNm NspectralSamples], e.g. [380 4 101]
         nativeS   
         
-        % the native spectral SPD matrix (Msensors x NspectralSamles)
+        % the native sensor matrix (Msensors x NspectralSamles)
         % e.g., 101 x 101 for a radiometer, 3 x 101 for an XYZ colorimeter 
         nativeT       
         
@@ -45,7 +45,7 @@ classdef Radiometer < handle
         % user-specified spectral sampling
         userS
         
-        % user-specified spectral SPD matrix
+        % user-specified spectral sensor matrix
         userT
         
         % the last measurement after application of userS, userT to the last native measurement
@@ -56,6 +56,11 @@ classdef Radiometer < handle
     properties (SetAccess = protected, GetAccess = protected)
         % The port string, i.e. /dev/cu.KeySerial1 
         portString;
+        
+        % Names and valid values for the user-settable configurations of
+        % the radiometer - these are hardware-specific, so they are set by the subclasses
+        availableConfigurationOptionNames;
+        availableConfigurationOptionValidValues;
     end
     
     % Private properties
@@ -65,6 +70,10 @@ classdef Radiometer < handle
     
         % Enumerate cu* devices - they correspond to serial ports:
         portDeviceFiles = dir('/dev/cu*');
+        
+        % Private Verbosity
+        privateVerbosity;
+        
     end % private properties
     
     % Abstract, public methods. Each subclass *must* implenent its own
@@ -72,7 +81,7 @@ classdef Radiometer < handle
     % it cannot instantiate any objects.
     methods(Abstract)
         
-        % Method to set device-specific options
+        % Method to set device-specific configuration options
         obj = setOptions(obj, varargin);
         
         % Method to conduct a single native measurement;
@@ -108,14 +117,24 @@ classdef Radiometer < handle
         
         % Setter method for property verbosity
         function set.verbosity(obj, new_verbosity)
-            obj.verbosity = obj.privateSetVerbosity(new_verbosity);
-            fprintf('\nNew verbosity level: %d\n', obj.verbosity);
+            obj.privateSetVerbosity(new_verbosity);
+            %fprintf('\nNew verbosity level: %d\n', obj.verbosity);
         end
+        
+        % Getter method for property verbosity
+        function verbosity = get.verbosity(obj)
+            verbosity = obj.privateVerbosity;
+        end
+        
         
         % Getter method for property hostInfo
         function hostInfo = get.hostInfo(obj)
             hostInfo = obj.privateGetHostInfo();
-        end         
+        end    
+        
+        % Method to list the avaible configuration options and their valid ranges
+        listConfigurationOptions(obj);
+        
     end % public methods
      
 
@@ -124,8 +143,11 @@ classdef Radiometer < handle
         % Method to check the validity of the selected port
         invalidPort = checkPortValidity(obj, invalidPortStrings)   
         
-        % Method to transform a native measurement according to user-supplied S and T matrices
-        measurement = transformMeasurement(obj, applyUserS, applyUserT)
+        % Method to transform a native measurement according to params passed
+        measurement = adjustMeasurement(obj, varargin);
+        
+        % Method to check if two values are same
+        isTrue = valuesAreSame(obj,newValue, oldValue);
     end % methods (Access = protected)
     
     

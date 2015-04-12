@@ -72,11 +72,14 @@ function setDisplaysInitialState(obj, userPrompt)
     targetSettings = [1 1 1]';
     obj.loadClut(bgSettings, targetSettings, calStruct.describe.useBitsPP);
     
+    fprintf('Hit enter to continue\n');
+    pause;
+    
     % Wait for user
-    if (userPrompt)
-        FlushEvents;
-        GetChar;
+    if (userPrompt) 
         fprintf('Pausing for %d seconds ...', calStruct.describe.leaveRoomTime);
+        FlushEvents;
+        % GetChar;
         WaitSecs(calStruct.describe.leaveRoomTime);
         fprintf(' done\n\n\n');
     end

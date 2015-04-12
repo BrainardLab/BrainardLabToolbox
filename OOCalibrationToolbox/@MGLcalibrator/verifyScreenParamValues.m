@@ -8,7 +8,7 @@ function obj = verifyScreenParamValues(obj)
         error('System has %d attached screen. The screenID specified for calibration (%d) is out of range !\n', length(a), obj.screenToCalibrate);
     end
     obj.screenInfo = a(obj.screenToCalibrate);
-
+    
     if (~isempty(obj.desiredRefreshRate))
         if (obj.screenInfo.refreshRate ~= obj.desiredRefreshRate)
             error('Current frame rate (%4.2f Hz) does not match that specified (%4.2f Hz) for this calibration !\n', obj.screenInfo.refreshRate, obj.desiredRefreshRate);
