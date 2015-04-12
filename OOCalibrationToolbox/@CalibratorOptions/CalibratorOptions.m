@@ -229,16 +229,12 @@ classdef CalibratorOptions
         
     end  % public methods
     
-    methods (Access = private)
-        
+    methods (Access = private)        
         % Method to configure the basic linearity setup
         function obj = configureBasicLinearitySetup(obj)
             
         end
-        
-        
+
     end  % private methods
-    
-    
-    
+
 end % classef
