@@ -14,7 +14,7 @@ function SwitchPathConfig
     fprintf('\n\t [7]. No Psychtoolbox');
     fprintf('\n\t [8]. No public or private BrainardLabToolbox, no Psychtoolbox');
     fprintf('\n\t [9]. No ISETBIO');
-    fprintf('\n\t[10]. ISETBIO, Matlab, Signal Processing, Image Processing');
+    fprintf('\n\t[10]. ISETBIO, UnitTestToolbox, Matlab, Signal Processing, Image Processing');
     fprintf('\n\t[11]. Matlab + Psychtoolbox only');
     fprintf('\n\t[12]. All native toolboxes + Psychtoolbox only');
     fprintf('\n\t[13]. All native toolboxes + Psychtoolbox + BrainardLabToolbox only');
@@ -73,6 +73,7 @@ function SwitchPathConfig
             % Will add the isetbio toolbox
             listOfNonNativeToolboxesToAdd = { ...
                 {isetbioRootPath(), '-end'} ...
+                {'/Users/Shared/Matlab/Toolboxes/UnitTestToolbox', '-end'} ...
                 {'/Users/Shared/Matlab/Toolboxes/BrainardLabToolbox/PathUtilities', '-begin'} ...
                 };
             
