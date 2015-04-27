@@ -41,9 +41,13 @@ function importManchesterImage
 end
 
 function exportFileName = exportScene(scene, destinationDir)
+    if (~exist(destinationDir, 'dir'))
+        mkdir(destinationDir);
+    end
+    
     exportFileName = fullfile(destinationDir, sceneGet(scene, 'name'));
     save(exportFileName, 'scene');
-    fprintf('Scene ''%s'' saved to ''%s''', sceneGet(scene, 'name'), exportFileName);
+    fprintf('Isetbio scene named ''%s'' was saved to ''%s''.\n', sceneGet(scene, 'name'), exportFileName);
 end
 
 
