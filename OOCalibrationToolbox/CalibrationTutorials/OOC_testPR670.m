@@ -1,5 +1,29 @@
 function OOC_testPR670
 
+    DB_PR670obj = PR670dev(...
+            'verbosity',        1, ...       % 1 -> minimum verbosity
+            'devicePortString', [] ...       % empty -> automatic port detection)
+        );
+    
+    load T_xyz1931;
+ 
+    sensorActivations = DB_PR670obj.measure('userS', S_xyz1931, 'userT', T_xyz1931)
+    
+    DB_PR670obj.measure();
+    measurement = DB_PR670obj.measurement.energy;
+    S           = WlsToS((DB_PR670obj.measurement.spectralAxis)');
+    
+    
+
+    V = squeeze(T_xyz1931(2,:));
+    V = SplineCmf(S_xyz1931, V, S);
+    
+    683 * dot(measurement, V)
+    pause
+    
+end
+
+function mainTest
     % Load the Stockman-Sharpe (2000) 2-degree cone fundamentals
     load T_cones_ss2;
 

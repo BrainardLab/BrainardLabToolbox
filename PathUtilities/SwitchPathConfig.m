@@ -1,9 +1,4 @@
-% SwitchPathConfig
-%
-% Set up various path configurations for testing.
-%
-% 4/12/15  dhb  Add UnitTestToolbox to #10, which is the main ISETBIO
-%               testing configuration.function SwitchPathConfig
+function SwitchPathConfig
 
     % Restore default path
     PathConfig.restoreDefaultPath();

@@ -36,15 +36,18 @@ function OOC_testPR650dev
         'devicePortString', [] ...       % empty -> automatic port detection
         );
 
+        fprintf('device model name: %s\n', DB_PR650obj.deviceModelName);
+        fprintf('Device serial no is : %s.\n', DB_PR650obj.deviceSerialNum)
+
+        % List available configuration options and their valid values
+        DB_PR650obj.listConfigurationOptions();
+        
         % Set various PR-650 specific optional parameters
         DB_PR650obj.setOptions(...
         	'syncMode',     'ON', ...
         	'verbosity',     5 ...
                 );
 
-        % Info
-        DB_PR650obj.deviceModelName
-        DB_PR650obj.hostInfo
 
         % userT showcase
         sensorActivations = DB_PR650obj.measure('userS', desiredS, 'userT', T_allSensors);
@@ -94,9 +97,6 @@ function OOC_testPR650dev
         clf;
         bar(DB_PR650obj.measurement.spectralAxis, DB_PR650obj.measurement.energy, 'EdgeColor', [0 0 0], 'FaceColor', [0.1 0.7 0.9], 'BarWidth', 1.0);
         set(gca, 'XLim', [380-5 780+5]);
-       
-        % Shutdown PR650obj object and close the associated device
-        DB_PR650obj.shutDown();
         
      catch err
         
@@ -110,4 +110,7 @@ function OOC_testPR650dev
         rethrow(err)
     end % end try/catch
     
+    % Shutdown PR650obj object and close the associated device
+    DB_PR650obj.shutDown();
+        
 end
