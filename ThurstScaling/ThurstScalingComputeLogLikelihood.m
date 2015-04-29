@@ -19,7 +19,7 @@ function [logLikely, predictedResponses] = ThurstScalingComputeLogLikelihood(the
 nPairs = size(thePairs,1);
 logLikely = 0;
 for i = 1:nPairs
-    predictedResponses(i) = MLDSComputeProb(yFit(thePairs(i,1)),yFit(thePairs(i,2)),sigma); %#ok<AGROW>
+    predictedResponses(i) = ThurstComputeProb(yFit(thePairs(i,1)),yFit(thePairs(i,2)),sigma); %#ok<AGROW>
     if (isnan(predictedResponses))
         error('Returned probability is NaN');
     end

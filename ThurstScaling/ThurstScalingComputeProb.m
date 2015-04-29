@@ -21,7 +21,7 @@ diff = y1-y2;
 % -diff, with sigma multipled by sqrt(2) to take into account 
 % of the fact that we are looking at the distribution of the
 % differences.
-p = 1-normcdf(-diff,0,sqrt(2)*sigma);
+p = 1-normcdf(0,diff,sqrt(2)*sigma);
 if (p == 0)
     p = 0.0001;
 elseif (p == 1)
