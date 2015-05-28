@@ -55,16 +55,19 @@ classdef GamePad < handle
     methods
         % Constructor
         function obj = GamePad()
-            obj.devHandle = vrjoystick(1);
+            obj.devHandle = vrjoystick(1)
         end
         
-        function [action, time] = read(obj)
+        function [action, time, timeString] = read(obj)
             % Read from the device
             [axes, buttons, povs] = read(obj.devHandle);
             
-            % Get time
+            % Get Secs
+            time = GetSecs;
+
+            % Get time as string
             a = clock();
-            time = sprintf('%d:%d:%2.4f', a(4), a(5), a(6));
+            timeString = sprintf('%d:%d:%2.4f', a(4), a(5), a(6));
             
             % force axes in [-64, -63, ..., -1, 0, 1, ..., 63, 64]
             % save the sign
