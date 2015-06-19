@@ -2,8 +2,7 @@
 function [targetCompetitorFit, logLikelyFit, predictedResponses] = MLDSColorSelection(thePairs,theResponses,nTrialsPerPair, numberOfCompetitors)
 % function [targetCompetitorFit, logLikelyFit, predictedResponses] = MLDSColorSelection(thePairs,theResponses,nTrialsPerPair, numberOfCompetitors)
 %
-% Main MLDS function. Takes as input set of observers and returns the inferred position of the target and each competitors. 
-% 
+% Main MLDS function. Takes as input set of observer's responses and returns the inferred position of the target and each competitors. 
 % Input: 
 %   thePairs -            competitor pairs. 
 %   theResponses -        set of responses for this pair (number of times first

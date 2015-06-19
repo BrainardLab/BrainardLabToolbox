@@ -1,5 +1,5 @@
 function response = MLDSSimulateResponse(x,y1,y2,sigma,mapFunction)
-% response1 = MLDSSimulateResponse(x,y1,y2,sigma,mapFunction)
+% response = MLDSSimulateResponse(x,y1,y2,sigma,mapFunction)
 %
 % Simulate a trial given target and pair.
 % The passed mapFunction simulates the effect of context change
