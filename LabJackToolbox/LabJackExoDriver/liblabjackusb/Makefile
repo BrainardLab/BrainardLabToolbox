@@ -2,6 +2,7 @@
 # Makefile for liblabjackusb
 #
 #
+#
 
 UNAME = $(shell uname -s)
 
@@ -33,6 +34,8 @@ else
 	RUN_LDCONFIG ?= 1
 endif
 
+IDIR = /usr/local/include
+CFLAGS=-I$(IDIR)
 CFLAGS += -fPIC -g -Wall $(ARCHFLAGS)
 
 %.o: %.c
