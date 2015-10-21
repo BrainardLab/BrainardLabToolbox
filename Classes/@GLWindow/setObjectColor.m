@@ -30,13 +30,7 @@ queueIndex = GLWObj.findObjectIndex(objectName);
 switch GLWObj.Objects{queueIndex}.ObjectType
 	% Mondrian
 	case GLWindow.ObjectTypes.Mondrian
-		error('Not supported yet.');
-		
-		numRows = GLWObj.private.objects{queueIndex(i)}.numrows;
-		numCols = GLWObj.private.objects{queueIndex(i)}.numcolumns;
-		if ~all(size(objectColor{i}) == [numRows numCols 3])
-			error('objectColor must be a %dx%dx3 matrix.', numRows, numCols, 3);
-		end
+        error('setObjectColor not allowed on Mondrian objects.');
 		
 	case GLWindow.ObjectTypes.Image
 		error('setObjectColor not allowed on image objects.');
