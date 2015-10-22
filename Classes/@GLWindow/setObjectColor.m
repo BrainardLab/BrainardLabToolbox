@@ -30,7 +30,7 @@ queueIndex = GLWObj.findObjectIndex(objectName);
 switch GLWObj.Objects{queueIndex}.ObjectType
 	% Mondrian
 	case GLWindow.ObjectTypes.Mondrian
-        error('setObjectColor not allowed on Mondrian objects.');
+        objectColor = GLW_ValidateMondrianColors(objectColor, GLWObj.DisplayTypeID);
 		
 	case GLWindow.ObjectTypes.Image
 		error('setObjectColor not allowed on image objects.');
