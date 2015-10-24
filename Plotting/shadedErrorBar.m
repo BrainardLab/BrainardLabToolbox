@@ -87,7 +87,7 @@ else
     if f==2, errBar=errBar'; end
 end
 
-if length(x) ~= length(errBar)
+if length(x) ~= size(errBar, 2)
     error('inputs x and y must have the same length as errBar')
 end
 
