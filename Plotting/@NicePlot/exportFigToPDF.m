@@ -1,7 +1,4 @@
-function exportFigToPDF(pdfFileName,figHandle,dpi)
-
-    % Verify correct number of arguments
-    error(nargchk(0,3,nargin));
+function exportFigToPDF(pdfFileName,figHandle,dpi, varargin)
 
     % If no handle is provided, use the current figure as default
     if nargin<1
@@ -38,7 +35,13 @@ function exportFigToPDF(pdfFileName,figHandle,dpi)
 
     set(figHandle,'InvertHardCopy','off')
     % Save the pdf (this is the same method used by "saveas")
-    print(figHandle,'-dpdf',pdfFileName,sprintf('-r%d',dpi))
+    if (~isempty(varargin))
+        if ismember('noui', varargin{:})
+            print(figHandle,'-dpdf', '-noui', pdfFileName,sprintf('-r%d',dpi));
+        end
+    else
+        print(figHandle,'-dpdf', pdfFileName,sprintf('-r%d',dpi));
+    end
 
     % Restore the previous settings
     set(figHandle,'PaperType',prePaperType);

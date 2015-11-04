@@ -30,8 +30,8 @@ classdef NicePlot
         
         % Method to export fig in figHandle to a PDF doc that looks just
         % like the screen figure
-        exportFigToPDF(pdfFileName,figHandle,dpi);
+        exportFigToPDF(pdfFileName,figHandle,dpi, varargin);
 
-        exportFigToPNG(pngFileName,figHandle,dpi);
+        exportFigToPNG(pngFileName,figHandle,dpi, varargin);
     end
 end
