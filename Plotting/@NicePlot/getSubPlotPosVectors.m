@@ -5,6 +5,7 @@ function posVectors = getSubPlotPosVectors(varargin)
     self.widthMargin    = 0.01;
     self.heightMargin   = 0.01;
     self.leftMargin     = 0.06;
+    self.rightMargin    = 0.06;
     self.bottomMargin   = 0.08;
     self.topMargin      = 0.08;
     
@@ -15,6 +16,7 @@ function posVectors = getSubPlotPosVectors(varargin)
     parser.addParamValue('widthMargin',     self.widthMargin);
     parser.addParamValue('heightMargin',    self.heightMargin);
     parser.addParamValue('leftMargin',      self.leftMargin);
+    parser.addParamValue('rightMargin',     self.rightMargin);
     parser.addParamValue('bottomMargin',    self.bottomMargin); 
     parser.addParamValue('topMargin',       self.topMargin);
 
@@ -27,7 +29,7 @@ function posVectors = getSubPlotPosVectors(varargin)
        self.(pNames{k}) = parser.Results.(pNames{k}); 
     end
     
-    plotWidth  = ((1.0-self.leftMargin) - self.widthMargin*(self.colsNum-1) - 0.01)/self.colsNum;
+    plotWidth  = ((1.0-self.leftMargin-self.rightMargin) - self.widthMargin*(self.colsNum-1) - 0.01)/self.colsNum;
     plotHeight = ((1.0-self.bottomMargin-self.topMargin) - self.heightMargin*(self.rowsNum-1) - 0.01)/self.rowsNum;
     
     for row = 1:self.rowsNum
