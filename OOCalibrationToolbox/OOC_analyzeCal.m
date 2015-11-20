@@ -5,12 +5,12 @@ function OOC_analyzeCal
     try
         [cal, calFilename] = GetCalibrationStructure('Enter calibration filename',defaultCalFile,[]);
     catch err
-        fullCalFile = input('Calibration file not found using GetCalibrationStructure. Enter calibration file here: ', 's');
-        if (exist(fullCalFile))
+        fullCalFile = input('Calibration file not found using GetCalibrationStructure.\nEnter calibration filename again: ', 's');
+        if (exist(fullCalFile, 'file'))
+            fprintf('\nThe calibration file ''%s'' was found in %s !!\n\n', fullCalFile, which(fullCalFile));
             v = whos('-file', fullCalFile);
             load(fullCalFile);
             eval(sprintf('cal = %s;', v.name));
-            cal
             calFilename = fullCalFile;
         else
            error('File ''%s'' not found on the path.', fullCalFile); 
