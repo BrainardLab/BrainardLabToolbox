@@ -2,8 +2,21 @@ function OOC_analyzeCal
 
     % Load a calibration file
     defaultCalFile = 'Right_SONY_PVM_OLED';
-    [cal, calFilename] = GetCalibrationStructure('Enter calibration filename',defaultCalFile,[]);
-    
+    try
+        [cal, calFilename] = GetCalibrationStructure('Enter calibration filename',defaultCalFile,[]);
+    catch err
+        fullCalFile = input('Calibration file not found using GetCalibrationStructure. Enter calibration file here: ', 's');
+        if (exist(fullCalFile))
+            v = whos('-file', fullCalFile);
+            load(fullCalFile);
+            eval(sprintf('cal = %s;', v.name));
+            cal
+            calFilename = fullCalFile;
+        else
+           error('File ''%s'' not found on the path.', fullCalFile); 
+        end
+    end
+
     % Instantiate a @CalAnalyzer object
     calAnalyzer = CalibratorAnalyzer(cal, calFilename);
     
