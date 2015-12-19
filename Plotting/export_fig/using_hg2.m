@@ -8,11 +8,17 @@
 %OUT:
 %   tf - boolean indicating whether the HG2 graphics pipeline is being used
 %        (true) or not (false).
-
+%
+% 12/19/15  dhb  Modified for 2016b, can't use graphicsversion without warning
 function tf = using_hg2(fig)
-try
-    tf = ~graphicsversion(fig, 'handlegraphics');
-catch
-    tf = false;
+
+if (verLessThan('matlab','9.0.0'))
+    try
+        tf = ~graphicsversion(fig, 'handlegraphics');
+    catch
+        tf = false;
+    end
+else
+    tf = true;
 end
 end
