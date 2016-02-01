@@ -31,6 +31,7 @@ function measureSPD(obj)
 
     % Extract the result code.
     qual = sscanf(readStr, '%f', 1);
+    obj.measurementQuality = qual;
     
     switch qual
         case 0 % Measurement OK

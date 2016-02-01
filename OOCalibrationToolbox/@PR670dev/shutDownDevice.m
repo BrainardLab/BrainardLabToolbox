@@ -1,5 +1,5 @@
 % Method to shutdown the device
-function obj = shutDown(obj)
+function obj = shutDownDevice(obj)
     if (obj.verbosity > 9)
         fprintf('In PR670obj.shutDown() method\n');
     end

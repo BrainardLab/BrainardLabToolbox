@@ -37,6 +37,8 @@ function measureSPD(obj)
             
             % Parse data 
             qual = sscanf(serialData,'%f',1);
+            obj.measurementQuality = qual;
+            
             if ((qual == 7) || (qual == 8))
                 error('>>>Quality code:%f\n', qual);
                 
