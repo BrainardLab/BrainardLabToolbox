@@ -47,5 +47,6 @@ classdef UDPcommunicator < handle
                 fprintf('UDPcommunicator  initialized! \n');
             end
         end
+    end
 end
 

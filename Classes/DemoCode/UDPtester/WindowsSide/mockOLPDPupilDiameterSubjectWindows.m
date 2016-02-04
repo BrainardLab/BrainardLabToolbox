@@ -1,17 +1,21 @@
 function mockOLPDPupilDiameterSubjectWindows
 
+    fprintf('\nStarting windows client\n');
     params = initParams();
 
-    % Open ip the UDP communication
-    matlabUDP('close');
-    matlabUDP('open',params.winHostIP,params.macHostIP,params.udpPort);
-
+    UDPobj = UDPcommunicator( ...
+          'localIP', params.winHostIP, ...
+         'remoteIP', params.macHostIP, ...
+          'portUDP', params.udpPort, ...      % optional with default 2007
+        'verbosity', 'normal' ...             % optional with possible values {'min', 'normal', 'max'}, and default 'normal'
+        );
+    
     fprintf('Waiting for Mac to tell us to go\n');
-    numStims = VSGOLGetNumberStims;
+    numStims = VSGOLGet('NumberStims');
 
 end
 
-function numStims = VSGOLGetNumberStims
+function numStims = VSGOLGet(expectedFlag)
     % numStims = VSGOLGetNumberStims
     % Get the number of trials from the Mac
     temp = VSGOLGetInput;
