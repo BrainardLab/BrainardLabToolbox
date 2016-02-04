@@ -24,19 +24,27 @@ classdef UDPcommunicator < handle
 
              % Parse input parameters.
             p = inputParser;
-            p.addRequired('localIP', @ischar);
-            p.addRequired('remoteIP', @ischar);
-            p.addOptional('portUDP', defaultRemoteIP, @isnumeric);
-            p.addParamValue('verbosity', defaultVerbosity, @ischar);
+            p.addParameter('localIP', 'none', @ischar);
+            p.addParameter('remoteIP', 'none', @ischar);
+            p.addParameter('udpPort', defaultUDPport, @isnumeric);
+            p.addParameter('verbosity', defaultVerbosity, @ischar);
             
             p.parse(varargin{:});
+            p.Results
             obj.localIP  = p.Results.localIP;
             obj.remoteIP = p.Results.remoteIP;
-            obj.portUDP  = p.Results.portUDP;
+            obj.portUDP  = p.Results.udpPort;
             obj.verbosity = p.Results.verbosity;
 
+            if strcmp(obj.localIP, 'none')
+                error('No ''localIP'' was specified\n');
+            end
+            if strcmp(obj.remoteIP, 'none')
+                error('No ''remoteIP'' was specified\n');
+            end
+            
             if (~strcmp(obj.verbosity,'min'))
-                fprintf('\nInitializing UDPcommunicator ... ');
+                fprintf('\nInitializing UDPcommunicator (local:%s remote:%s)\n', obj.localIP, obj.remoteIP);
             end
 
             % initialize UDP communication

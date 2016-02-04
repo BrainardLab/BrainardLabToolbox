@@ -4,10 +4,10 @@ function mockOLPDPupilDiameterSubjectWindows
     params = initParams();
 
     UDPobj = UDPcommunicator( ...
-          'localIP', params.winHostIP, ...
-         'remoteIP', params.macHostIP, ...
-          'portUDP', params.udpPort, ...      % optional with default 2007
-        'verbosity', 'normal' ...             % optional with possible values {'min', 'normal', 'max'}, and default 'normal'
+          'localIP', params.winHostIP, ...    % required: the IP of this computer
+         'remoteIP', params.macHostIP, ...    % required: the IP of the computer we want to conenct to
+          'udpPort', params.udpPort, ...      % optional, with default value: 2007
+        'verbosity', 'normal' ...             % optional, with default value: 'normal', and possible values: {'min', 'normal', 'max'},
         );
     
     fprintf('Waiting for Mac to tell us to go\n');
