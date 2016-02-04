@@ -13,25 +13,24 @@ function params = mockModulationTrialSequencePupilometry()
     mglListener('init');
 
     % Instantiate a UDPcommunictor object
-    UDPobj = UDPCommunicator( ...
+    UDPobj = UDPcommunicator( ...
           'localIP', params.macHostIP, ...
          'remoteIP', params.winHostIP, ...
-          'portUDP', params.udpPort, ...      % optional with default 2007
+          'udpPort', params.udpPort, ...      % optional with default 2007
         'verbosity', 'normal' ...             % optional with possible values {'min', 'normal', 'max'}, and default 'normal'
         );
-    fprintf('\n* Initializing UPD\n');
-    matlabUDP('close');
-    matlabUDP('open', params.macHostIP, params.winHostIP, params.udpPort);
 
-    params = trialLoop(params, block);
+    params = trialLoop(params, block, UDPobj);
 end
 
 
-function params = trialLoop(params, block)
+function params = trialLoop(params, block, UDPobj)
 
    % Send the number of trials to the Winbox
-    reply = OLVSGSendNumTrials(params);
-    fprintf('Win received number of trials? %s\n',reply);
+   UDPobj.send('numTrials', params.nTrials);
+   
+   % reply = OLVSGSendNumTrials(params);
+   % fprintf('Win received number of trials? %s\n',reply);
     
 end
 

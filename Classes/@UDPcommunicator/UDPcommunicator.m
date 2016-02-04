@@ -30,7 +30,6 @@ classdef UDPcommunicator < handle
             p.addParameter('verbosity', defaultVerbosity, @ischar);
             
             p.parse(varargin{:});
-            p.Results
             obj.localIP  = p.Results.localIP;
             obj.remoteIP = p.Results.remoteIP;
             obj.portUDP  = p.Results.udpPort;
@@ -55,6 +54,15 @@ classdef UDPcommunicator < handle
                 fprintf('UDPcommunicator  initialized! \n');
             end
         end
+        
+        % method to transmit a parameter (paramName, paramValue, [timeOutInSeconds])
+        send(obj, paramName, paramValue, timeOutInSeconds);
+        
+        % method to transmit a parameter (paramName, paramValue, [timeOutInSeconds])
+        receive(obj, timeOutInSeconds);
+        
+        
+        
     end
 end
 

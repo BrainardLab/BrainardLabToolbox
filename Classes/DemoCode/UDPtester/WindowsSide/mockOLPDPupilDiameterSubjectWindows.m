@@ -10,8 +10,10 @@ function mockOLPDPupilDiameterSubjectWindows
         'verbosity', 'normal' ...             % optional, with default value: 'normal', and possible values: {'min', 'normal', 'max'},
         );
     
-    fprintf('Waiting for Mac to tell us to go\n');
-    numStims = VSGOLGet('NumberStims');
+    fprintf('Waiting for Mac to tell us something.\n');
+    UDPobj.receive();
+    
+    %numStims = VSGOLGet('NumberStims');
 
 end
 
