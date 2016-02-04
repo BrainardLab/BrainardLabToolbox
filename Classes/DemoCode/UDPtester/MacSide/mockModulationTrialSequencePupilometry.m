@@ -44,7 +44,6 @@ end
     
     
 function params = initParams()
-    params = initParams();
     params.macHostIP = '130.91.72.120';
     params.winHostIP = '130.91.74.15';
     params.udpPort = 2007;
@@ -56,7 +55,6 @@ function params = initParams()
     end
 
     params.nTrials = 10;
-    params.protocolName = 'UDP_TEST';
     
 end
 
