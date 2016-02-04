@@ -12,7 +12,13 @@ function params = mockModulationTrialSequencePupilometry()
     fprintf('\n* Creating keyboard listener\n');
     mglListener('init');
 
-    % Initialize UDP
+    % Instantiate a UDPcommunictor object
+    UDPobj = UDPCommunicator( ...
+          'localIP', params.macHostIP, ...
+         'remoteIP', params.winHostIP, ...
+          'portUDP', params.udpPort, ...      % optional with default 2007
+        'verbosity', 'normal' ...             % optional with possible values {'min', 'normal', 'max'}, and default 'normal'
+        );
     fprintf('\n* Initializing UPD\n');
     matlabUDP('close');
     matlabUDP('open', params.macHostIP, params.winHostIP, params.udpPort);
