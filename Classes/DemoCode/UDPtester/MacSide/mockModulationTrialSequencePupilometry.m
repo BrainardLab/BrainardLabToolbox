@@ -27,7 +27,7 @@ end
 function params = trialLoop(params, block, UDPobj)
 
    % Send the number of trials to the Winbox
-   UDPobj.send('numTrials', params.nTrials);
+   ack = UDPobj.send('numTrials', params.nTrials);
    
    % reply = OLVSGSendNumTrials(params);
    % fprintf('Win received number of trials? %s\n',reply);

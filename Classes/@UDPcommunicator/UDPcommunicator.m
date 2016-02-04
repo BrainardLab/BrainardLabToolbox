@@ -56,10 +56,10 @@ classdef UDPcommunicator < handle
         end
         
         % method to transmit a parameter (paramName, paramValue, [timeOutInSeconds])
-        send(obj, paramName, paramValue, timeOutInSeconds);
+        ack = send(obj, paramName, paramValue, timeOutInSeconds);
         
         % method to transmit a parameter (paramName, paramValue, [timeOutInSeconds])
-        receive(obj, timeOutInSeconds);
+        dStruct = receive(obj, timeOutInSeconds);
         
         
         

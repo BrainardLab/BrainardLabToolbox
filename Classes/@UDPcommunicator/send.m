@@ -1,4 +1,4 @@
-function send(obj, paramName, paramValue, timeOut)
+function ack = send(obj, paramName, paramValue, timeOut)
 
     minArgs = 3;
     maxArgs = 4;
@@ -19,7 +19,7 @@ function send(obj, paramName, paramValue, timeOut)
     matlabUDP('send', sprintf('%s \t %s', paramName, sprintf('%f', paramValue)));
 
     timeOutInSeconds = 2;
-    messageInResponseToCommandSend = obj.receive(timeOutInSeconds)
+    ackStruct = obj.receive(timeOutInSeconds)
     
 end
 
