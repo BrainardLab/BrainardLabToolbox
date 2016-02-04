@@ -9,6 +9,7 @@ classdef UDPcommunicator < handle
 		localIP
 		remoteIP
         portUDP
+        verbosity
     end
 
 
@@ -16,11 +17,12 @@ classdef UDPcommunicator < handle
     methods
         % Constructor
         function obj = UDPcommunicator(varargin)
-            % Parse input parameters.
-
+           
+            % Set default values for some params
             defaultUDPport =  2007;
-            defaultVerbosity = 'normal';
+            defaultVerbosity = 'min';
 
+             % Parse input parameters.
             p = inputParser;
             p.addRequired('localIP', @ischar);
             p.addRequired('remoteIP', @ischar);
@@ -33,12 +35,16 @@ classdef UDPcommunicator < handle
             obj.portUDP  = p.Results.portUDP;
             obj.verbosity = p.Results.verbosity;
 
+            if (~strcmp(obj.verbosity,'min'))
+                fprintf('\nInitializing UDPcommunicator ... ');
+            end
+
             % initialize UDP communication
             matlabUDP('close');
-            q = matlabUDP('open', obj.localIP, obj.remoteIP, obj.portUDP);
+            matlabUDP('open', obj.localIP, obj.remoteIP, obj.portUDP);
 
-            if (strcmp(obj.verbosity,'normal'))
-                fprintf('Opened UDP channel\n.')
+            if (~strcmp(obj.verbosity,'min'))
+                fprintf('UDPcommunicator  initialized! \n');
             end
         end
 end
