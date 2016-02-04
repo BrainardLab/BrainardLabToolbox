@@ -1,4 +1,4 @@
-function send(obj, paramName, paramValue, timeOutInSeconds)
+function send(obj, paramName, paramValue, timeOut)
 
     minArgs = 3;
     maxArgs = 4;
@@ -6,6 +6,8 @@ function send(obj, paramName, paramValue, timeOutInSeconds)
     
     if (nargin == 3)
         timeOutInSeconds = 0;
+    else
+        timeOutInSeconds = timeOut;
     end
     
     if (~ischar(paramName))
@@ -14,7 +16,7 @@ function send(obj, paramName, paramValue, timeOutInSeconds)
     end
             
     % send the param name followed by the param value with a tab in-between
-    matlabUDP('send', sprintf('%s \t %s', paramName, sprintf('%f', number)));
+    matlabUDP('send', sprintf('%s \t %s', paramName, sprintf('%f', paramValue)));
 
     timeOutInSeconds = 2;
     messageInResponseToCommandSend = obj.receive(timeOutInSeconds)
