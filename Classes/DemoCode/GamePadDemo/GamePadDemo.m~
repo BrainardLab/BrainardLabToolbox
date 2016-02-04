@@ -2,10 +2,7 @@
 % access to the Logiteck gamepad.
 %
 % Caution: When using a USB hub to connect the Logitech gamepad (and/or) other components
-% unpredicted behavior may occur. This would need to be troubleshooted by
-% unplugging, one a time, the various components from the hub, or by connecting
-% all components directly to the computer.
-%
+% when we plugged in both keyboard and the controller into the USB hub. Connecting the keyboard directly to the computer removed the problem.
 % 6/18/2014 npc Wrote it.
 %
 
