@@ -32,29 +32,16 @@ end
 function params = trialLoop(params, block, UDPobj)
 
     fprintf('\nMac computer is sending number of trials (%d) message\n', params.nTrials);
-    status = UDPobj.sendMessage(...
-            'NUMBER_OF_TRIALS', 'withValue', params.nTrials, ...
+    status = UDPobj.sendMessage('NUMBER_OF_TRIALS', 'withValue', params.nTrials, ...
             'timeOutSecs', 2, 'maxAttemptsNum', 1);
-    status
+        
     if (~strcmp(status, 'MESSAGE_SENT_MATCHED_EXPECTED_MESSAGE'))
-        error('Aborting here');
+        fprintf('sendMessage returned with this message: ''%s''\n', status);
+        error('Aborting run at this point');
     end
    
-    
 end
 
-function reply = OLVSGSendNumTrials(params)
-    % reply = OLVSGSendNumStims(params)
-    % Send over the number of trials
-    number = params.nTrials;
-    matlabUDP('send', sprintf('%f', number));
-    reply = OLVSGGetInput;    
-end
-    
-function data = OLVSGGetInput
-    while matlabUDP('check') == 0; end
-    data = matlabUDP('receive');
-end
     
     
 function params = initParams()

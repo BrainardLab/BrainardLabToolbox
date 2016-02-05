@@ -14,7 +14,7 @@ function mockOLPDPupilDiameterSubjectWindows
     response = UDPobj.waitForMessage('NUMBER_OF_TRIALS', 'timeOutSecs', Inf)
     
     
-    fprintf('Bye bye from windows\n');
+    fprintf('\nBye bye from windows\n');
 
 end
 

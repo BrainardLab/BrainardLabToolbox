@@ -30,9 +30,9 @@ function response = waitForMessage(obj, msgLabel, varargin)
 
     % give some feedback
     if isinf(timeOutSecs)
-        fprintf('%s Waiting for ever to receive a ''%s'' message ....', signature, expectedMessageLabel);
+        fprintf('%s Waiting for ever to receive a ''%s'' message .... ', signature, expectedMessageLabel);
     else
-        fprintf('%s Waiting for %2.2f seconds to receive a ''%s'' message ...', signature, timeOutSecs, expectedMessageLabel);
+        fprintf('%s Waiting for %2.2f seconds to receive a ''%s'' message ... ', signature, timeOutSecs, expectedMessageLabel);
     end
     
     tic;
@@ -61,7 +61,7 @@ function response = waitForMessage(obj, msgLabel, varargin)
         % check if the message label we received is the same as the one we
         % are expecting, and inform the sender
         if (strcmp(response.msgLabel, expectedMessageLabel))
-            fprintf('Expected message received. Sending ACK to sender.');
+            fprintf('Expected message received, acknowledging the sender.');
             obj.sendMessage('ACK', 'timeOutSecs', -1);
         else
             fprintf('%s Received unexpected message: ''%s'' (istead of ''%s''). Informing the sender.', signature, response.msgLabel, expectedMessageLabel);
