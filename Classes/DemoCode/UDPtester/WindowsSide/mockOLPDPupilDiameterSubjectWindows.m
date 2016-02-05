@@ -30,7 +30,7 @@ function mockOLPDPupilDiameterSubjectWindows
         response = UDPobj.waitForMessage(messageLabel, 'timeOutSecs', Inf);
         
         % check for errors
-        if (~strcmp(response.msgLabel, messageKey)) 
+        if (~strcmp(response.msgLabel, messageLabel)) 
             communicationIsInSync = false;
             error('Communication out of sync');
         end
