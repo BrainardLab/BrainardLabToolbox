@@ -1,5 +1,7 @@
 function response = waitForMessage(obj, msgLabel, varargin)
-
+    
+    signature = obj.waitForMessageSignature;
+    
     p = inputParser;
     % the msgLabel is required, but we can pass an empty string
     addRequired(p,'msgLabel');
@@ -15,7 +17,7 @@ function response = waitForMessage(obj, msgLabel, varargin)
         expectedMessageLabel = '';
     end
     if (~ischar(expectedMessageLabel))
-        error('%s The expected message label must be a string, or an empty array, i.e.: []\n',obj.waitForMessageSignature);
+        error('%s The expected message label must be a string, or an empty array, i.e.: []\n',signature);
     end
     timeOutSecs = p.Results.timeOutSecs;
 
@@ -28,9 +30,9 @@ function response = waitForMessage(obj, msgLabel, varargin)
 
     % give some feedback
     if isinf(timeOutSecs)
-        fprintf('%s Waiting for ever to receive a ''%s'' message.', obj.waitForMessageSignature, expectedMessageLabel);
+        fprintf('%s Waiting for ever to receive a ''%s'' message.', signature, expectedMessageLabel);
     else
-        fprintf('%s Waiting for %2.2f seconds to receive a ''%s'' message.', obj.waitForMessageSignature, timeOutSecs, expectedMessageLabel);
+        fprintf('%s Waiting for %2.2f seconds to receive a ''%s'' message.', signature, timeOutSecs, expectedMessageLabel);
     end
     
     tic;
@@ -46,15 +48,17 @@ function response = waitForMessage(obj, msgLabel, varargin)
     if (response.timedOutFlag == false)
         % get raw data
         rawMessage = matlabUDP('receive');
-        fprintf('%s Raw message received: ''%s'' after %2.2f seconds. Expected message label: ''%s''\n', obj.waitForMessageSignature, rawMessage, elapsedTime, expectedMessageLabel);
+        fprintf('%s Raw message received: ''%s'' after %2.2f seconds. Expected message label: ''%s''\n', signature, rawMessage, elapsedTime, expectedMessageLabel);
         % parse the raw message received
         leftBracketPositions = strfind(rawMessage, sprintf('['));
         rightBracketPositions = strfind(rawMessage, sprintf(']'));
         if ((numel(leftBracketPositions) ~= 2) || (numel(rightBracketPositions) ~= 2))
-            error('%s Raw message received does not contain correct format. Incorrect number of brackets\n', obj.waitForMessageSignature);
+            error('%s Raw message received does not contain correct format. Incorrect number of brackets\n', signature);
         end
         response.msgLabel = rawMessage(leftBracketPositions(1)+1:rightBracketPositions(1)-1);
         response.msgValue = rawMessage(leftBracketPositions(2)+1:rightBracketPositions(2)-1);
+        response
+        pause
         
         % check if the message label we received is the same as the one we
         % are expecting, and inform the sender

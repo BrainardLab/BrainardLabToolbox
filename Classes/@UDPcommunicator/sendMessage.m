@@ -53,6 +53,7 @@ function status = sendMessage(obj, msgLabel, msgArgument, varargin)
         % wait for timeOutSecs to receive an acknowledgment that the sent
         % message has the same label as the expected (on the remote computer) message
         response = obj.waitForMessage('', timeOutSecs);
+        
         if (response.timedOutFlag)
              fprintf('%s Timed out waiting for an acknowledgment after sending message: ''%s''\n', obj.sendMessageSignature, commandString); 
              status = 'TIMED_OUT_WAITING_FOR_ACKNOWLEDGMENT';
