@@ -15,10 +15,12 @@ function mockOLPDPupilDiameterSubjectWindows
     % List of message label-value pairs
     messagesExpected = {...
         {'NUMBER_OF_TRIALS', 10} ... 
+        {'FREQUENCY', 15} ...
         {'NUMBER_OF_TRIALS', -20} ... 
         };
     
     % Start communication
+    while (1)
     communicationIsInSync = true; messageIndex = 0;
     while ((communicationIsInSync) && (messageIndex < numel(messagesExpected)))
         
@@ -35,7 +37,7 @@ function mockOLPDPupilDiameterSubjectWindows
             error('Communication out of sync');
         end
     end % while
-    
+    end % Infinite loop
     
     fprintf('\nBye bye from windows\n');
 
