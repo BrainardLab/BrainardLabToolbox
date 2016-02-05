@@ -33,7 +33,7 @@ function value = receive(obj, timeOutInSeconds)
         
         % parse the input to see what we got
         % format should be two strings separated by \t
-        tabPositions = strfind(data, '\t');
+        tabPositions = strfind(data, sprintf('\t'));
         if (isempty(tabPositions))
             error('Received data ''%s'' is inconsistent\n', data);
         end
