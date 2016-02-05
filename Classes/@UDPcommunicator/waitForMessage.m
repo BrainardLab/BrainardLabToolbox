@@ -30,9 +30,9 @@ function response = waitForMessage(obj, msgLabel, varargin)
 
     % give some feedback
     if isinf(timeOutSecs)
-        fprintf('%s Waiting for ever to receive a ''%s'' message.', signature, expectedMessageLabel);
+        fprintf('%s Waiting for ever to receive a ''%s'' message ....', signature, expectedMessageLabel);
     else
-        fprintf('%s Waiting for %2.2f seconds to receive a ''%s'' message.', signature, timeOutSecs, expectedMessageLabel);
+        fprintf('%s Waiting for %2.2f seconds to receive a ''%s'' message ...', signature, timeOutSecs, expectedMessageLabel);
     end
     
     tic;
@@ -48,7 +48,7 @@ function response = waitForMessage(obj, msgLabel, varargin)
     if (response.timedOutFlag == false)
         % get raw data
         rawMessage = matlabUDP('receive');
-        fprintf('%s Raw message received: ''%s'' after %2.2f seconds. Expected message label: ''%s''\n', signature, rawMessage, elapsedTime, expectedMessageLabel);
+        
         % parse the raw message received
         leftBracketPositions = strfind(rawMessage, sprintf('['));
         rightBracketPositions = strfind(rawMessage, sprintf(']'));
@@ -57,14 +57,14 @@ function response = waitForMessage(obj, msgLabel, varargin)
         end
         response.msgLabel = rawMessage(leftBracketPositions(1)+1:rightBracketPositions(1)-1);
         response.msgValue = rawMessage(leftBracketPositions(2)+1:rightBracketPositions(2)-1);
-        response
-
         
         % check if the message label we received is the same as the one we
         % are expecting, and inform the sender
         if (strcmp(response.msgLabel, expectedMessageLabel))
+            fprintf('Expected message received. Sending ACK to sender.');
             obj.sendMessage('ACK', 'timeOutSecs', -1);
         else
+            fprintf('%s Received unexpected message: ''%s'' (istead of ''%s''). Informing the sender.', signature, response.msgLabel, expectedMessageLabel);
             obj.sendMessage(sprintf('RECEIVED_MESSAGE_(''%s'')_DID_NOT_MATCH_EXPECTED_MESSAGE_(''%s'')', response.msgLabel, expectedMessageLabel), 'timeOutSecs', -1);
         end
     end

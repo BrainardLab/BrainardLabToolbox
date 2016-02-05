@@ -56,7 +56,7 @@ classdef UDPcommunicator < handle
             matlabUDP('open', obj.localIP, obj.remoteIP, obj.portUDP);
 
             if (~strcmp(obj.verbosity,'min'))
-                fprintf('%s Initialized\n', obj.selfSignature);
+                fprintf('%s Initialized.', obj.selfSignature);
             end
         end
         
