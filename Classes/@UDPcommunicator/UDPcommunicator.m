@@ -13,9 +13,9 @@ classdef UDPcommunicator < handle
     end
 
     properties (Access = private)
-        waitForMessageSignature = sprintf('\n\t<strong>UDPcommunicator.waitForMessage:</strong>');
-        sendMessageSignature    = sprintf('\n\t<strong>UDPcommunicator.sendMessage:</strong>');
-        selfSignature           = sprintf('\n\t<strong>UDPcommunicator</strong>');
+        waitForMessageSignature = sprintf('%32s', sprintf('\n\t<strong>UDPcommunicator.waitForMessage:</strong>'));
+        sendMessageSignature    = sprintf('%32s', sprintf('\n\t<strong>UDPcommunicator.sendMessage:</strong>'));
+        selfSignature           = sprintf('%32s', sprintf('\n\t<strong>UDPcommunicator</strong>'));
     end
     
 	% Public methods
@@ -48,7 +48,7 @@ classdef UDPcommunicator < handle
             end
             
             if (~strcmp(obj.verbosity,'min'))
-                fprintf('%s Initializing (local:%s remote:%s)', obj.selfSignature, obj.localIP, obj.remoteIP);
+                fprintf('%s Initializing (local:%s remote:%s)\n', obj.selfSignature, obj.localIP, obj.remoteIP);
             end
 
             % initialize UDP communication
@@ -56,7 +56,7 @@ classdef UDPcommunicator < handle
             matlabUDP('open', obj.localIP, obj.remoteIP, obj.portUDP);
 
             if (~strcmp(obj.verbosity,'min'))
-                fprintf('%s Initialized', obj.selfSignature);
+                fprintf('%s Initialized\n', obj.selfSignature);
             end
         end
         

@@ -26,24 +26,24 @@ function status = sendMessage(obj, msgLabel, msgArgument, varargin)
         commandString = sprintf('[%s][%s]', messageLabel, messageArgument);
     elseif (isnumeric(messageArgument))
         if (numel(messageArgument) > 1)
-            fprintf('%s message argument contains more than 1 element. Will only send the 1st element.', obj.sendrMessageSignature);
+            fprintf('%s message argument contains more than 1 element. Will only send the 1st element.', obj.sendMessageSignature);
         end
         commandString = sprintf('[%s][%f]', messageLabel, messageArgument(1));
     elseif (islogical(messageArgument))
         if (numel(messageArgument) > 1)
-            fprintf('%s message argument contains more than 1 element. Will only send the 1st element.', obj.sendrMessageSignature);
+            fprintf('%s message argument contains more than 1 element. Will only send the 1st element.', obj.sendMessageSignature);
         end
         commandString = sprintf('[%s][%d]', messageLabel, messageArgument(1));
     else
         class(messageArgument)
-        error('%s Do not know how to process this type or argument.', obj.sendrMessageSignature);
+        error('%s Do not know how to process this type or argument.', obj.sendMessageSignature);
     end
     
     % give some feedback
     if isinf(timeOutSecs)
-        fprintf('%s Will send ''%s'' and wait for ever to receive an acknowledgment', obj.sendrMessageSignature, commandString);
+        fprintf('%s Will send ''%s'' and wait for ever to receive an acknowledgment', obj.sendMessageSignature, commandString);
     else
-        fprintf('%sWill send''%s'' and wait for %2.2f seconds to receive an acknowledgment', obj.sendrMessageSignature, commandString, timeOutSecs);
+        fprintf('%sWill send''%s'' and wait for %2.2f seconds to receive an acknowledgment', obj.sendMessageSignature, commandString, timeOutSecs);
     end
     
     % send the message
@@ -54,7 +54,7 @@ function status = sendMessage(obj, msgLabel, msgArgument, varargin)
         % message has the same label as the expected (on the remote computer) message
         response = obj.waitForMessage('', timeOutSecs);
         if (response.timedOutFlag)
-             fprintf('%s Timed out waiting for an acknowledgment after sending message: ''%s''\n', obj.sendrMessageSignature, commandString); 
+             fprintf('%s Timed out waiting for an acknowledgment after sending message: ''%s''\n', obj.sendMessageSignature, commandString); 
              status = 'TIMED_OUT_WAITING_FOR_ACKNOWLEDGMENT';
         else
             if strcmp(response.msgLabel, 'ACK')
