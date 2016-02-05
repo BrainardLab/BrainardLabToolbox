@@ -4,8 +4,8 @@ function status = sendMessage(obj, msgLabel, varargin)
     % the msgLabel is required
     addRequired(p,'msgLabel',@ischar);
     
-    % the withValue parameter
-    addParameter(p,'withValue');
+    % the withValue optional parameter, with a default being the empty
+    addOptional(p, 'withValue', []);
     
     % the timeOutSecs is optional, with a default value: Inf
     defaultTimeOutSecs = Inf;
@@ -16,20 +16,25 @@ function status = sendMessage(obj, msgLabel, varargin)
     addOptional(p,'maxAttemptsNum',defaultMaxAttemptsNum,@isnumeric);
     
     % parse the input
-    parse(p,msgLabel,msgArgument,varargin{:});
+    parse(p,msgLabel,varargin{:});
     messageLabel    = p.Results.msgLabel;
     messageArgument = p.Results.withValue;
     timeOutSecs     = p.Results.timeOutSecs;
     attemptsNum     = p.Results.maxAttemptsNum;
     
     % form compound command
-    if (ischar(messageArgument))
+    if (isempty(messageArgument))
+        commandString = sprintf('[%s][]', messageLabel);
+        
+    elseif (ischar(messageArgument))
         commandString = sprintf('[%s][%s]', messageLabel, messageArgument);
+        
     elseif (isnumeric(messageArgument))
         if (numel(messageArgument) > 1)
             fprintf('%s message argument contains more than 1 element. Will only send the 1st element.', obj.sendMessageSignature);
         end
         commandString = sprintf('[%s][%f]', messageLabel, messageArgument(1));
+        
     elseif (islogical(messageArgument))
         if (numel(messageArgument) > 1)
             fprintf('%s message argument contains more than 1 element. Will only send the 1st element.', obj.sendMessageSignature);
