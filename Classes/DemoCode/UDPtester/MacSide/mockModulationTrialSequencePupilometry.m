@@ -1,5 +1,8 @@
 function params = mockModulationTrialSequencePupilometry()
 
+    fprintf('Make sure the windows program is running, then hit enter to continue\n');
+    pause;
+    
     params = initParams();
     
     % setup the trial blocks

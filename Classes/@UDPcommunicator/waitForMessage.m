@@ -15,7 +15,7 @@ function response = waitForMessage(obj, msgLabel, varargin)
         expectedMessageLabel = '';
     end
     if (~ischar(expectedMessageLabel))
-        error('UDPcommunicator: waitForMessage. The expected message label must be a string, or an empty array, i.e.: []\n');
+        error('%s The expected message label must be a string, or an empty array, i.e.: []\n',obj.waitForMessageSignature);
     end
     timeOutSecs = p.Results.timeOutSecs;
 
@@ -28,9 +28,9 @@ function response = waitForMessage(obj, msgLabel, varargin)
 
     % give some feedback
     if isinf(timeOutSecs)
-        fprintf('\nWaiting for ever to receive a ''%s'' message.', expectedMessageLabel);
+        fprintf('%s Waiting for ever to receive a ''%s'' message.', obj.waitForMessageSignature, expectedMessageLabel);
     else
-        fprintf('\nWaiting for %2.2f seconds to receive a ''%s'' message.', timeOutSecs, expectedMessageLabel);
+        fprintf('%s Waiting for %2.2f seconds to receive a ''%s'' message.', obj.waitForMessageSignature, timeOutSecs, expectedMessageLabel);
     end
     
     tic;
@@ -44,12 +44,17 @@ function response = waitForMessage(obj, msgLabel, varargin)
     end % while
     
     if (response.timedOutFlag == false)
-        % see what we received
+        % get raw data
         rawMessage = matlabUDP('receive');
-        fprintf('Raw message received: ''%s'' after %2.2f seconds. Expected message label: ''%s''\n', rawMessage, elapsedTime, expectedMessageLabel);
+        fprintf('%s Raw message received: ''%s'' after %2.2f seconds. Expected message label: ''%s''\n', obj.waitForMessageSignature, rawMessage, elapsedTime, expectedMessageLabel);
         % parse the raw message received
-        response.msgLabel = 'lala';
-        response.msgValue = 123;
+        leftBracketPositions = strfind(rawMessage, sprintf('['));
+        rightBracketPositions = strfind(rawMessage, sprintf(']'));
+        if ((numel(leftBracketPositions) ~= 2) || (numel(rightBracketPositions) ~= 2))
+            error('%s Raw message received does not contain correct format. Incorrect number of brackets\n', obj.waitForMessageSignature);
+        end
+        response.msgLabel = rawMessage(leftBracketPositions(1)+1:rightBracketPositions(1)-1);
+        response.msgValue = rawMessage(leftBracketPositions(2)+1:rightBracketPositions(2)-1);
         
         % check if the message label we received is the same as the one we
         % are expecting, and inform the sender

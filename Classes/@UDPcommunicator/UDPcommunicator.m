@@ -12,7 +12,11 @@ classdef UDPcommunicator < handle
         verbosity
     end
 
-
+    properties (Access = private)
+        waitForMessageSignature = sprintf('\n\t<strong>UDPcommunicator.waitForMessage:</strong>');
+        sendMessageSignature    = sprintf('\n\t<strong>UDPcommunicator.sendMessage:</strong>');
+    end
+    
 	% Public methods
     methods
         % Constructor

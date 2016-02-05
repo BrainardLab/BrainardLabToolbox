@@ -17,33 +17,33 @@ function status = sendMessage(obj, msgLabel, msgArgument, varargin)
     % parse the input
     parse(p,msgLabel,msgArgument,varargin{:});
     messageLabel    = p.Results.msgLabel;
-    messageArgument = p.Results.msfArgument;
+    messageArgument = p.Results.msgArgument;
     timeOutSecs     = p.Results.timeOutSecs;
-    attemptsNum     = p.Results.attemptsNum;
+    attemptsNum     = p.Results.maxAttemptsNum;
     
     % form compound command
     if (ischar(messageArgument))
         commandString = sprintf('[%s][%s]', messageLabel, messageArgument);
     elseif (isnumeric(messageArgument))
         if (numel(messageArgument) > 1)
-            fprintf('UDPcommunicator: sendMessage: message argument contains more than 1 element. Will only send the 1st element\n');
+            fprintf('%s message argument contains more than 1 element. Will only send the 1st element.', obj.sendrMessageSignature);
         end
         commandString = sprintf('[%s][%f]', messageLabel, messageArgument(1));
     elseif (islogical(messageArgument))
         if (numel(messageArgument) > 1)
-            fprintf('UDPcommunicator: sendMessage: message argument contains more than 1 element. Will only send the 1st element\n');
+            fprintf('%s message argument contains more than 1 element. Will only send the 1st element.', obj.sendrMessageSignature);
         end
         commandString = sprintf('[%s][%d]', messageLabel, messageArgument(1));
     else
         class(messageArgument)
-        error('UDPcommunicator: sendMessage: Do not know how to process this type or argument.');
+        error('%s Do not know how to process this type or argument.', obj.sendrMessageSignature);
     end
     
     % give some feedback
     if isinf(timeOutSecs)
-        fprintf('\nSending ''%s'' and waiting for ever to receive an acknowledgment', commandString);
+        fprintf('%s Will send ''%s'' and wait for ever to receive an acknowledgment', obj.sendrMessageSignature, commandString);
     else
-        fprintf('\nSending ''%s'' and waiting for %2.2f seconds to receive an acknowledgment', commandString, timeOutSecs);
+        fprintf('%sWill send''%s'' and wait for %2.2f seconds to receive an acknowledgment', obj.sendrMessageSignature, commandString, timeOutSecs);
     end
     
     % send the message
@@ -54,7 +54,7 @@ function status = sendMessage(obj, msgLabel, msgArgument, varargin)
         % message has the same label as the expected (on the remote computer) message
         response = obj.waitForMessage('', timeOutSecs);
         if (response.timedOutFlag)
-             fprintf('Timed out waiting for an acknowledgment after sending message: ''%s''\n', commandString); 
+             fprintf('%s Timed out waiting for an acknowledgment after sending message: ''%s''\n', obj.sendrMessageSignature, commandString); 
              status = 'TIMED_OUT_WAITING_FOR_ACKNOWLEDGMENT';
         else
             if strcmp(response.msgLabel, 'ACK')
