@@ -12,7 +12,7 @@ function mockOLPDPupilDiameterSubjectWindows
         );
     
     
-    % List of key-value pairs
+    % List of message label-value pairs
     messagesExpected = {...
         {'NUMBER_OF_TRIALS', 10} ... 
         {'NUMBER_OF_TRIALS', -20} ... 
@@ -26,12 +26,15 @@ function mockOLPDPupilDiameterSubjectWindows
         messageLabel = messagesExpected{messageIndex}{1};
         messageValue = messagesExpected{messageIndex}{2};
         
+        % wait for expected command
         response = UDPobj.waitForMessage(messageLabel, 'timeOutSecs', Inf);
+        
+        % check for errors
         if (~strcmp(response.msgLabel, messageKey)) 
             communicationIsInSync = false;
             error('Communication out of sync');
         end
-    end
+    end % while
     
     
     fprintf('\nBye bye from windows\n');
