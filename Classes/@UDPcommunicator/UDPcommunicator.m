@@ -13,9 +13,9 @@ classdef UDPcommunicator < handle
     end
 
     properties (Access = private)
-        waitForMessageSignature = sprintf('%32s', sprintf('\n\t<strong>UDPcommunicator.waitForMessage:</strong>'));
-        sendMessageSignature    = sprintf('%32s', sprintf('\n\t<strong>UDPcommunicator.sendMessage:</strong>'));
-        selfSignature           = sprintf('%32s', sprintf('\n\t<strong>UDPcommunicator</strong>'));
+        waitForMessageSignature = sprintf('\n<strong>%s:</strong>', sprintf('%40s','UDPcommunicator.waitForMessage'));
+        sendMessageSignature    = sprintf('\n<strong>%s:</strong>', sprintf('%40s','UDPcommunicator.sendMessage'));
+        selfSignature           = sprintf('\n<strong>%s:</strong>', sprintf('%40s','UDPcommunicator'));
     end
     
 	% Public methods

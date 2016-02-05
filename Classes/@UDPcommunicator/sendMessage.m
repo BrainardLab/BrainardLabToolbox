@@ -43,7 +43,7 @@ function status = sendMessage(obj, msgLabel, msgArgument, varargin)
     if isinf(timeOutSecs)
         fprintf('%s Will send ''%s'' and wait for ever to receive an acknowledgment', obj.sendMessageSignature, commandString);
     else
-        fprintf('%sWill send''%s'' and wait for %2.2f seconds to receive an acknowledgment', obj.sendMessageSignature, commandString, timeOutSecs);
+        fprintf('%s Will send ''%s'' and wait for %2.2f seconds to receive an acknowledgment', obj.sendMessageSignature, commandString, timeOutSecs);
     end
     
     % send the message
