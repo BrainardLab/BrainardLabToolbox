@@ -34,15 +34,17 @@ function params = trialLoop(params, block, UDPobj)
     % List of message label-value pairs to send
     messageList = {...
         {'NUMBER_OF_TRIALS', 10} ... 
+        {'FREQUENCY', 15} ... 
         {'NUMBER_OF_TRIALS', -20} ... 
         };
     
+    while (1)
     communicationIsInSync = true; messageIndex = 0;
     while ((communicationIsInSync) && (messageIndex < numel(messageList)))
         
         messageIndex = messageIndex + 1;
-        messageLabel = messagesExpected{messageIndex}{1};
-        messageValue = messagesExpected{messageIndex}{2};
+        messageLabel = messageList{messageIndex}{1};
+        messageValue = messageList{messageIndex}{2};
         
         % send command
         status = UDPobj.sendMessage( messageLabel, 'withValue', messageValue, 'timeOutSecs', 2, 'maxAttemptsNum', 1);
@@ -52,9 +54,8 @@ function params = trialLoop(params, block, UDPobj)
             fprintf('sendMessage returned with this message: ''%s''\n', status);
             error('Aborting run at this point');
         end
-    
     end  % while
-    
+    end % Infinite loop
     
    
 end
