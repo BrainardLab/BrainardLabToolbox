@@ -11,7 +11,27 @@ function mockOLPDPupilDiameterSubjectWindows
         'verbosity', 'normal' ...             % optional, with default value: 'normal', and possible values: {'min', 'normal', 'max'},
         );
     
-    response = UDPobj.waitForMessage('NUMBER_OF_TRIALS', 'timeOutSecs', Inf)
+    
+    % List of key-value pairs
+    messagesExpected = {...
+        {'NUMBER_OF_TRIALS', 10} ... 
+        {'NUMBER_OF_TRIALS', -20} ... 
+        };
+    
+    % Start communication
+    communicationIsInSync = true; messageIndex = 0;
+    while ((communicationIsInSync) && (messageIndex < numel(messagesExpected)))
+        
+        messageIndex = messageIndex + 1;
+        messageLabel = messagesExpected{messageIndex}{1};
+        messageValue = messagesExpected{messageIndex}{2};
+        
+        response = UDPobj.waitForMessage(messageLabel, 'timeOutSecs', Inf);
+        if (~strcmp(response.msgLabel, messageKey)) 
+            communicationIsInSync = false;
+            error('Communication out of sync');
+        end
+    end
     
     
     fprintf('\nBye bye from windows\n');
