@@ -22,7 +22,7 @@ classdef UDPcommunicator < handle
             defaultUDPport =  2007;
             defaultVerbosity = 'min';
 
-             % Parse input parameters.
+            % Parse input parameters.
             p = inputParser;
             p.addParameter('localIP', 'none', @ischar);
             p.addParameter('remoteIP', 'none', @ischar);
@@ -55,14 +55,18 @@ classdef UDPcommunicator < handle
             end
         end
         
+        % Public API
+        response = waitForMessage(obj, msgLabel, varargin);
+        status = sendMessage(obj, msgLabel, msgArgument, varargin);
+        
+    end % public method
+    
+    methods (Access = private)
         % method to transmit a parameter (paramName, paramValue, [timeOutInSeconds])
         ack = send(obj, paramName, paramValue, timeOutInSeconds);
         
         % method to transmit a parameter (paramName, paramValue, [timeOutInSeconds])
         dStruct = receive(obj, timeOutInSeconds);
-        
-        
-        
-    end
+    end % private methods
 end
 

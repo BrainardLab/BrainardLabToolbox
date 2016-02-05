@@ -21,16 +21,20 @@ function params = mockModulationTrialSequencePupilometry()
         );
 
     params = trialLoop(params, block, UDPobj);
+    
+    fprintf('Bye bye from mac\n');
 end
 
 
 function params = trialLoop(params, block, UDPobj)
 
-   % Send the number of trials to the Winbox
-   ack = UDPobj.send('numTrials', params.nTrials);
+    fprintf('Mac computer is sending number of trials (%d) message\n', params.nTrials);
+    status = UDPobj.sendMessage('NUMBER_OF_TRIALS', params.nTrials, 'timeOutSecs', 2, 'maxAttemptsNum', 1)
+    
+    if (~strcmp(status, 'MESSAGE_SENT_MATCHED_EXPECTED_MESSAGE'))
+        error('Aborting here');
+    end
    
-   % reply = OLVSGSendNumTrials(params);
-   % fprintf('Win received number of trials? %s\n',reply);
     
 end
 
@@ -59,7 +63,7 @@ function params = initParams()
         params.macHostIP = '130.91.74.10';  % Manta
     end
 
-    params.nTrials = 10;
+    params.nTrials = 13;
     
 end
 

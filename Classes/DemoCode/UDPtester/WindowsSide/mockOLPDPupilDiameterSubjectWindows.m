@@ -1,5 +1,6 @@
 function mockOLPDPupilDiameterSubjectWindows
 
+    % Start this program first.
     fprintf('\nStarting windows client\n');
     params = initParams();
 
@@ -10,10 +11,10 @@ function mockOLPDPupilDiameterSubjectWindows
         'verbosity', 'normal' ...             % optional, with default value: 'normal', and possible values: {'min', 'normal', 'max'},
         );
     
-    fprintf('Waiting for Mac to tell us something.\n');
-    UDPobj.receive();
+    response = UDPobj.waitForMessage('NUMBER_OF_TRIALS', 'timeOutSecs', Inf)
     
-    %numStims = VSGOLGet('NumberStims');
+    
+    fprintf('Bye bye from windows\n');
 
 end
 
