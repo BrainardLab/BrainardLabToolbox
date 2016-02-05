@@ -58,11 +58,14 @@ function response = waitForMessage(obj, msgLabel, varargin)
         response.msgLabel = rawMessage(leftBracketPositions(1)+1:rightBracketPositions(1)-1);
         response.msgValue = rawMessage(leftBracketPositions(2)+1:rightBracketPositions(2)-1);
         
-        % check if the message label we received is the same as the one we
-        % are expecting, and inform the sender
+ 
+        % check if the message label we received is the same as the one we are expecting, and inform the sender
         if (strcmp(response.msgLabel, expectedMessageLabel))
-            fprintf('Expected message received, acknowledging the sender.');
-            obj.sendMessage('ACK', 'timeOutSecs', -1);
+            fprintf('Expected message received withing %2.2f seconds, acknowledging the sender.', elapsedTime);
+            % Do not send back an ACK if we were expecting an ACK and we received it
+            if (~strcmp(expectedMessageLabel, 'ACK'))
+                obj.sendMessage('ACK', 'timeOutSecs', -1);
+            end
         else
             fprintf('%s Received unexpected message: ''%s'' (istead of ''%s''). Informing the sender.', signature, response.msgLabel, expectedMessageLabel);
             obj.sendMessage(sprintf('RECEIVED_MESSAGE_(''%s'')_DID_NOT_MATCH_EXPECTED_MESSAGE_(''%s'')', response.msgLabel, expectedMessageLabel), 'timeOutSecs', -1);
