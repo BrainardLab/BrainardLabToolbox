@@ -48,6 +48,8 @@ function status = sendMessage(obj, msgLabel, varargin)
     % give some feedback
     if isinf(timeOutSecs)
         fprintf('%s Will send ''%s'' and wait for ever to receive an acknowledgment', obj.sendMessageSignature, commandString);
+    elseif (timeOutSecs <= 0)
+        fprintf('%s Will send ''%s'' and return', obj.sendMessageSignature, commandString);
     else
         fprintf('%s Will send ''%s'' and wait for %2.2f seconds to receive an acknowledgment', obj.sendMessageSignature, commandString, timeOutSecs);
     end
@@ -58,7 +60,7 @@ function status = sendMessage(obj, msgLabel, varargin)
     if (timeOutSecs > 0)
         % wait for timeOutSecs to receive an acknowledgment that the sent
         % message has the same label as the expected (on the remote computer) message
-        response = obj.waitForMessage('', timeOutSecs);
+        response = obj.waitForMessage('ACK', timeOutSecs);
         
         if (response.timedOutFlag)
              fprintf('%s Timed out waiting for an acknowledgment after sending message: ''%s''\n', obj.sendMessageSignature, commandString); 
