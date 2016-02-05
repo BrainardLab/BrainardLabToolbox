@@ -58,12 +58,12 @@ function response = waitForMessage(obj, msgLabel, varargin)
         response.msgLabel = rawMessage(leftBracketPositions(1)+1:rightBracketPositions(1)-1);
         response.msgValue = rawMessage(leftBracketPositions(2)+1:rightBracketPositions(2)-1);
         response
-        pause
+
         
         % check if the message label we received is the same as the one we
         % are expecting, and inform the sender
         if (strcmp(response.msgLabel, 'expectedMessageLabel'))
-            obj.sendMessage('ACK', '', 'timeOutSecs', -1);
+            obj.sendMessage('ACK', 'timeOutSecs', -1);
         else
             obj.sendMessage(sprintf('RECEIVED_MESSAGE_(''%s'')_DID_NOT_MATCH_EXPECTED_MESSAGE_(''%s'')', response.msgLabel, expectedMessageLabel), 'timeOutSecs', -1);
         end
