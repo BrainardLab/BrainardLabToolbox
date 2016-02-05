@@ -32,7 +32,9 @@ end
 function params = trialLoop(params, block, UDPobj)
 
     fprintf('Mac computer is sending number of trials (%d) message\n', params.nTrials);
-    status = UDPobj.sendMessage('NUMBER_OF_TRIALS', params.nTrials, 'timeOutSecs', 2, 'maxAttemptsNum', 1)
+    status = UDPobj.sendMessage(...
+            'NUMBER_OF_TRIALS', 'withValue', params.nTrials, ...
+            'timeOutSecs', 2, 'maxAttemptsNum', 1);
     
     if (~strcmp(status, 'MESSAGE_SENT_MATCHED_EXPECTED_MESSAGE'))
         error('Aborting here');
