@@ -4,9 +4,9 @@ function showMessageValueAsStarString(obj, direction, msgLabel, msgValueType, ms
         starsNum = length(msgValue)/maxValue*maxStars;  % length of string
     elseif (strcmp(lower(msgValueType), 'boolean'))
         if (msgValue)
-            starsNum = maxStars-1
+            starsNum = maxStars-5;
         else
-            starsNum = 1;
+            starsNum = 5;
         end
     elseif (strcmp(lower(msgValueType), 'numeric'))
         starsNum = msgValue / maxValue * maxStars;
