@@ -62,7 +62,7 @@ function response = waitForMessage(obj, msgLabel, varargin)
         response.msgValueType = rawMessage(leftBracketPositions(2)+1:rightBracketPositions(2)-1);
         if (strcmp(lower(response.msgValueType), 'numeric'))
             response.msgValue = str2double(rawMessage(leftBracketPositions(3)+1:rightBracketPositions(3)-1));
-        if (strcmp(lower(response.msgValueType), 'boolean'))
+        elseif (strcmp(lower(response.msgValueType), 'boolean'))
             response.msgValue = str2double(rawMessage(leftBracketPositions(3)+1:rightBracketPositions(3)-1));
             if (response.msgValue == 0)
                 response.msgValue = false;
