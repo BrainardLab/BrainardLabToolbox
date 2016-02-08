@@ -1,5 +1,6 @@
 function params = mockModulationTrialSequencePupilometry()
 
+    clc
     fprintf('Make sure the windows program is running, then hit enter to continue\n');
     pause;
     
@@ -20,7 +21,7 @@ function params = mockModulationTrialSequencePupilometry()
           'localIP', params.macHostIP, ...
          'remoteIP', params.winHostIP, ...
           'udpPort', params.udpPort, ...      % optional with default 2007
-        'verbosity', 'normal' ...             % optional with possible values {'min', 'normal', 'max'}, and default 'normal'
+        'verbosity', 'min' ...             % optional with possible values {'min', 'normal', 'max'}, and default 'normal'
         );
 
     params = trialLoop(params, block, UDPobj);
@@ -33,10 +34,10 @@ function params = trialLoop(params, block, UDPobj)
 
     % List of message label-value pairs to send
     for k = 0:39
-        messageList{k} = {'NUMBER_OF_TRIALS', round(40*sin(2*pi*k/40))};
+        messageList{k+1} = {'NUMBER_OF_TRIALS', round(40*0.5*(1+sin(2*pi*k/40)))};
     end
     for k = 40 + (0:39)
-        messageList{k} = {'FREQUENCY', round(40*sin(2*pi*k/40))};
+        messageList{k+1} = {'FREQUENCY', round(40*0.5*(1+sin(2*pi*k/40)))};
     end
     
     communicationIsInSync = true;

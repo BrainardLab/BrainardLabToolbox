@@ -45,13 +45,15 @@ function status = sendMessage(obj, msgLabel, varargin)
         error('%s Do not know how to process this type or argument.', obj.sendMessageSignature);
     end
     
-    % give some feedback
-    if isinf(timeOutSecs)
-        fprintf('%s Will send ''%s'' and wait for ever to receive an acknowledgment', obj.sendMessageSignature, commandString);
-    elseif (timeOutSecs <= 0)
-        fprintf('%s Will send ''%s'' and return', obj.sendMessageSignature, commandString);
-    else
-        fprintf('%s Will send ''%s'' and wait for %2.2f seconds to receive an acknowledgment', obj.sendMessageSignature, commandString, timeOutSecs);
+    if (~strcmp(obj.verbosity,'min'))
+        % give some feedback
+        if isinf(timeOutSecs)
+            fprintf('%s Will send ''%s'' and wait for ever to receive an acknowledgment', obj.sendMessageSignature, commandString);
+        elseif (timeOutSecs <= 0)
+            fprintf('%s Will send ''%s'' and return', obj.sendMessageSignature, commandString);
+        else
+            fprintf('%s Will send ''%s'' and wait for %2.2f seconds to receive an acknowledgment', obj.sendMessageSignature, commandString, timeOutSecs);
+        end
     end
     
     % send the message

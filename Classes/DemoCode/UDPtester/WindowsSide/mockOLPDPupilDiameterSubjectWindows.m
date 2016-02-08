@@ -1,6 +1,7 @@
 function mockOLPDPupilDiameterSubjectWindows
 
     % Start this program first.
+    clc
     fprintf('\nStarting windows client\n');
     params = initParams();
 
@@ -14,10 +15,10 @@ function mockOLPDPupilDiameterSubjectWindows
     
     % List of message label-value pairs to expect
     for k = 0:39
-        messageList{k} = {'NUMBER_OF_TRIALS', round(40*sin(2*pi*k/40))};
+        messageList{k+1} = {'NUMBER_OF_TRIALS', round(40*0.5*(1+sin(2*pi*k/40)))};
     end
     for k = 40 + (0:39)
-        messageList{k} = {'FREQUENCY', round(40*sin(2*pi*k/40))};
+        messageList{k+1} = {'FREQUENCY', round(40*0.5*(1+sin(2*pi*k/40)))};
     end
     
     % Start communication
