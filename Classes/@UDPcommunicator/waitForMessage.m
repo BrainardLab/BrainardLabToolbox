@@ -57,10 +57,23 @@ function response = waitForMessage(obj, msgLabel, varargin)
         if ((numel(leftBracketPositions) ~= 2) || (numel(rightBracketPositions) ~= 2))
             error('%s Raw message received does not contain correct format. Incorrect number of brackets\n', signature);
         end
-        response.msgLabel = rawMessage(leftBracketPositions(1)+1:rightBracketPositions(1)-1);
-        response.msgValue = rawMessage(leftBracketPositions(2)+1:rightBracketPositions(2)-1);
         
- 
+        response.msgLabel = rawMessage(leftBracketPositions(1)+1:rightBracketPositions(1)-1);
+        response.msgValueType = rawMessage(leftBracketPositions(2)+1:rightBracketPositions(2)-1);
+        if (strcmp(lower(response.msgValueType), 'numeric'))
+            response.msgValue = str2double(rawMessage(leftBracketPositions(3)+1:rightBracketPositions(3)-1));
+        if (strcmp(lower(response.msgValueType), 'boolean'))
+            response.msgValue = str2double(rawMessage(leftBracketPositions(3)+1:rightBracketPositions(3)-1));
+            if (response.msgValue == 0)
+                response.msgValue = false;
+            else
+                response.msgValue = true;
+            end
+        elseif (strcmp(lower(response.msgValueType), 'string'))
+            response.msgValue = rawMessage(leftBracketPositions(3)+1:rightBracktPositions(3)-1);
+        else
+            error('Do not know how to handle message value type: ''%s''\n', response.msgValueType);
+        end
         % check if the message label we received is the same as the one we are expecting, and inform the sender
         if (strcmp(response.msgLabel, expectedMessageLabel))
             if (~strcmp(obj.verbosity,'min'))

@@ -27,19 +27,19 @@ function status = sendMessage(obj, msgLabel, varargin)
         commandString = sprintf('[%s][]', messageLabel);
         
     elseif (ischar(messageArgument))
-        commandString = sprintf('[%s][%s]', messageLabel, messageArgument);
+        commandString = sprintf('[%s][%s][%s]', messageLabel, 'STRING', messageArgument);
         
     elseif (isnumeric(messageArgument))
         if (numel(messageArgument) > 1)
             fprintf('%s message argument contains more than 1 element. Will only send the 1st element.', obj.sendMessageSignature);
         end
-        commandString = sprintf('[%s][%f]', messageLabel, messageArgument(1));
+        commandString = sprintf('[%s][%s][%f]', messageLabel, 'NUMERIC', messageArgument(1));
         
     elseif (islogical(messageArgument))
         if (numel(messageArgument) > 1)
             fprintf('%s message argument contains more than 1 element. Will only send the 1st element.', obj.sendMessageSignature);
         end
-        commandString = sprintf('[%s][%d]', messageLabel, messageArgument(1));
+        commandString = sprintf('[%s][%s][%d]', messageLabel, 'BOOLEAN', messageArgument(1));
     else
         class(messageArgument)
         error('%s Do not know how to process this type or argument.', obj.sendMessageSignature);
