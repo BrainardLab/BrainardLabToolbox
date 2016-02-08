@@ -62,7 +62,14 @@ function params = trialLoop(params, block, UDPobj)
             end
             
             % visualize message sent
-            UDPobj.showMessageValueAsStarString('transmit', messageLabel, messageValue, 40, 40);
+            if (ischar(messageValue))
+                messageValueType = 'string';
+            elseif (isnumeric(messageValue))
+                messageValueType = 'numeric';
+            elseif (islogical(messageValue))
+                messageValueType = 'boolean';
+            end
+            UDPobj.showMessageValueAsStarString('transmit', messageLabel, messageValueType, messageValue, 40, 40);
             
         end  % while
     end % Infinite loop as long as we are in sync
