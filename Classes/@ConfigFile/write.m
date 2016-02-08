@@ -17,7 +17,7 @@ end
 
 for i = 1:length(object.Params)
    fprintf(fid, '%s:%s:%s:%s\n', object.Params(i).paramName, object.Params(i).paramType, ...
-       object.Params(1).paramValRaw, object.Params(i).paramDescription); 
+       object.Params(i).paramValRaw, object.Params(i).paramDescription); 
 end
 
 fclose(fid);
