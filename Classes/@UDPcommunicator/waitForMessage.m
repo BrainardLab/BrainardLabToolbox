@@ -72,7 +72,11 @@ function response = waitForMessage(obj, msgLabel, varargin)
         elseif (strcmp(lower(response.msgValueType), 'string'))
             response.msgValue = rawMessage(leftBracketPositions(3)+1:rightBracktPositions(3)-1);
         else
-            error('Do not know how to handle message value type: ''%s''\n', response.msgValueType);
+            if (strcmp(response.msgLabel, 'ACK'))
+                % 'ACK' message has not value or value type
+            else
+                error('Do not know how to handle message value type: ''%s''\n', response.msgValueType);
+            end
         end
         % check if the message label we received is the same as the one we are expecting, and inform the sender
         if (strcmp(response.msgLabel, expectedMessageLabel))
