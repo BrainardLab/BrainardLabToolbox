@@ -20,26 +20,30 @@ function mockOLPDPupilDiameterSubjectWindows
         };
     
     % Start communication
-    while (1)
-    communicationIsInSync = true; messageIndex = 0;
-    while ((communicationIsInSync) && (messageIndex < numel(messagesExpected)))
+    
+    messageCount = 0;
+    communicationIsInSync = true;
+    while (communicationIsInSync)
+        messageIndex = 0;
+        while (messageIndex < numel(messagesExpected))
         
-        messageIndex = messageIndex + 1;
-        messageLabel = messagesExpected{messageIndex}{1};
-        messageValue = messagesExpected{messageIndex}{2};
+            messageCount = messageCount + 1;
+            messageIndex = messageIndex + 1;
+            messageLabel = messagesExpected{messageIndex}{1};
+            messageValue = messagesExpected{messageIndex}{2};
         
-        % wait for expected command
-        response = UDPobj.waitForMessage(messageLabel, 'timeOutSecs', Inf);
-        
-        % check for errors
-        if (~strcmp(response.msgLabel, messageLabel)) 
-            communicationIsInSync = false;
-            error('Communication out of sync');
-        end
-    end % while
+            % wait for expected command
+            response = UDPobj.waitForMessage(messageLabel, 'timeOutSecs', Inf);
+
+            % check for errors
+            if (~strcmp(response.msgLabel, messageLabel)) 
+                communicationIsInSync = false;
+                error('Communication out of sync');
+            end
+        end % while
     end % Infinite loop
     
-    fprintf('\nBye bye from windows\n');
+    fprintf(2, '\nOut of sync adter %d messages.\n', messageCount);
 
 end
 
