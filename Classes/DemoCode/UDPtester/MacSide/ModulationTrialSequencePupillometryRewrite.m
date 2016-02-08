@@ -1,6 +1,8 @@
 function params = ModulationTrialSequencePupillometryRewrite(exp)
 % params = MRITrialSequence(exp)
 
+% 02/09/16  npc     Rewrite to use UDPcommunicator class.
+
 % Setup basic parameters for the experiment
 params = initParams(exp);
 
