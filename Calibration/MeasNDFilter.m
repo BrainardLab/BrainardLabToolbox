@@ -21,6 +21,7 @@
 %
 % 08/30/12  dhb, ks  Write it
 % 07/03/13  dhb      Generalize i/o location, and add project types.
+% 2/01/16   npc      Adapted to use the PR670dev object
 
 % Setup
 clear; close all;
@@ -60,56 +61,85 @@ waitTime = 10;
 filterName = GetWithDefault('Enter filter name','ND3');
 dateName = GetWithDefault('Enter date name','022713');
 S = [380 2 201];
-whichMeter = 5;
+
 
 % Allow computation of luminance
 load T_xyz1931
 T_xyz = SplineCmf(S_xyz1931,683*T_xyz1931,S);
 
 if (~ANALYZEONLY)
-    % Make sure radiometer is hooked up
-    CMCheckInit(whichMeter);
     
-    % Measure unattenuated light
-    input('Set up unattenuated light and hit enter'); pause(waitTime);
-    Snd('Play',sin(0:10000));
-    for i = 1:nAverageUnatten
-        fprintf('\tUnatenuated measurement %d\n',i);
-        unattenSpd(:,i) = MeasSpd(S,whichMeter);
-    end
+    % init spectroRadiometerOBJ to empty
+    spectroRadiometerOBJ = [];
     
-    % Signal to user that it's time to insert the filter
-    fprintf('Hit a character\n');
-    ListenChar(2);
-    while (1)
+    try
+        % Instantiate a PR670 object
+        spectroRadiometerOBJ  = PR670dev(...
+            'verbosity',        1, ...       % 1 -> minimum verbosity
+            'devicePortString', [] ...       % empty -> automatic port detection)
+        );
+        spectroRadiometerOBJ.setOptions('syncMode', 'OFF');
+            
+        % Measure unattenuated light
+        input('Set up unattenuated light and hit enter'); pause(waitTime);
         Snd('Play',sin(0:10000));
-        pause(1);
-        if (CharAvail)
-            break;
+        for i = 1:nAverageUnatten
+            fprintf('\tUnatenuated measurement %d\n',i);
+            unattenSpd(:,i) = spectroRadiometerOBJ.measure('userS', S);
         end
-    end
-    GetChar;
-    ListenChar(0);
     
-    input('Set up attenuated light and hit enter'); pause(waitTime);
-    Snd('Play',sin(0:10000));
-    for i = 1:nAverageAtten
-        fprintf('\tAtenuated measurement %d\n',i);
-        attenSpd(:,i) = MeasSpd(S,whichMeter);
-    end
+        % Signal to user that it's time to insert the filter
+        fprintf('Hit a character\n');
+        ListenChar(2);
+        while (1)
+            Snd('Play',sin(0:10000));
+            pause(1);
+            if (CharAvail)
+                break;
+            end
+        end
+        GetChar;
+        ListenChar(0);
     
-    % Let user know we're all done measuring
-    fprintf('Hit a character\n');
-    ListenChar(2);
-    while (1)
+        input('Set up attenuated light and hit enter'); pause(waitTime);
         Snd('Play',sin(0:10000));
-        pause(1);
-        if (CharAvail)
-            break;
+        for i = 1:nAverageAtten
+            fprintf('\tAtenuated measurement %d\n',i);
+            attenSpd(:,i) = spectroRadiometerOBJ.measure('userS', S);
         end
+    
+        % Let user know we're all done measuring
+        fprintf('Hit a character\n');
+        ListenChar(2);
+        while (1)
+            Snd('Play',sin(0:10000));
+            pause(1);
+            if (CharAvail)
+                break;
+            end
+        end
+        GetChar;
+        ListenChar(0);
+        
+        % Gracefully shutdown the spectroradiometer
+        spectroRadiometerOBJ.shutDown();
+    
+    catch err
+        % cleanup related to the spectroRadiometerOBJ
+        if (exist('spectroRadiometerOBJ', 'var'))
+            if (isempty(spectroRadiometerOBJ))
+                fprintf(2,'\nClosing all IO ports due to encountered error.\n');
+                IOPort('closeall');
+            else
+                % Shutdown spectroRadiometerOBJ object and close the associated device
+                fprintf(2,'\nShutting down spectroRadiometerOBJ due to encountered error. \n');
+                spectroRadiometerOBJ.shutDown();
+            end
+        end
+    
+        rethrow(err);
     end
-    GetChar;
-    ListenChar(0);
+    
 else
     cd(targetDir);
     eval(['load srf_filter_' filterName '_' dateName]);

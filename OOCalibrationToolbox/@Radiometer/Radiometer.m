@@ -49,7 +49,10 @@ classdef Radiometer < handle
         userT
         
         % the last measurement after application of userS, userT to the last native measurement
-        measurement             
+        measurement     
+        
+        % the quality associated with the last measurement
+        measurementQuality
     end
     
     % The class-user has no need to access these properties directly so they are protected

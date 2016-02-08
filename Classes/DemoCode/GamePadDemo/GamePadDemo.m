@@ -1,6 +1,11 @@
 % Script to demo the use of the @GamePad class, which allows very fast 
 % access to the Logiteck gamepad.
 %
+% Caution: When using a USB hub to connect the Logitech gamepad (and/or) other components
+% unpredicted behavior may occur. This would need to be troubleshooted by
+% unplugging, one a time, the various components from the hub, or by connecting
+% all components directly to the computer.
+%
 % 6/18/2014 npc Wrote it.
 %
 
@@ -21,7 +26,7 @@ function GamePadDemo
                 % Control buttons
                 if (gamePad.buttonBack)
                     fprintf('[%s]: Back button\n', time);
-                    keepGoing = false;
+
                 elseif (gamePad.buttonStart)
                     fprintf('[%s]: Start button\n', time);
                     

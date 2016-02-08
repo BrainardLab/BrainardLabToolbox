@@ -128,7 +128,9 @@ classdef PR670dev < Radiometer
         triggerMeasure(obj);
         result = getMeasuredData(obj);
          
-        obj = shutDown(obj);  
+        function obj = shutDown(obj)
+            obj = obj.shutDownDevice();
+        end
     end % Implementations of required -- Public -- Abstract methods defined in the Radiometer interface
     
     % Public utility methods 
