@@ -40,6 +40,7 @@ function params = trialLoop(params, block, UDPobj)
         messageList{k+1} = {'FREQUENCY', round(40*0.5*(1+sin(2*pi*k/40)))};
     end
     
+    
     communicationIsInSync = true;
     messageCount = 0;
     
@@ -52,6 +53,30 @@ function params = trialLoop(params, block, UDPobj)
             messageLabel = messageList{messageIndex}{1};
             messageValue = messageList{messageIndex}{2};
 
+            % change the value type transmitted
+            if (mod(floor(messageCount/1000), 3) == 0)
+                changeToBoolean = true;
+                changeToString = false;
+            elseif (mod(floor(messageCount/1000), 3) == 1)
+                changeToBoolean = false;
+                changeToString = true;
+            else
+                changeToBoolean = false;
+                changeToString = false;
+            end
+            
+            if (changeToBoolean)
+                messageValue = messageValue > 20;
+            end
+            
+            if (changeToString)
+                if (messageValue > 20)
+                    messageValue = 'large string';
+                else
+                    messageValue = 'small value string';
+                end
+            end
+            
             % send command
             status = UDPobj.sendMessage( messageLabel, 'withValue', messageValue, 'timeOutSecs', 2, 'maxAttemptsNum', 1);
 
