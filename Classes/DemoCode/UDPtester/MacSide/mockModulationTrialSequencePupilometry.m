@@ -32,31 +32,41 @@ end
 function params = trialLoop(params, block, UDPobj)
 
     % List of message label-value pairs to send
-    messageList = {...
-        {'NUMBER_OF_TRIALS', 10} ... 
-        {'FREQUENCY', 15} ... 
-        {'NUMBER_OF_TRIALS', -20} ... 
-        };
+    for k = 0:39
+        messageList{k} = {'NUMBER_OF_TRIALS', round(40*sin(2*pi*k/40))};
+    end
+    for k = 40 + (0:39)
+        messageList{k} = {'FREQUENCY', round(40*sin(2*pi*k/40))};
+    end
     
-    while (1)
-    communicationIsInSync = true; messageIndex = 0;
-    while ((communicationIsInSync) && (messageIndex < numel(messageList)))
-        
-        messageIndex = messageIndex + 1;
-        messageLabel = messageList{messageIndex}{1};
-        messageValue = messageList{messageIndex}{2};
-        
-        % send command
-        status = UDPobj.sendMessage( messageLabel, 'withValue', messageValue, 'timeOutSecs', 2, 'maxAttemptsNum', 1);
-        
-        % check status for errors
-        if (~strcmp(status, 'MESSAGE_SENT_MATCHED_EXPECTED_MESSAGE'))
-            fprintf('sendMessage returned with this message: ''%s''\n', status);
-            error('Aborting run at this point');
-        end
-    end  % while
-    end % Infinite loop
+    communicationIsInSync = true;
+    messageCount = 0;
     
+    while (communicationIsInSync)
+        
+        messageIndex = 0;
+        while (messageIndex < numel(messageList))
+            messageIndex = messageIndex + 1;
+            messageCount =  messageCount + 1;
+            messageLabel = messageList{messageIndex}{1};
+            messageValue = messageList{messageIndex}{2};
+
+            % send command
+            status = UDPobj.sendMessage( messageLabel, 'withValue', messageValue, 'timeOutSecs', 2, 'maxAttemptsNum', 1);
+
+            % check status for errors
+            if (~strcmp(status, 'MESSAGE_SENT_MATCHED_EXPECTED_MESSAGE'))
+                fprintf('sendMessage returned with this message: ''%s''\n', status);
+                error('Aborting run at this point');
+            end
+            
+            % visualize message sent
+            UDPobj.showMessageValueAsStarString('transmit', messageLabel, messageValue, 40, 40);
+            
+        end  % while
+    end % Infinite loop as long as we are in sync
+    
+    fprintf(2, 'UDP communication came of sync after %d messages. \n', messageCount);
    
 end
 
@@ -74,6 +84,5 @@ function params = initParams()
     end
 
     params.nTrials = 13;
-    
 end
 

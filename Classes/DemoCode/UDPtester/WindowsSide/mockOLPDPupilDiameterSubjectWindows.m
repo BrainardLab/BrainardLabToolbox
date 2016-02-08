@@ -12,12 +12,13 @@ function mockOLPDPupilDiameterSubjectWindows
         );
     
     
-    % List of message label-value pairs
-    messagesExpected = {...
-        {'NUMBER_OF_TRIALS', 10} ... 
-        {'FREQUENCY', 15} ...
-        {'NUMBER_OF_TRIALS', -20} ... 
-        };
+    % List of message label-value pairs to expect
+    for k = 0:39
+        messageList{k} = {'NUMBER_OF_TRIALS', round(40*sin(2*pi*k/40))};
+    end
+    for k = 40 + (0:39)
+        messageList{k} = {'FREQUENCY', round(40*sin(2*pi*k/40))};
+    end
     
     % Start communication
     
@@ -25,12 +26,12 @@ function mockOLPDPupilDiameterSubjectWindows
     communicationIsInSync = true;
     while (communicationIsInSync)
         messageIndex = 0;
-        while (messageIndex < numel(messagesExpected))
+        while (messageIndex < numel(messageList))
         
             messageCount = messageCount + 1;
             messageIndex = messageIndex + 1;
-            messageLabel = messagesExpected{messageIndex}{1};
-            messageValue = messagesExpected{messageIndex}{2};
+            messageLabel = messageList{messageIndex}{1};
+            messageValue = messageList{messageIndex}{2};
         
             % wait for expected command
             response = UDPobj.waitForMessage(messageLabel, 'timeOutSecs', Inf);
@@ -40,6 +41,10 @@ function mockOLPDPupilDiameterSubjectWindows
                 communicationIsInSync = false;
                 error('Communication out of sync');
             end
+            
+            % visualize message received
+            UDPobj.showMessageValueAsStarString('received', response.msgLabel, response.msgValue, 40, 40);
+            
         end % while
     end % Infinite loop
     
