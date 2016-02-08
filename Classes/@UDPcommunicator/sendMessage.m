@@ -24,7 +24,7 @@ function status = sendMessage(obj, msgLabel, varargin)
     
     % form compound command
     if (isempty(messageArgument))
-        commandString = sprintf('[%s][]', messageLabel);
+        commandString = sprintf('[%s][][]', messageLabel);
         
     elseif (ischar(messageArgument))
         commandString = sprintf('[%s][%s][%s]', messageLabel, 'STRING', messageArgument);
@@ -33,13 +33,13 @@ function status = sendMessage(obj, msgLabel, varargin)
         if (numel(messageArgument) > 1)
             fprintf('%s message argument contains more than 1 element. Will only send the 1st element.', obj.sendMessageSignature);
         end
-        commandString = sprintf('[%s][%s][%f]', messageLabel, 'NUMERIC', messageArgument(1));
+        commandString = sprintf('[%s][%s][%s]', messageLabel, 'NUMERIC', sprintf('%f', messageArgument(1)));
         
     elseif (islogical(messageArgument))
         if (numel(messageArgument) > 1)
             fprintf('%s message argument contains more than 1 element. Will only send the 1st element.', obj.sendMessageSignature);
         end
-        commandString = sprintf('[%s][%s][%d]', messageLabel, 'BOOLEAN', messageArgument(1));
+        commandString = sprintf('[%s][%s][%s]', messageLabel, 'BOOLEAN', sprintf('%d', messageArgument(1)));
     else
         class(messageArgument)
         error('%s Do not know how to process this type or argument.', obj.sendMessageSignature);

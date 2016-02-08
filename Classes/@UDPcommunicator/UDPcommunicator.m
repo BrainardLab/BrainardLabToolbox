@@ -63,7 +63,7 @@ classdef UDPcommunicator < handle
         % Public API
         response = waitForMessage(obj, msgLabel, varargin);
         status = sendMessage(obj, msgLabel, varargin);
-        showMessageValueAsStarString(obj, direction, msgLabel, msgValue, maxValue, maxStars);
+        showMessageValueAsStarString(obj, direction, msgLabel, msgValueType, msgValue, maxValue, maxStars);
         
     end % public method
     

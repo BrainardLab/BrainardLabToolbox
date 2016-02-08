@@ -55,7 +55,7 @@ function response = waitForMessage(obj, msgLabel, varargin)
         leftBracketPositions = strfind(rawMessage, sprintf('['));
         rightBracketPositions = strfind(rawMessage, sprintf(']'));
         if ((numel(leftBracketPositions) ~= 3) || (numel(rightBracketPositions) ~= 3))
-            error('%s Raw message received does not contain correct format. Incorrect number of brackets\n', signature);
+            error('%s Raw message received (%s) does not contain correct format. Incorrect number of brackets\n', signature, rawMessage);
         end
         
         response.msgLabel = rawMessage(leftBracketPositions(1)+1:rightBracketPositions(1)-1);
