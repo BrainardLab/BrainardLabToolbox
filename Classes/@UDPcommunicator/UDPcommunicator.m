@@ -2,6 +2,78 @@ classdef UDPcommunicator < handle
 % Class for UDP-based communication between two computers.
 % UDPcommunicator is built on top of matlabUDP.mex located in BrainardLabToolbox/UDP.
 %
+% Demo usage:  computerA (mac, the master) -> computer B (windows, the listener)
+% -------------------------------------------------------------------------
+%
+% [STEP 1A.] Instantiate a UDPcommunicator object (the listener) on the  windows computer
+%
+% UDPobjWin = UDPcommunicator( ...
+%    'localIP', params.winHostIP, ...    % REQUIRED: the IP of this computer
+%    'remoteIP', params.macHostIP, ...   % REQUIRED: the IP of the computer we want to connect to
+%    'udpPort', params.udpPort, ...      % OPTIONAL, with default value: 2007
+%    'verbosity', 'min' ...              % OPTIONAL, with default value: 'normal', and possible values: {'min', 'normal', 'max'},
+%  );
+%
+% [STEP 1B.] Instantiate a UDPcommunicator object (the master) on the mac computer
+% UDPobjMac = UDPcommunicator( ...
+%    'localIP', params.macHostIP, ...   % REQUIRED: the IP of this computer
+%    'remoteIP', params.winHostIP, ...  % REQUIRED: the IP of the computer we want to connect to
+%    'udpPort', params.udpPort, ...     % OPTIONAL with default 2007
+%    'verbosity', 'min' ...             % OPTIONAL with possible values {'min', 'normal', 'max'}, and default 'normal'
+%  );
+%
+% -------------------------------------------------------------------------
+%
+% [STEP 2A] Set the windows computer to listen indefinitely for a message
+% with a specific label here, 'NUMBER_OF_TRIALS'.
+% response = UDPobjWin.waitForMessage(...
+%        'NUMBER_OF_TRIALS', ...      % REQUIRED field: the label of the message we expect, so we can provide a useful acknowledgment to the sender
+%        'timeOutSecs', Inf, ...      % OPTIONAL field: how long to wait for a message, here for ever
+%         );
+%
+% [STEP 2B.] Send a command message from the mac to the windows
+%  status = UDPobjMac.sendMessage(...
+%   'NUMBER_OF_TRIALS', ...           % REQUIRED field: every message must have a label
+%   'withValue', messageValue, ...    % OPTIONAL field: a message may or may not have a value, here it has a numerical value, 12, default: []
+%   'timeOutSecs', 2, ...             % OPTIONAL field: expect to receive an acknowdegment from the windows machine within 2 seconds, default: Inf 
+%   'maxAttemptsNum', 3 ...           % OPTIONAL field: if we get no ACK within the timeout period, resend this message up to a total of 3 times, default: 1 times
+%   );
+%
+% -------------------------------------------------------------------------
+%
+% [STEP 3.] Check the status parameter returned by the sendMessage command in [STEP 2B]
+% If the windows computer received the message we sent, and the message label it
+% received matched the message label it was expecting, it will inform the mac computer
+% that it did so, and in turn, the status param returned by the sendMessage 
+% will be set to 'MESSAGE_SENT_MATCHED_EXPECTED_MESSAGE'. Any other status
+% reflects a failure: either that a different message was received by the windows machine, 
+% or that the windows machine failed to provide an acknowlegmet within the
+% specified timeout period during any of the specied attempts
+%
+% if (~strcmp(status, 'MESSAGE_SENT_MATCHED_EXPECTED_MESSAGE'))
+%     fprintf('sendMessage returned with this message: ''%s''\n', status);
+%     error('Cannot communicate reliably with the windows computer. Aborting run at this point.');
+% end
+%
+% Additional notes:
+% We can send messages whose values are one of the following three types:
+% (a) numerical (i.e., int, double etc), i.e.:
+%      status = UDPobjMac.sendMessage('Modulation Frequency', 'withValue', 0.466);
+%      status = UDPobjMac.sendMessage('X-Offset', 'withValue', -123);
+% (b) boolean (i.e., true or false), i.e.:
+%      status = UDPobjMac.sendMessage('Invert Yaxis', 'withValue', false);
+% (c) strings (i.e., character arrays), i.e.:
+%      status = UDPobjMac.sendMessage('Experimenter name', 'withValue', 'Manuel Spitschan');
+%
+% These three different types are all transmitted as character strings together with
+% an additional field that specifies their type, so that the receiver can
+% reconstruct the actual type.
+%
+% Finally, we can send messages with no values, i.e.:
+% status = UDPobjMac.sendMessage('Exit loop');
+%
+%
+
 % 2/4/2016   npc   Wrote it
 %
 	% Read-only properties
