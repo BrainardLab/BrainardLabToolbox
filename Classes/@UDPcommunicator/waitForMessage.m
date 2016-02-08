@@ -70,7 +70,7 @@ function response = waitForMessage(obj, msgLabel, varargin)
                 response.msgValue = true;
             end
         elseif (strcmp(lower(response.msgValueType), 'string'))
-            response.msgValue = rawMessage(leftBracketPositions(3)+1:rightBracktPositions(3)-1);
+            response.msgValue = rawMessage(leftBracketPositions(3)+1:rightBracketPositions(3)-1);
         else
             if (strcmp(response.msgLabel, 'ACK'))
                 % 'ACK' message has not value or value type
