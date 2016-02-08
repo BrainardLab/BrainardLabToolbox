@@ -34,10 +34,10 @@ function params = trialLoop(params, block, UDPobj)
 
     % List of message label-value pairs to send
     for k = 0:39
-        messageList{k+1} = {'NUMBER_OF_TRIALS', round(40*0.5*(1+sin(2*pi*k/40)))};
+        messageList{k+1} = {'NUMBER_OF_TRIALS', 40*0.5*(1+sin(2*pi*k/40))};
     end
     for k = 40 + (0:39)
-        messageList{k+1} = {'FREQUENCY', round(40*0.5*(1+sin(2*pi*k/40)))};
+        messageList{k+1} = {'FREQUENCY', 40*0.5*(1+sin(2*pi*k/40))};
     end
     
     
@@ -94,7 +94,7 @@ function params = trialLoop(params, block, UDPobj)
             elseif (islogical(messageValue))
                 messageValueType = 'boolean';
             end
-            UDPobj.showMessageValueAsStarString('transmit', messageLabel, messageValueType, messageValue, 40, 40);
+            UDPobj.showMessageValueAsStarString('transmit', messageCount, messageLabel, messageValueType, messageValue, 40, 40);
             
         end  % while
     end % Infinite loop as long as we are in sync

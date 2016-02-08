@@ -1,4 +1,4 @@
-function showMessageValueAsStarString(obj, direction, msgLabel, msgValueType, msgValue, maxValue, maxStars)
+function showMessageValueAsStarString(obj, messageCount, direction, msgLabel, msgValueType, msgValue, maxValue, maxStars)
 
     if (strcmp(lower(msgValueType), 'string'))
         starsNum = length(msgValue)/maxValue*maxStars;  % length of string
@@ -19,15 +19,15 @@ function showMessageValueAsStarString(obj, direction, msgLabel, msgValueType, ms
     end
     
     if (strcmp(lower(msgValueType), 'string'))
-        fprintf('\n %10s %-20s (%10s with value: ''%s''): %40s', direction, msgLabel, msgValueType, msgValue, msg);
+        fprintf('\n [%d]: %10s %-20s (%10s with value: ''%s''): %40s', messageCount, direction, msgLabel, msgValueType, msgValue, msg);
     elseif (strcmp(lower(msgValueType), 'boolean'))
         if (msgValue)
-            fprintf('\n %10s %-20s (%10s with value: TRUE ): %40s', direction, msgLabel, msgValueType, msg);
+            fprintf('\n [%d]: %10s %-20s (%10s with value: TRUE ): %40s', messageCount, direction, msgLabel, msgValueType, msg);
         else
-            fprintf('\n %10s %-20s (%10s with value: FALSE): %40s', direction, msgLabel, msgValueType, msg);
+            fprintf('\n [%d]: %10s %-20s (%10s with value: FALSE): %40s', messageCount, direction, msgLabel, msgValueType, msg);
         end
     elseif (strcmp(lower(msgValueType), 'numeric'))
-        fprintf('\n %10s %-20s (%10s with value %3.3f): %40s', direction, msgLabel, msgValueType, msgValue, msg);
+        fprintf('\n [%d]: %10s %-20s (%10s with value %3.3f): %40s', messageCount, direction, msgLabel, msgValueType, msgValue, msg);
     end
     
 end

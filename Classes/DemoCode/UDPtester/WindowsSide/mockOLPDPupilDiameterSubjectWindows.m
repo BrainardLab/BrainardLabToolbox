@@ -44,7 +44,7 @@ function mockOLPDPupilDiameterSubjectWindows
             end
             
             % visualize message received
-            UDPobj.showMessageValueAsStarString('received', response.msgLabel, response.msgValueType, response.msgValue, 40, 40);
+            UDPobj.showMessageValueAsStarString(messageCount, 'received', response.msgLabel, response.msgValueType, response.msgValue, 40, 40);
             
         end % while
     end % Infinite loop
