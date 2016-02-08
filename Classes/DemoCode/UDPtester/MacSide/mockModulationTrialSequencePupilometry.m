@@ -78,7 +78,7 @@ function params = trialLoop(params, block, UDPobj)
             end
             
             % send command
-            status = UDPobj.sendMessage( messageLabel, 'withValue', messageValue, 'timeOutSecs', 2, 'maxAttemptsNum', 1);
+            status = UDPobj.sendMessage( messageLabel, 'withValue', messageValue, 'timeOutSecs', 2, 'maxAttemptsNum', 3);
 
             % check status for errors
             if (~strcmp(status, 'MESSAGE_SENT_MATCHED_EXPECTED_MESSAGE'))
@@ -94,7 +94,7 @@ function params = trialLoop(params, block, UDPobj)
             elseif (islogical(messageValue))
                 messageValueType = 'boolean';
             end
-            UDPobj.showMessageValueAsStarString('transmit', messageCount, messageLabel, messageValueType, messageValue, 40, 40);
+            UDPobj.showMessageValueAsStarString(messageCount, 'transmit',  messageLabel, messageValueType, messageValue, 40, 40);
             
         end  % while
     end % Infinite loop as long as we are in sync

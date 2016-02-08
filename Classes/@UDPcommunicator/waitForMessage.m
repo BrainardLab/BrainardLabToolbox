@@ -88,7 +88,7 @@ function response = waitForMessage(obj, msgLabel, varargin)
                 obj.sendMessage('ACK', 'timeOutSecs', -1);
             end
         else
-            fprintf('%s Received unexpected message: ''%s'' (istead of ''%s''). Informing the sender.', signature, response.msgLabel, expectedMessageLabel);
+            fprintf('%s Received unexpected message: ''%s'' (instead of ''%s''). Informing the sender.', signature, response.msgLabel, expectedMessageLabel);
             obj.sendMessage(sprintf('RECEIVED_MESSAGE_(''%s'')_DID_NOT_MATCH_EXPECTED_MESSAGE_(''%s'')', response.msgLabel, expectedMessageLabel), 'timeOutSecs', -1);
         end
     end
