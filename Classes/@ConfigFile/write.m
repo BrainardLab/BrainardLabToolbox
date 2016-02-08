@@ -15,4 +15,9 @@ for i = 1:length(object.RawText)
 	fprintf(fid, '%s\n', object.RawText{i});
 end
 
+for i = 1:length(object.Params)
+   fprintf(fid, '%s:%s:%s:%s\n', object.Params(i).paramName, object.Params(i).paramType, ...
+       object.Params(1).paramValRaw, object.Params(i).paramDescription); 
+end
+
 fclose(fid);
