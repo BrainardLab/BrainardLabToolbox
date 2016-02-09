@@ -60,7 +60,7 @@ function status = sendMessage(obj, msgLabel, varargin)
     
     if (~strcmp(obj.verbosity,'min'))
         if (doNotReplyToThisMessage)
-            fprintf('%s Will send ''%s'' and return.\n', obj.sendMessageSignature, commandString);
+            fprintf('%s Will send ''%s'' and return.', obj.sendMessageSignature, commandString);
         else
             % give some feedback
             if isinf(timeOutSecs)

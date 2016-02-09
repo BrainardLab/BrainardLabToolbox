@@ -54,7 +54,7 @@ function testWindowsClient
     if (~communicationIsInSync)
         fprintf(2, '\nUDP communication went out of sync after %d messages.\n', UDPobj.receivedMessagesCount);
     else
-        fprintf('Exiting after receiving ''%s'' command\n', response.msgLabel);
+        fprintf('\nExiting after receiving ''%s'' command\n', response.msgLabel);
     end
 end
 

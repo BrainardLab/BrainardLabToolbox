@@ -21,7 +21,7 @@ function params = testMacClient()
           'localIP', params.macHostIP, ...
          'remoteIP', params.winHostIP, ...
           'udpPort', params.udpPort, ...      % optional with default 2007
-        'verbosity', 'normal' ...             % optional with possible values {'min', 'normal', 'max'}, and default 'normal'
+        'verbosity', 'min' ...             % optional with possible values {'min', 'normal', 'max'}, and default 'normal'
         );
 
     params = trialLoop(params, block, UDPobj);
