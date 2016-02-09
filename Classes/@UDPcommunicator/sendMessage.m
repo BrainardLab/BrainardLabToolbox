@@ -15,12 +15,16 @@ function status = sendMessage(obj, msgLabel, varargin)
     defaultMaxAttemptsNum = 1;
     addOptional(p,'maxAttemptsNum',defaultMaxAttemptsNum,@isnumeric);
     
+    defaultDoToNotreplyToThisMessage = false;
+    addOptional(p,'doToNotreplyToThisMessage',defaultDoToNotreplyToThisMessage,@islogical);
+    
     % parse the input
     parse(p,msgLabel,varargin{:});
     messageLabel    = p.Results.msgLabel;
     messageArgument = p.Results.withValue;
     timeOutSecs     = p.Results.timeOutSecs;
     maxAttemptsNum  = p.Results.maxAttemptsNum;
+    doToNotreplyToThisMessage = p.Results.doToNotreplyToThisMessage;
     
     % ensure timeOutSecs is greater than 0
     if (timeOutSecs <= 0)
@@ -66,6 +70,13 @@ function status = sendMessage(obj, msgLabel, varargin)
     
     % send the message and increment sentMessagesCount
     transmitAndUpdateCounter(commandString);
+    
+    % If the doToNotreplyToThisMessage is set, return at this point
+    if (doToNotreplyToThisMessage)
+        status = '';
+        return;
+    end
+    
     
     attemptNo = 0;
     status = 'TIMED_OUT_WAITING_FOR_ACKNOWLEDGMENT';

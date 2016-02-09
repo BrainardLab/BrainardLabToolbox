@@ -82,7 +82,7 @@ function response = waitForMessage(obj, msgLabel, varargin)
         if (strcmp(response.msgLabel, expectedMessageLabel))    
             % Do not send back an ACK if we were expecting an ACK and we received it
             if (~strcmp(expectedMessageLabel, 'ACK'))
-                obj.sendMessage('ACK', 'timeOutSecs', 2);
+                obj.sendMessage('ACK', 'doToNotreplyToThisMessage', true);
                 if (~strcmp(obj.verbosity,'min'))
                     fprintf('Expected message received withing %2.2f seconds, acknowledging the sender.', elapsedTime);
                 end
