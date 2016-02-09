@@ -15,6 +15,7 @@ function status = sendMessage(obj, msgLabel, varargin)
     defaultMaxAttemptsNum = 1;
     addOptional(p,'maxAttemptsNum',defaultMaxAttemptsNum,@isnumeric);
     
+    % the doNotReplyToThisMessage is optional, with a default value false
     defaultDoNotReplyToThisMessage = false;
     addOptional(p,'doNotReplyToThisMessage',defaultDoNotReplyToThisMessage,@islogical);
     
@@ -58,13 +59,15 @@ function status = sendMessage(obj, msgLabel, varargin)
     end
     
     if (~strcmp(obj.verbosity,'min'))
-        % give some feedback
-        if isinf(timeOutSecs)
-            fprintf('%s Will send ''%s'' and wait for ever to receive an acknowledgment', obj.sendMessageSignature, commandString);
-        elseif (timeOutSecs <= 0)
-            fprintf('%s Will send ''%s'' and return', obj.sendMessageSignature, commandString);
+        if (doNotReplyToThisMessage)
+            fprintf('%s Will send ''%s'' and return.\n', obj.sendMessageSignature);
         else
-            fprintf('%s Will send ''%s'' and wait for %2.2f seconds to receive an acknowledgment', obj.sendMessageSignature, commandString, timeOutSecs);
+            % give some feedback
+            if isinf(timeOutSecs)
+                fprintf('%s Will send ''%s'' and wait for ever to receive an acknowledgment', obj.sendMessageSignature, commandString);
+            else
+                fprintf('%s Will send ''%s'' and wait for %2.2f seconds to receive an acknowledgment', obj.sendMessageSignature, commandString, timeOutSecs);
+            end
         end
     end
     
