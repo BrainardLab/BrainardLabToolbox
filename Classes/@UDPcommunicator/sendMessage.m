@@ -5,7 +5,7 @@ function status = sendMessage(obj, msgLabel, varargin)
     addRequired(p,'msgLabel',@ischar);
     
     % the withValue optional parameter, with a default being the empty string
-    addOptional(p, 'withValue', '');
+    addOptional(p, 'withValue', ' ');
     
     % the timeOutSecs is optional, with a default value: 5
     defaultTimeOutSecs = 5;
@@ -36,20 +36,20 @@ function status = sendMessage(obj, msgLabel, varargin)
     
     % form compound command
     if (isempty(messageArgument))
-        commandString = sprintf('[%s][][]', messageLabel);
+        commandString = sprintf('[%s][%s][%s]', messageLabel, 'STRING', '');
         
     elseif (ischar(messageArgument))
         commandString = sprintf('[%s][%s][%s]', messageLabel, 'STRING', messageArgument);
         
     elseif (isnumeric(messageArgument))
         if (numel(messageArgument) > 1)
-            fprintf('%s message argument contains more than 1 element. Will only send the 1st element.', obj.sendMessageSignature);
+            fprintf('%s >>>> message argument contains more than 1 element. Will only send the 1st element.', obj.sendMessageSignature);
         end
         commandString = sprintf('[%s][%s][%s]', messageLabel, 'NUMERIC', sprintf('%f', messageArgument(1)));
         
     elseif (islogical(messageArgument))
         if (numel(messageArgument) > 1)
-            fprintf('%s message argument contains more than 1 element. Will only send the 1st element.', obj.sendMessageSignature);
+            fprintf('%s >>>>> message argument contains more than 1 element. Will only send the 1st element.', obj.sendMessageSignature);
         end
         commandString = sprintf('[%s][%s][%s]', messageLabel, 'BOOLEAN', sprintf('%d', messageArgument(1)));
     else
