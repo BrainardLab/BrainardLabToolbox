@@ -81,8 +81,8 @@ function params = trialLoop(params, block, UDPobj)
             status = UDPobj.sendMessage(messageLabel, 'withValue', messageValue, 'timeOutSecs', 2, 'maxAttemptsNum', 3);
 
             % check status for errors
-            if (~strcmp(status, 'MESSAGE_SENT_MATCHED_EXPECTED_MESSAGE'))
-                fprintf('sendMessage returned with this message: ''%s''\n', status);
+            if (~strcmp(status, UDPobj.TRANSMITTED_MESSAGE_MATCHES_EXPECTED))
+                fprintf(2,'Transmitted and expected (by the other end) messages do not match! sendMessage() returned with this message: ''%s''\n', status);
                 communicationIsInSync = false;
             end
             

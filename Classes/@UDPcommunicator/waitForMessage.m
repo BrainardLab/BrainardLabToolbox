@@ -85,7 +85,7 @@ function response = waitForMessage(obj, msgLabel, varargin)
             end
             % Do not send back an ACK if we were expecting an ACK and we received it
             if (~strcmp(expectedMessageLabel, 'ACK'))
-                obj.sendMessage('ACK', 'timeOutSecs', -1);
+                obj.sendMessage('ACK', 'timeOutSecs', 2);
             end
         else
             fprintf('%s Received unexpected message: ''%s'' (instead of ''%s''). Informing the sender.', signature, response.msgLabel, expectedMessageLabel);

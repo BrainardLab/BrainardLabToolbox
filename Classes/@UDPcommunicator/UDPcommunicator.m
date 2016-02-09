@@ -96,6 +96,10 @@ classdef UDPcommunicator < handle
         selfSignature           = sprintf('\n<strong>%s:</strong>', sprintf('%35s','UDPcommunicator'));
     end
     
+    properties (Constant)
+        TRANSMITTED_MESSAGE_MATCHES_EXPECTED = 'MESSAGE_SENT_MATCHED_EXPECTED_MESSAGE';
+    end
+    
 	% Public methods
     methods
         % Constructor
