@@ -24,7 +24,7 @@ function status = sendMessage(obj, msgLabel, varargin)
     messageArgument = p.Results.withValue;
     timeOutSecs     = p.Results.timeOutSecs;
     maxAttemptsNum  = p.Results.maxAttemptsNum;
-    doNotReplyToThisMessage = p.Results.doNotreplyToThisMessage;
+    doNotReplyToThisMessage = p.Results.doNotReplyToThisMessage;
     
     % ensure timeOutSecs is greater than 0
     if (timeOutSecs <= 0)
