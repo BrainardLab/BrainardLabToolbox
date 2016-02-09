@@ -49,7 +49,7 @@ function response = waitForMessage(obj, msgLabel, varargin)
     
     if (response.timedOutFlag == false)
         % get raw data
-        rawMessage = matlabUDP('receive');
+        rawMessage = receiveAndUpdateCounter();
         
         % parse the raw message received
         leftBracketPositions = strfind(rawMessage, sprintf('['));
@@ -93,6 +93,9 @@ function response = waitForMessage(obj, msgLabel, varargin)
         end
     end
     
-    
+    function rawMessage = receiveAndUpdateCounter()
+        rawMessage = matlabUDP('receive');
+        obj.receivedMessagesCount = obj.receivedMessagesCount + 1;
+    end
 end
 

@@ -4,11 +4,11 @@ function status = sendMessage(obj, msgLabel, varargin)
     % the msgLabel is required
     addRequired(p,'msgLabel',@ischar);
     
-    % the withValue optional parameter, with a default being the empty
-    addOptional(p, 'withValue', []);
+    % the withValue optional parameter, with a default being the empty string
+    addOptional(p, 'withValue', '');
     
-    % the timeOutSecs is optional, with a default value: Inf
-    defaultTimeOutSecs = Inf;
+    % the timeOutSecs is optional, with a default value: 5
+    defaultTimeOutSecs = 5;
     addOptional(p,'timeOutSecs',defaultTimeOutSecs,@isnumeric);
     
     % the maxAttemptsNum is optional, with a default value: 1
@@ -21,6 +21,14 @@ function status = sendMessage(obj, msgLabel, varargin)
     messageArgument = p.Results.withValue;
     timeOutSecs     = p.Results.timeOutSecs;
     maxAttemptsNum  = p.Results.maxAttemptsNum;
+    
+    % ensure timeOutSecs is greater than 0
+    if (timeOutSecs <= 0)
+        timeOutSecs = 0.01;
+        if (~strcmp(obj.verbosity,'min'))
+            fprintf('%$ forcing negative or zero timeOutSecs to %2.4f seconds\n', obj.sendMessageSignature, timeOutSecs);
+        end
+    end
     
     % form compound command
     if (isempty(messageArgument))
@@ -56,8 +64,8 @@ function status = sendMessage(obj, msgLabel, varargin)
         end
     end
     
-    % send the message
-    matlabUDP('send', commandString);
+    % send the message and increment sentMessagesCount
+    transmitAndUpdateCounter(commandString);
     
     attemptNo = 0;
     status = 'TIMED_OUT_WAITING_FOR_ACKNOWLEDGMENT';
@@ -65,30 +73,34 @@ function status = sendMessage(obj, msgLabel, varargin)
     while ((attemptNo < maxAttemptsNum) && (strcmp(status,'TIMED_OUT_WAITING_FOR_ACKNOWLEDGMENT')))
         attemptNo = attemptNo + 1;
         
-        if (timeOutSecs > 0)
-            % wait for timeOutSecs to receive an acknowledgment that the sent
-            % message has the same label as the expected (on the remote computer) message
-            response = obj.waitForMessage('ACK', timeOutSecs);
+        % wait for timeOutSecs to receive an acknowledgment that the sent
+        % message has the same label as the expected (on the remote computer) message
+        response = obj.waitForMessage('ACK', timeOutSecs);
 
-            if (response.timedOutFlag)
-                status = 'TIMED_OUT_WAITING_FOR_ACKNOWLEDGMENT';
-                if (attemptNo == maxAttemptsNum)
-                    fprintf(2,'%s Timed out after %d seconds waiting to receive receipt acknowledgment for transmitted message: ''%s''. Attempt: %d/%d\n', obj.sendMessageSignature, timeOutSecs, commandString, attemptNo, maxAttemptsNum); 
-                else
-                    fprintf(2,'%s Timed out after %d seconds waiting to receive receipt acknowledgment for transmitted message: ''%s''. Attempt: %d/%d. Resending the same message now.\n', obj.sendMessageSignature, timeOutSecs, commandString, attemptNo, maxAttemptsNum); 
-                    % send the message
-                    matlabUDP('send', commandString);
-                end
+        if (response.timedOutFlag)
+            % update timeouts counter
+            obj.timeOutsCount = obj.timeOutsCount + 1;
+
+            status = 'TIMED_OUT_WAITING_FOR_ACKNOWLEDGMENT';
+            if (attemptNo == maxAttemptsNum)
+                fprintf(2,'%s Timed out after %d seconds waiting to receive receipt acknowledgment for transmitted message: ''%s''. Attempt: %d/%d\n', obj.sendMessageSignature, timeOutSecs, commandString, attemptNo, maxAttemptsNum); 
             else
-                if strcmp(response.msgLabel, 'ACK')
-                    status = 'MESSAGE_SENT_MATCHED_EXPECTED_MESSAGE';
-                else
-                    status = response.msgLabel;
-                end
+                fprintf(2,'%s Timed out after %d seconds waiting to receive receipt acknowledgment for transmitted message: ''%s''. Attempt: %d/%d. Resending the same message now.\n', obj.sendMessageSignature, timeOutSecs, commandString, attemptNo, maxAttemptsNum); 
+                % resend the message
+                transmitAndUpdateCounter(commandString);
+            end
+        else
+            if strcmp(response.msgLabel, 'ACK')
+                status = 'MESSAGE_SENT_MATCHED_EXPECTED_MESSAGE';
+            else
+                status = response.msgLabel;
             end
         end
-        
-        
     end % while attemptNo < maxAttemptsNum
     
+    function transmitAndUpdateCounter(commandString)
+        matlabUDP('send', commandString);
+        obj.sentMessagesCount = obj.sentMessagesCount + 1;
+    end
+
 end

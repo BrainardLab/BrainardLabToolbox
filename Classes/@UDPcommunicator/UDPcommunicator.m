@@ -1,24 +1,25 @@
 classdef UDPcommunicator < handle
-% Class for UDP-based communication between two computers.
+% Class for robust UDP-based communication between two computers.
 % UDPcommunicator is built on top of matlabUDP.mex located in BrainardLabToolbox/UDP.
 %
+% -------------------------------------------------------------------------
 % Demo usage:  computerA (mac, the master) -> computer B (windows, the listener)
 % -------------------------------------------------------------------------
 %
 % [STEP 1A.] Instantiate a UDPcommunicator object (the listener) on the  windows computer
 %
 % UDPobjWin = UDPcommunicator( ...
-%    'localIP', params.winHostIP, ...    % REQUIRED: the IP of this computer
-%    'remoteIP', params.macHostIP, ...   % REQUIRED: the IP of the computer we want to connect to
-%    'udpPort', params.udpPort, ...      % OPTIONAL, with default value: 2007
-%    'verbosity', 'min' ...              % OPTIONAL, with default value: 'normal', and possible values: {'min', 'normal', 'max'},
+%    'localIP',   params.winHostIP, ... % REQUIRED: the IP of this computer
+%    'remoteIP',  params.macHostIP, ... % REQUIRED: the IP of the computer we want to connect to
+%    'udpPort',   params.udpPort, ...   % OPTIONAL, with default value: 2007
+%    'verbosity', 'min' ...             % OPTIONAL, with default value: 'normal', and possible values: {'min', 'normal', 'max'},
 %  );
 %
 % [STEP 1B.] Instantiate a UDPcommunicator object (the master) on the mac computer
 % UDPobjMac = UDPcommunicator( ...
-%    'localIP', params.macHostIP, ...   % REQUIRED: the IP of this computer
-%    'remoteIP', params.winHostIP, ...  % REQUIRED: the IP of the computer we want to connect to
-%    'udpPort', params.udpPort, ...     % OPTIONAL with default 2007
+%    'localIP',   params.macHostIP, ... % REQUIRED: the IP of this computer
+%    'remoteIP',  params.winHostIP, ... % REQUIRED: the IP of the computer we want to connect to
+%    'udpPort',   params.udpPort, ...   % OPTIONAL with default 2007
 %    'verbosity', 'min' ...             % OPTIONAL with possible values {'min', 'normal', 'max'}, and default 'normal'
 %  );
 %
@@ -27,16 +28,16 @@ classdef UDPcommunicator < handle
 % [STEP 2A] Set the windows computer to listen indefinitely for a message
 % with a specific label here, 'NUMBER_OF_TRIALS'.
 % response = UDPobjWin.waitForMessage(...
-%        'NUMBER_OF_TRIALS', ...      % REQUIRED field: the label of the message we expect, so we can provide a useful acknowledgment to the sender
-%        'timeOutSecs', Inf, ...      % OPTIONAL field: how long to wait for a message, here for ever
+%    'NUMBER_OF_TRIALS', ...   % REQUIRED field: the label of the message we expect, so we can provide a useful acknowledgment to the sender
+%    'timeOutSecs', 10, ...    % OPTIONAL field: how long to wait for a message, with default value: Inf
 %         );
 %
 % [STEP 2B.] Send a command message from the mac to the windows
 %  status = UDPobjMac.sendMessage(...
-%   'NUMBER_OF_TRIALS', ...           % REQUIRED field: every message must have a label
-%   'withValue', messageValue, ...    % OPTIONAL field: a message may or may not have a value, here it has a numerical value, 12, default: []
-%   'timeOutSecs', 2, ...             % OPTIONAL field: expect to receive an acknowdegment from the windows machine within 2 seconds, default: Inf 
-%   'maxAttemptsNum', 3 ...           % OPTIONAL field: if we get no ACK within the timeout period, resend this message up to a total of 3 times, default: 1 times
+%     'NUMBER_OF_TRIALS', ...  % REQUIRED field: every message must have a label
+%     'withValue',      12, ...% OPTIONAL field: a message may or may not have a value, here it has a numerical value, 12, default: []
+%     'timeOutSecs',    2, ... % OPTIONAL field: expect to receive an acknowdegment from the windows machine within 2 seconds, default: 5 seconds 
+%     'maxAttemptsNum', 3 ...  % OPTIONAL field: if we get no ACK within the timeout period, resend this message up to a total of 3 times, default: 1 times
 %   );
 %
 % -------------------------------------------------------------------------
@@ -54,6 +55,8 @@ classdef UDPcommunicator < handle
 %     fprintf('sendMessage returned with this message: ''%s''\n', status);
 %     error('Cannot communicate reliably with the windows computer. Aborting run at this point.');
 % end
+%
+% -------------------------------------------------------------------------
 %
 % Additional notes:
 % We can send messages whose values are one of the following three types:
@@ -73,7 +76,7 @@ classdef UDPcommunicator < handle
 % status = UDPobjMac.sendMessage('Exit loop');
 %
 %
-
+%
 % 2/4/2016   npc   Wrote it
 %
 	% Read-only properties
@@ -81,7 +84,10 @@ classdef UDPcommunicator < handle
 		localIP
 		remoteIP
         portUDP
-        verbosity
+        verbosity             % choose from {'min', 'normal', 'max'}
+        sentMessagesCount     % number of messages sent
+        receivedMessagesCount % number of messages received
+        timeOutsCount         % number of timeouts
     end
 
     properties (Access = private)
@@ -95,7 +101,12 @@ classdef UDPcommunicator < handle
         % Constructor
         function obj = UDPcommunicator(varargin)
            
-            % Set default values for some params
+            % Reset counters
+            obj.sentMessagesCount = 0;       % number of messages sent
+            obj.receivedMessagesCount = 0;   % number of messages received
+            obj.timeOutsCount = 0;           % number of timeouts
+        
+            % Set default values for optional config params
             defaultUDPport =  2007;
             defaultVerbosity = 'min';
 
