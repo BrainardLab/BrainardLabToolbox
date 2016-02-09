@@ -142,6 +142,9 @@ classdef UDPcommunicator < handle
             matlabUDP('close');
             matlabUDP('open', obj.localIP, obj.remoteIP, obj.portUDP);
 
+            % flash any remaining bits
+            obj.flashQueue();
+            
             if (~strcmp(obj.verbosity,'min'))
                 fprintf('%s Initialized.', obj.selfSignature);
             end
@@ -150,6 +153,8 @@ classdef UDPcommunicator < handle
         % Public API
         response = waitForMessage(obj, msgLabel, varargin);
         status = sendMessage(obj, msgLabel, varargin);
+        flashedContents = flashQueue(obj);
+        
         showMessageValueAsStarString(obj, msgCount, direction, msgLabel, msgValueType, msgValue, maxValue, maxStars);
         
     end % public method
