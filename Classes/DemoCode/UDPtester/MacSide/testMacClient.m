@@ -102,7 +102,7 @@ function params = trialLoop(params, block, UDPobj)
     if (~communicationIsInSync)
         fprintf(2, '\nUDP communication went out of sync after %d messages. \n', UDPobj.sentMessagesCount);
     else
-        fprintf('Finished %d loops. Sending ''Exit Listening Loop'' to windows machine ...\n', loopIndex);
+        fprintf('\n\nFinished %d loops. Sending ''Exit Listening Loop'' to windows machine ...\n', loopIndex);
         status = UDPobj.sendMessage('Exit Listening Loop', 'doNotReplyToThisMessage', true)
     end
    
