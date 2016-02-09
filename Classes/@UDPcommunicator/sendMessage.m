@@ -15,8 +15,8 @@ function status = sendMessage(obj, msgLabel, varargin)
     defaultMaxAttemptsNum = 1;
     addOptional(p,'maxAttemptsNum',defaultMaxAttemptsNum,@isnumeric);
     
-    defaultDoToNotReplyToThisMessage = false;
-    addOptional(p,'doToNotReplyToThisMessage',defaultDoToNotReplyToThisMessage,@islogical);
+    defaultDoNotReplyToThisMessage = false;
+    addOptional(p,'doNotReplyToThisMessage',defaultDoNotReplyToThisMessage,@islogical);
     
     % parse the input
     parse(p,msgLabel,varargin{:});
@@ -24,7 +24,7 @@ function status = sendMessage(obj, msgLabel, varargin)
     messageArgument = p.Results.withValue;
     timeOutSecs     = p.Results.timeOutSecs;
     maxAttemptsNum  = p.Results.maxAttemptsNum;
-    doToNotreplyToThisMessage = p.Results.doToNotreplyToThisMessage;
+    doNotReplyToThisMessage = p.Results.doNotreplyToThisMessage;
     
     % ensure timeOutSecs is greater than 0
     if (timeOutSecs <= 0)
@@ -72,7 +72,7 @@ function status = sendMessage(obj, msgLabel, varargin)
     transmitAndUpdateCounter(commandString);
     
     % If the doToNotreplyToThisMessage is set, return at this point
-    if (doToNotReplyToThisMessage)
+    if (doNotReplyToThisMessage)
         status = '';
         return;
     end

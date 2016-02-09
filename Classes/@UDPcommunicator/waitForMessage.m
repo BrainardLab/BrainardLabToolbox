@@ -80,7 +80,7 @@ function response = waitForMessage(obj, msgLabel, varargin)
             % Do not send back an TRANSMITTED_MESSAGE_MATCHES_EXPECTED message 
             % when we were expecting a TRANSMITTED_MESSAGE_MATCHES_EXPECTED and we received it
             if (~strcmp(expectedMessageLabel, obj.TRANSMITTED_MESSAGE_MATCHES_EXPECTED))
-                obj.sendMessage(obj.TRANSMITTED_MESSAGE_MATCHES_EXPECTED, 'doToNotreplyToThisMessage', true);
+                obj.sendMessage(obj.TRANSMITTED_MESSAGE_MATCHES_EXPECTED, 'doNotreplyToThisMessage', true);
                 if (~strcmp(obj.verbosity,'min'))
                     fprintf('Expected message received withing %2.2f seconds, acknowledging the sender.', elapsedTime);
                 end
