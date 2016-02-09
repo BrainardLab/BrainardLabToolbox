@@ -21,52 +21,41 @@ function testWindowsClient
         messageList{k+1} = {'FREQUENCY', 0};
     end
     
-    % Start communication
-    
-    messageCount = 0;
+    % Start listening to mac
     communicationIsInSync = true;
-    while (communicationIsInSync)
-        messageIndex = 0;
-        while (messageIndex < numel(messageList))
+    remainInListeningLoop = true;
+    
+    while (communicationIsInSync) && (remainInListeningLoop)
         
-            messageCount = messageCount + 1;
+        messageIndex = 0;
+        while (messageIndex < numel(messageList)) && (communicationIsInSync) && (remainInListeningLoop) 
+            
             messageIndex = messageIndex + 1;
             messageLabel = messageList{messageIndex}{1};
-            messageValue = messageList{messageIndex}{2};
         
             % wait for expected command
             response = UDPobj.waitForMessage(messageLabel, 'timeOutSecs', Inf);
 
-            % check for errors
-            if (~strcmp(response.msgLabel, messageLabel)) 
+            % check for 'Exit Listening Loop' command
+            if (strcmp(response.msgLabel, 'Exit Listening Loop'))
+                remainInListeningLoop = false;
+                
+            % check for incorrect message 
+            elseif (~strcmp(response.msgLabel, messageLabel)) 
                 communicationIsInSync = false;
-                error('Communication out of sync');
             end
             
             % visualize message received
-            UDPobj.showMessageValueAsStarString(messageCount, 'received', response.msgLabel, response.msgValueType, response.msgValue, 40, 40);
-            
-        end % while
-    end % Infinite loop
+            UDPobj.showMessageValueAsStarString(UDPobj.receivedMessagesCount, 'received', response.msgLabel, response.msgValueType, response.msgValue, 40, 40);
+        
+        end % while (messageIndex < numel(messageList)) && (remainInListeningLoop)
+    end %  while (communicationIsInSync) && (remainInListeningLoop)
     
-    fprintf(2, '\nOut of sync adter %d messages.\n', messageCount);
-
-end
-
-function numStims = VSGOLGet(expectedFlag)
-    % numStims = VSGOLGetNumberStims
-    % Get the number of trials from the Mac
-    temp = VSGOLGetInput;
-    fprintf('Number of stims (%s) received!',temp);
-    numStims = str2num(temp);
-    matlabUDP('send',sprintf('Number of stimuli: %f received!!!',numStims));
-end
-
-function data = VSGOLGetInput
-    % data = VSGOLGetInput Continuously checks for input from the Mac machine
-    % until data is actually available.
-    while matlabUDP('check') == 0; end
-    data = matlabUDP('receive');
+    if (~communicationIsInSync)
+        fprintf(2, '\nUDP communication went out of sync after %d messages.\n', UDPobj.receivedMessagesCount);
+    else
+        fprintf('Exiting after receiving ''%s'' command\n', response.msgLabel);
+    end
 end
 
 function params = initParams()
@@ -79,6 +68,5 @@ function params = initParams()
         params.winHostIP = '130.91.72.17';  % IoneanPelagos
         params.macHostIP = '130.91.74.10';  % Manta
     end
-    
 end
 

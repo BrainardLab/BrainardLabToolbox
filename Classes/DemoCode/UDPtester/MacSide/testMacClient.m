@@ -40,24 +40,24 @@ function params = trialLoop(params, block, UDPobj)
         messageList{k+1} = {'FREQUENCY', 40*0.5*(1+sin(2*pi*k/40))};
     end
     
-    
+    % start talking to windows
     communicationIsInSync = true;
-    messageCount = 0;
+    loopIndex = 0;
     
-    while (communicationIsInSync)
-        
+    while (communicationIsInSync) && (loopIndex < 10)
+        loopIndex = loopIndex + 1;
         messageIndex = 0;
-        while (messageIndex < numel(messageList))
+        
+        while (messageIndex < numel(messageList)) && (communicationIsInSync)
             messageIndex = messageIndex + 1;
-            messageCount =  messageCount + 1;
             messageLabel = messageList{messageIndex}{1};
             messageValue = messageList{messageIndex}{2};
 
             % change the value type transmitted
-            if (mod(floor(messageCount/1000), 3) == 0)
+            if (mod(floor(UDPobj.sentMessagesCount/1000), 3) == 0)
                 changeToBoolean = true;
                 changeToString = false;
-            elseif (mod(floor(messageCount/1000), 3) == 1)
+            elseif (mod(floor(UDPobj.sentMessagesCount/1000), 3) == 1)
                 changeToBoolean = false;
                 changeToString = true;
             else
@@ -78,12 +78,12 @@ function params = trialLoop(params, block, UDPobj)
             end
             
             % send command
-            status = UDPobj.sendMessage( messageLabel, 'withValue', messageValue, 'timeOutSecs', 2, 'maxAttemptsNum', 3);
+            status = UDPobj.sendMessage(messageLabel, 'withValue', messageValue, 'timeOutSecs', 2, 'maxAttemptsNum', 3);
 
             % check status for errors
             if (~strcmp(status, 'MESSAGE_SENT_MATCHED_EXPECTED_MESSAGE'))
                 fprintf('sendMessage returned with this message: ''%s''\n', status);
-                error('Aborting run at this point');
+                communicationIsInSync = false;
             end
             
             % visualize message sent
@@ -94,12 +94,17 @@ function params = trialLoop(params, block, UDPobj)
             elseif (islogical(messageValue))
                 messageValueType = 'boolean';
             end
-            UDPobj.showMessageValueAsStarString(messageCount, 'transmit',  messageLabel, messageValueType, messageValue, 40, 40);
+            UDPobj.showMessageValueAsStarString(UDPobj.sentMessagesCount, 'transmit',  messageLabel, messageValueType, messageValue, 40, 40);
             
-        end  % while
-    end % Infinite loop as long as we are in sync
+        end  % while (messageIndex < numel(messageList))
+    end %  while (communicationIsInSync) && (loopIndex < 10)
     
-    fprintf(2, 'UDP communication came of sync after %d messages. \n', messageCount);
+    if (~communicationIsInSync)
+        fprintf(2, '\nUDP communication went out of sync after %d messages. \n', UDPobj.sentMessagesCount);
+    else
+        fprintf('Finished %d loops. Sending ''Exit Listening Loop'' to windows machine ...\n', loopIndex);
+        status = UDPobj.sendMessage('Exit Listening Loop')
+    end
    
 end
 
