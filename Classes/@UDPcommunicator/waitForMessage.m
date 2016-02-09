@@ -73,19 +73,23 @@ function response = waitForMessage(obj, msgLabel, varargin)
             response.msgValue = rawMessage(leftBracketPositions(3)+1:rightBracketPositions(3)-1);
         else
             if (strcmp(response.msgLabel, 'ACK'))
-                % 'ACK' message has not value or value type
+                % 'ACK' message has no value or value type
             else
                 error('Do not know how to handle message value type: ''%s''\n', response.msgValueType);
             end
         end
         % check if the message label we received is the same as the one we are expecting, and inform the sender
-        if (strcmp(response.msgLabel, expectedMessageLabel))
-            if (~strcmp(obj.verbosity,'min'))
-                fprintf('Expected message received withing %2.2f seconds, acknowledging the sender.', elapsedTime);
-            end
+        if (strcmp(response.msgLabel, expectedMessageLabel))    
             % Do not send back an ACK if we were expecting an ACK and we received it
             if (~strcmp(expectedMessageLabel, 'ACK'))
                 obj.sendMessage('ACK', 'timeOutSecs', 2);
+                if (~strcmp(obj.verbosity,'min'))
+                    fprintf('Expected message received withing %2.2f seconds, acknowledging the sender.', elapsedTime);
+                end
+            else
+                if (~strcmp(obj.verbosity,'min'))
+                    fprintf('Received expected message (''%s'')\n', expectedMessageLabel);
+                end
             end
         else
             fprintf('%s Received unexpected message: ''%s'' (instead of ''%s''). Informing the sender.', signature, response.msgLabel, expectedMessageLabel);
