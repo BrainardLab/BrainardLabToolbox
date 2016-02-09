@@ -15,8 +15,8 @@ function status = sendMessage(obj, msgLabel, varargin)
     defaultMaxAttemptsNum = 1;
     addOptional(p,'maxAttemptsNum',defaultMaxAttemptsNum,@isnumeric);
     
-    defaultDoToNotreplyToThisMessage = false;
-    addOptional(p,'doToNotreplyToThisMessage',defaultDoToNotreplyToThisMessage,@islogical);
+    defaultDoToNotReplyToThisMessage = false;
+    addOptional(p,'doToNotReplyToThisMessage',defaultDoToNotReplyToThisMessage,@islogical);
     
     % parse the input
     parse(p,msgLabel,varargin{:});
@@ -72,7 +72,7 @@ function status = sendMessage(obj, msgLabel, varargin)
     transmitAndUpdateCounter(commandString);
     
     % If the doToNotreplyToThisMessage is set, return at this point
-    if (doToNotreplyToThisMessage)
+    if (doToNotReplyToThisMessage)
         status = '';
         return;
     end
@@ -86,7 +86,7 @@ function status = sendMessage(obj, msgLabel, varargin)
         
         % wait for timeOutSecs to receive an acknowledgment that the sent
         % message has the same label as the expected (on the remote computer) message
-        response = obj.waitForMessage('ACK', timeOutSecs);
+        response = obj.waitForMessage(obj.TRANSMITTED_MESSAGE_MATCHES_EXPECTED, timeOutSecs);
 
         if (response.timedOutFlag)
             % update timeouts counter
@@ -101,8 +101,8 @@ function status = sendMessage(obj, msgLabel, varargin)
                 transmitAndUpdateCounter(commandString);
             end
         else
-            if strcmp(response.msgLabel, 'ACK')
-                status = 'MESSAGE_SENT_MATCHED_EXPECTED_MESSAGE';
+            if strcmp(response.msgLabel, obj.TRANSMITTED_MESSAGE_MATCHES_EXPECTED)
+                status = obj.TRANSMITTED_MESSAGE_MATCHES_EXPECTED;
             else
                 status = response.msgLabel;
             end

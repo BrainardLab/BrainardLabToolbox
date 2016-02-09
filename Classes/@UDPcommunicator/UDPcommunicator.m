@@ -97,6 +97,7 @@ classdef UDPcommunicator < handle
     end
     
     properties (Constant)
+        % SPECIAL STATUSES
         TRANSMITTED_MESSAGE_MATCHES_EXPECTED = 'MESSAGE_SENT_MATCHED_EXPECTED_MESSAGE';
     end
     

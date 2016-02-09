@@ -77,9 +77,10 @@ function response = waitForMessage(obj, msgLabel, varargin)
         
         % check if the message label we received is the same as the one we are expecting, and inform the sender
         if (strcmp(response.msgLabel, expectedMessageLabel))    
-            % Do not send back an ACK if we were expecting an ACK and we received it
-            if (~strcmp(expectedMessageLabel, 'ACK'))
-                obj.sendMessage('ACK', 'doToNotreplyToThisMessage', true);
+            % Do not send back an TRANSMITTED_MESSAGE_MATCHES_EXPECTED message 
+            % when we were expecting a TRANSMITTED_MESSAGE_MATCHES_EXPECTED and we received it
+            if (~strcmp(expectedMessageLabel, obj.TRANSMITTED_MESSAGE_MATCHES_EXPECTED))
+                obj.sendMessage(obj.TRANSMITTED_MESSAGE_MATCHES_EXPECTED, 'doToNotreplyToThisMessage', true);
                 if (~strcmp(obj.verbosity,'min'))
                     fprintf('Expected message received withing %2.2f seconds, acknowledging the sender.', elapsedTime);
                 end
