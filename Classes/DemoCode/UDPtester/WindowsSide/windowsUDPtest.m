@@ -1,10 +1,12 @@
 function windowsUDPtest
 
+    
     macHostIP = '130.91.72.120';
     winHostIP = '130.91.74.15';
     udpPort = 2007;
     
-    debug = true;
+    
+    debug = false;
     if (debug)
         winHostIP = '130.91.72.17';  % IoneanPelagos
         macHostIP = '130.91.74.10';  % Manta
