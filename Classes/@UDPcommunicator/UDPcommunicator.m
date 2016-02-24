@@ -81,6 +81,8 @@ classdef UDPcommunicator < handle
 %
 	% Read-only properties
 	properties (SetAccess = private)
+        useNativeUDP = true
+        udpClient
 		localIP
 		remoteIP
         portUDP
@@ -140,9 +142,14 @@ classdef UDPcommunicator < handle
             end
 
             % initialize UDP communication
-            matlabUDP('close');
-            matlabUDP('open', obj.localIP, obj.remoteIP, obj.portUDP);
-
+            if (obj.useNativeUDP)
+                obj.udpClient = udp(obj.remoteIP, obj.portUDP);
+                fopen(obj.udpClient);
+            else
+                matlabUDP('close');
+                matlabUDP('open', obj.localIP, obj.remoteIP, obj.portUDP);
+            end
+            
             % flash any remaining bits
             obj.flashQueue();
             
