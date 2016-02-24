@@ -81,7 +81,7 @@ classdef UDPcommunicator < handle
 %
 	% Read-only properties
 	properties (SetAccess = private)
-        useNativeUDP = true
+        useNativeUDP = false
         udpClient
 		localIP
 		remoteIP

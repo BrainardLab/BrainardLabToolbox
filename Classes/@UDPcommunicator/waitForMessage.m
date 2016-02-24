@@ -49,7 +49,7 @@ function response = waitForMessage(obj, msgLabel, varargin)
     
     if (response.timedOutFlag == false)
         % get raw data
-        rawMessage = receiveAndUpdateCounter();
+        rawMessage = receiveAndUpdateCounter(obj);
         
         % parse the raw message received
         leftBracketPositions = strfind(rawMessage, sprintf('['));
