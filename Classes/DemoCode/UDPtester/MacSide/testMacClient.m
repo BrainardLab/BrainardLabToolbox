@@ -44,7 +44,7 @@ function params = trialLoop(params, block, UDPobj)
     communicationIsInSync = true;
     loopIndex = 0;
     
-    while (communicationIsInSync) && (loopIndex < 10)
+    while (communicationIsInSync) && (loopIndex < params.nTrials)
         loopIndex = loopIndex + 1;
         messageIndex = 0;
         
@@ -115,12 +115,13 @@ function params = initParams()
     params.winHostIP = '130.91.74.15';
     params.udpPort = 2007;
 
-    debug = true;
+    debug = false;
     if (debug)
         params.winHostIP = '130.91.72.17';  % IoneanPelagos
         params.macHostIP = '130.91.74.10';  % Manta
+        params.udpPort = 2007;
     end
 
-    params.nTrials = 13;
+    params.nTrials = 100;
 end
 

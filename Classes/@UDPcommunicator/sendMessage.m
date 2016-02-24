@@ -72,7 +72,7 @@ function status = sendMessage(obj, msgLabel, varargin)
     end
     
     % send the message and increment sentMessagesCount
-    transmitAndUpdateCounter(commandString);
+    transmitAndUpdateCounter(obj, commandString);
     
     % If the doToNotreplyToThisMessage is set, return at this point
     if (doNotReplyToThisMessage)
@@ -101,7 +101,7 @@ function status = sendMessage(obj, msgLabel, varargin)
             else
                 fprintf(2,'%s Timed out after %d seconds waiting to receive receipt acknowledgment for transmitted message: ''%s''. Attempt: %d/%d. Resending the same message now.\n', obj.sendMessageSignature, timeOutSecs, commandString, attemptNo, maxAttemptsNum); 
                 % resend the message
-                transmitAndUpdateCounter(commandString);
+                transmitAndUpdateCounter(obj, commandString);
             end
         else
             if strcmp(response.msgLabel, obj.TRANSMITTED_MESSAGE_MATCHES_EXPECTED)
@@ -112,8 +112,12 @@ function status = sendMessage(obj, msgLabel, varargin)
         end
     end % while attemptNo < maxAttemptsNum
     
-    function transmitAndUpdateCounter(commandString)
-        matlabUDP('send', commandString);
+    function transmitAndUpdateCounter(obj, commandString)
+        if (obj.useNativeUDP)
+            fwrite(obj.udpClient, commandString);
+        else
+            matlabUDP('send', commandString);
+        end
         obj.sentMessagesCount = obj.sentMessagesCount + 1;
     end
 
