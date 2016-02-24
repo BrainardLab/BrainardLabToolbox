@@ -143,8 +143,12 @@ classdef UDPcommunicator < handle
 
             % initialize UDP communication
             if (obj.useNativeUDP)
+                fprintf('\nOpening udp channel ...');
+                echoudp('off');
+                echoudp('on', 4012);
                 obj.udpClient = udp(obj.remoteIP, obj.portUDP);
                 fopen(obj.udpClient);
+                fprintf('Opened udp channel\n');
             else
                 matlabUDP('close');
                 matlabUDP('open', obj.localIP, obj.remoteIP, obj.portUDP);
