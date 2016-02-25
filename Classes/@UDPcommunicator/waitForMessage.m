@@ -13,7 +13,10 @@ function response = waitForMessage(obj, msgLabel, varargin)
     addOptional(p,'callingFunctionName',defaultCallingFunctionName,@ischar);
    
     % parse the input
+    varargin{:}
     parse(p,msgLabel,varargin{:});
+    p.Results
+    
     expectedMessageLabel = p.Results.msgLabel;
     if isempty(expectedMessageLabel)
         expectedMessageLabel = '';

@@ -101,9 +101,9 @@ function status = sendMessage(obj, msgLabel, varargin)
         % wait for timeOutSecs to receive an acknowledgment that the sent
         % message has the same label as the expected (on the remote computer) message
         if (isempty(callingFunctionName))
-            response = obj.waitForMessage(obj.TRANSMITTED_MESSAGE_MATCHES_EXPECTED, timeOutSecs);
+            response = obj.waitForMessage(obj.TRANSMITTED_MESSAGE_MATCHES_EXPECTED, 'timeOutSecs', timeOutSecs);
         else
-            response = obj.waitForMessage(obj.TRANSMITTED_MESSAGE_MATCHES_EXPECTED, timeOutSecs, 'callingFunctionName', callingFunctionName);
+            response = obj.waitForMessage(obj.TRANSMITTED_MESSAGE_MATCHES_EXPECTED, 'timeOutSecs', timeOutSecs, 'callingFunctionName', callingFunctionName);
         end
         
         if (response.timedOutFlag)
