@@ -94,7 +94,7 @@ function [communicationError, protocolNameStr] = VSGOLGetProtocolName(UDPobj)
         return;
     end
     protocolNameStr = response.msgValue;
-    fprintf('>>> Protocol name received as %s.\n', protocolNameStr);
+    fprintf('<strong>''%s''</strong>:: Protocol name received as: ''%s''.\n', functionName, protocolNameStr);
 end
 
 function data = VSGOLGetInput
