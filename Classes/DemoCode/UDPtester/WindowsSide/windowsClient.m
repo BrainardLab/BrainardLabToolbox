@@ -59,7 +59,7 @@ function windowsClient
         if vetSelectVideoSource(CRS.vsCamera) < 0
             error('*** Video source not selected.');
         end
-    end
+    end % experimentMode
     
     % Receiving initial information from Mac
     fprintf('*** Waiting for Mac to tell us to go\n');
@@ -67,36 +67,66 @@ function windowsClient
     
     % Main Experiment Loop
     
-    % Compose the program to run : sequence of commands to receive from Mac
+    % Compose the program to run : specify sequence of messages (labels) expected to be received from the Mac
+    % and the names of variables in which to store the received message values
     programList = {...
-            {'Protocol Name', 'protocolNameStr'} ...  % messageLabel, variable name to store received data
-            {'Observer ID', 'obsID'} ...
+            {'Protocol Name',       'protocolNameStr'} ...  % {messageLabel, variable name in which to store received data}
+            {'Observer ID',         'obsID'} ...
+            {'Observer ID and Run', 'obsIDandRun'} ...
+            {'Number of Trials',    'nTrials'} ...
+            {'Starting Trial No',   'startTrialNum'} ...
+            {'Offline',             'offline'} ...
     };
 
-    % Run program
-    for k = 1:numel(programList)
-        % get current program command
+    % Run program from step #1 to step #3
+    stepsToExecute = (1:3);
+    for k = stepsToExecute
         programCommand = programList{k};
-        % decompose program command
-        messageToReceive = programCommand{1};
-        variableName = programCommand{2};
-        % Wait to receive the expect command from the Mac
-        [communicationError, messageValue] = VSGOLGetMessage(UDPobj, messageToReceive);
-        % Check for communication error and abort if one occurred
-        assert(isempty(communicationError), 'Exiting windows client due to communication error.\n');
-        % store the received message value to the specified variable name
-        eval(sprintf('%s = messageValue;', variableName));
+        runProgramCommand(programCommand);
+        eval(sprintf('%s = messageValue;', programCommand{2}));
     end
     
-    protocolNameStr
-    obsID
+    if (experimentMode)
+        % Ask if we want to save in Dropbox
+        if saveDropbox
+            dropboxPath = 'C:\Users\brainard_lab\Dropbox (Aguirre-Brainard Lab)\MELA_data';
+            savePath = fullfile(dropboxPath, protocolNameStr, obsID, obsIDAndRun);
+        else
+            expPath = fileparts(mfilename('OLFlickerSensitivityVSGPupillometry.m'));
+            savePath = fullfile(expPath,  protocolNameStr, obsID, obsIDAndRun);
+        end
+        if ~isdir(savePath)
+            mkdir(savePath);
+        end
+    end % experimentMode
     
+    % Run program from step #4 to step #6
+    stepsToExecute = (4:6);
+    for k = stepsToExecute
+        programCommand = programList{k};
+        runProgramCommand(programCommand);
+        eval(sprintf('%s = messageValue;', programCommand{2}));
+    end
     
-%     obsID = VSGOLGetObsID;
-%     obsIDAndRun = VSGOLGetObsIDAndRun;
+    if (experimentMode)
+        if (offline)
+            % Figure out paths.
 
+            % Set up the file name of the output file
+            saveFile = fullfile(savePath, obsIDAndRun);
+
+            %error('offline mode not implemented at this time.  There is unfinished offline code present in this state of the routine.  This error will be removed once the offline code is completed at a future time.');
+        end
+    end % experimentMode
+    
 end
 
+function messageValue = runProgramCommand(programCommand)
+    % Wait to receive the expect command from the Mac
+    [communicationError, messageValue] = VSGOLGetMessage(UDPobj, programCommand{1});
+    % Check for communication error and abort if one occurred
+    assert(isempty(communicationError), 'Exiting windows client due to communication error.\n');
+end
 
 function [communicationError, protocolNameStr] = VSGOLGetMessage(UDPobj, messageLabel)
     % Reset return args
