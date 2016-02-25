@@ -78,6 +78,7 @@ function windowsClient
             {'Offline',             'offline'} ...
     };
 
+    
     % Run program from step #1 to step #3
     stepsToExecute = (1:3);
     for k = stepsToExecute
@@ -118,6 +119,13 @@ function windowsClient
             %error('offline mode not implemented at this time.  There is unfinished offline code present in this state of the routine.  This error will be removed once the offline code is completed at a future time.');
         end
     end % experimentMode
+    
+    
+    % print the variables we received
+    for k = 1:numel(programList)
+        c = programList{k};
+        eval(c{2})
+    end
     
 end
 
