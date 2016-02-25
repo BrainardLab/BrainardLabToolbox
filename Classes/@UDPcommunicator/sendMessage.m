@@ -42,7 +42,7 @@ function status = sendMessage(obj, msgLabel, varargin)
     if (timeOutSecs <= 0)
         timeOutSecs = 0.01;
         if (~strcmp(obj.verbosity,'min'))
-            fprintf('%s forcing negative or zero timeOutSecs to %2.4f seconds\n', obj.sendMessageSignature, timeOutSecs);
+            fprintf('%s %s forcing negative or zero timeOutSecs to %2.4f seconds\n', obj.sendMessageSignature, callingFunctionSignature, timeOutSecs);
         end
     end
     
@@ -55,29 +55,29 @@ function status = sendMessage(obj, msgLabel, varargin)
         
     elseif (isnumeric(messageArgument))
         if (numel(messageArgument) > 1)
-            fprintf('%s >>>> message argument contains more than 1 element. Will only send the 1st element.', obj.sendMessageSignature);
+            fprintf('%s %s >>>> message argument contains more than 1 element. Will only send the 1st element.', obj.sendMessageSignature, callingFunctionSignature);
         end
         commandString = sprintf('[%s][%s][%s]', messageLabel, 'NUMERIC', sprintf('%f', messageArgument(1)));
         
     elseif (islogical(messageArgument))
         if (numel(messageArgument) > 1)
-            fprintf('%s >>>>> message argument contains more than 1 element. Will only send the 1st element.', obj.sendMessageSignature);
+            fprintf('%s %s >>>>> message argument contains more than 1 element. Will only send the 1st element.', obj.sendMessageSignature, callingFunctionSignature);
         end
         commandString = sprintf('[%s][%s][%s]', messageLabel, 'BOOLEAN', sprintf('%d', messageArgument(1)));
     else
         class(messageArgument)
-        error('%s Do not know how to process this type or argument.', obj.sendMessageSignature);
+        error('%s %s Do not know how to process this type or argument.', obj.sendMessageSignature, callingFunctionSignature);
     end
     
     if (~strcmp(obj.verbosity,'min'))
         if (doNotReplyToThisMessage)
-            fprintf('%s Will send ''%s'' and return.', obj.sendMessageSignature, commandString);
+            fprintf('%s %s Will send ''%s'' and return.', obj.sendMessageSignature, callingFunctionSignature, commandString);
         else
             % give some feedback
             if isinf(timeOutSecs)
-                fprintf('%s Will send ''%s'' and wait for ever to receive an acknowledgment', obj.sendMessageSignature, commandString);
+                fprintf('%s %s Will send ''%s'' and wait for ever to receive an acknowledgment', obj.sendMessageSignature, callingFunctionSignature, commandString);
             else
-                fprintf('%s Will send ''%s'' and wait for %2.2f seconds to receive an acknowledgment', obj.sendMessageSignature, commandString, timeOutSecs);
+                fprintf('%s %s Will send ''%s'' and wait for %2.2f seconds to receive an acknowledgment', obj.sendMessageSignature, callingFunctionSignature, commandString, timeOutSecs);
             end
         end
     end

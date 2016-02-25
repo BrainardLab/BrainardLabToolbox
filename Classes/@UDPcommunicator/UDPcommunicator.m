@@ -158,7 +158,7 @@ classdef UDPcommunicator < handle
             obj.flashQueue();
             
             if (~strcmp(obj.verbosity,'min'))
-                fprintf('%s Initialized.', obj.selfSignature);
+                fprintf('%s Initialized.\n', obj.selfSignature);
             end
         end
         

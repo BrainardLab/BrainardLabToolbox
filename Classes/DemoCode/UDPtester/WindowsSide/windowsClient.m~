@@ -67,7 +67,7 @@ function windowsClient
     
     % Main Experiment Loop
     
-    % Compose the program to run : sequence of commands to receive from Mac
+    % Compose the program to run sequence of received commands from Mac)
     programList = {...
             {'Protocol Name', 'protocolNameStr'} ...  % messageLabel, variable name to store received data
             {'Observer ID', 'obsID'} ...

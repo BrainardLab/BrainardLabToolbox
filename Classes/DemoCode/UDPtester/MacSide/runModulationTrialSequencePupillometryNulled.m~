@@ -19,23 +19,17 @@ function runModulationTrialSequencePupillometryNulled
         'verbosity', 'min' ...             % optional with possible values {'min', 'normal', 'max'}, and default 'normal'
         );
     
-    params = struct(...
-        'protocolName', 'ModulationTrialSequencePupillometryNulled',...
-        'observerID', 'nicolas', ...
-        'observerIDandRun', 'nicolas 10' ...
-    );
+    params.protocolName = 'ModulationTrialSequencePupillometryNulled';
     
-
-    % Compose the program to run: sequence of commands to transmit to Windows
+    % Send protocol name
     programList = {...
-            {'Protocol Name', params.protocolName} ...  % {messageLabel, messageValue}
-            {'Observer ID',   params.observerID} ...
+            {'Protocol Name', params.protocolName} ...
+            {'Observer ID', 'nicolas'} ...
     };
 
-    % Run program
-    for k = 1:numel(programList)
+    for programStep = 1:numel(programList)
         [communicationError] = OLVSGSendMessage(UDPobj, programList{k});
-        assert(isempty(communicationError), 'Exiting ''%s'' due to communication error.\n', mfilename);
+        assert(isempty(communicationError), 'Exit due to communication error.\n');
     end
 
     
@@ -43,7 +37,7 @@ function runModulationTrialSequencePupillometryNulled
 end
 
 function [communicationError] = OLVSGSendMessage(UDPobj, messageTuple)
-    % unwrap message
+
     messageLabel = messageTuple{1};
     messageValue = messageTuple{2};
     
