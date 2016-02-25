@@ -105,8 +105,8 @@ function windowsClient
     stepsToExecute = (4:6);
     for k = stepsToExecute
         programCommand = programList{k};
-        messageValue = runProgramCommand(programCommand, UDPobj);
-        eval(sprintf('%s = messageValue;', programCommand{2}));
+        %messageValue = runProgramCommand(programCommand, UDPobj);
+        eval(sprintf('%s = runProgramCommand(programCommand, UDPobj);', programCommand{2}));
     end
     
     if (experimentMode)
@@ -120,8 +120,7 @@ function windowsClient
         end
     end % experimentMode
     
-    
-    % print the variables we received
+    % print the variables we received so far
     for k = 1:numel(programList)
         c = programList{k};
         eval(c{2})
