@@ -68,7 +68,7 @@ function windowsClient
     % Main Experiment Loop
     % Get start command from Mac
     [communicationError, protocolNameStr] = VSGOLGetProtocolName(UDPobj);
-    assert(isempty(communicationError), 'Exiting windows client due to communication error.');
+    assert(isempty(communicationError), 'Exiting windows client due to communication error.\n');
     
     
 %     obsID = VSGOLGetObsID;

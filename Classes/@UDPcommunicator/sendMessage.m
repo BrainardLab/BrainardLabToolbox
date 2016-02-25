@@ -11,6 +11,10 @@ function status = sendMessage(obj, msgLabel, varargin)
     defaultTimeOutSecs = 5;
     addOptional(p,'timeOutSecs',defaultTimeOutSecs,@isnumeric);
     
+    % The calling function name is optional
+    defaultCallingFunctionName = '';
+    addOptional(p,'callingFunctionName',defaultCallingFunctionName,@ischar);
+    
     % the maxAttemptsNum is optional, with a default value: 1
     defaultMaxAttemptsNum = 1;
     addOptional(p,'maxAttemptsNum',defaultMaxAttemptsNum,@isnumeric);
@@ -26,6 +30,13 @@ function status = sendMessage(obj, msgLabel, varargin)
     timeOutSecs     = p.Results.timeOutSecs;
     maxAttemptsNum  = p.Results.maxAttemptsNum;
     doNotReplyToThisMessage = p.Results.doNotReplyToThisMessage;
+    callingFunctionName = p.Results.callingFunctionName;
+    
+    if (isempty(callingFunctionName))
+        callingFunctionSignature = '';
+    else
+        callingFunctionSignature = sprintf('[called from %s]:', callingFunctionName);
+    end
     
     % ensure timeOutSecs is greater than 0
     if (timeOutSecs <= 0)
@@ -89,17 +100,21 @@ function status = sendMessage(obj, msgLabel, varargin)
         
         % wait for timeOutSecs to receive an acknowledgment that the sent
         % message has the same label as the expected (on the remote computer) message
-        response = obj.waitForMessage(obj.TRANSMITTED_MESSAGE_MATCHES_EXPECTED, timeOutSecs);
-
+        if (isempty(callingFunctionName))
+            response = obj.waitForMessage(obj.TRANSMITTED_MESSAGE_MATCHES_EXPECTED, timeOutSecs);
+        else
+            response = obj.waitForMessage(obj.TRANSMITTED_MESSAGE_MATCHES_EXPECTED, timeOutSecs, 'callingFunctionName', callingFunctionName);
+        end
+        
         if (response.timedOutFlag)
             % update timeouts counter
             obj.timeOutsCount = obj.timeOutsCount + 1;
 
             status = 'TIMED_OUT_WAITING_FOR_ACKNOWLEDGMENT';
             if (attemptNo == maxAttemptsNum)
-                fprintf(2,'%s Timed out after %d seconds waiting to receive receipt acknowledgment for transmitted message: ''%s''. Attempt: %d/%d\n', obj.sendMessageSignature, timeOutSecs, commandString, attemptNo, maxAttemptsNum); 
+                fprintf(2,'%s %s Timed out after %d seconds waiting to receive receipt acknowledgment for transmitted message: ''%s''. Attempt: %d/%d\n', obj.sendMessageSignature, callingFunctionSignature, timeOutSecs, commandString, attemptNo, maxAttemptsNum); 
             else
-                fprintf(2,'%s Timed out after %d seconds waiting to receive receipt acknowledgment for transmitted message: ''%s''. Attempt: %d/%d. Resending the same message now.\n', obj.sendMessageSignature, timeOutSecs, commandString, attemptNo, maxAttemptsNum); 
+                fprintf(2,'%s %s Timed out after %d seconds waiting to receive receipt acknowledgment for transmitted message: ''%s''. Attempt: %d/%d. Resending the same message now.\n', obj.sendMessageSignature, callingFunctionSignature, timeOutSecs, commandString, attemptNo, maxAttemptsNum); 
                 % resend the message
                 transmitAndUpdateCounter(obj, commandString);
             end
