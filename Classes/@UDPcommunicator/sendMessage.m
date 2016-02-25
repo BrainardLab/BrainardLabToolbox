@@ -12,7 +12,7 @@ function status = sendMessage(obj, msgLabel, varargin)
     addOptional(p,'timeOutSecs',defaultTimeOutSecs,@isnumeric);
     
     % The calling function name is optional
-    defaultCallingFunctionName = '';
+    defaultCallingFunctionName = ' ';
     addOptional(p,'callingFunctionName',defaultCallingFunctionName,@ischar);
     
     % the maxAttemptsNum is optional, with a default value: 1
@@ -32,7 +32,7 @@ function status = sendMessage(obj, msgLabel, varargin)
     doNotReplyToThisMessage = p.Results.doNotReplyToThisMessage;
     callingFunctionName = p.Results.callingFunctionName;
     
-    if (isempty(callingFunctionName))
+    if (strcmp(callingFunctionName, ' '))
         callingFunctionSignature = '';
     else
         callingFunctionSignature = sprintf('[called from %s]:', callingFunctionName);

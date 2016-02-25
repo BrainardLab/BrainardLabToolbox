@@ -8,7 +8,7 @@ function response = waitForMessage(obj, msgLabel, varargin)
     
     % the timeOutSecs is optional, with a default value: Inf
     defaultTimeOutSecs = Inf;
-    defaultCallingFunctionName = '';
+    defaultCallingFunctionName = ' ';
     addOptional(p,'timeOutSecs',defaultTimeOutSecs,@isnumeric);
     addOptional(p,'callingFunctionName',defaultCallingFunctionName,@ischar);
    
@@ -95,7 +95,7 @@ function response = waitForMessage(obj, msgLabel, varargin)
             end
         else
             % Send back message that the expected message does not match the received one
-            if (isempty(callingFunctionName))
+            if (strcmp(callingFunctionName, ' '))
                 fprintf('%s Received unexpected message: ''%s'' (instead of ''%s''). Informing the sender.\n', signature, response.msgLabel, expectedMessageLabel);
             else
                 fprintf('%s [called from %s]: Received unexpected message: ''%s'' (instead of ''%s''). Informing the sender.\n', signature, callingFunctionName, response.msgLabel, expectedMessageLabel);
