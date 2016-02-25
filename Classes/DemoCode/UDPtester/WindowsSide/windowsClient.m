@@ -83,8 +83,7 @@ function windowsClient
     stepsToExecute = (1:3);
     for k = stepsToExecute
         programCommand = programList{k};
-        messageValue = runProgramCommand(programCommand, UDPobj);
-        eval(sprintf('%s = messageValue;', programCommand{2}));
+        eval(sprintf('%s = runProgramCommand(programCommand, UDPobj);', programCommand{2}));
     end
     
     if (experimentMode)
@@ -105,7 +104,6 @@ function windowsClient
     stepsToExecute = (4:6);
     for k = stepsToExecute
         programCommand = programList{k};
-        %messageValue = runProgramCommand(programCommand, UDPobj);
         eval(sprintf('%s = runProgramCommand(programCommand, UDPobj);', programCommand{2}));
     end
     
@@ -126,6 +124,216 @@ function windowsClient
         eval(c{2})
     end
     
+    
+    % ---------- PROGRAMS SYNCED UP TO HERE ------------- NICOLAS
+    
+    % Loop over trials
+    for i = startTrialNum:nTrials
+        % Initializating variables
+        params.run = false;
+    
+        if (experimentMode)
+            % Clear the buffer
+            vetClearDataBuffer;
+    
+            % Stop the tracking in case it is still running
+            vetStopTracking;
+        end
+        
+        % Debug
+        %params.run = true;
+        
+        % Check if we are ready to run
+        checkCounter = 0;
+        while (params.run == false)
+            checkCounter = checkCounter + 1;
+            userReady = VSGOLGetInput;
+            fprintf('>>> Check %g\n', checkCounter);
+            fprintf('>>> User ready? %s \n',userReady);
+            if checkCounter <= maxAttempts
+                matlabUDP('send','continue');
+                params = VSGOLEyeTrackerCheck(params);
+            else
+                matlabUDP('send','abort');
+                fprintf('>>> Could not acquire good tracking after %g attempts.\n', maxAttempts);
+                fprintf('>>> Saving %g seconds of diagnostic video on the hard drive.\n', nSecsToSave);
+                vetStartTracking;
+                vetStartRecordingToFile(fullfile([saveFile '_' num2str(i, '%03.f') '_diagnostics.cam']));
+                pause(nSecsToSave);
+                vetStopRecording;
+                vetStopTracking;
+                abortExperiment = true;
+                params.run = true;
+            end
+        end % while params.run
+        
+        %if abortExperiment
+        %   break; 
+        %end
+    
+        if (experimentMode)
+            % Stop the tracking
+            vetStopTracking;
+            %WaitSecs(1);
+    
+            % Start the tracking
+            vetStartTracking;
+            %WaitSecs(1);
+        end
+        
+        % Get the 'Go' signal
+        goCommand = VSGOLReceiveEyeTrackerCommand;
+        while (goCommand  ~= true)
+            fprintf('>>> The go signal is %d',goCommand);
+            goCommand = VSGOLReceiveEyeTrackerCommand;
+        end
+        if offline
+            %vetStartRecordingToFile([saveFile '-' num2str(i) '.cam']);
+        end
+    
+        % Check the 'stop' signal from the Mac
+        checkStop = 'no_stop';
+        while (~strcmp(checkStop,'stop'))
+            checkStop = VSGOLGetInput;
+            if strcmp(checkStop,'stop')
+                matlabUDP('send',sprintf('Trial %f has ended!\n', i));
+            end
+        end
+    
+        if (experimentMode)
+            % Get all data from the buffer
+            pupilData = vetGetBufferedEyePositions;
+    
+            if offline
+                % Stop the tracking
+                vetStopRecording;
+            end
+    
+            % Stop tracking
+            vetStopTracking;
+            %vetDestroyCameraScreen; ??? Needed?
+        end
+        
+        % Get the transfer data
+        goodCounter = 1;
+        badCounter = 1;
+        clear transferData;
+        for jj = 1 : length(pupilData.timeStamps)
+            if ((pupilData.tracked(jj) == 1)) %&& VSGOLIsWithinBounds(radius, origin, pupilData.mmPositions(jj,:)))
+                % Save the pupil diameter and time stamp for good data
+                % Keep data for checking plot
+                goodPupilDiameter(goodCounter) = pupilData.pupilDiameter(jj);
+                goodPupilTimeStamps(goodCounter) = pupilData.timeStamps(jj);
+
+                %Save the data as strings to send to the Mac
+                tempData = [num2str(goodPupilDiameter(goodCounter)) ' ' num2str(goodPupilTimeStamps(goodCounter)) ' 0 ' '0'];
+                transferData{jj} = tempData;
+
+                goodCounter = goodCounter + 1;
+            else
+                % Save the time stamp for bad data
+                % Keep data for checking plot
+                badPupilTimeStamps(badCounter) = pupilData.timeStamps(jj);
+
+                %Send the timestamps of the interruptions
+                tempData = ['0' ' 0 ' '1 ' num2str(badPupilTimeStamps(badCounter))];
+                transferData{jj} = tempData;
+
+                badCounter = badCounter + 1;
+            end
+        end
+    
+        % Start the file transfer
+        macCommand = 'fubar';
+        numDataPoints = length(transferData);
+        clear diameter;
+        clear time;
+        clear time_inter;
+        if offline
+            good_counter = 0;
+            interruption_counter = 0;
+
+            % Iterate over the data points
+            for j = 1:numDataPoints
+                parsedline = allwords(transferData{j}, ' ');
+                diam = str2double(parsedline{1});
+                ti = str2double(parsedline{2});
+                isinterruption = str2double(parsedline{3});
+                interrupttime = str2double(parsedline{4});
+                if (isinterruption == 0)
+                    good_counter = good_counter+1;
+                    diameter(good_counter) = diam;
+                    time(good_counter) = ti;
+                elseif (isinterruption == 1)
+                    interruption_counter = interruption_counter + 1;
+                    time_inter(interruption_counter) = interrupttime;
+                end
+            end
+            if ~exist('diameter', 'var')
+                diameter = [];
+            end
+
+            if ~exist('time', 'var')
+                time = [];
+            end
+
+            if ~exist('time_inter', 'var')
+                time_inter = [];
+            end
+
+            %average_diameter = mean(diameter)*ones(size(time));
+
+            % Assign what we obtain to the data structure.
+            dataStruct.diameter = diameter;
+            dataStruct.time = time;
+            dataStruct.time_inter = time_inter;
+            %dataStruct.average_diameter = average_diameter;
+
+            dataRaw = transferData;
+            save([saveFile '_' num2str(i, '%03.f') '.mat'], 'dataStruct', 'dataRaw', 'pupilData');
+        else
+            while (~strcmp(macCommand,'begin transfer'))
+                macCommand = VSGOLGetInput;
+            end
+
+            matlabUDP('send','begin transfer');
+            fprintf('Transfer beginning...\n');
+            matlabUDP('send',num2str(numDataPoints));
+
+            % Iterate over the data
+            for kk = 1:numDataPoints
+                while (~strcmp(macCommand,['transfering ' num2str(kk)]))
+                    macCommand = VSGOLGetInput;
+                end
+                matlabUDP('send',transferData{kk});
+            end
+
+            % Finish up the transfer
+            fprintf('Data transfer for trial %f ending...\n', i);
+
+            while (~strcmp(macCommand,'end transfer'))
+                macCommand = VSGOLGetInput;
+            end
+        end
+    
+        % After the trial, plot out a trace of the data. This is presumably to make sure that everything went ok.
+        % Calculates average pupil diameter.
+        % meanPupilDiameter = mean(goodPupilDiameter);
+
+        %     % Creates a figure with pupil diameter and interruptions over time. Also
+        %     % displays the average pupil diameter over time.
+        %     plot(goodPupilTimeStamps/1000,goodPupilDiameter,'b')
+        %     hold on
+        %     plot([goodPupilTimeStamps(1) goodPupilTimeStamps(2)]/1000, [meanPupilDiameter meanPupilDiameter], 'g')
+        %     plot(badPupilTimeStamps/1000, zeros(size(badPupilTimeStamps)),'ro');
+    
+    end % for i
+    
+    % Close the UDP connection
+    matlabUDP('close');
+    fprintf('*** Program completed successfully.\n');
+
+
 end
 
 function messageValue = runProgramCommand(programCommand, UDPobj)
@@ -161,6 +369,8 @@ function [communicationError, protocolNameStr] = VSGOLGetMessage(UDPobj, message
 end
 
 function data = VSGOLGetInput
+% NOT NEEDED JUST KEEPING IT HERE FOR REFERENCE - NICOLAS
+
     % data = VSGOLGetInput Continuously checks for input from the Mac machine
     % until data is actually available.
     %while matlabUDP('check') == 0; end
