@@ -8,7 +8,9 @@ function response = waitForMessage(obj, msgLabel, varargin)
     
     % the timeOutSecs is optional, with a default value: Inf
     defaultTimeOutSecs = Inf;
+    defaultCallingFunctionName = '';
     addOptional(p,'timeOutSecs',defaultTimeOutSecs,@isnumeric);
+    addOptional(p,'callingFunctionName',defaultCallingFunctionName,@ischar);
    
     % parse the input
     parse(p,msgLabel,varargin{:});
@@ -20,7 +22,8 @@ function response = waitForMessage(obj, msgLabel, varargin)
         error('%s The expected message label must be a string, or an empty array, i.e.: []\n',signature);
     end
     timeOutSecs = p.Results.timeOutSecs;
-
+    callingFunctionName = p.Results.callingFunctionName;
+    
     % initialize response struct
     response = struct(...
         'msgLabel', '', ...
@@ -81,7 +84,7 @@ function response = waitForMessage(obj, msgLabel, varargin)
             % when we were expecting a TRANSMITTED_MESSAGE_MATCHES_EXPECTED and we received it
             if (strcmp(expectedMessageLabel, obj.TRANSMITTED_MESSAGE_MATCHES_EXPECTED))
                 if (~strcmp(obj.verbosity,'min'))
-                    fprintf('%s Received expected message (''%s'')\n', expectedMessageLabel, signature);
+                    fprintf('%s Received expected message (''%s'')\n', signature, expectedMessageLabel);
                 end
             else 
                 % Send back an TRANSMITTED_MESSAGE_MATCHES_EXPECTED message 
@@ -92,7 +95,11 @@ function response = waitForMessage(obj, msgLabel, varargin)
             end
         else
             % Send back message that the expected message does not match the received one
-            fprintf('%s Received unexpected message: ''%s'' (instead of ''%s''). Informing the sender.', signature, response.msgLabel, expectedMessageLabel);
+            if (isempty(callingFunctionName))
+                fprintf('%s Received unexpected message: ''%s'' (instead of ''%s''). Informing the sender.\n', signature, response.msgLabel, expectedMessageLabel);
+            else
+                fprintf('%s [called from %s]: Received unexpected message: ''%s'' (instead of ''%s''). Informing the sender.\n', signature, callingFunctionName, response.msgLabel, expectedMessageLabel);
+            end
             obj.sendMessage(sprintf('RECEIVED_MESSAGE_(''%s'')_DID_NOT_MATCH_EXPECTED_MESSAGE_(''%s'')', response.msgLabel, expectedMessageLabel), 'doNotreplyToThisMessage', true);
         end
     end

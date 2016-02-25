@@ -68,10 +68,8 @@ function windowsClient
     % Main Experiment Loop
     % Get start command from Mac
     [communicationError, protocolNameStr] = VSGOLGetProtocolName(UDPobj);
-    if (~isempty(communicationError))
-        fprintf('Exit due to communication error\n');
-        return;
-    end
+    assert(isempty(communicationError), 'Exiting windows client due to communication error.');
+    
     
 %     obsID = VSGOLGetObsID;
 %     obsIDAndRun = VSGOLGetObsIDAndRun;
@@ -79,21 +77,30 @@ function windowsClient
 end
 
 function [communicationError, protocolNameStr] = VSGOLGetProtocolName(UDPobj)
+    % Reset return args
     communicationError = [];
     protocolNameStr = [];
     
+    % Message label we are expecting 
+    messageLabel = 'Protocol Name';
+    
+    % Get this function's name
     dbs = dbstack;
     if length(dbs)>1
-        functionName = dbs(1);
+        functionName = dbs(1).name;
     end
-
-    messageLabel = 'Protocol Name';
-    response = UDPobj.waitForMessage(messageLabel, 'timeOutSecs', Inf);
+    
+    % Wait for ever for a message to be received
+    response = UDPobj.waitForMessage(messageLabel, 'timeOutSecs', Inf, 'callingFunctionName', functionName);
     if (~strcmp(response.msgLabel, messageLabel)) 
         communicationError = sprintf('UDP comm got out of SYNC in ''%s'': Expected label: ''%s'', received label: ''%s''.', functionName, messageLabel, response.msgLabel);
         return;
     end
+    
+    % Get the message value received
     protocolNameStr = response.msgValue;
+    
+    % Report to user
     fprintf('<strong>''%s''</strong>:: Protocol name received as: ''%s''.\n', functionName, protocolNameStr);
 end
 
