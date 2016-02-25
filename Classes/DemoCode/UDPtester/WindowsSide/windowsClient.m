@@ -83,7 +83,7 @@ function windowsClient
     stepsToExecute = (1:3);
     for k = stepsToExecute
         programCommand = programList{k};
-        runProgramCommand(programCommand);
+        messageValue = runProgramCommand(programCommand, UDPobj);
         eval(sprintf('%s = messageValue;', programCommand{2}));
     end
     
@@ -105,7 +105,7 @@ function windowsClient
     stepsToExecute = (4:6);
     for k = stepsToExecute
         programCommand = programList{k};
-        runProgramCommand(programCommand);
+        messageValue = runProgramCommand(programCommand, UDPobj);
         eval(sprintf('%s = messageValue;', programCommand{2}));
     end
     
@@ -129,7 +129,7 @@ function windowsClient
     
 end
 
-function messageValue = runProgramCommand(programCommand)
+function messageValue = runProgramCommand(programCommand, UDPobj)
     % Wait to receive the expect command from the Mac
     [communicationError, messageValue] = VSGOLGetMessage(UDPobj, programCommand{1});
     % Check for communication error and abort if one occurred
