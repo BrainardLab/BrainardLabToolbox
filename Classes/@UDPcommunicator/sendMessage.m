@@ -35,14 +35,14 @@ function status = sendMessage(obj, msgLabel, varargin)
     if (strcmp(callingFunctionName, ' '))
         callingFunctionSignature = '';
     else
-        callingFunctionSignature = sprintf('[called from %s]:', callingFunctionName);
+        callingFunctionSignature = sprintf('[called from <strong>%s</strong>]:', callingFunctionName);
     end
     
     % ensure timeOutSecs is greater than 0
     if (timeOutSecs <= 0)
         timeOutSecs = 0.01;
         if (~strcmp(obj.verbosity,'min'))
-            fprintf('%$ forcing negative or zero timeOutSecs to %2.4f seconds\n', obj.sendMessageSignature, timeOutSecs);
+            fprintf('%s forcing negative or zero timeOutSecs to %2.4f seconds\n', obj.sendMessageSignature, timeOutSecs);
         end
     end
     
