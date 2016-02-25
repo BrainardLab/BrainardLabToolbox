@@ -37,8 +37,8 @@ function runModulationTrialSequencePupillometryNulled
         'ratioInterupt', -1);
         
     % This is the trialLoop function
-    % Compose the program to run: sequence of commands to transmit to Windows
-    programList = {...
+    % Compose the UDPcommunicationProgram to run: sequence of commands to transmit to Windows
+    UDPcommunicationProgram = {...
             {'Protocol Name',       params.protocolName} ...  % {messageLabel, messageValue}
             {'Observer ID',         params.obsID} ...
             {'Observer ID and Run', params.obsIDandRun} ...
@@ -48,8 +48,8 @@ function runModulationTrialSequencePupillometryNulled
     };
 
     % Run the initial program
-    for k = 1:numel(programList)
-        [communicationError] = OLVSGSendMessage(UDPobj, programList{k});
+    for k = 1:numel(UDPcommunicationProgram)
+        [communicationError] = OLVSGSendMessage(UDPobj, UDPcommunicationProgram{k});
         assert(isempty(communicationError), 'Exiting ''%s'' due to communication error.\n', mfilename);
     end
 

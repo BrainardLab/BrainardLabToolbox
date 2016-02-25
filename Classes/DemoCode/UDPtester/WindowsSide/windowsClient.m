@@ -67,9 +67,9 @@ function windowsClient
     
     % Main Experiment Loop
     
-    % Compose the program to run : specify sequence of messages (labels) expected to be received from the Mac
+    % Compose the UDPcommunicationProgram to run : specify sequence of messages (labels) expected to be received from the Mac
     % and the names of variables in which to store the received message values
-    programList = {...
+    UDPcommunicationProgram = {...
             {'Protocol Name',       'protocolNameStr'} ...  % {messageLabel, variable name in which to store received data}
             {'Observer ID',         'obsID'} ...
             {'Observer ID and Run', 'obsIDandRun'} ...
@@ -82,8 +82,8 @@ function windowsClient
     % Run program from step #1 to step #3
     stepsToExecute = (1:3);
     for k = stepsToExecute
-        programCommand = programList{k};
-        eval(sprintf('%s = runProgramCommand(programCommand, UDPobj);', programCommand{2}));
+        programCommand = UDPcommunicationProgram{k};
+        eval(sprintf('%s = runUDPProgramCommand(programCommand, UDPobj);', programCommand{2}));
     end
     
     if (experimentMode)
@@ -103,8 +103,8 @@ function windowsClient
     % Run program from step #4 to step #6
     stepsToExecute = (4:6);
     for k = stepsToExecute
-        programCommand = programList{k};
-        eval(sprintf('%s = runProgramCommand(programCommand, UDPobj);', programCommand{2}));
+        programCommand = UDPcommunicationProgram{k};
+        eval(sprintf('%s = runUDPProgramCommand(programCommand, UDPobj);', programCommand{2}));
     end
     
     if (experimentMode)
@@ -119,8 +119,8 @@ function windowsClient
     end % experimentMode
     
     % print the variables we received so far
-    for k = 1:numel(programList)
-        c = programList{k};
+    for k = 1:numel(UDPcommunicationProgram)
+        c = UDPcommunicationProgram{k};
         eval(c{2})
     end
     
@@ -336,14 +336,14 @@ function windowsClient
 
 end
 
-function messageValue = runProgramCommand(programCommand, UDPobj)
+function messageValue = runUDPProgramCommand(programCommand, UDPobj)
     % Wait to receive the expect command from the Mac
-    [communicationError, messageValue] = VSGOLGetMessage(UDPobj, programCommand{1});
+    [communicationError, messageValue] = VSGOLGetParameter(UDPobj, programCommand{1});
     % Check for communication error and abort if one occurred
     assert(isempty(communicationError), 'Exiting windows client due to communication error.\n');
 end
 
-function [communicationError, protocolNameStr] = VSGOLGetMessage(UDPobj, messageLabel)
+function [communicationError, messageValue] = VSGOLGetParameter(UDPobj, messageLabel)
     % Reset return args
     communicationError = [];
     protocolNameStr = [];
@@ -362,10 +362,10 @@ function [communicationError, protocolNameStr] = VSGOLGetMessage(UDPobj, message
     end
     
     % Get the message value received
-    protocolNameStr = response.msgValue;
+    messageValue = response.msgValue;
     
     % Report to user
-    fprintf('<strong>''%s''</strong>:: %s received as: ''%s''.\n', functionName, messageLabel, protocolNameStr);
+    fprintf('<strong>''%s''</strong>:: %s received as: ''%s''.\n', functionName, messageLabel, messageValue);
 end
 
 function data = VSGOLGetInput
