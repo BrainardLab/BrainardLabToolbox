@@ -66,7 +66,8 @@ function windowsClient
     fprintf('*** Run OLFlickerSensitivity on Mac and select protocol...\n');
     
     % Main Experiment Loop
-    % Get start command from Mac
+    
+    % Wait for Mac to send the protocol name
     [communicationError, protocolNameStr] = VSGOLGetProtocolName(UDPobj);
     assert(isempty(communicationError), 'Exiting windows client due to communication error.\n');
     
