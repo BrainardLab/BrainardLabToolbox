@@ -37,7 +37,7 @@ function [communicationError] = OLVSGSendProtocolName(UDPobj, protocolName)
     % Get this function's name
     dbs = dbstack;
     if length(dbs)>1
-        functionName = dbs(1).name
+        functionName = dbs(1).name;
     end
     
     status = UDPobj.sendMessage(messageLabel, 'withValue', protocolName, 'timeOutSecs', 2, 'maxAttemptsNum', 3, 'callingFunctionName', functionName);
