@@ -82,8 +82,7 @@ function windowsClient
     % Run program from step #1 to step #3
     stepsToExecute = (1:3);
     for k = stepsToExecute
-        programCommand = UDPcommunicationProgram{k};
-        eval(sprintf('%s = runUDPProgramCommand(programCommand, UDPobj);', programCommand{2}));
+        eval(sprintf('%s = VSGOLGetParameter(UDPobj, UDPcommunicationProgram{k}{1}, mfilename);', UDPcommunicationProgram{k}{2}));
     end
     
     if (experimentMode)
@@ -103,8 +102,7 @@ function windowsClient
     % Run program from step #4 to step #6
     stepsToExecute = (4:6);
     for k = stepsToExecute
-        programCommand = UDPcommunicationProgram{k};
-        eval(sprintf('%s = runUDPProgramCommand(programCommand, UDPobj);', programCommand{2}));
+        eval(sprintf('%s = VSGOLGetParameter(UDPobj, UDPcommunicationProgram{k}{1}, mfilename);', UDPcommunicationProgram{k}{2}));
     end
     
     if (experimentMode)
@@ -336,37 +334,8 @@ function windowsClient
 
 end
 
-function messageValue = runUDPProgramCommand(programCommand, UDPobj)
-    % Wait to receive the expect command from the Mac
-    [communicationError, messageValue] = VSGOLGetParameter(UDPobj, programCommand{1});
-    % Check for communication error and abort if one occurred
-    assert(isempty(communicationError), 'Exiting windows client due to communication error.\n');
-end
 
-function [communicationError, messageValue] = VSGOLGetParameter(UDPobj, messageLabel)
-    % Reset return args
-    communicationError = [];
-    protocolNameStr = [];
-    
-    % Get this function's name
-    dbs = dbstack;
-    if length(dbs)>1
-        functionName = dbs(1).name;
-    end
-    
-    % Wait for ever for a message to be received
-    response = UDPobj.waitForMessage(messageLabel, 'timeOutSecs', Inf, 'callingFunctionName', functionName);
-    if (~strcmp(response.msgLabel, messageLabel)) 
-        communicationError = sprintf('UDP comm got out of SYNC in ''%s'': Expected label: ''%s'', received label: ''%s''.', functionName, messageLabel, response.msgLabel);
-        return;
-    end
-    
-    % Get the message value received
-    messageValue = response.msgValue;
-    
-    % Report to user
-    fprintf('<strong>''%s''</strong>:: %s received as: ''%s''.\n', functionName, messageLabel, messageValue);
-end
+
 
 function data = VSGOLGetInput
 % NOT NEEDED JUST KEEPING IT HERE FOR REFERENCE - NICOLAS

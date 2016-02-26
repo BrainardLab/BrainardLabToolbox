@@ -267,23 +267,3 @@ function runModulationTrialSequencePupillometryNulled
     
 end
 
-function [communicationError] = OLVSGSendMessage(UDPobj, messageTuple)
-    % unwrap message
-    messageLabel = messageTuple{1};
-    messageValue = messageTuple{2};
-    
-    % Reset return args
-    communicationError = [];
-    
-    % Get this function's name
-    dbs = dbstack;
-    if length(dbs)>1
-        functionName = dbs(1).name;
-    end
-    
-    status = UDPobj.sendMessage(messageLabel, 'withValue', messageValue, 'timeOutSecs', 2, 'maxAttemptsNum', 3, 'callingFunctionName', functionName);
-    % check status for errors
-    if (~strcmp(status, UDPobj.TRANSMITTED_MESSAGE_MATCHES_EXPECTED)) 
-        communicationError = sprintf('Transmitted and expected (by the other end) messages do not match! sendMessage() returned with this message: ''%s''\n', status);
-    end
-end
