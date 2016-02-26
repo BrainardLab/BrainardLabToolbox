@@ -18,6 +18,8 @@ function windowsClient
         'verbosity', 'min' ...             % optional, with default value: 'normal', and possible values: {'min', 'normal', 'max'},
         );
     
+    maxAttempts = 2;
+    
     if (experimentMode)
         % Ask for observer
         fprintf('\n*********************************************');
@@ -26,7 +28,7 @@ function windowsClient
         
         % Create a VSGCALIBRATE mode to make test runs of the programmer quicker.
         VSGCALIBRATE = false;
-        maxAttempts = 2;
+        
         nSecsToSave = 5;
 
         %% Initializing Cambridge Researsh System and Other Neccessary Variables
