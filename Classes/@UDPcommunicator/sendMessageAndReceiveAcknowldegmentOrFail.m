@@ -10,9 +10,9 @@ function sendMessageAndReceiveAcknowldegmentOrFail(obj, messageTuple)
     
     % Send the message
     if (isempty(messageValue))
-        status = obj.sendMessage(messageLabel, 'timeOutSecs', 2, 'maxAttemptsNum', 3, 'callingFunctionName', functionName);
+        status = obj.sendMessage(messageLabel, 'timeOutSecs', 2, 'maxAttemptsNum', 3);
     else
-        status = obj.sendMessage(messageLabel, 'withValue', messageValue, 'timeOutSecs', 2, 'maxAttemptsNum', 3, 'callingFunctionName', functionName);
+        status = obj.sendMessage(messageLabel, 'withValue', messageValue, 'timeOutSecs', 2, 'maxAttemptsNum', 3);
     end
     
     % Get this backtrace of all functions leading to this point
