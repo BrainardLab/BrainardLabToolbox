@@ -117,7 +117,7 @@ function runModulationTrialSequencePupillometryNulled
             [readyToResume, abort] = OLVSGCheckResume(readyToResume, params, block(1).data.startsBG', block(1).data.stopsBG');
             
             %matlabUDP('send','The User is ready to move on.');
-            messageTuple = {'User Readiness Status', 'User is ready to move on.'}
+            messageTuple = {'User Readiness Status1', 'User is ready to move on.'}
             UDPobj.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
     
             
