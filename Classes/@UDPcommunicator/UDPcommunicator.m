@@ -162,11 +162,22 @@ classdef UDPcommunicator < handle
             end
         end
         
-        % Public API
+        % Public API (low-level)
         response = waitForMessage(obj, msgLabel, varargin);
         status = sendMessage(obj, msgLabel, varargin);
         flashedContents = flashQueue(obj);
         
+        % Public API (higher level)
+        % Wait for ever to get a message. Return the message value if the
+        % expected and received labels match or fail if the labels do not match, providing the strack trace
+        parameterValue = getMessageValueWithMatchingLabelOrFail(obj, messageLabel);
+        
+        % Send a message and wait for an good acknowledgment of fail,
+        % providing the stack trace. 
+        % messageTuple = {messageLabel} or {messageLabel, messageValue}
+        sendMessageAndReceiveAcknowldegmentOrFail(obj, messageTuple);
+        
+        % Just a utility method for testing message transmission
         showMessageValueAsStarString(obj, msgCount, direction, msgLabel, msgValueType, msgValue, maxValue, maxStars);
         
     end % public method

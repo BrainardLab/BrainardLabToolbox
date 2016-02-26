@@ -49,8 +49,7 @@ function runModulationTrialSequencePupillometryNulled
 
     % Run the initial program
     for k = 1:numel(UDPcommunicationProgram)
-        [communicationError] = OLVSGSendMessage(UDPobj, UDPcommunicationProgram{k});
-        assert(isempty(communicationError), 'Exiting ''%s'' due to communication error.\n', mfilename);
+        UDPobj.sendMessageAndReceiveAcknowldegmentOrFail(UDPcommunicationProgram{k});
     end
 
     if (experimentMode)  
