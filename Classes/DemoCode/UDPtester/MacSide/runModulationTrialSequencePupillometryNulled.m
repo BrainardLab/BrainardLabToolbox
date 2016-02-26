@@ -19,16 +19,18 @@ function runModulationTrialSequencePupillometryNulled
         'verbosity', 'min' ...             % optional with possible values {'min', 'normal', 'max'}, and default 'normal'
         );
     
+    
     params = struct(...
         'protocolName', 'ModulationTrialSequencePupillometryNulled',...
         'obsID', 'nicolas', ...
         'obsIDandRun', 'nicolas -123', ...
-        'nTrials', 0, ...,
-        'whichTrialToStartAt', 2, ...
+        'nTrials', 1, ...,
+        'whichTrialToStartAt', 1, ...
         'VSGOfflineMode', true ...
     );
     
 
+    
     % Initialize a data structure to be used to obtain the data
     dataStruct = struct('diameter', -1, ...
         'time', -1, ...
@@ -76,10 +78,10 @@ function runModulationTrialSequencePupillometryNulled
     % Iterate over trials
     for trial = params.whichTrialToStartAt:params.nTrials
         
-        fprintf('* Start trial %i/%i - %s, %.2f Hz.\n', trial, params.nTrials, block(trial).direction, block(trial).carrierFrequencyHz);
-        system(['say Trial ' num2str(trial)  ' of ' num2str(params.nTrials)]);
-
         if (experimentMode) 
+            fprintf('* Start trial %i/%i - %s, %.2f Hz.\n', trial, params.nTrials, block(trial).direction, block(trial).carrierFrequencyHz);
+            system(['say Trial ' num2str(trial)  ' of ' num2str(params.nTrials)]);
+
             ol.setMirrors(block(1).data.startsBG',  block(1).data.stopsBG'); % Use first trial
         end
         
@@ -98,6 +100,12 @@ function runModulationTrialSequencePupillometryNulled
         yStop = [sin(440*2*pi*t)];
 
 
+        if (~experimentMode) 
+            % dummy block
+            block(1).data.startsBG = [1 2];
+            block(1).data.stopsBG = [2 3];
+        end
+        
         % DEBUG
         %params.run = true; abort = false;
             
@@ -108,8 +116,26 @@ function runModulationTrialSequencePupillometryNulled
             % Check whether the user is good to resume
             [readyToResume, abort] = OLVSGCheckResume(readyToResume, params, block(1).data.startsBG', block(1).data.stopsBG');
             
+            %matlabUDP('send','The User is ready to move on.');
+            messageTuple = {'User Readiness Status', 'User is ready to move on.'}
+            UDPobj.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
+    
             
-            continueCheck = OLVSGGetInput;
+            fprintf('OLVSGCheckResume: User input acquired.\n');
+    
+            % Wait to receive the next action
+            % continueCheck = OLVSGGetInput;
+            UDPcommunicationProgram = {...
+                {'Action', 'continueCheck'} ...
+            };
+            for k = 1:numel(UDPcommunicationProgram)
+                eval(sprintf('%s = UDPobj.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
+            end
+            
+            continueCheck
+            pause
+            % ---- UP TO HERE ----
+            
             if strcmp(continueCheck, 'abort');
                abort = true;
             end
@@ -269,6 +295,39 @@ function runModulationTrialSequencePupillometryNulled
 end
 
 
+function isBeingTracked = OLVSGEyeTrackerCheck
+    % isBeingTracked = OLVSGEyeTrackerCheck
+    % This function makes sure that the EyeTracker is successfully tracking
+    % the subject's eye.
+    %
+    % We want to get 5 good data points for 5 seconds
+    timeCheck = 5;
+    dataCheck = 5;
+    OLVSGClearMessageBuffer;
+    WaitSecs(1);
+    matlabUDP('send','startEyeTrackerCheck');
+    tStart = mglGetSecs;
+
+    while (mglGetSecs-tStart <= timeCheck)
+        % Collecting checking data
+    end
+
+    numTrackedData = OLVSGGetInput;
+    fprintf('%s checking data points collected \n',numTrackedData)
+
+    % Clear the buffer
+    OLVSGClearMessageBuffer;
+        
+    if (str2double(numTrackedData) >= dataCheck)
+        isBeingTracked = true;
+        matlabUDP('send', 'true');
+        fprintf('Tracking check successful \n')
+    else
+        isBeingTracked = false;
+        matlabUDP('send', 'false');
+    end
+
+end
 
 
 function [readyToResume, abort] = OLVSGCheckResume(readyToResume, params, starts, stopsBackgroundIdle)
@@ -290,8 +349,11 @@ function [readyToResume, abort] = OLVSGCheckResume(readyToResume, params, starts
     t = linspace(0, durSecs, durSecs*fs);
     yHint = [sin(880*2*pi*t)];
 
-    % Suppress keypresses going to the Matlab window.
-    ListenChar(2);
+    if (experimentMode)
+        % Suppress keypresses going to the Matlab window.
+        ListenChar(2);
+    end
+    
     resume = false;
     % Flush our keyboard queue.
     mglGetKeyEvent;
@@ -318,11 +380,5 @@ function [readyToResume, abort] = OLVSGCheckResume(readyToResume, params, starts
             end
         end
     end
-    
-    messageTuple = {'User Ready ACK', 'The User is ready to move on'}
-    UDPobj.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
-    
-    %matlabUDP('send','The User is ready to move on.');
-    fprintf('OLVSGCheckResume: User input acquired.\n');
 end
     

@@ -149,18 +149,24 @@ function windowsClient
             %userReady = VSGOLGetInput;
             
             UDPcommunicationProgram = {...
-                {'User Ready ACK', 'userReady'} ...
+                {'User Readiness Status', 'userReadiness'} ...
             };
             for k = 1:numel(UDPcommunicationProgram)
                 eval(sprintf('%s = UDPobj.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
             end
 
             fprintf('>>> Check %g\n', checkCounter);
-            fprintf('>>> User ready? %s \n',userReady);
+            fprintf('>>> User ready? %s \n', userReadiness);
             
-            pause
+            
             if checkCounter <= maxAttempts
-                matlabUDP('send','continue');
+                % matlabUDP('send','continue');
+                messageTuple = {'Action', 'continue'};
+                UDPobj.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
+                
+                disp('OK to here\n')
+                % ---- UP TO HERE ----
+                
                 params = VSGOLEyeTrackerCheck(params);
             else
                 matlabUDP('send','abort');
@@ -345,6 +351,56 @@ function windowsClient
 
 end
 
+function params = VSGOLEyeTrackerCheck(params)
+% params = VSGOLEyeTrackerCheck(params)
+% This function calls VSGOLGetInput which listens for a "start" or "stop" from the
+% Mac host. VSGOLProcessCommand will either allow the program to continue or
+% close the UDP port respective of the command from the Mac host.
+% Continuously checks for input from the Mac machine until data is actually available.
+vetStopTracking;
+WaitSecs(2);
+%vetCreateCameraScreen;
+fprintf('>>> Entered VSGOLEyeTrackerCheck \n');
+checkStart = VSGOLGetInput;
+fprintf('%s',checkStart);
+WaitSecs(1);
+if (strcmp(checkStart,'startEyeTrackerCheck'))
+    fprintf('*** Start tracking...\n')
+    vetStartTracking;
+    timeCheck = 5;
+    tStart = GetSecs;
+    while (GetSecs - tStart < timeCheck)
+        % Collect some checking data
+    end
+    fprintf('*** Tracking finished \n')
+    checkData = vetGetBufferedEyePositions;
+    sumTrackData = sum(checkData.tracked);
+    fprintf('*** Number of checking data points %d\n',sumTrackData)
+    matlabUDP('send',num2str(sumTrackData))
+    vetStopTracking;
+    WaitSecs(1);
+    command = matlabUDP('receive');
+    params = VSGOLProcessCommand(params, command);
+end
+end
+
+
+function params = VSGOLProcessCommand(params, command)
+% params = VSGOLProcessCommand(params, command)
+% This function is called in the function "VSGOLGetStart"  It processes the
+% command from the Mac host and either starts or terminates the program.
+%
+% We may not need params.run anymore, however, I think it may be
+% useful in another portion of the code.
+[opcode, r] = strtok(command);
+switch lower(opcode)
+    case {'exit', 'quit', 'terminate', 'end', 'stop', 'false'}
+        params.run = false;
+    case {'start', 'begin', 'initiate', 'run', 'true'}
+        params.run = true;
+        disp('starting...');
+end
+end
 
 
 
