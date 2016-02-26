@@ -7,7 +7,7 @@ function parameterValue = getMessageValueWithMatchingLabelOrFail(obj, messageLab
     dbs = dbstack;
     backTrace = ''; depth = length(dbs);
     while (depth >= 1)
-        backTrace = sprintf('%s -> %s ', backTrace, dbs(depth).name);
+        backTrace = sprintf('%s-> %s ', backTrace, dbs(depth).name);
         depth = depth - 1;
     end
     

@@ -145,9 +145,20 @@ function windowsClient
         checkCounter = 0;
         while (params.run == false)
             checkCounter = checkCounter + 1;
-            userReady = VSGOLGetInput;
+            
+            %userReady = VSGOLGetInput;
+            
+            UDPcommunicationProgram = {...
+                {'User Ready ACK', 'userReady'} ...
+            };
+            for k = 1:numel(UDPcommunicationProgram)
+                eval(sprintf('%s = UDPobj.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
+            end
+
             fprintf('>>> Check %g\n', checkCounter);
             fprintf('>>> User ready? %s \n',userReady);
+            
+            pause
             if checkCounter <= maxAttempts
                 matlabUDP('send','continue');
                 params = VSGOLEyeTrackerCheck(params);

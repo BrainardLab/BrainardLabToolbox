@@ -1,5 +1,5 @@
 function runModulationTrialSequencePupillometryNulled
-
+    global experimentMode
     experimentMode = false;
     
     [rootDir, ~] = fileparts(fullfile(which(mfilename)));
@@ -24,8 +24,8 @@ function runModulationTrialSequencePupillometryNulled
         'obsID', 'nicolas', ...
         'obsIDandRun', 'nicolas -123', ...
         'nTrials', 0, ...,
-        'whichTrialToStartAt', 1, ...
-        'VSGOfflineMode', false ...
+        'whichTrialToStartAt', 2, ...
+        'VSGOfflineMode', true ...
     );
     
 
@@ -107,6 +107,8 @@ function runModulationTrialSequencePupillometryNulled
             
             % Check whether the user is good to resume
             [readyToResume, abort] = OLVSGCheckResume(readyToResume, params, block(1).data.startsBG', block(1).data.stopsBG');
+            
+            
             continueCheck = OLVSGGetInput;
             if strcmp(continueCheck, 'abort');
                abort = true;
@@ -266,3 +268,61 @@ function runModulationTrialSequencePupillometryNulled
     
 end
 
+
+
+
+function [readyToResume, abort] = OLVSGCheckResume(readyToResume, params, starts, stopsBackgroundIdle)
+    % [readyToResume, abort] = OLVSGCheckResume(readyToResume, params, stopsBackgroundIdle, starts)
+    % Checks whether suject is okay to resume with next trial.
+
+    global experimentMode
+    % We need to explicitly re-set the mirrors to the background to prevent
+    % OneLight from blinking the mirrors to zero during the function call away
+    % from the main routine
+    
+    if (experimentMode)
+        ol = OneLight;
+        ol.setMirrors(starts,stopsBackgroundIdle);
+    end
+    
+    fs = 20000;
+    durSecs = 0.01;
+    t = linspace(0, durSecs, durSecs*fs);
+    yHint = [sin(880*2*pi*t)];
+
+    % Suppress keypresses going to the Matlab window.
+    ListenChar(2);
+    resume = false;
+    % Flush our keyboard queue.
+    mglGetKeyEvent;
+    keyPress = [];
+    
+    while (resume == false)
+        %fprintf('waiting for response.'); This started working after adding
+        %the pause...keep in mind 4 future
+        pause(.1);
+        key = mglGetKeyEvent;
+        % If a key was pressed, get the key and exit.
+        if ~isempty(key)
+            sound(yHint, fs);
+            keyPress = key.charCode;
+            if (strcmp(keyPress,'a'))
+                abort = true;
+                readyToResume = false;
+                resume = true;
+                fprintf('Aborted.\n');
+            else
+                readyToResume = true;
+                abort = false;
+                resume = true;
+            end
+        end
+    end
+    
+    messageTuple = {'User Ready ACK', 'The User is ready to move on'}
+    UDPobj.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
+    
+    %matlabUDP('send','The User is ready to move on.');
+    fprintf('OLVSGCheckResume: User input acquired.\n');
+end
+    
