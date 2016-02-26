@@ -17,12 +17,12 @@ function sendMessageAndReceiveAcknowldegmentOrFail(obj, messageTuple)
     
     % Get this backtrace of all functions leading to this point
     dbs = dbstack;
-    backTrace = ''; depth = 1;
-    while (depth <= length(dbs))
+    backTrace = ''; depth = length(dbs);
+    while (depth >= 1)
         backTrace = sprintf('%s -> %s ', backTrace, dbs(depth).name);
-        depth = depth + 1;
+        depth = depth - 1;
     end
     
-    % Check status to ensure we received a 'UDPobj.TRANSMITTED_MESSAGE_MATCHES_EXPECTED' message
-    assert(strcmp(status, UDPobj.TRANSMITTED_MESSAGE_MATCHES_EXPECTED), sprintf('%s: Exiting due to communication error.\nExpected label: ''%s'', received label: ''%s''.\n', backTrace, UDPobj.TRANSMITTED_MESSAGE_MATCHES_EXPECTED, status));
+    % Check status to ensure we received a 'TRANSMITTED_MESSAGE_MATCHES_EXPECTED' message
+    assert(strcmp(status, obj.TRANSMITTED_MESSAGE_MATCHES_EXPECTED), sprintf('%s: Exiting due to communication error.\nExpected label: ''%s'', received label: ''%s''.\n', backTrace, obj.TRANSMITTED_MESSAGE_MATCHES_EXPECTED, status));
 end
