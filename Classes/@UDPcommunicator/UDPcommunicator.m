@@ -119,10 +119,17 @@ classdef UDPcommunicator < handle
 
             % Parse input parameters.
             p = inputParser;
-            p.addParameter('localIP', 'none', @ischar);
-            p.addParameter('remoteIP', 'none', @ischar);
-            p.addParameter('udpPort', defaultUDPport, @isnumeric);
-            p.addParameter('verbosity', defaultVerbosity, @ischar);
+            % addParameter is available after 2013b
+            %p.addParameter('localIP', 'none', @ischar);
+            %p.addParameter('remoteIP', 'none', @ischar);
+            %p.addParameter('udpPort', defaultUDPport, @isnumeric);
+            %p.addParameter('verbosity', defaultVerbosity, @ischar);
+            
+            % For earlier versions use addParamValue
+            p.addParamValue('localIP',   'none',           @ischar);
+            p.addParamValue('remoteIP',  'none',           @ischar);
+            p.addParamValue('udpPort',   defaultUDPport,   @isnumeric);
+            p.addParamValue('verbosity', defaultVerbosity, @ischar);
             
             p.parse(varargin{:});
             obj.localIP  = p.Results.localIP;
