@@ -5,13 +5,15 @@ function windowsClient
     experimentMode = false;
     
     [rootDir, ~] = fileparts(fullfile(which(mfilename)));
-    cd(rootDir); addpath('../Common');
+    cd(rootDir); 
+    addpath('../Common');
+    addpath(genpath('C:\Users\melanopsin\Documents\MATLAB\Toolboxes\BrainardLabToolbox\Classes'))'
     
     clc
     fprintf('\nStarting windows client\n');
     
      % Instantiate a UDPcommunictor object
-    udpParams = getUDPparams('NicolasOffice'); 
+    udpParams = getUDPparams('OneLightRoom'); % 'NicolasOffice'); 
     VSGOL = OLVSGcommunicator( ...
         'signature', 'WindowsSide', ...          % a label indicating the host, used to for user-feedback
           'localIP', udpParams.winHostIP, ...    % required: the IP of this computer
