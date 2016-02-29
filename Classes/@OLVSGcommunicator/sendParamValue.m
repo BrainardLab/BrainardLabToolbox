@@ -9,11 +9,10 @@ function sendParamValue(obj, paramNameAndValue,  varargin)
     defaultTimeOutSecs = 2;
     defaultMaxAttemptsNum = 3;
     p = inputParser;
-    p.addRequired('obj');
     p.addRequired('paramNameAndValue', @iscell);
     p.addParamValue('timeOutSecs', defaultTimeOutSecs,   @isnumeric);
     p.addParamValue('maxAttemptsNum', defaultMaxAttemptsNum, @isnumeric);
-    p.parse(obj, paramNameAndValue, varargin{:});
+    p.parse(paramNameAndValue, varargin{:});
     
     
     % Send the message
@@ -23,7 +22,7 @@ function sendParamValue(obj, paramNameAndValue,  varargin)
     else
         messageValue = nan;
     end
-    status = p.Results.obj.sendMessage(messageLabel, messageValue, p.Results.timeOutSecs, 'maxAttemptsNum', p.Results.maxAttemptsNum);
+    status = obj.sendMessage(messageLabel, messageValue, p.Results.timeOutSecs, 'maxAttemptsNum', p.Results.maxAttemptsNum);
 
     
     % Get this backtrace of all functions leading to this point
@@ -35,5 +34,5 @@ function sendParamValue(obj, paramNameAndValue,  varargin)
     end
     
     % Check status to ensure we received a 'TRANSMITTED_MESSAGE_MATCHES_EXPECTED' message
-    assert(strcmp(status, p.Results.obj.TRANSMITTED_MESSAGE_MATCHES_EXPECTED), sprintf('%s: Exiting due to mismatch in message labels.\nExpected label: ''%s'', Received label: ''%s''.\n', backTrace, p.Results.obj.TRANSMITTED_MESSAGE_MATCHES_EXPECTED, status));
+    assert(strcmp(status, obj.TRANSMITTED_MESSAGE_MATCHES_EXPECTED), sprintf('%s: Exiting due to mismatch in message labels.\nExpected label: ''%s'', Received label: ''%s''.\n', backTrace, obj.TRANSMITTED_MESSAGE_MATCHES_EXPECTED, status));
 end
