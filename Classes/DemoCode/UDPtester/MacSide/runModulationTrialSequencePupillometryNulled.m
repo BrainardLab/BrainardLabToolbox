@@ -26,7 +26,7 @@ function runModulationTrialSequencePupillometryNulled
         'obsIDandRun', 'nicolas -123', ...
         'nTrials', 1, ...,
         'whichTrialToStartAt', 1, ...
-        'VSGOfflineMode', true ...
+        'VSGOfflineMode', false ...
     );
     params.skipPupilRecordingFirstTrial = true;
 
@@ -37,6 +37,11 @@ function runModulationTrialSequencePupillometryNulled
         'time_inter', -1, ...
         'average_diameter', -1, ...
         'ratioInterupt', -1);
+      
+    % Determine the number of trials in this block and create a data struct of
+   % that size
+    dataStruct = repmat(dataStruct, params.nTrials, 1);
+    offline = params.VSGOfflineMode;
         
     % This is the trialLoop function
     % Compose the UDPcommunicationProgram to run: sequence of commands to transmit to Windows

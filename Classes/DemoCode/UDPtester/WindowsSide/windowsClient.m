@@ -250,31 +250,36 @@ function windowsClient
         goodCounter = 1;
         badCounter = 1;
         clear transferData;
-        for jj = 1 : length(pupilData.timeStamps)
-            if ((pupilData.tracked(jj) == 1)) %&& VSGOLIsWithinBounds(radius, origin, pupilData.mmPositions(jj,:)))
-                % Save the pupil diameter and time stamp for good data
-                % Keep data for checking plot
-                goodPupilDiameter(goodCounter) = pupilData.pupilDiameter(jj);
-                goodPupilTimeStamps(goodCounter) = pupilData.timeStamps(jj);
+        
+        if (experimentMode)
+            for jj = 1 : length(pupilData.timeStamps)
+                if ((pupilData.tracked(jj) == 1)) %&& VSGOLIsWithinBounds(radius, origin, pupilData.mmPositions(jj,:)))
+                    % Save the pupil diameter and time stamp for good data
+                    % Keep data for checking plot
+                    goodPupilDiameter(goodCounter) = pupilData.pupilDiameter(jj);
+                    goodPupilTimeStamps(goodCounter) = pupilData.timeStamps(jj);
 
-                %Save the data as strings to send to the Mac
-                tempData = [num2str(goodPupilDiameter(goodCounter)) ' ' num2str(goodPupilTimeStamps(goodCounter)) ' 0 ' '0'];
-                transferData{jj} = tempData;
+                    %Save the data as strings to send to the Mac
+                    tempData = [num2str(goodPupilDiameter(goodCounter)) ' ' num2str(goodPupilTimeStamps(goodCounter)) ' 0 ' '0'];
+                    transferData{jj} = tempData;
 
-                goodCounter = goodCounter + 1;
-            else
-                % Save the time stamp for bad data
-                % Keep data for checking plot
-                badPupilTimeStamps(badCounter) = pupilData.timeStamps(jj);
+                    goodCounter = goodCounter + 1;
+                else
+                    % Save the time stamp for bad data
+                    % Keep data for checking plot
+                    badPupilTimeStamps(badCounter) = pupilData.timeStamps(jj);
 
-                %Send the timestamps of the interruptions
-                tempData = ['0' ' 0 ' '1 ' num2str(badPupilTimeStamps(badCounter))];
-                transferData{jj} = tempData;
+                    %Send the timestamps of the interruptions
+                    tempData = ['0' ' 0 ' '1 ' num2str(badPupilTimeStamps(badCounter))];
+                    transferData{jj} = tempData;
 
-                badCounter = badCounter + 1;
+                    badCounter = badCounter + 1;
+                end
             end
+        else
+            transferData = [];
         end
-    
+        
         % Start the file transfer
         macCommand = 'fubar';
         numDataPoints = length(transferData);
