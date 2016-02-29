@@ -19,7 +19,7 @@ function sendParamValue(obj, paramNameAndValue,  varargin)
     % Send the message
     messageLabel = p.Results.paramNameAndValue{1};
     if (numel(p.Results.paramNameAndValue) == 2)
-    	messageValue = p.Results.paramName;
+    	messageValue = p.Results.paramNameAndValue{2};
     else
         messageValue = [];
     end
