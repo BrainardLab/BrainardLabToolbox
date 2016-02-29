@@ -330,9 +330,11 @@ function windowsClient
             save([saveFile '_' num2str(i, '%03.f') '.mat'], 'dataStruct', 'dataRaw', 'pupilData');
         else
             
+
             UDPcommunicationProgram = {...
                 {'Transfer Data Status', 'macCommand'} ...
             };
+        
             while (~strcmp(macCommand,'begin transfer'))
                 %macCommand = VSGOLGetInput;
                 for k = 1:numel(UDPcommunicationProgram)
@@ -340,9 +342,12 @@ function windowsClient
                 end
             end
 
+
+            
             %matlabUDP('send','begin transfer');
-            messageTuple = {'Transfer Data Status', 'begin trasfer'};
+            messageTuple = {'Transfer Data Status', 'begin transfer'};
             UDPobj.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
+        
         
             
             fprintf('Transfer beginning...\n');

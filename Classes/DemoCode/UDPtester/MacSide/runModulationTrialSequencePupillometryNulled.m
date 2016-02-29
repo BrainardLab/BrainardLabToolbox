@@ -336,9 +336,10 @@ function [time, diameter, good_counter, interruption_counter, time_inter] = OLVS
         fprintf('OLVSGTransferData: Beginning transfer of data...\n');
         
         %matlabUDP('send','begin transfer');
-        messageTuple = {'Transfer Data Status', 'begin trasfer'};
+        messageTuple = {'Transfer Data Status', 'begin transfer'};
         UDPobj.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
     
+
         UDPcommunicationProgram = {...
             {'Transfer Data Status', 'winCommand'} ...
         };
@@ -350,7 +351,7 @@ function [time, diameter, good_counter, interruption_counter, time_inter] = OLVS
                 eval(sprintf('%s = UDPobj.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
             end
         end
-        
+
 
         
         fprintf('OLVSGTransferData: proceeding with data transfer\n');
