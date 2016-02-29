@@ -23,7 +23,7 @@ function sendParamValue(obj, paramNameAndValue,  varargin)
     else
         messageValue = nan;
     end
-    status = p.Results.obj.sendMessage(messageLabel, 'withValue', messageValue, p.Results.timeOutSecs, 'maxAttemptsNum', p.Results.maxAttemptsNum);
+    status = p.Results.obj.sendMessage(messageLabel, messageValue, p.Results.timeOutSecs, 'maxAttemptsNum', p.Results.maxAttemptsNum);
 
     
     % Get this backtrace of all functions leading to this point
