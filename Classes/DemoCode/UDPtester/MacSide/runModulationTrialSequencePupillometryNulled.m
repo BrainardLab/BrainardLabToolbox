@@ -48,12 +48,12 @@ function runModulationTrialSequencePupillometryNulled
         
     % This is the trialLoop function
     % ==== NEW ===  Send param values =====================================
-    OLVSG.sendParamValue({OLVSG.PROTOCOL_NAME,       params.protocolName},        'timeOutSecs', Inf);
-    OLVSG.sendParamValue({OLVSG.OBSERVER_ID,         params.obsID},               'timeOutSecs', 2.0, 'maxAttemptsNum', 3);
-    OLVSG.sendParamValue({OLVSG.OBSERVER_ID_AND_RUN, params.obsIDandRun},         'timeOutSecs', 2.0, 'maxAttemptsNum', 3);
-    OLVSG.sendParamValue({OLVSG.NUMBER_OF_TRIALS,    params.nTrials},             'timeOutSecs', 2.0, 'maxAttemptsNum', 3);
-    OLVSG.sendParamValue({OLVSG.STARTING_TRIAL_NO,   params.whichTrialToStartAt}, 'timeOutSecs', 2.0, 'maxAttemptsNum', 3);
-    OLVSG.sendParamValue({OLVSG.OFFLINE,             params.VSGOfflineMode},      'timeOutSecs', 2.0, 'maxAttemptsNum', 3);
+    OLVSG.sendParamValue({OLVSG.PROTOCOL_NAME,       params.protocolName},        'timeOutSecs', 2.0, 'maxAttemptsNum', 1);
+    OLVSG.sendParamValue({OLVSG.OBSERVER_ID,         params.obsID},               'timeOutSecs', 2.0, 'maxAttemptsNum', 1);
+    OLVSG.sendParamValue({OLVSG.OBSERVER_ID_AND_RUN, params.obsIDandRun},         'timeOutSecs', 2.0, 'maxAttemptsNum', 1);
+    OLVSG.sendParamValue({OLVSG.NUMBER_OF_TRIALS,    params.nTrials},             'timeOutSecs', 2.0, 'maxAttemptsNum', 1);
+    OLVSG.sendParamValue({OLVSG.STARTING_TRIAL_NO,   params.whichTrialToStartAt}, 'timeOutSecs', 2.0, 'maxAttemptsNum', 1);
+    OLVSG.sendParamValue({OLVSG.OFFLINE,             params.VSGOfflineMode},      'timeOutSecs', 2.0, 'maxAttemptsNum', 1);
     % ==== NEW ===  Send param values =====================================
     
 
@@ -121,7 +121,7 @@ function runModulationTrialSequencePupillometryNulled
             
             %matlabUDP('send','The User is ready to move on.');
             % ==== NEW ===  Send user ready status ========================
-            OLVSG.sendParamValue({OLVSG.USER_READY_STATUS, 'User is ready to move on.'}, 'timeOutSecs', Inf);
+            OLVSG.sendParamValue({OLVSG.USER_READY_STATUS, 'User is ready to move on.'}, 'timeOutSecs', 2.0, 'maxAttemptsNum', 1);
             % =============================================================
             
             fprintf('OLVSGCheckResume: User input acquired.\n');
@@ -130,7 +130,7 @@ function runModulationTrialSequencePupillometryNulled
             % continueCheck = OLVSGGetInput;
             
             % === NEW ====== Wait for ever to receive the userReady status ==================
-            continueCheck = OLVSG.receiveParamValue(OLVSG.USER_READY_STATUS,  'timeOutSecs', Inf)
+            continueCheck = OLVSG.receiveParamValue(OLVSG.USER_READY_STATUS,  'timeOutSecs', 2.0)
             % === NEW ====== Wait for ever to receive the userReady status ==================
             
 
@@ -449,7 +449,7 @@ function isBeingTracked = OLVSGEyeTrackerCheck(OLVSG)
     
     % matlabUDP('send','startEyeTrackerCheck');
     % ==== NEW ===  Send eye tracker status = startEyeTrackerCheck ========
-    OLVSG.sendParamValue({OLVSG.EYE_TRACKER_STATUS, 'startEyeTrackerCheck'}, 'timeOutSecs', 2.0, 'maxAttemptsNum', 3);
+    OLVSG.sendParamValue({OLVSG.EYE_TRACKER_STATUS, 'startEyeTrackerCheck'}, 'timeOutSecs', 2.0, 'maxAttemptsNum', 1);
     % ==== NEW ============================================================
  
     
@@ -461,7 +461,7 @@ function isBeingTracked = OLVSGEyeTrackerCheck(OLVSG)
 
     % numTrackedData = OLVSGGetInput;
     % === NEW ====== Retrieve the number of eye tracking data points ==================
-    numTrackedData = OLVSG.receiveParamValue(OLVSG.EYE_TRACKER_DATA_POINTS_NUM,  'timeOutSecs', Inf);
+    numTrackedData = OLVSG.receiveParamValue(OLVSG.EYE_TRACKER_DATA_POINTS_NUM,  'timeOutSecs', 2.0);
     % === NEW ====== Retrieve the number of eye tracking data points ==================
   
     fprintf('%s checking data points collected \n',numTrackedData)
