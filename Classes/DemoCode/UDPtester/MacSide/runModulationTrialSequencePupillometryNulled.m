@@ -73,8 +73,7 @@ function runModulationTrialSequencePupillometryNulled
         %         OLDarkTimer;
     end
     
-    % ---------- PROGRAMS SYNCED UP TO HERE ------------- NICOLAS
-    
+
     % Iterate over trials
     for trial = params.whichTrialToStartAt:params.nTrials
         
@@ -142,9 +141,6 @@ function runModulationTrialSequencePupillometryNulled
                 isBeingTracked = OLVSGEyeTrackerCheck(UDPobj);
             end
                 
-            disp('OK to here\n')
-            pause
-            % ---- UP TO HERE ----
             
             % When we are in in OFFLINE mode, we need to send over the
             % direction to the VSG computer so that it knows how to name
@@ -180,11 +176,29 @@ function runModulationTrialSequencePupillometryNulled
             
         % Send the 'start' signal. Note that this will remain in the queue
         % over at the VSG box.
-        fprintf('Send permission to start tracking \n')
-        reply = OLVSGSendEyeTrackingCommand;
-        while (~strcmp(reply,'Permission to begin recording received'))
-            reply = OLVSGGetInput;
+        fprintf('Send permission to start tracking \n');
+        % reply = OLVSGSendEyeTrackingCommand;
+        
+        messageTuple = {'Eye Tracker Status', 'Requesting permission to start tracking'};
+        UDPobj.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
+    
+%         while (~strcmp(reply,'Permission granted'))
+%             reply = OLVSGGetInput;
+%         end
+
+        reply = ' ';
+        while (~strcmp(reply,'Permission granted'))
+            UDPcommunicationProgram = {...
+                {'User Readiness Status', 'reply'} ...
+            };
+            for k = 1:numel(UDPcommunicationProgram)
+                eval(sprintf('%s = UDPobj.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
+            end
         end
+        
+        disp('OK to here');
+        pause;
+        
         sound(yStart, fs);
         if trial == 1 && params.skipPupilRecordingFirstTrial
             % If we're in the first trial, we stop recording

@@ -150,7 +150,6 @@ function windowsClient
             checkCounter = checkCounter + 1;
             
             %userReady = VSGOLGetInput;
-            
             UDPcommunicationProgram = {...
                 {'User Readiness Status', 'userReadiness'} ...
             };
@@ -167,21 +166,23 @@ function windowsClient
                 messageTuple = {'Action', 'continue'};
                 UDPobj.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
                 
-                
                 params = VSGOLEyeTrackerCheck(UDPobj, params);
-                disp('OK to here\n')
-                pause
-                % ---- UP TO HERE ----
                 
             else
-                matlabUDP('send','abort');
+                % matlabUDP('send','abort');
+                messageTuple = {'Action', 'abort'};
+                UDPobj.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
+                
                 fprintf('>>> Could not acquire good tracking after %g attempts.\n', maxAttempts);
                 fprintf('>>> Saving %g seconds of diagnostic video on the hard drive.\n', nSecsToSave);
-                vetStartTracking;
-                vetStartRecordingToFile(fullfile([saveFile '_' num2str(i, '%03.f') '_diagnostics.cam']));
-                pause(nSecsToSave);
-                vetStopRecording;
-                vetStopTracking;
+                if (experimentMode)
+                    vetStartTracking;
+                    vetStartRecordingToFile(fullfile([saveFile '_' num2str(i, '%03.f') '_diagnostics.cam']));
+                    pause(nSecsToSave);
+                    vetStopRecording;
+                    vetStopTracking;
+                end
+                
                 abortExperiment = true;
                 params.run = true;
             end
@@ -201,16 +202,21 @@ function windowsClient
             %WaitSecs(1);
         end
         
+                
         % Get the 'Go' signal
-        goCommand = VSGOLReceiveEyeTrackerCommand;
+        goCommand = VSGOLReceiveEyeTrackerCommand(UDPobj);
         while (goCommand  ~= true)
             fprintf('>>> The go signal is %d',goCommand);
-            goCommand = VSGOLReceiveEyeTrackerCommand;
+            goCommand = VSGOLReceiveEyeTrackerCommand(UDPobj);
         end
         if offline
             %vetStartRecordingToFile([saveFile '-' num2str(i) '.cam']);
         end
     
+        disp('OK to here\n')
+        pause
+        % ---- UP TO HERE ----
+                
         % Check the 'stop' signal from the Mac
         checkStop = 'no_stop';
         while (~strcmp(checkStop,'stop'))
@@ -355,6 +361,29 @@ function windowsClient
 
 
 end
+
+
+function beginRecording = VSGOLReceiveEyeTrackerCommand(UDPobj)
+    % beginRecording = VSGOLReceiveEyeTrackerCommand
+    % Wait and the 'go command
+    
+    UDPcommunicationProgram = {...
+        {'Eye Tracker Status', 'eyeTrackerStatus'} ...
+    };
+    for k = 1:numel(UDPcommunicationProgram)
+        eval(sprintf('%s = UDPobj.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
+    end
+            
+    if strcmp(eyeTrackerStatus,'Requesting permission to start tracking')
+        % matlabUDP('send','Permission to begin recording received');
+        messageTuple = {'Eye Tracker Status', 'Permission granted'};
+        UDPobj.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
+        beginRecording = true;
+    else
+        beginRecording = false;
+    end
+end
+
 
 function params = VSGOLEyeTrackerCheck(UDPobj, params)
     % params = VSGOLEyeTrackerCheck(params)
