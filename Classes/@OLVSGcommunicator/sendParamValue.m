@@ -21,14 +21,10 @@ function sendParamValue(obj, paramNameAndValue,  varargin)
     if (numel(p.Results.paramNameAndValue) == 2)
     	messageValue = p.Results.paramNameAndValue{2};
     else
-        messageValue = [];
+        messageValue = nan;
     end
-    
-    if (isempty(messageValue))
-        status = p.Results.obj.sendMessage(messageLabel, p.Results.timeOutSecs, 'maxAttemptsNum', p.Results.maxAttemptsNum);
-    else
-        status = p.Results.obj.sendMessage(messageLabel, 'withValue', messageValue, 'timeOutSecs', p.Results.timeOutSecs, 'maxAttemptsNum', p.Results.maxAttemptsNum);
-    end
+    status = p.Results.obj.sendMessage(messageLabel, 'withValue', messageValue, p.Results.timeOutSecs, 'maxAttemptsNum', p.Results.maxAttemptsNum);
+
     
     % Get this backtrace of all functions leading to this point
     dbs = dbstack;

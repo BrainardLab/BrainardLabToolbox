@@ -1,11 +1,11 @@
-function status = sendMessage(obj, msgLabel, varargin)
+function status = sendMessage(obj, msgLabel, msgValue, varargin)
 
     p = inputParser;
     % the msgLabel is required
     addRequired(p,'msgLabel',@ischar);
     
-    % the withValue optional parameter, with a default being the empty string
-    addOptional(p, 'withValue', ' ');
+    % the withValue is required
+    addRequired(p, 'withValue', ' ');
     
     % the timeOutSecs is optional, with a default value: 5
     defaultTimeOutSecs = 5;
@@ -24,7 +24,7 @@ function status = sendMessage(obj, msgLabel, varargin)
     addOptional(p,'doNotReplyToThisMessage',defaultDoNotReplyToThisMessage,@islogical);
     
     % parse the input
-    parse(p,msgLabel,varargin{:});
+    parse(p,msgLabel, msgValue, varargin{:});
     messageLabel    = p.Results.msgLabel;
     messageArgument = p.Results.withValue;
     timeOutSecs     = p.Results.timeOutSecs;
