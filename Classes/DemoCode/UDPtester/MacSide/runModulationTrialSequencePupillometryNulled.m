@@ -46,12 +46,12 @@ function runModulationTrialSequencePupillometryNulled
     offline = params.VSGOfflineMode;
         
     % This is the trialLoop function
-    OLVSG.sendParamValue(OLVSG.PROTOCOL_NAME,       params.protocolName,    timeOutSecs, 2.0, 'maxAttemptsNum', 3);
-    OLVSG.sendParamValue(OLVSG.OBSERVER_ID,         params.obsID,           timeOutSecs, 2.0, 'maxAttemptsNum', 3);
-    OLVSG.sendParamValue(OLVSG.OBSERVER_ID_AND_RUN, params.obsIDandRun,     timeOutSecs, 2.0, 'maxAttemptsNum', 3);
-    OLVSG.sendParamValue(OLVSG.NUMBER_OF_TRIALS,    params.nTrials,         timeOutSecs, 2.0, 'maxAttemptsNum', 3);
-    OLVSG.sendParamValue(OLVSG.STARTING_TRIAL_NO,   params.whichTrialToStartAt, timeOutSecs, 2.0, 'maxAttemptsNum', 3);
-    OLVSG.sendParamValue(OLVSG.OFFLINE,             params.VSGOfflineMode,  timeOutSecs, 2.0, 'maxAttemptsNum', 3);
+    OLVSG.sendParamValue(OLVSG.PROTOCOL_NAME,       params.protocolName,        'timeOutSecs', 2.0, 'maxAttemptsNum', 3);
+    OLVSG.sendParamValue(OLVSG.OBSERVER_ID,         params.obsID,               'timeOutSecs', 2.0, 'maxAttemptsNum', 3);
+    OLVSG.sendParamValue(OLVSG.OBSERVER_ID_AND_RUN, params.obsIDandRun,         'timeOutSecs', 2.0, 'maxAttemptsNum', 3);
+    OLVSG.sendParamValue(OLVSG.NUMBER_OF_TRIALS,    params.nTrials,             'timeOutSecs', 2.0, 'maxAttemptsNum', 3);
+    OLVSG.sendParamValue(OLVSG.STARTING_TRIAL_NO,   params.whichTrialToStartAt, 'timeOutSecs', 2.0, 'maxAttemptsNum', 3);
+    OLVSG.sendParamValue(OLVSG.OFFLINE,                  'timeOutSecs', 2.0, 'maxAttemptsNum', 3);
     
     pause;
 

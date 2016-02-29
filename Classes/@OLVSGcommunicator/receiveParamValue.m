@@ -18,11 +18,12 @@ function paramValue = receiveParamValue(obj, paramName, varargin)
     % parse input
     defaultTimeOutSecs = Inf;
     p = inputParser;
+    p.addRequired('paramName', @ischar);
     p.addParamValue('timeOutSecs', defaultTimeOutSecs,   @isnumeric);
     p.parse(varargin{:});
 
     % Wait for ever for a message to be received
-    response = obj.waitForMessage(paramName, 'timeOutSecs', p.Results.timeOutSecs);
+    response = obj.waitForMessage(p.Results.paramName, 'timeOutSecs', p.Results.timeOutSecs);
 
     % Get this backtrace of all functions leading to this point
     dbs = dbstack;

@@ -52,10 +52,10 @@ classdef OLVSGcommunicator < UDPcommunicator
         paramValue = receiveParamValue(obj, paramName, varargin);
         
         % Method to send a parameter value
-        % ex.: OLVSG.sendParamValue(OLVSG.protocolName, params.protocolName);
-        % or   OLVSG.sendParamValue(OLVSG.protocolName,params.protocolName, timeOutSecs, 2.0, 'maxAttemptsNum', 3);
-        % or   OLVSG.sendParamValue(OLVSG.protocolName, {OLVSG.go}); - only a message with not value
-        sendParamValue(obj, paramName, paramValue);
+        % ex.: OLVSG.sendParamValue(OLVSG.protocolName, OLVSG.protocolName, 'something');
+        % or   OLVSG.sendParamValue(OLVSG.protocolName, OLVSG.protocolName, 'something', params.protocolName, timeOutSecs, 2.0, 'maxAttemptsNum', 3);
+        % or   OLVSG.sendParamValue(OLVSG.protocolName, OLVSG.go, []);
+        sendParamValue(obj, paramName, paramValue, varargin);
         
     end % Public methods
     
