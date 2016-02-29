@@ -26,7 +26,7 @@ function status = sendMessage(obj, msgLabel, msgValue, varargin)
     
     % parse the input
     parse(p, msgLabel, msgValue, varargin{:});
-    p.Results
+
     messageLabel    = p.Results.msgLabel;
     messageArgument = p.Results.msgValue;
     timeOutSecs     = p.Results.timeOutSecs;
