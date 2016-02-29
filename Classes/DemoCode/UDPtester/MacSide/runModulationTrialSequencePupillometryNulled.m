@@ -3,7 +3,8 @@ function runModulationTrialSequencePupillometryNulled
     experimentMode = false;
     
     [rootDir, ~] = fileparts(fullfile(which(mfilename)));
-    cd(rootDir); addpath('../Common');
+    cd(rootDir); 
+    addpath('../Common');
     
     clc
     fprintf('\nStarting ''%s''\n', mfilename);
@@ -11,7 +12,7 @@ function runModulationTrialSequencePupillometryNulled
     pause;
     
     % Instantiate a UDPcommunictor object
-    udpParams = getUDPparams('NicolasOffice');
+    udpParams = getUDPparams('OneLightRoom'); % 'NicolasOffice');
     OLVSG = OLVSGcommunicator( ...
         'signature', 'MacSide', ...              % a label indicating the host, used to for user-feedback
           'localIP', udpParams.macHostIP, ...    % required: the IP of this computer
