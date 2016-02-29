@@ -46,20 +46,14 @@ function runModulationTrialSequencePupillometryNulled
     offline = params.VSGOfflineMode;
         
     % This is the trialLoop function
-    % Compose the UDPcommunicationProgram to run: sequence of commands to transmit to Windows
-    UDPcommunicationProgram = {...
-            {'Protocol Name',       params.protocolName} ...  % {messageLabel, messageValue}
-            {'Observer ID',         params.obsID} ...
-            {'Observer ID and Run', params.obsIDandRun} ...
-            {'Number of Trials',    params.nTrials} ...
-            {'Starting Trial No',   params.whichTrialToStartAt} ...
-            {'Offline',             params.VSGOfflineMode}
-    };
-
-    % Run the initial program
-    for k = 1:numel(UDPcommunicationProgram)
-        OLVSG.sendMessageAndReceiveAcknowldegmentOrFail(UDPcommunicationProgram{k});
-    end
+    OLVSG.sendParamValue(OLVSG.PROTOCOL_NAME,       params.protocolName,    timeOutSecs, 2.0, 'maxAttemptsNum', 3);
+    OLVSG.sendParamValue(OLVSG.OBSERVER_ID,         params.obsID,           timeOutSecs, 2.0, 'maxAttemptsNum', 3);
+    OLVSG.sendParamValue(OLVSG.OBSERVER_ID_AND_RUN, params.obsIDandRun,     timeOutSecs, 2.0, 'maxAttemptsNum', 3);
+    OLVSG.sendParamValue(OLVSG.NUMBER_OF_TRIALS,    params.nTrials,         timeOutSecs, 2.0, 'maxAttemptsNum', 3);
+    OLVSG.sendParamValue(OLVSG.STARTING_TRIAL_NO,   params.whichTrialToStartAt, timeOutSecs, 2.0, 'maxAttemptsNum', 3);
+    OLVSG.sendParamValue(OLVSG.OFFLINE,             params.VSGOfflineMode,  timeOutSecs, 2.0, 'maxAttemptsNum', 3);
+    
+    pause;
 
     if (experimentMode)  
         % Create the OneLight object.

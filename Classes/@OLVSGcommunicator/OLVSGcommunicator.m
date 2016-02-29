@@ -6,8 +6,15 @@ classdef OLVSGcommunicator < UDPcommunicator
     properties (SetAccess = private)
     end
     
+    % Pre-defined labels
     properties (Constant)
-        eyeTrackerStatus = 'Eye Tracker Status';
+        PROTOCOL_NAME       = 'Protocol Name';
+        OBSERVER_ID         = 'Observer ID';
+        OBSERVER_ID_AND_RUN = 'Observer ID and Run';
+        NUMBER_OF_TRIALS    = 'Number of Trials';
+        STARTING_TRIAL_NO   = 'Starting Trial No';
+        OFFLINE             = 'Offline';
+        EYE_TRACKER_STATUS  = 'Eye Tracker Status';
     end
     
     % Public methods
@@ -39,10 +46,16 @@ classdef OLVSGcommunicator < UDPcommunicator
             );
         end % constructor
 
-        % method to receive a parameter value.
-        % ex.: protocolNameStr = VSGOL.receiveParamValue('Protocol Name');
+        % Method to receive a parameter value.
+        % ex.: protocolNameStr = VSGOL.receiveParamValue(VSGOL.protocolName);
         % or   userReady = VSGOL.receiveParamValue('User Ready', timeOutSecs, 2.0);
         paramValue = receiveParamValue(obj, paramName, varargin);
+        
+        % Method to send a parameter value
+        % ex.: OLVSG.sendParamValue(OLVSG.protocolName, params.protocolName);
+        % or   OLVSG.sendParamValue(OLVSG.protocolName,params.protocolName, timeOutSecs, 2.0, 'maxAttemptsNum', 3);
+        % or   OLVSG.sendParamValue(OLVSG.protocolName, {OLVSG.go}); - only a message with not value
+        sendParamValue(obj, paramName, paramValue);
         
     end % Public methods
     

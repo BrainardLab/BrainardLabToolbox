@@ -73,8 +73,13 @@ function windowsClient
     
     % Compose the UDPcommunicationProgram to run : specify sequence of messages (labels) expected to be received from the Mac
     % and the names of variables in which to store the received message values
-    protocolNameStr = VSGOL.receiveParamValue('Protocol Name')
-    obsID = VSGOL.receiveParamValue('Observer ID', 'timeOutSecs', 1.0)
+    protocolNameStr = VSGOL.receiveParamValue(VSGOL.PROTOCOL_NAME)
+    obsID           = VSGOL.receiveParamValue(VSGOL.OBSERVER_ID, 'timeOutSecs', 1.0)
+    obsIDAndRun     = VSGOL.receiveParamValue(VSGOL.OBSERVER_ID_AND_RUN)
+    nTrials         = VSGOL.receiveParamValue(VSGOL.NUMBER_OF_TRIALS)
+    startTrialNum   = VSGOL.receiveParamValue(VSGOL.STARTING_TRIAL_NO)
+    offline         = VSGOL.receiveParamValue(VSGOL.OFFLINE)
+    
     pause
     
     
