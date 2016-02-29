@@ -73,6 +73,10 @@ function windowsClient
     
     % Compose the UDPcommunicationProgram to run : specify sequence of messages (labels) expected to be received from the Mac
     % and the names of variables in which to store the received message values
+    protocolNameStr = VSGOL.receiveParamValue('Protocol Name');
+    obsID = VSGOL.receiveParamValue('Observer ID', timeOutSecs, 1.0);
+    
+    
     UDPcommunicationProgram = {...
             {'Protocol Name',       'protocolNameStr'} ...  % {messageLabel, variable name in which to store received data}
             {'Observer ID',         'obsID'} ...
@@ -220,7 +224,7 @@ function windowsClient
         while (~strcmp(checkStop,'stop pupil recording'))
             %checkStop = VSGOLGetInput;
             UDPcommunicationProgram = {...
-                {'Eye Tracker Status', 'checkStop'} ...
+                {OLVSGcommunicator.eyeTrackerStatus, 'checkStop'} ...
             };
             for k = 1:numel(UDPcommunicationProgram)
                 eval(sprintf('%s = VSGOL.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
@@ -228,7 +232,7 @@ function windowsClient
     
             if strcmp(checkStop,'stop pupil recording')
                 %matlabUDP('send',sprintf('Trial %f has ended!\n', i));
-                messageTuple = {'Eye Tracker Status', sprintf('Trial %f has ended!\n', i)};
+                messageTuple = {OLVSGcommunicator.eyeTrackerStatus, sprintf('Trial %f has ended!\n', i)};
                 VSGOL.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
             end
         end
@@ -417,7 +421,7 @@ function beginRecording = VSGOLReceiveEyeTrackerCommand(VSGOL)
     % Wait and the 'go command
     
     UDPcommunicationProgram = {...
-        {'Eye Tracker Status', 'eyeTrackerStatus'} ...
+        {OLVSGcommunicator.eyeTrackerStatus, 'eyeTrackerStatus'} ...
     };
     for k = 1:numel(UDPcommunicationProgram)
         eval(sprintf('%s = VSGOL.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
@@ -425,7 +429,7 @@ function beginRecording = VSGOLReceiveEyeTrackerCommand(VSGOL)
             
     if strcmp(eyeTrackerStatus,'Requesting permission to start tracking')
         % matlabUDP('send','Permission to begin recording received');
-        messageTuple = {'Eye Tracker Status', 'Permission granted'};
+        messageTuple = {OLVSGcommunicator.eyeTrackerStatus, 'Permission granted'};
         VSGOL.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
         beginRecording = true;
     else
@@ -453,7 +457,7 @@ function params = VSGOLEyeTrackerCheck(VSGOL, params)
     % checkStart = VSGOLGetInput;
 
     UDPcommunicationProgram = {...
-            {'Eye Tracker Status', 'checkStart'} ...
+            {OLVSGcommunicator.eyeTrackerStatus, 'checkStart'} ...
     };
     for k = 1:numel(UDPcommunicationProgram)
             eval(sprintf('%s = VSGOL.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
@@ -496,7 +500,7 @@ function params = VSGOLEyeTrackerCheck(VSGOL, params)
         % command = matlabUDP('receive');
         % params.run = VSGOLProcessCommand(params, command);
         UDPcommunicationProgram = {...
-            {'Eye Tracker Status', 'params.run'} ...
+            {OLVSGcommunicator.eyeTrackerStatus, 'params.run'} ...
         };
         for k = 1:numel(UDPcommunicationProgram)
             eval(sprintf('%s = VSGOL.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));

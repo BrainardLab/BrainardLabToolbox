@@ -187,7 +187,7 @@ function runModulationTrialSequencePupillometryNulled
         fprintf('Send permission to start tracking \n');
         % reply = OLVSGSendEyeTrackingCommand;
         
-        messageTuple = {'Eye Tracker Status', 'Requesting permission to start tracking'};
+        messageTuple = {OLVSGcommunicator.eyeTrackerStatus, 'Requesting permission to start tracking'};
         OLVSG.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
     
 %         while (~strcmp(reply,'Permission granted'))
@@ -197,7 +197,7 @@ function runModulationTrialSequencePupillometryNulled
         reply = ' ';
         while (~strcmp(reply,'Permission granted'))
             UDPcommunicationProgram = {...
-                {'Eye Tracker Status', 'reply'} ...
+                {OLVSGcommunicator.eyeTrackerStatus, 'reply'} ...
             };
             for k = 1:numel(UDPcommunicationProgram)
                 eval(sprintf('%s = OLVSG.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
@@ -426,11 +426,11 @@ end
     
 
 function reply = OLVSGStopPupilRecording(OLVSG)
-    messageTuple = {'Eye Tracker Status', 'stop pupil recording'};
+    messageTuple = {OLVSGcommunicator.eyeTrackerStatus, 'stop pupil recording'};
     OLVSG.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
 
     UDPcommunicationProgram = {...
-        {'Eye Tracker Status', 'reply'} ...
+        {OLVSGcommunicator.eyeTrackerStatus, 'reply'} ...
     };
     for k = 1:numel(UDPcommunicationProgram)
         eval(sprintf('%s = OLVSG.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
@@ -452,7 +452,7 @@ function isBeingTracked = OLVSGEyeTrackerCheck(OLVSG)
     WaitSecs(1);
     
     % matlabUDP('send','startEyeTrackerCheck');
-    messageTuple = {'Eye Tracker Status', 'startEyeTrackerCheck'};
+    messageTuple = {OLVSGcommunicator.eyeTrackerStatus, 'startEyeTrackerCheck'};
     OLVSG.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
     
     tStart = mglGetSecs;
@@ -484,7 +484,7 @@ function isBeingTracked = OLVSGEyeTrackerCheck(OLVSG)
         %matlabUDP('send', 'false');
     end
 
-    messageTuple = {'Eye Tracker Status', isBeingTracked};
+    messageTuple = {OLVSGcommunicator.eyeTrackerStatus, isBeingTracked};
     OLVSG.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
     
 end

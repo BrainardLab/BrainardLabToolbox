@@ -6,6 +6,10 @@ classdef OLVSGcommunicator < UDPcommunicator
     properties (SetAccess = private)
     end
     
+    properties (Constant)
+        eyeTrackerStatus = 'Eye Tracker Status';
+    end
+    
     % Public methods
     methods
         % Constructor
@@ -33,9 +37,14 @@ classdef OLVSGcommunicator < UDPcommunicator
                 'udpPort', p.Results.udpPort, ...      % optional, with default value: 2007
                 'verbosity', p.Results.verbosity ...             % optional, with default value: 'normal', and possible values: {'min', 'normal', 'max'},
             );
-        end
+        end % constructor
+
+        % method to receive a parameter value.
+        % ex.: protocolNameStr = VSGOL.receiveParamValue('Protocol Name');
+        % or   userReady = VSGOL.receiveParamValue('User Ready', timeOutSecs, 2.0);
+        paramValue = receiveParamValue(obj, paramName, varargin);
         
-    end
+    end % Public methods
     
 end
 
