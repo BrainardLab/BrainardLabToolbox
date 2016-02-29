@@ -77,7 +77,7 @@ function windowsClient()
     % Main Experiment Loop
     
     % === NEW ====== Get param values for labeled param names ==================
-    protocolNameStr = VSGOL.receiveParamValue(VSGOL.PROTOCOL_NAME,       'timeOutSecs', 2)
+    protocolNameStr = VSGOL.receiveParamValue(VSGOL.PROTOCOL_NAME,       'timeOutSecs', Inf)
     obsID           = VSGOL.receiveParamValue(VSGOL.OBSERVER_ID,         'timeOutSecs', 2)
     obsIDAndRun     = VSGOL.receiveParamValue(VSGOL.OBSERVER_ID_AND_RUN, 'timeOutSecs', 2)
     % === NEW ====== Get param values for labeled param names ==================
