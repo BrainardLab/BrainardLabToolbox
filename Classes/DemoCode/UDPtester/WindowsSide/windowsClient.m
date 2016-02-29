@@ -7,7 +7,7 @@ function windowsClient()
     [rootDir, ~] = fileparts(fullfile(which(mfilename)));
     cd(rootDir); 
     addpath('../Common');
-    addpath(genpath('C:\Users\melanopsin\Documents\MATLAB\Toolboxes\BrainardLabToolbox\Classes'))'
+    addpath(genpath('C:\Users\melanopsin\Documents\MATLAB\Toolboxes\BrainardLabToolbox\Classes'));
     
     clc
     fprintf('\nStarting windows client\n');
