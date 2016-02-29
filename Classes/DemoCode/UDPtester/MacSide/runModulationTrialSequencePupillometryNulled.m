@@ -121,7 +121,7 @@ function runModulationTrialSequencePupillometryNulled
             
             %matlabUDP('send','The User is ready to move on.');
             % ==== NEW ===  Send user ready status ========================
-            OLVSG.sendParamValue({OLVSG.USER_READY_STATUS, 'User is ready to move on.'}, 'timeOutSecs', 2.0, 'maxAttemptsNum', 3);
+            OLVSG.sendParamValue({OLVSG.USER_READY_STATUS, 'User is ready to move on.'}, 'timeOutSecs', Inf);
             % =============================================================
             
             fprintf('OLVSGCheckResume: User input acquired.\n');
@@ -130,16 +130,17 @@ function runModulationTrialSequencePupillometryNulled
             % continueCheck = OLVSGGetInput;
             
             % === NEW ====== Wait for ever to receive the userReady status ==================
-            continueCheck = OLVSG.receiveParamValue(OLVSG.USER_READY_STATUS,  'timeOutSecs', Inf);
+            continueCheck = OLVSG.receiveParamValue(OLVSG.USER_READY_STATUS,  'timeOutSecs', Inf)
             % === NEW ====== Wait for ever to receive the userReady status ==================
             
 
             if strcmp(continueCheck, 'abort');
                abort = true;
-            end
-            if strcmp(continueCheck, 'continue');
+            elseif strcmp(continueCheck, 'continue');
                 % Let's make sure that the eye is being tracked
                 isBeingTracked = OLVSGEyeTrackerCheck(OLVSG);
+            else
+                error('Unknown continueCheck value: ''%s''\n', continueCheck);
             end
                 
             
@@ -439,14 +440,16 @@ function isBeingTracked = OLVSGEyeTrackerCheck(OLVSG)
     timeCheck = 5;
     dataCheck = 5;
     
+    fprintf('In OLVSGEyeTrackerCheck\n');
+    
     % OLVSGClearMessageBuffer;
-    OLVSG.flashQueue();
+    OLVSG.flashQueue()
     
     WaitSecs(1);
     
     % matlabUDP('send','startEyeTrackerCheck');
     % ==== NEW ===  Send eye tracker status = startEyeTrackerCheck ========
-    VSGOL.sendParamValue({OLVSG.EYE_TRACKER_STATUS, 'startEyeTrackerCheck'}, 'timeOutSecs', 2.0, 'maxAttemptsNum', 3);
+    OLVSG.sendParamValue({OLVSG.EYE_TRACKER_STATUS, 'startEyeTrackerCheck'}, 'timeOutSecs', 2.0, 'maxAttemptsNum', 3);
     % ==== NEW ============================================================
  
     
@@ -505,7 +508,7 @@ function [readyToResume, abort] = OLVSGCheckResume(readyToResume, params, starts
 
     if (experimentMode)
         % Suppress keypresses going to the Matlab window.
-        ListenChar(2);
+        ListenChar(2); 
     end
     
     resume = false;
