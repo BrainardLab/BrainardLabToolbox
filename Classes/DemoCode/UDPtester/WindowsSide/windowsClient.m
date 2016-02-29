@@ -1,5 +1,6 @@
 function windowsClient
     global CRS;
+    global experimentMode
     
     experimentMode = false;
     
@@ -166,10 +167,12 @@ function windowsClient
                 messageTuple = {'Action', 'continue'};
                 UDPobj.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
                 
-                disp('OK to here\n')
-                % ---- UP TO HERE ----
                 
                 params = VSGOLEyeTrackerCheck(params);
+                disp('OK to here\n')
+                pause
+                % ---- UP TO HERE ----
+                
             else
                 matlabUDP('send','abort');
                 fprintf('>>> Could not acquire good tracking after %g attempts.\n', maxAttempts);
@@ -354,36 +357,76 @@ function windowsClient
 end
 
 function params = VSGOLEyeTrackerCheck(params)
-% params = VSGOLEyeTrackerCheck(params)
-% This function calls VSGOLGetInput which listens for a "start" or "stop" from the
-% Mac host. VSGOLProcessCommand will either allow the program to continue or
-% close the UDP port respective of the command from the Mac host.
-% Continuously checks for input from the Mac machine until data is actually available.
-vetStopTracking;
-WaitSecs(2);
-%vetCreateCameraScreen;
-fprintf('>>> Entered VSGOLEyeTrackerCheck \n');
-checkStart = VSGOLGetInput;
-fprintf('%s',checkStart);
-WaitSecs(1);
-if (strcmp(checkStart,'startEyeTrackerCheck'))
-    fprintf('*** Start tracking...\n')
-    vetStartTracking;
-    timeCheck = 5;
-    tStart = GetSecs;
-    while (GetSecs - tStart < timeCheck)
-        % Collect some checking data
+    % params = VSGOLEyeTrackerCheck(params)
+    % This function calls VSGOLGetInput which listens for a "start" or "stop" from the
+    % Mac host. VSGOLProcessCommand will either allow the program to continue or
+    % close the UDP port respective of the command from the Mac host.
+    % Continuously checks for input from the Mac machine until data is actually available.
+    global experimentMode
+    
+    if (experimentMode)
+        vetStopTracking;
     end
-    fprintf('*** Tracking finished \n')
-    checkData = vetGetBufferedEyePositions;
-    sumTrackData = sum(checkData.tracked);
-    fprintf('*** Number of checking data points %d\n',sumTrackData)
-    matlabUDP('send',num2str(sumTrackData))
-    vetStopTracking;
+    
+    WaitSecs(2);
+    %vetCreateCameraScreen;
+    fprintf('>>> Entered VSGOLEyeTrackerCheck \n');
+
+    % checkStart = VSGOLGetInput;
+
+    UDPcommunicationProgram = {...
+            {'Eye Tracker Status', 'startEyeTrackerCheck'} ...
+    };
+    for k = 1:numel(UDPcommunicationProgram)
+            eval(sprintf('%s = UDPobj.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
+    end
+
+    fprintf('%s',checkStart);
     WaitSecs(1);
-    command = matlabUDP('receive');
-    params = VSGOLProcessCommand(params, command);
-end
+        
+    if (strcmp(checkStart,'startEyeTrackerCheck'))
+        fprintf('*** Start tracking...\n')
+        if (experimentMode)
+            vetStartTracking;
+        end
+        timeCheck = 5;
+        tStart = GetSecs;
+        while (GetSecs - tStart < timeCheck)
+            % Collect some checking data
+        end
+        fprintf('*** Tracking finished \n')
+        
+        if (experimentMode)
+            checkData = vetGetBufferedEyePositions;
+            sumTrackData = sum(checkData.tracked);
+            fprintf('*** Number of checking data points %d\n',sumTrackData)
+        else
+            sumTrackData = 4;
+        end
+        
+        % matlabUDP('send',num2str(sumTrackData))
+        messageTuple = {'Number of checking data points', sumTrackData};
+        UDPobj.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
+            
+
+        if (experimentMode)
+            vetStopTracking;
+        end
+        
+        WaitSecs(1);
+        
+        % command = matlabUDP('receive');
+        % params.run = VSGOLProcessCommand(params, command);
+        UDPcommunicationProgram = {...
+            {'Eye Tracker Status', 'params.run'} ...
+        };
+        for k = 1:numel(UDPcommunicationProgram)
+            eval(sprintf('%s = UDPobj.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
+        end
+    
+        params.num
+        
+    end
 end
 
 

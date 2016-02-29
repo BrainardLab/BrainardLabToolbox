@@ -132,18 +132,20 @@ function runModulationTrialSequencePupillometryNulled
                 eval(sprintf('%s = UDPobj.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
             end
             
-            continueCheck
-            pause
-            % ---- UP TO HERE ----
+
             
             if strcmp(continueCheck, 'abort');
                abort = true;
             end
             if strcmp(continueCheck, 'continue');
                 % Let's make sure that the eye is being tracked
-                isBeingTracked = OLVSGEyeTrackerCheck;
+                isBeingTracked = OLVSGEyeTrackerCheck(UDPobj);
             end
                 
+            disp('OK to here\n')
+            pause
+            % ---- UP TO HERE ----
+            
             % When we are in in OFFLINE mode, we need to send over the
             % direction to the VSG computer so that it knows how to name
             % files
@@ -295,7 +297,7 @@ function runModulationTrialSequencePupillometryNulled
 end
 
 
-function isBeingTracked = OLVSGEyeTrackerCheck
+function isBeingTracked = OLVSGEyeTrackerCheck(UDPobj)
     % isBeingTracked = OLVSGEyeTrackerCheck
     % This function makes sure that the EyeTracker is successfully tracking
     % the subject's eye.
@@ -303,30 +305,48 @@ function isBeingTracked = OLVSGEyeTrackerCheck
     % We want to get 5 good data points for 5 seconds
     timeCheck = 5;
     dataCheck = 5;
-    OLVSGClearMessageBuffer;
+    
+    % OLVSGClearMessageBuffer;
+    UDPobj.flashQueue();
+    
     WaitSecs(1);
-    matlabUDP('send','startEyeTrackerCheck');
+    
+    % matlabUDP('send','startEyeTrackerCheck');
+    messageTuple = {'Eye Tracker Status', 'startEyeTrackerCheck'};
+    UDPobj.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
+    
     tStart = mglGetSecs;
 
     while (mglGetSecs-tStart <= timeCheck)
         % Collecting checking data
     end
 
-    numTrackedData = OLVSGGetInput;
+    % numTrackedData = OLVSGGetInput;
+    UDPcommunicationProgram = {...
+                {'Number of checking data points', 'numTrackedData'} ...
+    };
+    for k = 1:numel(UDPcommunicationProgram)
+        eval(sprintf('%s = UDPobj.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
+    end
+            
     fprintf('%s checking data points collected \n',numTrackedData)
 
     % Clear the buffer
-    OLVSGClearMessageBuffer;
-        
-    if (str2double(numTrackedData) >= dataCheck)
+    % OLVSGClearMessageBuffer;
+    UDPobj.flashQueue();
+    
+    if (numTrackedData >= dataCheck)
         isBeingTracked = true;
-        matlabUDP('send', 'true');
+        %matlabUDP('send', 'true');
         fprintf('Tracking check successful \n')
     else
         isBeingTracked = false;
-        matlabUDP('send', 'false');
+        %matlabUDP('send', 'false');
     end
 
+    messageTuple = {'Eye Tracker Status', isBeingTracked};
+    UDPobj.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
+    
 end
 
 
