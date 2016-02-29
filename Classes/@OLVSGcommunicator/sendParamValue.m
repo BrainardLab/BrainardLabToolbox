@@ -3,23 +3,27 @@
 % or   OLVSG.sendParamValue(OLVSG.protocolName, OLVSG.protocolName, 'something', params.protocolName, timeOutSecs, 2.0, 'maxAttemptsNum', 3);
 % or   OLVSG.sendParamValue(OLVSG.protocolName, OLVSG.go, []);
 
-function sendParamValue(obj, paramName, paramValue, varargin)
+function sendParamValue(obj, paramNameAndValue,  varargin)
     
     % parse input
     defaultTimeOutSecs = 2;
     defaultMaxAttemptsNum = 3;
     p = inputParser;
     p.addRequired('obj');
-    p.addRequired('paramName', @ischar);
-    p.addRequired('paramValue');
+    p.addRequired('paramNameAndValue', @iscell);
     p.addParamValue('timeOutSecs', defaultTimeOutSecs,   @isnumeric);
     p.addParamValue('maxAttemptsNum', defaultMaxAttemptsNum, @isnumeric);
-    p.parse(obj, paramName, paramValue, varargin{:});
+    p.parse(obj, paramNameAndValue, varargin{:});
     
     
     % Send the message
-    messageValue = p.Results.paramValue;
-    messageLabel = p.Results.paramName;
+    messageLabel = p.Results.paramNameAndValue{1};
+    if (numel(p.Results.paramNameAndValue) == 2)
+    	messageValue = p.Results.paramName;
+    else
+        messageValue = [];
+    end
+    
     if (isempty(messageValue))
         status = p.Results.obj.sendMessage(messageLabel, p.Results.timeOutSecs, 'maxAttemptsNum', p.Results.maxAttemptsNum);
     else
