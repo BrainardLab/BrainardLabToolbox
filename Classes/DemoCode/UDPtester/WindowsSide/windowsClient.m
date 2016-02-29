@@ -330,29 +330,56 @@ function windowsClient
             save([saveFile '_' num2str(i, '%03.f') '.mat'], 'dataStruct', 'dataRaw', 'pupilData');
         else
             
-            disp('OK to before transfer\n');
-            pause
+            UDPcommunicationProgram = {...
+                {'Transfer Data Status', 'macCommand'} ...
+            };
             while (~strcmp(macCommand,'begin transfer'))
-                macCommand = VSGOLGetInput;
+                %macCommand = VSGOLGetInput;
+                for k = 1:numel(UDPcommunicationProgram)
+                    eval(sprintf('%s = UDPobj.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
+                end
             end
 
-            matlabUDP('send','begin transfer');
+            %matlabUDP('send','begin transfer');
+            messageTuple = {'Transfer Data Status', 'begin trasfer'};
+            UDPobj.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
+        
+            
             fprintf('Transfer beginning...\n');
-            matlabUDP('send',num2str(numDataPoints));
-
+            %matlabUDP('send',num2str(numDataPoints));
+            messageTuple = {'Number of Data Points', numDataPoints};
+            UDPobj.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
+            
+            
+            UDPcommunicationProgram = {...
+                {'Transfer Data Status', 'macCommand'} ...
+            };
+        
             % Iterate over the data
             for kk = 1:numDataPoints
                 while (~strcmp(macCommand,['transfering ' num2str(kk)]))
-                    macCommand = VSGOLGetInput;
+                    %macCommand = VSGOLGetInput;
+                    for k = 1:numel(UDPcommunicationProgram)
+                        eval(sprintf('%s = UDPobj.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
+                    end
                 end
-                matlabUDP('send',transferData{kk});
+                
+                % matlabUDP('send',transferData{kk});
+                messageTuple = {'Data Point', transferData{kk}};
+                UDPobj.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
             end
 
             % Finish up the transfer
             fprintf('Data transfer for trial %f ending...\n', i);
 
+            UDPcommunicationProgram = {...
+                {'Transfer Data Status', 'macCommand'} ...
+            };
             while (~strcmp(macCommand,'end transfer'))
-                macCommand = VSGOLGetInput;
+                %macCommand = VSGOLGetInput;
+                for k = 1:numel(UDPcommunicationProgram)
+                    eval(sprintf('%s = UDPobj.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
+                end
             end
         end
     
@@ -370,7 +397,9 @@ function windowsClient
     end % for i
     
     % Close the UDP connection
-    matlabUDP('close');
+    %matlabUDP('close');
+    UDPobj.shuDown();
+    
     fprintf('*** Program completed successfully.\n');
 
 

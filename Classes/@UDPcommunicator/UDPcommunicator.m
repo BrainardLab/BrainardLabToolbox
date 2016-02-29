@@ -187,6 +187,9 @@ classdef UDPcommunicator < handle
         % Just a utility method for testing message transmission
         showMessageValueAsStarString(obj, msgCount, direction, msgLabel, msgValueType, msgValue, maxValue, maxStars);
         
+        % Close UDP
+        shuDown(obj);
+        
     end % public method
     
     methods (Access = private)

@@ -28,7 +28,7 @@ function runModulationTrialSequencePupillometryNulled
         'whichTrialToStartAt', 1, ...
         'VSGOfflineMode', false ...
     );
-    params.skipPupilRecordingFirstTrial = true;
+    params.skipPupilRecordingFirstTrial = false;
 
     
     % Initialize a data structure to be used to obtain the data
@@ -229,7 +229,7 @@ function runModulationTrialSequencePupillometryNulled
             end
             
             % We stop recording.
-            reply = OLVSGStopPupilRecording;
+            reply = OLVSGStopPupilRecording(UDPobj);
             fprintf('%s', reply);
         end
             
@@ -316,6 +316,7 @@ function runModulationTrialSequencePupillometryNulled
     % gets passed back to the calling routine and saved in our standard place.
     params.dataStruct = dataStruct;
     
+    UDPobj.shutDown();
 end
 
 
@@ -325,8 +326,6 @@ function [time, diameter, good_counter, interruption_counter, time_inter] = OLVS
         
         global experimentMode
         
-        disp('OK to before transfer\n');
-        pause
         if (experimentMode)
             % Set the mirrors to the background
             ol = OneLight;
@@ -335,11 +334,25 @@ function [time, diameter, good_counter, interruption_counter, time_inter] = OLVS
         
         % Initialize the data transfer
         fprintf('OLVSGTransferData: Beginning transfer of data...\n');
-        matlabUDP('send','begin transfer');
+        
+        %matlabUDP('send','begin transfer');
+        messageTuple = {'Transfer Data Status', 'begin trasfer'};
+        UDPobj.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
+    
+        UDPcommunicationProgram = {...
+            {'Transfer Data Status', 'winCommand'} ...
+        };
+
         winCommand = 'waiting';
         while (~strcmp(winCommand,'begin transfer'))
-            winCommand = OLVSGGetInput;
+            %winCommand = OLVSGGetInput;
+            for k = 1:numel(UDPcommunicationProgram)
+                eval(sprintf('%s = UDPobj.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
+            end
         end
+        
+
+        
         fprintf('OLVSGTransferData: proceeding with data transfer\n');
         good_counter = 0;
         
@@ -353,14 +366,33 @@ function [time, diameter, good_counter, interruption_counter, time_inter] = OLVS
         time_inter(1) = 0;
         
         % Get the number of data points to be transferred
-        nDataPoints = str2num(OLVSGGetInput);
-        
+        %nDataPoints = str2num(OLVSGGetInput);
+        UDPcommunicationProgram = {...
+                {'Number of Data Points', 'nDataPoints'} ...
+        };
+        for k = 1:numel(UDPcommunicationProgram)
+            eval(sprintf('%s = UDPobj.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
+        end
+                
         fprintf('OLVSGTransferData: The number of data points is %d\n', nDataPoints);
         
         % Iterate over the data points
         for i = 1:nDataPoints
-            matlabUDP('send', ['transfering ' num2str(i)]);
-            firstSampleTimeStamp = OLVSGGetInput;
+            
+            
+            %matlabUDP('send', ['transfering ' num2str(i)]);
+            messageTuple = {'Transfer Data Status', ['transfering ' num2str(i)]};
+            UDPobj.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
+        
+            
+            %firstSampleTimeStamp = OLVSGGetInput;
+            UDPcommunicationProgram = {...
+                {'Data Point', 'firstSampleTimeStamp'} ...
+            };
+            for k = 1:numel(UDPcommunicationProgram)
+                eval(sprintf('%s = UDPobj.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
+            end
+        
             parsedline = allwords(firstSampleTimeStamp, ' ');
             diam = str2double(parsedline{1});
             ti = str2double(parsedline{2});
@@ -377,7 +409,11 @@ function [time, diameter, good_counter, interruption_counter, time_inter] = OLVS
         end
         
         fprintf('OLVSGTransferData: Data transfer %f complete.\n', i)
-        matlabUDP('send','end transfer');
+        %matlabUDP('send','end transfer');
+        
+        messageTuple = {'Transfer Data Status', 'end transfer'};
+        UDPobj.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
+            
 end
     
 
