@@ -47,6 +47,8 @@ classdef OLVSGcommunicator < UDPcommunicator
                 'udpPort', p.Results.udpPort, ...      % optional, with default value: 2007
                 'verbosity', p.Results.verbosity ...             % optional, with default value: 'normal', and possible values: {'min', 'normal', 'max'},
             );
+        
+            obj.flashQueue();
         end % constructor
 
         % Method to receive a parameter value.

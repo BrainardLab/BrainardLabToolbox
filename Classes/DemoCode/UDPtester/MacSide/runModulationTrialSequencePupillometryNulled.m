@@ -7,12 +7,10 @@ function runModulationTrialSequencePupillometryNulled
     addpath('../Common');
     
     clc
-    fprintf('\nStarting ''%s''\n', mfilename);
-    fprintf('Hit enter when the windowsClient is up and running.\n');
-    pause;
+    
     
     % Instantiate a UDPcommunictor object
-    udpParams = getUDPparams('OneLightRoom'); % 'NicolasOffice');
+    udpParams = getUDPparams();
     OLVSG = OLVSGcommunicator( ...
         'signature', 'MacSide', ...              % a label indicating the host, used to for user-feedback
           'localIP', udpParams.macHostIP, ...    % required: the IP of this computer
@@ -21,7 +19,9 @@ function runModulationTrialSequencePupillometryNulled
         'verbosity', 'min' ...                   % optional, with default value: 'normal', and possible values: {'min', 'normal', 'max'},
         );
     
-    
+    fprintf('\nStarting ''%s''\n', mfilename);
+    fprintf('Hit enter when the windowsClient is up and running.\n');
+    pause;
     
     params = struct(...
         'protocolName', 'ModulationTrialSequencePupillometryNulled',...
@@ -130,7 +130,7 @@ function runModulationTrialSequencePupillometryNulled
             % continueCheck = OLVSGGetInput;
             
             % === NEW ====== Wait for ever to receive the userReady status ==================
-            continueCheck = OLVSG.receiveParamValue(VSGOL.USER_READY_STATUS,  'timeOutSecs', Inf);
+            continueCheck = OLVSG.receiveParamValue(OLVSG.USER_READY_STATUS,  'timeOutSecs', Inf);
             % === NEW ====== Wait for ever to receive the userReady status ==================
             
 
