@@ -213,16 +213,22 @@ function windowsClient
             %vetStartRecordingToFile([saveFile '-' num2str(i) '.cam']);
         end
     
-        disp('OK to here\n')
-        pause
-        % ---- UP TO HERE ----
                 
         % Check the 'stop' signal from the Mac
         checkStop = 'no_stop';
-        while (~strcmp(checkStop,'stop'))
-            checkStop = VSGOLGetInput;
-            if strcmp(checkStop,'stop')
-                matlabUDP('send',sprintf('Trial %f has ended!\n', i));
+        while (~strcmp(checkStop,'stop pupil recording'))
+            %checkStop = VSGOLGetInput;
+            UDPcommunicationProgram = {...
+                {'Eye Tracker Status', 'checkStop'} ...
+            };
+            for k = 1:numel(UDPcommunicationProgram)
+                eval(sprintf('%s = UDPobj.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
+            end
+    
+            if strcmp(checkStop,'stop pupil recording')
+                %matlabUDP('send',sprintf('Trial %f has ended!\n', i));
+                messageTuple = {'Eye Tracker Status', sprintf('Trial %f has ended!\n', i)};
+                UDPobj.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
             end
         end
     
@@ -318,6 +324,9 @@ function windowsClient
             dataRaw = transferData;
             save([saveFile '_' num2str(i, '%03.f') '.mat'], 'dataStruct', 'dataRaw', 'pupilData');
         else
+            
+            disp('OK to before transfer\n');
+            pause
             while (~strcmp(macCommand,'begin transfer'))
                 macCommand = VSGOLGetInput;
             end

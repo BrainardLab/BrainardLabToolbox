@@ -28,7 +28,7 @@ function runModulationTrialSequencePupillometryNulled
         'whichTrialToStartAt', 1, ...
         'VSGOfflineMode', true ...
     );
-    
+    params.skipPupilRecordingFirstTrial = true;
 
     
     % Initialize a data structure to be used to obtain the data
@@ -189,15 +189,13 @@ function runModulationTrialSequencePupillometryNulled
         reply = ' ';
         while (~strcmp(reply,'Permission granted'))
             UDPcommunicationProgram = {...
-                {'User Readiness Status', 'reply'} ...
+                {'Eye Tracker Status', 'reply'} ...
             };
             for k = 1:numel(UDPcommunicationProgram)
                 eval(sprintf('%s = UDPobj.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
             end
         end
         
-        disp('OK to here');
-        pause;
         
         sound(yStart, fs);
         if trial == 1 && params.skipPupilRecordingFirstTrial
@@ -206,21 +204,25 @@ function runModulationTrialSequencePupillometryNulled
             % the things below still check out.
 
             % We stop recording.
-            reply = OLVSGStopPupilRecording;
+            reply = OLVSGStopPupilRecording(UDPobj);
             fprintf('%s', reply);
 
-            % Launch into OLPDFlickerSettings.
-            events(trial).tTrialStart = mglGetSecs;
-            [~, events(trial).t] = ModulationTrialSequenceFlickerStartsStops(trial, params.timeStep, 1);
-            events(trial).tTrialEnd = mglGetSecs;
+            if (experimentMode) 
+                % Launch into OLPDFlickerSettings.
+                events(trial).tTrialStart = mglGetSecs;
+                [~, events(trial).t] = ModulationTrialSequenceFlickerStartsStops(trial, params.timeStep, 1);
+                events(trial).tTrialEnd = mglGetSecs;
+            end
 
         else
 
-            % Launch into OLPDFlickerSettings.
-            events(trial).tTrialStart = mglGetSecs;
-            [~, events(trial).t] = ModulationTrialSequenceFlickerStartsStops(trial, params.timeStep, 1);
-            events(trial).tTrialEnd = mglGetSecs;
-
+            if (experimentMode) 
+                % Launch into OLPDFlickerSettings.
+                events(trial).tTrialStart = mglGetSecs;
+                [~, events(trial).t] = ModulationTrialSequenceFlickerStartsStops(trial, params.timeStep, 1);
+                events(trial).tTrialEnd = mglGetSecs;
+            end
+            
             % We stop recording.
             reply = OLVSGStopPupilRecording;
             fprintf('%s', reply);
@@ -230,7 +232,8 @@ function runModulationTrialSequencePupillometryNulled
         % Save the data structure
         if (offline == false)
             % Get the data
-            [time, diameter, good_counter, interruption_counter, time_inter] = OLVSGTransferData(trial, params, block(1).data.startsBG', block(1).data.stopsBG');
+            [time, diameter, good_counter, interruption_counter, time_inter] = ...
+                OLVSGTransferData(UDPobj,trial, params, block(1).data.startsBG', block(1).data.stopsBG');
 
             % Calculate Some statistics on how good the measuremnts were
             good_counter = good_counter - 1;
@@ -310,6 +313,80 @@ function runModulationTrialSequencePupillometryNulled
     
 end
 
+
+function [time, diameter, good_counter, interruption_counter, time_inter] = OLVSGTransferData(UDPobj, i, params, starts, stopsBackgroundIdle)
+        % [time, diameter, good_counter, interruption_counter, time_inter] = OLVSGTransferData(i, params, starts, stopsBackgroundIdle)
+        % Get the data from the VSG box
+        
+        global experimentMode
+        
+        disp('OK to before transfer\n');
+        pause
+        if (experimentMode)
+            % Set the mirrors to the background
+            ol = OneLight;
+            ol.setMirrors(starts,stopsBackgroundIdle);
+        end
+        
+        % Initialize the data transfer
+        fprintf('OLVSGTransferData: Beginning transfer of data...\n');
+        matlabUDP('send','begin transfer');
+        winCommand = 'waiting';
+        while (~strcmp(winCommand,'begin transfer'))
+            winCommand = OLVSGGetInput;
+        end
+        fprintf('OLVSGTransferData: proceeding with data transfer\n');
+        good_counter = 0;
+        
+        % Clear and initialize some variables
+        clear diameter;
+        clear time;
+        clear time_inter;
+        interruption_counter = 0;
+        diameter(1) = 0;
+        time(1) = 0;
+        time_inter(1) = 0;
+        
+        % Get the number of data points to be transferred
+        nDataPoints = str2num(OLVSGGetInput);
+        
+        fprintf('OLVSGTransferData: The number of data points is %d\n', nDataPoints);
+        
+        % Iterate over the data points
+        for i = 1:nDataPoints
+            matlabUDP('send', ['transfering ' num2str(i)]);
+            firstSampleTimeStamp = OLVSGGetInput;
+            parsedline = allwords(firstSampleTimeStamp, ' ');
+            diam = str2double(parsedline{1});
+            ti = str2double(parsedline{2});
+            isinterruption = str2double(parsedline{3});
+            interrupttime = str2double(parsedline{4});
+            if (isinterruption == 0)
+                good_counter = good_counter+1;
+                diameter(good_counter) = diam;
+                time(good_counter) = ti;
+            elseif (isinterruption == 1)
+                interruption_counter = interruption_counter + 1;
+                time_inter(interruption_counter) = interrupttime;
+            end
+        end
+        
+        fprintf('OLVSGTransferData: Data transfer %f complete.\n', i)
+        matlabUDP('send','end transfer');
+end
+    
+
+function reply = OLVSGStopPupilRecording(UDPobj)
+    messageTuple = {'Eye Tracker Status', 'stop pupil recording'};
+    UDPobj.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
+
+    UDPcommunicationProgram = {...
+        {'Eye Tracker Status', 'reply'} ...
+    };
+    for k = 1:numel(UDPcommunicationProgram)
+        eval(sprintf('%s = UDPobj.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
+    end
+end
 
 function isBeingTracked = OLVSGEyeTrackerCheck(UDPobj)
     % isBeingTracked = OLVSGEyeTrackerCheck
