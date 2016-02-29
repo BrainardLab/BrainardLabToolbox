@@ -95,7 +95,7 @@ function response = waitForMessage(obj, msgLabel, varargin)
                 end
             else 
                 % Send back an TRANSMITTED_MESSAGE_MATCHES_EXPECTED message 
-                obj.sendMessage(obj.TRANSMITTED_MESSAGE_MATCHES_EXPECTED, 'doNotreplyToThisMessage', true);
+                obj.sendMessage(obj.TRANSMITTED_MESSAGE_MATCHES_EXPECTED, 'nan', 'doNotreplyToThisMessage', true);
                 if (~strcmp(obj.verbosity,'min'))
                     fprintf('%s %s Expected message received within %2.2f seconds, acknowledging the sender.', signature, callingFunctionSignature, elapsedTime);
                 end 
@@ -105,7 +105,7 @@ function response = waitForMessage(obj, msgLabel, varargin)
             if (~strcmp(obj.verbosity,'min'))
                 fprintf('%s %s: Received: ''%s'' <strong>instead of</strong> ''%s''.\n', signature, callingFunctionSignature, response.msgLabel, expectedMessageLabel);
             end
-            obj.sendMessage(sprintf('Received (''%s'') message does not match expected (''%s'')', response.msgLabel, expectedMessageLabel), 'doNotreplyToThisMessage', true);
+            obj.sendMessage(sprintf('Received (''%s'') message does not match expected (''%s'')', response.msgLabel, expectedMessageLabel), 'nan', 'doNotreplyToThisMessage', true);
         end
     end
     
