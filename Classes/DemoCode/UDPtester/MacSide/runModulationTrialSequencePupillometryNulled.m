@@ -47,14 +47,15 @@ function runModulationTrialSequencePupillometryNulled
     offline = params.VSGOfflineMode;
         
     % This is the trialLoop function
+    % ==== NEW ===  Send param values =====================================
     OLVSG.sendParamValue({OLVSG.PROTOCOL_NAME,       params.protocolName},        'timeOutSecs', 2.0, 'maxAttemptsNum', 3);
     OLVSG.sendParamValue({OLVSG.OBSERVER_ID,         params.obsID},               'timeOutSecs', 2.0, 'maxAttemptsNum', 3);
     OLVSG.sendParamValue({OLVSG.OBSERVER_ID_AND_RUN, params.obsIDandRun},         'timeOutSecs', 2.0, 'maxAttemptsNum', 3);
     OLVSG.sendParamValue({OLVSG.NUMBER_OF_TRIALS,    params.nTrials},             'timeOutSecs', 2.0, 'maxAttemptsNum', 3);
     OLVSG.sendParamValue({OLVSG.STARTING_TRIAL_NO,   params.whichTrialToStartAt}, 'timeOutSecs', 2.0, 'maxAttemptsNum', 3);
-    OLVSG.sendParamValue({OLVSG.OFFLINE},                                         'timeOutSecs', 2.0, 'maxAttemptsNum', 3);
+    OLVSG.sendParamValue({OLVSG.OFFLINE,             params.VSGOfflineMode},      'timeOutSecs', 2.0, 'maxAttemptsNum', 3);
+    % ==== NEW ===  Send param values =====================================
     
-    pause;
 
     if (experimentMode)  
         % Create the OneLight object.
@@ -119,23 +120,20 @@ function runModulationTrialSequencePupillometryNulled
             [readyToResume, abort] = OLVSGCheckResume(readyToResume, params, block(1).data.startsBG', block(1).data.stopsBG');
             
             %matlabUDP('send','The User is ready to move on.');
-            messageTuple = {'User Readiness Status', 'User is ready to move on.'}
-            OLVSG.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
-    
+            % ==== NEW ===  Send user ready status ========================
+            OLVSG.sendParamValue({OLVSG.USER_READY_STATUS, 'User is ready to move on.'}, 'timeOutSecs', 2.0, 'maxAttemptsNum', 3);
+            % =============================================================
             
             fprintf('OLVSGCheckResume: User input acquired.\n');
     
             % Wait to receive the next action
             % continueCheck = OLVSGGetInput;
-            UDPcommunicationProgram = {...
-                {'Action', 'continueCheck'} ...
-            };
-            for k = 1:numel(UDPcommunicationProgram)
-                eval(sprintf('%s = OLVSG.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
-            end
+            
+            % === NEW ====== Wait for ever to receive the userReady status ==================
+            continueCheck = OLVSG.receiveParamValue(VSGOL.USER_READY_STATUS,  'timeOutSecs', Inf);
+            % === NEW ====== Wait for ever to receive the userReady status ==================
             
 
-            
             if strcmp(continueCheck, 'abort');
                abort = true;
             end
@@ -447,8 +445,10 @@ function isBeingTracked = OLVSGEyeTrackerCheck(OLVSG)
     WaitSecs(1);
     
     % matlabUDP('send','startEyeTrackerCheck');
-    messageTuple = {OLVSGcommunicator.eyeTrackerStatus, 'startEyeTrackerCheck'};
-    OLVSG.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
+    % ==== NEW ===  Send eye tracker status = startEyeTrackerCheck ========
+    VSGOL.sendParamValue({OLVSG.EYE_TRACKER_STATUS, 'startEyeTrackerCheck'}, 'timeOutSecs', 2.0, 'maxAttemptsNum', 3);
+    % ==== NEW ============================================================
+ 
     
     tStart = mglGetSecs;
 
@@ -457,15 +457,14 @@ function isBeingTracked = OLVSGEyeTrackerCheck(OLVSG)
     end
 
     % numTrackedData = OLVSGGetInput;
-    UDPcommunicationProgram = {...
-                {'Number of checking data points', 'numTrackedData'} ...
-    };
-    for k = 1:numel(UDPcommunicationProgram)
-        eval(sprintf('%s = OLVSG.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
-    end
-            
+    % === NEW ====== Retrieve the number of eye tracking data points ==================
+    numTrackedData = OLVSG.receiveParamValue(OLVSG.EYE_TRACKER_DATA_POINTS_NUM,  'timeOutSecs', Inf);
+    % === NEW ====== Retrieve the number of eye tracking data points ==================
+  
     fprintf('%s checking data points collected \n',numTrackedData)
 
+    disp('here');
+    pause
     % Clear the buffer
     % OLVSGClearMessageBuffer;
     OLVSG.flashQueue();
@@ -511,6 +510,7 @@ function [readyToResume, abort] = OLVSGCheckResume(readyToResume, params, starts
     
     resume = false;
     % Flush our keyboard queue.
+    fprintf('Waiting for a key press ...\n');
     mglGetKeyEvent;
     keyPress = [];
     

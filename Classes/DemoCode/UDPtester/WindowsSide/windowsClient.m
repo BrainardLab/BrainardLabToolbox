@@ -73,33 +73,13 @@ function windowsClient
     
     % Main Experiment Loop
     
-    % Compose the UDPcommunicationProgram to run : specify sequence of messages (labels) expected to be received from the Mac
-    % and the names of variables in which to store the received message values
-    protocolNameStr = VSGOL.receiveParamValue(VSGOL.PROTOCOL_NAME)
-    obsID           = VSGOL.receiveParamValue(VSGOL.OBSERVER_ID, 'timeOutSecs', 1.0)
-    obsIDAndRun     = VSGOL.receiveParamValue(VSGOL.OBSERVER_ID_AND_RUN)
-    nTrials         = VSGOL.receiveParamValue(VSGOL.NUMBER_OF_TRIALS)
-    startTrialNum   = VSGOL.receiveParamValue(VSGOL.STARTING_TRIAL_NO)
-    offline         = VSGOL.receiveParamValue(VSGOL.OFFLINE)
-    
-    pause
+    % === NEW ====== Get param values for labeled param names ==================
+    protocolNameStr = VSGOL.receiveParamValue(VSGOL.PROTOCOL_NAME,       'timeOutSecs', 2)
+    obsID           = VSGOL.receiveParamValue(VSGOL.OBSERVER_ID,         'timeOutSecs', 2)
+    obsIDAndRun     = VSGOL.receiveParamValue(VSGOL.OBSERVER_ID_AND_RUN, 'timeOutSecs', 2)
+    % === NEW ====== Get param values for labeled param names ==================
     
     
-    UDPcommunicationProgram = {...
-            {'Protocol Name',       'protocolNameStr'} ...  % {messageLabel, variable name in which to store received data}
-            {'Observer ID',         'obsID'} ...
-            {'Observer ID and Run', 'obsIDandRun'} ...
-            {'Number of Trials',    'nTrials'} ...
-            {'Starting Trial No',   'startTrialNum'} ...
-            {'Offline',             'offline'} ...
-    };
-
-    
-    % Run program from step #1 to step #3
-    stepsToExecute = (1:3);
-    for k = stepsToExecute
-        eval(sprintf('%s = VSGOL.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
-    end
     
     if (experimentMode)
         % Ask if we want to save in Dropbox
@@ -115,11 +95,13 @@ function windowsClient
         end
     end % experimentMode
     
-    % Run program from step #4 to step #6
-    stepsToExecute = (4:6);
-    for k = stepsToExecute
-        eval(sprintf('%s = VSGOL.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
-    end
+    
+    % === NEW ====== Get param values for labeled param names ==================
+    nTrials         = VSGOL.receiveParamValue(VSGOL.NUMBER_OF_TRIALS,  'timeOutSecs', 2)
+    startTrialNum   = VSGOL.receiveParamValue(VSGOL.STARTING_TRIAL_NO, 'timeOutSecs', 2)
+    offline         = VSGOL.receiveParamValue(VSGOL.OFFLINE,           'timeOutSecs', 2)
+    % === NEW ====== Get param values for labeled param names ==================
+    
     
     if (experimentMode)
         if (offline)
@@ -132,14 +114,7 @@ function windowsClient
         end
     end % experimentMode
     
-    % print the variables we received so far
-    for k = 1:numel(UDPcommunicationProgram)
-        c = UDPcommunicationProgram{k};
-        eval(c{2})
-    end
-    
-    
-    % ---------- PROGRAMS SYNCED UP TO HERE ------------- NICOLAS
+
     
     % Loop over trials
     for i = startTrialNum:nTrials
@@ -163,22 +138,20 @@ function windowsClient
             checkCounter = checkCounter + 1;
             
             %userReady = VSGOLGetInput;
-            UDPcommunicationProgram = {...
-                {'User Readiness Status', 'userReadiness'} ...
-            };
-            for k = 1:numel(UDPcommunicationProgram)
-                eval(sprintf('%s = VSGOL.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
-            end
+            % === NEW ====== Wait for ever to receive the userReady status ==================
+            userReady = VSGOL.receiveParamValue(VSGOL.USER_READY_STATUS,  'timeOutSecs', Inf);
+            % === NEW ====== Wait for ever to receive the userReady status ==================
 
             fprintf('>>> Check %g\n', checkCounter);
-            fprintf('>>> User ready? %s \n', userReadiness);
+            fprintf('>>> User ready? %s \n', userReady);
             
             
             if checkCounter <= maxAttempts
                 % matlabUDP('send','continue');
-                messageTuple = {'Action', 'continue'};
-                VSGOL.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
-                
+                % ==== NEW ===  Send user ready status ========================
+                VSGOL.sendParamValue({VSGOL.USER_READY_STATUS, 'Continue'}, 'timeOutSecs', 2.0, 'maxAttemptsNum', 3);
+                % =============================================================
+ 
                 params = VSGOLEyeTrackerCheck(VSGOL, params);
                 
             else
@@ -463,13 +436,11 @@ function params = VSGOLEyeTrackerCheck(VSGOL, params)
     fprintf('>>> Entered VSGOLEyeTrackerCheck \n');
 
     % checkStart = VSGOLGetInput;
-
-    UDPcommunicationProgram = {...
-            {OLVSGcommunicator.eyeTrackerStatus, 'checkStart'} ...
-    };
-    for k = 1:numel(UDPcommunicationProgram)
-            eval(sprintf('%s = VSGOL.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
-    end
+    
+    % === NEW ====== Wait for ever to receive the eye tracker status ==================
+   	checkStart = VSGOL.receiveParamValue(VSGOL.EYE_TRACKER_STATUS,  'timeOutSecs', Inf);
+    % === NEW ====== Wait for ever to receive the eye tracker status ==================
+            
 
     fprintf('%s',checkStart);
     WaitSecs(1);
@@ -495,10 +466,13 @@ function params = VSGOLEyeTrackerCheck(VSGOL, params)
         end
         
         % matlabUDP('send',num2str(sumTrackData))
-        messageTuple = {'Number of checking data points', sumTrackData};
-        VSGOL.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
+        % ==== NEW ===  Send eye tracker status = startEyeTrackerCheck ========
+        VSGOL.sendParamValue({VSGOL.EYE_TRACKER_DATA_POINTS_NUM, sumTrackData}, 'timeOutSecs', 2.0, 'maxAttemptsNum', 3);
+        % ==== NEW ============================================================
             
-
+        disp('here');
+        pause
+    
         if (experimentMode)
             vetStopTracking;
         end
@@ -537,17 +511,4 @@ switch lower(opcode)
 end
 end
 
-
-
-function data = VSGOLGetInput
-% NOT NEEDED JUST KEEPING IT HERE FOR REFERENCE - NICOLAS
-
-    % data = VSGOLGetInput Continuously checks for input from the Mac machine
-    % until data is actually available.
-    %while matlabUDP('check') == 0; end
-    %data = matlabUDP('receive');
-    
-    data = VSGOL.waitForMessage(messageLabel, 'timeOutSecs', Inf);
-    
-end
 

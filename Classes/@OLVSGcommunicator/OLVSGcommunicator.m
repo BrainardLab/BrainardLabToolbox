@@ -8,13 +8,16 @@ classdef OLVSGcommunicator < UDPcommunicator
     
     % Pre-defined labels
     properties (Constant)
-        PROTOCOL_NAME       = 'Protocol Name';
-        OBSERVER_ID         = 'Observer ID';
-        OBSERVER_ID_AND_RUN = 'Observer ID and Run';
-        NUMBER_OF_TRIALS    = 'Number of Trials';
-        STARTING_TRIAL_NO   = 'Starting Trial No';
-        OFFLINE             = 'Offline';
-        EYE_TRACKER_STATUS  = 'Eye Tracker Status';
+        PROTOCOL_NAME               = 'Protocol Name Label';
+        OBSERVER_ID                 = 'Observer ID Label';
+        OBSERVER_ID_AND_RUN         = 'Observer ID and Run Label';
+        NUMBER_OF_TRIALS            = 'Number of Trials Label';
+        STARTING_TRIAL_NO           = 'Starting Trial No Label';
+        OFFLINE                     = 'Offline Label';
+        
+        USER_READY_STATUS           = 'User Ready Status Label';
+        EYE_TRACKER_STATUS          = 'Eye Tracker Status Label';
+        EYE_TRACKER_DATA_POINTS_NUM = 'Eye Tracker Data Points Num Label';
     end
     
     % Public methods
