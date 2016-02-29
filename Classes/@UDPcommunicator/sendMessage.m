@@ -5,7 +5,7 @@ function status = sendMessage(obj, msgLabel, msgValue, varargin)
     addRequired(p,'msgLabel',@ischar);
     
     % the withValue is required
-    addRequired(p, 'withValue', ' ');
+    addRequired(p, 'withValue');
     
     % the timeOutSecs is optional, with a default value: 5
     defaultTimeOutSecs = 5;
