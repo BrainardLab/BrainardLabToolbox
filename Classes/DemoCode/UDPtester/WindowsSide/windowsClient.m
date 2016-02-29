@@ -152,7 +152,7 @@ function windowsClient()
             if checkCounter <= maxAttempts
                 % matlabUDP('send','continue');
                 % ==== NEW ===  Send user ready status ========================
-                VSGOL.sendParamValue({VSGOL.USER_READY_STATUS, 'Continue'}, 'timeOutSecs', 2.0, 'maxAttemptsNum', 3);
+                VSGOL.sendParamValue({VSGOL.USER_READY_STATUS, 'continue'}, 'timeOutSecs', 2);
                 % =============================================================
  
                 params = VSGOLEyeTrackerCheck(VSGOL, params);
@@ -441,7 +441,7 @@ function params = VSGOLEyeTrackerCheck(VSGOL, params)
     % checkStart = VSGOLGetInput;
     
     % === NEW ====== Wait for ever to receive the eye tracker status ==================
-   	checkStart = VSGOL.receiveParamValue(VSGOL.EYE_TRACKER_STATUS,  'timeOutSecs', Inf);
+   	checkStart = VSGOL.receiveParamValue(VSGOL.EYE_TRACKER_STATUS,  'timeOutSecs', 2);
     % === NEW ====== Wait for ever to receive the eye tracker status ==================
             
 
