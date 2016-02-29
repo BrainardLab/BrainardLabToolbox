@@ -15,6 +15,7 @@ function paramValue = receiveParamValue(obj, paramName, varargin)
         error('Input to receiveParamValue must be a string corresponding to the parameter name.');
     else
         defaultTimeOutSecs = Inf;
+        p = inputParser;
         p.addParamValue('timeOutSecs', defaultTimeOutSecs,   @isnumeric);
         p.parse(varargin{:});
 
@@ -30,7 +31,7 @@ function paramValue = receiveParamValue(obj, paramName, varargin)
         end
 
         % Check for communication error and abort if one occurred
-        assert(strcmp(response.msgLabel, messageLabel), sprintf('%s: Exiting due to mismatch in message labels.\nExpected label: ''%s'', Received label: ''%s''.\n', backTrace, messageLabel, response.msgLabel));
+        assert(strcmp(response.msgLabel, paramName), sprintf('%s: Exiting due to mismatch in message labels.\nExpected label: ''%s'', Received label: ''%s''.\n', backTrace, paramName, response.msgLabel));
 
         % Get the message value received
         paramValue = response.msgValue;
