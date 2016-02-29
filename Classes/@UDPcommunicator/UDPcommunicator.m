@@ -79,8 +79,8 @@ classdef UDPcommunicator < handle
 %
 % 2/4/2016   npc   Wrote it
 %
-	% Read-only properties
-	properties (SetAccess = private)
+	% Protected properties. All subclasses of UDPcommunicator can read these, but they cannot set them. 
+	properties (SetAccess = protected)
         useNativeUDP = false
         udpClient
 		localIP
@@ -188,7 +188,7 @@ classdef UDPcommunicator < handle
         showMessageValueAsStarString(obj, msgCount, direction, msgLabel, msgValueType, msgValue, maxValue, maxStars);
         
         % Close UDP
-        shuDown(obj);
+        shutDown(obj);
         
     end % public method
     

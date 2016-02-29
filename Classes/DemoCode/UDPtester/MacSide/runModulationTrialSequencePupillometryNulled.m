@@ -12,12 +12,14 @@ function runModulationTrialSequencePupillometryNulled
     
     % Instantiate a UDPcommunictor object
     udpParams = getUDPparams('NicolasOffice');
-    UDPobj = UDPcommunicator( ...
-          'localIP', udpParams.macHostIP, ...
-         'remoteIP', udpParams.winHostIP, ...
-          'udpPort', udpParams.udpPort, ...      % optional with default 2007
-        'verbosity', 'min' ...             % optional with possible values {'min', 'normal', 'max'}, and default 'normal'
+    OLVSG = OLVSGcommunicator( ...
+        'signature', 'MacSide', ...              % a label indicating the host, used to for user-feedback
+          'localIP', udpParams.macHostIP, ...    % required: the IP of this computer
+         'remoteIP', udpParams.winHostIP, ...    % required: the IP of the computer we want to conenct to
+          'udpPort', udpParams.udpPort, ...      % optional, with default value: 2007
+        'verbosity', 'min' ...                   % optional, with default value: 'normal', and possible values: {'min', 'normal', 'max'},
         );
+    
     
     
     params = struct(...
@@ -56,7 +58,7 @@ function runModulationTrialSequencePupillometryNulled
 
     % Run the initial program
     for k = 1:numel(UDPcommunicationProgram)
-        UDPobj.sendMessageAndReceiveAcknowldegmentOrFail(UDPcommunicationProgram{k});
+        OLVSG.sendMessageAndReceiveAcknowldegmentOrFail(UDPcommunicationProgram{k});
     end
 
     if (experimentMode)  
@@ -108,6 +110,7 @@ function runModulationTrialSequencePupillometryNulled
             % dummy block
             block(1).data.startsBG = [1 2];
             block(1).data.stopsBG = [2 3];
+            block(1).modulationMode = 'AM'
         end
         
         % DEBUG
@@ -122,7 +125,7 @@ function runModulationTrialSequencePupillometryNulled
             
             %matlabUDP('send','The User is ready to move on.');
             messageTuple = {'User Readiness Status', 'User is ready to move on.'}
-            UDPobj.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
+            OLVSG.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
     
             
             fprintf('OLVSGCheckResume: User input acquired.\n');
@@ -133,7 +136,7 @@ function runModulationTrialSequencePupillometryNulled
                 {'Action', 'continueCheck'} ...
             };
             for k = 1:numel(UDPcommunicationProgram)
-                eval(sprintf('%s = UDPobj.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
+                eval(sprintf('%s = OLVSG.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
             end
             
 
@@ -143,7 +146,7 @@ function runModulationTrialSequencePupillometryNulled
             end
             if strcmp(continueCheck, 'continue');
                 % Let's make sure that the eye is being tracked
-                isBeingTracked = OLVSGEyeTrackerCheck(UDPobj);
+                isBeingTracked = OLVSGEyeTrackerCheck(OLVSG);
             end
                 
             
@@ -185,7 +188,7 @@ function runModulationTrialSequencePupillometryNulled
         % reply = OLVSGSendEyeTrackingCommand;
         
         messageTuple = {'Eye Tracker Status', 'Requesting permission to start tracking'};
-        UDPobj.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
+        OLVSG.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
     
 %         while (~strcmp(reply,'Permission granted'))
 %             reply = OLVSGGetInput;
@@ -197,7 +200,7 @@ function runModulationTrialSequencePupillometryNulled
                 {'Eye Tracker Status', 'reply'} ...
             };
             for k = 1:numel(UDPcommunicationProgram)
-                eval(sprintf('%s = UDPobj.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
+                eval(sprintf('%s = OLVSG.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
             end
         end
         
@@ -209,7 +212,7 @@ function runModulationTrialSequencePupillometryNulled
             % the things below still check out.
 
             % We stop recording.
-            reply = OLVSGStopPupilRecording(UDPobj);
+            reply = OLVSGStopPupilRecording(OLVSG);
             fprintf('%s', reply);
 
             if (experimentMode) 
@@ -229,7 +232,7 @@ function runModulationTrialSequencePupillometryNulled
             end
             
             % We stop recording.
-            reply = OLVSGStopPupilRecording(UDPobj);
+            reply = OLVSGStopPupilRecording(OLVSG);
             fprintf('%s', reply);
         end
             
@@ -238,58 +241,62 @@ function runModulationTrialSequencePupillometryNulled
         if (offline == false)
             % Get the data
             [time, diameter, good_counter, interruption_counter, time_inter] = ...
-                OLVSGTransferData(UDPobj,trial, params, block(1).data.startsBG', block(1).data.stopsBG');
+                OLVSGTransferData(OLVSG,trial, params, block(1).data.startsBG', block(1).data.stopsBG');
 
-            % Calculate Some statistics on how good the measuremnts were
-            good_counter = good_counter - 1;
-            interruption_counter = interruption_counter - 1;
-            ratioInterupt = (interruption_counter/(interruption_counter+good_counter));
-            average_diameter = mean(diameter)*ones(size(time));
+            if (experimentMode) 
+                % Calculate Some statistics on how good the measuremnts were
+                good_counter = good_counter - 1;
+                interruption_counter = interruption_counter - 1;
+                ratioInterupt = (interruption_counter/(interruption_counter+good_counter));
+                average_diameter = mean(diameter)*ones(size(time));
 
-            % Assign what we obtain to the data structure.
-            dataStruct(trial).diameter = diameter;
-            dataStruct(trial).time = time;
-            dataStruct(trial).time_inter = time_inter;
-            dataStruct(trial).average_diameter = average_diameter;
-            dataStruct(trial).ratioInterupt = ratioInterupt;
-
+                % Assign what we obtain to the data structure.
+                dataStruct(trial).diameter = diameter;
+                dataStruct(trial).time = time;
+                dataStruct(trial).time_inter = time_inter;
+                dataStruct(trial).average_diameter = average_diameter;
+                dataStruct(trial).ratioInterupt = ratioInterupt;
+            end
+            
         end
             
-        if strcmp(block(trial).modulationMode, 'AM')
-            dataStruct(trial).frequencyEnvelope = block(trial).envelopeFrequencyHz;
-            dataStruct(trial).phaseEnvelope = block(trial).carrierPhaseDeg;
-            dataStruct(trial).modulationMode = block(trial).modulationMode;
-        end
+        if (experimentMode) 
+            if strcmp(block(trial).modulationMode, 'AM')
+                dataStruct(trial).frequencyEnvelope = block(trial).envelopeFrequencyHz;
+                dataStruct(trial).phaseEnvelope = block(trial).carrierPhaseDeg;
+                dataStruct(trial).modulationMode = block(trial).modulationMode;
+            end
 
-        if strcmp(block(trial).modulationMode, 'BG')
-            dataStruct(trial).frequencyEnvelope = 0;
-            dataStruct(trial).phaseEnvelope = 0;
-            dataStruct(trial).modulationMode = block(trial).modulationMode;
-        end
-
-        if strcmp(block(trial).modulationMode, 'FM')
-            dataStruct(trial).frequencyEnvelope = 0;
-            dataStruct(trial).phaseEnvelope = 0;
-            dataStruct(trial).modulationMode = block(trial).modulationMode;
-        end
-        dataStruct(trial).modulationMode = block(trial).modulationMode;
-            
-        if (offline == true);
-            dataStruct(trial).frequencyCarrier = block(trial).carrierFrequencyHz;
-            dataStruct(trial).phaseCarrier = block(trial).carrierPhaseDeg;
-            dataStruct(trial).direction = block(trial).direction;
-            dataStruct(trial).contrastRelMax = block(trial).contrastRelMax;
-
-            if ~isempty(strfind(block(trial).modulationMode, 'pulse'))
+            if strcmp(block(trial).modulationMode, 'BG')
                 dataStruct(trial).frequencyEnvelope = 0;
                 dataStruct(trial).phaseEnvelope = 0;
                 dataStruct(trial).modulationMode = block(trial).modulationMode;
-                dataStruct(trial).phaseRandSec = block(trial).phaseRandSec;
-                dataStruct(trial).stepTimeSec = block(trial).stepTimeSec;
-                dataStruct(trial).preStepTimeSec = block(trial).preStepTimeSec;
+            end
+
+            if strcmp(block(trial).modulationMode, 'FM')
+                dataStruct(trial).frequencyEnvelope = 0;
+                dataStruct(trial).phaseEnvelope = 0;
+                dataStruct(trial).modulationMode = block(trial).modulationMode;
+            end
+            dataStruct(trial).modulationMode = block(trial).modulationMode;
+            
+            if (offline == true)
+                dataStruct(trial).frequencyCarrier = block(trial).carrierFrequencyHz;
+                dataStruct(trial).phaseCarrier = block(trial).carrierPhaseDeg;
+                dataStruct(trial).direction = block(trial).direction;
+                dataStruct(trial).contrastRelMax = block(trial).contrastRelMax;
+
+                if ~isempty(strfind(block(trial).modulationMode, 'pulse'))
+                    dataStruct(trial).frequencyEnvelope = 0;
+                    dataStruct(trial).phaseEnvelope = 0;
+                    dataStruct(trial).modulationMode = block(trial).modulationMode;
+                    dataStruct(trial).phaseRandSec = block(trial).phaseRandSec;
+                    dataStruct(trial).stepTimeSec = block(trial).stepTimeSec;
+                    dataStruct(trial).preStepTimeSec = block(trial).preStepTimeSec;
+                end
             end
         end
-            
+        
         % And clear the variables to get ready for the trial.
         clear time;
         clear diameter;
@@ -316,11 +323,11 @@ function runModulationTrialSequencePupillometryNulled
     % gets passed back to the calling routine and saved in our standard place.
     params.dataStruct = dataStruct;
     
-    UDPobj.shutDown();
+    OLVSG.shutDown();
 end
 
 
-function [time, diameter, good_counter, interruption_counter, time_inter] = OLVSGTransferData(UDPobj, i, params, starts, stopsBackgroundIdle)
+function [time, diameter, good_counter, interruption_counter, time_inter] = OLVSGTransferData(OLVSG, i, params, starts, stopsBackgroundIdle)
         % [time, diameter, good_counter, interruption_counter, time_inter] = OLVSGTransferData(i, params, starts, stopsBackgroundIdle)
         % Get the data from the VSG box
         
@@ -337,7 +344,7 @@ function [time, diameter, good_counter, interruption_counter, time_inter] = OLVS
         
         %matlabUDP('send','begin transfer');
         messageTuple = {'Transfer Data Status', 'begin transfer'};
-        UDPobj.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
+        OLVSG.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
     
 
         UDPcommunicationProgram = {...
@@ -348,7 +355,7 @@ function [time, diameter, good_counter, interruption_counter, time_inter] = OLVS
         while (~strcmp(winCommand,'begin transfer'))
             %winCommand = OLVSGGetInput;
             for k = 1:numel(UDPcommunicationProgram)
-                eval(sprintf('%s = UDPobj.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
+                eval(sprintf('%s = OLVSG.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
             end
         end
 
@@ -372,7 +379,7 @@ function [time, diameter, good_counter, interruption_counter, time_inter] = OLVS
                 {'Number of Data Points', 'nDataPoints'} ...
         };
         for k = 1:numel(UDPcommunicationProgram)
-            eval(sprintf('%s = UDPobj.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
+            eval(sprintf('%s = OLVSG.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
         end
                 
         fprintf('OLVSGTransferData: The number of data points is %d\n', nDataPoints);
@@ -383,7 +390,7 @@ function [time, diameter, good_counter, interruption_counter, time_inter] = OLVS
             
             %matlabUDP('send', ['transfering ' num2str(i)]);
             messageTuple = {'Transfer Data Status', ['transfering ' num2str(i)]};
-            UDPobj.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
+            OLVSG.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
         
             
             %firstSampleTimeStamp = OLVSGGetInput;
@@ -391,7 +398,7 @@ function [time, diameter, good_counter, interruption_counter, time_inter] = OLVS
                 {'Data Point', 'firstSampleTimeStamp'} ...
             };
             for k = 1:numel(UDPcommunicationProgram)
-                eval(sprintf('%s = UDPobj.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
+                eval(sprintf('%s = OLVSG.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
             end
         
             parsedline = allwords(firstSampleTimeStamp, ' ');
@@ -413,24 +420,24 @@ function [time, diameter, good_counter, interruption_counter, time_inter] = OLVS
         %matlabUDP('send','end transfer');
         
         messageTuple = {'Transfer Data Status', 'end transfer'};
-        UDPobj.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
+        OLVSG.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
             
 end
     
 
-function reply = OLVSGStopPupilRecording(UDPobj)
+function reply = OLVSGStopPupilRecording(OLVSG)
     messageTuple = {'Eye Tracker Status', 'stop pupil recording'};
-    UDPobj.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
+    OLVSG.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
 
     UDPcommunicationProgram = {...
         {'Eye Tracker Status', 'reply'} ...
     };
     for k = 1:numel(UDPcommunicationProgram)
-        eval(sprintf('%s = UDPobj.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
+        eval(sprintf('%s = OLVSG.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
     end
 end
 
-function isBeingTracked = OLVSGEyeTrackerCheck(UDPobj)
+function isBeingTracked = OLVSGEyeTrackerCheck(OLVSG)
     % isBeingTracked = OLVSGEyeTrackerCheck
     % This function makes sure that the EyeTracker is successfully tracking
     % the subject's eye.
@@ -440,13 +447,13 @@ function isBeingTracked = OLVSGEyeTrackerCheck(UDPobj)
     dataCheck = 5;
     
     % OLVSGClearMessageBuffer;
-    UDPobj.flashQueue();
+    OLVSG.flashQueue();
     
     WaitSecs(1);
     
     % matlabUDP('send','startEyeTrackerCheck');
     messageTuple = {'Eye Tracker Status', 'startEyeTrackerCheck'};
-    UDPobj.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
+    OLVSG.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
     
     tStart = mglGetSecs;
 
@@ -459,14 +466,14 @@ function isBeingTracked = OLVSGEyeTrackerCheck(UDPobj)
                 {'Number of checking data points', 'numTrackedData'} ...
     };
     for k = 1:numel(UDPcommunicationProgram)
-        eval(sprintf('%s = UDPobj.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
+        eval(sprintf('%s = OLVSG.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
     end
             
     fprintf('%s checking data points collected \n',numTrackedData)
 
     % Clear the buffer
     % OLVSGClearMessageBuffer;
-    UDPobj.flashQueue();
+    OLVSG.flashQueue();
     
     if (numTrackedData >= dataCheck)
         isBeingTracked = true;
@@ -478,7 +485,7 @@ function isBeingTracked = OLVSGEyeTrackerCheck(UDPobj)
     end
 
     messageTuple = {'Eye Tracker Status', isBeingTracked};
-    UDPobj.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
+    OLVSG.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
     
 end
 

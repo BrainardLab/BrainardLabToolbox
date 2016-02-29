@@ -1,4 +1,4 @@
-function shuDown(obj)
+function shutDown(obj)
     if (obj.useNativeUDP)
         matlabUDP('close');
     end

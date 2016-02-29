@@ -12,7 +12,8 @@ function windowsClient
     
      % Instantiate a UDPcommunictor object
     udpParams = getUDPparams('NicolasOffice'); 
-    UDPobj = UDPcommunicator( ...
+    VSGOL = OLVSGcommunicator( ...
+        'signature', 'WindowsSide', ...          % a label indicating the host, used to for user-feedback
           'localIP', udpParams.winHostIP, ...    % required: the IP of this computer
          'remoteIP', udpParams.macHostIP, ...    % required: the IP of the computer we want to conenct to
           'udpPort', udpParams.udpPort, ...      % optional, with default value: 2007
@@ -85,7 +86,7 @@ function windowsClient
     % Run program from step #1 to step #3
     stepsToExecute = (1:3);
     for k = stepsToExecute
-        eval(sprintf('%s = UDPobj.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
+        eval(sprintf('%s = VSGOL.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
     end
     
     if (experimentMode)
@@ -105,7 +106,7 @@ function windowsClient
     % Run program from step #4 to step #6
     stepsToExecute = (4:6);
     for k = stepsToExecute
-        eval(sprintf('%s = UDPobj.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
+        eval(sprintf('%s = VSGOL.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
     end
     
     if (experimentMode)
@@ -154,7 +155,7 @@ function windowsClient
                 {'User Readiness Status', 'userReadiness'} ...
             };
             for k = 1:numel(UDPcommunicationProgram)
-                eval(sprintf('%s = UDPobj.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
+                eval(sprintf('%s = VSGOL.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
             end
 
             fprintf('>>> Check %g\n', checkCounter);
@@ -164,14 +165,14 @@ function windowsClient
             if checkCounter <= maxAttempts
                 % matlabUDP('send','continue');
                 messageTuple = {'Action', 'continue'};
-                UDPobj.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
+                VSGOL.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
                 
-                params = VSGOLEyeTrackerCheck(UDPobj, params);
+                params = VSGOLEyeTrackerCheck(VSGOL, params);
                 
             else
                 % matlabUDP('send','abort');
                 messageTuple = {'Action', 'abort'};
-                UDPobj.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
+                VSGOL.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
                 
                 fprintf('>>> Could not acquire good tracking after %g attempts.\n', maxAttempts);
                 fprintf('>>> Saving %g seconds of diagnostic video on the hard drive.\n', nSecsToSave);
@@ -204,10 +205,10 @@ function windowsClient
         
                 
         % Get the 'Go' signal
-        goCommand = VSGOLReceiveEyeTrackerCommand(UDPobj);
+        goCommand = VSGOLReceiveEyeTrackerCommand(VSGOL);
         while (goCommand  ~= true)
             fprintf('>>> The go signal is %d',goCommand);
-            goCommand = VSGOLReceiveEyeTrackerCommand(UDPobj);
+            goCommand = VSGOLReceiveEyeTrackerCommand(VSGOL);
         end
         if offline
             %vetStartRecordingToFile([saveFile '-' num2str(i) '.cam']);
@@ -222,13 +223,13 @@ function windowsClient
                 {'Eye Tracker Status', 'checkStop'} ...
             };
             for k = 1:numel(UDPcommunicationProgram)
-                eval(sprintf('%s = UDPobj.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
+                eval(sprintf('%s = VSGOL.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
             end
     
             if strcmp(checkStop,'stop pupil recording')
                 %matlabUDP('send',sprintf('Trial %f has ended!\n', i));
                 messageTuple = {'Eye Tracker Status', sprintf('Trial %f has ended!\n', i)};
-                UDPobj.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
+                VSGOL.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
             end
         end
     
@@ -338,7 +339,7 @@ function windowsClient
             while (~strcmp(macCommand,'begin transfer'))
                 %macCommand = VSGOLGetInput;
                 for k = 1:numel(UDPcommunicationProgram)
-                    eval(sprintf('%s = UDPobj.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
+                    eval(sprintf('%s = VSGOL.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
                 end
             end
 
@@ -346,14 +347,14 @@ function windowsClient
             
             %matlabUDP('send','begin transfer');
             messageTuple = {'Transfer Data Status', 'begin transfer'};
-            UDPobj.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
+            VSGOL.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
         
         
             
             fprintf('Transfer beginning...\n');
             %matlabUDP('send',num2str(numDataPoints));
             messageTuple = {'Number of Data Points', numDataPoints};
-            UDPobj.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
+            VSGOL.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
             
             
             UDPcommunicationProgram = {...
@@ -365,13 +366,13 @@ function windowsClient
                 while (~strcmp(macCommand,['transfering ' num2str(kk)]))
                     %macCommand = VSGOLGetInput;
                     for k = 1:numel(UDPcommunicationProgram)
-                        eval(sprintf('%s = UDPobj.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
+                        eval(sprintf('%s = VSGOL.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
                     end
                 end
                 
                 % matlabUDP('send',transferData{kk});
                 messageTuple = {'Data Point', transferData{kk}};
-                UDPobj.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
+                VSGOL.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
             end
 
             % Finish up the transfer
@@ -383,7 +384,7 @@ function windowsClient
             while (~strcmp(macCommand,'end transfer'))
                 %macCommand = VSGOLGetInput;
                 for k = 1:numel(UDPcommunicationProgram)
-                    eval(sprintf('%s = UDPobj.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
+                    eval(sprintf('%s = VSGOL.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
                 end
             end
         end
@@ -403,7 +404,7 @@ function windowsClient
     
     % Close the UDP connection
     %matlabUDP('close');
-    UDPobj.shuDown();
+    VSGOL.shutDown();
     
     fprintf('*** Program completed successfully.\n');
 
@@ -411,7 +412,7 @@ function windowsClient
 end
 
 
-function beginRecording = VSGOLReceiveEyeTrackerCommand(UDPobj)
+function beginRecording = VSGOLReceiveEyeTrackerCommand(VSGOL)
     % beginRecording = VSGOLReceiveEyeTrackerCommand
     % Wait and the 'go command
     
@@ -419,13 +420,13 @@ function beginRecording = VSGOLReceiveEyeTrackerCommand(UDPobj)
         {'Eye Tracker Status', 'eyeTrackerStatus'} ...
     };
     for k = 1:numel(UDPcommunicationProgram)
-        eval(sprintf('%s = UDPobj.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
+        eval(sprintf('%s = VSGOL.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
     end
             
     if strcmp(eyeTrackerStatus,'Requesting permission to start tracking')
         % matlabUDP('send','Permission to begin recording received');
         messageTuple = {'Eye Tracker Status', 'Permission granted'};
-        UDPobj.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
+        VSGOL.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
         beginRecording = true;
     else
         beginRecording = false;
@@ -433,7 +434,7 @@ function beginRecording = VSGOLReceiveEyeTrackerCommand(UDPobj)
 end
 
 
-function params = VSGOLEyeTrackerCheck(UDPobj, params)
+function params = VSGOLEyeTrackerCheck(VSGOL, params)
     % params = VSGOLEyeTrackerCheck(params)
     % This function calls VSGOLGetInput which listens for a "start" or "stop" from the
     % Mac host. VSGOLProcessCommand will either allow the program to continue or
@@ -455,7 +456,7 @@ function params = VSGOLEyeTrackerCheck(UDPobj, params)
             {'Eye Tracker Status', 'checkStart'} ...
     };
     for k = 1:numel(UDPcommunicationProgram)
-            eval(sprintf('%s = UDPobj.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
+            eval(sprintf('%s = VSGOL.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
     end
 
     fprintf('%s',checkStart);
@@ -483,7 +484,7 @@ function params = VSGOLEyeTrackerCheck(UDPobj, params)
         
         % matlabUDP('send',num2str(sumTrackData))
         messageTuple = {'Number of checking data points', sumTrackData};
-        UDPobj.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
+        VSGOL.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
             
 
         if (experimentMode)
@@ -498,7 +499,7 @@ function params = VSGOLEyeTrackerCheck(UDPobj, params)
             {'Eye Tracker Status', 'params.run'} ...
         };
         for k = 1:numel(UDPcommunicationProgram)
-            eval(sprintf('%s = UDPobj.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
+            eval(sprintf('%s = VSGOL.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
         end
     
         params.run
@@ -534,7 +535,7 @@ function data = VSGOLGetInput
     %while matlabUDP('check') == 0; end
     %data = matlabUDP('receive');
     
-    data = UDPobj.waitForMessage(messageLabel, 'timeOutSecs', Inf);
+    data = VSGOL.waitForMessage(messageLabel, 'timeOutSecs', Inf);
     
 end
 
