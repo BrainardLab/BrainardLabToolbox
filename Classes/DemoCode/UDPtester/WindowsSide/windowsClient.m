@@ -1,4 +1,4 @@
-function windowsClient
+function windowsClient()
     global CRS;
     global experimentMode
     
@@ -12,8 +12,11 @@ function windowsClient
     clc
     fprintf('\nStarting windows client\n');
     
-     % Instantiate a UDPcommunictor object
-    udpParams = getUDPparams('OneLightRoom'); % 'NicolasOffice'); 
+   
+    udpParams = getUDPparams();
+
+    
+     % Instantiate a OLVSGcommunicator object
     VSGOL = OLVSGcommunicator( ...
         'signature', 'WindowsSide', ...          % a label indicating the host, used to for user-feedback
           'localIP', udpParams.winHostIP, ...    % required: the IP of this computer

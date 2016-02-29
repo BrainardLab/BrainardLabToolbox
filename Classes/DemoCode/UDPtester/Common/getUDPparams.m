@@ -1,4 +1,11 @@
-function params = getUDPparams(configuration)
+function params = getUDPparams()
+    
+    selection = input(sprintf('One light room (1) or Nicolas'' office ?'));
+    if (selection == 1)
+        configuration = 'OneLightRoom';
+    else
+        configuration = 'NicolasOffice'; 
+    end
     
     switch configuration
         case 'OneLightRoom'
