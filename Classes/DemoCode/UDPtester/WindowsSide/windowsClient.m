@@ -168,7 +168,7 @@ function windowsClient
                 UDPobj.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
                 
                 
-                params = VSGOLEyeTrackerCheck(params);
+                params = VSGOLEyeTrackerCheck(UDPobj, params);
                 disp('OK to here\n')
                 pause
                 % ---- UP TO HERE ----
@@ -356,7 +356,7 @@ function windowsClient
 
 end
 
-function params = VSGOLEyeTrackerCheck(params)
+function params = VSGOLEyeTrackerCheck(UDPobj, params)
     % params = VSGOLEyeTrackerCheck(params)
     % This function calls VSGOLGetInput which listens for a "start" or "stop" from the
     % Mac host. VSGOLProcessCommand will either allow the program to continue or
@@ -375,7 +375,7 @@ function params = VSGOLEyeTrackerCheck(params)
     % checkStart = VSGOLGetInput;
 
     UDPcommunicationProgram = {...
-            {'Eye Tracker Status', 'startEyeTrackerCheck'} ...
+            {'Eye Tracker Status', 'checkStart'} ...
     };
     for k = 1:numel(UDPcommunicationProgram)
             eval(sprintf('%s = UDPobj.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
@@ -401,7 +401,7 @@ function params = VSGOLEyeTrackerCheck(params)
             sumTrackData = sum(checkData.tracked);
             fprintf('*** Number of checking data points %d\n',sumTrackData)
         else
-            sumTrackData = 4;
+            sumTrackData = 6;
         end
         
         % matlabUDP('send',num2str(sumTrackData))
@@ -424,7 +424,7 @@ function params = VSGOLEyeTrackerCheck(params)
             eval(sprintf('%s = UDPobj.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
         end
     
-        params.num
+        params.run
         
     end
 end
