@@ -4,12 +4,17 @@ function receiveParamValueAndSendResponse(obj, paramNameAndValueToBeReceived, pa
     p.addRequired('paramNameAndValueToBeSent', @iscell);
     p.parse(paramNameAndValueToBeReceived, paramNameAndValueToBeSent);
     
-    paramValue = obj.receiveParamValue(paramNameAndValueToBeReceived{1}, varargin);
-    if (~strcmp(paramValue, paramNameAndValueToBeReceived{2}))
-        error('Expected param value: ''%s'', received: ''%s'' .', paramNameAndValueToBeReceived{2}, paramValue);
+    paramNameAndValueToBeReceived
+    paramName = paramNameAndValueToBeReceived{1};
+    expectedParamValue = paramNameAndValueToBeReceived{2};
+    ischar(paramName)
+    iscell(paramName)
+    paramValue = receiveParamValue(obj,paramName, varargin);
+    if (~strcmp(paramValue, expectedParamValue))
+        error('Expected param value: ''%s'', received: ''%s'' .', expectedParamValue, paramValue);
     end
     
-    obj.sendParamValue(paramNameAndValueToBeSent, 'timeOutSecs', 2, 'maxAttemptsNum', 1);
+    sendParamValue(obj,paramNameAndValueToBeSent, 'timeOutSecs', 2, 'maxAttemptsNum', 1);
 end
 
 

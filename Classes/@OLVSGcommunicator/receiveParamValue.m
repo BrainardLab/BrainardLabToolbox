@@ -11,22 +11,24 @@
 %
 function paramValue = receiveParamValue(obj, paramName, varargin)
             
+paramName
+varargin{:}
+
     % parse input
     defaultTimeOutSecs = Inf;
     defaultConsoleMessage = '';
     p = inputParser;
-    p.addRequired('obj');
     p.addRequired('paramName', @ischar);
     p.addParamValue('timeOutSecs', defaultTimeOutSecs,   @isnumeric);
     p.addParamValue('consoleMessage', defaultConsoleMessage,   @ischar);
-    p.parse(obj, paramName, varargin{:});
+    p.parse(paramName, varargin{:});
 
     % print feedback message to console
     if (~isempty(p.Results.consoleMessage))
         fprintf('\n<strong>%s</strong> [waiting to receive value for ''%s''] ....', p.Results.consoleMessage, paramName);
     end
     % Wait for ever for a message to be received
-    response = p.Results.obj.waitForMessage(p.Results.paramName, 'timeOutSecs', p.Results.timeOutSecs);
+    response = obj.waitForMessage(p.Results.paramName, 'timeOutSecs', p.Results.timeOutSecs);
 
     % Get this backtrace of all functions leading to this point
     dbs = dbstack;
