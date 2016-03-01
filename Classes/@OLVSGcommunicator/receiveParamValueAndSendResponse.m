@@ -4,12 +4,9 @@ function receiveParamValueAndSendResponse(obj, paramNameAndValueToBeReceived, pa
     p.addRequired('paramNameAndValueToBeSent', @iscell);
     p.parse(paramNameAndValueToBeReceived, paramNameAndValueToBeSent);
     
-    paramNameAndValueToBeReceived
     paramName = paramNameAndValueToBeReceived{1};
     expectedParamValue = paramNameAndValueToBeReceived{2};
-    ischar(paramName)
-    iscell(paramName)
-    paramValue = receiveParamValue(obj,paramName, varargin);
+    paramValue = receiveParamValue(obj,paramName, varargin{:});
     if (~strcmp(paramValue, expectedParamValue))
         error('Expected param value: ''%s'', received: ''%s'' .', expectedParamValue, paramValue);
     end

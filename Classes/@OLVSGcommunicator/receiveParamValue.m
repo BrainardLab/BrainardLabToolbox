@@ -11,9 +11,6 @@
 %
 function paramValue = receiveParamValue(obj, paramName, varargin)
             
-paramName
-varargin{:}
-
     % parse input
     defaultTimeOutSecs = Inf;
     defaultConsoleMessage = '';
