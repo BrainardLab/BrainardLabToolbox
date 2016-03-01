@@ -12,23 +12,26 @@ classdef OLVSGcommunicator < UDPcommunicator
     % Pre-defined param names 
     properties (Constant)
         
-        WAIT_STATUS                 = 'Wait Status Label';
-        PROTOCOL_NAME               = 'Protocol Name Label';
-        OBSERVER_ID                 = 'Observer ID Label';
-        OBSERVER_ID_AND_RUN         = 'Observer ID and Run Label';
-        NUMBER_OF_TRIALS            = 'Number of Trials Label';
-        STARTING_TRIAL_NO           = 'Starting Trial No Label';
-        OFFLINE                     = 'Offline Label';
+        % Names of parameters
+        PROTOCOL_NAME               = 'PROTOCOL_NAME';
+        OBSERVER_ID                 = 'OBSERVER_ID';
+        OBSERVER_ID_AND_RUN         = 'OBSERVER_ID_AND_RUN';
+        NUMBER_OF_TRIALS            = 'NUMBER_OF_TRIALS';
+        STARTING_TRIAL_NO           = 'STARTING_TRIAL_NO';
+        OFFLINE                     = 'OFFLINE';
         
-        USER_READY_STATUS           = 'User Ready Status Label';
-        EYE_TRACKER_STATUS          = 'Eye Tracker Status Label';
-        EYE_TRACKER_DATA_POINTS_NUM = 'Eye Tracker Data Points Num Label';
-        TRIAL_OUTCOME               = 'Trial Outcome Label';
+        % Status labels
+        WAIT_STATUS                 = 'WAIT_STATUS';
+        USER_READY_STATUS           = 'USER_READY_STATUS';
+        EYE_TRACKER_STATUS          = 'EYE_TRACKER_STATUS';
+        DATA_TRANSFER_STATUS        = 'DATA_TRANSFER_STATUS';
         
-        DATA_TRANSFER_STATUS        = 'Data Transfer Status Label';
-        DATA_TRANSFER_POINTS_NUM    = 'Data Points To Be Transfered Label';
-        DATA_TRANSFER_REQUEST_FOR_POINT = 'Data Trasnfer Request For Point Label';
-        DATA_FOR_POINT              = 'Data For Point Label';
+        % Data trasfer labels
+        EYE_TRACKER_DATA_POINTS_NUM = 'EYE_TRACKER_DATA_POINTS_NUM';
+        TRIAL_OUTCOME               = 'TRIAL_OUTCOME';
+        DATA_TRANSFER_POINTS_NUM    = 'DATA_TRANSFER_POINTS_NUM';
+        DATA_TRANSFER_REQUEST_FOR_POINT = 'DATA_TRANSFER_REQUEST_FOR_POINT';
+        DATA_FOR_POINT              = 'DATA_FOR_POINT';
     end
     
     % Public methods

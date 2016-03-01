@@ -34,7 +34,11 @@ function sendParamValue(obj, paramNameAndValue,  varargin)
     
     % print feedback message to console
     if (~isempty(p.Results.consoleMessage))
-        fprintf('\n<strong>%s</strong> [waiting to receive value for ''%s''] ....', p.Results.consoleMessage, paramName);
+        if (isinf(p.Results.timeOutSecs))
+            fprintf('\n<strong>%s</strong> [waiting for ever to receive value for ''%s''] ....', p.Results.consoleMessage, paramName);
+        else
+            fprintf('\n<strong>%s</strong> [waiting for %2.1 secs to receive value for ''%s''] ....', p.Results.consoleMessage, p.Results.timeOutSecs, paramName);
+        end
     end
     
     % validate paramValue before sending it, if there is a valid range for

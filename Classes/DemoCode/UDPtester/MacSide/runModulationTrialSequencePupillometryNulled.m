@@ -76,7 +76,7 @@ function runModulationTrialSequencePupillometryNulled
     dataStruct = repmat(dataStruct, params.nTrials, 1);
     offline = params.VSGOfflineMode;
         
-    fprintf('\n<strong> %s </strong> Hit enter when the windowsClient is up and running.\n', mfilename);
+    fprintf('\n<strong>%s</strong>; Hit enter when the windowsClient is up and running.\n', mfilename);
     pause;
     
     % Let the Windows loose
@@ -167,7 +167,8 @@ function runModulationTrialSequencePupillometryNulled
             % continueCheck = OLVSGGetInput;
             
             % === NEW ====== Wait for ever to receive the userReady status ==================
-            continueCheck = OLVSG.receiveParamValue(OLVSG.USER_READY_STATUS,  'timeOutSecs', 2.0);
+            continueCheck = OLVSG.receiveParamValue(OLVSG.USER_READY_STATUS,  ...
+                'timeOutSecs', 2.0, 'consoleMessage', 'Continue checking ?');
             % === NEW ====== Wait for ever to receive the userReady status ==================
             
 
@@ -449,21 +450,8 @@ function [time, diameter, good_counter, interruption_counter, time_inter] = OLVS
         % ==== NEW ===  Send the end transfer request  ========================
         OLVSG.sendParamValue({OLVSG.DATA_TRANSFER_STATUS, 'end transfer'});
         % ==== NEW ===  Send the end transfer request  ========================
-       
 end
     
-
-function reply = OLVSGStopPupilRecording(OLVSG)
-    messageTuple = {OLVSGcommunicator.eyeTrackerStatus, 'stop pupil recording'};
-    OLVSG.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
-
-    UDPcommunicationProgram = {...
-        {OLVSGcommunicator.eyeTrackerStatus, 'reply'} ...
-    };
-    for k = 1:numel(UDPcommunicationProgram)
-        eval(sprintf('%s = OLVSG.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
-    end
-end
 
 function isBeingTracked = OLVSGEyeTrackerCheck(OLVSG)
     % isBeingTracked = OLVSGEyeTrackerCheck
@@ -482,7 +470,7 @@ function isBeingTracked = OLVSGEyeTrackerCheck(OLVSG)
     % matlabUDP('send','startEyeTrackerCheck');
     % ==== NEW ===  Send eye tracker status = startEyeTrackerCheck ========
     OLVSG.sendParamValue({OLVSG.EYE_TRACKER_STATUS, 'startEyeTrackerCheck'}, ...
-        'timeOutSecs', 2.0, 'maxAttemptsNum', 1, 'consoleMessage', '>>>Entered OLVSGEyeTrackerCheck');
+        'timeOutSecs', 2.0, 'maxAttemptsNum', 1, 'consoleMessage', 'Start eye tracking check.');
     % ==== NEW ============================================================
  
     
@@ -507,14 +495,14 @@ function isBeingTracked = OLVSGEyeTrackerCheck(OLVSG)
         %matlabUDP('send', 'true');
         % ==== NEW ===  Send user ready status ================================
         OLVSG.sendParamValue({OLVSG.EYE_TRACKER_STATUS, 'isTracking'}, ...
-            'timeOutSecs', 2, 'consoleMessage', 'Tracking check: successful');
+            'timeOutSecs', 2, 'consoleMessage', 'Eye tracking check was successful.');
         % =====================================================================
     else
         isBeingTracked = false;
         %matlabUDP('send', 'false');
         % ==== NEW ===  Send user ready status ================================
         OLVSG.sendParamValue({OLVSG.EYE_TRACKER_STATUS, 'isNotTracking'}, ...
-            'timeOutSecs', 2, 'consoleMessage', 'Tracking check: failed');
+            'timeOutSecs', 2, 'consoleMessage', 'Eye tracking check failed');
         % =====================================================================
     end
 
