@@ -37,7 +37,7 @@ function sendParamValue(obj, paramNameAndValue,  varargin)
         if (isinf(p.Results.timeOutSecs))
             fprintf('\n<strong>%s</strong> [waiting for ever to receive value for ''%s''] ....', p.Results.consoleMessage, paramName);
         else
-            fprintf('\n<strong>%s</strong> [waiting for %2.1 secs to receive value for ''%s''] ....', p.Results.consoleMessage, p.Results.timeOutSecs, paramName);
+            fprintf('\n<strong>%s</strong> [waiting for %2.1f secs to receive value for ''%s''] ....', p.Results.consoleMessage, p.Results.timeOutSecs, paramName);
         end
     end
     
