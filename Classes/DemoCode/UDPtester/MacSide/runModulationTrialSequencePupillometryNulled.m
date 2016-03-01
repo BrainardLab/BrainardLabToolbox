@@ -54,7 +54,7 @@ function runModulationTrialSequencePupillometryNulled
         'whichTrialToStartAt', 1, ...
         'VSGOfflineMode', false ...
     );
-    params.skipPupilRecordingFirstTrial = false;
+    params.skipPupilRecordingFirstTrial = true;
 
     
     % Initialize a data structure to be used to obtain the data
@@ -227,18 +227,27 @@ function runModulationTrialSequencePupillometryNulled
 
 
             % ---------- The next 2 go together
-            % ==== NEW ===  Send the 'stopTracking' command ================================
-            OLVSG.sendParamValue({OLVSG.EYE_TRACKER_STATUS, 'stopTracking'}, ...
+%             % ==== NEW ===  Send the 'stopTracking' command ================================
+%             OLVSG.sendParamValue(...
+%                 {OLVSG.EYE_TRACKER_STATUS, 'stopTracking'}, ...
+%                 {OLVSG.TRIAL_OUTCOME}, ...
+%                 'timeOutSecs', 5, 'maxAttemptsNum', 3, ...
+%                 'consoleMessage', 'Sending request to stop tracking');
+%             % =====================================================================
+%         
+%             % === NEW ====== Receive the trial outcome ====================
+%             trialOutcome = OLVSG.receiveParamValue(OLVSG.TRIAL_OUTCOME,  ...
+%                 'timeOutSecs', Inf)
+%             % === NEW ====== Receive the trial outcome ====================
+        
+            % replaced with:
+            trialOutcome = OLVSG.sendParamValueAndWaitForResponse(...
+                {OLVSG.EYE_TRACKER_STATUS, 'stopTracking'}, ...
+                {OLVSG.TRIAL_OUTCOME}, ...                             % expected response label
                 'timeOutSecs', 5, 'maxAttemptsNum', 3, ...
                 'consoleMessage', 'Sending request to stop tracking');
-            % =====================================================================
-        
-            % === NEW ====== Receive the trial outcome ====================
-            trialOutcome = OLVSG.receiveParamValue(OLVSG.TRIAL_OUTCOME,  ...
-                'timeOutSecs', Inf, 'consoleMessage', 'What is the trial outcome?')
-            % === NEW ====== Receive the trial outcome ====================
-        
-             % ---------- The above 2 go together
+            fprintf('%s', trialOutcome);
+            % ---------- The above 2 go together
              
              
              
@@ -260,8 +269,14 @@ function runModulationTrialSequencePupillometryNulled
             end
             
             % We stop recording.
-            reply = OLVSGStopPupilRecording(OLVSG);
-            fprintf('%s', reply);
+            % reply = OLVSGStopPupilRecording(OLVSG);
+            trialOutcome = OLVSG.sendParamValueAndWaitForResponse(...
+                {OLVSG.EYE_TRACKER_STATUS, 'stopTracking'}, ...
+                {OLVSG.TRIAL_OUTCOME}, ...                             % expected response label
+                'timeOutSecs', 5, 'maxAttemptsNum', 3, ...
+                'consoleMessage', 'Sending request to stop tracking');
+            
+            fprintf('%s', trialOutcome);
         end
             
         

@@ -71,6 +71,12 @@ classdef OLVSGcommunicator < UDPcommunicator
         % or   OLVSG.sendParamValue(OLVSG.protocolName, OLVSG.protocolName, 'something', params.protocolName, timeOutSecs, 2.0, 'maxAttemptsNum', 3);
         % or   OLVSG.sendParamValue(OLVSG.protocolName, OLVSG.go, []);
         sendParamValue(obj, paramName, paramValue, varargin);
+        
+        % Method to send a parameter value and wait for a response with a specified label
+        response = sendParamValueAndWaitForResponse(obj, paramNameAndValue, expectedResponseLabel, varargin);
+        
+        % Method ro receive a parameter value, check its value and send a response
+        receiveParamValueAndSendResponse(obj, paramNameAndValueToBeReceived, paramNameAndValueToBeSent, varargin);
     end % Public methods
     
     methods (Access = private)
