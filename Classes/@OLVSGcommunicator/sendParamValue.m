@@ -34,7 +34,7 @@ function sendParamValue(obj, paramNameAndValue,  varargin)
     
     % print feedback message to console
     if (~isempty(p.Results.consoleMessage))
-        printf('\n%s [waiting to receive value for ''%s''] ....', p.Results.consoleMessage, paramName);
+        fprintf('\n%s [waiting to receive value for ''%s''] ....', p.Results.consoleMessage, paramName);
     end
     
     % validate paramValue before sending it, if there is a valid range for
