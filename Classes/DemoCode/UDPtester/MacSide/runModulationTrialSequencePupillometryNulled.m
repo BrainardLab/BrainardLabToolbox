@@ -1,3 +1,4 @@
+% Demo code for testing in my office
 function runModulationTrialSequencePupillometryNulled
     global experimentMode
     experimentMode = false;
