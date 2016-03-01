@@ -245,32 +245,12 @@ function windowsClient()
 %             end
 %         end
     
-
-        % ---------- The next 2 go together
-        
-        % === NEW ====== Wait for ever to receive the StopTracking signal ==================
-%         checkStop = VSGOL.receiveParamValue(VSGOL.EYE_TRACKER_STATUS,  ...
-%             'timeOutSecs', Inf, 'consoleMessage', 'Is there a stop tracking request?');
-%         if (~strcmp(checkStop, 'stopTracking'))
-%             error('Expected ''stopTracking'', received: ''%s'' .', checkStop);
-%         end
-%         % === NEW ====== Wait for ever to receive the StopTracking signal ==================
-%         
-%         
-%         %matlabUDP('send',sprintf('Trial %f has ended!\n', i));
-% 
-%         % === NEW ====== Send the trial outcome ===========================
-%         VSGOL.sendParamValue({VSGOL.TRIAL_OUTCOME, sprintf('Trial %f has ended!\n', i)}, ...
-%                 'timeOutSecs', 2, 'maxAttemptsNum', 1, ...
-%                 'consoleMessage', 'Sending the trial outcome');
-%         % === NEW ====== Send the trial outcome ===========================
-        
-        % ---------- The above 2 go together
-        % above replaced by:
+        % === NEW === Wait for ever to receive the stopTracking signal, then send the trial outcome ==================
         VSGOL.receiveParamValueAndSendResponse(...
             {VSGOL.EYE_TRACKER_STATUS, 'stopTracking'}, ...                  % expected param name and value
-            {VSGOL.TRIAL_OUTCOME, sprintf('Trial %f has ended!\n', i)}, ...  % the response message to be sent
+            {VSGOL.TRIAL_OUTCOME, sprintf('Trial %f has ended!\n', i)}, ...  % the response to be sent
             'timeOutSecs', Inf, 'consoleMessage', 'Is there a stop tracking request?');
+        % === NEW === Wait for ever to receive the stopTracking signal, then send the trial outcome ==================
         
     
         if (experimentMode)
@@ -372,32 +352,22 @@ function windowsClient()
             save([saveFile '_' num2str(i, '%03.f') '.mat'], 'dataStruct', 'dataRaw', 'pupilData');
         else
             
-            disp('Stop before transfer \n');
-            pause
-            UDPcommunicationProgram = {...
-                {'Transfer Data Status', 'macCommand'} ...
-            };
-        
-            while (~strcmp(macCommand,'begin transfer'))
-                %macCommand = VSGOLGetInput;
-                for k = 1:numel(UDPcommunicationProgram)
-                    eval(sprintf('%s = VSGOL.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
-                end
-            end
-
-
+            VSGOL.receiveParamValueAndSendResponse(...
+                {OLVSG.DATA_TRANSFER_STATUS, 'begin transfer'}, ...  % received from mac
+                {OLVSG.DATA_TRANSFER_STATUS, 'begin transfer'}, ...  % transmitted back
+                'timeOutSecs', Inf ...;
+            );
             
-            %matlabUDP('send','begin transfer');
-            messageTuple = {'Transfer Data Status', 'begin transfer'};
-            VSGOL.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
-        
-        
-            
+ 
             fprintf('Transfer beginning...\n');
             %matlabUDP('send',num2str(numDataPoints));
-            messageTuple = {'Number of Data Points', numDataPoints};
-            VSGOL.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
             
+            % ==== NEW ===  Send the number of data points to be transferred ===
+            VSGOL.sendParamValue({OLVSG.DATA_TRANSFER_POINTS_NUM, numDataPoints}, 'timeOutSecs', 2);
+            % ==== NEW ===  Send the number of data points to be transferred ===
+            
+            disp('OK to before data points \n');
+            pause
             
             UDPcommunicationProgram = {...
                 {'Transfer Data Status', 'macCommand'} ...

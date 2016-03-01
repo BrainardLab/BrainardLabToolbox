@@ -1,11 +1,19 @@
-function response = sendParamValueAndWaitForResponse(obj, paramNameAndValue, expectedResponseLabel, varargin)
+function response = sendParamValueAndWaitForResponse(obj, paramNameAndValue, expectedResponse, varargin)
 
     p = inputParser;
     p.addRequired('paramNameAndValue', @iscell);
     p.addRequired('expectedResponseLabel', @iscell);
-    p.parse(paramNameAndValue, expectedResponseLabel);
+    p.parse(paramNameAndValue, expectedResponse);
     
     obj.sendParamValue(paramNameAndValue, varargin{:});
-    response = obj.receiveParamValue(expectedResponseLabel{1}, 'timeOutSecs', Inf, 'consoleMessage', 'What is the response ?');
+    expectedResponseLabel = expectedResponse{1};
+    receivedResponse = obj.receiveParamValue(expectedResponseLabel, 'timeOutSecs', Inf, 'consoleMessage', 'What is the response ?');
+
+    if (numel(expectedResponse) == 2)
+        expectedResponseValue = expectedResponse{2};
+        if (~strcmp(receivedResponse, expectedResponseValue))
+            error('Expected response value: ''%s'', received: ''%s'' .', expectedResponseValue, receivedResponse);
+        end
+    end
 end
 

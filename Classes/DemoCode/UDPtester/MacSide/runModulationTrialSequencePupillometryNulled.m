@@ -223,34 +223,15 @@ function runModulationTrialSequencePupillometryNulled
 %             reply = OLVSGStopPupilRecording(OLVSG);
 %             fprintf('%s', reply);
 
-
-
-
-            % ---------- The next 2 go together
-%             % ==== NEW ===  Send the 'stopTracking' command ================================
-%             OLVSG.sendParamValue(...
-%                 {OLVSG.EYE_TRACKER_STATUS, 'stopTracking'}, ...
-%                 {OLVSG.TRIAL_OUTCOME}, ...
-%                 'timeOutSecs', 5, 'maxAttemptsNum', 3, ...
-%                 'consoleMessage', 'Sending request to stop tracking');
-%             % =====================================================================
-%         
-%             % === NEW ====== Receive the trial outcome ====================
-%             trialOutcome = OLVSG.receiveParamValue(OLVSG.TRIAL_OUTCOME,  ...
-%                 'timeOutSecs', Inf)
-%             % === NEW ====== Receive the trial outcome ====================
-        
-            % replaced with:
+            % ==== NEW ===  Send the 'stopTracking' command and wait for the trial outcome ====
             trialOutcome = OLVSG.sendParamValueAndWaitForResponse(...
                 {OLVSG.EYE_TRACKER_STATUS, 'stopTracking'}, ...
                 {OLVSG.TRIAL_OUTCOME}, ...                             % expected response label
                 'timeOutSecs', 5, 'maxAttemptsNum', 3, ...
                 'consoleMessage', 'Sending request to stop tracking');
             fprintf('%s', trialOutcome);
-            % ---------- The above 2 go together
-             
-             
-             
+            % ==== NEW ===  Send the 'stopTracking' command and wait for the trial outcome ====
+               
              
             if (experimentMode) 
                 % Launch into OLPDFlickerSettings.
@@ -270,22 +251,21 @@ function runModulationTrialSequencePupillometryNulled
             
             % We stop recording.
             % reply = OLVSGStopPupilRecording(OLVSG);
+            
+            % ==== NEW ===  Send the 'stopTracking' command and wait for the trial outcome ====
             trialOutcome = OLVSG.sendParamValueAndWaitForResponse(...
                 {OLVSG.EYE_TRACKER_STATUS, 'stopTracking'}, ...
                 {OLVSG.TRIAL_OUTCOME}, ...                             % expected response label
                 'timeOutSecs', 5, 'maxAttemptsNum', 3, ...
                 'consoleMessage', 'Sending request to stop tracking');
-            
             fprintf('%s', trialOutcome);
+            % ==== NEW ===  Send the 'stopTracking' command and wait for the trial outcome ====
         end
             
         
         % Save the data structure
         if (offline == false)
             % Get the data
-            
-            disp('Stop before transfer \n');
-            pause
             
             [time, diameter, good_counter, interruption_counter, time_inter] = ...
                 OLVSGTransferData(OLVSG,trial, params, block(1).data.startsBG', block(1).data.stopsBG');
@@ -387,26 +367,18 @@ function [time, diameter, good_counter, interruption_counter, time_inter] = OLVS
         end
         
         % Initialize the data transfer
-        fprintf('OLVSGTransferData: Beginning transfer of data...\n');
-        
+
         %matlabUDP('send','begin transfer');
-        messageTuple = {'Transfer Data Status', 'begin transfer'};
-        OLVSG.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
-    
-
-        UDPcommunicationProgram = {...
-            {'Transfer Data Status', 'winCommand'} ...
-        };
-
-        winCommand = 'waiting';
-        while (~strcmp(winCommand,'begin transfer'))
-            %winCommand = OLVSGGetInput;
-            for k = 1:numel(UDPcommunicationProgram)
-                eval(sprintf('%s = OLVSG.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
-            end
-        end
-
-
+        % fprintf('OLVSGTransferData: Beginning transfer of data...\n');
+        
+        % ==== NEW ===  Send user ready status ========================
+        OLVSG.sendParamValueAndWaitForResponse(...
+            {OLVSG.DATA_TRANSFER_STATUS, 'begin transfer'}, ...             % transmitted 
+            {OLVSG.DATA_TRANSFER_STATUS, 'begin transfer'}, ...             % response label and value expected to be received
+            'timeOutSecs', 2.0, 'maxAttemptsNum', 1, 'consoleMessage', 'Beginning transfer of data');
+        % =============================================================
+            
+        
         
         fprintf('OLVSGTransferData: proceeding with data transfer\n');
         good_counter = 0;
@@ -421,16 +393,15 @@ function [time, diameter, good_counter, interruption_counter, time_inter] = OLVS
         time_inter(1) = 0;
         
         % Get the number of data points to be transferred
-        %nDataPoints = str2num(OLVSGGetInput);
-        UDPcommunicationProgram = {...
-                {'Number of Data Points', 'nDataPoints'} ...
-        };
-        for k = 1:numel(UDPcommunicationProgram)
-            eval(sprintf('%s = OLVSG.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
-        end
+        % === NEW ====== Wait for ever to receive the userReady status ==================
+        nDataPoints = OLVSG.receiveParamValue(OLVSG.DATA_TRANSFER_POINTS_NUM,  'timeOutSecs', 2.0);
+        % === NEW ====== Wait for ever to receive the userReady status ==================
                 
         fprintf('OLVSGTransferData: The number of data points is %d\n', nDataPoints);
         
+        disp('OK to before data points \n');
+        pause
+            
         % Iterate over the data points
         for i = 1:nDataPoints
             
