@@ -110,7 +110,7 @@ function runWindowsClientOnLine
         vetStopTracking;
 
         %% Debug
-        params.run = true;
+        %params.run = true;
 
 
         %% Check if we are ready to run
