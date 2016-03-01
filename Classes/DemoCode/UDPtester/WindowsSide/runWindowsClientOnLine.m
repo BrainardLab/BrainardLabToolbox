@@ -30,7 +30,7 @@ function runWindowsClientOnLine
     % correlates a subject's pupil position with a focal point in visual space.
     % The .scf file is needed in order for the Eye tracker to intialize and
     % function properly.
-    calFilePath = 'C:\Users\brainard_lab\Documents\MATLAB\Experiments\VSGEyeTrackerPupillometry\subjectcalibration_current.scf';
+    calFilePath = 'C:\Users\melanopsin\Documents\MATLAB\Toolboxes\PupillometryToolbox\xWindows\subjectcalibration_current.scf';
     vetLoadCalibrationFile(calFilePath);
 
     % The way CRS setup the Eye Tracker, we must set a stimulus device, although
@@ -72,7 +72,7 @@ function runWindowsClientOnLine
     
     % Ask if we want to save in Dropbox
     if saveDropbox
-        dropboxPath = 'C:\Users\brainard_lab\Dropbox (Aguirre-Brainard Lab)\MELA_data';
+        dropboxPath = 'C:\Users\melanopsin\Dropbox (Aguirre-Brainard Lab)\MELA_data';
         savePath = fullfile(dropboxPath, protocolNameStr, obsID, obsIDAndRun);
     else
         expPath = fileparts(mfilename('OLFlickerSensitivityVSGPupillometry.m'));
@@ -85,7 +85,7 @@ function runWindowsClientOnLine
     % === NEW ====== Get param values for labeled param names ==================
     nTrials         = VSGOL.receiveParamValue(VSGOL.NUMBER_OF_TRIALS,  'timeOutSecs', 2, 'consoleMessage', 'receiving number of trials');
     startTrialNum   = VSGOL.receiveParamValue(VSGOL.STARTING_TRIAL_NO, 'timeOutSecs', 2, 'consoleMessage', 'receiving which trial to start');
-    offline         = VSGOL.receiveParamValue(VSGOL.OFFLINE,           'timeOutSecs', 2, 'consoleMessage', 'receivingVSGOfflineMode');
+    offline         = VSGOL.receiveParamValue(VSGOL.OFFLINE,           'timeOutSecs', 2, 'consoleMessage', 'receivingVSGOfflineMode')
     % === NEW ====== Get param values for labeled param names ==================
     
     if (offline)
@@ -110,7 +110,7 @@ function runWindowsClientOnLine
         vetStopTracking;
 
         %% Debug
-        %params.run = true;
+        params.run = true;
 
 
         %% Check if we are ready to run
@@ -229,7 +229,7 @@ function runWindowsClientOnLine
         clear diameter;
         clear time;
         clear time_inter;
-        
+        offline
         if offline
             good_counter = 0;
             interruption_counter = 0;
