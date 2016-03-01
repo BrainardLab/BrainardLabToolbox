@@ -10,7 +10,9 @@
 % userReady = VSGOL.receiveParamValue('User Ready', timeOutSecs, 2.0);
 %
 function paramValue = receiveParamValue(obj, paramName, varargin)
-            
+       
+    obj.currentMessageNo = obj.currentMessageNo + 1;
+    
     % parse input
     defaultTimeOutSecs = Inf;
     defaultConsoleMessage = '';
@@ -23,9 +25,9 @@ function paramValue = receiveParamValue(obj, paramName, varargin)
     % print feedback message to console
     if (~isempty(p.Results.consoleMessage))
         if (isinf(p.Results.timeOutSecs))
-            fprintf('\n<strong>%s</strong> [waiting to ever to receive value for ''%s''] ....', p.Results.consoleMessage, paramName);
+            fprintf('\n[%3d] <strong>%s</strong> [waiting for ever to receive value for ''%s''] ....', obj.currentMessageNo, p.Results.consoleMessage, paramName);
         else
-            fprintf('\n<strong>%s</strong> [waiting to %2.1f secs to receive value for ''%s''] ....', p.Results.consoleMessage, p.Results.timeOutSecs, paramName);
+            fprintf('\n[%3d] <strong>%s</strong> [waiting for %2.1f secs to receive value for ''%s''] ....', obj.currentMessageNo, p.Results.consoleMessage, p.Results.timeOutSecs, paramName);
         end
     end
     % Wait for ever for a message to be received

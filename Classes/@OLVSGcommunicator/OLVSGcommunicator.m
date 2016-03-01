@@ -11,7 +11,6 @@ classdef OLVSGcommunicator < UDPcommunicator
     
     % Pre-defined param names 
     properties (Constant)
-        
         % Names of parameters
         PROTOCOL_NAME               = 'PROTOCOL_NAME';
         OBSERVER_ID                 = 'OBSERVER_ID';
@@ -32,6 +31,10 @@ classdef OLVSGcommunicator < UDPcommunicator
         DATA_TRANSFER_POINTS_NUM    = 'DATA_TRANSFER_POINTS_NUM';
         DATA_TRANSFER_REQUEST_FOR_POINT = 'DATA_TRANSFER_REQUEST_FOR_POINT';
         DATA_FOR_POINT              = 'DATA_FOR_POINT';
+    end
+    
+    properties (Access = private)
+        currentMessageNo;
     end
     
     % Public methods
@@ -66,6 +69,8 @@ classdef OLVSGcommunicator < UDPcommunicator
             obj.validParamValues = containers.Map('UniformValues',false);
             
             obj.flashQueue();
+            
+            obj.currentMessageNo = 0;
         end % constructor
 
         % param value validation 
