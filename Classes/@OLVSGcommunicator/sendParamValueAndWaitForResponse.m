@@ -7,7 +7,7 @@ function receivedResponse = sendParamValueAndWaitForResponse(obj, paramNameAndVa
     
     obj.sendParamValue(paramNameAndValue, varargin{:});
     expectedResponseLabel = expectedResponse{1};
-    receivedResponse = obj.receiveParamValue(expectedResponseLabel, 'timeOutSecs', Inf, 'consoleMessage', 'What is the response ?');
+    receivedResponse = obj.receiveParamValue(expectedResponseLabel, 'timeOutSecs', Inf);
 
     if (numel(expectedResponse) == 2)
         expectedResponseValue = expectedResponse{2};

@@ -390,7 +390,7 @@ function [time, diameter, good_counter, interruption_counter, time_inter] = OLVS
         OLVSG.sendParamValueAndWaitForResponse(...
             {OLVSG.DATA_TRANSFER_STATUS, 'begin transfer'}, ...             % transmitted 
             {OLVSG.DATA_TRANSFER_STATUS, 'begin transfer'}, ...             % response label and value expected to be received
-            'timeOutSecs', 2.0, 'maxAttemptsNum', 1, 'consoleMessage', 'Beginning transfer of data');
+            'timeOutSecs', 2.0, 'maxAttemptsNum', 1, 'consoleMessage', 'Sending request to begin data transfer');
         % ==== NEW ===  Send begin transfer request and wait for acknowledgment ========================
             
         
@@ -424,7 +424,8 @@ function [time, diameter, good_counter, interruption_counter, time_inter] = OLVS
             firstSampleTimeStamp = OLVSG.sendParamValueAndWaitForResponse(...
                 {OLVSG.DATA_TRANSFER_REQUEST_FOR_POINT, i}, ...
                 {OLVSG.DATA_FOR_POINT}, ...
-                'timeOutSecs', 2 ...
+                'timeOutSecs', 2, ...
+                'consoleMessage', sprintf('Sending request for data point %d and waiting for response', i) ...
             );
             % === NEW == Send request to trasfer data point i, and wait to receive that point ===]
         
@@ -448,7 +449,7 @@ function [time, diameter, good_counter, interruption_counter, time_inter] = OLVS
         %matlabUDP('send','end transfer');
         
         % ==== NEW ===  Send the end transfer request  ========================
-        OLVSG.sendParamValue({OLVSG.DATA_TRANSFER_STATUS, 'end transfer'});
+        OLVSG.sendParamValue({OLVSG.DATA_TRANSFER_STATUS, 'end transfer'}, 'consoleMessage', 'Sending request to end data transfer');
         % ==== NEW ===  Send the end transfer request  ========================
 end
     
