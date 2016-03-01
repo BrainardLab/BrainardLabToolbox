@@ -100,13 +100,13 @@ function windowsClient()
     end % experimentMode
     
     % Receiving initial information from Mac
-    fprintf('*** Waiting for Mac to tell us to go\n');
-    fprintf('*** Run OLFlickerSensitivity on Mac and select protocol...\n');
+    fprintf('\nRun OLFlickerSensitivity on Mac and select protocol...\n');
+    VSGOL.receiveParamValue(VSGOL.WAIT_STATUS,  'timeOutSecs', Inf, 'consoleMessage', ' Waiting for Mac to tell us to go... ');
     
     % Main Experiment Loop
     
     % === NEW ====== Get param values for labeled param names ==================
-    protocolNameStr = VSGOL.receiveParamValue(VSGOL.PROTOCOL_NAME,       'timeOutSecs', Inf)
+    protocolNameStr = VSGOL.receiveParamValue(VSGOL.PROTOCOL_NAME,       'timeOutSecs', 2)
     obsID           = VSGOL.receiveParamValue(VSGOL.OBSERVER_ID,         'timeOutSecs', 2)
     obsIDAndRun     = VSGOL.receiveParamValue(VSGOL.OBSERVER_ID_AND_RUN, 'timeOutSecs', 2)
     % === NEW ====== Get param values for labeled param names ==================
@@ -377,8 +377,6 @@ function windowsClient()
             VSGOL.sendParamValue({VSGOL.DATA_TRANSFER_POINTS_NUM, numDataPoints}, 'timeOutSecs', 2);
             % ==== NEW ===  Send the number of data points to be transferred ===
             
-            disp('OK to before data points \n');
-            pause
             
         
             % Iterate over the data
@@ -403,7 +401,7 @@ function windowsClient()
             fprintf('Data transfer for trial %f ending...\n', i);
             %macCommand = VSGOLGetInput;
             
-            VSGOL.receiveParamValue(OLVSG.DATA_TRANSFER_STATUS);
+            VSGOL.receiveParamValue(VSGOL.DATA_TRANSFER_STATUS);
         end
     
         % After the trial, plot out a trace of the data. This is presumably to make sure that everything went ok.
