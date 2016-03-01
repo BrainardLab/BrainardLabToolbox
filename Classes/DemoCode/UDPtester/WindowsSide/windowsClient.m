@@ -8,13 +8,20 @@ function windowsClient()
     
     [rootDir, ~] = fileparts(fullfile(which(mfilename)));
     cd(rootDir); 
-    addpath('../Common');
     addpath(genpath('C:\Users\melanopsin\Documents\MATLAB\Toolboxes\BrainardLabToolbox\Classes'));
     
     clc
     fprintf('\nStarting windows client\n');
     
-    udpParams = getUDPparams();
+    % Params for my onelight room
+    udpParams.macHostIP = '130.91.72.120';
+    udpParams.winHostIP = '130.91.74.15';
+    udpParams.udpPort = 2007;
+            
+    % Params for my office
+    udpParams.winHostIP = '130.91.72.17';  % IoneanPelagos
+    udpParams.macHostIP = '130.91.74.10';  % Manta
+    udpParams.udpPort = 2007;
     
     % === NEW ======  Instantiate a OLVSGcommunicator object ==============
     VSGOL = OLVSGcommunicator( ...
