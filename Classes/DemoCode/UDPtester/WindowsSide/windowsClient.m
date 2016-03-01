@@ -231,7 +231,7 @@ function windowsClient()
     
         % === NEW ====== Wait for ever to receive the StartTracking signal ==================
         goCommand = VSGOL.receiveParamValue(VSGOL.EYE_TRACKER_STATUS,  ...
-            'timeOutSecs', Inf, 'consoleMessage', 'Is there a start tracking request?');
+            'timeOutSecs', Inf, 'consoleMessage', 'Start tracking?');
         if (~strcmp(goCommand, 'startTracking'))
             error('Expected ''startTracking'', received: ''%s'' .', checkStop);
         end
@@ -257,7 +257,7 @@ function windowsClient()
         VSGOL.receiveParamValueAndSendResponse(...
             {VSGOL.EYE_TRACKER_STATUS, 'stopTracking'}, ...                  % expected param name and value
             {VSGOL.TRIAL_OUTCOME, sprintf('Trial %f has ended!\n', i)}, ...  % the response to be sent
-            'timeOutSecs', Inf, 'consoleMessage', 'Is there a stop tracking request?');
+            'timeOutSecs', Inf, 'consoleMessage', 'Stop tracking?');
         % === NEW === Wait for ever to receive the stopTracking signal, then send the trial outcome ==================
         
     
@@ -365,7 +365,7 @@ function windowsClient()
                 {VSGOL.DATA_TRANSFER_STATUS, 'begin transfer'}, ...  % received from mac
                 {VSGOL.DATA_TRANSFER_STATUS, 'begin transfer'}, ...  % transmitted back
                 'timeOutSecs', Inf, ...
-                'consoleMessage', 'Mac, should we begin data transfer?' ...
+                'consoleMessage', 'Begin data transfer?' ...
             );
             % === NEW ====== Wait for ever to receive a 'begin transfer' signal and respond to it ==================
              
