@@ -8,6 +8,7 @@ function sendParamValue(obj, paramNameAndValue,  varargin)
     % parse input
     defaultTimeOutSecs = 2;
     defaultMaxAttemptsNum = 3;
+    defaultConsoleMessage = '';
     p = inputParser;
     p.addRequired('paramNameAndValue', @iscell);
     p.addParamValue('timeOutSecs', defaultTimeOutSecs,   @isnumeric);
