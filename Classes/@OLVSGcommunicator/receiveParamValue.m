@@ -35,4 +35,8 @@ function paramValue = receiveParamValue(obj, paramName, varargin)
 
     % Get the message value received
     paramValue = response.msgValue;
+    
+    % validate paramValue before returning, if there is a valid range for
+    % this paramName
+    obj.validateValueForParam(paramName, paramValue, backTrace);
 end

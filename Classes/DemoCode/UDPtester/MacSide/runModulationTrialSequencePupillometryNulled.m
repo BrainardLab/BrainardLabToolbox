@@ -9,8 +9,9 @@ function runModulationTrialSequencePupillometryNulled
     clc
     
     
-    % Instantiate a UDPcommunictor object
+    % === NEW ====== Instantiate a UDPcommunictor object ==================
     udpParams = getUDPparams();
+    
     OLVSG = OLVSGcommunicator( ...
         'signature', 'MacSide', ...              % a label indicating the host, used to for user-feedback
           'localIP', udpParams.macHostIP, ...    % required: the IP of this computer
@@ -18,7 +19,25 @@ function runModulationTrialSequencePupillometryNulled
           'udpPort', udpParams.udpPort, ...      % optional, with default value: 2007
         'verbosity', 'min' ...                   % optional, with default value: 'normal', and possible values: {'min', 'normal', 'max'},
         );
-    
+   
+    % Set valid values for comnunication param: USER_READY_STATUS
+    OLVSG.setValidValuesForParam(OLVSG.USER_READY_STATUS, ...
+          {...
+            'User is ready to move on.', ...
+            'continue', ...
+            'abort' ...
+          } ...
+    );
+        
+    % Set valid values for comnunication param: EYE_TRACKER_STATUS
+    OLVSG.setValidValuesForParam(OLVSG.EYE_TRACKER_STATUS, ...
+          {...
+            'startEyeTrackerCheck' ...
+          }...
+    );
+    % === NEW ====== Instantiate a UDPcommunictor object ==================
+     
+        
     fprintf('\nStarting ''%s''\n', mfilename);
     fprintf('Hit enter when the windowsClient is up and running.\n');
     pause;
@@ -42,7 +61,7 @@ function runModulationTrialSequencePupillometryNulled
         'ratioInterupt', -1);
       
     % Determine the number of trials in this block and create a data struct of
-   % that size
+    % that size
     dataStruct = repmat(dataStruct, params.nTrials, 1);
     offline = params.VSGOfflineMode;
         

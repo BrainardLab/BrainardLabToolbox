@@ -12,18 +12,34 @@ function windowsClient()
     clc
     fprintf('\nStarting windows client\n');
     
-   
     udpParams = getUDPparams();
-
     
-     % Instantiate a OLVSGcommunicator object
+    % === NEW ======  Instantiate a OLVSGcommunicator object ==============
     VSGOL = OLVSGcommunicator( ...
         'signature', 'WindowsSide', ...          % a label indicating the host, used to for user-feedback
           'localIP', udpParams.winHostIP, ...    % required: the IP of this computer
          'remoteIP', udpParams.macHostIP, ...    % required: the IP of the computer we want to conenct to
           'udpPort', udpParams.udpPort, ...      % optional, with default value: 2007
-        'verbosity', 'min' ...             % optional, with default value: 'normal', and possible values: {'min', 'normal', 'max'},
+        'verbosity', 'min' ...                   % optional, with default value: 'normal', and possible values: {'min', 'normal', 'max'},
         );
+    
+    % Set valid values for comnunication param: USER_READY_STATUS
+    VSGOL.setValidValuesForParam(VSGOL.USER_READY_STATUS, ...
+          {...
+            'User is ready to move on.',...
+            'continue', ...
+            'abort' ...
+          } ...
+    );
+        
+    % Set valid values for comnunication param: EYE_TRACKER_STATUS
+    VSGOL.setValidValuesForParam(VSGOL.EYE_TRACKER_STATUS, ...
+          {...
+            'startEyeTrackerCheck' ...
+          }...
+    );
+    % === NEW ======  Instantiate a OLVSGcommunicator object ==============
+    
     
     maxAttempts = 2;
     
@@ -38,7 +54,7 @@ function windowsClient()
         
         nSecsToSave = 5;
 
-        %% Initializing Cambridge Researsh System and Other Neccessary Variables
+        % Initializing Cambridge Researsh System and Other Neccessary Variables
         % Global CRS gives us access to a cell structure of the Video Eye Tracker's
         % variables.  Load constants creates this cell structure
         if isempty(CRS)
@@ -159,8 +175,10 @@ function windowsClient()
                 
             else
                 % matlabUDP('send','abort');
-                messageTuple = {'Action', 'abort'};
-                VSGOL.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
+                % ==== NEW ===  Send user ready status ========================
+                VSGOL.sendParamValue({VSGOL.USER_READY_STATUS, 'abort'}, 'timeOutSecs', 2);
+                % =============================================================
+ 
                 
                 fprintf('>>> Could not acquire good tracking after %g attempts.\n', maxAttempts);
                 fprintf('>>> Saving %g seconds of diagnostic video on the hard drive.\n', nSecsToSave);

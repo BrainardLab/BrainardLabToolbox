@@ -1,12 +1,15 @@
 classdef OLVSGcommunicator < UDPcommunicator
-    %UNTITLED2 Summary of this class goes here
-    %   Detailed explanation goes here
+    % OLVSGcommunicator Class to facilitate communication between Win, Mac
+    % computers involved in the OneLight - VSG setup
+    %   Detailed explanation
     
     % Read-only properties
     properties (SetAccess = private)
+        validParamValues;
     end
     
-    % Pre-defined labels
+    
+    % Pre-defined param names 
     properties (Constant)
         PROTOCOL_NAME               = 'Protocol Name Label';
         OBSERVER_ID                 = 'Observer ID Label';
@@ -48,9 +51,15 @@ classdef OLVSGcommunicator < UDPcommunicator
                 'verbosity', p.Results.verbosity ...             % optional, with default value: 'normal', and possible values: {'min', 'normal', 'max'},
             );
         
+            % Initialize validValues
+            obj.validParamValues = containers.Map('UniformValues',false);
+            
             obj.flashQueue();
         end % constructor
 
+        % param value validation 
+        setValidValuesForParam(obj, paramName, validValues);
+        
         % Method to receive a parameter value.
         % ex.: protocolNameStr = VSGOL.receiveParamValue(VSGOL.protocolName);
         % or   userReady = VSGOL.receiveParamValue('User Ready', timeOutSecs, 2.0);
@@ -61,8 +70,10 @@ classdef OLVSGcommunicator < UDPcommunicator
         % or   OLVSG.sendParamValue(OLVSG.protocolName, OLVSG.protocolName, 'something', params.protocolName, timeOutSecs, 2.0, 'maxAttemptsNum', 3);
         % or   OLVSG.sendParamValue(OLVSG.protocolName, OLVSG.go, []);
         sendParamValue(obj, paramName, paramValue, varargin);
-        
     end % Public methods
     
+    methods (Access = private)
+        validateValueForParam(obj, paramName, paramValue, backTrace);
+    end
 end
 
