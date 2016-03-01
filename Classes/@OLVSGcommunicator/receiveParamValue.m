@@ -23,7 +23,7 @@ function paramValue = receiveParamValue(obj, paramName, varargin)
 
     % print feedback message to console
     if (~isempty(p.Results.consoleMessage))
-        fprintf('\n%s [waiting to receive value for ''%s''] ....', p.Results.consoleMessage, paramName);
+        fprintf('\n<strong>%s</strong> [waiting to receive value for ''%s''] ....', p.Results.consoleMessage, paramName);
     end
     % Wait for ever for a message to be received
     response = p.Results.obj.waitForMessage(p.Results.paramName, 'timeOutSecs', p.Results.timeOutSecs);

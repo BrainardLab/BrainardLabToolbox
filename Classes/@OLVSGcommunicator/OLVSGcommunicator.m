@@ -21,6 +21,7 @@ classdef OLVSGcommunicator < UDPcommunicator
         USER_READY_STATUS           = 'User Ready Status Label';
         EYE_TRACKER_STATUS          = 'Eye Tracker Status Label';
         EYE_TRACKER_DATA_POINTS_NUM = 'Eye Tracker Data Points Num Label';
+        TRIAL_OUTCOME               = 'Trial Outcome Label';
     end
     
     % Public methods

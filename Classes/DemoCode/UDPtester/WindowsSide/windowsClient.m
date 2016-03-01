@@ -37,7 +37,9 @@ function windowsClient()
           {...
             'startEyeTrackerCheck', ...
             'isTracking', ...
-            'isNotTracking' ...
+            'isNotTracking', ...
+            'startTracking', ...
+            'stopTracking' ...
           }...
     );
     % === NEW ======  Instantiate a OLVSGcommunicator object ==============
@@ -210,38 +212,61 @@ function windowsClient()
             vetStartTracking;
             %WaitSecs(1);
         end
-        
-        disp('Up to here - before the GO signal \n');
-        pause;
-                
-        % Get the 'Go' signal
-        goCommand = VSGOLReceiveEyeTrackerCommand(VSGOL);
-        while (goCommand  ~= true)
-            fprintf('>>> The go signal is %d',goCommand);
-            goCommand = VSGOLReceiveEyeTrackerCommand(VSGOL);
+
+              
+         % Get the 'Go' signal
+%         goCommand = VSGOLReceiveEyeTrackerCommand;
+%         while (goCommand  ~= true)
+%             fprintf('>>> The go signal is %d',goCommand);
+%             goCommand = VSGOLReceiveEyeTrackerCommand;
+%         end
+    
+        % === NEW ====== Wait for ever to receive the StartTracking signal ==================
+        goCommand = VSGOL.receiveParamValue(VSGOL.EYE_TRACKER_STATUS,  ...
+            'timeOutSecs', Inf, 'consoleMessage', 'Is there a start tracking request?');
+        if (~strcmp(goCommand, 'startTracking'))
+            error('Expected ''startTracking'', received: ''%s'' .', checkStop);
         end
+        % === NEW ====== Wait for ever to receive the START signal ==================
+            
+        
+
         if offline
             %vetStartRecordingToFile([saveFile '-' num2str(i) '.cam']);
         end
-    
+       
                 
         % Check the 'stop' signal from the Mac
-        checkStop = 'no_stop';
-        while (~strcmp(checkStop,'stop pupil recording'))
-            %checkStop = VSGOLGetInput;
-            UDPcommunicationProgram = {...
-                {OLVSGcommunicator.eyeTrackerStatus, 'checkStop'} ...
-            };
-            for k = 1:numel(UDPcommunicationProgram)
-                eval(sprintf('%s = VSGOL.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
-            end
+%         checkStop = 'no_stop';
+%         while (~strcmp(checkStop,'stop'))
+%             checkStop = VSGOLGetInput;
+%             if strcmp(checkStop,'stop')
+%                 matlabUDP('send',sprintf('Trial %f has ended!\n', i));
+%             end
+%         end
     
-            if strcmp(checkStop,'stop pupil recording')
-                %matlabUDP('send',sprintf('Trial %f has ended!\n', i));
-                messageTuple = {OLVSGcommunicator.eyeTrackerStatus, sprintf('Trial %f has ended!\n', i)};
-                VSGOL.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
-            end
+
+        % ---------- The next 2 go together
+        
+        % === NEW ====== Wait for ever to receive the StopTracking signal ==================
+        checkStop = VSGOL.receiveParamValue(VSGOL.EYE_TRACKER_STATUS,  ...
+            'timeOutSecs', Inf, 'consoleMessage', 'Is there a stop tracking request?');
+        if (~strcmp(checkStop, 'stopTracking'))
+            error('Expected ''stopTracking'', received: ''%s'' .', checkStop);
         end
+        % === NEW ====== Wait for ever to receive the StopTracking signal ==================
+        
+        
+        %matlabUDP('send',sprintf('Trial %f has ended!\n', i));
+
+        % === NEW ====== Send the trial outcome ===========================
+        VSGOL.sendParamValue({VSGOL.TRIAL_OUTCOME, sprintf('Trial %f has ended!\n', i)}, ...
+                'timeOutSecs', 2, 'maxAttemptsNum', 1, ...
+                'consoleMessage', 'Sending the trial outcome');
+        % === NEW ====== Send the trial outcome ===========================
+        
+        % ---------- The above 2 go together
+        
     
         if (experimentMode)
             % Get all data from the buffer
@@ -297,6 +322,7 @@ function windowsClient()
         clear diameter;
         clear time;
         clear time_inter;
+        
         if offline
             good_counter = 0;
             interruption_counter = 0;
@@ -341,7 +367,8 @@ function windowsClient()
             save([saveFile '_' num2str(i, '%03.f') '.mat'], 'dataStruct', 'dataRaw', 'pupilData');
         else
             
-
+            disp('Stop before transfer \n');
+            pause
             UDPcommunicationProgram = {...
                 {'Transfer Data Status', 'macCommand'} ...
             };

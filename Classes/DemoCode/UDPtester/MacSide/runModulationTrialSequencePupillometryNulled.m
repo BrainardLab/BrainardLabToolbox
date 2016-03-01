@@ -34,7 +34,9 @@ function runModulationTrialSequencePupillometryNulled
           {...
             'startEyeTrackerCheck', ...
             'isTracking', ...
-            'isNotTracking' ...
+            'isNotTracking', ...
+            'startTracking', ...
+            'stopTracking' ...
           }...
     );
     % === NEW ====== Instantiate a UDPcommunictor object ==================
@@ -139,11 +141,11 @@ function runModulationTrialSequencePupillometryNulled
             
             % Check whether the user is good to resume
             [readyToResume, abort] = OLVSGCheckResume(readyToResume, params, block(1).data.startsBG', block(1).data.stopsBG');
-            fprintf('OLVSGCheckResume: User input acquired.\n');
             
             %matlabUDP('send','The User is ready to move on.');
             % ==== NEW ===  Send user ready status ========================
-            OLVSG.sendParamValue({OLVSG.USER_READY_STATUS, 'User is ready to move on.'}, 'timeOutSecs', 2.0, 'maxAttemptsNum', 1);
+            OLVSG.sendParamValue({OLVSG.USER_READY_STATUS, 'user ready to move on'}, ...
+                'timeOutSecs', 2.0, 'maxAttemptsNum', 1, 'consoleMessage', 'User input acquired');
             % =============================================================
             
     
@@ -197,30 +199,18 @@ function runModulationTrialSequencePupillometryNulled
             break;
         end
             
-        disp('Up to here - before the GO signal \n');
-        pause;
+
         
-        % Send the 'start' signal. Note that this will remain in the queue
-        % over at the VSG box.
-        fprintf('Send permission to start tracking \n');
+        % Send the 'start' signal. Note that this will remain in the queue over at the VSG box.
         % reply = OLVSGSendEyeTrackingCommand;
         
-        messageTuple = {OLVSGcommunicator.eyeTrackerStatus, 'Requesting permission to start tracking'};
-        OLVSG.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
-    
-%         while (~strcmp(reply,'Permission granted'))
-%             reply = OLVSGGetInput;
-%         end
-
-        reply = ' ';
-        while (~strcmp(reply,'Permission granted'))
-            UDPcommunicationProgram = {...
-                {OLVSGcommunicator.eyeTrackerStatus, 'reply'} ...
-            };
-            for k = 1:numel(UDPcommunicationProgram)
-                eval(sprintf('%s = OLVSG.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
-            end
-        end
+        % ==== NEW ===  Send the 'startTracking' command ================================
+        OLVSG.sendParamValue({OLVSG.EYE_TRACKER_STATUS, 'startTracking'}, ...
+            'timeOutSecs', 5, 'maxAttemptsNum', 3, ...
+            'consoleMessage', 'Sending request to start tracking');
+        % =====================================================================
+        
+        
         
         
         sound(yStart, fs);
@@ -230,9 +220,29 @@ function runModulationTrialSequencePupillometryNulled
             % the things below still check out.
 
             % We stop recording.
-            reply = OLVSGStopPupilRecording(OLVSG);
-            fprintf('%s', reply);
+%             reply = OLVSGStopPupilRecording(OLVSG);
+%             fprintf('%s', reply);
 
+
+
+
+            % ---------- The next 2 go together
+            % ==== NEW ===  Send the 'stopTracking' command ================================
+            OLVSG.sendParamValue({OLVSG.EYE_TRACKER_STATUS, 'stopTracking'}, ...
+                'timeOutSecs', 5, 'maxAttemptsNum', 3, ...
+                'consoleMessage', 'Sending request to stop tracking');
+            % =====================================================================
+        
+            % === NEW ====== Receive the trial outcome ====================
+            trialOutcome = OLVSG.receiveParamValue(OLVSG.TRIAL_OUTCOME,  ...
+                'timeOutSecs', Inf, 'consoleMessage', 'What is the trial outcome?')
+            % === NEW ====== Receive the trial outcome ====================
+        
+             % ---------- The above 2 go together
+             
+             
+             
+             
             if (experimentMode) 
                 % Launch into OLPDFlickerSettings.
                 events(trial).tTrialStart = mglGetSecs;
@@ -258,6 +268,10 @@ function runModulationTrialSequencePupillometryNulled
         % Save the data structure
         if (offline == false)
             % Get the data
+            
+            disp('Stop before transfer \n');
+            pause
+            
             [time, diameter, good_counter, interruption_counter, time_inter] = ...
                 OLVSGTransferData(OLVSG,trial, params, block(1).data.startsBG', block(1).data.stopsBG');
 
@@ -485,11 +499,9 @@ function isBeingTracked = OLVSGEyeTrackerCheck(OLVSG)
     % numTrackedData = OLVSGGetInput;
     % === NEW ====== Retrieve the number of eye tracking data points ==================
     numTrackedData = OLVSG.receiveParamValue(OLVSG.EYE_TRACKER_DATA_POINTS_NUM,  ...
-        'timeOutSecs', 2.0, 'consoleMessage', 'Waiting to receive numner of eye tracker data points.');
+        'timeOutSecs', 2.0, 'consoleMessage', 'Waiting for eye tracker data');
     % === NEW ====== Retrieve the number of eye tracking data points ==================
   
-    fprintf('%s checking data points collected \n',numTrackedData)
-
     % Clear the buffer
     % OLVSGClearMessageBuffer;
     OLVSG.flashQueue();
