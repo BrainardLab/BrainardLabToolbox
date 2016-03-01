@@ -63,7 +63,7 @@ function params = initParams()
     params.winHostIP = '130.91.74.15';
     params.udpPort = 2007;
     
-    debug = true;
+    debug = false;
     if (debug)
         params.winHostIP = '130.91.72.17';  % IoneanPelagos
         params.macHostIP = '130.91.74.10';  % Manta

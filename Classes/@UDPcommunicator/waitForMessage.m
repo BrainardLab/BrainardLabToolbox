@@ -8,10 +8,13 @@ function response = waitForMessage(obj, msgLabel, varargin)
     
     % the timeOutSecs is optional, with a default value: Inf
     defaultTimeOutSecs = Inf;
+    defaultCallingFunctionName = ' ';
     addOptional(p,'timeOutSecs',defaultTimeOutSecs,@isnumeric);
+    addOptional(p,'callingFunctionName',defaultCallingFunctionName,@ischar);
    
     % parse the input
     parse(p,msgLabel,varargin{:});
+    
     expectedMessageLabel = p.Results.msgLabel;
     if isempty(expectedMessageLabel)
         expectedMessageLabel = '';
@@ -20,7 +23,14 @@ function response = waitForMessage(obj, msgLabel, varargin)
         error('%s The expected message label must be a string, or an empty array, i.e.: []\n',signature);
     end
     timeOutSecs = p.Results.timeOutSecs;
-
+    callingFunctionName = p.Results.callingFunctionName;
+    
+    if (strcmp(callingFunctionName, ' '))
+        callingFunctionSignature = '';
+    else
+        callingFunctionSignature = sprintf('[called from <strong>%s</strong>]:', callingFunctionName);
+    end
+    
     % initialize response struct
     response = struct(...
         'msgLabel', '', ...
@@ -49,7 +59,7 @@ function response = waitForMessage(obj, msgLabel, varargin)
     
     if (response.timedOutFlag == false)
         % get raw data
-        rawMessage = receiveAndUpdateCounter();
+        rawMessage = receiveAndUpdateCounter(obj);
         
         % parse the raw message received
         leftBracketPositions = strfind(rawMessage, sprintf('['));
@@ -81,24 +91,30 @@ function response = waitForMessage(obj, msgLabel, varargin)
             % when we were expecting a TRANSMITTED_MESSAGE_MATCHES_EXPECTED and we received it
             if (strcmp(expectedMessageLabel, obj.TRANSMITTED_MESSAGE_MATCHES_EXPECTED))
                 if (~strcmp(obj.verbosity,'min'))
-                    fprintf('%s Received expected message (''%s'')\n', expectedMessageLabel, signature);
+                    fprintf('%s %s Received expected message (''%s'')\n', signature, callingFunctionSignature, expectedMessageLabel);
                 end
             else 
                 % Send back an TRANSMITTED_MESSAGE_MATCHES_EXPECTED message 
-                obj.sendMessage(obj.TRANSMITTED_MESSAGE_MATCHES_EXPECTED, 'doNotreplyToThisMessage', true);
+                obj.sendMessage(obj.TRANSMITTED_MESSAGE_MATCHES_EXPECTED, 'nan', 'doNotreplyToThisMessage', true);
                 if (~strcmp(obj.verbosity,'min'))
-                    fprintf('%s Expected message received withing %2.2f seconds, acknowledging the sender.', signature, elapsedTime);
+                    fprintf('%s %s Expected message received within %2.2f seconds, acknowledging the sender.', signature, callingFunctionSignature, elapsedTime);
                 end 
             end
         else
             % Send back message that the expected message does not match the received one
-            fprintf('%s Received unexpected message: ''%s'' (instead of ''%s''). Informing the sender.', signature, response.msgLabel, expectedMessageLabel);
-            obj.sendMessage(sprintf('RECEIVED_MESSAGE_(''%s'')_DID_NOT_MATCH_EXPECTED_MESSAGE_(''%s'')', response.msgLabel, expectedMessageLabel), 'doNotreplyToThisMessage', true);
+            if (~strcmp(obj.verbosity,'min'))
+                fprintf('%s %s: Received: ''%s'' <strong>instead of</strong> ''%s''.\n', signature, callingFunctionSignature, response.msgLabel, expectedMessageLabel);
+            end
+            obj.sendMessage(sprintf('Received (''%s'') message does not match expected (''%s'')', response.msgLabel, expectedMessageLabel), 'nan', 'doNotreplyToThisMessage', true);
         end
     end
     
-    function rawMessage = receiveAndUpdateCounter()
-        rawMessage = matlabUDP('receive');
+    function rawMessage = receiveAndUpdateCounter(obj)
+        if (obj.useNativeUDP)
+            rawMessage = fread(obj.udpClient);
+        else
+            rawMessage = matlabUDP('receive');
+        end
         obj.receivedMessagesCount = obj.receivedMessagesCount + 1;
     end
 end

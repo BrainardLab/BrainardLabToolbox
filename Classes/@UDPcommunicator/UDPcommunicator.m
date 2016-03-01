@@ -79,8 +79,10 @@ classdef UDPcommunicator < handle
 %
 % 2/4/2016   npc   Wrote it
 %
-	% Read-only properties
-	properties (SetAccess = private)
+	% Protected properties. All subclasses of UDPcommunicator can read these, but they cannot set them. 
+	properties (SetAccess = protected)
+        useNativeUDP = false
+        udpClient
 		localIP
 		remoteIP
         portUDP
@@ -117,10 +119,17 @@ classdef UDPcommunicator < handle
 
             % Parse input parameters.
             p = inputParser;
-            p.addParameter('localIP', 'none', @ischar);
-            p.addParameter('remoteIP', 'none', @ischar);
-            p.addParameter('udpPort', defaultUDPport, @isnumeric);
-            p.addParameter('verbosity', defaultVerbosity, @ischar);
+            % addParameter is available after 2013b
+            %p.addParameter('localIP', 'none', @ischar);
+            %p.addParameter('remoteIP', 'none', @ischar);
+            %p.addParameter('udpPort', defaultUDPport, @isnumeric);
+            %p.addParameter('verbosity', defaultVerbosity, @ischar);
+            
+            % For earlier versions use addParamValue
+            p.addParamValue('localIP',   'none',           @ischar);
+            p.addParamValue('remoteIP',  'none',           @ischar);
+            p.addParamValue('udpPort',   defaultUDPport,   @isnumeric);
+            p.addParamValue('verbosity', defaultVerbosity, @ischar);
             
             p.parse(varargin{:});
             obj.localIP  = p.Results.localIP;
@@ -140,23 +149,46 @@ classdef UDPcommunicator < handle
             end
 
             % initialize UDP communication
-            matlabUDP('close');
-            matlabUDP('open', obj.localIP, obj.remoteIP, obj.portUDP);
-
+            if (obj.useNativeUDP)
+                fprintf('\nOpening udp channel ...');
+                echoudp('off');
+                echoudp('on', 4012);
+                obj.udpClient = udp(obj.remoteIP, obj.portUDP);
+                fopen(obj.udpClient);
+                fprintf('Opened udp channel\n');
+            else
+                matlabUDP('close');
+                matlabUDP('open', obj.localIP, obj.remoteIP, obj.portUDP);
+            end
+            
             % flash any remaining bits
             obj.flashQueue();
             
             if (~strcmp(obj.verbosity,'min'))
-                fprintf('%s Initialized.', obj.selfSignature);
+                fprintf('%s Initialized.\n', obj.selfSignature);
             end
         end
         
-        % Public API
+        % Public API (low-level)
         response = waitForMessage(obj, msgLabel, varargin);
         status = sendMessage(obj, msgLabel, varargin);
         flashedContents = flashQueue(obj);
         
+        % Public API (higher level)
+        % Wait for ever to get a message. Return the message value if the
+        % expected and received labels match or fail if the labels do not match, providing the strack trace
+        parameterValue = getMessageValueWithMatchingLabelOrFail(obj, messageLabel);
+        
+        % Send a message and wait for an good acknowledgment of fail,
+        % providing the stack trace. 
+        % messageTuple = {messageLabel} or {messageLabel, messageValue}
+        sendMessageAndReceiveAcknowldegmentOrFail(obj, messageTuple);
+        
+        % Just a utility method for testing message transmission
         showMessageValueAsStarString(obj, msgCount, direction, msgLabel, msgValueType, msgValue, maxValue, maxStars);
+        
+        % Close UDP
+        shutDown(obj);
         
     end % public method
     
