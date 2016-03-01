@@ -101,7 +101,7 @@ function windowsClient()
     
     % Receiving initial information from Mac
     fprintf('\nRun OLFlickerSensitivity on Mac and select protocol...\n');
-    VSGOL.receiveParamValue(VSGOL.WAIT_STATUS,  'timeOutSecs', Inf, 'consoleMessage', 'Mac are you there ?');
+    VSGOL.receiveParamValue(VSGOL.WAIT_STATUS,  'timeOutSecs', Inf, 'consoleMessage', 'Hey Mac, is there anybody out there?');
     
     % Main Experiment Loop
     
