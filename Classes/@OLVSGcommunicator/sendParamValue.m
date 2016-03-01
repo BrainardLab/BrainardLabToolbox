@@ -12,6 +12,7 @@ function sendParamValue(obj, paramNameAndValue,  varargin)
     p.addRequired('paramNameAndValue', @iscell);
     p.addParamValue('timeOutSecs', defaultTimeOutSecs,   @isnumeric);
     p.addParamValue('maxAttemptsNum', defaultMaxAttemptsNum, @isnumeric);
+    p.addParamValue('consoleMessage', defaultConsoleMessage,   @ischar);
     p.parse(paramNameAndValue, varargin{:});
     
     % Get this backtrace of all functions leading to this point
@@ -28,6 +29,11 @@ function sendParamValue(obj, paramNameAndValue,  varargin)
     	paramValue = p.Results.paramNameAndValue{2};
     else
         paramValue = nan;
+    end
+    
+    % print feedback message to console
+    if (~isempty(p.Results.consoleMessage))
+        printf('\n%s [waiting to receive value for ''%s''] ....', p.Results.consoleMessage, paramName);
     end
     
     % validate paramValue before sending it, if there is a valid range for

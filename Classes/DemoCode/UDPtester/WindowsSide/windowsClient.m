@@ -158,7 +158,8 @@ function windowsClient()
             
             %userReady = VSGOLGetInput;
             % === NEW ====== Wait for ever to receive the userReady status ==================
-            userReady = VSGOL.receiveParamValue(VSGOL.USER_READY_STATUS,  'timeOutSecs', Inf);
+            userReady = VSGOL.receiveParamValue(VSGOL.USER_READY_STATUS,  ...
+                'timeOutSecs', Inf, 'consoleMessage', 'Waiting to receive the userReady signal');
             % === NEW ====== Wait for ever to receive the userReady status ==================
 
             fprintf('>>> Check %g\n', checkCounter);
@@ -172,7 +173,6 @@ function windowsClient()
                 % =============================================================
  
                 params = VSGOLEyeTrackerCheck(VSGOL, params);
-                
             else
                 % matlabUDP('send','abort');
                 % ==== NEW ===  Send user ready status ========================
@@ -209,6 +209,8 @@ function windowsClient()
             %WaitSecs(1);
         end
         
+        disp('Up to here - before the GO signal \n');
+        pause;
                 
         % Get the 'Go' signal
         goCommand = VSGOLReceiveEyeTrackerCommand(VSGOL);
@@ -454,12 +456,12 @@ function params = VSGOLEyeTrackerCheck(VSGOL, params)
     
     WaitSecs(2);
     %vetCreateCameraScreen;
-    fprintf('>>> Entered VSGOLEyeTrackerCheck \n');
 
     % checkStart = VSGOLGetInput;
     
     % === NEW ====== Wait for ever to receive the eye tracker status ==================
-   	checkStart = VSGOL.receiveParamValue(VSGOL.EYE_TRACKER_STATUS,  'timeOutSecs', 2);
+   	checkStart = VSGOL.receiveParamValue(VSGOL.EYE_TRACKER_STATUS,  ...
+        'timeOutSecs', 2, 'consoleMessage', '>>> Entered VSGOLEyeTrackerCheck');
     % === NEW ====== Wait for ever to receive the eye tracker status ==================
             
 
@@ -488,11 +490,9 @@ function params = VSGOLEyeTrackerCheck(VSGOL, params)
         
         % matlabUDP('send',num2str(sumTrackData))
         % ==== NEW ===  Send eye tracker status = startEyeTrackerCheck ========
-        VSGOL.sendParamValue({VSGOL.EYE_TRACKER_DATA_POINTS_NUM, sumTrackData}, 'timeOutSecs', 2.0, 'maxAttemptsNum', 3);
+        VSGOL.sendParamValue({VSGOL.EYE_TRACKER_DATA_POINTS_NUM, sumTrackData}, ...
+            'timeOutSecs', 2.0, 'maxAttemptsNum', 3);
         % ==== NEW ============================================================
-            
-        disp('here');
-        pause
     
         if (experimentMode)
             vetStopTracking;
@@ -502,14 +502,11 @@ function params = VSGOLEyeTrackerCheck(VSGOL, params)
         
         % command = matlabUDP('receive');
         % params.run = VSGOLProcessCommand(params, command);
-        UDPcommunicationProgram = {...
-            {OLVSGcommunicator.eyeTrackerStatus, 'params.run'} ...
-        };
-        for k = 1:numel(UDPcommunicationProgram)
-            eval(sprintf('%s = VSGOL.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
-        end
-    
-        params.run
+        
+        % === NEW ====== Wait for ever to receive the new eye tracker status ==================
+        params.run = VSGOL.receiveParamValue(VSGOL.EYE_TRACKER_STATUS,  ...
+            'timeOutSecs', Inf, 'consoleMessage', 'Waiting to receive new Eye Tracker Status');
+        % === NEW ====== Wait for ever to receive the new eye tracker status ==================
         
     end
 end

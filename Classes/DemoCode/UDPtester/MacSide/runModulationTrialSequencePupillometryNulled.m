@@ -137,19 +137,19 @@ function runModulationTrialSequencePupillometryNulled
             
             % Check whether the user is good to resume
             [readyToResume, abort] = OLVSGCheckResume(readyToResume, params, block(1).data.startsBG', block(1).data.stopsBG');
+            fprintf('OLVSGCheckResume: User input acquired.\n');
             
             %matlabUDP('send','The User is ready to move on.');
             % ==== NEW ===  Send user ready status ========================
             OLVSG.sendParamValue({OLVSG.USER_READY_STATUS, 'User is ready to move on.'}, 'timeOutSecs', 2.0, 'maxAttemptsNum', 1);
             % =============================================================
             
-            fprintf('OLVSGCheckResume: User input acquired.\n');
     
-            % Wait to receive the next action
+            % Wait to receive either a continue or an abort message
             % continueCheck = OLVSGGetInput;
             
             % === NEW ====== Wait for ever to receive the userReady status ==================
-            continueCheck = OLVSG.receiveParamValue(OLVSG.USER_READY_STATUS,  'timeOutSecs', 2.0)
+            continueCheck = OLVSG.receiveParamValue(OLVSG.USER_READY_STATUS,  'timeOutSecs', 2.0);
             % === NEW ====== Wait for ever to receive the userReady status ==================
             
 
@@ -195,6 +195,9 @@ function runModulationTrialSequencePupillometryNulled
             break;
         end
             
+        disp('Up to here - before the GO signal \n');
+        pause;
+        
         % Send the 'start' signal. Note that this will remain in the queue
         % over at the VSG box.
         fprintf('Send permission to start tracking \n');
@@ -459,8 +462,6 @@ function isBeingTracked = OLVSGEyeTrackerCheck(OLVSG)
     timeCheck = 5;
     dataCheck = 5;
     
-    fprintf('In OLVSGEyeTrackerCheck\n');
-    
     % OLVSGClearMessageBuffer;
     OLVSG.flashQueue()
     
@@ -468,7 +469,8 @@ function isBeingTracked = OLVSGEyeTrackerCheck(OLVSG)
     
     % matlabUDP('send','startEyeTrackerCheck');
     % ==== NEW ===  Send eye tracker status = startEyeTrackerCheck ========
-    OLVSG.sendParamValue({OLVSG.EYE_TRACKER_STATUS, 'startEyeTrackerCheck'}, 'timeOutSecs', 2.0, 'maxAttemptsNum', 1);
+    OLVSG.sendParamValue({OLVSG.EYE_TRACKER_STATUS, 'startEyeTrackerCheck'}, ...
+        'timeOutSecs', 2.0, 'maxAttemptsNum', 1, 'consoleMessage', '>>>Entered OLVSGEyeTrackerCheck');
     % ==== NEW ============================================================
  
     
@@ -480,13 +482,12 @@ function isBeingTracked = OLVSGEyeTrackerCheck(OLVSG)
 
     % numTrackedData = OLVSGGetInput;
     % === NEW ====== Retrieve the number of eye tracking data points ==================
-    numTrackedData = OLVSG.receiveParamValue(OLVSG.EYE_TRACKER_DATA_POINTS_NUM,  'timeOutSecs', 2.0);
+    numTrackedData = OLVSG.receiveParamValue(OLVSG.EYE_TRACKER_DATA_POINTS_NUM,  ...
+        'timeOutSecs', 2.0, 'consoleMessage', 'Waiting to receive numner of eye tracker data points.');
     % === NEW ====== Retrieve the number of eye tracking data points ==================
   
     fprintf('%s checking data points collected \n',numTrackedData)
 
-    disp('here');
-    pause
     % Clear the buffer
     % OLVSGClearMessageBuffer;
     OLVSG.flashQueue();
@@ -500,9 +501,10 @@ function isBeingTracked = OLVSGEyeTrackerCheck(OLVSG)
         %matlabUDP('send', 'false');
     end
 
-    messageTuple = {OLVSGcommunicator.eyeTrackerStatus, isBeingTracked};
-    OLVSG.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
-    
+    % ==== NEW ===  Send user ready status ================================
+    OLVSG.sendParamValue({OLVSG.USER_READY_STATUS, isBeingTracked}, ...
+        'timeOutSecs', 2, 'consoleMessage', 'Sending the isBeingTracked value');
+    % =====================================================================
 end
 
 
