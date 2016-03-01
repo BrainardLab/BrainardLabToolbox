@@ -1,61 +1,82 @@
-function runModulationTrialSequencePupillometryNulled
-    global experimentMode
-    experimentMode = false;
-    
-    [rootDir, ~] = fileparts(fullfile(which(mfilename)));
-    cd(rootDir); 
-    addpath('../Common');
-    
+function params = runModulationTrialSequencePupillometryNulledOnLine(exp)
+
     clc
-    
-    
-    % === NEW ====== Instantiate a UDPcommunictor object ==================
-    udpParams = getUDPparams();
-    
-    OLVSG = OLVSGcommunicator( ...
-        'signature', 'MacSide', ...              % a label indicating the host, used to for user-feedback
-          'localIP', udpParams.macHostIP, ...    % required: the IP of this computer
-         'remoteIP', udpParams.winHostIP, ...    % required: the IP of the computer we want to conenct to
-          'udpPort', udpParams.udpPort, ...      % optional, with default value: 2007
-        'verbosity', 'min' ...                   % optional, with default value: 'normal', and possible values: {'min', 'normal', 'max'},
-        );
+    % Setup basic parameters for the experiment
+    [params, block] = initParamsAndGenerateBlock(exp);
 
-    % === NEW ====== Instantiate a UDPcommunictor object ==================
-     
+    %% Create the OneLight object.
+    % This makes sure we are talking to OneLight.
+
+    ol = OneLight;
+
+    % Make sure our input and output pattern buffers are setup right.
+    ol.InputPatternBuffer = 0;
+    ol.OutputPatternBuffer = 0;
+
+    fprintf('\n* Creating keyboard listener\n');
+    mglListener('init');
+
+    %% Calibration mode
+    % The calibration mode exists to allow for a calibration of the x-y
+    % positions of the eye tracker. This is currently not used, but an
+    % appropriate routine to communicate with the VSG Winbox is implemented
+    % below.
+    VSGCALLIBRATE = false;
+
+    % OLVSGSendCalibrateTarget tells the other computer to start the EyeTracking
+    % routine, the one that makes sure the subject is looking at the target
+    % throughout the experiment/run.  OLVSGSendCalibrateTarget tells the Windows
+    % machine when to start recording.  This internal function also creates the
+    % GUI for the experimenter so that the position can be selected.
+    if VSGCALLIBRATE
+        OLVSGSendCalibrateTarget();
+    end
+
+    % Run the trial loop.
+    params = trialLoop(params, block, exp);
+
+    % Toss the OLCache and OneLight objects because they are really only
+    % ephemeral.
+    params = rmfield(params, {'olCache'});
+end
+
+function params = trialLoop(params, block, exp)
+
+    % Create the OneLight object.
+    % This makes sure we are talking to OneLight.
+    ol = OneLight;
         
-    
-    
-    params = struct(...
-        'protocolName', 'ModulationTrialSequencePupillometryNulled',...
-        'obsID', 'nicolas', ...
-        'obsIDandRun', 'nicolas -123', ...
-        'nTrials', 3, ...,
-        'whichTrialToStartAt', 1, ...
-        'VSGOfflineMode', false ...
-    );
-    params.skipPupilRecordingFirstTrial = true;
-
-    
     % Initialize a data structure to be used to obtain the data
     dataStruct = struct('diameter', -1, ...
         'time', -1, ...
         'time_inter', -1, ...
         'average_diameter', -1, ...
         'ratioInterupt', -1);
-      
+
     % Determine the number of trials in this block and create a data struct of
     % that size
     dataStruct = repmat(dataStruct, params.nTrials, 1);
     offline = params.VSGOfflineMode;
         
+    
+    
+    % === NEW ====== Instantiate a OLVSGcommunicator object ==================
+    % OLVSGcommunicator will manage the UDP connection between the mac and the windows 
+    % machine so that we can measure and monitor pupil size.
+    OLVSG = OLVSGcommunicator( ...
+            'signature', 'MacSide', ...              % a label indicating the host, used to for user-feedback
+              'localIP', params.macHostIP, ...    % required: the IP of this computer
+             'remoteIP', params.winHostIP, ...    % required: the IP of the computer we want to conenct to
+              'udpPort', params.udpPort, ...      % optional, with default value: 2007
+            'verbosity', 'min' ...                   % optional, with default value: 'normal', and possible values: {'min', 'normal', 'max'},
+            );
+    
     fprintf('\n<strong>%s</strong>; Hit enter when the windowsClient is up and running.\n', mfilename);
     pause;
     
-    % Let the Windows loose
+    % Wake the Windows machine up
     OLVSG.sendParamValue({OLVSG.WAIT_STATUS, 'Wake Up'}, 'timeOutSecs', 2.0, 'maxAttemptsNum', 1, 'consoleMessage', 'sending wake up message');
     
-    
-    % This is the trialLoop function
     % ==== NEW ===  Send param values =====================================
     OLVSG.sendParamValue({OLVSG.PROTOCOL_NAME,       params.protocolName},        'timeOutSecs', 2.0, 'maxAttemptsNum', 1, 'consoleMessage', 'sending protocol name');
     OLVSG.sendParamValue({OLVSG.OBSERVER_ID,         params.obsID},               'timeOutSecs', 2.0, 'maxAttemptsNum', 1, 'consoleMessage', 'sending observer ID');
@@ -63,38 +84,25 @@ function runModulationTrialSequencePupillometryNulled
     OLVSG.sendParamValue({OLVSG.NUMBER_OF_TRIALS,    params.nTrials},             'timeOutSecs', 2.0, 'maxAttemptsNum', 1, 'consoleMessage', 'sending number of trials');
     OLVSG.sendParamValue({OLVSG.STARTING_TRIAL_NO,   params.whichTrialToStartAt}, 'timeOutSecs', 2.0, 'maxAttemptsNum', 1, 'consoleMessage', 'sending which trial to start at');
     OLVSG.sendParamValue({OLVSG.OFFLINE,             params.VSGOfflineMode},      'timeOutSecs', 2.0, 'maxAttemptsNum', 1, 'consoleMessage', 'sending VSGOfflineMode');
-    % ==== NEW ===  Send param values =====================================
-    
 
-    if (experimentMode)  
-        % Create the OneLight object.
-        % This makes sure we are talking to OneLight.
-        ol = OneLight;
-        
-        % Set the background to the 'idle' background appropriate for this
-        % trial.
-        fprintf('- Setting mirrors to background\n');
-        ol.setMirrors(block(1).data.startsBG',  block(1).data.stopsBG'); % Use first trial
-    end
-    
+    % Set the background to the 'idle' background appropriate for this
+    % trial.
+    fprintf('- Setting mirrors to background\n');
+    ol.setMirrors(block(1).data.startsBG',  block(1).data.stopsBG'); % Use first trial
+
     events = struct();
+        
+    % UP TO HERE
+   
     
-    if (experimentMode) 
-        % Suppress keypresses going to the Matlab window.
-        ListenChar(2);
-        %         OLDarkTimer;
-    end
-    
-
     % Iterate over trials
     for trial = params.whichTrialToStartAt:params.nTrials
         
-        if (experimentMode) 
-            fprintf('* Start trial %i/%i - %s, %.2f Hz.\n', trial, params.nTrials, block(trial).direction, block(trial).carrierFrequencyHz);
-            system(['say Trial ' num2str(trial)  ' of ' num2str(params.nTrials)]);
+        fprintf('* Start trial %i/%i - %s, %.2f Hz.\n', trial, params.nTrials, block(trial).direction, block(trial).carrierFrequencyHz);
+        system(['say Trial ' num2str(trial)  ' of ' num2str(params.nTrials)]);
 
-            ol.setMirrors(block(1).data.startsBG',  block(1).data.stopsBG'); % Use first trial
-        end
+        ol.setMirrors(block(1).data.startsBG',  block(1).data.stopsBG'); % Use first trial
+  
         
         % Check the communication betwen Mac host and Win VET
         % Set some flags that are checked done below.
@@ -110,13 +118,6 @@ function runModulationTrialSequencePupillometryNulled
         yStart = [sin(880*2*pi*t)];
         yStop = [sin(440*2*pi*t)];
 
-
-        if (~experimentMode) 
-            % dummy block
-            block(1).data.startsBG = [1 2];
-            block(1).data.stopsBG = [2 3];
-            block(1).modulationMode = 'AM';
-        end
         
         % DEBUG
         %params.run = true; abort = false;
@@ -128,7 +129,7 @@ function runModulationTrialSequencePupillometryNulled
             % Check whether the user is good to resume
             [readyToResume, abort] = OLVSGCheckResume(readyToResume, params, block(1).data.startsBG', block(1).data.stopsBG');
             
-            %matlabUDP('send','The User is ready to move on.');
+            % Send message that user is ready
             % ==== NEW ===  Send user ready status ========================
             OLVSG.sendParamValue({OLVSG.USER_READY_STATUS, 'user ready to move on'}, ...
                 'timeOutSecs', 2.0, 'maxAttemptsNum', 1, 'consoleMessage', 'User input acquired');
@@ -136,8 +137,6 @@ function runModulationTrialSequencePupillometryNulled
             
     
             % Wait to receive either a continue or an abort message
-            % continueCheck = OLVSGGetInput;
-            
             % === NEW ====== Wait for ever to receive the userReady status ==================
             continueCheck = OLVSG.receiveParamValue(OLVSG.USER_READY_STATUS,  ...
                 'timeOutSecs', 2.0, 'consoleMessage', 'Continue checking ?');
@@ -220,21 +219,19 @@ function runModulationTrialSequencePupillometryNulled
             % ==== NEW ===  Send the 'stopTracking' command and wait for the trial outcome ====
                
              
-            if (experimentMode) 
-                % Launch into OLPDFlickerSettings.
-                events(trial).tTrialStart = mglGetSecs;
-                [~, events(trial).t] = ModulationTrialSequenceFlickerStartsStops(trial, params.timeStep, 1);
-                events(trial).tTrialEnd = mglGetSecs;
-            end
-
+            
+            % Launch into OLPDFlickerSettings.
+            events(trial).tTrialStart = mglGetSecs;
+            [~, events(trial).t] = ModulationTrialSequenceFlickerStartsStops(trial, params.timeStep, 1);
+            events(trial).tTrialEnd = mglGetSecs;
+          
         else
 
-            if (experimentMode) 
-                % Launch into OLPDFlickerSettings.
-                events(trial).tTrialStart = mglGetSecs;
-                [~, events(trial).t] = ModulationTrialSequenceFlickerStartsStops(trial, params.timeStep, 1);
+            % Launch into OLPDFlickerSettings.
+            events(trial).tTrialStart = mglGetSecs;
+            [~, events(trial).t] = ModulationTrialSequenceFlickerStartsStops(trial, params.timeStep, 1);
                 events(trial).tTrialEnd = mglGetSecs;
-            end
+
             
             % We stop recording.
             % reply = OLVSGStopPupilRecording(OLVSG);
@@ -257,59 +254,58 @@ function runModulationTrialSequencePupillometryNulled
             [time, diameter, good_counter, interruption_counter, time_inter] = ...
                 OLVSGTransferData(OLVSG,trial, params, block(1).data.startsBG', block(1).data.stopsBG');
 
-            if (experimentMode) 
-                % Calculate Some statistics on how good the measuremnts were
-                good_counter = good_counter - 1;
-                interruption_counter = interruption_counter - 1;
-                ratioInterupt = (interruption_counter/(interruption_counter+good_counter));
-                average_diameter = mean(diameter)*ones(size(time));
-
-                % Assign what we obtain to the data structure.
-                dataStruct(trial).diameter = diameter;
-                dataStruct(trial).time = time;
-                dataStruct(trial).time_inter = time_inter;
-                dataStruct(trial).average_diameter = average_diameter;
-                dataStruct(trial).ratioInterupt = ratioInterupt;
-            end
             
+            % Calculate Some statistics on how good the measuremnts were
+            good_counter = good_counter - 1;
+            interruption_counter = interruption_counter - 1;
+            ratioInterupt = (interruption_counter/(interruption_counter+good_counter));
+            average_diameter = mean(diameter)*ones(size(time));
+
+            % Assign what we obtain to the data structure.
+            dataStruct(trial).diameter = diameter;
+            dataStruct(trial).time = time;
+            dataStruct(trial).time_inter = time_inter;
+            dataStruct(trial).average_diameter = average_diameter;
+            dataStruct(trial).ratioInterupt = ratioInterupt;
+
         end
             
-        if (experimentMode) 
-            if strcmp(block(trial).modulationMode, 'AM')
-                dataStruct(trial).frequencyEnvelope = block(trial).envelopeFrequencyHz;
-                dataStruct(trial).phaseEnvelope = block(trial).carrierPhaseDeg;
-                dataStruct(trial).modulationMode = block(trial).modulationMode;
-            end
 
-            if strcmp(block(trial).modulationMode, 'BG')
-                dataStruct(trial).frequencyEnvelope = 0;
-                dataStruct(trial).phaseEnvelope = 0;
-                dataStruct(trial).modulationMode = block(trial).modulationMode;
-            end
-
-            if strcmp(block(trial).modulationMode, 'FM')
-                dataStruct(trial).frequencyEnvelope = 0;
-                dataStruct(trial).phaseEnvelope = 0;
-                dataStruct(trial).modulationMode = block(trial).modulationMode;
-            end
+        if strcmp(block(trial).modulationMode, 'AM')
+            dataStruct(trial).frequencyEnvelope = block(trial).envelopeFrequencyHz;
+            dataStruct(trial).phaseEnvelope = block(trial).carrierPhaseDeg;
             dataStruct(trial).modulationMode = block(trial).modulationMode;
-            
-            if (offline == true)
-                dataStruct(trial).frequencyCarrier = block(trial).carrierFrequencyHz;
-                dataStruct(trial).phaseCarrier = block(trial).carrierPhaseDeg;
-                dataStruct(trial).direction = block(trial).direction;
-                dataStruct(trial).contrastRelMax = block(trial).contrastRelMax;
+        end
 
-                if ~isempty(strfind(block(trial).modulationMode, 'pulse'))
-                    dataStruct(trial).frequencyEnvelope = 0;
-                    dataStruct(trial).phaseEnvelope = 0;
-                    dataStruct(trial).modulationMode = block(trial).modulationMode;
-                    dataStruct(trial).phaseRandSec = block(trial).phaseRandSec;
-                    dataStruct(trial).stepTimeSec = block(trial).stepTimeSec;
-                    dataStruct(trial).preStepTimeSec = block(trial).preStepTimeSec;
-                end
+        if strcmp(block(trial).modulationMode, 'BG')
+            dataStruct(trial).frequencyEnvelope = 0;
+            dataStruct(trial).phaseEnvelope = 0;
+            dataStruct(trial).modulationMode = block(trial).modulationMode;
+        end
+
+        if strcmp(block(trial).modulationMode, 'FM')
+            dataStruct(trial).frequencyEnvelope = 0;
+            dataStruct(trial).phaseEnvelope = 0;
+            dataStruct(trial).modulationMode = block(trial).modulationMode;
+        end
+        dataStruct(trial).modulationMode = block(trial).modulationMode;
+
+        if (offline == true)
+            dataStruct(trial).frequencyCarrier = block(trial).carrierFrequencyHz;
+            dataStruct(trial).phaseCarrier = block(trial).carrierPhaseDeg;
+            dataStruct(trial).direction = block(trial).direction;
+            dataStruct(trial).contrastRelMax = block(trial).contrastRelMax;
+
+            if ~isempty(strfind(block(trial).modulationMode, 'pulse'))
+                dataStruct(trial).frequencyEnvelope = 0;
+                dataStruct(trial).phaseEnvelope = 0;
+                dataStruct(trial).modulationMode = block(trial).modulationMode;
+                dataStruct(trial).phaseRandSec = block(trial).phaseRandSec;
+                dataStruct(trial).stepTimeSec = block(trial).stepTimeSec;
+                dataStruct(trial).preStepTimeSec = block(trial).preStepTimeSec;
             end
         end
+
         
         % And clear the variables to get ready for the trial.
         clear time;
@@ -326,12 +322,12 @@ function runModulationTrialSequencePupillometryNulled
 
     system('say End of Experiment');
     
-    if (experimentMode)
-        ListenChar(0);
 
-        % Turn all mirrors off
-        ol.setMirrors(block(1).data.startsBG',  block(1).data.stopsBG'); % Use first trialol.setAll(false);
-    end
+    ListenChar(0);
+
+    % Turn all mirrors off
+    ol.setMirrors(block(1).data.startsBG',  block(1).data.stopsBG'); % Use first trialol.setAll(false);
+
     
     % Tack data that we want for later analysis onto params structure.  It then
     % gets passed back to the calling routine and saved in our standard place.
@@ -345,13 +341,11 @@ function [time, diameter, good_counter, interruption_counter, time_inter] = OLVS
         % [time, diameter, good_counter, interruption_counter, time_inter] = OLVSGTransferData(i, params, starts, stopsBackgroundIdle)
         % Get the data from the VSG box
         
-        global experimentMode
-        
-        if (experimentMode)
-            % Set the mirrors to the background
-            ol = OneLight;
-            ol.setMirrors(starts,stopsBackgroundIdle);
-        end
+
+        % Set the mirrors to the background
+        ol = OneLight;
+        ol.setMirrors(starts,stopsBackgroundIdle);
+
         
         % Initialize the data transfer
 
@@ -487,25 +481,23 @@ function [readyToResume, abort] = OLVSGCheckResume(readyToResume, params, starts
     % [readyToResume, abort] = OLVSGCheckResume(readyToResume, params, stopsBackgroundIdle, starts)
     % Checks whether suject is okay to resume with next trial.
 
-    global experimentMode
     % We need to explicitly re-set the mirrors to the background to prevent
     % OneLight from blinking the mirrors to zero during the function call away
     % from the main routine
     
-    if (experimentMode)
-        ol = OneLight;
-        ol.setMirrors(starts,stopsBackgroundIdle);
-    end
+    ol = OneLight;
+    ol.setMirrors(starts,stopsBackgroundIdle);
+
     
     fs = 20000;
     durSecs = 0.01;
     t = linspace(0, durSecs, durSecs*fs);
     yHint = [sin(880*2*pi*t)];
 
-    if (experimentMode)
-        % Suppress keypresses going to the Matlab window.
-        ListenChar(2); 
-    end
+
+    % Suppress keypresses going to the Matlab window.
+    ListenChar(2); 
+
     
     resume = false;
     % Flush our keyboard queue.
@@ -534,5 +526,133 @@ function [readyToResume, abort] = OLVSGCheckResume(readyToResume, params, starts
             end
         end
     end
+end
+    
+
+function [params, block] = initParamsAndGenerateBlock(exp)
+    % params = initParams(exp)
+    % Initialize the parameters
+
+    [~, tmp, suff] = fileparts(exp.configFileName);
+    exp.configFileName = fullfile(exp.configFileDir, [tmp, suff]);
+
+    % Load the config file for this condition.
+    cfgFile = ConfigFile(exp.configFileName);
+
+    % Convert all the ConfigFile parameters into simple struct values.
+    params = convertToStruct(cfgFile);
+    params.cacheDir = fullfile(exp.baseDir, 'cache');
+
+    % Load the calibration file.
+    cType = OLCalibrationTypes.(params.calibrationType);
+    params.oneLightCal = LoadCalFile(cType.CalFileName);
+
+    % Setup the cache.
+    params.olCache = OLCache(params.cacheDir, params.oneLightCal);
+
+    file_names = allwords(params.modulationFiles,',');
+    for i = 1:length(file_names)
+        % Create the cache file name.
+        [~, params.cacheFileName{i}] = fileparts(file_names{i});
+    end
+    params.protocolName = exp.protocolList(exp.protocolIndex).dataDirectory;
+    params.obsIDAndRun = exp.obsIDAndRun;
+    params.obsID = exp.subject;
+    
+    fprintf('> Trial numbers in protocol file:\n');
+    fprintf('   nTrials: %g\n', params.nTrials);
+    fprintf('   theFrequencyIndices: %g\n', length(params.theFrequencyIndices));
+    fprintf('   thePhaseIndices: %g\n', length(params.thePhaseIndices));
+    fprintf('   theDirections: %g\n', length(params.theDirections));
+    fprintf('   theContrastRelMaxIndices: %g\n', length(params.theContrastRelMaxIndices));
+    fprintf('   trialDuration: %g\n\n', length(params.trialDuration));
+
+    % Ask for the observer age
+    params.observerAgeInYears = GetWithDefault('>>> Observer age', 32);
+
+    % Ask if we want to skip pupil recording in the first trial
+    params.skipPupilRecordingFirstTrial = false;
+
+    %% Put together the trial order
+    for i = 1:length(params.cacheFileName)
+        % Construct the file name to load in age-specific file
+
+        %modulationData{i} = LoadCalFile(params.cacheFileName{i}, [], [params.cacheDir '/modulations/']);
+        [~, fileName, fileSuffix] = fileparts(params.cacheFileName{i});
+        %params.cacheFileName{i} = [fileName '-' exp.subject fileSuffix];
+        params.cacheFileName{i} = [fileName '-' num2str(params.observerAgeInYears) fileSuffix];
+        try
+            modulationData{i} = load(fullfile(params.cacheDir, 'modulations', params.cacheFileName{i}));
+        catch
+            error('ERROR: Cache file for observer with specific age or nulling ID could not be found');
+        end
+    end
+
+    % Put together the trial order
+    % Pre-initialize the blocks
+    block = struct();
+    block(params.nTrials).describe = '';
+
+    % Debug
+    %params.nTrials = 1;
+
+    params.whichTrialToStartAt = GetWithDefault('Which trial to start at?', 1);
+
+    for i = 1:params.nTrials
+        fprintf('- Preconfiguring trial %i/%i...', i, params.nTrials);
+        block(i).data = modulationData{params.theDirections(i)}.modulationObj.modulation(params.theFrequencyIndices(i), params.thePhaseIndices(i), params.theContrastRelMaxIndices(i));
+        block(i).describe = modulationData{params.theDirections(i)}.modulationObj.describe;
+
+        % Check if the 'attentionTask' flag is set. If it is, set up the task
+        % (brief stimulus offset).
+        %block(i).attentionTask.flag = params.attentionTask(i);
+        block(i).modulationMode = block(i).data.modulationMode;
+        if ~isempty(strfind(block(i).modulationMode, 'pulse')) && isempty(strfind(block(i).describe.params.preCacheFileFull, 'DoublePulse'))
+            block(i).direction = block(i).data.direction;
+
+            block(i).contrastRelMax = block(i).describe.theContrastRelMax(params.theContrastRelMaxIndices(i));
+            block(i).carrierFrequencyHz = -1;
+            block(i).carrierPhaseDeg = -1;
+            block(i).phaseRandSec = block(i).data.phaseRandSec;
+            block(i).stepTimeSec = block(i).data.stepTimeSec;
+            block(i).preStepTimeSec = block(i).data.preStepTimeSec;
+        elseif ~isempty(strfind(block(i).describe.params.preCacheFileFull, 'DoublePulse'))
+            block(i).direction = block(i).data.direction;
+            block(i).contrastRelMax = block(i).describe.params.contrastScalars2(params.theContrastRelMaxIndices(i));
+            block(i).carrierFrequencyHz = -1;
+            block(i).carrierPhaseDeg = -1;
+            block(i).phaseRandSec = block(i).data.phaseRandSec;
+            block(i).stepTimeSec = block(i).data.stepTimeSec;
+            block(i).preStepTimeSec = block(i).data.preStepTimeSec;
+        else
+            block(i).direction = block(i).data.direction;
+            block(i).carrierFrequencyHz = block(i).describe.theFrequenciesHz(params.theFrequencyIndices(i));
+            block(i).carrierPhaseDeg = block(i).describe.thePhasesDeg(params.thePhaseIndices(i));
+            block(i).contrastRelMax = block(i).describe.theContrastRelMax(params.theContrastRelMaxIndices(i));
+        end
+
+        if strcmp(block(i).modulationMode, 'AM')
+            block(i).envelopeFrequencyHz = block(i).data.theEnvelopeFrequencyHz;
+            block(i).envelopePhaseDeg = block(i).carrierPhaseDeg;
+            block(i).carrierPhaseDeg = 0;
+        end
+
+        if strcmp(block(i).direction, 'Background')
+            block(i).modulationMode = 'BG';
+            block(i).envelopePhaseDeg = 0;
+            block(i).envelopeFrequencyHz = 0;
+        end
+
+
+        % We pull out the background.
+        block(i).data.startsBG = block(i).data.starts(1, :);
+        block(i).data.stopsBG = block(i).data.stops(1, :);
+
+        fprintf('Done\n');
+    end
+
+    % Get rid of modulationData struct
+    clear modulationData;
+    
 end
     
