@@ -46,4 +46,8 @@ function sendParamValue(obj, paramNameAndValue,  varargin)
 
     % Check status to ensure we received a 'TRANSMITTED_MESSAGE_MATCHES_EXPECTED' message
     assert(strcmp(status, obj.TRANSMITTED_MESSAGE_MATCHES_EXPECTED), sprintf('%s: Exiting due to mismatch in message labels.\nExpected label: ''%s'', Received label: ''%s''.\n', backTrace, obj.TRANSMITTED_MESSAGE_MATCHES_EXPECTED, status));
+
+    if (~isempty(p.Results.consoleMessage))
+        fprintf('<strong>DONE</strong>\n');
+    end
 end

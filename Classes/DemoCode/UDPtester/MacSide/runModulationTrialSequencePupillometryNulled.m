@@ -51,9 +51,7 @@ function runModulationTrialSequencePupillometryNulled
     % === NEW ====== Instantiate a UDPcommunictor object ==================
      
         
-    fprintf('\nStarting ''%s''\n', mfilename);
-    fprintf('Hit enter when the windowsClient is up and running.\n');
-    pause;
+    
     
     params = struct(...
         'protocolName', 'ModulationTrialSequencePupillometryNulled',...
@@ -78,6 +76,14 @@ function runModulationTrialSequencePupillometryNulled
     dataStruct = repmat(dataStruct, params.nTrials, 1);
     offline = params.VSGOfflineMode;
         
+    fprintf('\nStarting ''%s''\n', mfilename);
+    fprintf('Hit enter when the windowsClient is up and running.\n');
+    pause;
+    
+    % Let the Windows loose
+    OLVSG.sendParamValue({OLVSG.WAIT_STATUS, 'Wake Up'}, 'timeOutSecs', 2.0, 'maxAttemptsNum', 1);
+    
+    
     % This is the trialLoop function
     % ==== NEW ===  Send param values =====================================
     OLVSG.sendParamValue({OLVSG.PROTOCOL_NAME,       params.protocolName},        'timeOutSecs', 2.0, 'maxAttemptsNum', 1);
@@ -138,7 +144,7 @@ function runModulationTrialSequencePupillometryNulled
             % dummy block
             block(1).data.startsBG = [1 2];
             block(1).data.stopsBG = [2 3];
-            block(1).modulationMode = 'AM'
+            block(1).modulationMode = 'AM';
         end
         
         % DEBUG
@@ -407,9 +413,6 @@ function [time, diameter, good_counter, interruption_counter, time_inter] = OLVS
         % === NEW ====== Wait for ever to receive the userReady status ==================
                 
         fprintf('OLVSGTransferData: The number of data points is %d\n', nDataPoints);
-        
-        disp('OK to before data points \n');
-        pause
             
         % Iterate over the data points
         for i = 1:nDataPoints

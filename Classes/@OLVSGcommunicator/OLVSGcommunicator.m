@@ -11,6 +11,8 @@ classdef OLVSGcommunicator < UDPcommunicator
     
     % Pre-defined param names 
     properties (Constant)
+        
+        WAIT_STATUS                 = 'Wait Status Label';
         PROTOCOL_NAME               = 'Protocol Name Label';
         OBSERVER_ID                 = 'Observer ID Label';
         OBSERVER_ID_AND_RUN         = 'Observer ID and Run Label';
