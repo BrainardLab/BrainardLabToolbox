@@ -106,9 +106,9 @@ function windowsClient()
     % Main Experiment Loop
     
     % === NEW ====== Get param values for labeled param names ==================
-    protocolNameStr = VSGOL.receiveParamValue(VSGOL.PROTOCOL_NAME,       'timeOutSecs', 2);
-    obsID           = VSGOL.receiveParamValue(VSGOL.OBSERVER_ID,         'timeOutSecs', 2);
-    obsIDAndRun     = VSGOL.receiveParamValue(VSGOL.OBSERVER_ID_AND_RUN, 'timeOutSecs', 2);
+    protocolNameStr = VSGOL.receiveParamValue(VSGOL.PROTOCOL_NAME,       'timeOutSecs', 2, 'consoleMessage', 'receiving protocol name');
+    obsID           = VSGOL.receiveParamValue(VSGOL.OBSERVER_ID,         'timeOutSecs', 2, 'consoleMessage', 'receiving observer ID');
+    obsIDAndRun     = VSGOL.receiveParamValue(VSGOL.OBSERVER_ID_AND_RUN, 'timeOutSecs', 2, 'consoleMessage', 'receiving observer ID and run');
     % === NEW ====== Get param values for labeled param names ==================
     
     
@@ -129,9 +129,9 @@ function windowsClient()
     
     
     % === NEW ====== Get param values for labeled param names ==================
-    nTrials         = VSGOL.receiveParamValue(VSGOL.NUMBER_OF_TRIALS,  'timeOutSecs', 2);
-    startTrialNum   = VSGOL.receiveParamValue(VSGOL.STARTING_TRIAL_NO, 'timeOutSecs', 2);
-    offline         = VSGOL.receiveParamValue(VSGOL.OFFLINE,           'timeOutSecs', 2);
+    nTrials         = VSGOL.receiveParamValue(VSGOL.NUMBER_OF_TRIALS,  'timeOutSecs', 2, 'consoleMessage', 'receiving number of trials');
+    startTrialNum   = VSGOL.receiveParamValue(VSGOL.STARTING_TRIAL_NO, 'timeOutSecs', 2, 'consoleMessage', 'receiving which trial to start');
+    offline         = VSGOL.receiveParamValue(VSGOL.OFFLINE,           'timeOutSecs', 2, 'consoleMessage', 'receivingVSGOfflineMode');
     % === NEW ====== Get param values for labeled param names ==================
     
     

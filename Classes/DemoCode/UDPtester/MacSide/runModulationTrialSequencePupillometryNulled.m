@@ -80,17 +80,17 @@ function runModulationTrialSequencePupillometryNulled
     pause;
     
     % Let the Windows loose
-    OLVSG.sendParamValue({OLVSG.WAIT_STATUS, 'Wake Up'}, 'timeOutSecs', 2.0, 'maxAttemptsNum', 1);
+    OLVSG.sendParamValue({OLVSG.WAIT_STATUS, 'Wake Up'}, 'timeOutSecs', 2.0, 'maxAttemptsNum', 1, 'consoleMessage', 'sending wake up message');
     
     
     % This is the trialLoop function
     % ==== NEW ===  Send param values =====================================
-    OLVSG.sendParamValue({OLVSG.PROTOCOL_NAME,       params.protocolName},        'timeOutSecs', 2.0, 'maxAttemptsNum', 1);
-    OLVSG.sendParamValue({OLVSG.OBSERVER_ID,         params.obsID},               'timeOutSecs', 2.0, 'maxAttemptsNum', 1);
-    OLVSG.sendParamValue({OLVSG.OBSERVER_ID_AND_RUN, params.obsIDandRun},         'timeOutSecs', 2.0, 'maxAttemptsNum', 1);
-    OLVSG.sendParamValue({OLVSG.NUMBER_OF_TRIALS,    params.nTrials},             'timeOutSecs', 2.0, 'maxAttemptsNum', 1);
-    OLVSG.sendParamValue({OLVSG.STARTING_TRIAL_NO,   params.whichTrialToStartAt}, 'timeOutSecs', 2.0, 'maxAttemptsNum', 1);
-    OLVSG.sendParamValue({OLVSG.OFFLINE,             params.VSGOfflineMode},      'timeOutSecs', 2.0, 'maxAttemptsNum', 1);
+    OLVSG.sendParamValue({OLVSG.PROTOCOL_NAME,       params.protocolName},        'timeOutSecs', 2.0, 'maxAttemptsNum', 1, 'consoleMessage', 'sending protocol name');
+    OLVSG.sendParamValue({OLVSG.OBSERVER_ID,         params.obsID},               'timeOutSecs', 2.0, 'maxAttemptsNum', 1, 'consoleMessage', 'sending observer ID');
+    OLVSG.sendParamValue({OLVSG.OBSERVER_ID_AND_RUN, params.obsIDandRun},         'timeOutSecs', 2.0, 'maxAttemptsNum', 1, 'consoleMessage', 'sending observer ID and run');
+    OLVSG.sendParamValue({OLVSG.NUMBER_OF_TRIALS,    params.nTrials},             'timeOutSecs', 2.0, 'maxAttemptsNum', 1, 'consoleMessage', 'sending number of trials');
+    OLVSG.sendParamValue({OLVSG.STARTING_TRIAL_NO,   params.whichTrialToStartAt}, 'timeOutSecs', 2.0, 'maxAttemptsNum', 1, 'consoleMessage', 'sending which trial to start at');
+    OLVSG.sendParamValue({OLVSG.OFFLINE,             params.VSGOfflineMode},      'timeOutSecs', 2.0, 'maxAttemptsNum', 1, 'consoleMessage', 'sending VSGOfflineMode');
     % ==== NEW ===  Send param values =====================================
     
 
