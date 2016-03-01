@@ -353,8 +353,8 @@ function windowsClient()
         else
             
             VSGOL.receiveParamValueAndSendResponse(...
-                {OLVSG.DATA_TRANSFER_STATUS, 'begin transfer'}, ...  % received from mac
-                {OLVSG.DATA_TRANSFER_STATUS, 'begin transfer'}, ...  % transmitted back
+                {VSGOL.DATA_TRANSFER_STATUS, 'begin transfer'}, ...  % received from mac
+                {VSGOL.DATA_TRANSFER_STATUS, 'begin transfer'}, ...  % transmitted back
                 'timeOutSecs', Inf ...;
             );
             
@@ -363,7 +363,7 @@ function windowsClient()
             %matlabUDP('send',num2str(numDataPoints));
             
             % ==== NEW ===  Send the number of data points to be transferred ===
-            VSGOL.sendParamValue({OLVSG.DATA_TRANSFER_POINTS_NUM, numDataPoints}, 'timeOutSecs', 2);
+            VSGOL.sendParamValue({VSGOL.DATA_TRANSFER_POINTS_NUM, numDataPoints}, 'timeOutSecs', 2);
             % ==== NEW ===  Send the number of data points to be transferred ===
             
             disp('OK to before data points \n');
