@@ -101,14 +101,14 @@ function windowsClient()
     
     % Receiving initial information from Mac
     fprintf('\nRun OLFlickerSensitivity on Mac and select protocol...\n');
-    VSGOL.receiveParamValue(VSGOL.WAIT_STATUS,  'timeOutSecs', Inf, 'consoleMessage', ' Waiting for Mac to tell us to go... ');
+    VSGOL.receiveParamValue(VSGOL.WAIT_STATUS,  'timeOutSecs', Inf, 'consoleMessage', 'Mac are you there ?');
     
     % Main Experiment Loop
     
     % === NEW ====== Get param values for labeled param names ==================
-    protocolNameStr = VSGOL.receiveParamValue(VSGOL.PROTOCOL_NAME,       'timeOutSecs', 2)
-    obsID           = VSGOL.receiveParamValue(VSGOL.OBSERVER_ID,         'timeOutSecs', 2)
-    obsIDAndRun     = VSGOL.receiveParamValue(VSGOL.OBSERVER_ID_AND_RUN, 'timeOutSecs', 2)
+    protocolNameStr = VSGOL.receiveParamValue(VSGOL.PROTOCOL_NAME,       'timeOutSecs', 2);
+    obsID           = VSGOL.receiveParamValue(VSGOL.OBSERVER_ID,         'timeOutSecs', 2);
+    obsIDAndRun     = VSGOL.receiveParamValue(VSGOL.OBSERVER_ID_AND_RUN, 'timeOutSecs', 2);
     % === NEW ====== Get param values for labeled param names ==================
     
     
@@ -129,9 +129,9 @@ function windowsClient()
     
     
     % === NEW ====== Get param values for labeled param names ==================
-    nTrials         = VSGOL.receiveParamValue(VSGOL.NUMBER_OF_TRIALS,  'timeOutSecs', 2)
-    startTrialNum   = VSGOL.receiveParamValue(VSGOL.STARTING_TRIAL_NO, 'timeOutSecs', 2)
-    offline         = VSGOL.receiveParamValue(VSGOL.OFFLINE,           'timeOutSecs', 2)
+    nTrials         = VSGOL.receiveParamValue(VSGOL.NUMBER_OF_TRIALS,  'timeOutSecs', 2);
+    startTrialNum   = VSGOL.receiveParamValue(VSGOL.STARTING_TRIAL_NO, 'timeOutSecs', 2);
+    offline         = VSGOL.receiveParamValue(VSGOL.OFFLINE,           'timeOutSecs', 2);
     % === NEW ====== Get param values for labeled param names ==================
     
     
@@ -176,7 +176,6 @@ function windowsClient()
             % === NEW ====== Wait for ever to receive the userReady status ==================
 
             fprintf('>>> Check %g\n', checkCounter);
-            fprintf('>>> User ready? %s \n', userReady);
             
             
             if checkCounter <= maxAttempts
@@ -365,16 +364,17 @@ function windowsClient()
             VSGOL.receiveParamValueAndSendResponse(...
                 {VSGOL.DATA_TRANSFER_STATUS, 'begin transfer'}, ...  % received from mac
                 {VSGOL.DATA_TRANSFER_STATUS, 'begin transfer'}, ...  % transmitted back
-                'timeOutSecs', Inf ...;
+                'timeOutSecs', Inf, ...
+                'consoleMessage', 'Mac, should we begin data transfer?' ...
             );
             % === NEW ====== Wait for ever to receive a 'begin transfer' signal and respond to it ==================
              
- 
-            fprintf('Transfer beginning...\n');
+
             %matlabUDP('send',num2str(numDataPoints));
             
             % ==== NEW ===  Send the number of data points to be transferred ===
-            VSGOL.sendParamValue({VSGOL.DATA_TRANSFER_POINTS_NUM, numDataPoints}, 'timeOutSecs', 2);
+            VSGOL.sendParamValue({VSGOL.DATA_TRANSFER_POINTS_NUM, numDataPoints}, ...
+                'timeOutSecs', 2, 'consoleMessage', sprintf('Informing Mac about number of data points (%d)', numDataPoints));
             % ==== NEW ===  Send the number of data points to be transferred ===
             
             
@@ -398,10 +398,9 @@ function windowsClient()
             end
 
             % Finish up the transfer
-            fprintf('Data transfer for trial %f ending...\n', i);
             %macCommand = VSGOLGetInput;
             
-            VSGOL.receiveParamValue(VSGOL.DATA_TRANSFER_STATUS);
+            VSGOL.receiveParamValue(VSGOL.DATA_TRANSFER_STATUS, 'consoleMessage', sprintf('Data for trial %d transfered. End data transfer?', i));
         end
     
         % After the trial, plot out a trace of the data. This is presumably to make sure that everything went ok.
@@ -422,30 +421,6 @@ function windowsClient()
     VSGOL.shutDown();
     
     fprintf('*** Program completed successfully.\n');
-
-
-end
-
-
-function beginRecording = VSGOLReceiveEyeTrackerCommand(VSGOL)
-    % beginRecording = VSGOLReceiveEyeTrackerCommand
-    % Wait and the 'go command
-    
-    UDPcommunicationProgram = {...
-        {OLVSGcommunicator.eyeTrackerStatus, 'eyeTrackerStatus'} ...
-    };
-    for k = 1:numel(UDPcommunicationProgram)
-        eval(sprintf('%s = VSGOL.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
-    end
-            
-    if strcmp(eyeTrackerStatus,'Requesting permission to start tracking')
-        % matlabUDP('send','Permission to begin recording received');
-        messageTuple = {OLVSGcommunicator.eyeTrackerStatus, 'Permission granted'};
-        VSGOL.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
-        beginRecording = true;
-    else
-        beginRecording = false;
-    end
 end
 
 
@@ -468,7 +443,7 @@ function params = VSGOLEyeTrackerCheck(VSGOL, params)
     
     % === NEW ====== Wait for ever to receive the eye tracker status ==================
    	checkStart = VSGOL.receiveParamValue(VSGOL.EYE_TRACKER_STATUS,  ...
-        'timeOutSecs', 2, 'consoleMessage', '>>> Entered VSGOLEyeTrackerCheck');
+        'timeOutSecs', 2, 'consoleMessage', 'Start checking eye tracking ?');
     % === NEW ====== Wait for ever to receive the eye tracker status ==================
             
     WaitSecs(1);
@@ -483,7 +458,7 @@ function params = VSGOLEyeTrackerCheck(VSGOL, params)
         while (GetSecs - tStart < timeCheck)
             % Collect some checking data
         end
-        fprintf('*** Tracking finished \n')
+        fprintf('*** End tracking\n')
         
         if (experimentMode)
             checkData = vetGetBufferedEyePositions;
@@ -510,28 +485,11 @@ function params = VSGOLEyeTrackerCheck(VSGOL, params)
         
         % === NEW ====== Wait for ever to receive the new eye tracker status ==================
         params.run = VSGOL.receiveParamValue(VSGOL.EYE_TRACKER_STATUS,  ...
-            'timeOutSecs', Inf, 'consoleMessage', 'Did we track?');
+            'timeOutSecs', Inf, 'consoleMessage', 'Did we track OK?');
         % === NEW ====== Wait for ever to receive the new eye tracker status ==================
         
     end
 end
 
-
-function params = VSGOLProcessCommand(params, command)
-% params = VSGOLProcessCommand(params, command)
-% This function is called in the function "VSGOLGetStart"  It processes the
-% command from the Mac host and either starts or terminates the program.
-%
-% We may not need params.run anymore, however, I think it may be
-% useful in another portion of the code.
-[opcode, r] = strtok(command);
-switch lower(opcode)
-    case {'exit', 'quit', 'terminate', 'end', 'stop', 'false'}
-        params.run = false;
-    case {'start', 'begin', 'initiate', 'run', 'true'}
-        params.run = true;
-        disp('starting...');
-end
-end
 
 
