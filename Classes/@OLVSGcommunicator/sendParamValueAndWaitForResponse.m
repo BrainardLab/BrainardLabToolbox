@@ -1,4 +1,4 @@
-function response = sendParamValueAndWaitForResponse(obj, paramNameAndValue, expectedResponse, varargin)
+function receivedResponse = sendParamValueAndWaitForResponse(obj, paramNameAndValue, expectedResponse, varargin)
 
     p = inputParser;
     p.addRequired('paramNameAndValue', @iscell);
