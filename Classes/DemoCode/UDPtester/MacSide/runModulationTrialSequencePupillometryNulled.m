@@ -1,4 +1,5 @@
-% Demo code for testing in my office
+% Demo code for testing in my office. 
+% Paired with windowsClient on WindowsSide
 function runModulationTrialSequencePupillometryNulled
     global experimentMode
     experimentMode = false;

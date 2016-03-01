@@ -1,3 +1,5 @@
+% Demo code for testing in my office.
+% Paired with runModulationTrialSequencePupillometryNulled on MacSide
 function windowsClient()
     global CRS;
     global experimentMode
