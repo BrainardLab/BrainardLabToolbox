@@ -25,6 +25,8 @@ classdef OLVSGcommunicator < UDPcommunicator
         
         DATA_TRANSFER_STATUS        = 'Data Transfer Status Label';
         DATA_TRANSFER_POINTS_NUM    = 'Data Points To Be Transfered Label';
+        DATA_TRANSFER_REQUEST_FOR_POINT = 'Data Trasnfer Request For Point Label';
+        DATA_FOR_POINT              = 'Data For Point Label';
     end
     
     % Public methods

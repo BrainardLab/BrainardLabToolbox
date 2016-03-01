@@ -47,7 +47,7 @@ function windowsClient()
     VSGOL.setValidValuesForParam(VSGOL.DATA_TRANSFER_STATUS, ...
         { ...
             'begin transfer', ...
-            'stop transfer' ...
+            'end transfer' ...
         }...
     );
 
@@ -311,7 +311,7 @@ function windowsClient()
         end
         
         % Start the file transfer
-        macCommand = 'fubar';
+        
         numDataPoints = length(transferData);
         clear diameter;
         clear time;
@@ -361,12 +361,14 @@ function windowsClient()
             save([saveFile '_' num2str(i, '%03.f') '.mat'], 'dataStruct', 'dataRaw', 'pupilData');
         else
             
+            % === NEW ====== Wait for ever to receive a 'begin transfer' signal and respond to it ==================
             VSGOL.receiveParamValueAndSendResponse(...
                 {VSGOL.DATA_TRANSFER_STATUS, 'begin transfer'}, ...  % received from mac
                 {VSGOL.DATA_TRANSFER_STATUS, 'begin transfer'}, ...  % transmitted back
                 'timeOutSecs', Inf ...;
             );
-            
+            % === NEW ====== Wait for ever to receive a 'begin transfer' signal and respond to it ==================
+             
  
             fprintf('Transfer beginning...\n');
             %matlabUDP('send',num2str(numDataPoints));
@@ -378,36 +380,30 @@ function windowsClient()
             disp('OK to before data points \n');
             pause
             
-            UDPcommunicationProgram = {...
-                {'Transfer Data Status', 'macCommand'} ...
-            };
         
             % Iterate over the data
             for kk = 1:numDataPoints
-                while (~strcmp(macCommand,['transfering ' num2str(kk)]))
-                    %macCommand = VSGOLGetInput;
-                    for k = 1:numel(UDPcommunicationProgram)
-                        eval(sprintf('%s = VSGOL.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
-                    end
-                end
                 
-                % matlabUDP('send',transferData{kk});
-                messageTuple = {'Data Point', transferData{kk}};
-                VSGOL.sendMessageAndReceiveAcknowldegmentOrFail(messageTuple);
+%                 while (~strcmp(macCommand,['transfering ' num2str(kk)]))
+%                     macCommand = VSGOLGetInput;
+%                 end
+%                  matlabUDP('send',transferData{kk})
+
+                % === NEW Wait for ever to receive request to transfer data for point kk, then send that data over
+                VSGOL.receiveParamValueAndSendResponse(...
+                    {VSGOL.DATA_TRANSFER_REQUEST_FOR_POINT, kk}, ...  % received trasnfer request for data point kk 
+                    {VSGOL.DATA_FOR_POINT, transferData{kk}}, ...     % transmit back the data for point kk
+                    'timeOutSecs', Inf ...
+                );
+                % === NEW Wait for ever to receive request to transfer data for point kk, then send that data over
+                
             end
 
             % Finish up the transfer
             fprintf('Data transfer for trial %f ending...\n', i);
-
-            UDPcommunicationProgram = {...
-                {'Transfer Data Status', 'macCommand'} ...
-            };
-            while (~strcmp(macCommand,'end transfer'))
-                %macCommand = VSGOLGetInput;
-                for k = 1:numel(UDPcommunicationProgram)
-                    eval(sprintf('%s = VSGOL.getMessageValueWithMatchingLabelOrFail(UDPcommunicationProgram{k}{1});', UDPcommunicationProgram{k}{2}));
-                end
-            end
+            %macCommand = VSGOLGetInput;
+            
+            VSGOL.receiveParamValue(OLVSG.DATA_TRANSFER_STATUS);
         end
     
         % After the trial, plot out a trace of the data. This is presumably to make sure that everything went ok.
