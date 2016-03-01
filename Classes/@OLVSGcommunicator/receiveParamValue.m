@@ -44,4 +44,8 @@ function paramValue = receiveParamValue(obj, paramName, varargin)
     % validate paramValue before returning, if there is a valid range for
     % this paramName
     obj.validateValueForParam(paramName, paramValue, backTrace);
+    
+    if (~isempty(p.Results.consoleMessage))
+        fprintf('<strong>DONE</strong>\n');
+    end
 end

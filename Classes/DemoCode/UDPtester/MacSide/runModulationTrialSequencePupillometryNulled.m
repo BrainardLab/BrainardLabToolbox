@@ -76,8 +76,7 @@ function runModulationTrialSequencePupillometryNulled
     dataStruct = repmat(dataStruct, params.nTrials, 1);
     offline = params.VSGOfflineMode;
         
-    fprintf('\nStarting ''%s''\n', mfilename);
-    fprintf('Hit enter when the windowsClient is up and running.\n');
+    fprintf('\n<strong> %s </strong> Hit enter when the windowsClient is up and running.\n', mfilename);
     pause;
     
     % Let the Windows loose
