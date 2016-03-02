@@ -16,8 +16,10 @@ function paramValue = receiveParamValue(obj, paramName, varargin)
     % parse input
     defaultTimeOutSecs = Inf;
     defaultConsoleMessage = '';
+    defaultExpectedParamValue = [];
     p = inputParser;
     p.addRequired('paramName', @ischar);
+    p.addParamValue('expectedParamValue', defaultExpectedParamValue);
     p.addParamValue('timeOutSecs', defaultTimeOutSecs,   @isnumeric);
     p.addParamValue('consoleMessage', defaultConsoleMessage,   @ischar);
     p.parse(paramName, varargin{:});
@@ -47,9 +49,21 @@ function paramValue = receiveParamValue(obj, paramName, varargin)
     % Get the message value received
     paramValue = response.msgValue;
     
-    % validate paramValue before returning, if there is a valid range for
-    % this paramName
+    % validate paramValue before returning, if there is a valid range for this paramName
     obj.validateValueForParam(paramName, paramValue, backTrace);
+    
+    % check the param value before returning, if we got an expectedParamValue
+    if (~isempty(p.Results.expectedParamValue))
+        if (ischar(paramValue))
+            assert(strcmp(paramValue, p.Results.expectedParamValue), sprintf('%s: Exiting due to mismatch param values.\nExpected value: ''%s'', Received value: ''%s''.\n', backTrace, p.Results.expectedParamValue, paramValue));
+        elseif (isnumeric(paramValue)) 
+            assert(abs(paramValue - p.Results.expectedParamValue) < 500*eps, sprintf('%s: Exiting due to mismatch param values.\nExpected value: ''%f'', Received value: ''%f''.\n', backTrace, p.Results.expectedParamValue, paramValue));
+        elseif (islogical(paramValue))
+            assert(paramValue ~= p.Results.expectedParamValue, sprintf('%s: Exiting due to mismatch param values.\nExpected value: ''%d'', Received value: ''%d''.\n', backTrace, p.Results.expectedParamValue, paramValue));
+        else
+            fprintf(2,'Do not know how to compare param values that are not strings, logical or numerics\n');
+        end
+    end
     
     if (~isempty(p.Results.consoleMessage))
         fprintf('<strong>DONE</strong>\n');

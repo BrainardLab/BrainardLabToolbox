@@ -43,8 +43,7 @@ function sendParamValue(obj, paramNameAndValue,  varargin)
         end
     end
     
-    % validate paramValue before sending it, if there is a valid range for
-    % this paramName
+    % validate paramValue before sending it, if there is a valid range for this paramName
     obj.validateValueForParam(paramName, paramValue, backTrace);
     
     % send it
