@@ -229,7 +229,7 @@ function runWindowsClientOnLine
         clear diameter;
         clear time;
         clear time_inter;
-        offline
+        
         if offline
             good_counter = 0;
             interruption_counter = 0;

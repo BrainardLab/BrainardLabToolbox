@@ -297,48 +297,55 @@ function windowsClient()
         clear time;
         clear time_inter;
         
-        if offline
-            good_counter = 0;
-            interruption_counter = 0;
+        if (offline) || (experimentMode == false)
+            
+            if (~experimentMode)
+                % simulate a long write-to-disk time
+                fprintf('Waiting to save to disk for 50 seconds');
+                wait(50);
+            else
+                good_counter = 0;
+                interruption_counter = 0;
 
-            % Iterate over the data points
-            for j = 1:numDataPoints
-                parsedline = allwords(transferData{j}, ' ');
-                diam = str2double(parsedline{1});
-                ti = str2double(parsedline{2});
-                isinterruption = str2double(parsedline{3});
-                interrupttime = str2double(parsedline{4});
-                if (isinterruption == 0)
-                    good_counter = good_counter+1;
-                    diameter(good_counter) = diam;
-                    time(good_counter) = ti;
-                elseif (isinterruption == 1)
-                    interruption_counter = interruption_counter + 1;
-                    time_inter(interruption_counter) = interrupttime;
+                % Iterate over the data points
+                for j = 1:numDataPoints
+                    parsedline = allwords(transferData{j}, ' ');
+                    diam = str2double(parsedline{1});
+                    ti = str2double(parsedline{2});
+                    isinterruption = str2double(parsedline{3});
+                    interrupttime = str2double(parsedline{4});
+                    if (isinterruption == 0)
+                        good_counter = good_counter+1;
+                        diameter(good_counter) = diam;
+                        time(good_counter) = ti;
+                    elseif (isinterruption == 1)
+                        interruption_counter = interruption_counter + 1;
+                        time_inter(interruption_counter) = interrupttime;
+                    end
                 end
+                if ~exist('diameter', 'var')
+                    diameter = [];
+                end
+
+                if ~exist('time', 'var')
+                    time = [];
+                end
+
+                if ~exist('time_inter', 'var')
+                    time_inter = [];
+                end
+
+                %average_diameter = mean(diameter)*ones(size(time));
+
+                % Assign what we obtain to the data structure.
+                dataStruct.diameter = diameter;
+                dataStruct.time = time;
+                dataStruct.time_inter = time_inter;
+                %dataStruct.average_diameter = average_diameter;
+
+                dataRaw = transferData;
+                save([saveFile '_' num2str(i, '%03.f') '.mat'], 'dataStruct', 'dataRaw', 'pupilData');
             end
-            if ~exist('diameter', 'var')
-                diameter = [];
-            end
-
-            if ~exist('time', 'var')
-                time = [];
-            end
-
-            if ~exist('time_inter', 'var')
-                time_inter = [];
-            end
-
-            %average_diameter = mean(diameter)*ones(size(time));
-
-            % Assign what we obtain to the data structure.
-            dataStruct.diameter = diameter;
-            dataStruct.time = time;
-            dataStruct.time_inter = time_inter;
-            %dataStruct.average_diameter = average_diameter;
-
-            dataRaw = transferData;
-            save([saveFile '_' num2str(i, '%03.f') '.mat'], 'dataStruct', 'dataRaw', 'pupilData');
         else
             
             % === NEW ====== Wait for ever to receive a 'begin transfer' signal and respond to it ==================
