@@ -46,6 +46,9 @@ function runModulationTrialSequencePupillometryNulled
     );
     params.skipPupilRecordingFirstTrial = true;
 
+    % ======= make offline 1 to test wiring to disk delay
+    params.VSGOfflineMode = 1
+    
     
     % Initialize a data structure to be used to obtain the data
     dataStruct = struct('diameter', -1, ...
@@ -64,7 +67,7 @@ function runModulationTrialSequencePupillometryNulled
     
     % Let the Windows loose
     OLVSG.sendParamValue({OLVSG.WAIT_STATUS, 'Wake Up'}, 'timeOutSecs', 2.0, 'maxAttemptsNum', 1, 'consoleMessage', 'sending wake up message');
-    
+
     
     % This is the trialLoop function
     % ==== NEW ===  Send param values =====================================
@@ -260,6 +263,16 @@ function runModulationTrialSequencePupillometryNulled
             % ==== NEW ===  Send the 'stopTracking' command and wait for the trial outcome ====
         end
             
+        if (offline)
+            % ==== NEW ===  Send the start saving data command and wait until windows says it is done
+            OLVSG.sendParamValueAndWaitForResponse(...
+                {OLVSG.EYE_TRACKER_STATUS, 'startSavingOfflineData'}, ...
+                {OLVSG.EYE_TRACKER_STATUS, 'finishedSavingOfflineData'}, ...
+                'timeOutSecs', Inf, ...
+                'consoleMessage', 'Sending request to start saving offline data'...
+            );
+            % ==== NEW ===  Send the start saving data command and wait until windows says it is done
+        end
         
         % Save the data structure
         if (offline == false)
@@ -282,7 +295,6 @@ function runModulationTrialSequencePupillometryNulled
                 dataStruct(trial).average_diameter = average_diameter;
                 dataStruct(trial).ratioInterupt = ratioInterupt;
             end
-            
         end
             
         if (experimentMode) 
