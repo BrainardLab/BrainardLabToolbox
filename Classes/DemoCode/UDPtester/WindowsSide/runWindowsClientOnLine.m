@@ -8,8 +8,6 @@ function runWindowsClientOnLine
     fprintf('\n*********************************************\n');
     saveDropbox = GetWithDefault('Save into Dropbox folder?', 1);
 
-    % Create a VSGCALIBRATE mode to make test runs of the programmer quicker.
-    VSGCALIBRATE = false;
     maxAttempts = 2;
     nSecsToSave = 5;
 
