@@ -13,10 +13,10 @@ function runWindowsClient()
     clc
     fprintf('\nStarting windows client\n');
     
-    % Params for my onelight room
-    udpParams.macHostIP = '130.91.72.120';
-    udpParams.winHostIP = '130.91.74.15';
-    udpParams.udpPort = 2007;
+    % Params for onelight room
+    %udpParams.macHostIP = '130.91.72.120';
+    %udpParams.winHostIP = '130.91.74.15';
+    %udpParams.udpPort = 2007;
             
     % Params for my office
     udpParams.winHostIP = '130.91.72.17';  % IoneanPelagos
@@ -82,7 +82,9 @@ function runWindowsClient()
     
     % Receiving initial information from Mac
     fprintf('\nRun OLFlickerSensitivity on Mac and select protocol...\n');
-    VSGOL.receiveParamValue(VSGOL.WAIT_STATUS,  'timeOutSecs', Inf, 'consoleMessage', 'Hey Mac, is there anybody out there?');
+    VSGOL.receiveParamValue(VSGOL.WAIT_STATUS,  ...
+        'expectedParamValue', 'Wake Up', ...
+        'timeOutSecs', Inf, 'consoleMessage', 'Hey Mac, is there anybody out there?');
     
     % Main Experiment Loop
     
@@ -152,7 +154,8 @@ function runWindowsClient()
             
             %userReady = VSGOLGetInput;
             % === NEW ====== Wait for ever to receive the userReady status ==================
-            userReady = VSGOL.receiveParamValue(VSGOL.USER_READY_STATUS,  ...
+            VSGOL.receiveParamValue(VSGOL.USER_READY_STATUS,  ...
+                'expectedParamValue', 'user ready to move on', ...
                 'timeOutSecs', Inf, 'consoleMessage', 'Is user ready?');
             % === NEW ====== Wait for ever to receive the userReady status ==================
 
@@ -211,11 +214,9 @@ function runWindowsClient()
 %         end
     
         % === NEW ====== Wait for ever to receive the StartTracking signal ==================
-        goCommand = VSGOL.receiveParamValue(VSGOL.EYE_TRACKER_STATUS,  ...
+        VSGOL.receiveParamValue(VSGOL.EYE_TRACKER_STATUS,  ...
+            'expectedParamValue', 'startTracking', ...
             'timeOutSecs', Inf, 'consoleMessage', 'Start tracking?');
-        if (~strcmp(goCommand, 'startTracking'))
-            error('Expected ''startTracking'', received: ''%s'' .', checkStop);
-        end
         % === NEW ====== Wait for ever to receive the START signal ==================
             
         
@@ -297,12 +298,19 @@ function runWindowsClient()
         clear time;
         clear time_inter;
         
-        if (offline) || (experimentMode == false)
+        if (offline)
+            
+            % Wait for mac to tell us to start saving data
+            % === NEW ====== Wait for ever to receive the StartTracking signal ==================
+            VSGOL.receiveParamValue(VSGOL.EYE_TRACKER_STATUS,  ...
+                'expectedParamValue', 'startSavingOfflineData', ...
+                'timeOutSecs', Inf, 'consoleMessage', 'Start saving offline data?');
+            % === NEW ====== Wait for ever to receive the StartTracking signal ==================
             
             if (~experimentMode)
                 % simulate a long write-to-disk time
                 fprintf('Waiting to save to disk for 50 seconds');
-                wait(50);
+                pause(50);
             else
                 good_counter = 0;
                 interruption_counter = 0;
@@ -346,6 +354,13 @@ function runWindowsClient()
                 dataRaw = transferData;
                 save([saveFile '_' num2str(i, '%03.f') '.mat'], 'dataStruct', 'dataRaw', 'pupilData');
             end
+            
+            % === NEW ====== Tell mac we are all done saving offline data ==================
+            VSGOL.sendParamValue(...
+                {VSGOL.EYE_TRACKER_STATUS,  'finishedSavingOfflineData'}, ...
+                'timeOutSecs', 2, 'consoleMessage', 'Informing Mac we ended saving offline data' ...
+            );
+            
         else
             
             % === NEW ====== Wait for ever to receive a 'begin transfer' signal and respond to it ==================
@@ -388,7 +403,9 @@ function runWindowsClient()
             % Finish up the transfer
             %macCommand = VSGOLGetInput;
             
-            VSGOL.receiveParamValue(VSGOL.DATA_TRANSFER_STATUS, 'consoleMessage', sprintf('Data for trial %d transfered. End data transfer?', i));
+            VSGOL.receiveParamValue(VSGOL.DATA_TRANSFER_STATUS, ...
+                'expectedParamValue', 'end transfer', ...
+                'consoleMessage', sprintf('Data for trial %d transfered. End data transfer?', i));
         end
     
         % After the trial, plot out a trace of the data. This is presumably to make sure that everything went ok.

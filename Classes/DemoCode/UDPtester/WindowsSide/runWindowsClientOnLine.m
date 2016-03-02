@@ -62,7 +62,9 @@ function runWindowsClientOnLine
     
     % === NEW ====== Receiving initial information from Mac
     fprintf('\nRun OLFlickerSensitivity on Mac and select protocol...\n');
-    VSGOL.receiveParamValue(VSGOL.WAIT_STATUS,  'timeOutSecs', Inf, 'consoleMessage', 'Hey Mac, is there anybody out there?');
+    VSGOL.receiveParamValue(VSGOL.WAIT_STATUS, ...
+        'expectedParamValue', 'Wake Up', ...
+        'timeOutSecs', Inf, 'consoleMessage', 'Hey Mac, is there anybody out there?');
     
     % === NEW ====== Get param values for labeled param names ==================
     protocolNameStr = VSGOL.receiveParamValue(VSGOL.PROTOCOL_NAME,       'timeOutSecs', 2, 'consoleMessage', 'receiving protocol name');
@@ -119,7 +121,8 @@ function runWindowsClientOnLine
             checkCounter = checkCounter + 1;
             
             % === NEW ====== Wait for ever to receive the userReady status ==================
-            userReady = VSGOL.receiveParamValue(VSGOL.USER_READY_STATUS,  ...
+            VSGOL.receiveParamValue(VSGOL.USER_READY_STATUS,  ...
+                'expectedParamValue', 'user ready to move on', ...
                 'timeOutSecs', Inf, 'consoleMessage', 'Is user ready?');
             % === NEW ====== Wait for ever to receive the userReady status ==================
             fprintf('>>> Check %g\n', checkCounter);
@@ -163,11 +166,9 @@ function runWindowsClientOnLine
 
         % Get the 'Go' signal
         % === NEW ====== Wait for ever to receive the StartTracking signal ==================
-        goCommand = VSGOL.receiveParamValue(VSGOL.EYE_TRACKER_STATUS,  ...
+        VSGOL.receiveParamValue(VSGOL.EYE_TRACKER_STATUS,  ...
+            'expectedParamValue', 'startTracking', ...
             'timeOutSecs', Inf, 'consoleMessage', 'Start tracking?');
-        if (~strcmp(goCommand, 'startTracking'))
-            error('Expected ''startTracking'', received: ''%s'' .', checkStop);
-        end
         % === NEW ====== Wait for ever to receive the START signal ==================
     
         if offline
@@ -231,6 +232,14 @@ function runWindowsClientOnLine
         clear time_inter;
         
         if offline
+            
+            % Wait for mac to tell us to start saving data
+            % === NEW ====== Wait for ever to receive the StartTracking signal ==================
+            VSGOL.receiveParamValue(VSGOL.EYE_TRACKER_STATUS,  ...
+                'expectedParamValue', 'startSavingOfflineData', ...
+                'timeOutSecs', Inf, 'consoleMessage', 'Start saving offline data?');
+            % === NEW ====== Wait for ever to receive the StartTracking signal ==================
+            
             good_counter = 0;
             interruption_counter = 0;
         
@@ -272,6 +281,13 @@ function runWindowsClientOnLine
 
             dataRaw = transferData;
             save([saveFile '_' num2str(i, '%03.f') '.mat'], 'dataStruct', 'dataRaw', 'pupilData');
+       
+        
+            % === NEW ====== Tell mac we are all done saving offline data ==================
+            VSGOL.sendParamValue(...
+                {VSGOL.EYE_TRACKER_STATUS,  'finishedSavingOfflineData'}, ...
+                'timeOutSecs', 2, 'consoleMessage', 'Informing Mac we ended saving offline data' ...
+            );
         else
             
             % === NEW ====== Wait for ever to receive a 'begin transfer' signal and respond to it ==================
@@ -302,7 +318,9 @@ function runWindowsClientOnLine
             end % kk
             
             % Finish up the transfer
-            VSGOL.receiveParamValue(VSGOL.DATA_TRANSFER_STATUS, 'consoleMessage', sprintf('Data for trial %d transfered. End data transfer?', i));
+            VSGOL.receiveParamValue(VSGOL.DATA_TRANSFER_STATUS, ...
+                'expectedParamValue', 'end transfer', ...
+                'consoleMessage', sprintf('Data for trial %d transfered. End data transfer?', i));
         end
         
         %% After the trial, plot out a trace of the data. This is presumably to make sure that everything went ok.
