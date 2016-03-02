@@ -82,11 +82,13 @@ function runWindowsClient()
     
     % Receiving initial information from Mac
     fprintf('\nRun OLFlickerSensitivity on Mac and select protocol...\n');
+    
+    % === NEW ====== Receiving the Wake Up signal from Mac ================
     VSGOL.receiveParamValue(VSGOL.WAIT_STATUS,  ...
         'expectedParamValue', 'Wake Up', ...
         'timeOutSecs', Inf, 'consoleMessage', 'Hey Mac, is there anybody out there?');
+    % === NEW ====== Receiving the Wake Up signal from Mac ================
     
-    % Main Experiment Loop
     
     % === NEW ====== Get param values for labeled param names ==================
     protocolNameStr = VSGOL.receiveParamValue(VSGOL.PROTOCOL_NAME,       'timeOutSecs', 2, 'consoleMessage', 'receiving protocol name');
