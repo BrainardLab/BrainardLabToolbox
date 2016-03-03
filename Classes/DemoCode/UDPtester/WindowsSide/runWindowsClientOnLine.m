@@ -1,8 +1,9 @@
 function runWindowsClientOnLine
 
     % Housekeeping.
-    clear; close all;
+    clear; close all; clc
 
+    addpath(genpath('C:\Users\melanopsin\Documents\MATLAB\Toolboxes\BrainardLabToolbox'));
     % Ask for observer
     fprintf('\n*********************************************');
     fprintf('\n*********************************************\n');
@@ -59,7 +60,7 @@ function runWindowsClientOnLine
     % === NEW ======  Instantiate a OLVSGcommunicator object ==============
     
     % === NEW ====== Receiving the Wake Up signal from Mac ================
-    fprintf('\nRun OLFlickerSensitivity on Mac and select protocol...\n');
+    fprintf('\n<strong>Run OLFlickerSensitivity on Mac and select protocol... </strong>\n');
     VSGOL.receiveParamValue(VSGOL.WAIT_STATUS, ...
         'expectedParamValue', 'Wake Up', ...
         'timeOutSecs', Inf, 'consoleMessage', 'Hey Mac, is there anybody out there?');
@@ -86,7 +87,7 @@ function runWindowsClientOnLine
     % === NEW ====== Get param values for labeled param names ==================
     nTrials         = VSGOL.receiveParamValue(VSGOL.NUMBER_OF_TRIALS,  'timeOutSecs', 2, 'consoleMessage', 'receiving number of trials');
     startTrialNum   = VSGOL.receiveParamValue(VSGOL.STARTING_TRIAL_NO, 'timeOutSecs', 2, 'consoleMessage', 'receiving which trial to start');
-    offline         = VSGOL.receiveParamValue(VSGOL.OFFLINE,           'timeOutSecs', 2, 'consoleMessage', 'receivingVSGOfflineMode')
+    offline         = VSGOL.receiveParamValue(VSGOL.OFFLINE,           'timeOutSecs', 2, 'consoleMessage', 'receivingVSGOfflineMode');
     % === NEW ====== Get param values for labeled param names ==================
     
     if (offline)
@@ -131,7 +132,7 @@ function runWindowsClientOnLine
                 VSGOL.sendParamValue({VSGOL.USER_READY_STATUS, 'continue'}, 'timeOutSecs', 2);
                 % =============================================================
  
-                params = VSGOLEyeTrackerCheck(VSGOL, params);
+                params.run = VSGOLEyeTrackerCheck(VSGOL);
             else
                 % ==== NEW ===  Send user ready status ========================
                 VSGOL.sendParamValue({VSGOL.USER_READY_STATUS, 'abort'}, 'timeOutSecs', 2);
@@ -342,7 +343,7 @@ function runWindowsClientOnLine
 end
 
 
-function params = VSGOLEyeTrackerCheck(VSGOL, params)
+function canRun = VSGOLEyeTrackerCheck(VSGOL)
     
     vetStopTracking;
     WaitSecs(2);
@@ -377,8 +378,13 @@ function params = VSGOLEyeTrackerCheck(VSGOL, params)
         WaitSecs(1);
         
         % === NEW ====== Wait for ever to receive the new eye tracker status ==================
-        params.run = VSGOL.receiveParamValue(VSGOL.EYE_TRACKER_STATUS,  ...
+        trackingResult = VSGOL.receiveParamValue(VSGOL.EYE_TRACKER_STATUS,  ...
             'timeOutSecs', Inf, 'consoleMessage', 'Did we track OK?');
+        if (strcmp(trackingResult, 'isNotTracking'))
+            canRun = false;
+        else
+            canRun = true;
+        end
         % === NEW ====== Wait for ever to receive the new eye tracker status ==================
     end
 end
