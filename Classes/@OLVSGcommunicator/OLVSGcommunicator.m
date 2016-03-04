@@ -1,8 +1,11 @@
 classdef OLVSGcommunicator < UDPcommunicator
     % OLVSGcommunicator Class to facilitate communication between Win, Mac
     % computers involved in the OneLight - VSG setup
-    %   Detailed explanation
-    
+    %   Detailed explanation - here (to do)
+    %
+    % 2/20/2016   NPC   Wrote it
+
+
     % Read-only properties
     properties (SetAccess = private)
         validParamValues;
@@ -12,25 +15,32 @@ classdef OLVSGcommunicator < UDPcommunicator
     % Pre-defined param names 
     properties (Constant)
         % Names of parameters
-        PROTOCOL_NAME               = 'PROTOCOL_NAME';
-        OBSERVER_ID                 = 'OBSERVER_ID';
-        OBSERVER_ID_AND_RUN         = 'OBSERVER_ID_AND_RUN';
-        NUMBER_OF_TRIALS            = 'NUMBER_OF_TRIALS';
-        STARTING_TRIAL_NO           = 'STARTING_TRIAL_NO';
-        OFFLINE                     = 'OFFLINE';
+        PROTOCOL_NAME                                = 'PROTOCOL_NAME';
+        OBSERVER_ID                                  = 'OBSERVER_ID';
+        OBSERVER_ID_AND_RUN                          = 'OBSERVER_ID_AND_RUN';
+        NUMBER_OF_TRIALS                             = 'NUMBER_OF_TRIALS';
+        STARTING_TRIAL_NO                            = 'STARTING_TRIAL_NO';
+        OFFLINE                                      = 'OFFLINE';
         
         % Status labels
-        WAIT_STATUS                 = 'WAIT_STATUS';
-        USER_READY_STATUS           = 'USER_READY_STATUS';
-        EYE_TRACKER_STATUS          = 'EYE_TRACKER_STATUS';
-        DATA_TRANSFER_STATUS        = 'DATA_TRANSFER_STATUS';
+        WAIT_STATUS                                  = 'WAIT_STATUS';
+        
+        UDPCOMM_TESTING_STATUS                       = 'UDP_COMM_TESTING_STATUS';
+        UDPCOMM_TESTING_REPEATS_NUM                  = 'UDP_COMM_TESTING_REPEATS_NUM';
+        UDPCOMM_TESTING_SEND_PARAM                   = 'UDP_COMM_TESTING_SEND_PARAM';
+        UDPCOMM_TESTING_RECEIVE_PARAM                = 'UDP_COMM_TESTING_RECEIVE_PARAM';
+        UDPCOMM_TESTING_SEND_PARAM_WAIT_FOR_RESPONSE = 'UDP_COMM_TESTING_SEND_VALIDATE';
+
+        USER_READY_STATUS                            = 'USER_READY_STATUS';
+        EYE_TRACKER_STATUS                           = 'EYE_TRACKER_STATUS';
+        DATA_TRANSFER_STATUS                         = 'DATA_TRANSFER_STATUS';
         
         % Data trasfer labels
-        EYE_TRACKER_DATA_POINTS_NUM = 'EYE_TRACKER_DATA_POINTS_NUM';
-        TRIAL_OUTCOME               = 'TRIAL_OUTCOME';
-        DATA_TRANSFER_POINTS_NUM    = 'DATA_TRANSFER_POINTS_NUM';
-        DATA_TRANSFER_REQUEST_FOR_POINT = 'DATA_TRANSFER_REQUEST_FOR_POINT';
-        DATA_FOR_POINT              = 'DATA_FOR_POINT';
+        EYE_TRACKER_DATA_POINTS_NUM                  = 'EYE_TRACKER_DATA_POINTS_NUM';
+        TRIAL_OUTCOME                                = 'TRIAL_OUTCOME';
+        DATA_TRANSFER_POINTS_NUM                     = 'DATA_TRANSFER_POINTS_NUM';
+        DATA_TRANSFER_REQUEST_FOR_POINT              = 'DATA_TRANSFER_REQUEST_FOR_POINT';
+        DATA_FOR_POINT                               = 'DATA_FOR_POINT';
     end
     
     properties (Access = private)
@@ -46,6 +56,7 @@ classdef OLVSGcommunicator < UDPcommunicator
             defaultUDPport =  2007;
             defaultVerbosity = 'min';
             defaultSignature = ' ';
+            defaultUseNativeUDP = false;
             
             % Parse input parameters.
             p = inputParser;
@@ -55,14 +66,16 @@ classdef OLVSGcommunicator < UDPcommunicator
             p.addParamValue('udpPort',   defaultUDPport,   @isnumeric);
             p.addParamValue('verbosity', defaultVerbosity, @ischar);
             p.addParamValue('signature', defaultSignature, @ischar);
+            p.addParamValue('useNativeUDP', defaultUseNativeUDP, @islogical);
             p.parse(varargin{:});
             
             % Call the super-class constructor.
             obj = obj@UDPcommunicator( ...
-                'localIP', p.Results.localIP, ...    % required: the IP of this computer
-                'remoteIP', p.Results.remoteIP, ...    % required: the IP of the computer we want to conenct to
-                'udpPort', p.Results.udpPort, ...      % optional, with default value: 2007
-                'verbosity', p.Results.verbosity ...             % optional, with default value: 'normal', and possible values: {'min', 'normal', 'max'},
+                'localIP', p.Results.localIP, ...           % required: the IP of this computer
+                'remoteIP', p.Results.remoteIP, ...         % required: the IP of the computer we want to conenct to
+                'udpPort', p.Results.udpPort, ...           % optional, with default value: 2007
+                'verbosity', p.Results.verbosity, ...       % optional, with default value: 'normal', and possible values: {'min', 'normal', 'max'},
+                'useNativeUDP', p.Results.useNativeUDP...   % optional, with default false: i.e., use the Brainard Lab matlabUDP mexfile
             );
         
             % Initialize validValues

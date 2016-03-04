@@ -1,7 +1,5 @@
 classdef UDPcommunicator < handle
 % Class for robust UDP-based communication between two computers.
-% UDPcommunicator is built on top of matlabUDP.mex located in BrainardLabToolbox/UDP.
-%
 % -------------------------------------------------------------------------
 % Demo usage:  computerA (mac, the master) -> computer B (windows, the listener)
 % -------------------------------------------------------------------------
@@ -12,7 +10,8 @@ classdef UDPcommunicator < handle
 %    'localIP',   params.winHostIP, ... % REQUIRED: the IP of this computer
 %    'remoteIP',  params.macHostIP, ... % REQUIRED: the IP of the computer we want to connect to
 %    'udpPort',   params.udpPort, ...   % OPTIONAL, with default value: 2007
-%    'verbosity', 'min' ...             % OPTIONAL, with default value: 'normal', and possible values: {'min', 'normal', 'max'},
+%    'verbosity', 'min', ...            % OPTIONAL, with default value: 'normal', and possible values: {'min', 'normal', 'max'},
+%    'useNativeUDP', false ...          % OPTIONAL, with default value: false (i.e., using the brainard lab matlabUDP mexfile
 %  );
 %
 % [STEP 1B.] Instantiate a UDPcommunicator object (the master) on the mac computer
@@ -21,6 +20,7 @@ classdef UDPcommunicator < handle
 %    'remoteIP',  params.winHostIP, ... % REQUIRED: the IP of the computer we want to connect to
 %    'udpPort',   params.udpPort, ...   % OPTIONAL with default 2007
 %    'verbosity', 'min' ...             % OPTIONAL with possible values {'min', 'normal', 'max'}, and default 'normal'
+%    'useNativeUDP', false ...          % OPTIONAL, with default value: false (i.e., using the brainard lab matlabUDP mexfile
 %  );
 %
 % -------------------------------------------------------------------------
@@ -77,8 +77,9 @@ classdef UDPcommunicator < handle
 %
 %
 %
-% 2/4/2016   npc   Wrote it
+% 2/4/2016   NPC   Wrote it
 %
+
 	% Protected properties. All subclasses of UDPcommunicator can read these, but they cannot set them. 
 	properties (SetAccess = protected)
         useNativeUDP = false
@@ -116,7 +117,8 @@ classdef UDPcommunicator < handle
             % Set default values for optional config params
             defaultUDPport =  2007;
             defaultVerbosity = 'min';
-
+            defaultUseNativeUDP = false;
+            
             % Parse input parameters.
             p = inputParser;
             % addParameter is available after 2013b
@@ -130,13 +132,15 @@ classdef UDPcommunicator < handle
             p.addParamValue('remoteIP',  'none',           @ischar);
             p.addParamValue('udpPort',   defaultUDPport,   @isnumeric);
             p.addParamValue('verbosity', defaultVerbosity, @ischar);
+            p.addParamValue('useNativeUDP', defaultUseNativeUDP, @islogical);
             
             p.parse(varargin{:});
             obj.localIP  = p.Results.localIP;
             obj.remoteIP = p.Results.remoteIP;
             obj.portUDP  = p.Results.udpPort;
             obj.verbosity = p.Results.verbosity;
-
+            obj.useNativeUDP = p.Results.useNativeUDP;
+            
             if strcmp(obj.localIP, 'none')
                 error('%s No ''localIP'' was specified', obj.selfSignature);
             end
