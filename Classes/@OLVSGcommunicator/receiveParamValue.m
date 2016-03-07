@@ -25,7 +25,7 @@ function paramValue = receiveParamValue(obj, paramName, varargin)
     p.parse(paramName, varargin{:});
 
     % print feedback message to console
-    if (~isempty(p.Results.consoleMessage))
+    if (~isempty(p.Results.consoleMessage)) && (~strcmp(obj.verbosity,'none'))
         if (isinf(p.Results.timeOutSecs))
             fprintf('\n[%3d] <strong>%s</strong> [waiting for ever to receive value for ''%s''] ....', obj.currentMessageNo, p.Results.consoleMessage, paramName);
         else
@@ -35,14 +35,18 @@ function paramValue = receiveParamValue(obj, paramName, varargin)
     % Wait for ever for a message to be received
     response = obj.waitForMessage(p.Results.paramName, 'timeOutSecs', p.Results.timeOutSecs);
 
-    % Get this backtrace of all functions leading to this point
-    dbs = dbstack;
-    backTrace = ''; depth = length(dbs);
-    while (depth >= 1)
-        backTrace = sprintf('%s-> %s ', backTrace, dbs(depth).name);
-        depth = depth - 1;
+    if (~strcmp(obj.verbosity,'none'))
+        % Get this backtrace of all functions leading to this point
+        dbs = dbstack;
+        backTrace = ''; depth = length(dbs);
+        while (depth >= 1)
+            backTrace = sprintf('%s-> %s ', backTrace, dbs(depth).name);
+            depth = depth - 1;
+        end
+    else
+         backTrace = 'no backtrace';
     end
-
+    
     % Check for communication error and abort if one occurred
     assert(strcmp(response.msgLabel, paramName), sprintf('%s: Exiting due to mismatch in message labels.\nExpected label: ''%s'', Received label: ''%s''.\n', backTrace, p.Results.paramName, response.msgLabel));
 
@@ -53,7 +57,7 @@ function paramValue = receiveParamValue(obj, paramName, varargin)
     obj.validateValueForParam(paramName, paramValue, backTrace);
     
     % check the param value before returning, if we got an expectedParamValue
-    if (~isempty(p.Results.expectedParamValue))
+    if (~isempty(p.Results.expectedParamValue)) && (~strcmp(obj.verbosity,'none'))
         if (ischar(paramValue))
             assert(strcmp(paramValue, p.Results.expectedParamValue), sprintf('%s: Exiting due to mismatch param values.\nExpected value: ''%s'', Received value: ''%s''.\n', backTrace, p.Results.expectedParamValue, paramValue));
         elseif (isnumeric(paramValue)) 
@@ -65,7 +69,7 @@ function paramValue = receiveParamValue(obj, paramName, varargin)
         end
     end
     
-    if (~isempty(p.Results.consoleMessage))
+    if (~isempty(p.Results.consoleMessage)) && (~strcmp(obj.verbosity,'none'))
         fprintf('<strong>DONE</strong>\n');
     end
 end

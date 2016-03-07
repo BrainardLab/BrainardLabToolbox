@@ -18,12 +18,16 @@ function sendParamValue(obj, paramNameAndValue,  varargin)
     p.addParamValue('consoleMessage', defaultConsoleMessage,   @ischar);
     p.parse(paramNameAndValue, varargin{:});
     
-    % Get this backtrace of all functions leading to this point
-    dbs = dbstack;
-    backTrace = ''; depth = length(dbs);
-    while (depth >= 1)
-        backTrace = sprintf('%s-> %s ', backTrace, dbs(depth).name);
-        depth = depth - 1;
+    if (~strcmp(obj.verbosity,'none'))
+        % Get this backtrace of all functions leading to this point
+        dbs = dbstack;
+        backTrace = ''; depth = length(dbs);
+        while (depth >= 1)
+            backTrace = sprintf('%s-> %s ', backTrace, dbs(depth).name);
+            depth = depth - 1;
+        end
+    else
+        backTrace = 'no backtrace';
     end
     
     % Get the param name and value
@@ -35,7 +39,7 @@ function sendParamValue(obj, paramNameAndValue,  varargin)
     end
     
     % print feedback message to console
-    if (~isempty(p.Results.consoleMessage))
+    if (~isempty(p.Results.consoleMessage)) && (~strcmp(obj.verbosity,'none'))
         if (isinf(p.Results.timeOutSecs))
             fprintf('\n[%3d] <strong>%s</strong> [waiting for ever to receive value for ''%s''] ....', obj.currentMessageNo, p.Results.consoleMessage, paramName);
         else
@@ -52,7 +56,7 @@ function sendParamValue(obj, paramNameAndValue,  varargin)
     % Check status to ensure we received a 'TRANSMITTED_MESSAGE_MATCHES_EXPECTED' message
     assert(strcmp(status, obj.TRANSMITTED_MESSAGE_MATCHES_EXPECTED), sprintf('%s: Exiting due to mismatch in message labels.\nExpected label: ''%s'', Received label: ''%s''.\n', backTrace, obj.TRANSMITTED_MESSAGE_MATCHES_EXPECTED, status));
 
-    if (~isempty(p.Results.consoleMessage))
+    if (~isempty(p.Results.consoleMessage)) && (~strcmp(obj.verbosity,'none'))
         fprintf('<strong>DONE</strong>\n');
     end
 end

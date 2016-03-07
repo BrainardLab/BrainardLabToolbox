@@ -43,7 +43,7 @@ function status = sendMessage(obj, msgLabel, msgValue, varargin)
     % ensure timeOutSecs is greater than 0
     if (timeOutSecs <= 0)
         timeOutSecs = 0.01;
-        if (~strcmp(obj.verbosity,'min'))
+        if (~strcmp(obj.verbosity,'min'))  && (~strcmp(obj.verbosity,'none'))
             fprintf('%s %s forcing negative or zero timeOutSecs to %2.4f seconds\n', obj.sendMessageSignature, callingFunctionSignature, timeOutSecs);
         end
     end
@@ -71,7 +71,7 @@ function status = sendMessage(obj, msgLabel, msgValue, varargin)
         error('%s %s Do not know how to process this type or argument.', obj.sendMessageSignature, callingFunctionSignature);
     end
     
-    if (~strcmp(obj.verbosity,'min'))
+    if (~strcmp(obj.verbosity,'min')) && (~strcmp(obj.verbosity,'none'))
         if (doNotReplyToThisMessage)
             fprintf('%s %s Will send ''%s'' and return.', obj.sendMessageSignature, callingFunctionSignature, commandString);
         else

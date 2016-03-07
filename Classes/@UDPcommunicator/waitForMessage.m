@@ -38,7 +38,7 @@ function response = waitForMessage(obj, msgLabel, varargin)
         'timedOutFlag', false ...
     );
 
-    if (~strcmp(obj.verbosity,'min'))
+    if (~strcmp(obj.verbosity,'min')) && (~strcmp(obj.verbosity,'none'))
         % give some feedback
         if isinf(timeOutSecs)
             fprintf('%s Waiting for ever to receive a ''%s'' message .... ', signature, expectedMessageLabel);
@@ -90,19 +90,19 @@ function response = waitForMessage(obj, msgLabel, varargin)
             % Do not send back an TRANSMITTED_MESSAGE_MATCHES_EXPECTED message 
             % when we were expecting a TRANSMITTED_MESSAGE_MATCHES_EXPECTED and we received it
             if (strcmp(expectedMessageLabel, obj.TRANSMITTED_MESSAGE_MATCHES_EXPECTED))
-                if (~strcmp(obj.verbosity,'min'))
+                if (~strcmp(obj.verbosity,'min'))  && (~strcmp(obj.verbosity,'none'))
                     fprintf('%s %s Received expected message (''%s'')\n', signature, callingFunctionSignature, expectedMessageLabel);
                 end
             else 
                 % Send back an TRANSMITTED_MESSAGE_MATCHES_EXPECTED message 
                 obj.sendMessage(obj.TRANSMITTED_MESSAGE_MATCHES_EXPECTED, 'nan', 'doNotreplyToThisMessage', true);
-                if (~strcmp(obj.verbosity,'min'))
+                if (~strcmp(obj.verbosity,'min'))  && (~strcmp(obj.verbosity,'none'))
                     fprintf('%s %s Expected message received within %2.2f seconds, acknowledging the sender.', signature, callingFunctionSignature, elapsedTime);
                 end 
             end
         else
             % Send back message that the expected message does not match the received one
-            if (~strcmp(obj.verbosity,'min'))
+            if (~strcmp(obj.verbosity,'min'))  && (~strcmp(obj.verbosity,'none'))
                 fprintf('%s %s: Received: ''%s'' <strong>instead of</strong> ''%s''.\n', signature, callingFunctionSignature, response.msgLabel, expectedMessageLabel);
             end
             obj.sendMessage(sprintf('Received (''%s'') message does not match expected (''%s'')', response.msgLabel, expectedMessageLabel), 'nan', 'doNotreplyToThisMessage', true);
