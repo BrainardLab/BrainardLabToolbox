@@ -24,6 +24,7 @@ classdef OLVSGcommunicator < UDPcommunicator
         
         % Status labels
         WAIT_STATUS                                  = 'WAIT_STATUS';
+        ABORT_MAC_DUE_TO_WINDOWS_FAILURE             = 'ABORT_MAC_DUE_TO_WINDOWS_FAILURE';
         
         UDPCOMM_TESTING_STATUS                       = 'UDP_COMM_TESTING_STATUS';
         UDPCOMM_TESTING_REPEATS_NUM                  = 'UDP_COMM_TESTING_REPEATS_NUM';
