@@ -8,13 +8,7 @@ function receiveParamValueAndSendResponse(obj, paramNameAndValueToBeReceived, pa
     expectedParamValue = paramNameAndValueToBeReceived{2};
     paramValue = receiveParamValue(obj,paramName, varargin{:});
     if (~strcmp(paramValue, expectedParamValue))
-        
-        if (strcmp(paramValue, obj.ABORT_MAC_DUE_TO_WINDOWS_FAILURE))
-            Speak('Windows computer experienced a fatal error. Mac computer aborting now.');
-            error('Windows computer experienced a fatal error. Mac computer aborting now.\n');
-        else
-            error('Expected param value: ''%s'', received: ''%s'' .', expectedParamValue, paramValue);
-        end
+       error('Expected param value: ''%s'', received: ''%s'' .', expectedParamValue, paramValue);
     end
     
     sendParamValue(obj,paramNameAndValueToBeSent, 'timeOutSecs', 2, 'maxAttemptsNum', 1);
