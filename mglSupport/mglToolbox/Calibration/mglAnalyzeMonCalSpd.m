@@ -358,7 +358,7 @@ if (~isempty(calStructOBJ.get('basicmeas.settings')))
         subplot(1,3,3); hold on
         plot(nominalxyY(3,:),deviationsxyY1(3,:),'r+');
         plot(nominalxyY(3,:),deviationsxyY2(3,:),'b+');
-        xlim([min(nominalxyY(3,:))-1 max(nominalxyY(3,:))+1]); ylim([-5 5]);
+        xlim([min(nominalxyY(3,:))-1 max(nominalxyY(3,:))+1]); ylim([-15 15]);
         xlabel('Nominal Y');
         ylabel('Y meas-nominal');
         title(sprintf('Max abs deviation %0.2f\n',max(abs([deviationsxyY1(3,:) deviationsxyY2(3,:)]))));
