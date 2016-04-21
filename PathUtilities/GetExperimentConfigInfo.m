@@ -47,7 +47,7 @@ while true
 	fprintf('\n- Available protocols\n\n');
 	
 	for i = 1:numProtocols
-		fprintf('%d - %s\n', i, protocolList(i).name);
+		fprintf('%d - <strong>%s</strong>\n', i, protocolList(i).name);
 	end
 	fprintf('\n');
 	

@@ -60,7 +60,7 @@ classdef GamePad < handle
     methods
         % Constructor
         function obj = GamePad()
-            obj.devHandle = vrjoystick(1)
+            obj.devHandle = vrjoystick(1);
         end
         
         function [action, time, timeString] = read(obj)
