@@ -69,11 +69,16 @@ function obj = establishCommunication(obj)
             error('*** Wrong response from PR670. \n\tExpected: '' REMOTE MODE''\n\tReceived: ''%s''\n.', response );
         end
         
-        % Write command to export the configuration
-        obj.writeSerialPortCommand('commandString', 'D14');
-        config = obj.getConfiguration();
-        if (obj.verbosity > 1)
-            fprintf('Config: %s\n', config);
+        try
+            % Write command to export the configuration
+            obj.writeSerialPortCommand('commandString', 'D14');
+            config = obj.getConfiguration();
+            if (obj.verbosity > 1)
+                fprintf('Config: %s\n', config);
+            end
+        catch err
+            obj.shutDown();
+            rethrow(err)
         end
         
     end
