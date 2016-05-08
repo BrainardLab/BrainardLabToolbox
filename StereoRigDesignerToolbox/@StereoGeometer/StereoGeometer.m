@@ -1,5 +1,11 @@
-% Class with methods for eazy geometric 3D plotting
-% 
+% Class for management and rendering of stero geometry
+% For usage, see StereoRigDesigner.m
+%
+% Concept and implementation: 
+%   Nicolas P. Cottaris, Ph.D.
+%   Unversity of Pennsylvania
+%
+% History:
 % 10/13/2015  npc Wrote it.
 %
 

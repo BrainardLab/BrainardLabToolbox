@@ -1,6 +1,13 @@
-function StereoRigDesigner
-
-    
+% Graphical user interface to the StereoGeometer class.
+%
+% Concept and implementation: 
+%   Nicolas P. Cottaris, Ph.D.
+%   Unversity of Pennsylvania
+%
+% History:
+% 10/13/2015  npc Wrote it.
+%
+function StereoRigDesigner    
     defaults.vergencePlaneWidth = 80;
     defaults.vergencePlaneHeight = 50;
     
