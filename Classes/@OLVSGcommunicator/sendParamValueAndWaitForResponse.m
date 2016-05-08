@@ -12,7 +12,12 @@ function receivedResponse = sendParamValueAndWaitForResponse(obj, paramNameAndVa
     if (numel(expectedResponse) == 2)
         expectedResponseValue = expectedResponse{2};
         if (~strcmp(receivedResponse, expectedResponseValue))
-            error('Expected response value: ''%s'', received: ''%s'' .', expectedResponseValue, receivedResponse);
+            if (strcmp(paramValue, obj.ABORT_MAC_DUE_TO_WINDOWS_FAILURE))
+                Speak('Windows computer experienced a fatal error. Mac computer aborting now.');
+                error('Windows computer experienced a fatal error. Mac computer aborting now.\n');
+            else
+                error('Expected response value: ''%s'', received: ''%s'' .', expectedResponseValue, receivedResponse);
+            end
         end
     end
 end

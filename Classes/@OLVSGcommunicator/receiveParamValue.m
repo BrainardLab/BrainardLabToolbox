@@ -48,8 +48,15 @@ function paramValue = receiveParamValue(obj, paramName, varargin)
     end
     
     % Check for communication error and abort if one occurred
-    assert(strcmp(response.msgLabel, paramName), sprintf('%s: Exiting due to mismatch in message labels.\nExpected label: ''%s'', Received label: ''%s''.\n', backTrace, p.Results.paramName, response.msgLabel));
-
+    if (~strcmp(p.Results.paramName, response.msgLabel))
+        if (strcmp(response.msgLabel, obj.ABORT_MAC_DUE_TO_WINDOWS_FAILURE))
+            Speak('Windows computer experienced a fatal error. Mac computer aborting now.');
+            error('Windows computer experienced a fatal error. Mac computer aborting now.\n');
+        else
+            error(sprintf('%s: Exiting due to mismatch in message labels.\nExpected label: ''%s'', Received label: ''%s''.\n', backTrace, p.Results.paramName, response.msgLabel));
+        end
+    end
+    
     % Get the message value received
     paramValue = response.msgValue;
     
