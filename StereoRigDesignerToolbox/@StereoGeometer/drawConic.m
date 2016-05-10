@@ -1,3 +1,12 @@
+% Method for drawing a conic section
+%
+% Concept and implementation: 
+%   Nicolas P. Cottaris, Ph.D.
+%   Unversity of Pennsylvania
+%
+% History:
+% 10/13/2015  npc Wrote it.
+
 function drawConic(obj, planeApoints, planeBpoints, color, opacity, edgeColor, edgeStyle)
           
     n = size(planeApoints,2);

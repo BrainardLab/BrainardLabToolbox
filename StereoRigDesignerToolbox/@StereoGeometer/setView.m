@@ -1,3 +1,12 @@
+% Method to set the 3D viewing angle
+%
+% Concept and implementation: 
+%   Nicolas P. Cottaris, Ph.D.
+%   Unversity of Pennsylvania
+%
+% History:
+% 10/13/2015  npc Wrote it.
+
 function setView(obj, mode)
             
     if (ischar(mode))

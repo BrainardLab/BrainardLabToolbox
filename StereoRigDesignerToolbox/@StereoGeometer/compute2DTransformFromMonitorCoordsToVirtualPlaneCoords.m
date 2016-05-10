@@ -1,3 +1,12 @@
+% Method for computing the transform from monitor coords to virtual plane coords
+%
+% Concept and implementation: 
+%   Nicolas P. Cottaris, Ph.D.
+%   Unversity of Pennsylvania
+%
+% History:
+% 10/13/2015  npc Wrote it.
+
 function compute2DTransformFromMonitorCoordsToVirtualPlaneCoords(obj)
 
     virtualStimulusPlanes = {obj.virtualLeftMonocularStimulus, obj.virtualRightMonocularStimulus};

@@ -1,3 +1,12 @@
+% Method for redrawing the entire 3D scene
+%
+% Concept and implementation: 
+%   Nicolas P. Cottaris, Ph.D.
+%   Unversity of Pennsylvania
+%
+% History:
+% 10/13/2015  npc Wrote it.
+
 function redrawScene(obj)
     
     % Set the outlets
@@ -14,7 +23,7 @@ function redrawScene(obj)
     apertureHeightInCm = abs(obj.aperturePlane.boundaryPoints(3,3)-obj.aperturePlane.boundaryPoints(3,2));
     if (obj.apertureSizeOutletUseAlternateDisplay)
         % compute aperture in degrees
-        apDepth = obj.apertureDepth
+        apDepth = obj.apertureDepth;
         apertureWidthInDeg  = 2*atan(apertureWidthInCm/(2*(obj.viewingDistance-obj.apertureDepth)))/pi*180;
         apertureHeightInDeg = 2*atan(apertureHeightInCm/(2*(obj.viewingDistance-obj.apertureDepth)))/pi*180;
         set(obj.apertureSizeOutlet,     'String', sprintf(' [ %+2.1f (W) x %+2.1f (H) ] deg', apertureWidthInDeg, apertureHeightInDeg));

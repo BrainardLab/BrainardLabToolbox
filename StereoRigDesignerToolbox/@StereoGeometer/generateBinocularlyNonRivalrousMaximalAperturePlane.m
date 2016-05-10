@@ -1,5 +1,13 @@
 % Method to compute the maximal aperture that leads to
 % non rivalrous binocular stimulus (depending on the set aperture depth)
+%
+% Concept and implementation: 
+%   Nicolas P. Cottaris, Ph.D.
+%   Unversity of Pennsylvania
+%
+% History:
+% 10/13/2015  npc Wrote it.
+
 function generateBinocularlyNonRivalrousMaximalAperturePlane(obj)
 
     p1 = [-obj.vergencePlaneWidth/2;  -obj.apertureDepth;  obj.vergencePlaneHeight/2];

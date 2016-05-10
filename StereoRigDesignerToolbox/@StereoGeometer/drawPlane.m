@@ -1,3 +1,12 @@
+% Method for drawing a plane in 3D
+%
+% Concept and implementation: 
+%   Nicolas P. Cottaris, Ph.D.
+%   Unversity of Pennsylvania
+%
+% History:
+% 10/13/2015  npc Wrote it.
+
 function drawPlane(obj, plane, color, opacity, normalVectorDisplay, boundaryPointsDisplay, varargin)
     
     if (~isstruct(normalVectorDisplay))

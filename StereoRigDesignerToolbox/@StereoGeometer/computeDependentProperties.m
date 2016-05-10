@@ -1,3 +1,12 @@
+% Method for computing dependent properties
+%
+% Concept and implementation: 
+%   Nicolas P. Cottaris, Ph.D.
+%   Unversity of Pennsylvania
+%
+% History:
+% 10/13/2015  npc Wrote it.
+
 function computeDependentProperties(obj)
 
     % compute the dependent properties

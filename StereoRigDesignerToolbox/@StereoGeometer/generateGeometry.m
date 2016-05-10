@@ -1,3 +1,12 @@
+% Method for computing the 3D geometry of the scene.
+%
+% Concept and implementation: 
+%   Nicolas P. Cottaris, Ph.D.
+%   Unversity of Pennsylvania
+%
+% History:
+% 10/13/2015  npc Wrote it.
+
 function generateGeometry(obj)
 
     obj.XaxisLims = [-120 120];

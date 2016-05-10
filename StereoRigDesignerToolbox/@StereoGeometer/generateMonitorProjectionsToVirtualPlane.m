@@ -1,3 +1,12 @@
+% Method for computing the monitor projections to the virtual plane
+%
+% Concept and implementation: 
+%   Nicolas P. Cottaris, Ph.D.
+%   Unversity of Pennsylvania
+%
+% History:
+% 10/13/2015  npc Wrote it.
+
 function generateMonitorProjectionsToVirtualPlane(obj)
 
     debug = false;
