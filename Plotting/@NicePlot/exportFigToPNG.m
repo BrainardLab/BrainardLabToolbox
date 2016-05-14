@@ -42,6 +42,7 @@ function exportFigToPNG(imFileName,figHandle,dpi, varargin)
     else
         print(figHandle,'-dpng',imFileName,sprintf('-r%d',dpi))
     end
+    fprintf('\nNicePlot: figure saved to %s.\n', imFileName);
     
     % Restore the previous settings
     set(figHandle,'PaperType',prePaperType);

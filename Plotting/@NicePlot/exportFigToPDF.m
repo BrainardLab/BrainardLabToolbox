@@ -42,7 +42,7 @@ function exportFigToPDF(pdfFileName,figHandle,dpi, varargin)
     else
         print(figHandle,'-dpdf', pdfFileName,sprintf('-r%d',dpi));
     end
-
+    fprintf('\nNicePlot: figure saved to %s.\n', pdfFileName);
     % Restore the previous settings
     set(figHandle,'PaperType',prePaperType);
     set(figHandle,'PaperUnits',prePaperUnits);
