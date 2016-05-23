@@ -46,10 +46,10 @@ function appendFigAsSeparatePageInPDFdoc(pdfFileName,figHandle,dpi)
         else
             system(sprintf('rm %s', tmpFileName));
             system(sprintf('mv %s %s', mergedFileName, pdfFileName));
-            fprintf('PDF appended as the last page of %s.\n', pdfFileName);
+            fprintf('\nNicePlot: PDF appended as the last page of %s.\n', pdfFileName);
         end
     else
-        fprintf('PDF saved as the first page of %s.\n', pdfFileName);
+        fprintf('\nNicePlot: PDF saved as the first page of %s.\n', pdfFileName);
         print(figHandle,'-dpdf', pdfFileName,sprintf('-r%d',dpi));
     end
 
