@@ -28,10 +28,17 @@ classdef NicePlot
         % Method to set the fonts for the axes, labels
         setFontSizes(figHandle, varargin);
         
-        % Method to export fig in figHandle to a PDF doc that looks just
-        % like the screen figure
+        % Method to export fig in figHandle to a PDF doc that looks just like the screen figure
         exportFigToPDF(pdfFileName,figHandle,dpi, varargin);
 
+        % Method to export fig in figHandle to a PNG doc that looks just like the screen figure
         exportFigToPNG(pngFileName,figHandle,dpi, varargin);
+        
+        % Method to export fig in figHandle to a separate page in a PDF doc 
+        appendFigAsSeparatePageInPDFdoc(pdfFileName,figHandle,dpi);
+        
+        % Method to combine multiple PDFfiles into a single PDF;
+        % sourcePDFFileNames should be a cell array of PDF filenames
+        combinePDFfilesInSinglePDF(sourcePDFFileNames, pdfFileName);
     end
 end
