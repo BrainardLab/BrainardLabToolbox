@@ -1,5 +1,4 @@
 function combinePDFfilesInSinglePDF(sourcePDFFileNames, pdfFileName)
-
     for k = 1:numel(sourcePDFFileNames)
         theFileName = sourcePDFFileNames{k};
         if (k == 1)
@@ -16,7 +15,5 @@ function combinePDFfilesInSinglePDF(sourcePDFFileNames, pdfFileName)
             end
         end
     end
-    
-    
 end
 
