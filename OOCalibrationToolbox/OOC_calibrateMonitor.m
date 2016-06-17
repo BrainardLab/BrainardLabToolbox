@@ -350,7 +350,7 @@ function radiometerOBJ = generateRadiometerObject()
         desiredCyclesToAverage = 1;
         desiredSensitivityMode = 'STANDARD';
         desiredApertureSize = '1 DEG';
-        desiredExposureTime =  1000;  % 'ADAPTIVE' or range [1-6000 msec] or [1-30000 msec]
+        desiredExposureTime =  'ADAPTIVE';  % 'ADAPTIVE' or range [1-6000 msec] or [1-30000 msec]
         
         radiometerOBJ.setOptions(...
         	'syncMode',         desiredSyncMode, ...
