@@ -349,7 +349,7 @@ classdef StereoViewController < handle
         %
         function hideStimulus(obj)
             obj.stereoGLWindow.disableObject('StereoPair');
-        %    obj.stereoGLWindow.draw;
+            obj.stereoGLWindow.draw;
         end
         
         % Method that renders the scene after enabling the target elements.
@@ -511,6 +511,11 @@ classdef StereoViewController < handle
         % See @ref RunExperimentalLoopWithCubeSceneMouse.m for more information.
         function responseStruct = runExperimentalLoopWithCubeSceneMouse(obj, initialMousePositon)
             responseStruct = RunExperimentalLoopWithCubeSceneMouse(obj, initialMousePositon);
+        end
+        
+        % See @ref RunExperimentalLoopWithCubeSceneMouse.m for more information.
+        function responseStruct = runExperimentalLoopWithSliderSLC(obj, params)
+            responseStruct = RunExperimentalLoopWithSliderSLC(obj, params);
         end
         
         % Method that measures the radiometric distribution at a scene location (debug mode only). 
