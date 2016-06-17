@@ -33,6 +33,7 @@ classdef OLVSGcommunicator < UDPcommunicator
         UDPCOMM_TESTING_SEND_PARAM_WAIT_FOR_RESPONSE = 'UDP_COMM_TESTING_SEND_VALIDATE';
 
         USER_READY_STATUS                            = 'USER_READY_STATUS';
+        DIAGNOSTIC_VIDEO_RECORDING_STATUS            = 'DIAGNOSTIC_VIDEO_RECORDING_STATUS';
         EYE_TRACKER_STATUS                           = 'EYE_TRACKER_STATUS';
         DATA_TRANSFER_STATUS                         = 'DATA_TRANSFER_STATUS';
         

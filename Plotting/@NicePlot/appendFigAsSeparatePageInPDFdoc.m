@@ -1,6 +1,6 @@
-function exportFigToPDF(pdfFileName,figHandle,dpi, varargin)
+function appendFigAsSeparatePageInPDFdoc(pdfFileName,figHandle,dpi)
 
-    % If no handle is provided, use the current figure as default
+        % If no handle is provided, use the current figure as default
     if nargin<1
         [fileName,pathName] = uiputfile('*.pdf','Save to PDF file:');
         if fileName == 0; return; end
@@ -33,21 +33,32 @@ function exportFigToPDF(pdfFileName,figHandle,dpi, varargin)
     set(figHandle,'PaperPosition',[0,0,position(3:4)]);
     set(figHandle,'PaperSize',position(3:4));
 
-    set(figHandle,'InvertHardCopy','off')
-    % Save the pdf (this is the same method used by "saveas")
-    if (~isempty(varargin))
-        if ismember('noui', varargin{:})
-            print(figHandle,'-dpdf', '-noui', pdfFileName,sprintf('-r%d',dpi));
+    set(figHandle,'InvertHardCopy','off');
+    
+    if (exist(pdfFileName, 'file'))
+        tmpFileName = sprintf('tmpPDF.pdf');
+        mergedFileName = sprintf('mergedPDF.pdf');
+        print(figHandle,'-dpdf', tmpFileName,sprintf('-r%d',dpi));
+        status = system(sprintf('/usr/local/bin/pdfunite %s %s %s', pdfFileName, tmpFileName, mergedFileName));
+        if (status ~= 0)
+            fprintf('Error during pdfunite. Have you installed poppler (''brew install poppler'')?');
+            system(sprintf('rm %s', tmpFileName));
+        else
+            system(sprintf('rm %s', tmpFileName));
+            system(sprintf('mv %s %s', mergedFileName, pdfFileName));
+            fprintf('\nNicePlot: PDF appended as the last page of %s.\n', pdfFileName);
         end
     else
+        fprintf('\nNicePlot: PDF saved as the first page of %s.\n', pdfFileName);
         print(figHandle,'-dpdf', pdfFileName,sprintf('-r%d',dpi));
     end
-    fprintf('\nNicePlot: figure saved to %s.\n', pdfFileName);
+
     % Restore the previous settings
     set(figHandle,'PaperType',prePaperType);
     set(figHandle,'PaperUnits',prePaperUnits);
     set(figHandle,'Units',preUnits);
     set(figHandle,'PaperPosition',prePaperPosition);
     set(figHandle,'PaperSize',prePaperSize);
-
+    
 end
+
