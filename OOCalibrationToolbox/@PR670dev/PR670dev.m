@@ -82,8 +82,19 @@ classdef PR670dev < Radiometer
                 fprintf('In PR670dev.constructor() method\n');
             end
             
+            allInitStepsAtOnce = false;
+            if (allInitStepsAtOnce) 
             % Initialize communication
-            obj = obj.establishCommunication();
+                obj = obj.establishCommunication();
+            else
+                fprintf('Hit enter to call openPort() method\n');
+                pause
+                obj = obj.openPort();
+
+                fprintf('Hit enter to call initCommunication() method\n');
+                pause
+                obj = obj.initCommunication();
+            end
 
             % Initialize properties
             obj.deviceModelName     = 'PR-670';
@@ -210,7 +221,14 @@ classdef PR670dev < Radiometer
     end
     
     
-    methods (Access = private)     
+    methods (Access = private)   
+
+        % Method to open port for PR670 (establish communication  part1)
+        obj = openPort(obj);
+
+        % Method to initialize communication with the PR670 (establish communication  part2)
+        obj = initCommunication(obj);
+
         % Method to initialize communication with the device
         obj = establishCommunication(obj)
         

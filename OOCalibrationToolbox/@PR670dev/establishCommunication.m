@@ -75,7 +75,9 @@ function obj = establishCommunication(obj)
             obj.writeSerialPortCommand('commandString', 'D14');
             config = obj.getConfiguration();
             if (obj.verbosity > 1)
-                fprintf('Config: %s\n', config);
+                fprintf('Config:\n')
+                config
+                fprintf('\n');
             end
             
         catch err
