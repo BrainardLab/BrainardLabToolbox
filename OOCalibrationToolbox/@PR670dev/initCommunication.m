@@ -11,24 +11,38 @@ function obj = initCommunication(obj)
         % first time it's asked to go into remote mode.  There is no return code
         % for this command.
 
-        fprintf(2,'\n Sending command ''Q'' to exit remote mode ...');
-        obj.writeSerialPortCommand('commandString', 'Q', ...
-                                   'appendCR', false);
-        pause(0.5);
+%         fprintf(2,'\n Sending command ''Q'' to exit remote mode ...');
+%         obj.writeSerialPortCommand('commandString', 'Q', ...
+%                                    'appendCR', false);
+%         pause(1.5);
 
         fprintf(2,'\nDone. Attempting to put device in remote mode ...')
         % Put in remote mode.
         obj.writeSerialPortCommand('commandString', 'PHOTO', ...
                                    'appendCR', false);
 
+        pause(3.0);
         fprintf(2,'\n Waiting for PR670 to acknowledge remote mode for up to 10 seconds ...');
         % Get the response.  Timeout after 10 seconds.  
         timeoutInSeconds = 10;
-        response = getResponseOrTimeOut(obj, timeoutInSeconds, 'Failed to set PR670 in REMOTE  MODE') ;   
+        response = obj.getResponseOrTimeOut(timeoutInSeconds, 'Failed to set PR670 in REMOTE  MODE') ;   
 
+        % Try once more
+        if (isempty(response ))
+            fprintf('No response. Will try to put device in remote mode once more\n');
+            obj.writeSerialPortCommand('commandString', 'PHOTO', ...
+                                   'appendCR', false);
+                               
+           fprintf(2,'\n Waiting for PR670 to acknowledge remote mode for up to 10 seconds ...');
+            % Get the response.  Timeout after 10 seconds.  
+            timeoutInSeconds = 10;
+            response = obj.getResponseOrTimeOut(timeoutInSeconds, 'Failed to set PR670 in REMOTE  MODE') ;   
+        end
+        
         fprintf(2,'\n Response received:\n')
         response
 
+        
         if (isempty(response ))
             error('Count not read response from PR670');
         elseif strcmp(response , ' REMOTE MODE')
