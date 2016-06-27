@@ -52,7 +52,7 @@ function obj = establishCommunication(obj)
             % for this command.
             obj.writeSerialPortCommand('commandString', 'Q', ...
                                        'appendCR', false);
-            pause(0.5);
+            pause(1.0);
 
             % Put in remote mode.
             obj.writeSerialPortCommand('commandString', 'PHOTO', ...
@@ -75,7 +75,9 @@ function obj = establishCommunication(obj)
             obj.writeSerialPortCommand('commandString', 'D14');
             config = obj.getConfiguration();
             if (obj.verbosity > 1)
-                fprintf('Config: %s\n', config);
+                fprintf('Config:\n')
+                config
+                fprintf('\n');
             end
             
         catch err

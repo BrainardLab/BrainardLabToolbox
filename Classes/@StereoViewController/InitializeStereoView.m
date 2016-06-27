@@ -15,19 +15,9 @@ function obj = InitializeStereoView(obj)
     
         % promote to full configuration by adding more display information
         sD = mglDescribeDisplays;
-        if (length(sD) == 3)
-            obj.stereoDisplayConfiguration.screenID.left    = 2;  % left screen ID
-            obj.stereoDisplayConfiguration.screenID.right   = 3;  % right screen ID
-        elseif (length(sD) == 2)
-            obj.stereoDisplayConfiguration.screenID.left    = 2;  % left screen ID
-            obj.stereoDisplayConfiguration.screenID.right   = 1;  % right screen ID
-        elseif (length(sD) == 1)
-            obj.stereoDisplayConfiguration.screenID.left    = 1;  % main screen only
-            obj.stereoDisplayConfiguration.screenID.right   = 1;
-        else
-            StereoView.DisplayModalMessageBox('The StereoView has not been configured to initialize with more than 3 displays', 'ERROR');
-            return;
-        end
+        load('screenNumberAssigment.mat');
+        obj.stereoDisplayConfiguration.screenID.left = screens.left;
+        obj.stereoDisplayConfiguration.screenID.right = screens.right; 
      
         obj.stereoDisplayConfiguration.screenData{1} = sD(obj.stereoDisplayConfiguration.screenID.left);
         obj.stereoDisplayConfiguration.screenData{1}.displayPosition = obj.stereoCalibrationInfo.displayPosition{1};
