@@ -52,7 +52,7 @@ function obj = establishCommunication(obj)
             % for this command.
             obj.writeSerialPortCommand('commandString', 'Q', ...
                                        'appendCR', false);
-            pause(0.5);
+            pause(1.0);
 
             % Put in remote mode.
             obj.writeSerialPortCommand('commandString', 'PHOTO', ...

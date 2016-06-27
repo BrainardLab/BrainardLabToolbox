@@ -9,15 +9,9 @@ function response = getResponseOrTimeOut(obj, timeoutInSeconds, timeoutString)
         inStr = obj.readSerialPortData;
     end
     
-    if (waited >= timeoutInSeconds)
-        response = [];
-        fprintf(2, 'Timed out waiting for PR670 to respond after %d seconds\n', timeoutInSeconds);
-        return;
+    if (waited == timeoutInSeconds)
+       error(timeoutString);
     end
-    
-    %if (waited == timeoutInSeconds)
-    %    error(timeoutString);
-    %end
 
     % Pick up entire buffer.
     response = inStr;

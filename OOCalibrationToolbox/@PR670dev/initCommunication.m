@@ -16,32 +16,16 @@ function obj = initCommunication(obj)
 %                                    'appendCR', false);
 %         pause(1.5);
 
-        fprintf(2,'\nDone. Attempting to put device in remote mode ...')
+        fprintf('\nDone. Attempting to put device in remote mode ...')
         % Put in remote mode.
         obj.writeSerialPortCommand('commandString', 'PHOTO', ...
                                    'appendCR', false);
 
         pause(3.0);
-        fprintf(2,'\n Waiting for PR670 to acknowledge remote mode for up to 10 seconds ...');
+        fprintf('\n Waiting for PR670 to acknowledge remote mode for up to 10 seconds ...');
         % Get the response.  Timeout after 10 seconds.  
         timeoutInSeconds = 10;
-        response = obj.getResponseOrTimeOut(timeoutInSeconds, 'Failed to set PR670 in REMOTE  MODE') ;   
-
-        % Try once more
-        if (isempty(response ))
-            fprintf('No response. Will try to put device in remote mode once more\n');
-            obj.writeSerialPortCommand('commandString', 'PHOTO', ...
-                                   'appendCR', false);
-                               
-           fprintf(2,'\n Waiting for PR670 to acknowledge remote mode for up to 10 seconds ...');
-            % Get the response.  Timeout after 10 seconds.  
-            timeoutInSeconds = 10;
-            response = obj.getResponseOrTimeOut(timeoutInSeconds, 'Failed to set PR670 in REMOTE  MODE') ;   
-        end
-        
-        fprintf(2,'\n Response received:\n')
-        response
-
+        response = obj.getResponseOrTimeOut(timeoutInSeconds, 'Failed to set PR670 in REMOTE  MODE. Disconnect PR670, recycle its power, and try again');
         
         if (isempty(response ))
             error('Count not read response from PR670');

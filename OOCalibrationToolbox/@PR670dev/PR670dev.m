@@ -87,12 +87,10 @@ classdef PR670dev < Radiometer
             % Initialize communication
                 obj = obj.establishCommunication();
             else
-                fprintf('Hit enter to call openPort() method\n');
-                pause
+                pause(2.0);
                 obj = obj.openPort();
 
-                fprintf('Hit enter to call initCommunication() method\n');
-                pause
+                pause(2.0);
                 obj = obj.initCommunication();
             end
 
