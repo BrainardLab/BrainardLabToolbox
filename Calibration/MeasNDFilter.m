@@ -54,10 +54,10 @@ end
 % Parameters.  One of the plots below will break if you
 % make nAverageUnatten and nAverageAtten different from
 % each other.
-nAverage = 15;
+nAverage = 3;
 nAverageUnatten = nAverage;
 nAverageAtten = nAverage;
-waitTime = 10;
+waitTime = 5;
 filterName = GetWithDefault('Enter filter name','ND3');
 dateName = GetWithDefault('Enter date name','022713');
 S = [380 2 201];
@@ -79,16 +79,16 @@ if (~ANALYZEONLY)
             'devicePortString', [] ...       % empty -> automatic port detection)
         );
         spectroRadiometerOBJ.setOptions('syncMode', 'OFF');
-            
-        % Measure unattenuated light
-        input('Set up unattenuated light and hit enter'); pause(waitTime);
+        
+    
+        input('Set up attenuated light and hit enter'); pause(waitTime);
         Snd('Play',sin(0:10000));
-        for i = 1:nAverageUnatten
-            fprintf('\tUnatenuated measurement %d\n',i);
-            unattenSpd(:,i) = spectroRadiometerOBJ.measure('userS', S);
+        for i = 1:nAverageAtten
+            fprintf('\tAtenuated measurement %d\n',i);
+            attenSpd(:,i) = spectroRadiometerOBJ.measure('userS', S);
         end
     
-        % Signal to user that it's time to insert the filter
+        % Let user know we're all done measuring
         fprintf('Hit a character\n');
         ListenChar(2);
         while (1)
@@ -100,15 +100,17 @@ if (~ANALYZEONLY)
         end
         GetChar;
         ListenChar(0);
-    
-        input('Set up attenuated light and hit enter'); pause(waitTime);
+        
+            
+        % Measure unattenuated light
+        input('Set up unattenuated light and hit enter'); pause(waitTime);
         Snd('Play',sin(0:10000));
-        for i = 1:nAverageAtten
-            fprintf('\tAtenuated measurement %d\n',i);
-            attenSpd(:,i) = spectroRadiometerOBJ.measure('userS', S);
+        for i = 1:nAverageUnatten
+            fprintf('\tUnatenuated measurement %d\n',i);
+            unattenSpd(:,i) = spectroRadiometerOBJ.measure('userS', S);
         end
     
-        % Let user know we're all done measuring
+        % Signal to user that it's time to insert the filter
         fprintf('Hit a character\n');
         ListenChar(2);
         while (1)
