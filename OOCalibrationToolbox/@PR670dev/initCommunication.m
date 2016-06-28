@@ -44,8 +44,6 @@ function obj = initCommunication(obj)
             config
             fprintf('\n');
         end
-        fprintf('Hit enter to continue\n')
-        pause
 
     catch err
         obj.shutDown();
