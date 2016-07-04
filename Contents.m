@@ -13,6 +13,8 @@
 % D70Toolbox             		- Tools for processing digital camera images, particular those from a Nikon D70.
 % DisplaySupport                - 
 % Ellipses               		- Routines related to fitting ellipses.
+%                               - Should be harmonized with Ellipsoids code.
+% Ellipsoids                    - Routines related to fitting ellipsoids.
 % ExperimentSupport      		- Support for experimental programs.
 % Hardware               		- Support for lab hardware.
 % HarvardHyperspectral   		- Routines for reading images in the Harvard database.
