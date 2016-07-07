@@ -51,6 +51,7 @@ function mglCalibrateMonSpd
 %              the effect of bits++ box being set to zero.
 % 10/8/13 ar   Made new case for the SquidNEC display. 
 % 10/16/13 ar  Made new case for the new EyeTrackerLCD
+% 04/20/16 ar  Made new case for new eye tracking display. 
 
 % We could make this email the user that the calibration is done.
 % Apparently the codelet something like the following will do the trick,
@@ -122,13 +123,15 @@ while true
     fprintf('\tDummyBits - Dummy calibration file to test program, without meter, with bits++ß\n');
     fprintf('\tStereoLCDRight - right monitor, LCD stereo rig\n');
     fprintf('\tStereoLCDLeft - left monitor, LCD stereo rig\n');
+    fprintf('\tBoldDisplay - ColorMaterial exp, HDR room\n');
+    fprintf('\tEyeTrackerLCDNew - Illum Discrimination, NEC 24"\n');
     
     calibrationType = input(sprintf('What type of calibration are doing? [%s]: ', ...
         defaultCalibrationType),'s');
     
     % Make sure it's a valid calibration type.
     switch calibrationType
-        case {'SamsungOLED240Hz', 'ViewSonicProbe', 'Generic', 'EyeTracker','EyeTrackerTest', 'SquidNEC', 'EyeTrackerLCD', 'FrontRoomLex', 'FrontRoomClass', 'StereoRigRightAchrom', 'StereoRigLeftAchrom', 'HDRBackRGB', 'FrontRoomObjColor', 'StereoRigLeftClass', 'StereoRigRightClass', 'Dummy', 'DummyBits', 'StereoLCDRight','StereoLCDLeft'}
+        case {'EyeTrackerLCDNew','BoldDisplay','SamsungOLED240Hz', 'ViewSonicProbe', 'Generic', 'EyeTracker','EyeTrackerTest', 'SquidNEC', 'EyeTrackerLCD', 'FrontRoomLex', 'FrontRoomClass', 'StereoRigRightAchrom', 'StereoRigLeftAchrom', 'HDRBackRGB', 'FrontRoomObjColor', 'StereoRigLeftClass', 'StereoRigRightClass', 'Dummy', 'DummyBits', 'StereoLCDRight','StereoLCDLeft'}
             break;
         otherwise
             fprintf('*** Invalid calibration type, try again\n\n');
@@ -280,7 +283,7 @@ switch calibrationType
         % Properties we think this monitor should have at
         % calibration time.
         desired.hz = 60;
-        desired.screenSizePixel = [1920 1080];
+        desired.screenSizePixel = [2560 1440];
         
         % Fitting parameters
         cal.describe.gamma.fitType = 'crtPolyLinear';
@@ -294,11 +297,11 @@ switch calibrationType
         cal.describe.leaveRoomTime = 10;
         cal.describe.nAverage = 1;
         cal.describe.nMeas = 25;
-        cal.describe.boxSize = 400; % adjusted to the size of the target.
+        cal.describe.boxSize = 150; % adjusted to the size of the target.
         cal.nDevices = 3;
         cal.nPrimaryBases = 1;
         beepWhenDone = 2; %#ok<*NASGU>
-        emailToStr = GetWithDefault('Enter email address for done notification','cottaris@sas.upenn.edu');
+        emailToStr = GetWithDefault('Enter email address for done notification','radonjic@sas.upenn.edu');
         setpref('Internet', 'SMTP_Server', 'smtp-relay.upenn.edu');
         setpref('Internet', 'E_Mail', emailToStr);
      
@@ -319,6 +322,84 @@ switch calibrationType
         % Properties we think this monitor should have at
         % calibration time.
         desired.hz = 60;
+        desired.screenSizePixel = [1920 1080];
+        
+        % Fitting parameters
+        cal.describe.gamma.fitType = 'crtPolyLinear';
+        cal.describe.gamma.contrastThresh = 1.0000e-03;
+        cal.describe.gamma.fitBreakThresh = 0.02;
+        
+        % Bits++? This is what we're testing. 
+        cal.usebitspp = 0;
+        
+        % Other parameters=
+        cal.describe.leaveRoomTime = 10;
+        cal.describe.nAverage = 1;
+        cal.describe.nMeas = 25;
+        cal.describe.boxSize = 150; % adjusted to the size of the target.
+        cal.nDevices = 3;
+        cal.nPrimaryBases = 1;
+        beepWhenDone = 2; %#ok<*NASGU>
+        emailToStr = GetWithDefault('Enter email address for done notification','radonjic@sas.upenn.edu');
+        setpref('Internet', 'SMTP_Server', 'smtp-relay.upenn.edu');
+        setpref('Internet', 'E_Mail', emailToStr);
+        
+        % New LCD for eyetracking
+        case 'EyeTrackerLCDNew'
+        whichScreen = 2;
+        cal.describe.whichScreen = whichScreen;
+        cal.describe.blankOtherScreen = 0;
+        cal.describe.blankSettings = [0 0 0];
+        cal.bgColor = [0.7451, 0.7451, 0.7451];
+        cal.fgColor = [0 ; 0 ; 0]';
+        cal.describe.meterDistance = 0.8;
+        cal.describe.monitor = 'EyeTrackerLCDNew';
+        cal.describe.comment = 'New EyeTrackerLCD (April 2016)';
+        newFileName = 'EyeTrackerLCDNew';
+        
+        % Properties we think this monitor should have at
+        % calibration time.
+        desired.hz = 60;
+        desired.screenSizePixel = [1920 1200];
+        
+        % Fitting parameters
+        cal.describe.gamma.fitType = 'crtPolyLinear';
+        cal.describe.gamma.contrastThresh = 1.0000e-03;
+        cal.describe.gamma.fitBreakThresh = 0.02;
+        
+        % Bits++? This is what we're testing. 
+        cal.usebitspp = 0;
+        
+        % Other parameters=
+        cal.describe.leaveRoomTime = 10;
+        cal.describe.nAverage = 1;
+        cal.describe.nMeas = 25;
+        cal.describe.boxSize = 150; % adjusted to the size of the target.
+        cal.nDevices = 3;
+        cal.nPrimaryBases = 1;
+        beepWhenDone = 2; %#ok<*NASGU>
+        emailToStr = GetWithDefault('Enter email address for done notification','radonjic@sas.upenn.edu');
+        setpref('Internet', 'SMTP_Server', 'smtp-relay.upenn.edu');
+        setpref('Internet', 'E_Mail', emailToStr);
+        
+        
+        % Lightness classification, CRT/Bits++ rig
+         % New LCD for eyetracking
+        case 'BoldDisplay'
+        whichScreen = 2;
+        cal.describe.whichScreen = whichScreen;
+        cal.describe.blankOtherScreen = 0;
+        cal.describe.blankSettings = [0 0 0];
+        cal.bgColor = [0.7451, 0.7451, 0.7451];
+        cal.fgColor = [0 ; 0 ; 0]';
+        cal.describe.meterDistance = 0.7;
+        cal.describe.monitor = 'Bold Display';
+        cal.describe.comment = 'BoldDisplay for Color Material exp, set up in HDR room';
+        newFileName = 'BoldDisplay';
+        
+        % Properties we think this monitor should have at
+        % calibration time.
+        desired.hz = 120;
         desired.screenSizePixel = [1920 1080];
         
         % Fitting parameters

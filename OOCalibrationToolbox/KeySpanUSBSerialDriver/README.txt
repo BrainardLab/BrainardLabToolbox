@@ -12,6 +12,8 @@ Additional notes:
 
 (2b) This driver worked on a laptop running 10.9, but it crashed an iMac (kernel panic) running 10.11
 
+(2c) This driver worked on a 17” Macbook Pro (David’s old laptop) running 10.11.4 (ElCapitan)
+
 So your mileage may vary.
 
 Nicolas

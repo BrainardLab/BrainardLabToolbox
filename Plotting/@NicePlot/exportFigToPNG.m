@@ -1,10 +1,10 @@
-function exportFigToPNG(pdfFileName,figHandle,dpi, varargin)
+function exportFigToPNG(imFileName,figHandle,dpi, varargin)
 
     % If no handle is provided, use the current figure as default
     if nargin<1
         [fileName,pathName] = uiputfile('*.png','Save to PNG file:');
         if fileName == 0; return; end
-        pdfFileName = [pathName,fileName];
+        imFileName = [pathName,fileName];
     end
     if nargin<2
         handle = gcf;
@@ -37,11 +37,12 @@ function exportFigToPNG(pdfFileName,figHandle,dpi, varargin)
     % Save the pdf (this is the same method used by "saveas")
     if (~isempty(varargin))
         if ismember('noui', varargin{:})
-            print(figHandle,'-dpng', '-noui',pdfFileName,sprintf('-r%d',dpi))
+            print(figHandle,'-dpng', '-noui',imFileName,sprintf('-r%d',dpi))
         end
     else
-        print(figHandle,'-dpng',pdfFileName,sprintf('-r%d',dpi))
+        print(figHandle,'-dpng',imFileName,sprintf('-r%d',dpi))
     end
+    fprintf('\nNicePlot: figure saved to %s.\n', imFileName);
     
     % Restore the previous settings
     set(figHandle,'PaperType',prePaperType);

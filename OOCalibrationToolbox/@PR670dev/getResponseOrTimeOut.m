@@ -8,8 +8,9 @@ function response = getResponseOrTimeOut(obj, timeoutInSeconds, timeoutString)
         waited = waited+1;
         inStr = obj.readSerialPortData;
     end
-    if waited == timeoutInSeconds
-        error(timeoutString);
+    
+    if (waited == timeoutInSeconds)
+       error(timeoutString);
     end
 
     % Pick up entire buffer.
