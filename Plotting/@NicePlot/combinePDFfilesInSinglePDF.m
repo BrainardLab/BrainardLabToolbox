@@ -8,13 +8,18 @@ function combinePDFfilesInSinglePDF(sourcePDFFileNames, pdfFileName)
     for k = 1:numel(sourcePDFFileNames)
         theFileName = sourcePDFFileNames{k};
         if (k == 1)
-            system(sprintf('cp %s %s', theFileName, pdfFileName));
+            sysCommandString = sprintf('cp %s %s', theFileName, pdfFileName);
+            status = system(sysCommandString);
+            if (status ~= 0)
+                fprintf('Error during system command ''%s''\n', sysCommandString);
+            end
             fprintf('\nNicePlot: file %s appended as the first page of %s.\n', theFileName, pdfFileName);
         else
             mergedFileName = sprintf('mergedPDF.pdf');
-            status = system(sprintf('/usr/local/bin/pdfunite %s %s %s', pdfFileName, theFileName, mergedFileName));
+            sysCommandString = sprintf('/usr/local/bin/pdfunite %s %s %s', pdfFileName, theFileName, mergedFileName);
+            status = system(sysCommandString);
             if (status ~= 0)
-                fprintf('Error during pdfunite. Have you installed poppler (''brew install poppler'')?');
+                fprintf('Error during system command ''%s''. Have you installed poppler (''brew install poppler'')?', sysCommandString);
             else
                 system(sprintf('mv %s %s', mergedFileName, pdfFileName));
                 fprintf('\nNicePlot: file %s appended as the last page of %s.\n', theFileName, pdfFileName);
