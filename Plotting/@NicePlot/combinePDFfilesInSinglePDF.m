@@ -1,4 +1,10 @@
 function combinePDFfilesInSinglePDF(sourcePDFFileNames, pdfFileName)
+
+    if (~exist('/usr/local/bin/pdfunite'))
+        fprintf(2,'NOTE: pdfunite not found in /usr/local/bin.\nTo install pdfunite, open Terminal.app and type ''''brew install poppler''.\nWill not generate summary PDF.\n');
+        return;
+    end
+    
     for k = 1:numel(sourcePDFFileNames)
         theFileName = sourcePDFFileNames{k};
         if (k == 1)
