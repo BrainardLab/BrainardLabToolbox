@@ -65,7 +65,7 @@ function measureSPD(obj)
             obj.nativeMeasurement.energy = obj.nativeS(2) * obj.nativeMeasurement.energy;
                 
         case -8 % Too dark
-            fprintf('>>> Quality code: %d. Low light level!. Returning zeros.\n', qual);
+            fprintf('\n<strong>Quality code: %d. Low light level!. Returning zeros.</strong>\n', qual);
             % return zeros
             nativeSamples = obj.nativeS(3);
             obj.nativeMeasurement.spectralAxis = SToWls(obj.nativeS);
