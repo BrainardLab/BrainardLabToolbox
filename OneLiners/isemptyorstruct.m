@@ -8,7 +8,7 @@ if (isempty(value))
     return;
 end
 
-if (isstruct(value)
+if (isstruct(value))
     status = true;
     return;
 end
