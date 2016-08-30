@@ -4,7 +4,7 @@
 % 8/05/2014  npc   Added option to conduct PsychImaging - based calibration
 % 3/02/2015  npc   Re-organized script so that settings and options are set in 
 %                  a single function.
-% 8/30/2016 JAR    Added calibration configuration for the InVivo Sensa Vue
+% 8/30/2016  JAR   Added calibration configuration for the InVivo Sensa Vue
 %                  Flat panel monitor located at the Stellar Chance 3T Magnet.
 
 function OOC_calibrateMonitor
@@ -61,7 +61,7 @@ function OOC_calibrateMonitor
         case 'InVivoSensaVue_FlatPanel'
             configFunctionHandle = @generateConfigurationForInVivoSensaVue_FlatPanel;   
             
-        default
+        otherwise
             configFunctionHandle = @generateConfigurationForViewSonicProbe;
     end
     
@@ -297,7 +297,6 @@ function [displaySettings, calibratorOptions] = generateConfigurationForSamsungO
     );
 end
 
-%% Nicolas please edit - JR 8/30/2016
 % configuration function for InVivoSensaVue_FlatPanel
 function [displaySettings, calibratorOptions] = generateConfigurationForInVivoSensaVue_FlatPanel()
     % Specify where to send the 'Calibration Done' notification email
@@ -312,9 +311,9 @@ function [displaySettings, calibratorOptions] = generateConfigurationForInVivoSe
         'desiredRefreshRate',       60, ...                         % refresh rate in Hz
         'displayPrimariesNum',      3, ...                          % for regular displays this is always 3 (RGB) 
         'displayDeviceType',        'monitor', ...                  % this should always be set to 'monitor' for now
-        'displayDeviceName',        'BOLDScreen', ...               % a name for the display been calibrated
-        'calibrationFile',          'BOLDScreen', ...               % name of calibration file to be generated
-        'comment',                  'BOLDScreen' ...                % some comment, could be anything
+        'displayDeviceName',        'InVivoSensaVueFlatPanel', ...  % a name for the display been calibrated
+        'calibrationFile',          'InVivoSensaVueFlatPanel', ...  % name of calibration file to be generated
+        'comment',                  'First calibration' ...         % some comment, could be anything
         };
     
     % Specify the @Calibrator's optional params using a CalibratorOptions object
@@ -326,9 +325,9 @@ function [displaySettings, calibratorOptions] = generateConfigurationForInVivoSe
         'emailAddressForDoneNotification',  GetWithDefault('Enter email address for done notification',  emailAddressForNotification), ...
         'blankOtherScreen',                 0, ...                          % whether to blank other displays attached to the host computer (1=yes, 0 = no), ...
         'whichBlankScreen',                 1, ...                          % screen number of the display to be blanked  (main screen = 1, second display = 2)
-        'blankSettings',                    [0.25 0.25 0.25], ...           % color of the whichBlankScreen 
-        'bgColor',                          [0.3962 0.3787 0.4039], ...     % color of the background  
-        'fgColor',                          [0.3962 0.3787 0.4039], ...     % color of the foreground
+        'blankSettings',                    [0.1 0.1 0.1], ...           % color of the whichBlankScreen 
+        'bgColor',                          [0.5 0.5 0.5], ...     % color of the background  
+        'fgColor',                          [0.5 0.5 0.5], ...     % color of the foreground
         'meterDistance',                    0.5, ...                        % distance between radiometer and screen in meters
         'leaveRoomTime',                    1, ...                          % seconds allowed to leave room
         'nAverage',                         1, ...                          % number of repeated measurements for averaging
