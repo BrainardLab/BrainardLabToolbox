@@ -1,3 +1,8 @@
+% Subclass of @Radiometer, specific to the PR670
+%
+% 3/27/2014  npc   Wrote it.
+%
+
 classdef PR650dev < Radiometer
    
     % Public properties (specific to the PR650dev) 

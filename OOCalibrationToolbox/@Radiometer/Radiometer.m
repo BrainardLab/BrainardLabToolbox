@@ -8,7 +8,9 @@ classdef Radiometer < handle
 % Also all subclasses  must specify the properties defined here.
 % The data contained in these properties may differ from one
 % class to another but their names must be the same.
-
+%
+% 3/27/2014  npc   Wrote it.
+%
     % Public access.
     properties
     end % Public properties
