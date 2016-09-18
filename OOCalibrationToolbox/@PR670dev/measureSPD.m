@@ -68,7 +68,8 @@ function measureSPD(obj)
             fprintf('\n<strong>Quality code: %d. Low light level!. Returning zeros.</strong>\n', qual);
             % return zeros
             nativeSamples = obj.nativeS(3);
-            obj.nativeMeasurement.spectralAxis = SToWls(obj.nativeS);
+            spectralAxis = SToWls(obj.nativeS);
+            obj.nativeMeasurement.spectralAxis = spectralAxis(:);
             obj.nativeMeasurement.energy = zeros(1,nativeSamples);
             
         case {-1, -10}  % Light source sync failure
