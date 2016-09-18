@@ -306,9 +306,9 @@ function [displaySettings, calibratorOptions] = generateConfigurationForInVivoSe
     % Users should tailor these according to their hardware specs. 
     % These can be set once only, at the time the @Calibrator object is instantiated.
     displaySettings = { ...
-        'screenToCalibrate',        2, ...                          % which display to calibrate. main screen = 1, second display = 2
+        'screenToCalibrate',        1, ...                          % which display to calibrate. main screen = 1, second display = 2
         'desiredScreenSizePixel',   [1920 1080], ...                % pixels along the width and height of the display to be calibrated
-        'desiredRefreshRate',       60, ...                         % refresh rate in Hz
+        'desiredRefreshRate',       [], ...                         % refresh rate in Hz
         'displayPrimariesNum',      3, ...                          % for regular displays this is always 3 (RGB) 
         'displayDeviceType',        'monitor', ...                  % this should always be set to 'monitor' for now
         'displayDeviceName',        'InVivoSensaVueFlatPanel', ...  % a name for the display been calibrated
@@ -379,6 +379,7 @@ function radiometerOBJ = generateRadiometerObject()
     selectedRadiometerType = radiometerTypes{radiometerIndex};
     fprintf('Will employ an %s radiometer object [%d].\n', selectedRadiometerType, radiometerIndex);
     
+    
     if (strcmp(selectedRadiometerType, 'PR650dev'))
         radiometerOBJ = PR650dev(...
             'verbosity',        1, ...       % 1 -> minimum verbosity
@@ -406,7 +407,6 @@ function radiometerOBJ = generateRadiometerObject()
         );
     
     end
-    
     
 end
 
