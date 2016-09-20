@@ -1,13 +1,19 @@
-function choiceIndex = ChoiceMenuFromList(inputCell)
-% answer = ChoiceMenuFromList(inputCell)
+function choiceIndex = ChoiceMenuFromList(inputCell, optionalPrompt)
+% answer = ChoiceMenuFromList(inputCell, [optionalPrompt])
 %
 % This function takes a cell array of strings and presents them as a menu
 % in the MATLAB command window, allowing the user to make a choice.
 %
 % 9/20/16   ms      Wrote it.
 
+% Check if there's an input
 if isempty(inputCell)
    error('No inputs passed.') 
+end
+
+% Display an optional prompt
+if nargin > 1
+    fprintf('\n<strong>%s</strong>', optionalPrompt);;
 end
 
 % Have the user select an available option.
