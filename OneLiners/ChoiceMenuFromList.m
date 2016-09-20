@@ -27,11 +27,11 @@ while keepPrompting
     end
     fprintf('\n');
     
-    choiceIndex = GetInput('Select a Calibration Type', 'number', 1);
+    choiceIndex = GetInput('> Select a Calibration Type', 'number', 1);
     
     % Check the selection.
     if choiceIndex >= 1 && choiceIndex <= numChoices
-        fprintf('* Selected choice: %s\n', inputCell{choiceIndex});
+        fprintf('* Selected choice: <strong>%s</strong>\n', inputCell{choiceIndex});
         keepPrompting = false;
     else
         fprintf('\n* <strong>Invalid selection.</strong>\n');
