@@ -1,5 +1,7 @@
-function [logLikely, predictedResponses] = ColorMaterialComputeLogLikelihood(thePairs,theResponses,nTrials,xFit,yFit,sigma)
-% function [logLikely,predictedResponses] = ColorMaterialComputeLogLikelihood(thePairs,theResponses,nTrials,xFit,yFit,sigma)
+function [logLikely, predictedResponses] = ColorMaterialModelComputeLogLikelihood(thePairs,theResponses,nTrials,xFit,yFit,sigma)
+% function [logLikely, predictedResponses] = ColorMaterialModelComputeLogLikelihood(thePairs,theResponses,nTrials,xFit,yFit,sigma)
+% This is identical to a function we are using the the ColorSelectionModel.
+%
 %
 % Computes cummulative log likelihood and predicted responses for a current MLDS solution. 
 %   Input: 
@@ -15,8 +17,8 @@ function [logLikely, predictedResponses] = ColorMaterialComputeLogLikelihood(the
 %       logLikelyFit -        log likelihood of the fit.
 %       predictedResponses -  responses predicted from the fit.
 %
-% 05/03/12  dhb  Store and return predicted probabilities.
-% 06/13/13  ar   Added more comments. 
+% 11/07/16  ar  Copied it to the new directory. 
+
 
 nPairs = size(thePairs,1);
 logLikely = 0;

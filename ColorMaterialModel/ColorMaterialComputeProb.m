@@ -5,22 +5,25 @@ function p = ColorMaterialComputeProb(targetC,targetM, cy1,cy2,my1, my2, sigma, 
 % inferred position of the target and the two competitors in the pair. 
 %
 %   Inputs: 
-%       x  - inferred target position . 
-%       y1 - inferred position of the first element in the pair
-%       y2 - inferred position of the second element in the pair
-%       sigma - fixed standard deviation of a cummulative normal distribution
-%       mapFunction - function that determins the mapping from x to y domain. 
-%                     it can be used to model the effect of context. 
-%                     we typically use the identity function. 
+%       targetC  - target position on color dimension (fixed to 0).
+%       targetM  - target position on material dimension (fixed to 0). 
+%      
+%       cy1 - inferred position on the color dimension for the first competitor in the pair
+%       my1 - inferred position on the material dimension for the first competitor in the pair
+%       cy2 - inferred position on the color dimension for the second competitor in the pair
+%       my2 - inferred position on the material dimension for the second competitor in the pair
+%       sigma - noise around the target position (we assume it is equal to 1 and the same for both color and material dimenesions).  
+%        w - weight for color dimension.   
+%          
 %   Output: 
 %       p - probability of first competitor in the pair being chosen given the
-%           inferred target position.  
+%           target position and inferred position of the second competitor.  
 
 %% Make diagnostic plots?
 PLOTS = false;
 
 %% Since we're going to assume that the target is at 0,0, check this
-if (targetC ~= 0 | targetM ~= 0)
+if (targetC ~= 0 || targetM ~= 0)
     error('We baked in that the target is at 0,0, but it is not');
 end
 

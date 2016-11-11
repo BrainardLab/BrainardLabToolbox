@@ -1,5 +1,8 @@
-function response = CMModelSimulateResponse(targetC,targetM, cy1,cy2,my1, my2, sigma, w)
-% function response = CMModelSimulateResponse(targetC,targetM, cy1,cy2,my1, my2, sigma, w)
+function response = ColorMaterialModelSimulateResponse(targetC,targetM, cy1,cy2,my1, my2, sigma, w)
+% function response = ColorMaterialModelSimulateResponse(targetC,targetM, cy1,cy2,my1, my2, sigma, w)
+
+% Add description here. 
+
 
 % Simulate a trial given target and a competitor pair.
 
@@ -13,7 +16,9 @@ end
 % Parameters
 DO_APPROX = false;
 
-% 
+% Note that we're not explicitly adding noise to the target. 
+% Rather, we add noise to competitor positions and we assume that this
+% noise aggregates the target and competitor noise. 
 targetC = targetC; 
 targetM = targetM; 
 cy1 = cy1 + normrnd(0,sigma); 
@@ -21,9 +26,11 @@ cy2 = cy2 + normrnd(0,sigma);
 my1 = my1 + normrnd(0,sigma); 
 my2 = my2 + normrnd(0,sigma); 
 
-if (DO_APPROX)
-    cdiff1 = (cy1-targetC); % weighted difference on color dimension
-    cdiff2 = (cy2-targetC); % weighted difference on material dimension
+if (DO_APPROX) 
+    % here we want some clarification. 
+    % no weights
+    cdiff1 = (cy1-targetC); 
+    cdiff2 = (cy2-targetC); 
     mdiff1 = (my1-targetM);
     mdiff2 = (my2-targetM);
       
@@ -35,9 +42,10 @@ if (DO_APPROX)
     else
         response = 0;
     end
+    
 else
-    cdiff1 = w*(cy1-targetC); % weighted difference on color dimension
-    cdiff2 = w*(cy2-targetC); % weighted difference on material dimension
+    cdiff1 = w*(cy1-targetC); 
+    cdiff2 = w*(cy2-targetC); 
     mdiff1 = (1-w)*(my1-targetM);
     mdiff2 = (1-w)*(my2-targetM);
     
