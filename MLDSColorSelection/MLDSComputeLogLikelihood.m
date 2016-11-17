@@ -22,10 +22,10 @@ nPairs = size(thePairs,1);
 logLikely = 0;
 for i = 1:nPairs
     predictedResponses(i) = MLDSComputeProb(xFit,yFit(thePairs(i,1)),yFit(thePairs(i,2)),sigma,@MLDSIdentityMap); %#ok<AGROW>
-    if (isnan(predictedResponses))
+    if (isnan(predictedResponses(i)))
         error('Returned probability is NaN');
     end
-    if (isinf(predictedResponses))
+    if (isinf(predictedResponses(i)))
         error('Returend probability is Inf');
     end
     logLikely = logLikely + theResponses(i)*log10(predictedResponses(i)) + (nTrials(i)-theResponses(i))*log10(1-predictedResponses(i));
