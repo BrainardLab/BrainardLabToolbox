@@ -24,7 +24,6 @@ sigma = 1;
 sigmaFactor = 4;
 
 %% Set up parameters for search.
-
 A = zeros(numberOfCompetitors-2,numberOfCompetitors);
 for i = 1:numberOfCompetitors-2
     A(i,i+1) = 1;
@@ -34,7 +33,10 @@ end
 % This is the minimum interval size for use with the
 % the A matrix above.
 b = -sigma/sigmaFactor*ones(numberOfCompetitors-2,1);
+
+% We have determined that target is going to be at 0. 
 targetPosition = 0; 
+
 % Set spacings for initializing the search.  
 % Try different ones in the hope that we thus avoid local minima in 
 % the search.
@@ -64,27 +66,13 @@ maxLogLikely = -Inf;
 for k1 = 1:length(trySpacings)
     % Choose initial competitor positions based on current spacing to try.
     %initialCompetitorPositions = linspace(0,trySpacings(k1)*numberOfCompetitors*sigma,numberOfCompetitors);
-    initialCompetitorPositionsColor = [trySpacing*linspace(-3,-1,3),targetLocation,trySpacing*linspace(1,3,3)]; 
+    initialCompetitorPositionsColor = [trySpacing*linspace(-3,-1,3),targetPosition,trySpacing*linspace(1,3,3)]; 
     % TRY SPACING THE SAME OR DIFFERENT. 
-    initialCompetitorPositionsMaterial = [trySpacing*linspace(-3,-1,3),targetLocation,trySpacing*linspace(1,3,3)]; 
+    initialCompetitorPositionsMaterial = [trySpacing*linspace(-3,-1,3),targetPosition,trySpacing*linspace(1,3,3)]; 
     
-    % Choose a set of initial target positions for the current initial competitor positions.
-    tryTargetPositions(k1,:) = 0; 
-    
-    % We don't actually search on the position of the first competitor, since the model predictions don't change
-    % if we add a constant to all of the positions.  Thus we pull out the first competitor from the parameters
-    % vector.  Saving it here just allows us to plop it back in for computations later.
-    yC1 = initialCompetitorPositionsColor(1); 
-    yC1 = initialCompetitorPositionsMaterial(1); 
-    
-    % Loop over all initial target positions that we are going to try
-    for k = 1:length(tryTargetPositions(k1,:))
-        
-        % Initialize the parameters vector for the search, by prepending the initial target position
-        % to the list of all but the first initial competitor positions.
-        initialTargetPosition = tryTargetPositions(k1,k);
-        initialParams = [initialTargetPosition initialCompetitorPositions(2:end)]; 
-        
+        initialParams = [initialCompetitorPositionsColor initialCompetitorPositionsMaterial w]; 
+        targetIndex1 = 4; 
+        targetIndex2 = 11; 
         % Get reasonable upper and lower bound. These are most easily computed from the initial parameters.
         % We enforce that the competitor solutions head off in the positive direction, but the target can
         % be anywhere.  (We take 100 times the maximum value in the intial parameters to equal 'anyware');
@@ -95,63 +83,53 @@ for k1 = 1:length(trySpacings)
         % bound for C3 etc is OK.
         vlb = (sigma/sigmaFactor)*ones(size(initialParams));
         vub = 100*max(abs(initialParams))*ones(size(initialParams));
-        
-        % Remember that the searched vector is [T C2 C3 ...].  We don't
-        % want a strong lower bound constraint on the target, so we make
-        % this the negative our our large upper bound.  This lets the
-        % target, in effect, go anywhere.  That's what we want.
-        vlb(1) = -vub(1);
+        vlb(targetIndex1) = 0; 
+        vlb(targetIndex2) = 0; 
+        vub(targetIndex1) = vlb(targetIndex1); % fix search for target position at 0. 
+        vub(targetIndex2) = vlb(targetIndex2); % fix search for target position at 0. 
         
         % Run the search
-        fitParams = fmincon(@(x)FitContextFCScalingFun(x,y1,thePairs,theResponses,nTrialsPerPair,sigma),initialParams,A,b,[],[],vlb,vub,[],options);
+        fitParams = fmincon(@(x)FitColorMaterialScalingFun(colorPositions,materialPositions, targetIndex, sigma, w),initialParams,A,b,[],[],vlb,vub,[],options);
         
-        % Extract target and competetior positions from the solution, and prepend the first competitor postion to
-        % final positions (see comment above).
-        fitCompetitorPositions = [y1 fitParams(2:end)]; 
-        fitCompetitorPositions = [y1 fitParams(2:end)]; 
-        
-        % Compute log likelihood for this solution.  We need this so that we can keep track of the best
+        % Compute log likelihood for this solution.  Keep track of the best
         % solution that comes out of the multiple starting points.
         % Save this solution if it's better than the current best. 
-        temp = ColorMaterialComputeLogLikelyhood(thePairs,theResponses,nTrialsPerPair,fitTargetPosition,fitCompetitorPositions,sigma);
+        temp = ColorMaterialModelComputeLogLikelihood(thePairs,theResponses, nTrials, colorPositions,materialPositions, targetIndex, sigma, w);
         if (temp > maxLogLikely)
             maxLogLikely = temp;
             [logLikelyFit,predictedResponses] = ColorMaterialComputeLogLikelyhood(thePairs,theResponses,nTrialsPerPair,fitTargetPosition,fitCompetitorPositions,sigma);
             targetCompetitorFit = [fitTargetPosition, fitCompetitorPositions];
         end
-    end
 end
 end
 
-function f = FitContextFCScalingFun(x,y1,thePairs,theResponses,nTrials,sigma)
-%function f = FitContextFCScalingFun(x,y1,thePairs,theResponses,nTrials,sigma)
+function f = FitColorMaterialScalingFun(thePairs,theResponses,nTrials, colorPositions,materialPositions, targetIndex, sigma, w)
+%function f = FitColorMaterialScalingFun(thePairs,theResponses,nTrials, colorPositions,materialPositions, targetIndex, sigma, w)
+
 % The error function we are minimizing in the numerical search.
-% Computes the negative log likelyhood of the current solution i.e. inferred
-% positio of the target and the competitors. 
+% Computes the negative log likelyhood of the current solution i.e. the weights and the inferred
+% position of the competitors on color and material axes. 
 % Input: 
-%   x           - current target position fit. 
-%   y1          - current competitor position fits. 
+%   w           - the current weight(s). 
+%   y1          - current competitor position fits on color and material axis. 
 %   thePairs    - competitor pairs. 
 %   theResponses- set of responses for this pair (number of times first
-%                 competitor is chosen. 
+%                 competitor is chosen). 
 %   nTrialsPerPair - total number of trials run. 
 %   sigma          - fixed standard deviation
 % Output: 
 %   f - negative log likelihood for the current solution. 
 
 
-% Sanity check. 
-if (any(isnan(x)))
+% Sanity check - did any of the solutions return as NaN
+if (any(isnan([colorPositions, materialPositions, w])))
     error('Entry of x is NaN');
 end
 
-% Reorganize the solution vector.  
-% Pull the target from the solution, put the fixed competitor 1 back in the competitor array.  
-xFit = x(1); 
-yFit = [y1 x(2:end)]; 
 
 % compute negative log likelyhood of the current solution
-logLikely = MLDSComputeLogLikelihood(thePairs,theResponses,nTrials,xFit,yFit,sigma);
+%function [logLikely, predictedResponses] = ColorMaterialModelComputeLogLikelihood(thePairs,theResponses,nTrials, colorPositions,materialPositions, targetIndex, sigma, w)
+logLikely = ColorMaterialModelComputeLogLikelihood(thePairs,theResponses,nTrials, colorPositions,materialPositions, targetIndex1, sigma, w);
 f = -logLikely;
 
 end

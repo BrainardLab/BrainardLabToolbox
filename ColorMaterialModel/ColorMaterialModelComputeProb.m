@@ -34,8 +34,8 @@ function p = ColorMaterialModelComputeProb(targetC,targetM, cy1,cy2,my1, my2, si
 % is to provide a reasonable analytic approximation that applies to our
 % current experiments.
 %  1) Target position is always 0,0.
-%  2) The mean of the y1 representaitonal distribution lies on the color axis
-%     and the mean of the y2 representaitonal distribution lies on the material axis.
+%  2) The mean of the y1 representational distribution lies on the color axis
+%     and the mean of the y2 representational distribution lies on the material axis.
 %  3) The value of sigma is the same for both axes and is 1.
 %  4) 0 < w < 1
 %
@@ -96,12 +96,12 @@ if (sigma ~= 1)
 end
 
 % We assume that my1 is 0 and cy2 is 0, check
-if (my1 ~= 0 | cy2 ~= 0)
+if (my1 ~= 0 || cy2 ~= 0)
     error('Assumption that competitors lie on the axes is violated.');
 end
 
 % Check w and also avoid numerical problems for very small w or (1-w)
-if (w < 0 | w > 1)
+if (w < 0 || w > 1)
     error('w must be between 0 and 1 inclusive');
 end
 if (w == 0)
@@ -110,7 +110,7 @@ elseif (w == 1)
     w = 0.9999;
 end
 
-%% Compute distribution of lengths (over trials) of competitor y1 
+%% Compute distribution of distances (over trials) of competitor y1 
 %
 % We can get the probability distribution of the first distance by using
 % the pdf of the non-central chi2 distribution.  We count on the fact that
@@ -121,54 +121,52 @@ end
 % article on non-central chi-squared, where delta is called lambda.  This
 % parameter is needed so that the non-central chi-squared returns the
 % appropriate values for (cy1,my1).
-% Also take square root to get mean length.
+% Also take square root to get mean distance.
 delta1 = cy1^2 + my1^2;
 
-% We'll also need the length of the mean of the distribution of y1 in the
+% We'll also need the distance of the mean of the distribution of y1 in the
 % perceptual space.
-meanLength1 = sqrt(delta1);
+meanDistance1 = sqrt(delta1);
 
-% Step 2: We want the probability distribution for the length of noisy draws
+% Step 2: We want the probability distribution for the distance of noisy draws
 % of y1 in the stimulus space. Given the assumption we make that sigma is 1 for both axes,
-% and the fact my1 = 0, the distribution of lengths of y1 is going to bet
-% between meanLength +/- n, where n is 3 or 4 or something like that
+% and the fact my1 = 0, the distribution of distances of y1 is going to be
+% between meanDistance +/- n, where n is 3 or 4 or something like that
 % (because sigma == 1) and not too much gets perturbed because the noise
 % along the material direction isn't going to screw things up too much.
-% We use this fact to compute a set of discrete values for the length of y1 that covers
+% We use this fact to compute a set of discrete values for the distance of y1 that covers
 % the range of values that will occur.
 
 % Turns out empirically that 6 is a good range, and we'll compute the pdf
 % over nSamplesValues within that range, to get a good approximation.
-% Lengths cannot be negative.  It is convenient to work in length^2,
+% Distances cannot be negative.  It is convenient to work in distance^2,
 % because that's what the non-central chi-squared describes the probability
 % of.
 %
-% Note that the length of y1 is the same as the distance between y1
-% and the target, because we force the target to be at the origin.  Its
-% possible that the code would be clearer if we had called everything
-% distance, rather than length.
+% Note that the lenght of distance y1 is the same as the distance between y1
+% and the target, because we force the target to be at the origin.  
 rangeValue = 6;
 nSampleValues = 1000;
-minLength1 = max([0 meanLength1-rangeValue]);
-lengthsSquared1 = linspace(minLength1^2,(meanLength1+rangeValue)^2,nSampleValues);
-deltaValues1 = lengthsSquared1(2)-lengthsSquared1(1);
+minDistance1 = max([0 meanDistance1-rangeValue]);
+distancesSquared1 = linspace(minDistance1^2,(meanDistance1+rangeValue)^2,nSampleValues);
+deltaValues1 = distancesSquared1(2)-distancesSquared1(1);
 
-% Now get probability for each interval over the sampled lengths for y1,
+% Now get probability for each interval over the sampled distances for y1,
 % using the non-central chi-squared.  Make sure the probability sums to 1.
-probForEachValueOf1 = ncx2pdf(lengthsSquared1,2,delta1)*deltaValues1;
+probForEachValueOf1 = ncx2pdf(distancesSquared1,2,delta1)*deltaValues1;
 totalProb1 = sum(probForEachValueOf1);
 if (PLOTS)
     % Show sampled PDF, optionally.
     plotFigure1 = figure; clf; hold on;
-    plot(lengthsSquared1,probForEachValueOf1,'r','LineWidth',2);
-    xlabel('Length of y1')
+    plot(distancesSquared1,probForEachValueOf1,'r','LineWidth',2);
+    xlabel('Distance of y1')
     ylabel('Probability');
 end
 if (abs(totalProb1 - 1) > 1e-2)
-    error('Total probability that length1 has a length is not close enough to 1');
+    error('Total probability that distance1 has a distance is not close enough to 1');
 end
 
-%% Compute expected value of length1 and adjust w
+%% Compute expected value of distance1 and adjust w
 %
 % We want to compare the distance to y1 and y2 in a weighted fashion.
 % Ideally, we would compute each distance by weighting the color axis by w
@@ -177,63 +175,63 @@ end
 % squares of independent normal random variables each with sigma = 1.
 %
 % So, we do a trick.  First note that in the limit that sigma -> 0, the
-% length of y1 depends only on the color axis position and the length of y2
+% distance of y1 depends only on the color axis position and the distance of y2
 % only on the material axis position.  In this case, we could weight the
-% length of y1 by w and the length of y2 by (1-w) and compare those
-% lengths.  Doing that in fact (we checked) gives an excellend contribution
+% distance of y1 by w and the distance of y2 by (1-w) and compare those
+% distances.  Doing that in fact (we checked) gives an excellend contribution
 % for cases where cy1 >> 1 and my2 >> 1.  But when cy1 gets smaller (say, <
 % 20 or so based on some simulations we did) or my2 gets similarly small,
 % the trial by trial variation that takes the perceptual representations
 % off the axes intrudes on the approxmation more than we would like.
 %
-% So, here's what we do.  First, we find the expected length of y1.  Then,
-% we note that the expected value of the length of the material component
-% of y1 is 1 and thus its expected squared length is also 1.  (This is a
+% So, here's what we do.  First, we find the expected distance of y1.  Then,
+% we note that the expected value of the distance of the material component
+% of y1 is 1 and thus its expected squared distance is also 1.  (This is a
 % property of the univariate normal distribution with 0 mean, because the
 % variance is in fact the expected squared value when the mean is 0.  These
 % facts allow us to draw a right triangle with hypotonuese corresponding to
-% the expected length and rise corresponding to 1.  Then we can compute the
+% the expected distance and rise corresponding to 1.  Then we can compute the
 % squared value of the run using Pythagoreus.  
 %
-% Then, we shrink the run by w and the rise by (1-w) and compute the length
-% of the hypotenuse after the shrinking.  Taking the ratio of this length
-% with the original expected length gives us an approximation to the amount
+% Then, we shrink the run by w and the rise by (1-w) and compute the distance
+% of the hypotenuse after the shrinking.  Taking the ratio of this distance
+% with the original expected distance gives us an approximation to the amount
 % we need to shrink distance to approximate what we'd get, on average, if
 % we did the underlying dimensional shrinkage.  We have no theorems about
 % this, it is based on intuition and in comparison with simulations
 % improves the approximation compared to not doing it.
 %
 % Note that this adjustment only applies to the factor we apply to the
-% length of y1 -- it is not the right adjustment for the length of y2.  We
-% compute that length below.
-expectedLengthsSquared1 = sum(probForEachValueOf1.*lengthsSquared1);
+% distance of y1 -- it is not the right adjustment for the distance of y2.  We
+% compute that distance below.
+expectedDistancesSquared1 = sum(probForEachValueOf1.*distancesSquared1);
 expectedRise1Squared = 1;
-expectedRun1Squared = expectedLengthsSquared1 - expectedRise1Squared ;
-expectedAdjustedLengthsSquared1 = w^2*expectedRun1Squared + (1-w)^2*1;
-adjustedW = sqrt(expectedAdjustedLengthsSquared1 / expectedLengthsSquared1);
+expectedRun1Squared = expectedDistancesSquared1 - expectedRise1Squared ;
+expectedAdjustedDistancesSquared1 = w^2*expectedRun1Squared + (1-w)^2*1;
+adjustedW = sqrt(expectedAdjustedDistancesSquared1 / expectedDistancesSquared1);
 fprintf('Adjusted w %0.3f, w %0.3f\n',adjustedW,w);
 
-%% Compute expected value of length2 and adjust w2
+%% Compute expected value of distance2 and adjust w2
 delta2 = cy2^2 + my2^2;
-meanLength2 = sqrt(delta2);
-minLength2 = max([0 meanLength2-rangeValue]);
-lengthsSquared2 = linspace(minLength2^2,(meanLength2+rangeValue)^2,nSampleValues);
-deltaValues2 = lengthsSquared2(2)-lengthsSquared2(1);
-probForEachValueOf2 = ncx2pdf(lengthsSquared2,2,delta2)*deltaValues2;
+meanDistance2 = sqrt(delta2);
+minDistance2 = max([0 meanDistance2-rangeValue]);
+distancesSquared2 = linspace(minDistance2^2,(meanDistance2+rangeValue)^2,nSampleValues);
+deltaValues2 = distancesSquared2(2)-distancesSquared2(1);
+probForEachValueOf2 = ncx2pdf(distancesSquared2,2,delta2)*deltaValues2;
 totalProb2 = sum(probForEachValueOf2);
 if (PLOTS)
     plotFigure2 = figure; clf; hold on
-    plot(lengthsSquared2,probForEachValueOf2,'r','LineWidth',2);
+    plot(distancesSquared2,probForEachValueOf2,'r','LineWidth',2);
     xlabel('Distance2')
     ylabel('Probability');  
 end
 if (abs(totalProb2 - 1) > 1e-2)
-    error('Total probability that length2 has a length is not close enough to 1');
+    error('Total probability that distance2 has a distance is not close enough to 1');
 end
-expectedLengthsSquared2 = sum(probForEachValueOf2.*lengthsSquared2);
-expectedA2Squared = expectedLengthsSquared2 - 1;
-expectedAdjustedLengthsSquared2 = (1-w)^2*expectedA2Squared + w^2*1;
-adjustedOneMinusW = sqrt(expectedAdjustedLengthsSquared2 / expectedLengthsSquared2);
+expectedDistancesSquared2 = sum(probForEachValueOf2.*distancesSquared2);
+expectedA2Squared = expectedDistancesSquared2 - 1;
+expectedAdjustedDistancesSquared2 = (1-w)^2*expectedA2Squared + w^2*1;
+adjustedOneMinusW = sqrt(expectedAdjustedDistancesSquared2 / expectedDistancesSquared2);
 fprintf('Adjusted (1-w) %0.3f, (1-w) %0.3f\n\n',adjustedOneMinusW,1-w);
 
 
@@ -243,13 +241,13 @@ fprintf('Adjusted (1-w) %0.3f, (1-w) %0.3f\n\n',adjustedOneMinusW,1-w);
 % first distance is less than the second distance, with the expectation
 % taken across values of the first distance.
 
-% Now for each value that the first length might take on, compute the
-% probability that the second length is longer.  For this we use
+% Now for each value that the first distance might take on, compute the
+% probability that the second distance is longer.  For this we use
 % the cdf of the ncx2 distribution.
-p1LessThan2ForEachValueOf1 = 1 - ncx2cdf((adjustedW/adjustedOneMinusW)^2*lengthsSquared1,2,delta2);
+p1LessThan2ForEachValueOf1 = 1 - ncx2cdf((adjustedW/adjustedOneMinusW)^2*distancesSquared1,2,delta2);
 if (PLOTS)
     plotFigure3 = figure; clf; hold on
-    plot(lengthsSquared1,p1LessThan2ForEachValueOf1,'r','LineWidth',2);
+    plot(distancesSquared1,p1LessThan2ForEachValueOf1,'r','LineWidth',2);
     xlabel('Distance1')
     ylabel('Probability 1 Less Than 2');
 end

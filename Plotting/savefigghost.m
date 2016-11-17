@@ -1,6 +1,6 @@
 function savefigghost(fname, varargin)
 	
-% Usage: savefig(ghostfilename, fighdl, options)
+% Usage: savefigghost(ghostfilename, fighdl, options)
 %
 % Saves a pdf, eps, png, jpeg, and/or tiff of the contents of the fighandle's (or current) figure.
 % It saves an eps of the figure and the uses Ghostscript to convert to the other formats.

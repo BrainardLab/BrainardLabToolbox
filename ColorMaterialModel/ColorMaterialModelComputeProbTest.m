@@ -34,7 +34,7 @@ for ii = 1:nY2s
         response(jj) = ColorMaterialModelSimulateResponse(targetC,targetM,cy1,cy2,my1,my2s(ii),sigma,w);
     end
     simulatedPs(ii) = sum(response)/nSimulate;
-    computedPs(ii) = ColorMaterialComputeProb(targetC,targetM,cy1,cy2,my1,my2s(ii),sigma,w);
+    computedPs(ii) = ColorMaterialModelComputeProb(targetC,targetM,cy1,cy2,my1,my2s(ii),sigma,w);
 end
 
 %% Scale for best fit

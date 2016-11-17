@@ -21,11 +21,12 @@ nCompetitors = 5;
 nTrials = 30; % number of simulated trials
 sigma = 0.1; % used for simulation. 
 
-spacingRange = [0.15, 0.5, 1, 3, 5];
-nSimulations = 10;
+% spacingRange = [0.15, 0.5, 1, 3, 5]; old spacing range. 
+spacingRange = [0.15, 5];
+nSimulations = 100;
 
 % create competitor pairs for a given set of competitors. 
-thePairs = nchoosek(1:nCompetitors,2);
+thePairs = nchoosek(1:nCompetitors,2); 
 nPairs = size(thePairs,1);
 nTrials = nTrials.*ones(nPairs,1);
 
@@ -37,20 +38,18 @@ for trySpacing = 1:length(spacingRange)
     
     % add some targets which fall between the competitors. 
     if nCompetitors == 5
-        targets = [linY, linY(2)-((linY(2)-linY(1))*0.5),  linY(3)-((linY(3)-linY(2))*.25), linY(4)-((linY(4)-linY(3))*.66), linY(5)-((linY(5)-linY(4))*.33)];
-    elseif nCompetitors ==6
-        targets = [linY, linY(2)-((linY(2)-linY(1))*0.5),  linY(3)-((linY(3)-linY(2))*.25), linY(4)-((linY(4)-linY(3))*.66), linY(5)-((linY(5)-linY(4))*.33), ...
-            linY(6)-((linY(6)-linY(5))*0.5)];
+        targets = [linY, linspace(1,spacingRange(trySpacing)+1,50)];
+    elseif nCompetitors == 6
+        targets = [linY, linspace(1,spacingRange(trySpacing)+1,50)];
     end
     
     for whichTarget = 1:length(targets);
-        tic
         for whichSim = 1:nSimulations
             % Simulate responses
             for i = 1:length(thePairs)
                 n1 = 0;
                 for j = 1:nTrials(i) %nSimulatePerPair
-                    if (MLDSSimulateResponse(targets(whichTarget),y(thePairs(i,1)),y(thePairs(i,2)),sigma,@MLDSIdentityMap))
+                    if (MLDSSimulateResponse(targets(whichTarget),y(thePairs(i,1)),y(thePairs(i,2)),sigma,@MLDSIdentityMap));
                         n1 = n1 + 1;
                     end
                 end
@@ -64,13 +63,14 @@ for trySpacing = 1:length(spacingRange)
         end
         % recover actual targetPosition from spacings. 
         realPosition(whichTarget)  =  MLDSInferPosition([targets(whichTarget), linY], nCompetitors);
-        toc
     end
     if nCompetitors == 5
-        save(['simulatedRecoverySpacing5C' num2str(trySpacing)], 'position', 'realPosition')
+        save(['simulatedRecoverySpacingNew' num2str(trySpacing)], 'position', 'realPosition')
+        
+    % old simulation   
+    % save(['simulatedRecoverySpacing5C' num2str(trySpacing)], 'position', 'realPosition')
+    
     elseif nCompetitors == 6
-        save(['simulatedRecoverySpacing6C' num2str(trySpacing)], 'position', 'realPosition')
+        save(['simulatedRecoverySpacingZaidi' num2str(trySpacing)], 'position', 'realPosition')
     end
 end
-
-
