@@ -211,7 +211,10 @@ expectedAdjustedDistancesSquared1 = w^2*expectedRun1Squared + (1-w)^2*1;
 adjustedW = sqrt(expectedAdjustedDistancesSquared1 / expectedDistancesSquared1);
 fprintf('Adjusted w %0.3f, w %0.3f\n',adjustedW,w);
 
-%% Compute expected value of distance2 and adjust w2
+%% Compute expected value of distance2 and get the adjusted factor (1-w)
+% This factor is used to adjust the weight on the second dimension.
+%
+% The logic here is essentially like what we did for distance1 above.
 delta2 = cy2^2 + my2^2;
 meanDistance2 = sqrt(delta2);
 minDistance2 = max([0 meanDistance2-rangeValue]);
@@ -230,20 +233,32 @@ if (abs(totalProb2 - 1) > 1e-2)
 end
 expectedDistancesSquared2 = sum(probForEachValueOf2.*distancesSquared2);
 expectedA2Squared = expectedDistancesSquared2 - 1;
-expectedAdjustedDistancesSquared2 = (1-w)^2*expectedA2Squared + w^2*1;
+expectedAdjustedDistancesSquared2 = w^2*1 +(1-w)^2*expectedA2Squared;
 adjustedOneMinusW = sqrt(expectedAdjustedDistancesSquared2 / expectedDistancesSquared2);
 fprintf('Adjusted (1-w) %0.3f, (1-w) %0.3f\n\n',adjustedOneMinusW,1-w);
 
-
+%% Compute probability of a response of 1
 % This happens if the first distance is less than the second distance.
 %
 % The way we find the probability is to take the expected value that the
 % first distance is less than the second distance, with the expectation
 % taken across values of the first distance.
+%
+% We use the adjusted weights as calculated above when comparing the
+% distances.
 
-% Now for each value that the first distance might take on, compute the
+% For each value that the first distance might take on, compute the
 % probability that the second distance is longer.  For this we use
 % the cdf of the ncx2 distribution.
+%
+% We are interested in the probabilty that:
+%         adjustedW^2*distanceSquared1 < adjustedOneMinusW^2*distanceSquared2
+%   <=>   (adjustedW^2/adjustedOneMinusW^2)*distanceSquared1 < distanceSquared2
+% This is given by the probability that distanceSquared2 is greater than
+% the quantity on the left.  We know this by taking 1 minus the cdf of
+% distancesSquared2 with respect to the quantity on the left.  And we know
+% the cdf of distanceSquared2 since it is given by the non-central chi2
+% with the distanceSquared2 parameters.
 p1LessThan2ForEachValueOf1 = 1 - ncx2cdf((adjustedW/adjustedOneMinusW)^2*distancesSquared1,2,delta2);
 if (PLOTS)
     plotFigure3 = figure; clf; hold on
@@ -252,10 +267,13 @@ if (PLOTS)
     ylabel('Probability 1 Less Than 2');
 end
 
-% Get expected value to get the returned p
+% Now we just need to take the expected value of the quantity we just
+% computed, over the values of distanceSquared1, and we already have 
+% these probabilities from our work above.  So we get our desired
+% probability!
 p = sum(probForEachValueOf1 .* p1LessThan2ForEachValueOf1);
 
-% Deal with edge cases
+%% Deal with edge cases to avoid disaster when computing likilihoods later on
 if (p == 0)
     p = 0.0001;
 elseif (p == 1)
