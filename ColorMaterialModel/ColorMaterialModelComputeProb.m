@@ -1,5 +1,5 @@
-function p = ColorMaterialModelComputeProb(targetC,targetM, cy1,cy2,my1, my2, sigma, w)
-% function p = ColorMaterialModelComputeProb(targetC,targetM, cy1,cy2,my1, my2, sigma, w)
+function p = ColorMaterialModelComputeProb(targetC,targetM, cy1,cy2,my1, my2, w, sigma)
+% function p = ColorMaterialModelComputeProb(targetC,targetM, cy1,cy2,my1, my2, w, sigma)
 %
 % This function is part of our modeling effort for our initial
 % color-material tradeoff experiments.  On each trial of these experiments,
@@ -85,18 +85,21 @@ PLOTS = false;
 % We pass them all because some day we might generalize, but here we 
 % check that they're good.
 
-% We assume that the target is at 0,0, check
+% We assume that the target is at 0,0, check 
+targetC = 0; 
+targetM = 0; 
+sigma = 1; 
 if (targetC ~= 0 || targetM ~= 0)
-    error('We baked in that the target is at 0,0, but it is not');
+ %   error('We baked in that the target is at 0,0, but it is not');
 end
 
 % We assume that sigma is 1, check
 if (sigma ~= 1)
-    error('Code assumes that sigma is 1');
+  %  error('Code assumes that sigma is 1');
 end
 
 % We assume that my1 is 0 and cy2 is 0, check
-if (my1 ~= 0 || cy2 ~= 0)
+if (cy1 ~= 0 || my2 ~= 0)
     error('Assumption that competitors lie on the axes is violated.');
 end
 
@@ -209,7 +212,7 @@ expectedRise1Squared = 1;
 expectedRun1Squared = expectedDistancesSquared1 - expectedRise1Squared ;
 expectedAdjustedDistancesSquared1 = w^2*expectedRun1Squared + (1-w)^2*1;
 adjustedW = sqrt(expectedAdjustedDistancesSquared1 / expectedDistancesSquared1);
-fprintf('Adjusted w %0.3f, w %0.3f\n',adjustedW,w);
+%fprintf('Adjusted w %0.3f, w %0.3f\n',adjustedW,w);
 
 %% Compute expected value of distance2 and get the adjusted factor (1-w)
 % This factor is used to adjust the weight on the second dimension.
@@ -235,7 +238,7 @@ expectedDistancesSquared2 = sum(probForEachValueOf2.*distancesSquared2);
 expectedA2Squared = expectedDistancesSquared2 - 1;
 expectedAdjustedDistancesSquared2 = w^2*1 +(1-w)^2*expectedA2Squared;
 adjustedOneMinusW = sqrt(expectedAdjustedDistancesSquared2 / expectedDistancesSquared2);
-fprintf('Adjusted (1-w) %0.3f, (1-w) %0.3f\n\n',adjustedOneMinusW,1-w);
+%fprintf('Adjusted (1-w) %0.3f, (1-w) %0.3f\n\n',adjustedOneMinusW,1-w);
 
 %% Compute probability of a response of 1
 % This happens if the first distance is less than the second distance.

@@ -1,5 +1,5 @@
-function [logLikely, predictedResponses] = ColorMaterialModelComputeLogLikelihood(thePairs,theResponses,nTrials, colorPositions,materialPositions, targetIndex, sigma, w)
-% function [logLikely, predictedResponses] = ColorMaterialModelComputeLogLikelihood(thePairs,theResponses,nTrials,colorPositions,materialPositions, targetIndex, sigma, w)
+function [logLikely, predictedResponses] = ColorMaterialModelComputeLogLikelihood(thePairs,theResponses,nTrials, colorPositions,materialPositions, targetIndex, w, sigma)
+% function [logLikely, predictedResponses] = ColorMaterialModelComputeLogLikelihood(thePairs,theResponses,nTrials,colorPositions,materialPositions, targetIndex, w, sigma)
 %
 % Computes cummulative log likelihood and predicted responses for a current weights and positions. 
 %   Input: 
@@ -21,10 +21,14 @@ function [logLikely, predictedResponses] = ColorMaterialModelComputeLogLikelihoo
 %               accordingly. 
 
 nPairs = size(thePairs,1);
+cy1 = 0; 
+my2 = 0;
 logLikely = 0;
 for i = 1:nPairs
     % p = ColorMaterialModelComputeProb(targetC,targetM, cy1,cy2,my1, my2, sigma, w)
-    predictedResponses(i) = ColorMaterialModelComputeProb(colorPositions(targetIndex),materialPositions(targetIndex), colorPositions(thePairs(i,1)),colorPositions(thePairs(i,2)), materialPositions(thePairs(i,1)),materialPositions(thePairs(i,2)), sigma, w); 
+colorPositions(targetIndex)
+materialPositions(targetIndex)
+    predictedResponses(i) = ColorMaterialModelComputeProb(colorPositions(targetIndex),materialPositions(targetIndex), cy1,colorPositions(thePairs(i)), materialPositions(thePairs(i)),my2, w, sigma); 
     if (isnan(predictedResponses(i)))
         error('Returned probability is NaN');
     end
