@@ -1,23 +1,22 @@
 % ColorMaterialModelDemo.m
 %
-% Demonstrates MLDS Fitting procedure for a data set.
-% Initially used as a test bed for improving search algorithm.
-% Currently used as demo and also to debug the algorithm for
-% any "problematic data set".
+% Demonstrates color material MLDS model itting procedure for a data set.
+% Initially used as a test bed for testing and improving search algorithm.
 %
 % The work is done by other routines in this folder. 
 %
 % Requires optimization toolbox.
 %
-% 5/3/12  dhb  Wrote it. Added scatterplot of predicted versus measured probs added.
-% 6/13/13  ar  Clean up, added comments
+% 11/18/16  ar  Wrote from selection model version
 
-% Initialize
+%% Initialize and parameter set
 clear ; close all;
 DEMO = true;
 saveFig = 0;
+
+%% We can use simulated data (DEMO == true) or some real data (DEMO == false)
 if (DEMO)
-    % make a stimulus list
+    % Make a stimulus list and set underlying parameters.
     targetM = 0; 
     targetC = 0; 
     stimuliC = [];
@@ -26,75 +25,78 @@ if (DEMO)
     mDistances = [-3, -2, -1, 0, 1, 2, 3];
     sigma = 1;
     w = 0.5; 
-    for i = 1:length(cDistances)
-        % these are the material matches that vary in color.
+    
+    % These are the material matches that vary in color.
+    for i = 1:length(cDistances)   
         stimuliC = [stimuliC, {[cDistances(i), targetM]}];
     end
+    
+    % These are the color matches that vary in material
     for i = 1:length(mDistances)
-        % these are the color matches that vary in material
         stimuliM = [stimuliM, {[targetC, mDistances(i)]}];
     end
+    
+    % Simulate the data
+    %
     % Initialize the response structure
     cIndex = 1;
     mIndex = 2;
     nBlocks = 24;
-    
     response  = zeros(length(cDistances),length(mDistances));
     pairIndices = []; 
     pairSpecs = []; 
-    % simulate the experiment.
+    
+    % Loop over blocks and stimulus pairs and simulate responses
+    %
+    % We pair each color stimulus with each material stimulus
     for b = 1:nBlocks
         for whichColor = 1:length(cDistances)
             for whichMaterial = 1:length(mDistances)
-                % pair all material matches with all color matches.
                 clear pair
                 pair = {stimuliM{whichMaterial},stimuliC{whichColor}};
+                
+                % Set up matrices of indices that will allow us to relate the
+                % stimuli and the reponse matrix.
+                % We only need to do this on the first block,
+                % since it is the same on each block in this simulation.
                 if b == 1
-                    pairIndices = [pairIndices; whichColor, whichMaterial];
-                    % pair1: color, material; pair2: color, material
-                    pairSpecs = [pairSpecs; [stimuliM{whichMaterial},stimuliC{whichColor}]];
+                    pairColorMatrix(whichColor,whichMaterial) = whichColor;
+                    pairMaterialMatrix(whichColor,whichMaterial) = whichMaterial;
                 end
-                % compute probability using this function
-                % CMModelSimulateResponse(xC,xM, cy1,cy2,my1, my2, sigma, w)
                 
-                response1(whichColor,whichMaterial) = ColorMaterialModelSimulateResponse(targetC,targetM, pair{1}(cIndex), pair{2}(cIndex), pair{1}(mIndex),pair{2}(mIndex), sigma, w);
-                % note that the first competitor passed is always a
-                % color match that differs in materia. 
-                % so the response 1 == 1 is the color match is chosen
-                
-                % note that in the response column shows the probability of material match being chosen rows are
-                % colorMatches and the columns are material matches. 
+                % Simulate out what the response is for this pair in this
+                % block.
+                %
+                % Note that the first competitor passed is always a color
+                % match that differs in material. so the response1 == 1
+                % means that the color match was chosen
+                response1(whichColor,whichMaterial) = ColorMaterialModelSimulateResponse(targetC, targetM, pair{1}(cIndex), pair{2}(cIndex), pair{1}(mIndex), pair{2}(mIndex), sigma, w);
             end
         end
-        % track cummulative response
+        
+        % Track cummulative response over blocks
         response = response+response1;
         clear response1
     end
     
-    % compute response probabilities
-    % responseProbabilities = response./nBlocks;
-    
-    % Number of trials first competitor in each
-    % row of competitorIndices was chosen as closest
-    % to the target.  One row here for every row 
-    % of competitorIndices.
-    %
-    % You can have more than one column here if you want,
-    % as long as all the columns correspond to the same nominal
-    % pairing provided in competitorIndices above.
+    % String the response matrix as well as the pairMatrices out as vectors. 
     theResponses = response(:);
+    pairIndices(:,1) = pairColorMatrix(:);
+    pairIndices(:,2) = pairMaterialMatrix(:);
     
     % Total number of trials run for every row of competitorIndices.
     % Number of columns here should match the number of columns in
     % someData.
     nTrials = nBlocks*ones(size(theResponses)); 
+    
+% Here you could enter some real data and work on figuring out why a model
+% fit was going awry.
 else
-    % You can put your own data here and change DEMO flag above to
-    % false, to see what happens for a different dataset.
-    competitorIndices = [
+    
+    pairIndices = [
         ];
     
-    someData = [
+    theResponses = [
         ];
 
     nTrials = [

@@ -1,5 +1,5 @@
-function response = ColorMaterialModelSimulateResponse(targetC,targetM, cy1,cy2,my1, my2, sigma, w)
-% function response = ColorMaterialModelSimulateResponse(targetC,targetM, cy1,cy2,my1, my2, sigma, w)
+function response = ColorMaterialModelSimulateResponse(targetC, targetM, cy1, cy2,my1, my2, sigma, w)
+% function response = ColorMaterialModelSimulateResponse(targetC, targetM, cy1, cy2,my1, my2, sigma, w)
 
 % Add description here. 
 

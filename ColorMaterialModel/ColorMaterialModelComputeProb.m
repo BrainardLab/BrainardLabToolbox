@@ -58,21 +58,21 @@ function p = ColorMaterialModelComputeProb(targetC,targetM, cy1,cy2,my1, my2, w,
 % deterministic.  A deterministic value is important for numerical search,
 % which will call this routine as part of its objective function.
 %
-%   Inputs: 
+%   Inputs:
 %       targetC  - target position on color dimension (fixed to 0).
-%       targetM  - target position on material dimension (fixed to 0). 
-%      
+%       targetM  - target position on material dimension (fixed to 0).
+%
 %       cy1 - inferred position on the color dimension for the first competitor in the pair
 %       my1 - inferred position on the material dimension for the first competitor in the pair
 %       cy2 - inferred position on the color dimension for the second competitor in the pair
 %       my2 - inferred position on the material dimension for the second competitor in the pair
 %       sigma - noise around the target position (we assume it is equal to 1 and the same
-%               for both color and material dimenesions).  
-%       w - weight for color dimension.   
-%          
-%   Output: 
+%               for both color and material dimenesions).
+%       w - weight for color dimension.
+%
+%   Output:
 %       p - probability of first competitor in the pair being chosen given the
-%           target position and inferred position of the second competitor.  
+%           target position and inferred position of the second competitor.
 
 %% Make diagnostic plots?
 %
@@ -82,20 +82,18 @@ PLOTS = false;
 
 %% Check that passed args meet assumptions
 %
-% We pass them all because some day we might generalize, but here we 
+% We pass them all because some day we might generalize, but here we
 % check that they're good.
 
-% We assume that the target is at 0,0, check 
-targetC = 0; 
-targetM = 0; 
-sigma = 1; 
-if (targetC ~= 0 || targetM ~= 0)
- %   error('We baked in that the target is at 0,0, but it is not');
+% We assume that the target is at 0,0, check
+numTolerance = 1e-7;
+if (abs(targetC) > numTolerance || abs(targetM) > numTolerance)
+    error('We baked in that the target is at 0,0, but it is not');
 end
 
 % We assume that sigma is 1, check
-if (sigma ~= 1)
-  %  error('Code assumes that sigma is 1');
+if (abs(sigma-1) > numTolerance)
+    error('Code assumes that sigma is 1');
 end
 
 % We assume that my1 is 0 and cy2 is 0, check
@@ -113,7 +111,7 @@ elseif (w == 1)
     w = 0.9999;
 end
 
-%% Compute distribution of distances (over trials) of competitor y1 
+%% Compute distribution of distances (over trials) of competitor y1
 %
 % We can get the probability distribution of the first distance by using
 % the pdf of the non-central chi2 distribution.  We count on the fact that
@@ -147,7 +145,7 @@ meanDistance1 = sqrt(delta1);
 % of.
 %
 % Note that the lenght of distance y1 is the same as the distance between y1
-% and the target, because we force the target to be at the origin.  
+% and the target, because we force the target to be at the origin.
 rangeValue = 6;
 nSampleValues = 1000;
 minDistance1 = max([0 meanDistance1-rangeValue]);
@@ -194,7 +192,7 @@ end
 % variance is in fact the expected squared value when the mean is 0.  These
 % facts allow us to draw a right triangle with hypotonuese corresponding to
 % the expected distance and rise corresponding to 1.  Then we can compute the
-% squared value of the run using Pythagoreus.  
+% squared value of the run using Pythagoreus.
 %
 % Then, we shrink the run by w and the rise by (1-w) and compute the distance
 % of the hypotenuse after the shrinking.  Taking the ratio of this distance
@@ -229,7 +227,7 @@ if (PLOTS)
     plotFigure2 = figure; clf; hold on
     plot(distancesSquared2,probForEachValueOf2,'r','LineWidth',2);
     xlabel('Distance2')
-    ylabel('Probability');  
+    ylabel('Probability');
 end
 if (abs(totalProb2 - 1) > 1e-2)
     error('Total probability that distance2 has a distance is not close enough to 1');
@@ -271,7 +269,7 @@ if (PLOTS)
 end
 
 % Now we just need to take the expected value of the quantity we just
-% computed, over the values of distanceSquared1, and we already have 
+% computed, over the values of distanceSquared1, and we already have
 % these probabilities from our work above.  So we get our desired
 % probability!
 p = sum(probForEachValueOf1 .* p1LessThan2ForEachValueOf1);
