@@ -125,7 +125,7 @@ for k1 = 1%:length(trySpacing)
             % Compute log likelihood for this solution.  Keep track of the best
             % solution that comes out of the multiple starting points.
             % Save this solution if it's better than the current best.
-            [materialPositions, colorPositions, sigma, w] = ColorMaterialModelXToParams(x); 
+            [materialPositions, colorPositions, sigma, w] = ColorMaterialModelXToParams(x, params); 
             temp = ColorMaterialModelComputeLogLikelihood(thePairs,theResponses, nTrialsPerPair, materialPositions, colorPositions, targetIndex, w, sigma);
             if (temp > maxLogLikely)
                 maxLogLikely = temp;
