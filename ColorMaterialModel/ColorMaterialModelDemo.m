@@ -1,13 +1,13 @@
 % ColorMaterialModelDemo.m
 %
-% Demonstrates color material MLDS model itting procedure for a data set.
+% Demonstrates color material MLDS model fitting procedure for a data set.
 % Initially used as a test bed for testing and improving search algorithm.
 %
 % The work is done by other routines in this folder. 
 %
 % Requires optimization toolbox.
 %
-% 11/18/16  ar  Wrote from selection model version
+% 11/18/16  ar  Wrote from color selection model version
 
 %% Initialize and parameter set
 clear ; close all;
@@ -16,6 +16,7 @@ saveFig = 0;
 
 %% We can use simulated data (DEMO == true) or some real data (DEMO == false)
 if (DEMO)
+    
     % Make a stimulus list and set underlying parameters.
     targetM = 0; 
     targetC = 0; 
@@ -30,7 +31,6 @@ if (DEMO)
     for i = 1:length(cDistances)   
         stimuliC = [stimuliC, {[cDistances(i), targetM]}];
     end
-    
     % These are the color matches that vary in material
     for i = 1:length(mDistances)
         stimuliM = [stimuliM, {[targetC, mDistances(i)]}];
@@ -39,16 +39,15 @@ if (DEMO)
     % Simulate the data
     %
     % Initialize the response structure
-    cIndex = 1;
+    cIndex = 1; 
     mIndex = 2;
     nBlocks = 24;
     response  = zeros(length(cDistances),length(mDistances));
     pairIndices = []; 
-    pairSpecs = []; 
     
     % Loop over blocks and stimulus pairs and simulate responses
     %
-    % We pair each color stimulus with each material stimulus
+    % We pair each color-difference stimulus with each material-difference stimulus
     for b = 1:nBlocks
         for whichColor = 1:length(cDistances)
             for whichMaterial = 1:length(mDistances)
@@ -70,7 +69,7 @@ if (DEMO)
                 % Note that the first competitor passed is always a color
                 % match that differs in material. so the response1 == 1
                 % means that the color match was chosen
-                response1(whichColor,whichMaterial) = ColorMaterialModelSimulateResponse(targetC, targetM, pair{1}(cIndex), pair{2}(cIndex), pair{1}(mIndex), pair{2}(mIndex), sigma, w);
+                response1(whichColor,whichMaterial) = ColorMaterialModelSimulateResponse(targetC, targetM, pair{1}(cIndex), pair{2}(cIndex), pair{1}(mIndex), pair{2}(mIndex), w, sigma);
             end
         end
         

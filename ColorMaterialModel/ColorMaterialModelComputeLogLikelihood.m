@@ -1,5 +1,5 @@
-function [logLikely, predictedResponses] = ColorMaterialModelComputeLogLikelihood(thePairs,theResponses,nTrials, colorPositions,materialPositions, targetIndex, w, sigma)
-% function [logLikely, predictedResponses] = ColorMaterialModelComputeLogLikelihood(thePairs,theResponses,nTrials,colorPositions,materialPositions, targetIndex, w, sigma)
+function [logLikely, predictedResponses] = ColorMaterialModelComputeLogLikelihood(thePairs,theResponses,nTrials, materialPositions, colorPositions,targetIndex, w, sigma)
+% function [logLikely, predictedResponses] = ColorMaterialModelComputeLogLikelihood(thePairs,theResponses,nTrials,materialPositions, colorPositions,targetIndex, w, sigma)
 %
 % Computes cummulative log likelihood and predicted responses for a current weights and positions.
 %   Input:
@@ -7,8 +7,8 @@ function [logLikely, predictedResponses] = ColorMaterialModelComputeLogLikelihoo
 %       theResponses - set of responses for this pair (number of times first
 %                      competitor is chosen.
 %       nTrials      - total number of trials run.
-%       colorPositions - current inferred position for the competitors on the color axis (material matches).
 %       materialPositions - current inferred position for the competitors on the material axis (color matches).
+%       colorPositions - current inferred position for the competitors on the color axis (material matches).
 %       sigma -        fixed standard deviation
 %          w  -        current weight(s) for color/material axes.
 %
@@ -26,7 +26,7 @@ my2 = 0;
 logLikely = 0;
 for i = 1:nPairs
     % p = ColorMaterialModelComputeProb(targetC,targetM, cy1,cy2,my1, my2, sigma, w)
-    predictedResponses(i) = ColorMaterialModelComputeProb(colorPositions(targetIndex),materialPositions(targetIndex), cy1,colorPositions(thePairs(i)), materialPositions(thePairs(i)),my2, w, sigma);
+    predictedResponses(i) = ColorMaterialModelComputeProb(materialPositions(targetIndex), colorPositions(targetIndex), cy1, materialPositions(thePairs(i)), colorPositions(thePairs(i)),my2, w, sigma);
     if (isnan(predictedResponses(i)))
         error('Returned probability is NaN');
     end

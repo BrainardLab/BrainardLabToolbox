@@ -1,7 +1,44 @@
 function [x, logLikelyFit, predictedResponses] = ColorMaterialModelMain(thePairs,theResponses,nTrialsPerPair)
-% function [targetCompetitorFit, logLikelyFit, predictedResponses] = ColorMaterialModelMain(thePairs,theResponses,nTrialsPerPair)
+% function [x, logLikelyFit, predictedResponses] = ColorMaterialModelMain(thePairs,theResponses,nTrialsPerPair)
 
-% NEED TO ADD DEFINITIONS OF IN AND OUT PARAMS.
+% This is the main fitting/search routine in the model. 
+% It takes the data (from experiment or simulation) and returns inferred position of the
+% competitors on color and material dimension as well as the weigths. 
+% WARNING: It required loading a structure that specifies hardcoded experimental
+% parameters. Here we load ExampleStructure.mat which is identical 
+% to the structure of our Experiment1. 
+% Input: 
+%   thePairs -            competitor pairs. 
+%   theResponses -        set of responses for this pair (number of times
+%                         color match is chosen. 
+%   nTrialsPerPair -      total number of trials run. Vector of same size as theResponses.
+%
+% Output: 
+%   x -                   returned parameters. needs to be converted using xToParams routine to get the positions and weigths.
+%   logLikelyFit -        log likelihood of the fit.
+%   predictedResponses -  responses predicted from the fit.
+
+%% Load and unwrap parameter structure which contains all fixed parameters. 
+load('ExampleStructure.mat')
+targetPosition = params.targetPosition;
+targetIndex = params.targetIndex; % WE SHOULD NOT HAVE THIS ONE. 
+targetIndexColor = params.targetIndexColor; % target position in the color position vector.
+targetIndexMaterial = params.targetIndexMaterial; % target position in the material position vector.
+numberOfColorCompetitors = params.numberOfColorCompetitors; 
+numberOfMaterialCompetitors = params.numberOfMaterialCompetitors; 
+
+% NEED TO ALLOW FOR POSSIBLY DIFFERENT NUMBER OF POSITIVE AND NEGATIVE
+% COMPETITORS FOR COLOR AND MATERIAL
+numberOfCompetitorsPositive = params.numberOfCompetitorsPositive;
+numberOfCompetitorsNegative = params.numberOfCompetitorsNegative;
+competitorsRangePositive = params.competitorsRangePositive;
+competitorsRangeNegative = params.competitorsRangeNegative;
+
+% Standard deviation for the solution. This determines the scale of the solution.
+sigma = params.sigma;
+% Determine minimum size of interval between the color and material position elements relative to sigma.
+% That is, the minimum spacing will be sigma/sigmaFactor.
+sigmaFactor = params.sigmaFactor;
 
 %% Run some sanity checks.
 %
@@ -16,56 +53,30 @@ if (any(theResponses > nTrialsPerPair))
     error('An entry of input theResponses exceeds passed nTrialsPerPair.  No good!');
 end
 
-%% Set fixed parameters
-%
-% Standard deviation for the solution. This determines the scale of the solution.
-sigma = 1;
-
-% Determine minimum size of interval between the color and material position elements relative to sigma.
-% That is, the minimum spacing will be sigma/sigmaFactor.
-sigmaFactor = 4;
-
-% Design structure
-%stimulusDesign.nColor = x;
-
 %% Enforce the spacing between competitors. This needs to be done in color and material space, separately. 
-%
-% We need to append two columns for parameter weight and sigma, that are not going
+% Plus, for each we need to append two columns for parameter weight and sigma, that are not going
 % to be modified in this way. 
-numberOfColorMatchCompetitors = max(thePairs(:)); 
-numberOfMaterialMatchCompetitors = max(thePairs(:)); 
-
-AColorMatch = zeros(numberOfColorMatchCompetitors-1,numberOfColorMatchCompetitors);
-for i = 1:numberOfColorMatchCompetitors-1
-        AColorMatch(i,i) = 1;
-        AColorMatch(i,i+1) = -1;
+AMaterialPositions = zeros(numberOfMaterialCompetitors-1,numberOfMaterialCompetitors);
+for i = 1:numberOfMaterialCompetitors-1
+    AMaterialPositions(i,i) = 1;
+    AMaterialPositions(i,i+1) = -1;
 end
-AColorMatchIgnore = zeros(size(AColorMatch));
-bColorMatch = -sigma/sigmaFactor*ones(numberOfColorMatchCompetitors-1,1);
+AMaterialPositionsIgnore = zeros(size(AMaterialPositions));
+bMaterialPositions = -sigma/sigmaFactor*ones(numberOfMaterialCompetitors-1,1);
 
-AMaterialMatch = zeros(numberOfMaterialMatchCompetitors-1,numberOfMaterialMatchCompetitors);
-for i = 1:numberOfMaterialMatchCompetitors-1
-    AMaterialMatch (i,i) = 1;
-    AMaterialMatch (i,i+1) = -1;
+AColorPositions = zeros(numberOfColorCompetitors-1,numberOfColorCompetitors);
+for i = 1:numberOfColorCompetitors-1
+        AColorPositions(i,i) = 1;
+        AColorPositions(i,i+1) = -1;
 end
-AMaterialMatchIgnore = zeros(size(AMaterialMatch));
-bMaterialMatch = -sigma/sigmaFactor*ones(numberOfMaterialMatchCompetitors-1,1);
+AColorPositionsIgnore = zeros(size(AColorPositions));
+bColorPositions = -sigma/sigmaFactor*ones(numberOfColorCompetitors-1,1);
 
-AColorMatchFull = [AMaterialMatchIgnore,  AColorMatch, zeros(size(AColorMatch(:,1))),  zeros(size(AColorMatch(:,1)))]; 
-AMaterialMatchFull = [AMaterialMatch,  AColorMatchIgnore, zeros(size(AMaterialMatch(:,1))),  zeros(size(AMaterialMatch(:,1)))]; 
-A = [AColorMatchFull ; AMaterialMatchFull];
-b = [bColorMatch ; bMaterialMatch];
+AMaterialPositionsFull = [AColorPositionsIgnore, AMaterialPositions,  zeros(size(AMaterialPositions(:,1))),  zeros(size(AMaterialPositions(:,1)))]; 
+AColorPositionsFull = [AColorPositions, AMaterialPositionsIgnore, zeros(size(AColorPositions(:,1))),  zeros(size(AColorPositions(:,1)))]; 
 
-%% Get some values we need to index into the parameters vector in ways we
-% will need.
-targetPosition = 0;
-targetIndex = 4; % this is going to be target index in the competitor space.
-targetIndexColor = 4; % in the vector of parameters, this is the position for target on color dimension.
-targetIndexMaterial = 11; % in the vector of parameters, this is the positino for target on material dimension.
-competitorsRangePositive = [1 3];
-competitorsRangeNegative = [-3 -1];
-numberOfCompetitorsPositive = 3;
-numberOfCompetitorsNegative = 3;
+A = [AMaterialPositionsFull; AColorPositionsFull];
+b = [bMaterialPositions; bColorPositions];
 
 %% Set spacings for initializing the search.
 % Try different ones in the hope that we thus avoid local minima in
@@ -74,8 +85,8 @@ numberOfCompetitorsNegative = 3;
 % Note that these spacings are hard coded. We have used the same spacing as in the color selection experiment.
 % We will try the same spacings for both color and material space. As for MLDS-CS: it is possible that there would be a
 % cleverer thing to do here.
-trySpacing = [0.5 1 2];
-tryWeights = [0.1 0.5 0.8];
+trySpacing = [1 2 0.5];
+tryWeights = [0.5 0.8 0.1];
 
 % Standard fmincon options
 options = optimset('fmincon');
@@ -87,45 +98,45 @@ options = optimset(options,'Diagnostics','off','Display','off','LargeScale','off
 % There are two loops. One sets the positions of the competitors
 % in the solution in the color dimension, the other tries different initial spacings for material dimension.
 maxLogLikely = -Inf;
-for k1 = 1:length(trySpacing)
-    for k2 = 1:length(trySpacing)
-        for k3 = 1:size(tryWeights)
+for k1 = 1%:length(trySpacing)
+    for k2 = 1%:length(trySpacing)
+        for k3 = 1%:size(tryWeights)
             % Choose initial competitor positions based on current spacing to try.
-            initialCompetitorPositionsColor = [trySpacing(k1)*linspace(competitorsRangeNegative(1),competitorsRangeNegative(2), numberOfCompetitorsNegative),targetPosition,trySpacing(k1)*linspace(competitorsRangePositive(1),competitorsRangePositive(2), numberOfCompetitorsPositive)];
-            initialCompetitorPositionsMaterial = [trySpacing(k2)*linspace(competitorsRangeNegative(1),competitorsRangeNegative(2), numberOfCompetitorsNegative),targetPosition,trySpacing(k2)*linspace(competitorsRangePositive(1),competitorsRangePositive(2), numberOfCompetitorsPositive)];
+            initialCompetitorPositionsMaterial = [trySpacing(k1)*linspace(competitorsRangeNegative(1),competitorsRangeNegative(2), numberOfCompetitorsNegative),targetPosition,trySpacing(k1)*linspace(competitorsRangePositive(1),competitorsRangePositive(2), numberOfCompetitorsPositive)];
+            initialCompetitorPositionsColor = [trySpacing(k2)*linspace(competitorsRangeNegative(1),competitorsRangeNegative(2), numberOfCompetitorsNegative),targetPosition,trySpacing(k2)*linspace(competitorsRangePositive(1),competitorsRangePositive(2), numberOfCompetitorsPositive)];
             initialParams = [initialCompetitorPositionsMaterial initialCompetitorPositionsColor tryWeights(k3) sigma];
             
             % Get reasonable upper and lower bound. These are most easily computed from the initial parameters.
             % For now we just say - go anywhere (+/-100 times the maximum value in the intial parameters);
             vlb = -100*max(abs(initialParams))*ones(size(initialParams));
             vub = 100*max(abs(initialParams))*ones(size(initialParams));
-            vlb(targetIndexColor) = 0;
             vlb(targetIndexMaterial) = 0;
-            vub(targetIndexColor) = vlb(targetIndexColor); % fix search for target position at 0.
-            vub(targetIndexMaterial) = vlb(targetIndexMaterial); % fix search for target position at 0.
-            vlb(end) = 1; % fix position of the sigma. 
-            vub(end) = 1; 
-            vub(end-1) = 1; % limit w
-            vlb(end-1) = 0; 
+            vub(targetIndexColor) = 0; % fix search for target position at 0.
+            vlb(targetIndexColor) = 0;
+            vub(targetIndexMaterial) = 0; % fix search for target position at 0.
+            vlb(end-1) = 0; % limit variation in w. 
+            vub(end-1) = 1; 
+            vub(end) = 1; % fix sigma to 1. 
+            vlb(end) = 1; 
             
             % Run the search
-            fitParams = fmincon(@(x)FitColorMaterialScalingFun(x, thePairs, theResponses, nTrialsPerPair, targetIndex),initialParams,A,b,[],[],vlb,vub,[],options);
+            x = fmincon(@(x)FitColorMaterialScalingFun(x, thePairs, theResponses, nTrialsPerPair, params),initialParams,A,b,[],[],vlb,vub,[],options);
             
             % Compute log likelihood for this solution.  Keep track of the best
             % solution that comes out of the multiple starting points.
             % Save this solution if it's better than the current best.
-            temp = ColorMaterialModelComputeLogLikelihood(thePairs,theResponses, nTrialsPerPair, colorPositions,materialPositions, targetIndex, w, sigma);
+            [materialPositions, colorPositions, sigma, w] = ColorMaterialModelXToParams(x); 
+            temp = ColorMaterialModelComputeLogLikelihood(thePairs,theResponses, nTrialsPerPair, materialPositions, colorPositions, targetIndex, w, sigma);
             if (temp > maxLogLikely)
                 maxLogLikely = temp;
-                [logLikelyFit,predictedResponses] = ColorMaterialComputeLogLikelyhood(thePairs,theResponses,nTrialsPerPair,fitTargetPosition,fitCompetitorPositions, w, sigma);
-                targetCompetitorFit = [fitTargetPosition, fitCompetitorPositions];
+                [logLikelyFit, predictedResponses] = ColorMaterialModelComputeLogLikelihood(thePairs,theResponses,nTrialsPerPair, materialPositions, colorPositions,targetIndex, w, sigma);
             end
         end
     end
 end
 end
 
-function f = FitColorMaterialScalingFun(x, thePairs,theResponses,nTrials, targetIndex)
+function f = FitColorMaterialScalingFun(x, thePairs,theResponses,nTrials, params)
 %function f = FitColorMaterialScalingFun(x, thePairs,theResponses,nTrials, targetIndex)
 %
 % The error function we are minimizing in the numerical search.
@@ -147,15 +158,11 @@ if (any(isnan(x)))
 end
 
 % We need to convert X to params here
-materialPositions = x(1:7);
-colorPositions = x(8:14);
-w = x(end-1);
-sigma = x(end);
-
-
+[colorPositions, materialPositions,w,sigma] = ColorMaterialModelXToParams(x, params); 
+           
 % Compute negative log likelyhood of the current solution
 %           ColorMaterialModelComputeLogLikelihood(thePairs,theResponses,nTrials, colorPositions,materialPositions, targetIndex, w, sigma)
-logLikely = ColorMaterialModelComputeLogLikelihood(thePairs,theResponses,nTrials, colorPositions,materialPositions, targetIndex, w, sigma);
+logLikely = ColorMaterialModelComputeLogLikelihood(thePairs,theResponses,nTrials, colorPositions,materialPositions, params.targetIndex, w, sigma);
 f = -logLikely;
 
 end

@@ -102,7 +102,7 @@ if (cy1 ~= 0 || my2 ~= 0)
 end
 
 % Check w and also avoid numerical problems for very small w or (1-w)
-if (w < 0 || w > 1)
+if ~(w > -numTolerance || abs(w-1)  > numTolerance)
     error('w must be between 0 and 1 inclusive');
 end
 if (w == 0)
