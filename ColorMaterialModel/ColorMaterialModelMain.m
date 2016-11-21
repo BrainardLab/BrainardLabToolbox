@@ -36,6 +36,7 @@ competitorsRangeNegative = params.competitorsRangeNegative;
 
 % Standard deviation for the solution. This determines the scale of the solution.
 sigma = params.sigma;
+
 % Determine minimum size of interval between the color and material position elements relative to sigma.
 % That is, the minimum spacing will be sigma/sigmaFactor.
 sigmaFactor = params.sigmaFactor;
@@ -85,12 +86,14 @@ b = [bMaterialPositions; bColorPositions];
 % Note that these spacings are hard coded. We have used the same spacing as in the color selection experiment.
 % We will try the same spacings for both color and material space. As for MLDS-CS: it is possible that there would be a
 % cleverer thing to do here.
-trySpacing = [1 2 0.5];
+% trySpacing = [1 2 0.5];
+% tryWeights = [0.5 0.8 0.1];
+trySpacing = [0.5];
 tryWeights = [0.5 0.8 0.1];
 
 % Standard fmincon options
 options = optimset('fmincon');
-options = optimset(options,'Diagnostics','off','Display','off','LargeScale','off','Algorithm','active-set');
+options = optimset(options,'Diagnostics','off','Display','iter','LargeScale','off','Algorithm','active-set','MaxIter',300);
 
 %% Search
 %
@@ -104,7 +107,7 @@ for k1 = 1%:length(trySpacing)
             % Choose initial competitor positions based on current spacing to try.
             initialCompetitorPositionsMaterial = [trySpacing(k1)*linspace(competitorsRangeNegative(1),competitorsRangeNegative(2), numberOfCompetitorsNegative),targetPosition,trySpacing(k1)*linspace(competitorsRangePositive(1),competitorsRangePositive(2), numberOfCompetitorsPositive)];
             initialCompetitorPositionsColor = [trySpacing(k2)*linspace(competitorsRangeNegative(1),competitorsRangeNegative(2), numberOfCompetitorsNegative),targetPosition,trySpacing(k2)*linspace(competitorsRangePositive(1),competitorsRangePositive(2), numberOfCompetitorsPositive)];
-            initialParams = [initialCompetitorPositionsMaterial initialCompetitorPositionsColor tryWeights(k3) sigma];
+            initialParams = [initialCompetitorPositionsMaterial initialCompetitorPositionsColor tryWeights(k3) sigma]';
             
             % Get reasonable upper and lower bound. These are most easily computed from the initial parameters.
             % For now we just say - go anywhere (+/-100 times the maximum value in the intial parameters);
@@ -125,7 +128,7 @@ for k1 = 1%:length(trySpacing)
             % Compute log likelihood for this solution.  Keep track of the best
             % solution that comes out of the multiple starting points.
             % Save this solution if it's better than the current best.
-            [materialPositions, colorPositions, sigma, w] = ColorMaterialModelXToParams(x, params); 
+            [materialPositions, colorPositions,w,sigma] = ColorMaterialModelXToParams(x, params); 
             temp = ColorMaterialModelComputeLogLikelihood(thePairs,theResponses, nTrialsPerPair, materialPositions, colorPositions, targetIndex, w, sigma);
             if (temp > maxLogLikely)
                 maxLogLikely = temp;

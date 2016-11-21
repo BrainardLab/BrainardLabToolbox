@@ -20,20 +20,20 @@ if (DEMO)
     % Make a stimulus list and set underlying parameters.
     targetM = 0; 
     targetC = 0; 
-    stimuliC = [];
-    stimuliM = [];
-    cDistances = [-3, -2, -1, 0, 1, 2, 3];
-    mDistances = [-3, -2, -1, 0, 1, 2, 3];
+    stimuliMaterialMatch = [];
+    stimuliColorMatch = [];
+    cDistances = 0.5*[-3, -2, -1, 0, 1, 2, 3];
+    mDistances = 0.5*[-3, -2, -1, 0, 1, 2, 3];
     sigma = 1;
     w = 0.5; 
     
     % These are the material matches that vary in color.
     for i = 1:length(cDistances)   
-        stimuliC = [stimuliC, {[cDistances(i), targetM]}];
+        stimuliMaterialMatch = [stimuliMaterialMatch, {[cDistances(i), targetM]}];
     end
     % These are the color matches that vary in material
     for i = 1:length(mDistances)
-        stimuliM = [stimuliM, {[targetC, mDistances(i)]}];
+        stimuliColorMatch = [stimuliColorMatch, {[targetC, mDistances(i)]}];
     end
     
     % Simulate the data
@@ -49,18 +49,18 @@ if (DEMO)
     %
     % We pair each color-difference stimulus with each material-difference stimulus
     for b = 1:nBlocks
-        for whichColor = 1:length(cDistances)
-            for whichMaterial = 1:length(mDistances)
+        for whichColorOfTheMaterialMatch = 1:length(cDistances)
+            for whichMaterialOfTheColorMatch = 1:length(mDistances)
                 clear pair
-                pair = {stimuliM{whichMaterial},stimuliC{whichColor}};
+                pair = {stimuliColorMatch{whichMaterialOfTheColorMatch},stimuliMaterialMatch{whichColorOfTheMaterialMatch}};
                 
                 % Set up matrices of indices that will allow us to relate the
                 % stimuli and the reponse matrix.
                 % We only need to do this on the first block,
                 % since it is the same on each block in this simulation.
                 if b == 1
-                    pairColorMatrix(whichColor,whichMaterial) = whichColor;
-                    pairMaterialMatrix(whichColor,whichMaterial) = whichMaterial;
+                    pairColorMatrix(whichColorOfTheMaterialMatch,whichMaterialOfTheColorMatch) = whichColorOfTheMaterialMatch;
+                    pairMaterialMatrix(whichColorOfTheMaterialMatch,whichMaterialOfTheColorMatch) = whichMaterialOfTheColorMatch;
                 end
                 
                 % Simulate out what the response is for this pair in this
@@ -69,7 +69,7 @@ if (DEMO)
                 % Note that the first competitor passed is always a color
                 % match that differs in material. so the response1 == 1
                 % means that the color match was chosen
-                response1(whichColor,whichMaterial) = ColorMaterialModelSimulateResponse(targetC, targetM, pair{1}(cIndex), pair{2}(cIndex), pair{1}(mIndex), pair{2}(mIndex), w, sigma);
+                response1(whichColorOfTheMaterialMatch,whichMaterialOfTheColorMatch) = ColorMaterialModelSimulateResponse(targetC, targetM, pair{1}(cIndex), pair{2}(cIndex), pair{1}(mIndex), pair{2}(mIndex), w, sigma);
             end
         end
         
