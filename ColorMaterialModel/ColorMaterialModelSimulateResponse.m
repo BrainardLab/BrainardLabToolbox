@@ -59,11 +59,11 @@ if (DO_APPROX)
     mdiff2 = (my2-targetM);
       
     % Compute squared distance and compare
-    cummulativeDiff12 = cdiff1^2 + mdiff1^2;
-    cummulativeDiff22 = cdiff2^2 + mdiff2^2;
+    cummulativeDiff1= cdiff1^2 + mdiff1^2;
+    cummulativeDiff2 = cdiff2^2 + mdiff2^2;
     
     % CLARIFICATION
-    if ((w/(1-w))^2*cummulativeDiff12-cummulativeDiff22 <= 0)
+    if ((w/(1-w))^2*cummulativeDiff1-cummulativeDiff2 <= 0)
         response = 1;
     else
         response = 0;
@@ -76,9 +76,9 @@ else
     mdiff2 = (1-w)*(my2-targetM);
     
     % Compute squared distance and compare
-    cummulativeDiff12 = cdiff1^2 + mdiff1^2;
-    cummulativeDiff22 = cdiff2^2 + mdiff2^2;
-    if (cummulativeDiff12-cummulativeDiff22 <= 0)
+    cummulativeDiff1 = cdiff1^2 + mdiff1^2;
+    cummulativeDiff2 = cdiff2^2 + mdiff2^2;
+    if (cummulativeDiff1-cummulativeDiff2 > 0)
         response = 1;
     else
         response = 0;

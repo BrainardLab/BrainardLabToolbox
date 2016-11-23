@@ -22,8 +22,9 @@ if (DEMO)
     targetC = 0; 
     stimuliMaterialMatch = [];
     stimuliColorMatch = [];
-    cDistances = 0.5*[-3, -2, -1, 0, 1, 2, 3];
-    mDistances = 0.5*[-3, -2, -1, 0, 1, 2, 3];
+    scalePositions = 1; % scaling factor for input positions (we're trying different ones to adjust our noise of 1). 
+    cDistances = scalePositions*[-3, -2, -1, 0, 1, 2, 3];
+    mDistances = scalePositions*[-3, -2, -1, 0, 1, 2, 3];
     sigma = 1;
     w = 0.5; 
     
@@ -43,6 +44,8 @@ if (DEMO)
     mIndex = 2;
     nBlocks = 24;
     response  = zeros(length(cDistances),length(mDistances));
+    computedPs  = zeros(length(cDistances),length(mDistances));
+    
     pairIndices = []; 
     
     % Loop over blocks and stimulus pairs and simulate responses
@@ -78,8 +81,37 @@ if (DEMO)
         clear response1
     end
     
+   % compute response probabilities
+    responseProbabilities = response./nBlocks;
+   
+    % Plot fits for each curve.
+    % Fit each data run separately
+    % CURRENTLY COMMENTED OUT, UNTIL THESE FUNCTIONS ARE CLEANED UP
+    % COMMENTED AND MOVED TO THE TOOLBOX
+%     for i = 1:size(response,2);
+%         if i == 4
+%             fixPoint = 1;
+%         else
+%             fixPoint = 0;
+%         end
+%         [theSmoothPreds(:,i), theSmoothVals, ~,~] = ...
+%     %        getValuesFromFitsCM(responseProbabilities(:,i)',cDistances, fixPoint);
+%     end
+%     plotCMFitsSimForMODEL(theSmoothVals, theSmoothPreds, cDistances, responseProbabilities)
+    
+    % Use identical loop to compute probabilities, based on our function. 
+    for whichColorOfTheMaterialMatch = 1:length(cDistances)
+        for whichMaterialOfTheColorMatch = 1:length(mDistances)
+            clear pair
+            pair = {stimuliColorMatch{whichMaterialOfTheColorMatch},stimuliMaterialMatch{whichColorOfTheMaterialMatch}};
+            % compute probabilities
+            computedPs(whichColorOfTheMaterialMatch,whichMaterialOfTheColorMatch) = ColorMaterialModelComputeProb(targetC,targetM, pair{1}(cIndex), pair{2}(cIndex), pair{1}(mIndex), pair{2}(mIndex), w, sigma);
+        end
+    end
+        
     % String the response matrix as well as the pairMatrices out as vectors. 
     theResponses = response(:);
+    computedPs = computedPs(:);
     pairIndices(:,1) = pairColorMatrix(:);
     pairIndices(:,2) = pairMaterialMatrix(:);
     
@@ -87,7 +119,8 @@ if (DEMO)
     % Number of columns here should match the number of columns in
     % someData.
     nTrials = nBlocks*ones(size(theResponses)); 
-    
+    logLikely = ColorMaterialModelComputeLogLikelihood(pairIndices,theResponses,nTrials, cDistances,mDistances, 4, w, sigma);
+    fprintf('Initial log likelihood %0.2f.\n', logLikely); 
 % Here you could enter some real data and work on figuring out why a model
 % fit was going awry.
 else
@@ -105,4 +138,18 @@ end
 % Need to unpack this here!
 [returnParams, logLikelyFit, predictedResponses] = ColorMaterialModelMain(pairIndices,theResponses,nTrials); %#ok<SAGROW>
 
+%% Plot measured vs. predicted probabilities 
+theDataProb = theResponses./nTrials; 
 
+figure; hold on
+plot(theDataProb,predictedResponses,'ro','MarkerSize',12,'MarkerFaceColor','r');
+plot(theDataProb,computedPs,'bo','MarkerSize',12,'MarkerFaceColor','b');
+
+plot([0 1],[0 1],'k');
+axis('square')
+axis([0 1 0 1]);
+set(gca,  'FontSize', 18);
+xlabel('Measured p');
+ylabel('Predicted p');
+set(gca, 'xTick', [0, 0.5, 1]);
+set(gca, 'yTick', [0, 0.5, 1]);

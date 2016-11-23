@@ -96,7 +96,7 @@ if (abs(sigma-1) > numTolerance)
     error('Code assumes that sigma is 1');
 end
 
-% We assume that my1 is 0 and cy2 is 0, check
+% We assume that cy1 is 0 and my2 is 0, check
 if (cy1 ~= 0 || my2 ~= 0)
     error('Assumption that competitors lie on the axes is violated.');
 end
@@ -163,7 +163,7 @@ if (PLOTS)
     xlabel('Distance of y1')
     ylabel('Probability');
 end
-if (abs(totalProb1 - 1) > 1e-2)
+if (abs(totalProb1 - 1) > 1e-1)
     error('Total probability that distance1 has a distance is not close enough to 1');
 end
 
@@ -229,7 +229,7 @@ if (PLOTS)
     xlabel('Distance2')
     ylabel('Probability');
 end
-if (abs(totalProb2 - 1) > 1e-2)
+if (abs(totalProb2 - 1) > 1e-1)
     error('Total probability that distance2 has a distance is not close enough to 1');
 end
 expectedDistancesSquared2 = sum(probForEachValueOf2.*distancesSquared2);
@@ -260,7 +260,9 @@ adjustedOneMinusW = sqrt(expectedAdjustedDistancesSquared2 / expectedDistancesSq
 % distancesSquared2 with respect to the quantity on the left.  And we know
 % the cdf of distanceSquared2 since it is given by the non-central chi2
 % with the distanceSquared2 parameters.
+%p1LessThan2ForEachValueOf1 = 1 - ncx2cdf((adjustedW/adjustedOneMinusW)^2*distancesSquared1,2,delta2);
 p1LessThan2ForEachValueOf1 = 1 - ncx2cdf((adjustedW/adjustedOneMinusW)^2*distancesSquared1,2,delta2);
+
 if (PLOTS)
     plotFigure3 = figure; clf; hold on
     plot(distancesSquared1,p1LessThan2ForEachValueOf1,'r','LineWidth',2);
