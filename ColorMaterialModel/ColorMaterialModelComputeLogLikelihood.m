@@ -7,8 +7,8 @@ function [logLikely, predictedResponses] = ColorMaterialModelComputeLogLikelihoo
 %       theResponses - set of responses for this pair (number of times first
 %                      competitor is chosen.
 %       nTrials      - total number of trials run.
-%       materialPositions - current inferred position for the competitors on the material axis (color matches).
-%       colorPositions - current inferred position for the competitors on the color axis (material matches).
+%       materialPositions - current inferred position for color matches on the material axis.
+%       colorPositions - current inferred position for material matches on the color axis.
 %       sigma -        fixed standard deviation
 %          w  -        current weight(s) for color/material axes.
 %
@@ -21,12 +21,13 @@ function [logLikely, predictedResponses] = ColorMaterialModelComputeLogLikelihoo
 %               accordingly.
 
 nPairs = size(thePairs,1);
-cy1 = 0;
-my2 = 0;
+colorMatchColorCoord = colorPositions(targetIndex);
+materialMatchMaterialCoord = materialPositions(targetIndex);
+
 logLikely = 0;
 for i = 1:nPairs
-    % p = ColorMaterialModelComputeProb(targetC,targetM, cy1,cy2,my1, my2, sigma, w)
-    predictedResponses(i) = ColorMaterialModelComputeProb(materialPositions(targetIndex), colorPositions(targetIndex), cy1, materialPositions(thePairs(i)), colorPositions(thePairs(i)),my2, w, sigma);
+    predictedResponses(i) = ColorMaterialModelComputeProb(materialPositions(targetIndex), colorPositions(targetIndex), colorMatchColorCoord, materialPositions(thePairs(i)), colorPositions(thePairs(i)),materialMatchMaterialCoord, w, sigma);
+    % ColorMaterialModelComputeProb(targetColorCoord,targetMaterialCoord, colorMatchColorCoord,materialMatchColorCoord,colorMatchMatrialCoord, materialMatchMaterialCoord, w, sigma)
     if (isnan(predictedResponses(i)))
         error('Returned probability is NaN');
     end

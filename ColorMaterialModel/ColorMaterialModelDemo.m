@@ -18,23 +18,24 @@ saveFig = 0;
 if (DEMO)
     
     % Make a stimulus list and set underlying parameters.
-    targetM = 0; 
-    targetC = 0; 
+    targetMaterialCoord = 0; 
+    targetColorCoord = 0; 
     stimuliMaterialMatch = [];
     stimuliColorMatch = [];
     scalePositions = 1; % scaling factor for input positions (we're trying different ones to adjust our noise of 1). 
-    cDistances = scalePositions*[-3, -2, -1, 0, 1, 2, 3];
-    mDistances = scalePositions*[-3, -2, -1, 0, 1, 2, 3];
+    colorPositionsOfMaterialMatch = scalePositions*[-3, -2, -1, 0, 1, 2, 3];
+    materialPositionsOfColorMatch = scalePositions*[-3, -2, -1, 0, 1, 2, 3];
+    targetIndex = 1; 
     sigma = 1;
     w = 0.5; 
     
     % These are the material matches that vary in color.
-    for i = 1:length(cDistances)   
-        stimuliMaterialMatch = [stimuliMaterialMatch, {[cDistances(i), targetM]}];
+    for i = 1:length(colorPositionsOfMaterialMatch)   
+        stimuliMaterialMatch = [stimuliMaterialMatch, {[colorPositionsOfMaterialMatch(i), targetMaterialCoord]}];
     end
     % These are the color matches that vary in material
-    for i = 1:length(mDistances)
-        stimuliColorMatch = [stimuliColorMatch, {[targetC, mDistances(i)]}];
+    for i = 1:length(materialPositionsOfColorMatch)
+        stimuliColorMatch = [stimuliColorMatch, {[targetColorCoord, materialPositionsOfColorMatch(i)]}];
     end
     
     % Simulate the data
@@ -43,8 +44,8 @@ if (DEMO)
     cIndex = 1; 
     mIndex = 2;
     nBlocks = 24;
-    response  = zeros(length(cDistances),length(mDistances));
-    computedPs  = zeros(length(cDistances),length(mDistances));
+    response  = zeros(length(colorPositionsOfMaterialMatch),length(materialPositionsOfColorMatch));
+    computedPs  = zeros(length(colorPositionsOfMaterialMatch),length(materialPositionsOfColorMatch));
     
     pairIndices = []; 
     
@@ -52,8 +53,8 @@ if (DEMO)
     %
     % We pair each color-difference stimulus with each material-difference stimulus
     for b = 1:nBlocks
-        for whichColorOfTheMaterialMatch = 1:length(cDistances)
-            for whichMaterialOfTheColorMatch = 1:length(mDistances)
+        for whichColorOfTheMaterialMatch = 1:length(colorPositionsOfMaterialMatch)
+            for whichMaterialOfTheColorMatch = 1:length(materialPositionsOfColorMatch)
                 clear pair
                 pair = {stimuliColorMatch{whichMaterialOfTheColorMatch},stimuliMaterialMatch{whichColorOfTheMaterialMatch}};
                 
@@ -72,7 +73,7 @@ if (DEMO)
                 % Note that the first competitor passed is always a color
                 % match that differs in material. so the response1 == 1
                 % means that the color match was chosen
-                response1(whichColorOfTheMaterialMatch,whichMaterialOfTheColorMatch) = ColorMaterialModelSimulateResponse(targetC, targetM, pair{1}(cIndex), pair{2}(cIndex), pair{1}(mIndex), pair{2}(mIndex), w, sigma);
+                response1(whichColorOfTheMaterialMatch,whichMaterialOfTheColorMatch) = ColorMaterialModelSimulateResponse(targetColorCoord, targetMaterialCoord, pair{1}(cIndex), pair{2}(cIndex), pair{1}(mIndex), pair{2}(mIndex), w, sigma);
             end
         end
         
@@ -100,12 +101,12 @@ if (DEMO)
 %     plotCMFitsSimForMODEL(theSmoothVals, theSmoothPreds, cDistances, responseProbabilities)
     
     % Use identical loop to compute probabilities, based on our function. 
-    for whichColorOfTheMaterialMatch = 1:length(cDistances)
-        for whichMaterialOfTheColorMatch = 1:length(mDistances)
+    for whichColorOfTheMaterialMatch = 1:length(colorPositionsOfMaterialMatch)
+        for whichMaterialOfTheColorMatch = 1:length(materialPositionsOfColorMatch)
             clear pair
             pair = {stimuliColorMatch{whichMaterialOfTheColorMatch},stimuliMaterialMatch{whichColorOfTheMaterialMatch}};
             % compute probabilities
-            computedPs(whichColorOfTheMaterialMatch,whichMaterialOfTheColorMatch) = ColorMaterialModelComputeProb(targetC,targetM, pair{1}(cIndex), pair{2}(cIndex), pair{1}(mIndex), pair{2}(mIndex), w, sigma);
+            computedPs(whichColorOfTheMaterialMatch,whichMaterialOfTheColorMatch) = ColorMaterialModelComputeProb(targetColorCoord,targetMaterialCoord, pair{1}(cIndex), pair{2}(cIndex), pair{1}(mIndex), pair{2}(mIndex), w, sigma);
         end
     end
         
@@ -119,7 +120,8 @@ if (DEMO)
     % Number of columns here should match the number of columns in
     % someData.
     nTrials = nBlocks*ones(size(theResponses)); 
-    logLikely = ColorMaterialModelComputeLogLikelihood(pairIndices,theResponses,nTrials, cDistances,mDistances, 4, w, sigma);
+    logLikely = ColorMaterialModelComputeLogLikelihood(pairIndices,theResponses,nTrials, colorPositionsOfMaterialMatch,materialPositionsOfColorMatch, 4, w, sigma);
+    ColorMaterialModelComputeLogLikelihood(thePairs,theResponses,nTrials, materialPositions, colorPositions,targetIndex, w, sigma)
     fprintf('Initial log likelihood %0.2f.\n', logLikely); 
 % Here you could enter some real data and work on figuring out why a model
 % fit was going awry.

@@ -97,7 +97,7 @@ if (abs(sigma-1) > numTolerance)
 end
 
 % We assume that cy1 is 0 and my2 is 0, check
-if (colorMatchColorCoord ~= 0 || materialMatchMaterialCoord ~= 0)
+if (abs(colorMatchColorCoord) > numTolerance || abs(materialMatchMaterialCoord) > numTolerance)
     error('Assumption that competitors lie on the axes is violated.');
 end
 
