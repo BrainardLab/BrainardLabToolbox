@@ -1,5 +1,5 @@
-function response = ColorMaterialModelSimulateResponse(targetC, targetM, cy1, cy2,my1, my2, w, sigma)
-% function response = ColorMaterialModelSimulateResponse(targetC, targetM, cy1, cy2,my1, my2, w, sigma)
+function response = ColorMaterialModelSimulateResponse(targetColorCoord, targetMaterialCoord, colorMatchColorCoord, materialMatchColorCoord,colorMatchMaterialCoord, materialMatchMaterialCoord, w, sigma)
+% function response = ColorMaterialModelSimulateResponse(targetColorCoord, targetMaterialCoord, colorMatchColorCoord, materialMatchColorCoord,colorMatchMaterialCoord, materialMatchMaterialCoord, w, sigma)
 %
 % We simulate responses following the same experimental design as we have
 % in the actual experiment. We assume that on each trial, the target and
@@ -11,13 +11,13 @@ function response = ColorMaterialModelSimulateResponse(targetC, targetM, cy1, cy
 % (current draw) is smaller than the target and the other competitor. 
 
 %   Inputs:
-%       targetC  - target position on color dimension (should be fixed to 0).
-%       targetM  - target position on material dimension (should be fixed to 0).
+%       targetColorCoord  - target position on color dimension (should be fixed to 0).
+%       targetMaterialCoord  - target position on material dimension (should be fixed to 0).
 %
-%       cy1 - inferred position on the color dimension for the first competitor in the pair
-%       my1 - inferred position on the material dimension for the first competitor in the pair
-%       cy2 - inferred position on the color dimension for the second competitor in the pair
-%       my2 - inferred position on the material dimension for the second competitor in the pair
+%       colorMatchColorCoord - inferred position on the color dimension for the first competitor in the pair
+%       materialMatchColorCoord - inferred position on the material dimension for the first competitor in the pair
+%       colorMatchMaterialCoord - inferred position on the color dimension for the second competitor in the pair
+%        materialMatchMaterialCoord - inferred position on the material dimension for the second competitor in the pair
 %       w - weight for color dimension.
 %       sigma - noise around the target position (we assume it is equal to 1 and the same
 %               for both color and material dimenesions).
@@ -43,42 +43,46 @@ DO_APPROX = false;
 % Note that we're not explicitly adding noise to the target. 
 % Rather, we add noise to competitor positions and we assume that this
 % noise aggregates the target and competitor noise. 
-targetC = targetC; 
-targetM = targetM; 
-cy1 = cy1 + normrnd(0,sigma); 
-cy2 = cy2 + normrnd(0,sigma); 
-my1 = my1 + normrnd(0,sigma); 
-my2 = my2 + normrnd(0,sigma); 
+colorMatchColorCoord = colorMatchColorCoord + normrnd(0,sigma); 
+materialMatchColorCoord = materialMatchColorCoord + normrnd(0,sigma); 
+colorMatchMaterialCoord = colorMatchMaterialCoord + normrnd(0,sigma); 
+materialMatchMaterialCoord = materialMatchMaterialCoord + normrnd(0,sigma); 
 
+% In the approximation case, we apply the weights to the distances rather
+% than to the coordinates.  This is not really want we want, but is where
+% we started.  Also, we know how to do this on analytically, so being able
+% to run it was useful for some early checks.
 if (DO_APPROX) 
-    % CLARIFICATION
-    % no weights
-    cdiff1 = (cy1-targetC); 
-    cdiff2 = (cy2-targetC); 
-    mdiff1 = (my1-targetM);
-    mdiff2 = (my2-targetM);
+    % Compute distances
+    colorMatchColorCoordDiff = (colorMatchColorCoord-targetColorCoord); 
+    materialMatchColorCoordDiff = (materialMatchColorCoord-targetColorCoord); 
+    colorMatchMaterialCoordDiff = (colorMatchMaterialCoord-targetMaterialCoord);
+    materialMatchMaterialCoordDiff = (materialMatchMaterialCoord-targetMaterialCoord);
       
     % Compute squared distance and compare
-    cummulativeDiff1= cdiff1^2 + mdiff1^2;
-    cummulativeDiff2 = cdiff2^2 + mdiff2^2;
+    colorMatchDist2 = colorMatchColorCoordDiff^2 + colorMatchMaterialCoordDiff^2;
+    materialMatchDist2 = materialMatchColorCoordDiff^2 + materialMatchMaterialCoordDiff^2;
     
-    % CLARIFICATION
-    if ((w/(1-w))^2*cummulativeDiff1-cummulativeDiff2 <= 0)
+    % Apply weights to the distances.  We write this in the form that is
+    % more like what we do with the analytic calculation, where (w)/(w-1)
+    % is applied to the first distance.
+    if ((w/(1-w))^2*colorMatchDist2-materialMatchDist2 <= 0)
         response = 1;
     else
         response = 0;
     end
-    
+
+% Here we apply the weights to the differences in each dimension
 else
-    cdiff1 = w*(cy1-targetC); 
-    cdiff2 = w*(cy2-targetC); 
-    mdiff1 = (1-w)*(my1-targetM);
-    mdiff2 = (1-w)*(my2-targetM);
+    colorMatchColorCoordDiff = w*(colorMatchColorCoord-targetColorCoord); 
+    materialMatchColorCoordDiff = w*(materialMatchColorCoord-targetColorCoord); 
+    colorMatchMaterialCoordDiff = (1-w)*(colorMatchMaterialCoord-targetMaterialCoord);
+    materialMatchMaterialCoordDiff = (1-w)*(materialMatchMaterialCoord-targetMaterialCoord);
     
     % Compute squared distance and compare
-    cummulativeDiff1 = cdiff1^2 + mdiff1^2;
-    cummulativeDiff2 = cdiff2^2 + mdiff2^2;
-    if (cummulativeDiff1-cummulativeDiff2 <= 0)
+    colorMatchDist2 = colorMatchColorCoordDiff^2 + colorMatchMaterialCoordDiff^2;
+    materialMatchDist2 = materialMatchColorCoordDiff^2 + materialMatchMaterialCoordDiff^2;
+    if (colorMatchDist2-materialMatchDist2 <= 0)
         response = 1;
     else
         response = 0;

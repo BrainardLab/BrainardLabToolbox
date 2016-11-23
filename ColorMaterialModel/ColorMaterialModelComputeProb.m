@@ -1,5 +1,5 @@
-function p = ColorMaterialModelComputeProb(targetC,targetM, cy1,cy2,my1, my2, w, sigma)
-% function p = ColorMaterialModelComputeProb(targetC,targetM, cy1,cy2,my1, my2, w, sigma)
+function p = ColorMaterialModelComputeProb(targetColorCoord,targetMaterialCoord, colorMatchColorCoord,materialMatchColorCoord,colorMatchMatrialCoord, materialMatchMaterialCoord, w, sigma)
+% function p = ColorMaterialModelComputeProb(targetColorCoord,targetMaterialCoord, colorMatchColorCoord,materialMatchColorCoord,colorMatchMatrialCoord, materialMatchMaterialCoord, w, sigma)
 %
 % This function is part of our modeling effort for our initial
 % color-material tradeoff experiments.  On each trial of these experiments,
@@ -59,13 +59,13 @@ function p = ColorMaterialModelComputeProb(targetC,targetM, cy1,cy2,my1, my2, w,
 % which will call this routine as part of its objective function.
 %
 %   Inputs:
-%       targetC  - target position on color dimension (fixed to 0).
-%       targetM  - target position on material dimension (fixed to 0).
+%       targetColorCoord  - target position on color dimension (fixed to 0).
+%       targetMateialCoord  - target position on material dimension (fixed to 0).
 %
-%       cy1 - inferred position on the color dimension for the first competitor in the pair
-%       my1 - inferred position on the material dimension for the first competitor in the pair
-%       cy2 - inferred position on the color dimension for the second competitor in the pair
-%       my2 - inferred position on the material dimension for the second competitor in the pair
+%       colorMatchColorCoord - inferred position on the color dimension for the first competitor in the pair
+%       materialMatchColorCoord - inferred position on the material dimension for the first competitor in the pair
+%       colorMatchMaterialCoord - inferred position on the color dimension for the second competitor in the pair
+%       materialMatchMaterialCoord - inferred position on the material dimension for the second competitor in the pair
 %       sigma - noise around the target position (we assume it is equal to 1 and the same
 %               for both color and material dimenesions).
 %       w - weight for color dimension.
@@ -87,7 +87,7 @@ PLOTS = false;
 
 % We assume that the target is at 0,0, check
 numTolerance = 1e-7;
-if (abs(targetC) > numTolerance || abs(targetM) > numTolerance)
+if (abs(targetColorCoord) > numTolerance || abs(targetMaterialCoord) > numTolerance)
     error('We baked in that the target is at 0,0, but it is not');
 end
 
@@ -97,7 +97,7 @@ if (abs(sigma-1) > numTolerance)
 end
 
 % We assume that cy1 is 0 and my2 is 0, check
-if (cy1 ~= 0 || my2 ~= 0)
+if (colorMatchColorCoord ~= 0 || materialMatchMaterialCoord ~= 0)
     error('Assumption that competitors lie on the axes is violated.');
 end
 
@@ -123,7 +123,7 @@ end
 % parameter is needed so that the non-central chi-squared returns the
 % appropriate values for (cy1,my1).
 % Also take square root to get mean distance.
-delta1 = cy1^2 + my1^2;
+delta1 = colorMatchColorCoord^2 + colorMatchMatrialCoord^2;
 
 % We'll also need the distance of the mean of the distribution of y1 in the
 % perceptual space.
@@ -147,7 +147,7 @@ meanDistance1 = sqrt(delta1);
 % Note that the lenght of distance y1 is the same as the distance between y1
 % and the target, because we force the target to be at the origin.
 rangeValue = 6;
-nSampleValues = 1000;
+nSampleValues = 100;
 minDistance1 = max([0 meanDistance1-rangeValue]);
 distancesSquared1 = linspace(minDistance1^2,(meanDistance1+rangeValue)^2,nSampleValues);
 deltaValues1 = distancesSquared1(2)-distancesSquared1(1);
@@ -155,7 +155,7 @@ deltaValues1 = distancesSquared1(2)-distancesSquared1(1);
 % Now get probability for each interval over the sampled distances for y1,
 % using the non-central chi-squared.  Make sure the probability sums to 1.
 probForEachValueOf1 = ncx2pdf(distancesSquared1,2,delta1)*deltaValues1;
-totalProb1 = sum(probForEachValueOf1);
+totalProb1 = trapz(probForEachValueOf1);
 if (PLOTS)
     % Show sampled PDF, optionally.
     plotFigure1 = figure; clf; hold on;
@@ -163,7 +163,8 @@ if (PLOTS)
     xlabel('Distance of y1')
     ylabel('Probability');
 end
-if (abs(totalProb1 - 1) > 1e-1)
+if (abs(totalProb1 - 1) > 1e-2)
+	fprintf('totalProb1 = %0.3f\n',totalProb1);
     error('Total probability that distance1 has a distance is not close enough to 1');
 end
 
@@ -205,7 +206,7 @@ end
 % Note that this adjustment only applies to the factor we apply to the
 % distance of y1 -- it is not the right adjustment for the distance of y2.  We
 % compute that distance below.
-expectedDistancesSquared1 = sum(probForEachValueOf1.*distancesSquared1);
+expectedDistancesSquared1 = trapz(probForEachValueOf1.*distancesSquared1);
 expectedRise1Squared = 1;
 expectedRun1Squared = expectedDistancesSquared1 - expectedRise1Squared ;
 expectedAdjustedDistancesSquared1 = w^2*expectedRun1Squared + (1-w)^2*1;
@@ -216,23 +217,24 @@ adjustedW = sqrt(expectedAdjustedDistancesSquared1 / expectedDistancesSquared1);
 % This factor is used to adjust the weight on the second dimension.
 %
 % The logic here is essentially like what we did for distance1 above.
-delta2 = cy2^2 + my2^2;
+delta2 = materialMatchColorCoord^2 + materialMatchMaterialCoord^2;
 meanDistance2 = sqrt(delta2);
 minDistance2 = max([0 meanDistance2-rangeValue]);
 distancesSquared2 = linspace(minDistance2^2,(meanDistance2+rangeValue)^2,nSampleValues);
 deltaValues2 = distancesSquared2(2)-distancesSquared2(1);
 probForEachValueOf2 = ncx2pdf(distancesSquared2,2,delta2)*deltaValues2;
-totalProb2 = sum(probForEachValueOf2);
+totalProb2 = trapz(probForEachValueOf2);
 if (PLOTS)
     plotFigure2 = figure; clf; hold on
     plot(distancesSquared2,probForEachValueOf2,'r','LineWidth',2);
     xlabel('Distance2')
     ylabel('Probability');
 end
-if (abs(totalProb2 - 1) > 1e-1)
+if (abs(totalProb2 - 1) > 1e-2)
+    fprintf('totalProb2 = %0.3f\n',totalProb2);
     error('Total probability that distance2 has a distance is not close enough to 1');
 end
-expectedDistancesSquared2 = sum(probForEachValueOf2.*distancesSquared2);
+expectedDistancesSquared2 = trapz(probForEachValueOf2.*distancesSquared2);
 expectedA2Squared = expectedDistancesSquared2 - 1;
 expectedAdjustedDistancesSquared2 = w^2*1 +(1-w)^2*expectedA2Squared;
 adjustedOneMinusW = sqrt(expectedAdjustedDistancesSquared2 / expectedDistancesSquared2);
@@ -274,7 +276,7 @@ end
 % computed, over the values of distanceSquared1, and we already have
 % these probabilities from our work above.  So we get our desired
 % probability!
-p = sum(probForEachValueOf1 .* p1LessThan2ForEachValueOf1);
+p = trapz(probForEachValueOf1 .* p1LessThan2ForEachValueOf1);
 
 %% Deal with edge cases to avoid disaster when computing likilihoods later on
 if (p == 0)
