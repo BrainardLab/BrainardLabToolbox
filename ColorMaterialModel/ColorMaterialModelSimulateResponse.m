@@ -78,7 +78,7 @@ else
     % Compute squared distance and compare
     cummulativeDiff1 = cdiff1^2 + mdiff1^2;
     cummulativeDiff2 = cdiff2^2 + mdiff2^2;
-    if (cummulativeDiff1-cummulativeDiff2 > 0)
+    if (cummulativeDiff1-cummulativeDiff2 <= 0)
         response = 1;
     else
         response = 0;
