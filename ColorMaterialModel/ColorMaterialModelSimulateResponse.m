@@ -1,4 +1,4 @@
-function response = ColorMaterialModelSimulateResponse(targetColorCoord, targetMaterialCoord, colorMatchColorCoord, materialMatchColorCoord,colorMatchMaterialCoord, materialMatchMaterialCoord, w, sigma)
+function response = ColorMaterialModelSimulateResponse(targetColorCoord, targetMaterialCoord, colorMatchColorCoord, materialMatchColorCoord, colorMatchMaterialCoord, materialMatchMaterialCoord, w, sigma)
 % function response = ColorMaterialModelSimulateResponse(targetColorCoord, targetMaterialCoord, colorMatchColorCoord, materialMatchColorCoord,colorMatchMaterialCoord, materialMatchMaterialCoord, w, sigma)
 %
 % We simulate responses following the same experimental design as we have

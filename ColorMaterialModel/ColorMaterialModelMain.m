@@ -1,5 +1,5 @@
-function [x, logLikelyFit, predictedResponses] = ColorMaterialModelMain(thePairs,theResponses,nTrialsPerPair)
-% function [x, logLikelyFit, predictedResponses] = ColorMaterialModelMain(thePairs,theResponses,nTrialsPerPair)
+function [x, logLikelyFit, predictedResponses] = ColorMaterialModelMain(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponses,nTrials)
+% function [x, logLikelyFit, predictedResponses] = ColorMaterialModelMain(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponses,nTrials)
 
 % This is the main fitting/search routine in the model. 
 % It takes the data (from experiment or simulation) and returns inferred position of the
@@ -8,10 +8,11 @@ function [x, logLikelyFit, predictedResponses] = ColorMaterialModelMain(thePairs
 % parameters. Here we load ExampleStructure.mat which is identical 
 % to the structure of our Experiment1. 
 % Input: 
-%   thePairs -            competitor pairs. 
+%   pairColorMatchMatrialCoordIndices - index to get color match material coordinate for each trial type.
+%   pairMaterialMatchColorCoordIndices - index to get material match color coordinate for each trial type.
 %   theResponses -        set of responses for this pair (number of times
 %                         color match is chosen. 
-%   nTrialsPerPair -      total number of trials run. Vector of same size as theResponses.
+%   nTrials -      total number of trials run. Vector of same size as theResponses.
 %
 % Output: 
 %   x -                   returned parameters. needs to be converted using xToParams routine to get the positions and weigths.
@@ -45,12 +46,12 @@ sigmaFactor = params.sigmaFactor;
 %
 % These are the same checks we were implemented for the MLDSColorSelection model.
 % And it seems reasonable to do them here as well. Check this and throw error message if it does not hold.
-if (length(theResponses(:)) ~= length(nTrialsPerPair(:)))
+if (length(theResponses(:)) ~= length(nTrials(:)))
     error('Passed theResponses and nTrialsPerPair must be of same length');
 end
 
 % The number of responses in theResponses cannot ever exceed nTrialsPerPair.
-if (any(theResponses > nTrialsPerPair))
+if (any(theResponses > nTrials))
     error('An entry of input theResponses exceeds passed nTrialsPerPair.  No good!');
 end
 
@@ -100,7 +101,7 @@ options = optimset(options,'Diagnostics','off','Display','iter','LargeScale','of
 % We search over various initial spacings and take the best result.
 % There are two loops. One sets the positions of the competitors
 % in the solution in the color dimension, the other tries different initial spacings for material dimension.
-maxLogLikely = -Inf;
+logLikelyFit = -Inf;
 for k1 = 1%:length(trySpacing)
     for k2 = 1%:length(trySpacing)
         for k3 = 1%:size(tryWeights)
@@ -123,31 +124,32 @@ for k1 = 1%:length(trySpacing)
             vlb(end) = 1; 
             
             % Run the search
-            x = fmincon(@(x)FitColorMaterialScalingFun(x, thePairs, theResponses, nTrialsPerPair, params),initialParams,A,b,[],[],vlb,vub,[],options);
+            xTemp = fmincon(@(x)FitColorMaterialScalingFun(x, pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices, theResponses, nTrials, params),initialParams,A,b,[],[],vlb,vub,[],options);
             
             % Compute log likelihood for this solution.  Keep track of the best
             % solution that comes out of the multiple starting points.
             % Save this solution if it's better than the current best.
-            [materialPositions, colorPositions,w,sigma] = ColorMaterialModelXToParams(x, params); 
-            temp = ColorMaterialModelComputeLogLikelihood(thePairs,theResponses, nTrialsPerPair, materialPositions, colorPositions, targetIndex, w, sigma);
-            if (temp > maxLogLikely)
-                maxLogLikely = temp;
-                [logLikelyFit, predictedResponses] = ColorMaterialModelComputeLogLikelihood(thePairs,theResponses,nTrialsPerPair, materialPositions, colorPositions,targetIndex, w, sigma);
+            [fTemp,predictedResponsesTemp] = FitColorMaterialScalingFun(xTemp,pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponses,nTrials,params);
+            if (-fTemp > logLikelyFit)
+                x = xTemp;
+                logLikelyFit = -fTemp;
+                predictedResponses = predictedResponsesTemp;
             end
         end
     end
 end
 end
 
-function f = FitColorMaterialScalingFun(x, thePairs,theResponses,nTrials, params)
-%function f = FitColorMaterialScalingFun(x, thePairs,theResponses,nTrials, targetIndex)
-%
+function [f,predictedResponses] = FitColorMaterialScalingFun(x,pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponses,nTrials,params)
+% [f,predictedResponses] = FitColorMaterialScalingFun(x,pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponses,nTrials, targetIndex)
+
 % The error function we are minimizing in the numerical search.
 % Computes the negative log likelyhood of the current solution i.e. the weights and the inferred
 % position of the competitors on color and material axes.
 % Input:
 %   x           - returned parameters vector.
-%   thePairs    - competitor pairs.
+%   pairColorMatchMatrialCoordIndices - index to get color match material coordinate for each trial type.
+%   pairMaterialMatchColorCoordIndices - index to get material match color coordinate for each trial type.
 %   theResponses- set of responses for this pair (number of times first competitor is chosen).
 %   nTrialsPerPair - total number of trials run.
 %   targetIndex    - index of the target position in the color and material space.
@@ -161,11 +163,10 @@ if (any(isnan(x)))
 end
 
 % We need to convert X to params here
-[colorPositions, materialPositions,w,sigma] = ColorMaterialModelXToParams(x, params); 
+[materialMatchColorCoords,colorMatchMaterialCoords,w,sigma] = ColorMaterialModelXToParams(x,params); 
            
 % Compute negative log likelyhood of the current solution
-%           ColorMaterialModelComputeLogLikelihood(thePairs,theResponses,nTrials, colorPositions,materialPositions, targetIndex, w, sigma)
-logLikely = ColorMaterialModelComputeLogLikelihood(thePairs,theResponses,nTrials, colorPositions,materialPositions, params.targetIndex, w, sigma);
+[logLikely,predictedResponses] = ColorMaterialModelComputeLogLikelihood(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponses,nTrials,colorMatchMaterialCoords,materialMatchColorCoords,params.targetIndex,w,sigma);
 f = -logLikely;
 
 end

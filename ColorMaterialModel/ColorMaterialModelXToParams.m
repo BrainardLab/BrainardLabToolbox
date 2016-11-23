@@ -1,8 +1,12 @@
-function [colorPositions,  materialPositions, w, sigma] = ColorMaterialModelXToParams(x, params)
-%function [colorPositions,  materialPositions, w, sigma] = ColorMaterialModelXToParams(x, params)
+function [colorMatchMaterialCoords,materialMatchColorCoords,w,sigma] = ColorMaterialModelXToParams(x,params)
+% [colorMatchMaterialCoords,materialMatchColorCoords,w,sigma] = ColorMaterialModelXToParams(x,params)
+%
 % Unpack the parameter vector for ColorMaterialModel
+%
 % Input: 
 %   x - parameters vector
+%   params - structure giving experiment design parameters
+%
 % Output: 
 %   colorPositions - inferred positions on color dimensions for a material match
 %   materialPositions - inferred positions on material dimensions for a color match
@@ -15,8 +19,8 @@ function [colorPositions,  materialPositions, w, sigma] = ColorMaterialModelXToP
 
 % 11/20/2016 ar Wrote it
 
-colorPositions = x(1:params.numberOfColorCompetitors);
-materialPositions = x((1+params.numberOfColorCompetitors):(params.numberOfColorCompetitors+params.numberOfMaterialCompetitors));
+colorMatchMaterialCoords = x((1+params.numberOfColorCompetitors):(params.numberOfColorCompetitors+params.numberOfMaterialCompetitors));
+materialMatchColorCoords = x(1:params.numberOfColorCompetitors);
 w = x(end-1);
 sigma = x(end); 
 
