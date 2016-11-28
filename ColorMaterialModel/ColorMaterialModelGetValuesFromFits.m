@@ -1,0 +1,68 @@
+function [theSmoothPreds,theSmoothVals] = ColorMaterialModelGetValuesFromFits(thisData,theDeltaCs, fixPoint)
+% function [theSmoothPreds,theSmoothVals] = ColorMaterialModelGetValuesFromFits(thisData,theDeltaCs, fixPoint)
+
+% Find the best fit for the data and produce the fit values to plot
+% Input: 
+%   thisData - response probabilities that are fitted (all are the same
+%              colorMatchMaterialCoordiante)
+%   theDeltaCs - number of color difference steps (i.e. number of
+%                materialMatchColorCompetitors); 
+%   fixPoint - setting this value to 1 causes the fit to pass through 0.5
+%              in case when the subject sees the target and two identical
+%              stimuli. 
+% Output: 
+%   theSmoothPreds - fit values for the y-axis 
+%   theSmoothVals  - fit values for the x-axis
+%
+% 11/27/16  ar Adapted it from the working version of the routines that were fitting the data.  
+
+
+% Smooth values for interpolation
+nSmoothVals = 100;
+theSmoothVals = linspace(theDeltaCs(1),theDeltaCs(end),nSmoothVals)';
+
+% Allocate some space
+nVals = size(theDeltaCs,1);
+theSmoothPreds = zeros(nSmoothVals,1);
+
+% Try some starting places to optimize the fits.
+tryMin = [0:0.1:0.4];
+tryShape = [0.5, 1, 2, 3];
+maxLogLikely = -Inf;
+
+for k1 = 1:length(tryMin)
+    for k2 = 1:length(tryShape)
+        
+        % Set up search parameters
+        theScaleNeg0 = 1;
+        theScalePos0 = 1;
+        theShape0 = tryShape(k2);
+        theMin0 = tryMin(k1);
+        theRange0 = 1-theMin0;
+        x0 = [theScaleNeg0 theScalePos0 theShape0 theMin0 theRange0]';
+        
+        % Set reasonable bounds on parameters
+        if fixPoint == 1
+            % force the fit to go through 0.5 when the subject sees two identical
+            % tests - we do that by setting both the lower and the
+            % upper bound to 0.5 
+            vlb = [0.001 0.001 0.01 0.5 0];
+        else
+            vlb = [0.001 0.001 0.01 0 0];
+        end
+        vub = [100 100 10 0.5 1];
+        
+        % Enforce max percent < 1
+        A = [0 0 0 1 1]; b = 1;
+        
+        options = optimset('fmincon');
+        options = optimset(options,'Diagnostics','off','Display','off','LargeScale','off','Algorithm','active-set');
+        temp = fmincon(@(x)FitToColorMaterialTradeOffFun(x,theDeltaCs,thisData),x0,A,b,[],[],vlb,vub,[],options);
+        
+        if (temp > maxLogLikely)
+            x = temp;
+            [~,theSmoothPreds] = FitToColorMaterialTradeOffFun(x,theSmoothVals);
+        end
+    end
+end
+end

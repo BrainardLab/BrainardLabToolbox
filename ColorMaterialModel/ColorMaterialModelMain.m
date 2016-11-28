@@ -1,5 +1,5 @@
-function [x, logLikelyFit, predictedResponses] = ColorMaterialModelMain(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponses,nTrials)
-% function [x, logLikelyFit, predictedResponses] = ColorMaterialModelMain(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponses,nTrials)
+function [x, logLikelyFit, predictedResponses] = ColorMaterialModelMain(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponses,nTrials, params)
+% function [x, logLikelyFit, predictedResponses] = ColorMaterialModelMain(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponses,nTrials, params)
 
 % This is the main fitting/search routine in the model. 
 % It takes the data (from experiment or simulation) and returns inferred position of the
@@ -13,14 +13,13 @@ function [x, logLikelyFit, predictedResponses] = ColorMaterialModelMain(pairColo
 %   theResponses -        set of responses for this pair (number of times
 %                         color match is chosen. 
 %   nTrials -      total number of trials run. Vector of same size as theResponses.
-%
+%   params - structure giving experiment design parameters
 % Output: 
 %   x -                   returned parameters. needs to be converted using xToParams routine to get the positions and weigths.
 %   logLikelyFit -        log likelihood of the fit.
 %   predictedResponses -  responses predicted from the fit.
 
 %% Load and unwrap parameter structure which contains all fixed parameters. 
-load('ExampleStructure.mat')
 targetPosition = params.targetPosition;
 targetIndex = params.targetIndex; % WE SHOULD NOT HAVE THIS ONE. 
 targetIndexColor = params.targetIndexColor; % target position in the color position vector.

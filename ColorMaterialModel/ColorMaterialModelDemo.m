@@ -14,15 +14,18 @@ clear ; close all;
 DEMO = true;
 saveFig = 0;
 
+%% Load structure giving experiment design parameters. 
+% Here we use the example structure that mathes the experimental design of
+% our initial experiments. 
+load('ColorMaterialExampleStructure.mat')
 %% We can use simulated data (DEMO == true) or some real data (DEMO == false)
 if (DEMO)
-    
     % Make a stimulus list and set underlying parameters.
     targetMaterialCoord = 0;
     targetColorCoord = 0;
     stimuliMaterialMatch = [];
     stimuliColorMatch = [];
-    scalePositions = 1; % scaling factor for input positions (we're trying different ones to adjust our noise of 1).
+    scalePositions = 1; % scaling factor for input positions (we can try different ones to match our noise i.e. sigma of 1).
     materialMatchColorCoords = scalePositions*[-3, -2, -1, 0, 1, 2, 3];
     colorMatchMaterialCoords = scalePositions*[-3, -2, -1, 0, 1, 2, 3];
     targetIndex = 4;
@@ -96,21 +99,6 @@ if (DEMO)
     % compute response probabilities
     responseProbabilities = response./nBlocks;
     
-    % Plot fits for each curve.
-    % Fit each data run separately
-    % CURRENTLY COMMENTED OUT, UNTIL THESE FUNCTIONS ARE CLEANED UP
-    % COMMENTED AND MOVED TO THE TOOLBOX
-    %     for i = 1:size(response,2);
-    %         if i == 4
-    %             fixPoint = 1;
-    %         else
-    %             fixPoint = 0;
-    %         end
-    %         [theSmoothPreds(:,i), theSmoothVals, ~,~] = ...
-    %     %        getValuesFromFitsCM(responseProbabilities(:,i)',cDistances, fixPoint);
-    %     end
-    %     plotCMFitsSimForMODEL(theSmoothVals, theSmoothPreds, cDistances, responseProbabilities)
-    
     % Use identical loop to compute probabilities, based on our function.
     for whichColorOfTheMaterialMatch = 1:length(materialMatchColorCoords)
         for whichMaterialOfTheColorMatch = 1:length(colorMatchMaterialCoords)
@@ -125,6 +113,7 @@ if (DEMO)
     
     % String the response matrix as well as the pairMatrices out as vectors.
     theResponses = response(:);
+    computedProbabilitiesMatrix = response./nBlocks; 
     computedProbatilities = computedProbatilities(:);
     pairColorMatchMatrialCoordIndices = pairColorMatchMatrialCoordIndexMatrix(:);
     pairMaterialMatchColorCoordIndices = pairMaterialMatchColorCoordIndexMatrix(:);
@@ -150,7 +139,8 @@ else
 end
 
 % Need to unpack this here!
-[returnParams, logLikelyFit, predictedResponses] = ColorMaterialModelMain(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponses,nTrials); %#ok<SAGROW>
+[returnedParams, logLikelyFit, predictedResponses] = ColorMaterialModelMain(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponses,nTrials, params); %#ok<SAGROW>
+[returnedMaterialCoords,returnedColorCoords,returnedW,returnedSigma]  = ColorMaterialModelXToParams(returnedParams', params); 
 
 %% Plot measured vs. predicted probabilities
 theDataProb = theResponses./nTrials;
@@ -167,3 +157,63 @@ xlabel('Measured p');
 ylabel('Predicted p');
 set(gca, 'xTick', [0, 0.5, 1]);
 set(gca, 'yTick', [0, 0.5, 1]);
+
+%% Fit cubic spline to the data
+% We do this separately for color and material dimension
+ppColor = spline(materialMatchColorCoords, returnedColorCoords);
+ppMaterial = spline(colorMatchMaterialCoords, returnedMaterialCoords);
+xMin = ceil(min([colorMatchMaterialCoords, materialMatchColorCoords]))-0.5; 
+xMax = ceil(max([colorMatchMaterialCoords, materialMatchColorCoords]))+0.5; 
+yMin = ceil(min([returnedMaterialCoords, returnedMaterialCoords]))-0.5; 
+yMax = ceil(max([returnedMaterialCoords, returnedMaterialCoords]))+0.5;
+splineOverX = linspace(xMin,xMax,1000);
+%% Plot found vs predicted positions. 
+figure; 
+subplot(1,2,1); hold on % plot of material positions
+plot(materialMatchColorCoords,returnedColorCoords,'ro',splineOverX,ppval(splineOverX,ppColor), 'r');
+plot([xMin xMax],[yMin yMax],'--', 'LineWidth', 1, 'color', [0.5 0.5 0.5]);
+title('Color dimension')
+axis([xMin, xMax,yMin, yMax])
+axis('square')
+xlabel('"True" position');
+ylabel('Inferred position');
+set(gca, 'xTick', [xMin, 0, xMax],'FontSize', 18);
+set(gca, 'yTick', [yMin, 0, yMax],'FontSize', 18);
+
+% set large range of values for fittings
+subplot(1,2,2); hold on % plot of material positions
+title('Material dimension')
+plot(colorMatchMaterialCoords,returnedMaterialCoords,'bo',splineOverX,ppval(splineOverX,ppMaterial), 'b');
+plot([xMin xMax],[yMin yMax],'--', 'LineWidth', 1, 'color', [0.5 0.5 0.5]);
+axis([xMin, xMax,yMin, yMax])
+axis('square')
+xlabel('"True" position');
+ylabel('Inferred position');
+set(gca, 'xTick', [xMin, 0, xMax],'FontSize', 18);
+set(gca, 'yTick', [yMin, 0, yMax],'FontSize', 18);
+
+%% Another way to plot the data
+figure; hold on; 
+plot(returnedColorCoords, zeros(size(returnedColorCoords)),'ro', 'MarkerFaceColor', 'r', 'MarkerSize', 12); 
+line([xMin, xMax], [0,0],'color', 'k'); 
+plot(zeros(size(returnedMaterialCoords)), returnedMaterialCoords, 'bo','MarkerFaceColor', 'b', 'MarkerSize', 12); 
+axis([xMin, xMax,yMin, yMax])
+line([0,0],[yMin, yMax],  'color', 'k'); 
+axis('square')
+xlabel('color positions', 'FontSize', 18);
+ylabel('material positions','FontSize', 18);
+
+%% Plot the predictions agains the data
+% Here we need to adapt the way we're goign to map the positions, for now
+% we're just going to make the plots work as before.
+
+for i = 1:size(response,2);
+    if i == 4
+        fixPoint = 1;
+    else
+        fixPoint = 0;
+    end
+    disp(i)
+    [theSmoothPreds(:,i), theSmoothVals(:,i)] = ColorMaterialModelGetValuesFromFits(responseProbabilities(:,i)',colorMatchMaterialCoords, fixPoint);
+end
+ColorMaterialModelPlotFits(theSmoothVals, theSmoothPreds, colorMatchMaterialCoords, responseProbabilities);
