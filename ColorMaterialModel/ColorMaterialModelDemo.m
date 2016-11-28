@@ -20,6 +20,11 @@ saveFig = 0;
 load('ColorMaterialExampleStructure.mat')
 %% We can use simulated data (DEMO == true) or some real data (DEMO == false)
 if (DEMO)
+    
+    % Make the random number generator seed start at the same place each
+    % time we do this.
+    rng('default');
+    
     % Make a stimulus list and set underlying parameters.
     targetMaterialCoord = 0;
     targetColorCoord = 0;
@@ -162,11 +167,15 @@ set(gca, 'yTick', [0, 0.5, 1]);
 % We do this separately for color and material dimension
 ppColor = spline(materialMatchColorCoords, returnedColorCoords);
 ppMaterial = spline(colorMatchMaterialCoords, returnedMaterialCoords);
-xMin = ceil(min([colorMatchMaterialCoords, materialMatchColorCoords]))-0.5; 
-xMax = ceil(max([colorMatchMaterialCoords, materialMatchColorCoords]))+0.5; 
-yMin = ceil(min([returnedMaterialCoords, returnedMaterialCoords]))-0.5; 
-yMax = ceil(max([returnedMaterialCoords, returnedMaterialCoords]))+0.5;
+xMinTemp = floor(min([returnedColorCoords, returnedMaterialCoords]))-0.5; 
+xMaxTemp = ceil(max([returnedColorCoords, returnedMaterialCoords]))+0.5;
+xTemp = max(abs([xMinTemp xMaxTemp]));
+xMin = -xTemp;
+xMax = xTemp;
+yMin = xMin; 
+yMax = xMax;
 splineOverX = linspace(xMin,xMax,1000);
+
 %% Plot found vs predicted positions. 
 figure; 
 subplot(1,2,1); hold on % plot of material positions

@@ -86,9 +86,7 @@ b = [bMaterialPositions; bColorPositions];
 % Note that these spacings are hard coded. We have used the same spacing as in the color selection experiment.
 % We will try the same spacings for both color and material space. As for MLDS-CS: it is possible that there would be a
 % cleverer thing to do here.
-% trySpacing = [1 2 0.5];
-% tryWeights = [0.5 0.8 0.1];
-trySpacing = [0.5];
+trySpacing = [1 2 0.5];
 tryWeights = [0.5 0.8 0.1];
 
 % Standard fmincon options
