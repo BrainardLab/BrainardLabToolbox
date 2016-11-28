@@ -101,9 +101,9 @@ options = optimset(options,'Diagnostics','off','Display','iter','LargeScale','of
 % There are two loops. One sets the positions of the competitors
 % in the solution in the color dimension, the other tries different initial spacings for material dimension.
 logLikelyFit = -Inf;
-for k1 = 1%:length(trySpacing)
-    for k2 = 1%:length(trySpacing)
-        for k3 = 1%:size(tryWeights)
+for k1 = 1:length(trySpacing)
+    for k2 = 1:length(trySpacing)
+        for k3 = 1:size(tryWeights)
             % Choose initial competitor positions based on current spacing to try.
             initialCompetitorPositionsMaterial = [trySpacing(k1)*linspace(competitorsRangeNegative(1),competitorsRangeNegative(2), numberOfCompetitorsNegative),targetPosition,trySpacing(k1)*linspace(competitorsRangePositive(1),competitorsRangePositive(2), numberOfCompetitorsPositive)];
             initialCompetitorPositionsColor = [trySpacing(k2)*linspace(competitorsRangeNegative(1),competitorsRangeNegative(2), numberOfCompetitorsNegative),targetPosition,trySpacing(k2)*linspace(competitorsRangePositive(1),competitorsRangePositive(2), numberOfCompetitorsPositive)];
