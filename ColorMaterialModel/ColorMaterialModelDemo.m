@@ -130,23 +130,7 @@ if (DEMO)
     fprintf('Initial log likelihood %0.2f.\n', logLikely);
     % Here you could enter some real data and work on figuring out why a model
     % fit was going awry.
-else
-    
-    pairIndices = [
-        ];
-    
-    theResponses = [
-        ];
-    
-    nTrials = [
-        ];
-end
-
-% Need to unpack this here!
-[returnedParams, logLikelyFit, predictedResponses] = ColorMaterialModelMain(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponses,nTrials, params); %#ok<SAGROW>
-[returnedMaterialCoords,returnedColorCoords,returnedW,returnedSigma]  = ColorMaterialModelXToParams(returnedParams', params); 
-
-%% Plot measured vs. predicted probabilities
+else%% Plot measured vs. predicted probabilities
 theDataProb = theResponses./nTrials;
 
 figure; hold on
@@ -226,6 +210,25 @@ if plotWeibullFitsToData
     ColorMaterialModelPlotFits(theSmoothVals, theSmoothPreds, materialMatchColorCoords, responseProbabilities);
 end
 
+    
+    pairIndices = [
+        ];
+    
+    theResponses = [
+        ];
+    
+    nTrials = [
+        ];
+end
+
+% Need to unpack this here!
+[returnedParams, logLikelyFit, predictedResponses] = ColorMaterialModelMain(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponses,nTrials, params); %#ok<SAGROW>
+[returnedColorMatchMaterialCoords,returnedMaterialMatchColorCoords,returnedW,returnedSigma]  = ColorMaterialModelXToParams(returnedParams', params); 
+
+returnedMaterialMatchColorCoords = returnedColorCoords;
+returnedColorMatchMaterialCoords = returnedMaterialCoords;
+clear modelPredictions
+
 %% Plot model predictions 
 % First check the positions of color (material) match on color (material) axis.  
 % Signal if there is an error. 
@@ -239,19 +242,29 @@ if ~(returnedColorMatchColorCoord == 0)
 end
 
 % Find the predicted probabilities for a range of possible color coordinates 
-rangeOfColorCoordinates = linspace(xMin, xMax, 100)';   
-for whichMaterialCoordinate = 1:length(materialMatchColorCoords)
+%rangeOfColorCoordinates = linspace(xMin, xMax, 100)';
+rangeOfMaterialMatchColorCoordinates = materialMatchColorCoords';
+
+% Loop over each material coordinate of the color match, to get a predicted
+% curve for each one.
+for whichMaterialCoordinate = 1:length(colorMatchMaterialCoords)
+    % Get the inferred material position for this color match
     returnedColorMatchMaterialCoord(whichMaterialCoordinate) = ppval(colorMatchMaterialCoords(whichMaterialCoordinate), ppMaterial);
-    for whichColorCoordinate = 1:length(rangeOfColorCoordinates)
-        returnedMaterialMatchColorCoord(whichColorCoordinate) = ppval(rangeOfColorCoordinates(whichColorCoordinate), ppColor);
+    
+    % Get the inferred color position for a range of material matches
+    for whichColorCoordinate = 1:length(rangeOfMaterialMatchColorCoordinates)
+        % Get the position of the material match
+        returnedMaterialMatchColorCoord(whichColorCoordinate) = ppval(rangeOfMaterialMatchColorCoordinates(whichColorCoordinate), ppColor);
+                
+        % Compute the model predictions
         modelPredictions(whichColorCoordinate, whichMaterialCoordinate) = ColorMaterialModelComputeProb(targetColorCoord,targetMaterialCoord, ...
             returnedColorMatchColorCoord,returnedMaterialMatchColorCoord(whichColorCoordinate),...
             returnedColorMatchMaterialCoord(whichMaterialCoordinate), returnedMaterialMatchMaterialCoord, returnedW, returnedSigma);
     end
 end
 %remap the intial Color Values
-rangeOfColorCoordinates = repmat(rangeOfColorCoordinates,[1, length(materialMatchColorCoords)]);
-ColorMaterialModelPlotFits(rangeOfColorCoordinates, modelPredictions, returnedColorCoords, responseProbabilities, xMin, xMax);
+rangeOfMaterialMatchColorCoordinates = repmat(rangeOfMaterialMatchColorCoordinates,[1, length(materialMatchColorCoords)]);
+ColorMaterialModelPlotFits(rangeOfMaterialMatchColorCoordinates, modelPredictions, materialMatchColorCoords, responseProbabilities, xMin, xMax);
 
 
 
