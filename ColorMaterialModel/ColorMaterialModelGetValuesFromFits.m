@@ -11,8 +11,9 @@ function [theSmoothPreds,theSmoothVals] = ColorMaterialModelGetValuesFromFits(th
 %              in case when the subject sees the target and two identical
 %              stimuli. 
 % Output: 
-%   theSmoothPreds - fit values for the y-axis 
 %   theSmoothVals  - fit values for the x-axis
+%   theSmoothPreds - fit values for the y-axis 
+
 %
 % 11/27/16  ar Adapted it from the working version of the routines that were fitting the data.  
 
@@ -28,7 +29,7 @@ theSmoothPreds = zeros(nSmoothVals,1);
 % Try some starting places to optimize the fits.
 tryMin = [0:0.1:0.4];
 tryShape = [0.5, 1, 2, 3];
-maxLogLikely = -Inf;
+minError = Inf;
 
 for k1 = 1:length(tryMin)
     for k2 = 1:length(tryShape)
@@ -57,12 +58,24 @@ for k1 = 1:length(tryMin)
         
         options = optimset('fmincon');
         options = optimset(options,'Diagnostics','off','Display','off','LargeScale','off','Algorithm','active-set');
-        temp = fmincon(@(x)FitToColorMaterialTradeOffFun(x,theDeltaCs,thisData),x0,A,b,[],[],vlb,vub,[],options);
+        if length(thisData) > 7
+            pause
+        end
+        % current best solution
+        xTemp = fmincon(@(x)FitToColorMaterialTradeOffFun(x,theDeltaCs,thisData),x0,A,b,[],[],vlb,vub,[],options);
         
-        if (temp > maxLogLikely)
-            x = temp;
-            [~,theSmoothPreds] = FitToColorMaterialTradeOffFun(x,theSmoothVals);
+        % compute the error of the current best solution
+        [minErrorTemp, ~] = FitToColorMaterialTradeOffFun(xTemp,theDeltaCs,thisData);
+        
+        % keep track of the smallest error and best solution so far. 
+        if (minErrorTemp < minError)
+            x = xTemp;
+            minError = minErrorTemp;
         end
     end
 end
+% Once we have the best Weibull function parameters, we will compute the predictions for 
+% a series of values. 
+[~, theSmoothPreds] = FitToColorMaterialTradeOffFun(x, theSmoothVals);
+        
 end

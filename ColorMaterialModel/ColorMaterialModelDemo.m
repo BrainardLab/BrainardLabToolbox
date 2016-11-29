@@ -12,8 +12,7 @@
 %% Initialize and parameter set
 clear ; close all;
 DEMO = true;
-saveFig = 0;
-
+plotWeibullFitsToData = 1; 
 %% Load structure giving experiment design parameters. 
 % Here we use the example structure that mathes the experimental design of
 % our initial experiments. 
@@ -175,11 +174,13 @@ xMax = xTemp;
 yMin = xMin; 
 yMax = xMax;
 splineOverX = linspace(xMin,xMax,1000);
+inferredPositionsColor = ppval(splineOverX,ppColor); 
+inferredPositionsMaterial  = ppval(splineOverX,ppMaterial); 
 
 %% Plot found vs predicted positions. 
 figure; 
 subplot(1,2,1); hold on % plot of material positions
-plot(materialMatchColorCoords,returnedColorCoords,'ro',splineOverX,ppval(splineOverX,ppColor), 'r');
+plot(materialMatchColorCoords,returnedColorCoords,'ro',splineOverX, inferredPositionsColor, 'r');
 plot([xMin xMax],[yMin yMax],'--', 'LineWidth', 1, 'color', [0.5 0.5 0.5]);
 title('Color dimension')
 axis([xMin, xMax,yMin, yMax])
@@ -189,10 +190,10 @@ ylabel('Inferred position');
 set(gca, 'xTick', [xMin, 0, xMax],'FontSize', 18);
 set(gca, 'yTick', [yMin, 0, yMax],'FontSize', 18);
 
-% set large range of values for fittings
+% Set large range of values for fittings
 subplot(1,2,2); hold on % plot of material positions
 title('Material dimension')
-plot(colorMatchMaterialCoords,returnedMaterialCoords,'bo',splineOverX,ppval(splineOverX,ppMaterial), 'b');
+plot(colorMatchMaterialCoords,returnedMaterialCoords,'bo',splineOverX,inferredPositionsMaterial, 'b');
 plot([xMin xMax],[yMin yMax],'--', 'LineWidth', 1, 'color', [0.5 0.5 0.5]);
 axis([xMin, xMax,yMin, yMax])
 axis('square')
@@ -212,17 +213,47 @@ axis('square')
 xlabel('color positions', 'FontSize', 18);
 ylabel('material positions','FontSize', 18);
 
-%% Plot the predictions agains the data
-% Here we need to adapt the way we're goign to map the positions, for now
-% we're just going to make the plots work as before.
-
-for i = 1:size(response,2);
-    if i == 4
-        fixPoint = 1;
-    else
-        fixPoint = 0;
+%% Plot Weibull fits to the data
+if plotWeibullFitsToData
+    for i = 1:size(response,2);
+        if i == 4
+            fixPoint = 1;
+        else
+            fixPoint = 0;
+        end
+        [theSmoothPreds(:,i), theSmoothVals(:,i)] = ColorMaterialModelGetValuesFromFits(responseProbabilities(:,i)',colorMatchMaterialCoords, fixPoint);
     end
-    disp(i)
-    [theSmoothPreds(:,i), theSmoothVals(:,i)] = ColorMaterialModelGetValuesFromFits(responseProbabilities(:,i)',colorMatchMaterialCoords, fixPoint);
+    ColorMaterialModelPlotFits(theSmoothVals, theSmoothPreds, materialMatchColorCoords, responseProbabilities);
 end
-ColorMaterialModelPlotFits(theSmoothVals, theSmoothPreds, colorMatchMaterialCoords, responseProbabilities);
+
+%% Plot model predictions 
+% First check the positions of color (material) match on color (material) axis.  
+% Signal if there is an error. 
+returnedMaterialMatchMaterialCoord = ppval(targetMaterialCoord, ppMaterial);
+returnedColorMatchColorCoord =  ppval(targetColorCoord, ppColor);
+if ~(returnedMaterialMatchMaterialCoord == 0)
+    error('Target material coordinate did not map to zero.')
+end
+if ~(returnedColorMatchColorCoord == 0)
+    error('Target color coordinates did not map to zero.')
+end
+
+% Find the predicted probabilities for a range of possible color coordinates 
+rangeOfColorCoordinates = linspace(xMin, xMax, 100)';   
+for whichMaterialCoordinate = 1:length(materialMatchColorCoords)
+    returnedColorMatchMaterialCoord(whichMaterialCoordinate) = ppval(colorMatchMaterialCoords(whichMaterialCoordinate), ppMaterial);
+    for whichColorCoordinate = 1:length(rangeOfColorCoordinates)
+        returnedMaterialMatchColorCoord(whichColorCoordinate) = ppval(rangeOfColorCoordinates(whichColorCoordinate), ppColor);
+        modelPredictions(whichColorCoordinate, whichMaterialCoordinate) = ColorMaterialModelComputeProb(targetColorCoord,targetMaterialCoord, ...
+            returnedColorMatchColorCoord,returnedMaterialMatchColorCoord(whichColorCoordinate),...
+            returnedColorMatchMaterialCoord(whichMaterialCoordinate), returnedMaterialMatchMaterialCoord, returnedW, returnedSigma);
+    end
+end
+%remap the intial Color Values
+rangeOfColorCoordinates = repmat(rangeOfColorCoordinates,[1, length(materialMatchColorCoords)]);
+ColorMaterialModelPlotFits(rangeOfColorCoordinates, modelPredictions, returnedColorCoords, responseProbabilities, xMin, xMax);
+
+
+
+
+
