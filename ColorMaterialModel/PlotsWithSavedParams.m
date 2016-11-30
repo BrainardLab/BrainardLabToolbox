@@ -1,4 +1,9 @@
+% PlotsWithSavedParams
+%
+% Plot out the results of a fit to simulated data, based on parameters
+% we saved by hand after running a long demo fit.
 
+%% Clear and close and load
 clear; close all; 
 load('returnedParamsTemp.mat')
 plotWeibullFitsToData = 1; 
@@ -8,7 +13,7 @@ theDataProb = theResponsesFromSimulatedData./nTrials;
 figure; hold on
 plot(theDataProb,predictedProbabilitiesBasedOnSolution,'ro','MarkerSize',12,'MarkerFaceColor','r');
 plot(theDataProb,probabilitiesComputedForSimulatedData,'bo','MarkerSize',12,'MarkerFaceColor','b');
-legend('predicted', 'computed', 'Location', 'NorthWest')
+legend('Fit Parameters', 'Actual Parameters', 'Location', 'NorthWest')
 plot([0 1],[0 1],'k');
 axis('square')
 axis([0 1 0 1]);
@@ -33,7 +38,7 @@ splineOverX = linspace(xMin,xMax,1000);
 inferredPositionsColor = ppval(splineOverX,ppColor); 
 inferredPositionsMaterial  = ppval(splineOverX,ppMaterial); 
 
-%% Plot found vs predicted positions. 
+%% Plot positions from fit versus actual simulated positions 
 figure; 
 subplot(1,2,1); hold on % plot of material positions
 plot(materialMatchColorCoords,returnedMaterialMatchColorCoords,'ro',splineOverX, inferredPositionsColor, 'r');
@@ -58,7 +63,7 @@ ylabel('Inferred position');
 set(gca, 'xTick', [xMin, 0, xMax],'FontSize', 18);
 set(gca, 'yTick', [yMin, 0, yMax],'FontSize', 18);
 
-%% Another way to plot the data
+%% Plot the color and material of the stimuli obtained from the fit in the 2D representational space
 figure; hold on; 
 plot(returnedMaterialMatchColorCoords, zeros(size(returnedMaterialMatchColorCoords)),'ro', 'MarkerFaceColor', 'r', 'MarkerSize', 12); 
 line([xMin, xMax], [0,0],'color', 'k'); 
@@ -69,7 +74,7 @@ axis('square')
 xlabel('color positions', 'FontSize', 18);
 ylabel('material positions','FontSize', 18);
 
-%% Plot Weibull fits to the data
+%% Plot descriptive Weibull fits to the data
 if plotWeibullFitsToData
     for i = 1:size(responseFromSimulatedData,2);
         if i == 4
@@ -82,7 +87,8 @@ if plotWeibullFitsToData
     ColorMaterialModelPlotFits(theSmoothVals, theSmoothPreds, materialMatchColorCoords, simulatedProbabilities);
 end
 
-%% Plot model predictions 
+%% Plot predictions of the model through the actual data 
+%
 % First check the positions of color (material) match on color (material) axis.  
 % Signal if there is an error. 
 returnedMaterialMatchMaterialCoord = ppval(targetMaterialCoord, ppMaterial);
@@ -115,6 +121,16 @@ for whichMaterialCoordinate = 1:length(colorMatchMaterialCoords)
             returnedColorMatchMaterialCoord(whichMaterialCoordinate), returnedMaterialMatchMaterialCoord, returnedW, returnedSigma);
     end
 end
+
+[~,modelPredictions2] = ColorMaterialModelComputeLogLikelihood(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponsesFromSimulatedData,nTrials,...
+    returnedColorMatchMaterialCoords,returnedMaterialMatchColorCoords,params.targetIndex,...
+    returnedW, returnedSigma);
+
+%% Make sure the numbers we compute from the model now match those we computed in the demo program
+figure; clf; hold on
+plot(predictedProbabilitiesBasedOnSolution(:),modelPredictions(:),'ro','MarkerSize',12,'MarkerFaceColor','r');
+plot(predictedProbabilitiesBasedOnSolution(:),modelPredictions2(:),'bo','MarkerSize',12,'MarkerFaceColor','b');
+xlim([0 1]); ylim([0,1]); axis('square');
 
 rangeOfMaterialMatchColorCoordinates = repmat(rangeOfMaterialMatchColorCoordinates,[1, length(materialMatchColorCoords)]);
 ColorMaterialModelPlotFits(rangeOfMaterialMatchColorCoordinates, modelPredictions, materialMatchColorCoords, simulatedProbabilities, xMin, xMax);

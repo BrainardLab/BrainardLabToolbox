@@ -13,10 +13,12 @@
 clear ; close all;
 DEMO = true;
 plotWeibullFitsToData = 1; 
+
 %% Load structure giving experiment design parameters. 
 % Here we use the example structure that mathes the experimental design of
 % our initial experiments. 
 load('ColorMaterialExampleStructure.mat')
+
 %% We can use simulated data (DEMO == true) or some real data (DEMO == false)
 if (DEMO)
     
@@ -155,8 +157,21 @@ else
     
 end
 
+%% Extract parameters and other useful things from the solution
 [returnedParams, logLikelyFit, predictedProbabilitiesBasedOnSolution] = ColorMaterialModelMain(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponsesFromSimulatedData,nTrials, params); %#ok<SAGROW>
-[returnedColorMatchMaterialCoords,returnedMaterialMatchColorCoords,returnedW,returnedSigma]  = ColorMaterialModelXToParams(returnedParams', params); 
+[returnedMaterialMatchColorCoords,returnedColorMatchMaterialCoords,returnedW,returnedSigma]  = ColorMaterialModelXToParams(returnedParams, params); 
+
+%% Check that we can get the same predictions directly from the solution in ways we might want to do it
+[logLikelyFit2,predictedProbabilitiesBasedOnSolution2] = ColorMaterialModelComputeLogLikelihood(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponsesFromSimulatedData,nTrials,...
+    returnedColorMatchMaterialCoords,returnedMaterialMatchColorCoords,params.targetIndex,...
+    returnedW, returnedSigma);
+[negLogLikelyFit3,predictedProbabilitiesBasedOnSolution3] = FitColorMaterialScalingFun(returnedParams,pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponsesFromSimulatedData,nTrials,params);
+if (any(predictedProbabilitiesBasedOnSolution ~= predictedProbabilitiesBasedOnSolution3))
+    error('Cannot recover the predictions 3 from the parameters right after we found them!');
+end
+if (any(predictedProbabilitiesBasedOnSolution ~= predictedProbabilitiesBasedOnSolution2))
+    error('Cannot recover the predictions 2 from the parameters right after we found them!');
+end
 
 %% Plot measured vs. predicted probabilities
 theDataProb = theResponsesFromSimulatedData./nTrials;
