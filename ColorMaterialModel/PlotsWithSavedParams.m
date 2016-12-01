@@ -23,8 +23,12 @@ if DEMO
 else
     plot(theDataProb(:),predictedProbabilitiesBasedOnSolution(:),'ro','MarkerSize',12,'MarkerFaceColor','r');
 end
-legend('Fit Parameters', 'Actual Parameters', 'Location', 'NorthWest')
-plot([0 1],[0 1],'k');
+line([0, 0], [1,1],'color','k'); 
+if DEMO
+    legend('Fit Parameters', 'Actual Parameters', 'Location', 'NorthWest')
+else
+    legend('Actual Parameters', 'Location', 'NorthWest')
+end
 axis('square')
 axis([0 1 0 1]);
 set(gca,  'FontSize', 18);
@@ -47,6 +51,8 @@ yMax = xMax;
 splineOverX = linspace(xMin,xMax,1000);
 inferredPositionsColor = ppval(splineOverX,ppColor); 
 inferredPositionsMaterial  = ppval(splineOverX,ppMaterial); 
+splineOverX(splineOverX>max(materialMatchColorCoords))=NaN;
+splineOverX(splineOverX<min(materialMatchColorCoords))=NaN;
 
 %% Plot positions from fit versus actual simulated positions 
 figure; 
@@ -113,7 +119,7 @@ if (abs(returnedColorMatchColorCoord) > tolerance)
 end
 
 % Find the predicted probabilities for a range of possible color coordinates 
-rangeOfMaterialMatchColorCoordinates = linspace(xMin, xMax, 100)';
+rangeOfMaterialMatchColorCoordinates = linspace(min(materialMatchColorCoords), max(materialMatchColorCoords), 100)';
 
 % Loop over each material coordinate of the color match, to get a predicted
 % curve for each one.
@@ -132,16 +138,17 @@ for whichMaterialCoordinate = 1:length(colorMatchMaterialCoords)
             returnedColorMatchMaterialCoord(whichMaterialCoordinate), returnedMaterialMatchMaterialCoord, returnedW, returnedSigma);
     end
 end
-
+% if debugging
 % [~,modelPredictions2] = ColorMaterialModelComputeLogLikelihood(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponsesFromSimulatedData,nTrials,...
 %     returnedColorMatchMaterialCoords,returnedMaterialMatchColorCoords,params.targetIndex,...
 %     returnedW, returnedSigma);
-
+% end
 %% Make sure the numbers we compute from the model now match those we computed in the demo program
+%if debugging
 %figure; clf; hold on
 %plot(predictedProbabilitiesBasedOnSolution(:),modelPredictions(:),'ro','MarkerSize',12,'MarkerFaceColor','r');
 %plot(predictedProbabilitiesBasedOnSolution(:),modelPredictions2(:),'bo','MarkerSize',12,'MarkerFaceColor','b');
 %xlim([0 1]); ylim([0,1]); axis('square');
-
+%end
 rangeOfMaterialMatchColorCoordinates = repmat(rangeOfMaterialMatchColorCoordinates,[1, length(materialMatchColorCoords)]);
-ColorMaterialModelPlotFits(rangeOfMaterialMatchColorCoordinates, modelPredictions, materialMatchColorCoords, simulatedProbabilities, xMin, xMax);
+ColorMaterialModelPlotFits(rangeOfMaterialMatchColorCoordinates, modelPredictions, materialMatchColorCoords, simulatedProbabilities, min(materialMatchColorCoords)-0.5, max(materialMatchColorCoords)+0.5);
