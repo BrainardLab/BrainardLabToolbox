@@ -5,14 +5,24 @@
 
 %% Clear and close and load
 clear; close all; 
-load('returnedParamsTemp.mat')
+DEMO = false; 
+if DEMO
+    load('returnedParamsTemp.mat')
+else
+    load('solutionForifj.mat')
+    simulatedProbabilities = theDataProb; 
+end
 plotWeibullFitsToData = 1; 
 
 %% Plot measured vs. predicted probabilities
 theDataProb = theResponsesFromSimulatedData./nTrials;
 figure; hold on
-plot(theDataProb,predictedProbabilitiesBasedOnSolution,'ro','MarkerSize',12,'MarkerFaceColor','r');
-plot(theDataProb,probabilitiesComputedForSimulatedData,'bo','MarkerSize',12,'MarkerFaceColor','b');
+if DEMO
+    plot(theDataProb,predictedProbabilitiesBasedOnSolution,'ro','MarkerSize',12,'MarkerFaceColor','r');
+    plot(theDataProb,probabilitiesComputedForSimulatedData,'bo','MarkerSize',12,'MarkerFaceColor','b');
+else
+    plot(theDataProb(:),predictedProbabilitiesBasedOnSolution(:),'ro','MarkerSize',12,'MarkerFaceColor','r');
+end
 legend('Fit Parameters', 'Actual Parameters', 'Location', 'NorthWest')
 plot([0 1],[0 1],'k');
 axis('square')
@@ -75,8 +85,9 @@ xlabel('color positions', 'FontSize', 18);
 ylabel('material positions','FontSize', 18);
 
 %% Plot descriptive Weibull fits to the data
+%simulatedProbabilities = theDataProb; 
 if plotWeibullFitsToData
-    for i = 1:size(responseFromSimulatedData,2);
+    for i = 1:size(theDataProb,2);
         if i == 4
             fixPoint = 1;
         else
@@ -91,18 +102,18 @@ end
 %
 % First check the positions of color (material) match on color (material) axis.  
 % Signal if there is an error. 
+tolerance = 1e-7; 
 returnedMaterialMatchMaterialCoord = ppval(targetMaterialCoord, ppMaterial);
 returnedColorMatchColorCoord =  ppval(targetColorCoord, ppColor);
-if ~(returnedMaterialMatchMaterialCoord == 0)
+if (abs(returnedMaterialMatchMaterialCoord) > tolerance)
     error('Target material coordinate did not map to zero.')
 end
-if ~(returnedColorMatchColorCoord == 0)
+if (abs(returnedColorMatchColorCoord) > tolerance)
     error('Target color coordinates did not map to zero.')
 end
 
 % Find the predicted probabilities for a range of possible color coordinates 
-%rangeOfColorCoordinates = linspace(xMin, xMax, 100)';
-rangeOfMaterialMatchColorCoordinates = materialMatchColorCoords';
+rangeOfMaterialMatchColorCoordinates = linspace(xMin, xMax, 100)';
 
 % Loop over each material coordinate of the color match, to get a predicted
 % curve for each one.
@@ -122,15 +133,15 @@ for whichMaterialCoordinate = 1:length(colorMatchMaterialCoords)
     end
 end
 
-[~,modelPredictions2] = ColorMaterialModelComputeLogLikelihood(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponsesFromSimulatedData,nTrials,...
-    returnedColorMatchMaterialCoords,returnedMaterialMatchColorCoords,params.targetIndex,...
-    returnedW, returnedSigma);
+% [~,modelPredictions2] = ColorMaterialModelComputeLogLikelihood(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponsesFromSimulatedData,nTrials,...
+%     returnedColorMatchMaterialCoords,returnedMaterialMatchColorCoords,params.targetIndex,...
+%     returnedW, returnedSigma);
 
 %% Make sure the numbers we compute from the model now match those we computed in the demo program
-figure; clf; hold on
-plot(predictedProbabilitiesBasedOnSolution(:),modelPredictions(:),'ro','MarkerSize',12,'MarkerFaceColor','r');
-plot(predictedProbabilitiesBasedOnSolution(:),modelPredictions2(:),'bo','MarkerSize',12,'MarkerFaceColor','b');
-xlim([0 1]); ylim([0,1]); axis('square');
+%figure; clf; hold on
+%plot(predictedProbabilitiesBasedOnSolution(:),modelPredictions(:),'ro','MarkerSize',12,'MarkerFaceColor','r');
+%plot(predictedProbabilitiesBasedOnSolution(:),modelPredictions2(:),'bo','MarkerSize',12,'MarkerFaceColor','b');
+%xlim([0 1]); ylim([0,1]); axis('square');
 
 rangeOfMaterialMatchColorCoordinates = repmat(rangeOfMaterialMatchColorCoordinates,[1, length(materialMatchColorCoords)]);
 ColorMaterialModelPlotFits(rangeOfMaterialMatchColorCoordinates, modelPredictions, materialMatchColorCoords, simulatedProbabilities, xMin, xMax);

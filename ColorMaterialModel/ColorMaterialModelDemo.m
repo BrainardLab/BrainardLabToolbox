@@ -11,7 +11,7 @@
 
 %% Initialize and parameter set
 clear ; close all;
-DEMO = true;
+DEMO = false;
 plotWeibullFitsToData = 1; 
 
 %% Load structure giving experiment design parameters. 
@@ -145,39 +145,39 @@ else
     
     load('pairIndices.mat')
     
-    theResponsesFromSimulatedData = [ 21    18     1     0    14    23    24
-    21    15     0     0    19    24    23
-    24    16     2     1    17    24    24
-    24    23    15    11    24    24    24
-    24    22     6     4    22    24    24
-    24    18     1     0    15    22    24
-    20    12     1     0     3    22    23  ];
+    theResponsesFromSimulatedData = [ 21    21    24    24    24    24    20
+    18    15    16    23    22    18    12
+     1     0     2    15     6     1     1
+     0     0     1    11     4     0     0
+    14    19    17    24    22    15     3
+    23    24    24    24    24    22    22
+    24    23    24    24    24    24    23  ];
     nBlocks = 24; 
     nTrials = nBlocks*[ones(size(theResponsesFromSimulatedData))];
     
 end
 
 %% Extract parameters and other useful things from the solution
-[returnedParams, logLikelyFit, predictedProbabilitiesBasedOnSolution] = ColorMaterialModelMain(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponsesFromSimulatedData,nTrials, params); %#ok<SAGROW>
+[returnedParams, logLikelyFit, predictedProbabilitiesBasedOnSolution, k] = ColorMaterialModelMain(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponsesFromSimulatedData,nTrials, params); %#ok<SAGROW>
 [returnedMaterialMatchColorCoords,returnedColorMatchMaterialCoords,returnedW,returnedSigma]  = ColorMaterialModelXToParams(returnedParams, params); 
 
 %% Check that we can get the same predictions directly from the solution in ways we might want to do it
-[logLikelyFit2,predictedProbabilitiesBasedOnSolution2] = ColorMaterialModelComputeLogLikelihood(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponsesFromSimulatedData,nTrials,...
-    returnedColorMatchMaterialCoords,returnedMaterialMatchColorCoords,params.targetIndex,...
-    returnedW, returnedSigma);
-[negLogLikelyFit3,predictedProbabilitiesBasedOnSolution3] = FitColorMaterialScalingFun(returnedParams,pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponsesFromSimulatedData,nTrials,params);
-if (any(predictedProbabilitiesBasedOnSolution ~= predictedProbabilitiesBasedOnSolution3))
-    error('Cannot recover the predictions 3 from the parameters right after we found them!');
-end
-if (any(predictedProbabilitiesBasedOnSolution ~= predictedProbabilitiesBasedOnSolution2))
-    error('Cannot recover the predictions 2 from the parameters right after we found them!');
-end
+% [logLikelyFit2,predictedProbabilitiesBasedOnSolution2] = ColorMaterialModelComputeLogLikelihood(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponsesFromSimulatedData,nTrials,...
+%     returnedColorMatchMaterialCoords,returnedMaterialMatchColorCoords,params.targetIndex,...
+%     returnedW, returnedSigma);
+% [negLogLikelyFit3,predictedProbabilitiesBasedOnSolution3] = FitColorMaterialScalingFun(returnedParams,pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponsesFromSimulatedData,nTrials,params);
+% if (any(predictedProbabilitiesBasedOnSolution ~= predictedProbabilitiesBasedOnSolution3))
+%     error('Cannot recover the predictions 3 from the parameters right after we found them!');
+% end
+% if (any(predictedProbabilitiesBasedOnSolution ~= predictedProbabilitiesBasedOnSolution2))
+%     error('Cannot recover the predictions 2 from the parameters right after we found them!');
+% end
 
 %% Plot measured vs. predicted probabilities
 theDataProb = theResponsesFromSimulatedData./nTrials;
 figure; hold on
-plot(theDataProb,predictedProbabilitiesBasedOnSolution,'ro','MarkerSize',12,'MarkerFaceColor','r');
-plot(theDataProb,probabilitiesComputedForSimulatedData,'bo','MarkerSize',12,'MarkerFaceColor','b');
+plot(theDataProb(:),predictedProbabilitiesBasedOnSolution,'ro','MarkerSize',12,'MarkerFaceColor','r');
+plot(theDataProb(:),probabilitiesComputedForSimulatedData,'bo','MarkerSize',12,'MarkerFaceColor','b');
 
 plot([0 1],[0 1],'k');
 axis('square')
@@ -241,15 +241,15 @@ ylabel('material positions','FontSize', 18);
 
 %% Plot Weibull fits to the data
 if plotWeibullFitsToData
-    for i = 1:size(responseFromSimulatedData,2);
+    for i = 1:size(theResponsesFromSimulatedData,2);
         if i == 4
             fixPoint = 1;
         else
             fixPoint = 0;
         end
-        [theSmoothPreds(:,i), theSmoothVals(:,i)] = ColorMaterialModelGetValuesFromFits(simulatedProbabilities(:,i)',colorMatchMaterialCoords, fixPoint);
+        [theSmoothPreds(:,i), theSmoothVals(:,i)] = ColorMaterialModelGetValuesFromFits(theDataProb(:,i)',colorMatchMaterialCoords, fixPoint);
     end
-    ColorMaterialModelPlotFits(theSmoothVals, theSmoothPreds, materialMatchColorCoords, simulatedProbabilities);
+    ColorMaterialModelPlotFits(theSmoothVals, theSmoothPreds, materialMatchColorCoords, theDataProb);
 end
 
 %% Plot model predictions 
@@ -257,16 +257,18 @@ end
 % Signal if there is an error. 
 returnedMaterialMatchMaterialCoord = ppval(targetMaterialCoord, ppMaterial);
 returnedColorMatchColorCoord =  ppval(targetColorCoord, ppColor);
-if ~(returnedMaterialMatchMaterialCoord == 0)
+tolerance = 1e-7; 
+returnedMaterialMatchMaterialCoord = ppval(targetMaterialCoord, ppMaterial);
+returnedColorMatchColorCoord =  ppval(targetColorCoord, ppColor);
+if (abs(returnedMaterialMatchMaterialCoord) > tolerance)
     error('Target material coordinate did not map to zero.')
 end
-if ~(returnedColorMatchColorCoord == 0)
+if (abs(returnedColorMatchColorCoord) > tolerance)
     error('Target color coordinates did not map to zero.')
 end
 
 % Find the predicted probabilities for a range of possible color coordinates 
-%rangeOfColorCoordinates = linspace(xMin, xMax, 100)';
-rangeOfMaterialMatchColorCoordinates = materialMatchColorCoords';
+rangeOfMaterialMatchColorCoordinates = linspace(xMin, xMax, 100)';
 
 % Loop over each material coordinate of the color match, to get a predicted
 % curve for each one.
@@ -285,6 +287,5 @@ for whichMaterialCoordinate = 1:length(colorMatchMaterialCoords)
             returnedColorMatchMaterialCoord(whichMaterialCoordinate), returnedMaterialMatchMaterialCoord, returnedW, returnedSigma);
     end
 end
-
 rangeOfMaterialMatchColorCoordinates = repmat(rangeOfMaterialMatchColorCoordinates,[1, length(materialMatchColorCoords)]);
 ColorMaterialModelPlotFits(rangeOfMaterialMatchColorCoordinates, modelPredictions, materialMatchColorCoords, simulatedProbabilities, xMin, xMax);

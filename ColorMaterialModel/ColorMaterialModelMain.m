@@ -1,4 +1,4 @@
-function [x, logLikelyFit, predictedResponses] = ColorMaterialModelMain(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponses,nTrials, params)
+function [x, logLikelyFit, predictedResponses, k] = ColorMaterialModelMain(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponses,nTrials, params)
 % function [x, logLikelyFit, predictedResponses] = ColorMaterialModelMain(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponses,nTrials, params)
 
 % This is the main fitting/search routine in the model. 
@@ -99,12 +99,9 @@ options = optimset(options,'Diagnostics','off','Display','iter','LargeScale','of
 % There are two loops. One sets the positions of the competitors
 % in the solution in the color dimension, the other tries different initial spacings for material dimension.
 logLikelyFit = -Inf;
-%for k1 = 1:length(trySpacing)
-%    for k2 = 1:length(trySpacing)
-%for k3 = 1:size(tryWeights)
-for k1 = 1
-    for k2 = 1
-        for k3 = 1
+for k1 = 1:length(trySpacing)
+    for k2 = 1:length(trySpacing)
+        for k3 = 1:size(tryWeights)
             % Choose initial competitor positions based on current spacing to try.
             initialCompetitorPositionsMaterial = [trySpacing(k1)*linspace(competitorsRangeNegative(1),competitorsRangeNegative(2), numberOfCompetitorsNegative),targetPosition,trySpacing(k1)*linspace(competitorsRangePositive(1),competitorsRangePositive(2), numberOfCompetitorsPositive)];
             initialCompetitorPositionsColor = [trySpacing(k2)*linspace(competitorsRangeNegative(1),competitorsRangeNegative(2), numberOfCompetitorsNegative),targetPosition,trySpacing(k2)*linspace(competitorsRangePositive(1),competitorsRangePositive(2), numberOfCompetitorsPositive)];
@@ -134,6 +131,9 @@ for k1 = 1
                 x = xTemp;
                 logLikelyFit = -fTemp;
                 predictedResponses = predictedResponsesTemp;
+                k.k1 = k1; 
+                k.k2 = k2; 
+                k.k3 = k3; 
             end
         end
     end

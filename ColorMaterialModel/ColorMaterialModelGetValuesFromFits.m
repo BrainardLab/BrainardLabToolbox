@@ -58,9 +58,7 @@ for k1 = 1:length(tryMin)
         
         options = optimset('fmincon');
         options = optimset(options,'Diagnostics','off','Display','off','LargeScale','off','Algorithm','active-set');
-        if length(thisData) > 7
-            pause
-        end
+        
         % current best solution
         xTemp = fmincon(@(x)FitToColorMaterialTradeOffFun(x,theDeltaCs,thisData),x0,A,b,[],[],vlb,vub,[],options);
         
