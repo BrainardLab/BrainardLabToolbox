@@ -13,11 +13,22 @@
 clear ; close all;
 DEMO = false;
 plotWeibullFitsToData = 1; 
+whichVersion = 'equalSpacing';
 
 %% Load structure giving experiment design parameters. 
 % Here we use the example structure that mathes the experimental design of
 % our initial experiments. 
 load('ColorMaterialExampleStructure.mat')
+
+% Make a stimulus list and set underlying parameters.
+targetMaterialCoord = 0;
+targetColorCoord = 0;
+stimuliMaterialMatch = [];
+stimuliColorMatch = [];
+scalePositions = 1; % scaling factor for input positions (we can try different ones to match our noise i.e. sigma of 1).
+materialMatchColorCoords = scalePositions*[-3, -2, -1, 0, 1, 2, 3];
+colorMatchMaterialCoords = scalePositions*[-3, -2, -1, 0, 1, 2, 3];
+targetIndex = 4;
 
 %% We can use simulated data (DEMO == true) or some real data (DEMO == false)
 if (DEMO)
@@ -26,16 +37,7 @@ if (DEMO)
     % time we do this.
     rng('default');
     
-    % Make a stimulus list and set underlying parameters.
-    targetMaterialCoord = 0;
-    targetColorCoord = 0;
-    stimuliMaterialMatch = [];
-    stimuliColorMatch = [];
-    scalePositions = 1; % scaling factor for input positions (we can try different ones to match our noise i.e. sigma of 1).
-    materialMatchColorCoords = scalePositions*[-3, -2, -1, 0, 1, 2, 3];
-    colorMatchMaterialCoords = scalePositions*[-3, -2, -1, 0, 1, 2, 3];
-    targetIndex = 4;
-    sigma = 1;
+    sigma = 1;   
     w = 0.5;
     
     % These are the coordinates of the color matches.  The color coordinate always matches the
@@ -154,11 +156,13 @@ else
     24    23    24    24    24    24    23  ];
     nBlocks = 24; 
     nTrials = nBlocks*[ones(size(theResponsesFromSimulatedData))];
-    
 end
 
 %% Extract parameters and other useful things from the solution
-[returnedParams, logLikelyFit, predictedProbabilitiesBasedOnSolution, k] = ColorMaterialModelMain(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponsesFromSimulatedData,nTrials, params); %#ok<SAGROW>
+% Put the method into the params structure, so it flows to where we need it
+params.whichVersion = whichVersion;
+[returnedParams, logLikelyFit, predictedProbabilitiesBasedOnSolution, k] = ColorMaterialModelMain(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponsesFromSimulatedData,nTrials, params, ...
+    'whichVersion',whichVersion); %#ok<SAGROW>
 [returnedMaterialMatchColorCoords,returnedColorMatchMaterialCoords,returnedW,returnedSigma]  = ColorMaterialModelXToParams(returnedParams, params); 
 
 %% Check that we can get the same predictions directly from the solution in ways we might want to do it
@@ -177,7 +181,9 @@ end
 theDataProb = theResponsesFromSimulatedData./nTrials;
 figure; hold on
 plot(theDataProb(:),predictedProbabilitiesBasedOnSolution,'ro','MarkerSize',12,'MarkerFaceColor','r');
-plot(theDataProb(:),probabilitiesComputedForSimulatedData,'bo','MarkerSize',12,'MarkerFaceColor','b');
+if (DEMO)
+    plot(theDataProb(:),probabilitiesComputedForSimulatedData,'bo','MarkerSize',12,'MarkerFaceColor','b');
+end
 
 plot([0 1],[0 1],'k');
 axis('square')
