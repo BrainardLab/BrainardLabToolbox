@@ -161,7 +161,8 @@ end
 %% Extract parameters and other useful things from the solution
 % Put the method into the params structure, so it flows to where we need it
 params.whichVersion = whichVersion;
-[returnedParams, logLikelyFit, predictedProbabilitiesBasedOnSolution, k] = ColorMaterialModelMain(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponsesFromSimulatedData,nTrials, params, ...
+params.smoothOrder = 3;
+[returnedParams, logLikelyFit, predictedProbabilitiesBasedOnSolution, k] = ColorMaterialModelMain(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponsesFromSimulatedData,nTrials,params, ...
     'whichVersion',whichVersion); %#ok<SAGROW>
 [returnedMaterialMatchColorCoords,returnedColorMatchMaterialCoords,returnedW,returnedSigma]  = ColorMaterialModelXToParams(returnedParams, params); 
 
