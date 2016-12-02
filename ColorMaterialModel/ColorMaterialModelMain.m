@@ -1,5 +1,5 @@
-function [x, logLikelyFit, predictedResponses, k] = ColorMaterialModelMain(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponses,nTrials, params)
-% function [x, logLikelyFit, predictedResponses] = ColorMaterialModelMain(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponses,nTrials, params)
+function [x, logLikelyFit, predictedResponses, k] = ColorMaterialModelMain(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponses,nTrials, params, varargin)
+% function [x, logLikelyFit, predictedResponses] = ColorMaterialModelMain(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponses,nTrials, params, varargin)
 
 % This is the main fitting/search routine in the model. 
 % It takes the data (from experiment or simulation) and returns inferred position of the
@@ -18,6 +18,21 @@ function [x, logLikelyFit, predictedResponses, k] = ColorMaterialModelMain(pairC
 %   x -                   returned parameters. needs to be converted using xToParams routine to get the positions and weigths.
 %   logLikelyFit -        log likelihood of the fit.
 %   predictedResponses -  responses predicted from the fit.
+%
+% Optional key/value pairs
+%   'whichVersion' - string (default 'full').  Which model to fit
+%      'full' - Fit all parameters.
+%      'weightFixed' - Fix the weight at value in fixedWeightValue
+%      'equalSpacing - Force spacing between stimulus positions to have equal spacing on each axis.
+%   'fixedWeightValue' - value (default 0.5). Value to use when fixing weight.
+
+
+%% Parse variable input key/value pairs
+p = inputParser;
+p = inputParser;
+p.addParameter('whichVersion','full',@ischar);
+p.addParameter('fixedWeightValue',0.5,@isnumeric);
+p.parse(varargin{:});
 
 %% Load and unwrap parameter structure which contains all fixed parameters. 
 targetPosition = params.targetPosition;
@@ -87,7 +102,12 @@ b = [bMaterialPositions; bColorPositions];
 % We will try the same spacings for both color and material space. As for MLDS-CS: it is possible that there would be a
 % cleverer thing to do here.
 trySpacing = [1 2 0.5];
-tryWeights = [0.5 0.8 0.1];
+switch (p.Results.whichVersion)
+    case 'weightFixed'
+        tryWeights = p.Results.weightsFixedValue;
+    otherwise
+        tryWeights = [0.5 0.8 0.1];
+end
 
 % Standard fmincon options
 options = optimset('fmincon');
@@ -115,8 +135,14 @@ for k1 = 1:length(trySpacing)
             vub(targetIndexColor) = 0; % fix search for target position at 0.
             vlb(targetIndexColor) = 0;
             vub(targetIndexMaterial) = 0; % fix search for target position at 0.
-            vlb(end-1) = 0; % limit variation in w. 
-            vub(end-1) = 1; 
+            switch (p.Results.p.Results.whichVersion)
+                case 'wFixed'
+                    vlb(end-1) = initialParams(end-1);
+                    vub(end-1) = initialParams(end-1);
+                otherwise
+                    vlb(end-1) = 0; % limit variation in w.
+                    vub(end-1) = 1;
+            end
             vub(end) = 1; % fix sigma to 1. 
             vlb(end) = 1; 
             
