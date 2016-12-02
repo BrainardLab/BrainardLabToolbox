@@ -9,7 +9,7 @@ DEMO = false;
 if DEMO
     load('returnedParamsTemp.mat')
 else
-    load('solutionForifj.mat')
+    load('solutionIfjWFixed.mat');  materialMatchColorCoords = -3:3; colorMatchMaterialCoords = -3:3; targetColorCoord = 0; targetMaterialCoord = 0;
     simulatedProbabilities = theDataProb; 
 end
 plotWeibullFitsToData = 1; 

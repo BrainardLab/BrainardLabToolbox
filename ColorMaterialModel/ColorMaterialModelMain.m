@@ -1,5 +1,5 @@
-function [x, logLikelyFit, predictedResponses, k] = ColorMaterialModelMain(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponses,nTrials, params)
-% function [x, logLikelyFit, predictedResponses] = ColorMaterialModelMain(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponses,nTrials, params)
+function [x, logLikelyFit, predictedResponses, k] = ColorMaterialModelMain(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponses,nTrials, params, varargin)
+% function [x, logLikelyFit, predictedResponses] = ColorMaterialModelMain(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponses,nTrials, params, varargin)
 
 % This is the main fitting/search routine in the model. 
 % It takes the data (from experiment or simulation) and returns inferred position of the
@@ -18,6 +18,21 @@ function [x, logLikelyFit, predictedResponses, k] = ColorMaterialModelMain(pairC
 %   x -                   returned parameters. needs to be converted using xToParams routine to get the positions and weigths.
 %   logLikelyFit -        log likelihood of the fit.
 %   predictedResponses -  responses predicted from the fit.
+%
+% Optional key/value pairs
+%   'whichVersion' - string (default 'full').  Which model to fit
+%      'full' - Fit all parameters.
+%      'weightFixed' - Fix the weight at value in fixedWeightValue
+%      'equalSpacing - Force spacing between stimulus positions to have equal spacing on each axis.
+%   'fixedWeightValue' - value (default 0.5). Value to use when fixing weight.
+
+
+%% Parse variable input key/value pairs
+p = inputParser;
+p = inputParser;
+p.addParameter('whichVersion','full',@ischar);
+p.addParameter('fixedWeightValue',0.5,@isnumeric);
+p.parse(varargin{:});
 
 %% Load and unwrap parameter structure which contains all fixed parameters. 
 targetPosition = params.targetPosition;
@@ -87,7 +102,13 @@ b = [bMaterialPositions; bColorPositions];
 % We will try the same spacings for both color and material space. As for MLDS-CS: it is possible that there would be a
 % cleverer thing to do here.
 trySpacing = [1 2 0.5];
-tryWeights = [0.5 0.8 0.1];
+switch (p.Results.whichVersion)
+    case 'weightFixed'
+        tryWeights = p.Results.weightsFixedValue;
+    otherwise
+        tryWeights = [0.5 0.8 0.1];
+end
+sigma = 1;
 
 % Standard fmincon options
 options = optimset('fmincon');
@@ -103,22 +124,69 @@ for k1 = 1:length(trySpacing)
     for k2 = 1:length(trySpacing)
         for k3 = 1:size(tryWeights)
             % Choose initial competitor positions based on current spacing to try.
-            initialCompetitorPositionsMaterial = [trySpacing(k1)*linspace(competitorsRangeNegative(1),competitorsRangeNegative(2), numberOfCompetitorsNegative),targetPosition,trySpacing(k1)*linspace(competitorsRangePositive(1),competitorsRangePositive(2), numberOfCompetitorsPositive)];
-            initialCompetitorPositionsColor = [trySpacing(k2)*linspace(competitorsRangeNegative(1),competitorsRangeNegative(2), numberOfCompetitorsNegative),targetPosition,trySpacing(k2)*linspace(competitorsRangePositive(1),competitorsRangePositive(2), numberOfCompetitorsPositive)];
-            initialParams = [initialCompetitorPositionsMaterial initialCompetitorPositionsColor tryWeights(k3) sigma]';
+            switch (p.Results.whichVersion)
+                case 'equalSpacing'
+                    % In this method, the positions are just specified by
+                    % the spacing, so we simply use the regular variable to
+                    % specify it.
+                    initialColorMatchMaterialCoords = trySpacing(k1);
+                    initialMaterialMatchColorCoords = trySpacing(k2);
+                otherwise
+                    initialColorMatchMaterialCoords = [trySpacing(k1)*linspace(competitorsRangeNegative(1),competitorsRangeNegative(2), numberOfCompetitorsNegative),targetPosition,trySpacing(k1)*linspace(competitorsRangePositive(1),competitorsRangePositive(2), numberOfCompetitorsPositive)];
+                    initialMaterialMatchColorCoords = [trySpacing(k2)*linspace(competitorsRangeNegative(1),competitorsRangeNegative(2), numberOfCompetitorsNegative),targetPosition,trySpacing(k2)*linspace(competitorsRangePositive(1),competitorsRangePositive(2), numberOfCompetitorsPositive)];
+            end
+            initialParams = ColorMaterialModelParamsToX(initialColorMatchMaterialCoords,initialMaterialMatchColorCoords,tryWeights(k3),sigma,params);
             
-            % Get reasonable upper and lower bound. These are most easily computed from the initial parameters.
-            % For now we just say - go anywhere (+/-100 times the maximum value in the intial parameters);
-            vlb = -100*max(abs(initialParams))*ones(size(initialParams));
-            vub = 100*max(abs(initialParams))*ones(size(initialParams));
-            vlb(targetIndexMaterial) = 0;
-            vub(targetIndexColor) = 0; % fix search for target position at 0.
-            vlb(targetIndexColor) = 0;
-            vub(targetIndexMaterial) = 0; % fix search for target position at 0.
-            vlb(end-1) = 0; % limit variation in w. 
-            vub(end-1) = 1; 
-            vub(end) = 1; % fix sigma to 1. 
-            vlb(end) = 1; 
+            % Get reasonable upper and lower bounds for each method
+            vlb = initialParams; vub = initialParams;
+            switch (p.Results.whichVersion)
+                case 'equalSpacing'
+                    vlb(1) = 0.1;
+                    vub(1) = 10;
+                    vlb(2) = 0.1;
+                    vub(2) = 10;
+                           
+                    % Limit variation in w.
+                    vlb(end-1) = 0;
+                    vub(end-1) = 1;
+                    
+                    % We don't need A and b here.  Override by setting to
+                    % empty.
+                    A = [];
+                    b = [];
+                case 'wFixed'
+                    % Loose bounds on positions
+                    vlb = -10*max(abs(initialParams))*ones(size(initialParams));
+                    vub = 10*max(abs(initialParams))*ones(size(initialParams));
+                    
+                     % Lock target into place
+                    vlb(targetIndexMaterial) = 0;
+                    vub(targetIndexColor) = 0; 
+                    vlb(targetIndexColor) = 0;
+                    vub(targetIndexMaterial) = 0;
+                    
+                    % Fix weight
+                    vlb(end-1) = initialParams(end-1);
+                    vub(end-1) = initialParams(end-1);
+                otherwise
+                    % Loose bounds on positions
+                    vlb = -10*max(abs(initialParams))*ones(size(initialParams));
+                    vub = 10*max(abs(initialParams))*ones(size(initialParams));
+                    
+                    % Lock target into place
+                    vlb(targetIndexMaterial) = 0;
+                    vub(targetIndexColor) = 0; 
+                    vlb(targetIndexColor) = 0;
+                    vub(targetIndexMaterial) = 0;
+                    
+                     % Weights go between 0 and 1
+                    vlb(end-1) = 0;
+                    vub(end-1) = 1;
+            end
+            
+            % Bounds on sigma, which we just keep fixed
+            vub(end) = sigma;
+            vlb(end) = sigma; 
             
             % Run the search
             xTemp = fmincon(@(x)FitColorMaterialScalingFun(x, pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices, theResponses, nTrials, params),initialParams,A,b,[],[],vlb,vub,[],options);
