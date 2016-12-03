@@ -122,7 +122,7 @@ options = optimset(options,'Diagnostics','off','Display','iter','LargeScale','of
 logLikelyFit = -Inf;
 for k1 = 1:length(trySpacing)
     for k2 = 1:length(trySpacing)
-        for k3 = 1:size(tryWeights)
+        for k3 = 1:length(tryWeights)
             % Choose initial competitor positions based on current spacing to try.
             switch (p.Results.whichVersion)
                 case 'equalSpacing'
