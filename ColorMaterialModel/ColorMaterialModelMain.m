@@ -23,7 +23,7 @@ function [x, logLikelyFit, predictedResponses, k] = ColorMaterialModelMain(pairC
 %   'whichVersion' - string (default 'full').  Which model to fit
 %      'full' - Fit all parameters.
 %      'weightFixed' - Fix the weight at value in fixedWeightValue
-%      'equalSpacing - Force spacing between stimulus positions to have equal spacing on each axis.
+%      'equalSpacing - Force spacing between stimulus positions to vary smoothly.
 %   'fixedWeightValue' - value (default 0.5). Value to use when fixing weight.
 
 
@@ -122,15 +122,15 @@ options = optimset(options,'Diagnostics','off','Display','iter','LargeScale','of
 logLikelyFit = -Inf;
 for k1 = 1:length(trySpacing)
     for k2 = 1:length(trySpacing)
-        for k3 = 1:size(tryWeights)
+        for k3 = 1:length(tryWeights)
             % Choose initial competitor positions based on current spacing to try.
             switch (p.Results.whichVersion)
                 case 'equalSpacing'
                     % In this method, the positions are just specified by
                     % the spacing, so we simply use the regular variable to
                     % specify it.
-                    initialColorMatchMaterialCoords = trySpacing(k1);
-                    initialMaterialMatchColorCoords = trySpacing(k2);
+                    initialColorMatchMaterialCoords = [trySpacing(k1) zeros(1,params.smoothOrder-1)];
+                    initialMaterialMatchColorCoords = [trySpacing(k2) zeros(1,params.smoothOrder-1)];
                 otherwise
                     initialColorMatchMaterialCoords = [trySpacing(k1)*linspace(competitorsRangeNegative(1),competitorsRangeNegative(2), numberOfCompetitorsNegative),targetPosition,trySpacing(k1)*linspace(competitorsRangePositive(1),competitorsRangePositive(2), numberOfCompetitorsPositive)];
                     initialMaterialMatchColorCoords = [trySpacing(k2)*linspace(competitorsRangeNegative(1),competitorsRangeNegative(2), numberOfCompetitorsNegative),targetPosition,trySpacing(k2)*linspace(competitorsRangePositive(1),competitorsRangePositive(2), numberOfCompetitorsPositive)];
@@ -141,10 +141,8 @@ for k1 = 1:length(trySpacing)
             vlb = initialParams; vub = initialParams;
             switch (p.Results.whichVersion)
                 case 'equalSpacing'
-                    vlb(1) = 0.1;
-                    vub(1) = 10;
-                    vlb(2) = 0.1;
-                    vub(2) = 10;
+                    vlb(1:end-2) = -10;
+                    vub(1:end-2) = 10;
                            
                     % Limit variation in w.
                     vlb(end-1) = 0;
@@ -189,7 +187,7 @@ for k1 = 1:length(trySpacing)
             vlb(end) = sigma; 
             
             % Run the search
-            xTemp = fmincon(@(x)FitColorMaterialScalingFun(x, pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices, theResponses, nTrials, params),initialParams,A,b,[],[],vlb,vub,[],options);
+            xTemp = fmincon(@(x)FitColorMaterialScalingFun(x, pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices, theResponses, nTrials, params),initialParams,A,b,[],[],vlb,vub,@(x)FitColorMaterialScalingConstraint(x,params),options);
             
             % Compute log likelihood for this solution.  Keep track of the best
             % solution that comes out of the multiple starting points.

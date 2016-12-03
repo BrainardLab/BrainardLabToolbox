@@ -1,5 +1,5 @@
 function [f,predictedResponses] = FitColorMaterialScalingFun(x,pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponses,nTrials,params)
-% [f,predictedResponses] = FitColorMaterialScalingFun(x,pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponses,nTrials, targetIndex)
+% [f,predictedResponses] = FitColorMaterialScalingFun(x,pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponses,nTrials,params)
 
 % The error function we are minimizing in the numerical search.
 % Computes the negative log likelyhood of the current solution i.e. the weights and the inferred
