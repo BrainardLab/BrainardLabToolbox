@@ -20,17 +20,19 @@ function [x, logLikelyFit, predictedResponses, k] = ColorMaterialModelMain(pairC
 %   predictedResponses -  responses predicted from the fit.
 %
 % Optional key/value pairs
-%   'whichVersion' - string (default 'full').  Which model to fit
+%   'whichPositions' - string (default 'full').  Which model to fit
 %      'full' - Fit all parameters.
-%      'weightFixed' - Fix the weight at value in fixedWeightValue
-%      'equalSpacing - Force spacing between stimulus positions to vary smoothly.
+%      'smoothlSpacing - Force spacing between stimulus positions to vary smoothly.
+%   'whichWeight' - string (default 'weightVary').  How to handle weights.
+%     '
+%     'weightFixed' - Fix the weight at value in fixedWeightValue
 %   'fixedWeightValue' - value (default 0.5). Value to use when fixing weight.
 
 
 %% Parse variable input key/value pairs
 p = inputParser;
 p = inputParser;
-p.addParameter('whichVersion','full',@ischar);
+p.addParameter('whichPositions','full',@ischar);
 p.addParameter('fixedWeightValue',0.5,@isnumeric);
 p.parse(varargin{:});
 
@@ -102,7 +104,7 @@ b = [bMaterialPositions; bColorPositions];
 % We will try the same spacings for both color and material space. As for MLDS-CS: it is possible that there would be a
 % cleverer thing to do here.
 trySpacing = [1 2 0.5];
-switch (p.Results.whichVersion)
+switch (p.Results.whichPositions)
     case 'weightFixed'
         tryWeights = p.Results.weightsFixedValue;
     otherwise
@@ -124,8 +126,8 @@ for k1 = 1:length(trySpacing)
     for k2 = 1:length(trySpacing)
         for k3 = 1:length(tryWeights)
             % Choose initial competitor positions based on current spacing to try.
-            switch (p.Results.whichVersion)
-                case 'equalSpacing'
+            switch (p.Results.whichPositions)
+                case 'smoothSpacing'
                     % In this method, the positions are just specified by
                     % the spacing, so we simply use the regular variable to
                     % specify it.
@@ -139,8 +141,8 @@ for k1 = 1:length(trySpacing)
             
             % Get reasonable upper and lower bounds for each method
             vlb = initialParams; vub = initialParams;
-            switch (p.Results.whichVersion)
-                case 'equalSpacing'
+            switch (p.Results.whichPositions)
+                case 'smoothSpacing'
                     vlb(1:end-2) = -10;
                     vub(1:end-2) = 10;
                            

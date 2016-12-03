@@ -13,7 +13,8 @@
 clear ; close all;
 DEMO = false;
 plotWeibullFitsToData = 1; 
-whichVersion = 'equalSpacing';
+whichPositions = 'smoothSpacing';
+smoothOrder = 2;
 
 %% Load structure giving experiment design parameters. 
 % Here we use the example structure that mathes the experimental design of
@@ -160,10 +161,10 @@ end
 
 %% Extract parameters and other useful things from the solution
 % Put the method into the params structure, so it flows to where we need it
-params.whichVersion = whichVersion;
-params.smoothOrder = 2;
+params.whichPositions = whichPositions;
+params.smoothOrder = smoothOrder;
 [returnedParams, logLikelyFit, predictedProbabilitiesBasedOnSolution, k] = ColorMaterialModelMain(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponsesFromSimulatedData,nTrials,params, ...
-    'whichVersion',whichVersion); %#ok<SAGROW>
+    'whichPositions',whichPositions); %#ok<SAGROW>
 [returnedMaterialMatchColorCoords,returnedColorMatchMaterialCoords,returnedW,returnedSigma]  = ColorMaterialModelXToParams(returnedParams, params); 
 
 %% Check that we can get the same predictions directly from the solution in ways we might want to do it
