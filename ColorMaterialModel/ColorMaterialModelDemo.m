@@ -11,10 +11,29 @@
 
 %% Initialize and parameter set
 clear ; close all;
+
+% Simulate up some data, or read in data.  DEMO means simulate.
 DEMO = false;
-plotWeibullFitsToData = 1; 
-whichPositions = 'smoothSpacing';
+
+% Make plots with descriptive Weibull fits to the data?
+plotWeibullFitsToData = true; 
+
+% What sort of position fitting are we doing, and if smooth
+% the order of the polynomial.
+% Options:
+%  'full' - Weights vary
+%  'smoothSpacing' - Weights computed according to a polynomial fit.
+whichPositions = 'full';
 smoothOrder = 2;
+
+% Initial position spacing values to try.
+trySpacingValues = [0.5 1 2];
+
+% Does material/color weight vary in fit?
+%  'weightVary' - yes, it does.
+%  'weightFixed' - fix weight to specified value in tryWeightValues(1);
+whichWeight = 'weightVary';
+tryWeightValues = [0.5 0.2 0.8];
 
 %% Load structure giving experiment design parameters. 
 % Here we use the example structure that mathes the experimental design of
@@ -160,11 +179,15 @@ else
 end
 
 %% Extract parameters and other useful things from the solution
-% Put the method into the params structure, so it flows to where we need it
+%
+% Put the method into the params structure, so it flows to where we need
+% it.  This isn't beautiful, but saves us figuring out how to pass the
+% various key value pairs all the way down into the functions called by
+% fmincon, which is actually somewhat hard to do in a more elegant way.
 params.whichPositions = whichPositions;
 params.smoothOrder = smoothOrder;
 [returnedParams, logLikelyFit, predictedProbabilitiesBasedOnSolution, k] = ColorMaterialModelMain(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponsesFromSimulatedData,nTrials,params, ...
-    'whichPositions',whichPositions); %#ok<SAGROW>
+    'whichPositions',whichPositions,'whichWeight',whichWeight,'tryWeightValues',tryWeightValues,'trySpacingValues',trySpacingValues); %#ok<SAGROW>
 [returnedMaterialMatchColorCoords,returnedColorMatchMaterialCoords,returnedW,returnedSigma]  = ColorMaterialModelXToParams(returnedParams, params); 
 
 %% Check that we can get the same predictions directly from the solution in ways we might want to do it

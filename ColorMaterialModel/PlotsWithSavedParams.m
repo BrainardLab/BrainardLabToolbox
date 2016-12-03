@@ -44,6 +44,7 @@ ppMaterial = spline(colorMatchMaterialCoords, returnedColorMatchMaterialCoords);
 xMinTemp = floor(min([returnedMaterialMatchColorCoords, returnedColorMatchMaterialCoords]))-0.5; 
 xMaxTemp = ceil(max([returnedMaterialMatchColorCoords, returnedColorMatchMaterialCoords]))+0.5;
 xTemp = max(abs([xMinTemp xMaxTemp]));
+xTemp = 9.5;
 xMin = -xTemp;
 xMax = xTemp;
 yMin = xMin; 
