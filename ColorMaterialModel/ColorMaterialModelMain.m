@@ -31,6 +31,7 @@ function [x, logLikelyFit, predictedResponses, k] = ColorMaterialModelMain(pairC
 
 
 %% Parse variable input key/value pairs
+tic
 p = inputParser;
 p.addParameter('whichPositions','full',@ischar);
 p.addParameter('whichWeight','weightVary',@ischar);
@@ -243,6 +244,7 @@ for k1 = 1:length(p.Results.trySpacingValues)
         end
     end
 end
+toc
 end
 
 

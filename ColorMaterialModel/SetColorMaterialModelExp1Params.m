@@ -10,10 +10,12 @@ params.competitorsRangePositive = [1 3];
 params.competitorsRangeNegative = [-3 -1];
 params.numberOfCompetitorsPositive = 3;
 params.numberOfCompetitorsNegative = 3;
-params.sigma = 1; 0
-params.sigmaFactor = 4; 
-params.numberOfColorCompetitors = 7; 
-params.numberOfMaterialCompetitors = 7; 
+params.sigma = 1; 
+params.sigmaFactor = 4;
+params.numberOfColorCompetitors = 7;
+params.numberOfMaterialCompetitors = 7;
+params.targetColorCoord = 0;
+params.targetMaterialCoord = 0;
 
-save('ExampleStructure', 'params') 
+save('ColorMaterialExampleStructure', 'params')
 

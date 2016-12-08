@@ -32,7 +32,7 @@ trySpacingValues = [0.5 1 2];
 % Does material/color weight vary in fit?
 %  'weightVary' - yes, it does.
 %  'weightFixed' - fix weight to specified value in tryWeightValues(1);
-whichWeight = 'weightVary';
+whichWeight = 'weightFixed';
 tryWeightValues = [0.5 0.2 0.8];
 
 %% Load structure giving experiment design parameters. 
@@ -49,6 +49,12 @@ scalePositions = 1; % scaling factor for input positions (we can try different o
 materialMatchColorCoords = scalePositions*[-3, -2, -1, 0, 1, 2, 3];
 colorMatchMaterialCoords = scalePositions*[-3, -2, -1, 0, 1, 2, 3];
 targetIndex = 4;
+params.materialMatchColorCoords  =  materialMatchColorCoords; 
+params.colorMatchMaterialCoords  =  colorMatchMaterialCoords; 
+
+% Set figure directories
+figDir = pwd; 
+saveFig = 0; 
 
 %% We can use simulated data (DEMO == true) or some real data (DEMO == false)
 if (DEMO)
@@ -59,7 +65,7 @@ if (DEMO)
     
     sigma = 1;   
     w = 0.5;
-    
+    params.subjectName = 'demo'; 
     % These are the coordinates of the color matches.  The color coordinate always matches the
     % target and the matrial coordinate varies.
     for i = 1:length(colorMatchMaterialCoords)
@@ -124,7 +130,7 @@ if (DEMO)
     end
     
     % compute response probabilities
-    simulatedProbabilities = responseFromSimulatedData./nBlocks;
+    theDataProb = responseFromSimulatedData./nBlocks;
     
     % Use identical loop to compute probabilities, based on our function.
     for whichColorOfTheMaterialMatch = 1:length(materialMatchColorCoords)
@@ -159,23 +165,40 @@ if (DEMO)
 else
     
     % Set up some params
+    % All this should be in the pair indices matrix. 
     colorCoordIndex = 1;
     materialCoordIndex = 2;
     colorMatchIndexInPair = 1;
     materialMatchIndexInPair = 2;
-    nBlocks = 24;
-    
     load('pairIndices.mat')
     
-    theResponsesFromSimulatedData = [ 21    21    24    24    24    24    20
-    18    15    16    23    22    18    12
-     1     0     2    15     6     1     1
-     0     0     1    11     4     0     0
-    14    19    17    24    22    15     3
-    23    24    24    24    24    22    22
-    24    23    24    24    24    24    23  ];
-    nBlocks = 24; 
-    nTrials = nBlocks*[ones(size(theResponsesFromSimulatedData))];
+    whichOption = 'option2'; 
+    
+    switch whichOption
+        case 'option1'
+            theResponsesFromSimulatedData = [ 21    21    24    24    24    24    20
+                18    15    16    23    22    18    12
+                1     0     2    15     6     1     1
+                0     0     1    11     4     0     0
+                14    19    17    24    22    15     3
+                23    24    24    24    24    22    22
+                24    23    24    24    24    24    23  ];
+            nBlocks = 24;
+            nTrials = nBlocks*[ones(size(theResponsesFromSimulatedData))];
+        case 'option2'
+            %
+            theResponsesFromSimulatedData = [   23    24    25    25    25    23    23
+                21    25    24    25    22    23    22
+                6    10    21    25    18     8     8
+                0     1     1   12     0     0     0
+                1     2    15    22     6     3     3
+                10    10    21    25    18    12     8
+                24    25    25    25    24    25    24 ];
+            nBlocks = 25;
+            nTrials = nBlocks*[ones(size(theResponsesFromSimulatedData))];
+    end
+    theDataProb = theResponsesFromSimulatedData./nTrials;
+    params.subjectName = whichOption; 
 end
 
 %% Extract parameters and other useful things from the solution
@@ -189,6 +212,20 @@ params.smoothOrder = smoothOrder;
 [returnedParams, logLikelyFit, predictedProbabilitiesBasedOnSolution, k] = ColorMaterialModelMain(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponsesFromSimulatedData,nTrials,params, ...
     'whichPositions',whichPositions,'whichWeight',whichWeight,'tryWeightValues',tryWeightValues,'trySpacingValues',trySpacingValues); %#ok<SAGROW>
 [returnedMaterialMatchColorCoords,returnedColorMatchMaterialCoords,returnedW,returnedSigma]  = ColorMaterialModelXToParams(returnedParams, params); 
+fprintf('Returned weigth: %0.2f.\n', returnedW);  
+fprintf('Log likelyhood of the solution: %0.2f.\n', logLikelyFit);
+
+% Check that the returned target coordinate is 0.
+% Here we need to add the target index. 
+tolerance = 1e-7; 
+if (abs(returnedMaterialMatchMaterialCoord) > tolerance)
+    error('Target material coordinate did not map to zero.')
+end
+if (abs(returnedColorMatchColorCoord) > tolerance)
+    error('Target color coordinates did not map to zero.')
+end
+
+ColorMaterialPlotSolution(theDataProb, predictedProbabilitiesBasedOnSolution, returnedParams, params, figDir, saveFig); % probabilitiesComputedForSimulatedData); 
 
 %% Check that we can get the same predictions directly from the solution in ways we might want to do it
 % [logLikelyFit2,predictedProbabilitiesBasedOnSolution2] = ColorMaterialModelComputeLogLikelihood(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponsesFromSimulatedData,nTrials,...
@@ -201,122 +238,15 @@ params.smoothOrder = smoothOrder;
 % if (any(predictedProbabilitiesBasedOnSolution ~= predictedProbabilitiesBasedOnSolution2))
 %     error('Cannot recover the predictions 2 from the parameters right after we found them!');
 % end
-
-%% Plot measured vs. predicted probabilities
-theDataProb = theResponsesFromSimulatedData./nTrials;
-figure; hold on
-plot(theDataProb(:),predictedProbabilitiesBasedOnSolution,'ro','MarkerSize',12,'MarkerFaceColor','r');
-if (DEMO)
-    plot(theDataProb(:),probabilitiesComputedForSimulatedData,'bo','MarkerSize',12,'MarkerFaceColor','b');
-end
-
-plot([0 1],[0 1],'k');
-axis('square')
-axis([0 1 0 1]);
-set(gca,  'FontSize', 18);
-xlabel('Measured p');
-ylabel('Predicted p');
-set(gca, 'xTick', [0, 0.5, 1]);
-set(gca, 'yTick', [0, 0.5, 1]);
-
-%% Fit cubic spline to the data
-% We do this separately for color and material dimension
-ppColor = spline(materialMatchColorCoords, returnedMaterialMatchColorCoords);
-ppMaterial = spline(colorMatchMaterialCoords, returnedColorMatchMaterialCoords);
-xMinTemp = floor(min([returnedMaterialMatchColorCoords, returnedColorMatchMaterialCoords]))-0.5; 
-xMaxTemp = ceil(max([returnedMaterialMatchColorCoords, returnedColorMatchMaterialCoords]))+0.5;
-xTemp = max(abs([xMinTemp xMaxTemp]));
-xMin = -xTemp;
-xMax = xTemp;
-yMin = xMin; 
-yMax = xMax;
-splineOverX = linspace(xMin,xMax,1000);
-inferredPositionsColor = ppval(splineOverX,ppColor); 
-inferredPositionsMaterial  = ppval(splineOverX,ppMaterial); 
-
-%% Plot found vs predicted positions. 
-figure; 
-subplot(1,2,1); hold on % plot of material positions
-plot(materialMatchColorCoords,returnedMaterialMatchColorCoords,'ro',splineOverX, inferredPositionsColor, 'r');
-plot([xMin xMax],[yMin yMax],'--', 'LineWidth', 1, 'color', [0.5 0.5 0.5]);
-title('Color dimension')
-axis([xMin, xMax,yMin, yMax])
-axis('square')
-xlabel('"True" position');
-ylabel('Inferred position');
-set(gca, 'xTick', [xMin, 0, xMax],'FontSize', 18);
-set(gca, 'yTick', [yMin, 0, yMax],'FontSize', 18);
-
-% Set large range of values for fittings
-subplot(1,2,2); hold on % plot of material positions
-title('Material dimension')
-plot(colorMatchMaterialCoords,returnedColorMatchMaterialCoords,'bo',splineOverX,inferredPositionsMaterial, 'b');
-plot([xMin xMax],[yMin yMax],'--', 'LineWidth', 1, 'color', [0.5 0.5 0.5]);
-axis([xMin, xMax,yMin, yMax])
-axis('square')
-xlabel('"True" position');
-ylabel('Inferred position');
-set(gca, 'xTick', [xMin, 0, xMax],'FontSize', 18);
-set(gca, 'yTick', [yMin, 0, yMax],'FontSize', 18);
-
-%% Another way to plot the data
-figure; hold on; 
-plot(returnedMaterialMatchColorCoords, zeros(size(returnedMaterialMatchColorCoords)),'ro', 'MarkerFaceColor', 'r', 'MarkerSize', 12); 
-line([xMin, xMax], [0,0],'color', 'k'); 
-plot(zeros(size(returnedColorMatchMaterialCoords)), returnedColorMatchMaterialCoords, 'bo','MarkerFaceColor', 'b', 'MarkerSize', 12); 
-axis([xMin, xMax,yMin, yMax])
-line([0,0],[yMin, yMax],  'color', 'k'); 
-axis('square')
-xlabel('color positions', 'FontSize', 18);
-ylabel('material positions','FontSize', 18);
-
-%% Plot Weibull fits to the data
-if plotWeibullFitsToData
-    for i = 1:size(theResponsesFromSimulatedData,2);
-        if i == 4
-            fixPoint = 1;
-        else
-            fixPoint = 0;
-        end
-        [theSmoothPreds(:,i), theSmoothVals(:,i)] = ColorMaterialModelGetValuesFromFits(theDataProb(:,i)',colorMatchMaterialCoords, fixPoint);
-    end
-    ColorMaterialModelPlotFits(theSmoothVals, theSmoothPreds, materialMatchColorCoords, theDataProb);
-end
-
-%% Plot model predictions 
-% First check the positions of color (material) match on color (material) axis.  
-% Signal if there is an error. 
-returnedMaterialMatchMaterialCoord = ppval(targetMaterialCoord, ppMaterial);
-returnedColorMatchColorCoord =  ppval(targetColorCoord, ppColor);
-tolerance = 1e-7; 
-returnedMaterialMatchMaterialCoord = ppval(targetMaterialCoord, ppMaterial);
-returnedColorMatchColorCoord =  ppval(targetColorCoord, ppColor);
-if (abs(returnedMaterialMatchMaterialCoord) > tolerance)
-    error('Target material coordinate did not map to zero.')
-end
-if (abs(returnedColorMatchColorCoord) > tolerance)
-    error('Target color coordinates did not map to zero.')
-end
-
-% Find the predicted probabilities for a range of possible color coordinates 
-rangeOfMaterialMatchColorCoordinates = linspace(xMin, xMax, 100)';
-
-% Loop over each material coordinate of the color match, to get a predicted
-% curve for each one.
-for whichMaterialCoordinate = 1:length(colorMatchMaterialCoords)
-    % Get the inferred material position for this color match
-    returnedColorMatchMaterialCoord(whichMaterialCoordinate) = ppval(colorMatchMaterialCoords(whichMaterialCoordinate), ppMaterial);
-    
-    % Get the inferred color position for a range of material matches
-    for whichColorCoordinate = 1:length(rangeOfMaterialMatchColorCoordinates)
-        % Get the position of the material match
-        returnedMaterialMatchColorCoord(whichColorCoordinate) = ppval(rangeOfMaterialMatchColorCoordinates(whichColorCoordinate), ppColor);
-                
-        % Compute the model predictions
-        modelPredictions(whichColorCoordinate, whichMaterialCoordinate) = ColorMaterialModelComputeProb(targetColorCoord,targetMaterialCoord, ...
-            returnedColorMatchColorCoord,returnedMaterialMatchColorCoord(whichColorCoordinate),...
-            returnedColorMatchMaterialCoord(whichMaterialCoordinate), returnedMaterialMatchMaterialCoord, returnedW, returnedSigma);
-    end
-end
-rangeOfMaterialMatchColorCoordinates = repmat(rangeOfMaterialMatchColorCoordinates,[1, length(materialMatchColorCoords)]);
-ColorMaterialModelPlotFits(rangeOfMaterialMatchColorCoordinates, modelPredictions, materialMatchColorCoords, simulatedProbabilities, xMin, xMax);
+% if debugging
+% [~,modelPredictions2] = ColorMaterialModelComputeLogLikelihood(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponsesFromSimulatedData,nTrials,...
+%     returnedColorMatchMaterialCoords,returnedMaterialMatchColorCoords,params.targetIndex,...
+%     returnedW, returnedSigma);
+% end
+%% Make sure the numbers we compute from the model now match those we computed in the demo program
+%if debugging
+%figure; clf; hold on
+%plot(predictedProbabilitiesBasedOnSolution(:),modelPredictions(:),'ro','MarkerSize',12,'MarkerFaceColor','r');
+%plot(predictedProbabilitiesBasedOnSolution(:),modelPredictions2(:),'bo','MarkerSize',12,'MarkerFaceColor','b');
+%xlim([0 1]); ylim([0,1]); axis('square');
+%end

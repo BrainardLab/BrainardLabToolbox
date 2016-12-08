@@ -4,31 +4,43 @@
 % we saved by hand after running a long demo fit.
 
 %% Clear and close and load
-clear; close all; 
-DEMO = false; 
-if DEMO
-    load('returnedParamsTemp.mat')
-else
-    load('solutionIfjWFixed.mat');  materialMatchColorCoords = -3:3; colorMatchMaterialCoords = -3:3; targetColorCoord = 0; targetMaterialCoord = 0;
-    simulatedProbabilities = theDataProb; 
+clear; close all;
+whichFit = 'demo';
+switch whichFit
+    case 'demo'
+        load('returnedParamsTemp.mat')
+    case 'full'
+        load('solutionIfjFull.mat');
+        materialMatchColorCoords = -3:3;
+        colorMatchMaterialCoords = -3:3;
+        targetColorCoord = 0;
+        targetMaterialCoord = 0;
+    case 'wfixed'
+        load('solutionIfjWFixed.mat');
+        materialMatchColorCoords = -3:3;
+        colorMatchMaterialCoords = -3:3;
+        targetColorCoord = 0;
+        targetMaterialCoord = 0;
+    case 'equalSpacing'
+        load('solutionIFJEqualSpacing.mat');
+        materialMatchColorCoords = -3:3;
+        colorMatchMaterialCoords = -3:3;
+        targetColorCoord = 0;
+        targetMaterialCoord = 0;
 end
 plotWeibullFitsToData = 1; 
 
 %% Plot measured vs. predicted probabilities
-theDataProb = theResponsesFromSimulatedData./nTrials;
 figure; hold on
-if DEMO
-    plot(theDataProb,predictedProbabilitiesBasedOnSolution,'ro','MarkerSize',12,'MarkerFaceColor','r');
-    plot(theDataProb,probabilitiesComputedForSimulatedData,'bo','MarkerSize',12,'MarkerFaceColor','b');
-else
-    plot(theDataProb(:),predictedProbabilitiesBasedOnSolution(:),'ro','MarkerSize',12,'MarkerFaceColor','r');
+plot(theDataProb(:),predictedProbabilitiesBasedOnSolution(:),'ro','MarkerSize',12,'MarkerFaceColor','r');       
+switch whichFit
+    case 'demo'
+        plot(theDataProb(:),probabilitiesComputedForSimulatedData(:),'bo','MarkerSize',12,'MarkerFaceColor','b');
+        legend('Fit Parameters', 'Actual Parameters', 'Location', 'NorthWest')
+    otherwise
+        legend('Fit Parameters', 'Location', 'NorthWest')
 end
-line([0, 0], [1,1],'color','k'); 
-if DEMO
-    legend('Fit Parameters', 'Actual Parameters', 'Location', 'NorthWest')
-else
-    legend('Actual Parameters', 'Location', 'NorthWest')
-end
+line([0, 1], [0,1], 'color', 'k'); 
 axis('square')
 axis([0 1 0 1]);
 set(gca,  'FontSize', 18);
@@ -44,7 +56,6 @@ ppMaterial = spline(colorMatchMaterialCoords, returnedColorMatchMaterialCoords);
 xMinTemp = floor(min([returnedMaterialMatchColorCoords, returnedColorMatchMaterialCoords]))-0.5; 
 xMaxTemp = ceil(max([returnedMaterialMatchColorCoords, returnedColorMatchMaterialCoords]))+0.5;
 xTemp = max(abs([xMinTemp xMaxTemp]));
-xTemp = 9.5;
 xMin = -xTemp;
 xMax = xTemp;
 yMin = xMin; 
@@ -92,7 +103,6 @@ xlabel('color positions', 'FontSize', 18);
 ylabel('material positions','FontSize', 18);
 
 %% Plot descriptive Weibull fits to the data
-%simulatedProbabilities = theDataProb; 
 if plotWeibullFitsToData
     for i = 1:size(theDataProb,2);
         if i == 4
@@ -100,9 +110,11 @@ if plotWeibullFitsToData
         else
             fixPoint = 0;
         end
-        [theSmoothPreds(:,i), theSmoothVals(:,i)] = ColorMaterialModelGetValuesFromFits(simulatedProbabilities(:,i)',colorMatchMaterialCoords, fixPoint);
+        [theSmoothPreds(:,i), theSmoothVals(:,i)] = ColorMaterialModelGetValuesFromFits(theDataProb(:,i)',materialMatchColorCoords, fixPoint);
+        [theSmoothPreds2(:,i), theSmoothVals2(:,i)] = ColorMaterialModelGetValuesFromFits(theDataProb(i,:),colorMatchMaterialCoords, fixPoint);
     end
-    ColorMaterialModelPlotFits(theSmoothVals, theSmoothPreds, materialMatchColorCoords, simulatedProbabilities);
+    ColorMaterialModelPlotFits(theSmoothVals, theSmoothPreds, colorMatchMaterialCoords, theDataProb);
+%   ColorMaterialModelPlotFits(theSmoothVals2, theSmoothPreds2, materialMatchColorCoords, theDataProb');
 end
 
 %% Plot predictions of the model through the actual data 
@@ -152,4 +164,4 @@ end
 %xlim([0 1]); ylim([0,1]); axis('square');
 %end
 rangeOfMaterialMatchColorCoordinates = repmat(rangeOfMaterialMatchColorCoordinates,[1, length(materialMatchColorCoords)]);
-ColorMaterialModelPlotFits(rangeOfMaterialMatchColorCoordinates, modelPredictions, materialMatchColorCoords, simulatedProbabilities, min(materialMatchColorCoords)-0.5, max(materialMatchColorCoords)+0.5);
+ColorMaterialModelPlotFits(rangeOfMaterialMatchColorCoordinates, modelPredictions, materialMatchColorCoords, theDataProb, min(materialMatchColorCoords)-0.5, max(materialMatchColorCoords)+0.5);
