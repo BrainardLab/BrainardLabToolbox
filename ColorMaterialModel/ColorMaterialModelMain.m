@@ -176,12 +176,12 @@ for k1 = 1:length(p.Results.trySpacingValues)
             switch (p.Results.whichPositions)
                 case 'smoothSpacing'
                     % Weights on coefficients should be bounded. 
-                    vlb(1:end-2) = -100;
-                    vub(1:end-2) = 100;
+                    vlb(1:end-2) = -20;
+                    vub(1:end-2) = 20;
                 case 'full'
                     % Loose bounds on positions
-                    vlb = -100*max(abs(initialParams))*ones(size(initialParams));
-                    vub = 100*max(abs(initialParams))*ones(size(initialParams));
+                    vlb = -20*max(abs(initialParams))*ones(size(initialParams));
+                    vub = 20*max(abs(initialParams))*ones(size(initialParams));
                     
                     % Lock target into place
                     vlb(targetIndexMaterial) = 0;

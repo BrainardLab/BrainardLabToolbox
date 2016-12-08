@@ -217,13 +217,13 @@ fprintf('Log likelyhood of the solution: %0.2f.\n', logLikelyFit);
 
 % Check that the returned target coordinate is 0.
 % Here we need to add the target index. 
-tolerance = 1e-7; 
-if (abs(returnedMaterialMatchMaterialCoord) > tolerance)
-    error('Target material coordinate did not map to zero.')
-end
-if (abs(returnedColorMatchColorCoord) > tolerance)
-    error('Target color coordinates did not map to zero.')
-end
+% tolerance = 1e-7; 
+% if (abs(returnedMaterialMatchMaterialCoord) > tolerance)
+%     error('Target material coordinate did not map to zero.')
+% end
+% if (abs(returnedColorMatchColorCoord) > tolerance)
+%     error('Target color coordinates did not map to zero.')
+% end
 
 ColorMaterialPlotSolution(theDataProb, predictedProbabilitiesBasedOnSolution, returnedParams, params, figDir, saveFig); % probabilitiesComputedForSimulatedData); 
 
