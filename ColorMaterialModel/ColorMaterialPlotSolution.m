@@ -44,19 +44,22 @@ splineOverX(splineOverX<min(params.materialMatchColorCoords))=NaN;
 ppColor = spline(params.materialMatchColorCoords, returnedMaterialMatchColorCoords);
 ppMaterial = spline(params.colorMatchMaterialCoords, returnedColorMatchMaterialCoords);
 
+ppColor = interp1(params.materialMatchColorCoords, returnedMaterialMatchColorCoords,'linear','pp');
+ppMaterial = interp1(params.colorMatchMaterialCoords, returnedColorMatchMaterialCoords,'linear','pp');
+
 % We evaluate this function at all values of X we're interested in. 
 inferredPositionsColor = ppval(splineOverX,ppColor); 
 inferredPositionsMaterial  = ppval(splineOverX,ppMaterial); 
 
 % We do the same thing, just using the interp1 function, to make the plots
 % less wavy. In Figure 2 we plot the interp1 values. 
-inferredPositionsColorInterp = interp1(params.materialMatchColorCoords, returnedMaterialMatchColorCoords,splineOverX); 
-inferredPositionsMaterialInterp  = interp1(params.colorMatchMaterialCoords, returnedColorMatchMaterialCoords,splineOverX); 
+%inferredPositionsColorInterp = interp1(params.materialMatchColorCoords, returnedMaterialMatchColorCoords,splineOverX); 
+%inferredPositionsMaterialInterp  = interp1(params.colorMatchMaterialCoords, returnedColorMatchMaterialCoords,splineOverX); 
 
 %% Figure 2. Plot positions from fit versus actual simulated positions 
 figure; 
 subplot(1,2,1); hold on % plot of material positions
-plot(params.materialMatchColorCoords,returnedMaterialMatchColorCoords,'ro',splineOverX, inferredPositionsColorInterp, 'r');
+plot(params.materialMatchColorCoords,returnedMaterialMatchColorCoords,'ro',splineOverX, inferredPositionsColor, 'r');
 plot([xMin xMax],[yMin yMax],'--', 'LineWidth', 1, 'color', [0.5 0.5 0.5]);
 title('Color dimension')
 axis([xMin, xMax,yMin, yMax])
@@ -69,7 +72,7 @@ set(gca, 'yTick', [yMin, 0, yMax],'FontSize', 18);
 % Set large range of values for fittings
 subplot(1,2,2); hold on % plot of material positions
 title('Material dimension')
-plot(params.colorMatchMaterialCoords,returnedColorMatchMaterialCoords,'bo',splineOverX,inferredPositionsMaterialInterp, 'b');
+plot(params.colorMatchMaterialCoords,returnedColorMatchMaterialCoords,'bo',splineOverX,inferredPositionsMaterial, 'b');
 plot([xMin xMax],[yMin yMax],'--', 'LineWidth', 1, 'color', [0.5 0.5 0.5]);
 axis([xMin, xMax,yMin, yMax])
 axis('square')
@@ -94,7 +97,7 @@ if saveFig
     saveFigure([params.subjectName, 'RecoveredPositions2D'], 'pdf'); 
 end
 %% Figure 3. Plot descriptive Weibull fits to the data. Optional. 
-if params.plotWeibullFitsToData
+%if params.plotWeibullFitsToData
     for i = 1:size(theDataProb,2);
         if i == 4
             fixMidPoint = 1;
@@ -105,8 +108,8 @@ if params.plotWeibullFitsToData
         [theSmoothPreds2(:,i), theSmoothVals2(:,i)] = ColorMaterialModelGetValuesFromFits(1-theDataProb(i,:),params.colorMatchMaterialCoords, fixMidPoint);
     end
     ColorMaterialModelPlotFits(theSmoothVals, theSmoothPreds, params.colorMatchMaterialCoords, theDataProb);
-   ColorMaterialModelPlotFits(theSmoothVals2, theSmoothPreds2, materialMatchColorCoords, 1-theDataProb');
-end
+%   ColorMaterialModelPlotFits(theSmoothVals2, theSmoothPreds2, materialMatchColorCoords, 1-theDataProb');
+%end
 if saveFig
     saveFigure([params.subjectName, 'WeibullFitColorXAxis'], 'pdf'); 
 end
@@ -133,6 +136,7 @@ for whichMaterialCoordinate = 1:length(params.colorMatchMaterialCoords)
         % Get the position of the material match 
         % To avoid a wavy spline, here we use interp1 
         returnedMaterialMatchColorCoord(whichColorCoordinate) = interp1(params.materialMatchColorCoords, returnedColorMatchMaterialCoords, rangeOfMaterialMatchColorCoordinates(whichColorCoordinate));
+        returnedMaterialMatchColorCoord(whichColorCoordinate) = ppval(rangeOfMaterialMatchColorCoordinates(whichColorCoordinate), ppColor);
                 
         % Compute the model predictions
         modelPredictions(whichColorCoordinate, whichMaterialCoordinate) = ColorMaterialModelComputeProb(params.targetColorCoord,params.targetMaterialCoord, ...
