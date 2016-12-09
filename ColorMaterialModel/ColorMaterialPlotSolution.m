@@ -41,15 +41,21 @@ splineOverX = linspace(xMin,xMax,1000);
 splineOverX(splineOverX>max(params.materialMatchColorCoords))=NaN;
 splineOverX(splineOverX<min(params.materialMatchColorCoords))=NaN; 
 % We fit a cubic spline to the data for both color and material. 
-ppColor = spline(params.materialMatchColorCoords, returnedMaterialMatchColorCoords);
-ppMaterial = spline(params.colorMatchMaterialCoords, returnedColorMatchMaterialCoords);
+%ppColor = spline(params.materialMatchColorCoords, returnedMaterialMatchColorCoords);
+%ppMaterial = spline(params.colorMatchMaterialCoords, returnedColorMatchMaterialCoords);
 
 ppColor = interp1(params.materialMatchColorCoords, returnedMaterialMatchColorCoords,'linear','pp');
 ppMaterial = interp1(params.colorMatchMaterialCoords, returnedColorMatchMaterialCoords,'linear','pp');
 
+FColor = griddedInterpolant(params.materialMatchColorCoords, returnedMaterialMatchColorCoords,'linear');
+FMaterial = griddedInterpolant(params.colorMatchMaterialCoords, returnedColorMatchMaterialCoords,'linear');
+
 % We evaluate this function at all values of X we're interested in. 
 inferredPositionsColor = ppval(splineOverX,ppColor); 
 inferredPositionsMaterial  = ppval(splineOverX,ppMaterial); 
+
+inferredPositionsColor = FColor(splineOverX); 
+inferredPositionsMaterial  = FMaterial(splineOverX); 
 
 % We do the same thing, just using the interp1 function, to make the plots
 % less wavy. In Figure 2 we plot the interp1 values. 
@@ -116,9 +122,12 @@ end
 %% Plot predictions of the model through the actual data 
 %
 % First check the positions of color (material) match on color (material) axis.  
-% Signal if there is an error. 
-returnedMaterialMatchMaterialCoord = ppval(params.targetMaterialCoord, ppMaterial);
+% Signal if there is an error.
 returnedColorMatchColorCoord =  ppval(params.targetColorCoord, ppColor);
+returnedMaterialMatchMaterialCoord = ppval(params.targetMaterialCoord, ppMaterial);
+
+returnedColorMatchColorCoord =  FColor(params.targetColorCoord);
+returnedMaterialMatchMaterialCoord = FMatieral(params.targetMaterialCoord);
 
 % Find the predicted probabilities for a range of possible color coordinates 
 rangeOfMaterialMatchColorCoordinates = linspace(min(params.materialMatchColorCoords), max(params.materialMatchColorCoords), 100)';
@@ -130,13 +139,16 @@ for whichMaterialCoordinate = 1:length(params.colorMatchMaterialCoords)
     % Get the inferred material position for this color match
     % Note that this is read from cubic spline fit.  
     returnedColorMatchMaterialCoord(whichMaterialCoordinate) = ppval(params.colorMatchMaterialCoords(whichMaterialCoordinate), ppMaterial);
+    returnedColorMatchMaterialCoord(whichMaterialCoordinate) = FMaterial(params.colorMatchMaterialCoords(whichMaterialCoordinate));
+
     
     % Get the inferred color position for a range of material matches
     for whichColorCoordinate = 1:length(rangeOfMaterialMatchColorCoordinates)
         % Get the position of the material match 
         % To avoid a wavy spline, here we use interp1 
-        returnedMaterialMatchColorCoord(whichColorCoordinate) = interp1(params.materialMatchColorCoords, returnedColorMatchMaterialCoords, rangeOfMaterialMatchColorCoordinates(whichColorCoordinate));
+        %returnedMaterialMatchColorCoord(whichColorCoordinate) = interp1(params.materialMatchColorCoords, returnedColorMatchMaterialCoords, rangeOfMaterialMatchColorCoordinates(whichColorCoordinate));
         returnedMaterialMatchColorCoord(whichColorCoordinate) = ppval(rangeOfMaterialMatchColorCoordinates(whichColorCoordinate), ppColor);
+        returnedMaterialMatchColorCoord(whichColorCoordinate) = FColor(rangeOfMaterialMatchColorCoordinates(whichColorCoordinate));
                 
         % Compute the model predictions
         modelPredictions(whichColorCoordinate, whichMaterialCoordinate) = ColorMaterialModelComputeProb(params.targetColorCoord,params.targetMaterialCoord, ...
