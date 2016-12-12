@@ -10,27 +10,10 @@
 % 11/18/16  ar  Wrote from color selection model version
 
 %% Initialize and parameter set
-clear ; close all;
+clc; clear ; close all;
 
 % Simulate up some data, or read in data.  DEMO means simulate.
 DEMO = false;
-
-% What sort of position fitting are we doing, and if smooth
-% the order of the polynomial.
-% Options:
-%  'full' - Weights vary
-%  'smoothSpacing' - Weights computed according to a polynomial fit.
-whichPositions = 'full';
-smoothOrder = 2;
-
-% Initial position spacing values to try.
-trySpacingValues = [0.5 1 2];
-
-% Does material/color weight vary in fit?
-%  'weightVary' - yes, it does.
-%  'weightFixed' - fix weight to specified value in tryWeightValues(1);
-whichWeight = 'weightFixed';
-tryWeightValues = [0.5 0.2 0.8];
 
 %% Load structure giving experiment design parameters. 
 % Here we use the example structure that mathes the experimental design of
@@ -39,6 +22,23 @@ load('ColorMaterialExampleStructure.mat')
 
 params.materialMatchColorCoords  =  params.competitorsRangeNegative(1):1:params.competitorsRangePositive(end); 
 params.colorMatchMaterialCoords  =  params.competitorsRangeNegative(1):1:params.competitorsRangePositive(end); 
+
+% What sort of position fitting are we doing, and if smooth
+% the order of the polynomial.
+% Options:
+%  'full' - Weights vary
+%  'smoothSpacing' - Weights computed according to a polynomial fit.
+params.whichPositions = 'full';
+params.smoothOrder = 2;
+
+% Initial position spacing values to try.
+trySpacingValues = [0.5 1 2];
+
+% Does material/color weight vary in fit?
+%  'weightVary' - yes, it does.
+%  'weightFixed' - fix weight to specified value in tryWeightValues(1);
+params.whichWeight = 'weightFixed';
+tryWeightValues = [0.5 0.2 0.8];
 
 % Set figure directories
 figDir = pwd; 
@@ -67,15 +67,15 @@ if (DEMO)
    
     % These are the coordinates of the color matches.  The color coordinate always matches the
     % target and the matrial coordinate varies.
-    for i = 1:length(colorMatchMaterialCoords)
-        stimuliColorMatch = [stimuliColorMatch, {[targetColorCoord, colorMatchMaterialCoords(i)]}];
+    for i = 1:length(params.colorMatchMaterialCoords)
+        stimuliColorMatch = [stimuliColorMatch, {[targetColorCoord, params.colorMatchMaterialCoords(i)]}];
     end
     
     % These are the coordinates of the material matches.  The color
     % coordinate varies and the material coordinate always matches the
     % target.
-    for i = 1:length(materialMatchColorCoords)
-        stimuliMaterialMatch = [stimuliMaterialMatch, {[materialMatchColorCoords(i), targetMaterialCoord]}];
+    for i = 1:length(params.materialMatchColorCoords)
+        stimuliMaterialMatch = [stimuliMaterialMatch, {[params.materialMatchColorCoords(i), targetMaterialCoord]}];
     end
     
     % Simulate the data
@@ -86,15 +86,15 @@ if (DEMO)
     colorMatchIndexInPair = 1;
     materialMatchIndexInPair = 2;
     nBlocks = 100;
-    responseFromSimulatedData  = zeros(length(materialMatchColorCoords),length(colorMatchMaterialCoords));
-    probabilitiesComputedForSimulatedData  = zeros(length(materialMatchColorCoords),length(colorMatchMaterialCoords));
+    responseFromSimulatedData  = zeros(length(params.materialMatchColorCoords),length(params.colorMatchMaterialCoords));
+    probabilitiesComputedForSimulatedData  = zeros(length(params.materialMatchColorCoords),length(params.colorMatchMaterialCoords));
     
     % Loop over blocks and stimulus pairs and simulate responses
     %
     % We pair each color-difference stimulus with each material-difference stimulus
     for b = 1:nBlocks
-        for whichColorOfTheMaterialMatch = 1:length(materialMatchColorCoords)
-            for whichMaterialOfTheColorMatch = 1:length(colorMatchMaterialCoords)
+        for whichColorOfTheMaterialMatch = 1:length(params.materialMatchColorCoords)
+            for whichMaterialOfTheColorMatch = 1:length(params.colorMatchMaterialCoords)
                 
                 % The pair is a cell array containing two vectors.  The
                 % first vector is the coordinates of the color match, the
@@ -132,8 +132,8 @@ if (DEMO)
     theDataProb = responseFromSimulatedData./nBlocks;
     
     % Use identical loop to compute probabilities, based on our function.
-    for whichColorOfTheMaterialMatch = 1:length(materialMatchColorCoords)
-        for whichMaterialOfTheColorMatch = 1:length(colorMatchMaterialCoords)
+    for whichColorOfTheMaterialMatch = 1:length(params.materialMatchColorCoords)
+        for whichMaterialOfTheColorMatch = 1:length(params.colorMatchMaterialCoords)
             clear pair
             pair = {stimuliColorMatch{whichMaterialOfTheColorMatch},stimuliMaterialMatch{whichColorOfTheMaterialMatch}};
             
@@ -199,6 +199,10 @@ else
     end
     theDataProb = theResponsesFromSimulatedData./nTrials;
     params.subjectName = whichOption; 
+    
+    % string out the responses for fitting. 
+    theResponsesFromSimulatedData = theResponsesFromSimulatedData(:);
+    nTrials  = nTrials(:);
 end
 
 %% Extract parameters and other useful things from the solution
@@ -214,7 +218,7 @@ end
 
 [returnedParams, logLikelyFit, predictedProbabilitiesBasedOnSolution, k] = ColorMaterialModelMain(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,...
     theResponsesFromSimulatedData,nTrials,params, ...
-    'whichPositions',whichPositions,'whichWeight',whichWeight, ...
+    'whichPositions',params.whichPositions,'whichWeight',params.whichWeight, ...
     'tryWeightValues',tryWeightValues,'trySpacingValues',trySpacingValues); %#ok<SAGROW>
 [returnedMaterialMatchColorCoords,returnedColorMatchMaterialCoords,returnedW,returnedSigma]  = ColorMaterialModelXToParams(returnedParams, params); 
 fprintf('Returned weigth: %0.2f.\n', returnedW);  
