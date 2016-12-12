@@ -15,9 +15,6 @@ clear ; close all;
 % Simulate up some data, or read in data.  DEMO means simulate.
 DEMO = false;
 
-% Make plots with descriptive Weibull fits to the data?
-plotWeibullFitsToData = true; 
-
 % What sort of position fitting are we doing, and if smooth
 % the order of the polynomial.
 % Options:
@@ -40,17 +37,8 @@ tryWeightValues = [0.5 0.2 0.8];
 % our initial experiments. 
 load('ColorMaterialExampleStructure.mat')
 
-% Make a stimulus list and set underlying parameters.
-targetMaterialCoord = 0;
-targetColorCoord = 0;
-stimuliMaterialMatch = [];
-stimuliColorMatch = [];
-scalePositions = 1; % scaling factor for input positions (we can try different ones to match our noise i.e. sigma of 1).
-materialMatchColorCoords = scalePositions*[-3, -2, -1, 0, 1, 2, 3];
-colorMatchMaterialCoords = scalePositions*[-3, -2, -1, 0, 1, 2, 3];
-targetIndex = 4;
-params.materialMatchColorCoords  =  materialMatchColorCoords; 
-params.colorMatchMaterialCoords  =  colorMatchMaterialCoords; 
+params.materialMatchColorCoords  =  params.competitorsRangeNegative(1):1:params.competitorsRangePositive(end); 
+params.colorMatchMaterialCoords  =  params.competitorsRangeNegative(1):1:params.competitorsRangePositive(end); 
 
 % Set figure directories
 figDir = pwd; 
@@ -63,9 +51,20 @@ if (DEMO)
     % time we do this.
     rng('default');
     
-    sigma = 1;   
+    % Set up some parameters for the demo
+    % Make a stimulus list and set underlying parameters.
+    targetMaterialCoord = 0;
+    targetColorCoord = 0;
+    stimuliMaterialMatch = [];
+    stimuliColorMatch = [];
+    scalePositions = 1; % scaling factor for input positions (we can try different ones to match our noise i.e. sigma of 1).
+    sigma = 1;
     w = 0.5;
+    
     params.subjectName = 'demo'; 
+    params.materialMatchColorCoords = scalePositions*params.materialMatchColorCoords;
+    params.colorMatchMaterialCoords = scalePositions*params.colorMatchMaterialCoords;
+   
     % These are the coordinates of the color matches.  The color coordinate always matches the
     % target and the matrial coordinate varies.
     for i = 1:length(colorMatchMaterialCoords)
@@ -156,7 +155,8 @@ if (DEMO)
     % Number of columns here should match the number of columns in
     % someData.
     nTrials = nBlocks*ones(size(theResponsesFromSimulatedData));
-    logLikely = ColorMaterialModelComputeLogLikelihood(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponsesFromSimulatedData,nTrials,colorMatchMaterialCoords,materialMatchColorCoords,targetIndex,w,sigma);
+    logLikely = ColorMaterialModelComputeLogLikelihood(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices, ...
+        theResponsesFromSimulatedData,nTrials,params.colorMatchMaterialCoords,params.materialMatchColorCoords,params.targetIndex,w,sigma);
     fprintf('Initial log likelihood %0.2f.\n', logLikely);
     
     
@@ -207,10 +207,15 @@ end
 % it.  This isn't beautiful, but saves us figuring out how to pass the
 % various key value pairs all the way down into the functions called by
 % fmincon, which is actually somewhat hard to do in a more elegant way.
-params.whichPositions = whichPositions;
-params.smoothOrder = smoothOrder;
-[returnedParams, logLikelyFit, predictedProbabilitiesBasedOnSolution, k] = ColorMaterialModelMain(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponsesFromSimulatedData,nTrials,params, ...
-    'whichPositions',whichPositions,'whichWeight',whichWeight,'tryWeightValues',tryWeightValues,'trySpacingValues',trySpacingValues); %#ok<SAGROW>
+
+% params.whichPositions = whichPositions;
+% params.smoothOrder = smoothOrder;
+% params.whichWeight = whichWeight; 
+
+[returnedParams, logLikelyFit, predictedProbabilitiesBasedOnSolution, k] = ColorMaterialModelMain(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,...
+    theResponsesFromSimulatedData,nTrials,params, ...
+    'whichPositions',whichPositions,'whichWeight',whichWeight, ...
+    'tryWeightValues',tryWeightValues,'trySpacingValues',trySpacingValues); %#ok<SAGROW>
 [returnedMaterialMatchColorCoords,returnedColorMatchMaterialCoords,returnedW,returnedSigma]  = ColorMaterialModelXToParams(returnedParams, params); 
 fprintf('Returned weigth: %0.2f.\n', returnedW);  
 fprintf('Log likelyhood of the solution: %0.2f.\n', logLikelyFit);
