@@ -12,8 +12,9 @@
 clear; close all;
 
 %% Load in the data
+whichDataSet = 4;
 theRawData = load('dataForEllipseTest.mat');
-theData0 = theRawData.dataForEllipse';
+theData0 = theRawData.dataForEllipse(theRawData.ind==whichDataSet,:)';
 
 %% Embed in 3D so we can use ellipsoid code
 theData0(3,:) = 0*ones(1,size(theData0,2));
@@ -22,7 +23,7 @@ theData1(3,:) = 0.5;
 theData2 = 0.5*theData0;
 theData2(3,:) = -0.5;
 theDataToFit = [theData0 theData1 theData2];
-[fitA,fitAinv,fitQ,fitEllParams] = EllipsoidFit(theDataToFit,[],true);
+[fitA,fitAinv,fitQ,fitEllParams] = EllipsoidFit(theDataToFit,[],true,true);
 
 %% Grab ellipsoid center from params.  
 fitXCenter = fitEllParams(7:9);
