@@ -1,12 +1,13 @@
 function thePreds = ColorMaterialModelComputeTradeOffPredictions(theVals,theScaleNeg,theScalePos,theShape,theMin,theRange)
 %function thePreds = ColorMaterialModelComputeTradeOffPredictions(theVals,theScaleNeg,theScalePos,theShape,theMin,theRange)
 % Fit the Weibull function given the current parameters. 
+%
 % There are two legs of this function - positive and negative, each is allowed to have its own
-% scale but not shape parameters. 
+% scale but not shape parameters. Note that we are fixing the shape to be
+% the same for both positive and negative leg (this can change in the
+% future, if needed). 
 % 
 % 11/28/16 ar   Simplified original function written by dhb
-
-% NOT SURE WHY WE DON T ALLOW DIFFERENT SHAPES FOR THE TWO PARTS?
 
 FORCE_ASYMPTOTE = true;
 if (FORCE_ASYMPTOTE)

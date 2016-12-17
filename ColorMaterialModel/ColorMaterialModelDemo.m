@@ -20,25 +20,29 @@ DEMO = false;
 % our initial experiments. 
 load('ColorMaterialExampleStructure.mat')
 
+% After iniatial parameters are imported we need to specify the following info 
+% and add it to the params structure
+% 1) initial material and color positions
 params.materialMatchColorCoords  =  params.competitorsRangeNegative(1):1:params.competitorsRangePositive(end); 
 params.colorMatchMaterialCoords  =  params.competitorsRangeNegative(1):1:params.competitorsRangePositive(end); 
 
-% What sort of position fitting are we doing, and if smooth
+% 2) What sort of position fitting are we doing, and if smooth
 % the order of the polynomial.
 % Options:
 %  'full' - Weights vary
 %  'smoothSpacing' - Weights computed according to a polynomial fit.
 params.whichPositions = 'full';
 params.smoothOrder = 2;
-
 % Initial position spacing values to try.
 trySpacingValues = [0.5 1 2];
+params.trySpacingValues = trySpacingValues; 
 
-% Does material/color weight vary in fit?
+% 3) Does material/color weight vary in fit?
 %  'weightVary' - yes, it does.
 %  'weightFixed' - fix weight to specified value in tryWeightValues(1);
 params.whichWeight = 'weightFixed';
 tryWeightValues = [0.5 0.2 0.8];
+params.tryWeightValues = tryWeightValues; 
 
 % Set figure directories
 figDir = pwd; 
@@ -175,7 +179,8 @@ else
     whichOption = 'option2'; 
     
     switch whichOption
-        case 'option1'
+        
+        case 'option1' % some actual data from our Experiment 1. 
             theResponsesFromSimulatedData = [ 21    21    24    24    24    24    20
                 18    15    16    23    22    18    12
                 1     0     2    15     6     1     1
@@ -185,8 +190,11 @@ else
                 24    23    24    24    24    24    23  ];
             nBlocks = 24;
             nTrials = nBlocks*[ones(size(theResponsesFromSimulatedData))];
+        
         case 'option2'
-            %
+            % Note: In this option 12 in the 3rd row is 'appriximation' of a data point that we did not
+            % collect in the exeriment (target is presented with two identical tests), thus, 
+            % responses should be 50:50.
             theResponsesFromSimulatedData = [   23    24    25    25    25    23    23
                 21    25    24    25    22    23    22
                 6    10    21    25    18     8     8
@@ -200,7 +208,7 @@ else
     theDataProb = theResponsesFromSimulatedData./nTrials;
     params.subjectName = whichOption; 
     
-    % string out the responses for fitting. 
+    % String out the responses for fitting. 
     theResponsesFromSimulatedData = theResponsesFromSimulatedData(:);
     nTrials  = nTrials(:);
 end
@@ -212,10 +220,6 @@ end
 % various key value pairs all the way down into the functions called by
 % fmincon, which is actually somewhat hard to do in a more elegant way.
 
-% params.whichPositions = whichPositions;
-% params.smoothOrder = smoothOrder;
-% params.whichWeight = whichWeight; 
-
 [returnedParams, logLikelyFit, predictedProbabilitiesBasedOnSolution, k] = ColorMaterialModelMain(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,...
     theResponsesFromSimulatedData,nTrials,params, ...
     'whichPositions',params.whichPositions,'whichWeight',params.whichWeight, ...
@@ -224,19 +228,10 @@ end
 fprintf('Returned weigth: %0.2f.\n', returnedW);  
 fprintf('Log likelyhood of the solution: %0.2f.\n', logLikelyFit);
 
-% Check that the returned target coordinate is 0.
-% Here we need to add the target index. 
-% tolerance = 1e-7; 
-% if (abs(returnedMaterialMatchMaterialCoord) > tolerance)
-%     error('Target material coordinate did not map to zero.')
-% end
-% if (abs(returnedColorMatchColorCoord) > tolerance)
-%     error('Target color coordinates did not map to zero.')
-% end
-
 ColorMaterialPlotSolution(theDataProb, predictedProbabilitiesBasedOnSolution, returnedParams, params, figDir, saveFig); % probabilitiesComputedForSimulatedData); 
 
-%% Check that we can get the same predictions directly from the solution in ways we might want to do it
+%% Bellow is the code we used for debugging initial program. 
+% Check that we can get the same predictions directly from the solution in ways we might want to do it
 % [logLikelyFit2,predictedProbabilitiesBasedOnSolution2] = ColorMaterialModelComputeLogLikelihood(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponsesFromSimulatedData,nTrials,...
 %     returnedColorMatchMaterialCoords,returnedMaterialMatchColorCoords,params.targetIndex,...
 %     returnedW, returnedSigma);

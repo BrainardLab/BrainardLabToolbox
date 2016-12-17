@@ -18,9 +18,11 @@ function [theSmoothPreds,theSmoothVals] = ColorMaterialModelGetValuesFromFits(th
 % 11/27/16  ar Adapted it from the working version of the routines that were fitting the data.  
 
 
-% Smooth values for interpolation
+% Smooth values for interpolation. 
+% Make sure the fit includes a zero, so that all Weibull functions would
+% look nice. 
 nSmoothVals = 100;
-theSmoothVals = linspace(theDeltaCs(1),theDeltaCs(end),nSmoothVals)';
+theSmoothVals = sort([0 ; linspace(theDeltaCs(1),theDeltaCs(end),nSmoothVals)']);
 
 % Allocate some space
 nVals = size(theDeltaCs,1);
@@ -28,7 +30,7 @@ theSmoothPreds = zeros(nSmoothVals,1);
 
 % Try some starting places to optimize the fits.
 tryMin = [0:0.1:0.4];
-tryShape = [0.5, 1, 2, 3];
+tryShape = [0.01, 0.25, 0.5, 1, 2, 3];
 minError = Inf;
 
 for k1 = 1:length(tryMin)

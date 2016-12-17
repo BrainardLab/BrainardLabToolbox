@@ -1,12 +1,18 @@
-function ColorMaterialModelPlotFits(theSmoothVals,theSmoothPreds, theDeltaCs, theData, xMin, xMax)
-%function ColorMaterialModelPlotFits(theSmoothVals,theSmoothPreds, theDeltaCs, theData, xMin, xMax)
+function h = ColorMaterialModelPlotFits(theSmoothVals,theSmoothPreds, theDeltaSteps, theData, whichMatch, xMin, xMax)
+%function ColorMaterialModelPlotFits(theSmoothVals,theSmoothPreds, theDeltaSteps, theData, whichMatch, xMin, xMax)
 % 
 % Plots the fits to the data given the following input 
 % Input: 
-%   theSmoothVals
-%   theSmoothPreds
-%   theDeltaCs
-%   theData
+%   theSmoothVals - range of values for the x-axis
+%   theSmoothPreds - corresponding range of predictions from the fit (y-axis)
+%   theDeltaSteps - number of color/material steps (x-axis) 
+%   theData - data points from the experiment (y-axis)
+%   whichMatch - string - either 'colorMatch' or 'materialMatch' - defines
+%                what choice probabilities we're plotting
+%   figDir - whichDirectory to save the figures in
+%   saveFig - should we save figures
+% 
+%   Dec 2016 ar Wrote it
 
 % Set up some plotting parameters
 blue = [28, 134, 238]./255; 
@@ -15,28 +21,41 @@ green = [34, 139, 34]./255.*1.2;
 stepColors = {red, green, blue, 'k', blue, green, red};
 
 % Plot color material trade off fits
-figure; clf; hold on
+h = figure; clf; hold on
 for i = 1:size(theData,2)
     if i < 4
-        plot(theDeltaCs,theData(:,i),'o','MarkerEdgeColor',stepColors{i},'MarkerSize',12, 'LineWidth', 2);
+        plot(theDeltaSteps,theData(:,i),'o','MarkerEdgeColor',stepColors{i},'MarkerSize',12, 'LineWidth', 2);
         plot(theSmoothVals(:,i),theSmoothPreds(:,i),'--','color', stepColors{i}, 'LineWidth',2);
     else
-        plot(theDeltaCs,theData(:,i),'o','MarkerFaceColor',stepColors{i},'MarkerEdgeColor',stepColors{i},'MarkerSize',12);
+        plot(theDeltaSteps,theData(:,i),'o','MarkerFaceColor',stepColors{i},'MarkerEdgeColor',stepColors{i},'MarkerSize',12);
         plot(theSmoothVals(:,i),theSmoothPreds(:,i),'color', stepColors{i}, 'LineWidth',2);
     end
 end
 plot(0, 0.5, 'kx', 'LineWidth',2)
 % Set ends of the xAxis if we didn't pass them. 
-title(sprintf('Model fits for different material steps'),'FontName','Helvetica','FontSize',16);
-if (nargin < 5)
-    xMin = theDeltaCs(1)-0.5;
-    xMax =  theDeltaCs(end)+0.5; 
-    title(sprintf('Weibull fits for different material steps'),'FontName','Helvetica','FontSize',16);
+switch whichMatch
+    case 'colorMatch'
+        title(sprintf('Model fits for different material steps'),'FontName','Helvetica','FontSize',16);
+        xlabel('Color Coordinates of the Material Match','FontName','Helvetica','FontSize',18);
+        ylabel('Fraction color match chosen','FontName','Helvetica','FontSize',18);
+
+    case 'materialMatch'
+        title(sprintf('Model fits for different color steps'),'FontName','Helvetica','FontSize',16);
+        xlabel('Material Coordinates of the Color Match','FontName','Helvetica','FontSize',18);
+        ylabel('Fraction material match chosen','FontName','Helvetica','FontSize',18);
+
 end
-xlabel('Color Coordinates of the Material Match','FontName','Helvetica','FontSize',18);
-ylabel('Fraction color match chosen','FontName','Helvetica','FontSize',18);
+
+if (nargin < 7)
+    xMin = theDeltaSteps(1)-0.5;
+    xMax =  theDeltaSteps(end)+0.5;
+    switch whichMatch
+        case 'colorMatch'
+            title(sprintf('Weibull fits for different material steps'),'FontName','Helvetica','FontSize',16);
+        case 'materialMatch'
+            title(sprintf('Weibull fits for different color steps'),'FontName','Helvetica','FontSize',16);
+    end
+end
 axis([xMin xMax 0 1.05])
 set(gca,'FontName','Helvetica','FontSize',14);
-%cd(figureDir)
-%FigureSave(sprintf('%s_DeltaM_%s',subjectData.Name, conditionCode),gcf,'pdf');
 
