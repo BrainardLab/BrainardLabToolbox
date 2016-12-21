@@ -1,8 +1,9 @@
-function h = ColorMaterialModelPlotFits(theSmoothVals,theSmoothPreds, theDeltaSteps, theData, whichMatch, xMin, xMax)
+function h = ColorMaterialModelPlotFits(returnedW, theSmoothVals,theSmoothPreds, theDeltaSteps, theData, whichMatch, xMin, xMax)
 %function ColorMaterialModelPlotFits(theSmoothVals,theSmoothPreds, theDeltaSteps, theData, whichMatch, xMin, xMax)
 % 
 % Plots the fits to the data given the following input 
 % Input: 
+%   returnedW - returned weigth (value we print on the figure); 
 %   theSmoothVals - range of values for the x-axis
 %   theSmoothPreds - corresponding range of predictions from the fit (y-axis)
 %   theDeltaSteps - number of color/material steps (x-axis) 
@@ -31,6 +32,7 @@ for i = 1:size(theData,2)
         plot(theSmoothVals(:,i),theSmoothPreds(:,i),'color', stepColors{i}, 'LineWidth',2);
     end
 end
+text(-3, 1.05, sprintf('w = %.2f', returnedW), 'FontSize', 12); 
 plot(0, 0.5, 'kx', 'LineWidth',2)
 % Set ends of the xAxis if we didn't pass them. 
 switch whichMatch
@@ -46,7 +48,7 @@ switch whichMatch
 
 end
 
-if (nargin < 7)
+if (nargin < 8)
     xMin = theDeltaSteps(1)-0.5;
     xMax =  theDeltaSteps(end)+0.5;
     switch whichMatch

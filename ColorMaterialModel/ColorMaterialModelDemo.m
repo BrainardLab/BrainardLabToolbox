@@ -32,7 +32,7 @@ params.colorMatchMaterialCoords  =  params.competitorsRangeNegative(1):1:params.
 %  'full' - Weights vary
 %  'smoothSpacing' - Weights computed according to a polynomial fit.
 params.whichPositions = 'full';
-params.smoothOrder = 2;
+params.smoothOrder = 3;
 % Initial position spacing values to try.
 trySpacingValues = [0.5 1 2];
 params.trySpacingValues = trySpacingValues; 

@@ -6,7 +6,6 @@ function [colorMatchMaterialCoords,materialMatchColorCoords,w,sigma] = ColorMate
 % Input: 
 %   x - parameters vector
 %   params - structure giving experiment design parameters
-%
 % Output: 
 %   colorPositions - inferred positions on color dimensions for a material match
 %   materialPositions - inferred positions on material dimensions for a color match

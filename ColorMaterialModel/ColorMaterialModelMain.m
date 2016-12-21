@@ -22,7 +22,7 @@ function [x, logLikelyFit, predictedResponses, k] = ColorMaterialModelMain(pairC
 % Optional key/value pairs
 %   'whichPositions' - string (default 'full').  Which model to fit
 %      'full' - Fit all parameters.
-%      'smoothlSpacing - Force spacing between stimulus positions to vary smoothly.
+%      'smoothSpacing - Force spacing between stimulus positions to vary smoothly.
 %   'whichWeight' - string (default 'weightVary').  How to handle weights.
 %     'weightVary' - Allow the weight to vary
 %     'weightFixed' - Fix the weight at value in tryWeightValues(1).

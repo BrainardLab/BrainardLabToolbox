@@ -17,12 +17,19 @@ function ColorMaterialPlotSolution(theDataProb, predictedProbabilitiesBasedOnSol
 %% Figure 1. Plot measured vs. predicted probabilities
 figure; hold on
 plot(theDataProb(:),predictedProbabilitiesBasedOnSolution(:),'ro','MarkerSize',12,'MarkerFaceColor','r');
+rmse = computeRealRMSE(theDataProb(:),predictedProbabilitiesBasedOnSolution(:)); 
+text(0.07, 0.87, sprintf('RMSE = %.4f', rmse), 'FontSize', 12); 
+
 if strcmp(subjectName,  'demo')
  %   plot(theDataProb(:),probabilitiesComputedForSimulatedData(:),'bo','MarkerSize',12,'MarkerFaceColor','b');
-    legend('Fit Parameters', 'Actual Parameters', 'Location', 'NorthWest')
+ %   legend('Fit Parameters', 'Actual Parameters', 'Location', 'NorthWest')
+  legend('Fit Parameters', 'Location', 'NorthWest')
+  legend boxoff
 else
     legend('Fit Parameters', 'Location', 'NorthWest')
+    legend boxoff
 end
+
 thisFontSize = 12; 
 line([0, 1], [0,1], 'color', 'k');
 axis('square')
@@ -106,8 +113,7 @@ if saveFig
     FigureSave([subjectName, conditionCode, 'RecoveredPositions2D'], gcf, 'pdf'); 
 end
 %% Figure 3. Plot descriptive Weibull fits to the data. 
-weibullfits = 0; 
-if weibullfits
+if weibullplots
     for i = 1:size(theDataProb,2);
         if i == 4
             fixMidPoint = 1;
@@ -161,25 +167,18 @@ for whichMaterialCoordinate = 1:length(params.colorMatchMaterialCoords)
     for whichColorCoordinate = 1:length(rangeOfMaterialMatchColorCoordinates)
         % Get the position of the material match using our FColor function
         returnedMaterialMatchColorCoord(whichColorCoordinate) = FColor(rangeOfMaterialMatchColorCoordinates(whichColorCoordinate));
-                
+        
         % Compute the model predictions
         modelPredictions(whichColorCoordinate, whichMaterialCoordinate) = ColorMaterialModelComputeProb(params.targetColorCoord,params.targetMaterialCoord, ...
             returnedColorMatchColorCoord,returnedMaterialMatchColorCoord(whichColorCoordinate),...
             returnedColorMatchMaterialCoord(whichMaterialCoordinate), returnedMaterialMatchMaterialCoord, returnedW, returnedSigma);
-       
         % Compute the model predictions
-        modelPredictions2(whichColorCoordinate, whichMaterialCoordinate) = ColorMaterialModelComputeProb(params.targetColorCoord,params.targetMaterialCoord, ...
-            returnedColorMatchColorCoord,returnedMaterialMatchColorCoord(whichColorCoordinate),...
-            returnedColorMatchMaterialCoord(whichMaterialCoordinate), returnedMaterialMatchMaterialCoord, 0.5, returnedSigma);
-   
+        
     end
 end
 rangeOfMaterialMatchColorCoordinates = repmat(rangeOfMaterialMatchColorCoordinates,[1, length(params.materialMatchColorCoords)]);
-% thisFig3 = ColorMaterialModelPlotFits(rangeOfMaterialMatchColorCoordinates, modelPredictions, params.materialMatchColorCoords, theDataProb, 'colorMatch', ...
-%     min(params.materialMatchColorCoords)-0.5, max(params.materialMatchColorCoords)+0.5);
-% 
-% thisFig5 = ColorMaterialModelPlotFits(rangeOfMaterialMatchColorCoordinates, modelPredictions2, params.materialMatchColorCoords, theDataProb, 'colorMatch', ...
- %   min(params.materialMatchColorCoords)-0.5, max(params.materialMatchColorCoords)+0.5);
+thisFig3 = ColorMaterialModelPlotFits(returnedW, rangeOfMaterialMatchColorCoordinates, modelPredictions, params.materialMatchColorCoords, theDataProb, 'colorMatch', ...
+    min(params.materialMatchColorCoords)-0.5, max(params.materialMatchColorCoords)+0.5);
 
 % Get values for reverse plotting
 for whichColorCoordinate = 1:length(params.materialMatchColorCoords)
@@ -194,27 +193,19 @@ for whichColorCoordinate = 1:length(params.materialMatchColorCoords)
         returnedColorMatchMaterialCoord(whichMaterialCoordinate) = FMaterial(rangeOfColorMatchMaterialCoordinates(whichMaterialCoordinate));
                 
         % Compute the model predictions
-        modelPredictions3(whichMaterialCoordinate, whichColorCoordinate) = 1-ColorMaterialModelComputeProb(params.targetColorCoord,params.targetMaterialCoord, ...
+        modelPredictions2(whichMaterialCoordinate, whichColorCoordinate) = 1-ColorMaterialModelComputeProb(params.targetColorCoord,params.targetMaterialCoord, ...
             returnedColorMatchColorCoord,returnedMaterialMatchColorCoord(whichColorCoordinate),...
             returnedColorMatchMaterialCoord(whichMaterialCoordinate), returnedMaterialMatchMaterialCoord, ...
             returnedW, returnedSigma);
-        % Compute the model predictions
-        modelPredictions4(whichMaterialCoordinate, whichColorCoordinate) = 1-ColorMaterialModelComputeProb(params.targetColorCoord,params.targetMaterialCoord, ...
-            returnedColorMatchColorCoord,returnedMaterialMatchColorCoord(whichColorCoordinate),...
-            returnedColorMatchMaterialCoord(whichMaterialCoordinate), returnedMaterialMatchMaterialCoord, ...
-            0.5, returnedSigma);
     end
 end
 rangeOfColorMatchMaterialCoordinates = repmat(rangeOfColorMatchMaterialCoordinates,[1, length(params.colorMatchMaterialCoords)]);
-thisFig4 = ColorMaterialModelPlotFits(rangeOfColorMatchMaterialCoordinates, modelPredictions3, params.colorMatchMaterialCoords, 1-theDataProb', 'materialMatch', ...
+thisFig4 = ColorMaterialModelPlotFits(returnedW, rangeOfColorMatchMaterialCoordinates, modelPredictions2, params.colorMatchMaterialCoords, 1-theDataProb', 'materialMatch', ...
     min(params.colorMatchMaterialCoords)-0.5, max(params.colorMatchMaterialCoords)+0.5);
 
-thisFig5 = ColorMaterialModelPlotFits(rangeOfColorMatchMaterialCoordinates, modelPredictions4, params.colorMatchMaterialCoords, 1-theDataProb', 'materialMatch', ...
-    min(params.colorMatchMaterialCoords)-0.5, max(params.colorMatchMaterialCoords)+0.5);
-
-% if saveFig
-%     FigureSave([subjectName, conditionCode, 'ModelFitColorXAxis'], thisFig3, 'pdf');
-%     FigureSave([subjectName, conditionCode, 'ModelFitMaterialXAxis'], thisFig4, 'pdf');
-% end
+ if saveFig
+     FigureSave([subjectName, conditionCode, 'ModelFitColorXAxis'], thisFig3, 'pdf');
+     FigureSave([subjectName, conditionCode, 'ModelFitMaterialXAxis'], thisFig4, 'pdf');
+ end
 
 end
