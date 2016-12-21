@@ -1,5 +1,7 @@
-function response = ColorMaterialModelSimulateResponse(targetColorCoord, targetMaterialCoord, colorMatchColorCoord, materialMatchColorCoord, colorMatchMaterialCoord, materialMatchMaterialCoord, w, sigma)
-% function response = ColorMaterialModelSimulateResponse(targetColorCoord, targetMaterialCoord, colorMatchColorCoord, materialMatchColorCoord,colorMatchMaterialCoord, materialMatchMaterialCoord, w, sigma)
+function response = ColorMaterialModelSimulateResponse(targetColorCoord, targetMaterialCoord, colorMatchColorCoord, materialMatchColorCoord, colorMatchMaterialCoord, materialMatchMaterialCoord, w, sigma, varargin)
+% function response = ColorMaterialModelSimulateResponse(targetColorCoord, targetMaterialCoord, colorMatchColorCoord, materialMatchColorCoord,colorMatchMaterialCoord, materialMatchMaterialCoord, w, sigma, varargin)
+%
+% Simulate a trial given target and a competitor pair.
 %
 % We simulate responses following the same experimental design as we have
 % in the actual experiment. We assume that on each trial, the target and
@@ -9,26 +11,36 @@ function response = ColorMaterialModelSimulateResponse(targetColorCoord, targetM
 % On each trial subject select the competitor that is closer to the target 
 % i.e., the distance between the target (current draw) and that competitor
 % (current draw) is smaller than the target and the other competitor. 
-
+%
 %   Inputs:
 %       targetColorCoord  - target position on color dimension (should be fixed to 0).
 %       targetMaterialCoord  - target position on material dimension (should be fixed to 0).
-%
 %       colorMatchColorCoord - inferred position on the color dimension for the first competitor in the pair
 %       materialMatchColorCoord - inferred position on the material dimension for the first competitor in the pair
 %       colorMatchMaterialCoord - inferred position on the color dimension for the second competitor in the pair
 %        materialMatchMaterialCoord - inferred position on the material dimension for the second competitor in the pair
-%       w - weight for color dimension.
+%       w - weight for color coordinate.
 %       sigma - noise around the target position (we assume it is equal to 1 and the same
 %               for both color and material dimenesions).
 %   Output: 
 %       response - response, given the input parameter. 1 if the color
 %       match is chosen. 0 if material match is chosen. 
+%
+%   Key/value pairs
+%   'doApprox'- true/false (default false). Use an approximation where the
+%       two distances are scaled by w and (1-w), rather than the underlying
+%       dimensions.
 
 % Nov 2016 ar      Wrote it
 % Nov 2016 ar, dhb Edits and comments. 
+% 12/21/16 dhb, ar Add input parser.
+%                  Make use of w consistent with w being applied to color
+%                  coordinate for both approx and non-approx conditions.
 
-% Simulate a trial given target and a competitor pair.
+%% Parse key/value pairs
+p = inputParser;
+p.addParameter('doApprox', false, @islogical);
+p.parse(varargin{:});
 
 %% Prevent pathological values of w
 if (w == 0)
@@ -36,9 +48,6 @@ if (w == 0)
 elseif (w == 1)
     w = 0.9999;
 end
-
-% Parameters
-DO_APPROX = false;
 
 % Note that we're not explicitly adding noise to the target. 
 % Rather, we add noise to competitor positions and we assume that this
@@ -52,7 +61,7 @@ materialMatchMaterialCoord = materialMatchMaterialCoord + normrnd(0,sigma);
 % than to the coordinates.  This is not really want we want, but is where
 % we started.  Also, we know how to do this on analytically, so being able
 % to run it was useful for some early checks.
-if (DO_APPROX) 
+if (p.Results.doApprox) 
     % Compute distances
     colorMatchColorCoordDiff = (colorMatchColorCoord-targetColorCoord); 
     materialMatchColorCoordDiff = (materialMatchColorCoord-targetColorCoord); 
@@ -63,10 +72,12 @@ if (DO_APPROX)
     colorMatchDist2 = colorMatchColorCoordDiff^2 + colorMatchMaterialCoordDiff^2;
     materialMatchDist2 = materialMatchColorCoordDiff^2 + materialMatchMaterialCoordDiff^2;
     
-    % Apply weights to the distances.  We write this in the form that is
-    % more like what we do with the analytic calculation, where (w)/(w-1)
-    % is applied to the first distance.
-    if ((w/(1-w))^2*colorMatchDist2-materialMatchDist2 <= 0)
+    % Apply weights to the distances.  We write this in the form that is is
+    % consistent with the idea that w should be applied to the color
+    % coordinate (and thus mostly to the material match distance) and (1-w)
+    % should be applied to the material coord (and thus mostly to the color
+    % match distance).
+    if (((1-w)/w)^2*colorMatchDist2-materialMatchDist2 <= 0)
         response = 1;
     else
         response = 0;
