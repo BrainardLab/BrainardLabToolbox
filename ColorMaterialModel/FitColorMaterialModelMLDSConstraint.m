@@ -1,5 +1,5 @@
-function [c,ceq] = FitColorMaterialScalingConst(x,params)
-% [c,ceq] = FitColorMaterialScalingConst(x,params)
+function [c,ceq] = FitColorMaterialModelMLDSConstraint(x,params)
+% [c,ceq] = FitColorMaterialModelMLDSConstraint(x,params)
 %
 % Implement constraint function.  This prevents elements of the solution
 % from being too close to each other.  We use it when the parameters are

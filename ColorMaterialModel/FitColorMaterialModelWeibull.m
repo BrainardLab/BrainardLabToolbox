@@ -1,7 +1,8 @@
-function [theSmoothPreds,theSmoothVals] = ColorMaterialModelGetValuesFromFits(thisData,theDeltaCs, fixPoint)
-% function [theSmoothPreds,theSmoothVals] = ColorMaterialModelGetValuesFromFits(thisData,theDeltaCs, fixPoint)
-
-% Find the best fit for the data and produce the fit values to plot
+function [theSmoothPreds,theSmoothVals] = FitColorMaterialModelWeibull(thisData,theDeltaCs, fixPoint)
+% [theSmoothPreds,theSmoothVals] = FitColorMaterialModelWeibull(thisData,theDeltaCs, fixPoint)
+%
+% Fit the descriptive Weibull model to the data.
+%
 % Input: 
 %   thisData - response probabilities that are fitted (all are the same
 %              colorMatchMaterialCoordiante)
@@ -14,7 +15,6 @@ function [theSmoothPreds,theSmoothVals] = ColorMaterialModelGetValuesFromFits(th
 %   theSmoothVals  - fit values for the x-axis
 %   theSmoothPreds - fit values for the y-axis 
 
-%
 % 11/27/16  ar Adapted it from the working version of the routines that were fitting the data.  
 
 
@@ -62,10 +62,10 @@ for k1 = 1:length(tryMin)
         options = optimset(options,'Diagnostics','off','Display','off','LargeScale','off','Algorithm','active-set');
         
         % current best solution
-        xTemp = fmincon(@(x)FitToColorMaterialTradeOffFun(x,theDeltaCs,thisData),x0,A,b,[],[],vlb,vub,[],options);
+        xTemp = fmincon(@(x)FitColorMaterialWeibullFun(x,theDeltaCs,thisData),x0,A,b,[],[],vlb,vub,[],options);
         
         % compute the error of the current best solution
-        [minErrorTemp, ~] = FitToColorMaterialTradeOffFun(xTemp,theDeltaCs,thisData);
+        [minErrorTemp, ~] = FitColorMaterialWeibullFun(xTemp,theDeltaCs,thisData);
         
         % keep track of the smallest error and best solution so far. 
         if (minErrorTemp < minError)
@@ -74,6 +74,7 @@ for k1 = 1:length(tryMin)
         end
     end
 end
+
 % Once we have the best Weibull function parameters, we will compute the predictions for 
 % a series of values. 
 [~, theSmoothPreds] = FitToColorMaterialTradeOffFun(x, theSmoothVals);

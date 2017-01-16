@@ -1,21 +1,20 @@
 % ColorMaterialModelCrossValidation
-
+%
 % Write a skeleton to do cross validation. 
-% use cvpartition
-
+% Use cvpartition
+%
 % We want to be able to compare two instancies of our model using cross
 % validation. The main goal is to figure out whether we're overfitting with
 % our many parameters. 
-
+%
 % A thing we know so far is that full positions + weights fixed model (12 params) works
 % equally well as the full positions + weights vary model. It looks like
 % any crazy inappropriate weight can be 'countered' by recovering certain
 % (crazy) position. We therefore suspect our 12 params model might be
 % overfitting the data. To test for the possibility of overfitting with the increasing number of 
 % parameters in smoothPositions vs. fullPositions we want to use cross validation
-
+%
 % Basic cross validation for one model option 
-
 
 % Initialize
 clear; close all; 
@@ -38,7 +37,6 @@ nReplications = size(thisSubject.block,2);
 % materialCoordIndex = 2;
 % colorMatchIndexInPair = 1;
 % materialMatchIndexInPair = 2;
-
 
 % Arbitrarily decide nFolds
 nFolds = 8; 

@@ -1,18 +1,22 @@
-function ColorMaterialPlotSolution(theDataProb, predictedProbabilitiesBasedOnSolution, ...
-    returnedParams, params, subjectName, conditionCode, figDir, saveFig, weibullplots)
-% function ColorMaterialPlotSolution(theDataProb, predictedProbabilitiesBasedOnSolution, returnedParams, params,  figDir, saveFig, weibullplots)
-% theDataProb - the data probabilities measured in the experiment
-% predictedProbabilitiesBasedOnSolution - predictions based on solutions
-% returnedParams - set of returned parameters
-% params - exp. specifications
-% subjectName - which subject to plot 
-% conditionCode - which condition to plot
-% figDir -  specify figure directory
-% saveFig - save figure or not
-% weibullplots - flag indicating whether to save weibullplots or not
+function ColorMaterialModelPlotMLDSFit(theDataProb, predictedProbabilitiesBasedOnSolution, ...
+    modelParams, params, subjectName, conditionCode, figDir, saveFig, weibullplots)
+% ColorMaterialModelPlotMLDSFit(theDataProb, predictedProbabilitiesBasedOnSolution, modelParams, params,  figDir, saveFig, weibullplots)
+%
+% Make a nice plot of the data and MLDS-based model fit.
+%
+% Inputs:
+%   theDataProb - the data probabilities measured in the experiment
+%   predictedProbabilitiesBasedOnSolution - predictions based on solutions
+%   modelParams - set of model parameters
+%   params - exp. specifications
+%   subjectName - which subject to plot 
+%   conditionCode - which condition to plot
+%   figDir -  specify figure directory
+%   saveFig - save figure or not
+%   weibullplots - flag indicating whether to save weibullplots or not
 
 % Unpack passed params. Set tolerance for recovered target position. 
-[returnedMaterialMatchColorCoords,returnedColorMatchMaterialCoords,returnedW,returnedSigma]  = ColorMaterialModelXToParams(returnedParams, params); 
+[returnedMaterialMatchColorCoords,returnedColorMatchMaterialCoords,returnedW,returnedSigma]  = ColorMaterialModelXToParams(modelParams, params); 
 
 %% Figure 1. Plot measured vs. predicted probabilities
 figure; hold on

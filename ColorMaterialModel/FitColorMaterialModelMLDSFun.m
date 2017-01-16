@@ -1,5 +1,5 @@
-function [f,predictedResponses] = FitColorMaterialScalingFun(x,pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponses,nTrials,params)
-% [f,predictedResponses] = FitColorMaterialScalingFun(x,pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponses,nTrials,params)
+function [f,predictedResponses] = FitColorMaterialModelMLDSFun(x,pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponses,nTrials,params)
+% [f,predictedResponses] = FitColorMaterialModelMLDSFun(x,pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponses,nTrials,params)
 
 % The error function we are minimizing in the numerical search, when we are
 % fitting a descriptive Weibull-based function to the data directly,

@@ -224,7 +224,7 @@ end
 % it.  This isn't beautiful, but saves us figuring out how to pass the
 % various key value pairs all the way down into the functions called by
 % fmincon, which is actually somewhat hard to do in a more elegant way.
-[returnedParams, logLikelyFit, predictedProbabilitiesBasedOnSolution, k] = FitColorMaterialModel(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,...
+[returnedParams, logLikelyFit, predictedProbabilitiesBasedOnSolution, k] = FitColorMaterialModelMLDS(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,...
     theResponsesFromSimulatedData,nTrials,params, ...
     'whichPositions',params.whichPositions,'whichWeight',params.whichWeight, ...
     'tryWeightValues',tryWeightValues,'trySpacingValues',trySpacingValues); %#ok<SAGROW>
@@ -233,7 +233,7 @@ fprintf('Returned weigth: %0.2f.\n', returnedW);
 fprintf('Log likelyhood of the solution: %0.2f.\n', logLikelyFit);
 
 %% Plot the solution
-ColorMaterialPlotSolution(theDataProb, predictedProbabilitiesBasedOnSolution, returnedParams, params, figDir, saveFig); % probabilitiesComputedForSimulatedData); 
+ColorMaterialModelPlotMLDSFit(theDataProb, predictedProbabilitiesBasedOnSolution, returnedParams, params, figDir, saveFig); % probabilitiesComputedForSimulatedData); 
 
 %% Below is code we used for debugging initial program. 
 %
