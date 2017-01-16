@@ -8,7 +8,7 @@ function [f,thePreds] = FitToColorMaterialTradeOffFun(x,theVals,theData)
 % Output: 
 % f - root mean square error between the predicted and actual values
 % thePreds - the predicted values, given the current paramters.
-% 
+
 % 11/27/16 ar Adapted it from a function written initially by dhb. 
 % 11/28/16 ar Added comments.  
 

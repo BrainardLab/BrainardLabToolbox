@@ -1,4 +1,4 @@
-% ColorMaterialModelDemo.m
+% ColorMaterialModelDemo
 %
 % Demonstrates color material MLDS model fitting procedure for a data set.
 % Initially used as a test bed for testing and improving search algorithm.
@@ -10,34 +10,38 @@
 % 11/18/16  ar  Wrote from color selection model version
 
 %% Initialize and parameter set
-clc; clear ; close all;
+clc; clear; close all;
 
-% Simulate up some data, or read in data.  DEMO means simulate.
+% Simulate up some data, or read in data.  DEMO == true means simulate.
 DEMO = false;
 
 %% Load structure giving experiment design parameters. 
+%
 % Here we use the example structure that mathes the experimental design of
 % our initial experiments. 
 load('ColorMaterialExampleStructure.mat')
 
 % After iniatial parameters are imported we need to specify the following info 
 % and add it to the params structure
-% 1) initial material and color positions
+%
+% Initial material and color positions.  If we don't at some point muck
+% with the example structure, these go from -3 to 3 in steps of 1 for a
+% total of 7 stimuli arrayed along each dimension.
 params.materialMatchColorCoords  =  params.competitorsRangeNegative(1):1:params.competitorsRangePositive(end); 
 params.colorMatchMaterialCoords  =  params.competitorsRangeNegative(1):1:params.competitorsRangePositive(end); 
 
-% 2) What sort of position fitting are we doing, and if smooth
-% the order of the polynomial.
+% What sort of position fitting are we doing, and if smooth the order of the polynomial.
 % Options:
 %  'full' - Weights vary
 %  'smoothSpacing' - Weights computed according to a polynomial fit.
 params.whichPositions = 'full';
 params.smoothOrder = 3;
+
 % Initial position spacing values to try.
 trySpacingValues = [0.5 1 2];
 params.trySpacingValues = trySpacingValues; 
 
-% 3) Does material/color weight vary in fit?
+% Does material/color weight vary in fit?
 %  'weightVary' - yes, it does.
 %  'weightFixed' - fix weight to specified value in tryWeightValues(1);
 params.whichWeight = 'weightFixed';
@@ -132,16 +136,20 @@ if (DEMO)
         clear response1
     end
     
-    % compute response probabilities
+    % Compute response probabilities for each pair
     theDataProb = responseFromSimulatedData./nBlocks;
     
-    % Use identical loop to compute probabilities, based on our function.
+    % Use identical loop to compute probabilities, based on our analytic
+    % function.  These ought to be close to the simulated probabilities.
+    % This mainly serves as a check that our analytic function works
+    % correctly.  Note that analytic is a bit too strong, there is some
+    % numerical integration and approximation involved.
     for whichColorOfTheMaterialMatch = 1:length(params.materialMatchColorCoords)
         for whichMaterialOfTheColorMatch = 1:length(params.colorMatchMaterialCoords)
             clear pair
             pair = {stimuliColorMatch{whichMaterialOfTheColorMatch},stimuliMaterialMatch{whichColorOfTheMaterialMatch}};
             
-            % compute probabilities from simulated data using our function
+            % Compute probabilities from simulated data using our function
             probabilitiesComputedForSimulatedData(whichColorOfTheMaterialMatch,whichMaterialOfTheColorMatch) = ...
                 ColorMaterialModelComputeProb(targetColorCoord, targetMaterialCoord, ...
                 pair{colorMatchIndexInPair}(colorCoordIndex), pair{materialMatchIndexInPair}(colorCoordIndex), pair{colorMatchIndexInPair}(materialCoordIndex), pair{materialMatchIndexInPair}(materialCoordIndex), w, sigma);
@@ -155,17 +163,15 @@ if (DEMO)
     pairColorMatchMatrialCoordIndices = pairColorMatchMatrialCoordIndexMatrix(:);
     pairMaterialMatchColorCoordIndices = pairMaterialMatchColorCoordIndexMatrix(:);
     
-    % Total number of trials run for every row of competitorIndices.
-    % Number of columns here should match the number of columns in
-    % someData.
+    % Compute the log likelihood of the simulated data.
     nTrials = nBlocks*ones(size(theResponsesFromSimulatedData));
     logLikely = ColorMaterialModelComputeLogLikelihood(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices, ...
         theResponsesFromSimulatedData,nTrials,params.colorMatchMaterialCoords,params.materialMatchColorCoords,params.targetIndex,w,sigma);
     fprintf('Initial log likelihood %0.2f.\n', logLikely);
     
     
-    % Here you could enter some real data and work on figuring out why a model
-    % fit was going awry.
+% Here you could enter some real data and fit it, either to see the fit or to figure
+% out why the fitting is not working.
 else
     
     % Set up some params
@@ -177,10 +183,9 @@ else
     load('pairIndices.mat')
     
     whichOption = 'option2'; 
-    
     switch whichOption
-        
-        case 'option1' % some actual data from our Experiment 1. 
+        case 'option1'
+            % Some actual data from our Experiment 1. 
             theResponsesFromSimulatedData = [ 21    21    24    24    24    24    20
                 18    15    16    23    22    18    12
                 1     0     2    15     6     1     1
@@ -192,10 +197,10 @@ else
             nTrials = nBlocks*[ones(size(theResponsesFromSimulatedData))];
         
         case 'option2'
-            % Note: In this option 12 in the 3rd row is 'appriximation' of a data point that we did not
+            % Note: In this option 12 in the 3rd row is 'approximation' of a data point that we did not
             % collect in the exeriment (target is presented with two identical tests), thus, 
             % responses should be 50:50.
-            theResponsesFromSimulatedData = [   23    24    25    25    25    23    23
+            theResponsesFromSimulatedData = [ 23    24    25    25    25    23    23
                 21    25    24    25    22    23    22
                 6    10    21    25    18     8     8
                 0     1     1   12     0     0     0
@@ -213,14 +218,13 @@ else
     nTrials  = nTrials(:);
 end
 
-%% Extract parameters and other useful things from the solution
+%% Fit the data and extract parameters and other useful things from the solution
 %
-% Put the method into the params structure, so it flows to where we need
+% We put the method into the params structure, so it flows to where we need
 % it.  This isn't beautiful, but saves us figuring out how to pass the
 % various key value pairs all the way down into the functions called by
 % fmincon, which is actually somewhat hard to do in a more elegant way.
-
-[returnedParams, logLikelyFit, predictedProbabilitiesBasedOnSolution, k] = ColorMaterialModelMain(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,...
+[returnedParams, logLikelyFit, predictedProbabilitiesBasedOnSolution, k] = FitColorMaterialModel(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,...
     theResponsesFromSimulatedData,nTrials,params, ...
     'whichPositions',params.whichPositions,'whichWeight',params.whichWeight, ...
     'tryWeightValues',tryWeightValues,'trySpacingValues',trySpacingValues); %#ok<SAGROW>
@@ -228,9 +232,11 @@ end
 fprintf('Returned weigth: %0.2f.\n', returnedW);  
 fprintf('Log likelyhood of the solution: %0.2f.\n', logLikelyFit);
 
+%% Plot the solution
 ColorMaterialPlotSolution(theDataProb, predictedProbabilitiesBasedOnSolution, returnedParams, params, figDir, saveFig); % probabilitiesComputedForSimulatedData); 
 
-%% Bellow is the code we used for debugging initial program. 
+%% Below is code we used for debugging initial program. 
+%
 % Check that we can get the same predictions directly from the solution in ways we might want to do it
 % [logLikelyFit2,predictedProbabilitiesBasedOnSolution2] = ColorMaterialModelComputeLogLikelihood(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponsesFromSimulatedData,nTrials,...
 %     returnedColorMatchMaterialCoords,returnedMaterialMatchColorCoords,params.targetIndex,...
@@ -243,14 +249,15 @@ ColorMaterialPlotSolution(theDataProb, predictedProbabilitiesBasedOnSolution, re
 %     error('Cannot recover the predictions 2 from the parameters right after we found them!');
 % end
 % if debugging
-% [~,modelPredictions2] = ColorMaterialModelComputeLogLikelihood(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponsesFromSimulatedData,nTrials,...
-%     returnedColorMatchMaterialCoords,returnedMaterialMatchColorCoords,params.targetIndex,...
-%     returnedW, returnedSigma);
+%     [~,modelPredictions2] = ColorMaterialModelComputeLogLikelihood(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponsesFromSimulatedData,nTrials,...
+%         returnedColorMatchMaterialCoords,returnedMaterialMatchColorCoords,params.targetIndex,...
+%         returnedW, returnedSigma);
 % end
-%% Make sure the numbers we compute from the model now match those we computed in the demo program
-%if debugging
-%figure; clf; hold on
-%plot(predictedProbabilitiesBasedOnSolution(:),modelPredictions(:),'ro','MarkerSize',12,'MarkerFaceColor','r');
-%plot(predictedProbabilitiesBasedOnSolution(:),modelPredictions2(:),'bo','MarkerSize',12,'MarkerFaceColor','b');
-%xlim([0 1]); ylim([0,1]); axis('square');
+%
+% Make sure the numbers we compute from the model now match those we computed in the demo program
+% if debugging
+%     figure; clf; hold on
+%     plot(predictedProbabilitiesBasedOnSolution(:),modelPredictions(:),'ro','MarkerSize',12,'MarkerFaceColor','r');
+%     plot(predictedProbabilitiesBasedOnSolution(:),modelPredictions2(:),'bo','MarkerSize',12,'MarkerFaceColor','b');
+%     xlim([0 1]); ylim([0,1]); axis('square');
 %end

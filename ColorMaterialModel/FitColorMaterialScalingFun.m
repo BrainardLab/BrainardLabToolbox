@@ -1,9 +1,13 @@
 function [f,predictedResponses] = FitColorMaterialScalingFun(x,pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponses,nTrials,params)
 % [f,predictedResponses] = FitColorMaterialScalingFun(x,pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponses,nTrials,params)
 
-% The error function we are minimizing in the numerical search.
+% The error function we are minimizing in the numerical search, when we are
+% fitting a descriptive Weibull-based function to the data directly,
+% without any particular underlying model.
+%
 % Computes the negative log likelyhood of the current solution i.e. the weights and the inferred
 % position of the competitors on color and material axes.
+%
 % Input:
 %   x           - returned parameters vector.
 %   pairColorMatchMatrialCoordIndices - index to get color match material coordinate for each trial type.
@@ -12,6 +16,7 @@ function [f,predictedResponses] = FitColorMaterialScalingFun(x,pairColorMatchMat
 %   nTrialsPerPair - total number of trials run.
 %   targetIndex    - index of the target position in the color and material space.
 %   pairSpecs - defines each pair - w
+%
 % Output:
 %   f - negative log likelihood for the current solution.
 

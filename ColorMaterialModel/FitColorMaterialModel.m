@@ -1,18 +1,17 @@
-function [x, logLikelyFit, predictedResponses, k] = ColorMaterialModelMain(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponses,nTrials, params, varargin)
-% function [x, logLikelyFit, predictedResponses, k] = ColorMaterialModelMain(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponses,nTrials, params, varargin)
+function [x, logLikelyFit, predictedResponses, k] = FitColorMaterialModel(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponses,nTrials, params, varargin)
+% [x, logLikelyFit, predictedResponses, k] = FitColorMaterialModel(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponses,nTrials, params, varargin)
 
 % This is the main fitting/search routine in the model. 
 % It takes the data (from experiment or simulation) and returns inferred position of the
-% competitors on color and material dimension as well as the weigths. 
-% WARNING: It required loading a structure that specifies hardcoded experimental
-% parameters. Here we load ExampleStructure.mat which is identical 
-% to the structure of our Experiment1. 
+% competitors on color and material dimension as well as the weigths.
+% 
 % Input: 
 %   pairColorMatchMatrialCoordIndices - index to get color match material coordinate for each trial type.
 %   pairMaterialMatchColorCoordIndices - index to get material match color coordinate for each trial type.
 %   theResponses - set of responses for this pair (number of times color match is chosen. 
 %   nTrials - total number of trials run. Vector of same size as theResponses.
 %   params - structure giving experiment design parameters
+%
 % Output: 
 %   x - returned parameters. needs to be converted using xToParams routine to get the positions and weigths.
 %   logLikelyFit - log likelihood of the fit.
