@@ -22,8 +22,8 @@ clear; close all;
 
 % First thing to do is take a set of test data and organize it so that 
 % each block is a column and each row is a set of trials
-load('/Users/ana/Dropbox (Aguirre-Brainard Lab)/CNST_analysis/ColorMaterial/Experiment1/mdcSummarizedData.mat') % data
-load('/Users/ana/Dropbox (Aguirre-Brainard Lab)/CNST_analysis/ColorMaterial/Experiment1/pairIndicesE1P2.mat');  % pair indices
+load('/Users/radonjic/Dropbox (Aguirre-Brainard Lab)/CNST_analysis/ColorMaterial/Experiment1/mdcSummarizedData.mat') % data
+load('/Users/radonjic/Dropbox (Aguirre-Brainard Lab)/CNST_analysis/ColorMaterial/Experiment1/pairIndicesE1P2.mat');  % pair indices
 load('ColorMaterialExampleStructure.mat')  % other params. 
 params.materialMatchColorCoords  =  params.competitorsRangeNegative(1):1:params.competitorsRangePositive(end); 
 params.colorMatchMaterialCoords  =  params.competitorsRangeNegative(1):1:params.competitorsRangePositive(end); 
@@ -45,7 +45,7 @@ nFolds = 8;
 
 % I am not sure yet, what other things we need to pass. 
 c = cvpartition(nReplications,'Kfold',nFolds);
-for kk = 1%:nFolds
+for kk = 1:nFolds
     
     % We keep the code below, that looks like it's standard.
     % Get indices for kkth fold
@@ -81,7 +81,7 @@ for kk = 1%:nFolds
     
     params.whichPositions = 'full'; 
     % Get the predictions from the full positions model
-    [returnedParamsTrainingFull(kk,:), logLikelyFitTrainingFull(kk), predictedProbabilitie0sBasedOnSolutionTrainingFull(kk,:), kTrainingFull(kk)] = ...
+    [returnedParamsTrainingFull(kk,:), logLikelyFitTrainingFull(kk), predictedProbabilitiesBasedOnSolutionTrainingFull(kk,:), kTrainingFull(kk)] = ...
         ColorMaterialModelMain(pairColorMatchMaterialCoordIndices,pairMaterialMatchColorCoordIndices,...
         trainingData,sum(trainingIndex)*[ones(size(trainingData))],params, ...
         'whichPositions', 'full','whichWeight','weightFixed', ...
@@ -95,4 +95,5 @@ end
 % Get mean error for two types of model
 meanSmoothPositionsError = mean(SmoothPositionsRMSError);
 meanFullPositionsError = mean(FullPositionsRMSError);
-save('crossValidationTake1')
+cd('/Users/radonjic/Dropbox (Aguirre-Brainard Lab)/CNST_analysis/ColorMaterial/Experiment1/')
+save('crossValidationTake8')
