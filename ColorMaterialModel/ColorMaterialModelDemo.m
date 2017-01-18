@@ -13,7 +13,7 @@
 clc; clear; close all;
 
 % Simulate up some data, or read in data.  DEMO == true means simulate.
-DEMO = false;
+DEMO = true;
 
 %% Load structure giving experiment design parameters. 
 %
@@ -44,14 +44,14 @@ params.trySpacingValues = trySpacingValues;
 % Does material/color weight vary in fit?
 %  'weightVary' - yes, it does.
 %  'weightFixed' - fix weight to specified value in tryWeightValues(1);
-params.whichWeight = 'weightFixed';
+params.whichWeight = 'weightVary';
 tryWeightValues = [0.5 0.2 0.8];
 params.tryWeightValues = tryWeightValues; 
 
 % Set figure directories
 figDir = pwd; 
 saveFig = 0; 
-
+weibullplots = 0; 
 %% We can use simulated data (DEMO == true) or some real data (DEMO == false)
 if (DEMO)
     
@@ -68,8 +68,9 @@ if (DEMO)
     scalePositions = 1; % scaling factor for input positions (we can try different ones to match our noise i.e. sigma of 1).
     sigma = 1;
     w = 0.5;
-    
-    params.subjectName = 'demo'; 
+    params.scalePositions  = scalePositions; 
+    params.subjectName = 'demoFixed'; 
+    params.conditionCode = 'demo';
     params.materialMatchColorCoords = scalePositions*params.materialMatchColorCoords;
     params.colorMatchMaterialCoords = scalePositions*params.colorMatchMaterialCoords;
    
@@ -183,6 +184,8 @@ else
     load('pairIndices.mat')
     
     whichOption = 'option2'; 
+    params.subjectName = whichOption; 
+    params.conditionCode = 'demo'; 
     switch whichOption
         case 'option1'
             % Some actual data from our Experiment 1. 
@@ -233,8 +236,8 @@ fprintf('Returned weigth: %0.2f.\n', returnedW);
 fprintf('Log likelyhood of the solution: %0.2f.\n', logLikelyFit);
 
 %% Plot the solution
-ColorMaterialModelPlotMLDSFit(theDataProb, predictedProbabilitiesBasedOnSolution, returnedParams, params, figDir, saveFig); % probabilitiesComputedForSimulatedData); 
-
+ColorMaterialModelPlotFit(theDataProb, predictedProbabilitiesBasedOnSolution, ...
+    returnedParams, params, params.subjectName, params.conditionCode, figDir, saveFig, weibullplots);
 %% Below is code we used for debugging initial program. 
 %
 % Check that we can get the same predictions directly from the solution in ways we might want to do it
