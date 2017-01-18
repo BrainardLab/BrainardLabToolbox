@@ -1,4 +1,4 @@
-function h = ColorMaterialModelPlotWeibullFit(returnedW, theSmoothVals,theSmoothPreds, theDeltaSteps, theData, whichMatch, xMin, xMax)
+function h = ColorMaterialModelPlotWeibullFit(theSmoothVals,theSmoothPreds, theDeltaSteps, theData, whichMatch, xMin, xMax)
 % ColorMaterialModelPlotWeibullFit(theSmoothVals,theSmoothPreds, theDeltaSteps, theData, whichMatch, xMin, xMax)
 % 
 % Plots the fit of the descriptive Weibull model to the data.
@@ -33,7 +33,7 @@ for i = 1:size(theData,2)
         plot(theSmoothVals(:,i),theSmoothPreds(:,i),'color', stepColors{i}, 'LineWidth',2);
     end
 end
-text(-3, 1.05, sprintf('w = %.2f', returnedW), 'FontSize', 12); 
+%text(-3, 1.05, sprintf('w = %.2f', returnedW), 'FontSize', 12); 
 plot(0, 0.5, 'kx', 'LineWidth',2)
 % Set ends of the xAxis if we didn't pass them. 
 switch whichMatch

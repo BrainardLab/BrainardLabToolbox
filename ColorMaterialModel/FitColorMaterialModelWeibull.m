@@ -77,6 +77,6 @@ end
 
 % Once we have the best Weibull function parameters, we will compute the predictions for 
 % a series of values. 
-[~, theSmoothPreds] = FitToColorMaterialTradeOffFun(x, theSmoothVals);
+[~, theSmoothPreds] = FitColorMaterialWeibullFun(x, theSmoothVals);
         
 end

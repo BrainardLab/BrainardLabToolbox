@@ -25,7 +25,7 @@ theRange = x(5);
 
 % Compute error only if we provide the actual data. Otherwise, just produce
 % return the values of a Weibul fit that correspond to the current paramters given our set of input values. 
-thePreds = ColorMaterialModelComputeWeibullPredictions(theVals,theScaleNeg,theScalePos,theShape,theMin,theRange);
+thePreds = ColorMaterialModelComputeWeibullProb(theVals,theScaleNeg,theScalePos,theShape,theMin,theRange);
 if (nargin > 2)
     theDiff = theData-thePreds;
     f = sqrt(mean(theDiff.^2));
