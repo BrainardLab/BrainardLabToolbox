@@ -10,6 +10,7 @@
 % Classes                		- Object-oriented code for various experimental tasks
 % Calibration            		- Calibration support routines.
 % Colorimetric           		- Color calculations and related.
+% ColorMaterialModel            - Model the color material experiment, extending the MLDSColorSelection idea.
 % D70Toolbox             		- Tools for processing digital camera images, particular those from a Nikon D70.
 % DisplaySupport                - 
 % Ellipses               		- Routines related to fitting ellipses.
