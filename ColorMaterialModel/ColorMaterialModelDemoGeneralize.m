@@ -105,22 +105,21 @@ if (DEMO)
             % second is the coordinates of the material match.  There
             % is one such pair for each trial type.
             pair = [pair; ...
-                {stimuliColorMatch{whichMaterialOfTheColorMatch},stimuliMaterialMatch{whichColorOfTheMaterialMatch}}];
+                {stimuliColorMatch{whichMaterialOfTheColorMatch}, ...
+                stimuliMaterialMatch{whichColorOfTheMaterialMatch} }];
         end
     end
-     
-    % Add pairs with within target competitors only. 
+        
+    % Within color category (so material cooredinate == target material coord)
     withinCategoryPairsColor  =  nchoosek(1:length(params.materialMatchColorCoords),2);
-    withinCategoryPairsMaterial  =  nchoosek(1:length(params.colorMatchMaterialCoords),2);
-   
-    % within color category (so material cooredinate == target material coord)
     for whichWithinColorPair = 1:size(withinCategoryPairsColor,1)
         pair = [pair; ...
             {[params.materialMatchColorCoords(withinCategoryPairsColor(whichWithinColorPair, 1)), targetMaterialCoord]}, ...
             {[params.materialMatchColorCoords(withinCategoryPairsColor(whichWithinColorPair, 2)), targetMaterialCoord]}];
     end
    
-     % within material category (so color cooredinate == target color coord)
+    % Within material category (so color cooredinate == target color coord)
+    withinCategoryPairsMaterial  =  nchoosek(1:length(params.colorMatchMaterialCoords),2);
     for whichWithinMaterialPair = 1:size(withinCategoryPairsMaterial,1)
         pair = [pair; ...
             {[targetColorCoord, params.colorMatchMaterialCoords(withinCategoryPairsMaterial(whichWithinMaterialPair, 1))]}, ...
@@ -141,13 +140,12 @@ if (DEMO)
                 pair{whichPair, 1}(colorCoordIndex), pair{whichPair,2}(colorCoordIndex), ...
                 pair{whichPair, 1}(materialCoordIndex), pair{whichPair,2}(materialCoordIndex), w, sigma);
             
-            pairColorMatchColorCoordIndices(whichPair) = pair{whichPair, 1}(colorCoordIndex);
-            pairColorMatchMaterialCoordIndices(whichPair) = pair{whichPair, 1}(materialCoordIndex);
-            pairMaterialMatchColorCoordIndices(whichPair) = pair{whichPair, 2}(colorCoordIndex); 
-            pairMaterialMatchMaterialCoordIndices(whichPair) = pair{whichPair, 2}(materialCoordIndex);
-            % add option for this block for the variation in the material when
-            % the color is fixed
+            pairColorMatchColorCoords(whichPair) = pair{whichPair, 1}(colorCoordIndex);
+            pairColorMatchMaterialCoords(whichPair) = pair{whichPair, 1}(materialCoordIndex);
+            pairMaterialMatchColorCoords(whichPair) = pair{whichPair, 2}(colorCoordIndex); 
+            pairMaterialMatchMaterialCoords(whichPair) = pair{whichPair, 2}(materialCoordIndex);
         end
+        
         % Track cummulative response over blocks
         responseFromSimulatedData = responseFromSimulatedData+response1;
         clear response1
@@ -160,14 +158,11 @@ if (DEMO)
     % function.  These ought to be close to the simulated probabilities.
     % This mainly serves as a check that our analytic function works
     % correctly.  Note that analytic is a bit too strong, there is some
-    % numerical integration and approximation involved.
-    
+    % numerical integration and approximation involved. 
     for whichPair = 1:size(pair,1)
         probabilitiesComputedForSimulatedData(whichPair) = ColorMaterialModelComputeProb(targetColorCoord, targetMaterialCoord, ...
             pair{whichPair, 1}(colorCoordIndex), pair{whichPair,2}(colorCoordIndex), ...
             pair{whichPair, 1}(materialCoordIndex), pair{whichPair,2}(materialCoordIndex), w, sigma);
-        % add option for this block for the variation in the material when
-        % the color is fixed
     end
     
     % String the response matrix as well as the pairMatrices out as vectors.
@@ -176,11 +171,11 @@ if (DEMO)
     probabilitiesComputedForSimulatedData = probabilitiesComputedForSimulatedData(:);
     
     nTrials = nBlocks*ones(size(theResponsesFromSimulatedData));
-    [logLikely, predictedResponses] = ColorMaterialModelComputeLogLikelihood(pairColorMatchColorCoordIndices, pairMaterialMatchColorCoordIndices,...
-        pairColorMatchMaterialCoordIndices, pairMaterialMatchMaterialCoordIndices,...
+    [logLikely, predictedResponses] = ColorMaterialModelComputeLogLikelihood(pairColorMatchColorCoords, pairMaterialMatchColorCoords,...
+        pairColorMatchMaterialCoords, pairMaterialMatchMaterialCoords,...
         theResponsesFromSimulatedData, nTrials,...
-        params.colorMatchColorCoords, params.colorMatchMaterialCoords, params.materialMatchColorCoords, params.materialMatchMaterialCoords,...
-        params.targetIndex,w,sigma);
+        params.materialMatchColorCoords(params.targetIndex), params.colorMatchMaterialCoords(params.targetIndex), ...
+        w,sigma);
 
     fprintf('Initial log likelihood %0.2f.\n', logLikely);
 % Here you could enter some real data and fit it, either to see the fit or to figure
@@ -240,8 +235,8 @@ end
 % various key value pairs all the way down into the functions called by
 % fmincon, which is actually somewhat hard to do in a more elegant way.
 [returnedParams, logLikelyFit, predictedProbabilitiesBasedOnSolution, k] = FitColorMaterialModelMLDS(...
-    pairColorMatchColorCoordIndices, pairMaterialMatchColorCoordIndices,...
-    pairColorMatchMatrialCoordIndices, pairMaterialMatchMaterialCoordIndices,...
+    pairColorMatchColorCoords, pairMaterialMatchColorCoords,...
+    pairColorMatchMatrialCoordIndices, pairMaterialMatchMaterialCoords,...
     theResponsesFromSimulatedData,nTrials,params, ...
     'whichPositions',params.whichPositions,'whichWeight',params.whichWeight, ...
     'tryWeightValues',tryWeightValues,'trySpacingValues',trySpacingValues); %#ok<SAGROW>

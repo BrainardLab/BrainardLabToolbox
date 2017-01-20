@@ -98,11 +98,6 @@ if (abs(sigma-1) > numTolerance)
     error('Code assumes that sigma is 1');
 end
 
-% We assume that cy1 is 0 and my2 is 0, check
-if (abs(colorMatchColorCoord) > numTolerance || abs(materialMatchMaterialCoord) > numTolerance)
-    error('Assumption that competitors lie on the axes is violated.');
-end
-
 % Check w and also avoid numerical problems for very small w or (1-w)
 if ~(w > -numTolerance || abs(w-1)  > numTolerance)
     error('w must be between 0 and 1 inclusive');
