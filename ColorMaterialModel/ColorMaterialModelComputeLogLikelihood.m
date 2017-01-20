@@ -1,8 +1,13 @@
-function [logLikely, predictedResponses] = ColorMaterialModelComputeLogLikelihood(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices, ...
-     theResponses,nTrials,colorMatchMaterialCoords,materialMatchColorCoords,targetIndex,w,sigma)
-% function [logLikely, predictedResponses] = ColorMaterialModelComputeLogLikelihood(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices, ...
-%    theResponses,nTrials,colorMatchMaterialCoords,materialMatchColorCoords,targetIndex,w,sigma)
-%
+function [logLikely, predictedResponses] = ColorMaterialModelComputeLogLikelihood(pairColorMatchColorCoordIndices, pairMaterialMatchColorCoordIndices,...
+    pairColorMatchMaterialCoordIndices, pairMaterialMatchMaterialCoordIndices,...
+     theResponses, nTrials,...
+     colorMatchColorCoords, colorMatchMaterialCoords,materialMatchColorCoords,materialMatchMaterialCoords,...
+     targetIndex,w,sigma)
+% function [logLikely, predictedResponses] = ColorMaterialModelComputeLogLikelihood(pairColorMatchColorCoordIndices, pairMaterialMatchColorCoordIndices,...
+%     pairColorMatchMaterialCoordIndices, pairMaterialMatchMaterialCoordIndices,...
+%      theResponses, nTrials,...
+%      colorMatchColorCoords, colorMatchMaterialCoords,materialMatchColorCoords,materialMatchMaterialCoords,...
+%      targetIndex,w,sigma)
 % Computes cummulative log likelihood and predicted responses for a current weights and positions.
 %   Input:
 %       pairColorMatchMatrialCoordIndices - index to get color match material coordinate for each trial type.
@@ -25,9 +30,7 @@ function [logLikely, predictedResponses] = ColorMaterialModelComputeLogLikelihoo
 % Get some basic info out
 nPairs = size(pairColorMatchMatrialCoordIndices,1);
 targetColorCoord = materialMatchColorCoords(targetIndex);
-colorMatchColorCoord = targetColorCoord;
 targetMaterialCoord = colorMatchMaterialCoords(targetIndex);
-materialMatchMaterialCoord = targetMaterialCoord;
 
 % Check that should be true in our current implementation
 tolerance = 1e-7;
@@ -38,14 +41,19 @@ end
 % Compute the log likelihood
 logLikely = 0;
 for i = 1:nPairs
+    
+    colorMatchColorCoord = colorMatchColorCoords(pairColorMatchColorCoordIndices(i));
+    materialMatchMaterialCoord = materialMatchMaterialCoords(pairMaterialMatchMaterialCoordIndices(i));
+    
     predictedResponses(i) = ColorMaterialModelComputeProb(targetColorCoord, targetMaterialCoord, ...
         colorMatchColorCoord, materialMatchColorCoords(pairMaterialMatchColorCoordIndices(i)), ...
-        colorMatchMaterialCoords(pairColorMatchMatrialCoordIndices(i)),materialMatchMaterialCoord, ...
+        colorMatchMaterialCoords(pairColorMatchMaterialCoordIndices(i)),materialMatchMaterialCoord, ...
         w, sigma);
     
     if (isnan(predictedResponses(i)))
         error('Returned probability is NaN');
     end
+    
     if (isinf(predictedResponses(i)))
         error('Returend probability is Inf');
     end

@@ -1,4 +1,7 @@
-function [f,predictedResponses] = FitColorMaterialModelMLDSFun(x,pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponses,nTrials,params)
+function [f,predictedResponses] = FitColorMaterialModelMLDSFun(x,...
+    pairColorMatchColorCoordIndices,pairMaterialMatchColorCoordIndices,...
+    pairColorMatchMatrialCoordIndices,pairMaterialMatchMaterialCoordIndices,...
+    theResponses,nTrials,params)
 % [f,predictedResponses] = FitColorMaterialModelMLDSFun(x,pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponses,nTrials,params)
 
 % The error function we are minimizing in the numerical search, when we are
@@ -29,7 +32,10 @@ end
 [materialMatchColorCoords,colorMatchMaterialCoords,w,sigma] = ColorMaterialModelXToParams(x,params); 
            
 % Compute negative log likelyhood of the current solution
-[logLikely,predictedResponses] = ColorMaterialModelComputeLogLikelihood(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponses,nTrials,colorMatchMaterialCoords,materialMatchColorCoords,params.targetIndex,w,sigma);
+[logLikely,predictedResponses] = ColorMaterialModelComputeLogLikelihood(...
+    pairColorMatchColorCoordIndices, pairMaterialMatchColorCoordIndices,...
+    pairColorMatchMaterialCoordIndices, pairMaterialMatchMaterialCoordIndices,...
+    theResponses,nTrials,colorMatchMaterialCoords,materialMatchColorCoords,params.targetIndex,w,sigma);
 f = -logLikely;
 
 end

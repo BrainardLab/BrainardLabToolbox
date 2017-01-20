@@ -1,4 +1,7 @@
-function [x, logLikelyFit, predictedResponses, k] = FitColorMaterialModelMLDS(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponses,nTrials, params, varargin)
+function [x, logLikelyFit, predictedResponses, k] = FitColorMaterialModelMLDS(...
+    pairColorMatchColorCoordIndices, pairMaterialMatchColorCoordIndices,...
+    pairColorMatchMatrialCoordIndices, pairMaterialMatchMaterialCoordIndices,...
+    theResponses,nTrials, params, varargin)
 % [x, logLikelyFit, predictedResponses, k] = FitColorMaterialModelMLDS(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponses,nTrials, params, varargin)
 
 % This is the main fitting/search routine in the model. 
@@ -217,7 +220,10 @@ for k1 = 1:length(p.Results.trySpacingValues)
                 case 'smoothSpacing'
                     % Need to use nonlinear constraint function for this
                     % version.
-                    xTemp = fmincon(@(x)FitColorMaterialModelMLDSFun(x, pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices, theResponses, nTrials, params),initialParams,A,b,[],[],vlb,vub,@(x)FitColorMaterialModelMLDSConstraint(x,params),options);                 
+                    xTemp = fmincon(@(x)FitColorMaterialModelMLDSFun(x, ...
+                        pairColorMatchColorCoordIndices,pairMaterialMatchColorCoordIndices, ...
+                        pairColorMatchMatrialCoordIndices,pairMaterialMatchMaterialCoordIndices, ...
+                        theResponses, nTrials, params),initialParams,A,b,[],[],vlb,vub,@(x)FitColorMaterialModelMLDSConstraint(x,params),options);
                 case 'full'
                     % Constraints are linear in parameter, so don't call
                     % nonlinear constraint function here.
