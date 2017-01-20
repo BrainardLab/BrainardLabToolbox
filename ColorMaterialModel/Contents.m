@@ -15,8 +15,8 @@
 % ColorMaterialModelCrossValidation        - Demo program for cross-validating MLDS fits.
 % ColorMaterialModelDemo                   - Demo program that fits the model to simulated or example data.
 % ColorMaterialModelParamsToX              - Unpack parameters for MLDS-based model to a vector for search.
-% ColorMaterialModelPlotMLDSFit            - Make a nice plot of the MLDS-based model fit
-% ColorMaterialModelPlotWeibullFit         - Make a nice plot of the descriptive Weibull fit.
+% ColorMaterialModelPlotFit                - Make a nice plot of either Weibull or MLDS-based model fit
+% ColorMaterialModelPlotSolution           - Make all sorts of nice plots of the data and the MLDS solution. 
 % ColorMaterialModelSimulatedData          - Various functions related to distributions and Bayesian calculations.
 % ColorMaterialModelSimulateResponse       - Various functions related to distributions and Bayesian calculations.
 % ColorMaterialModelXToParams              - Pack the vector of MLDS-based model parameters into structure.
