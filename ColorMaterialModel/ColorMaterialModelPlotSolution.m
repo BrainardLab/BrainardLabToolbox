@@ -22,7 +22,7 @@ function ColorMaterialModelPlotSolution(theDataProb, predictedProbabilitiesBased
 %% Figure 1. Plot measured vs. predicted probabilities
 figure; hold on
 plot(theDataProb(:),predictedProbabilitiesBasedOnSolution(:),'ro','MarkerSize',12,'MarkerFaceColor','r');
-rmse = computeRealRMSE(theDataProb(:),predictedProbabilitiesBasedOnSolution(:)); 
+rmse = ComputeRealRMSE(theDataProb(:),predictedProbabilitiesBasedOnSolution(:)); 
 text(0.07, 0.87, sprintf('RMSE = %.4f', rmse), 'FontSize', 12); 
 
 if strcmp(subjectName,  'demo')
@@ -184,7 +184,7 @@ for whichMaterialCoordinate = 1:length(params.colorMatchMaterialCoords)
     end
 end
 rangeOfMaterialMatchColorCoordinates = repmat(rangeOfMaterialMatchColorCoordinates,[1, length(params.materialMatchColorCoords)]);
-thisFig3 = ColorMaterialModelPlotMLDSFit(rangeOfMaterialMatchColorCoordinates, modelPredictions, params.materialMatchColorCoords, theDataProb, ...
+thisFig3 = ColorMaterialModelPlotFit(rangeOfMaterialMatchColorCoordinates, modelPredictions, params.materialMatchColorCoords, theDataProb, ...
     'whichMatch', 'materialMatch', 'whichFit', 'MLDS','returnedWeigth', returnedW);
 
 % Get values for reverse plotting
