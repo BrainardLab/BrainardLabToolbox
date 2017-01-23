@@ -17,9 +17,9 @@ function h = ColorMaterialModelPlotFit(theSmoothVals,theSmoothPreds, theDeltaSte
 %   Dec 2016 ar Wrote it
 
 p = inputParser;
-p.addParameter('whichMatch',@ischar);
-p.addParameter('returnedWeigth',@isnumeric);
-p.addParameter('whichFit',@ischar);
+p.addParameter('whichMatch','colorMatch', @ischar);
+p.addParameter('returnedWeight',0.5, @isnumeric);
+p.addParameter('whichFit','MLDS', @ischar);
 p.parse(varargin{:});
 
 % Set up some plotting parameters
@@ -46,26 +46,26 @@ axis([xMin xMax 0 1.05])
 set(gca,'FontName','Helvetica','FontSize',14);
 
 % add appropriate text
-switch whichFit
-    case 'MLDS'
-        text(-3, 1.05, sprintf('w = %.2f', returnedW), 'FontSize', 12);
-        switch whichMatch
-            case 'colorMatch'
-                title(sprintf('MLDS fits for different material steps'),'FontName','Helvetica','FontSize',16);
-                xlabel('Color Coordinates of the Material Match','FontName','Helvetica','FontSize',18);
-                ylabel('Fraction color match chosen','FontName','Helvetica','FontSize',18);
-            case 'materialMatch'
-                title(sprintf('MLDS fits for different color steps'),'FontName','Helvetica','FontSize',16);
-                xlabel('Material Coordinates of the Color Match','FontName','Helvetica','FontSize',18);
-                ylabel('Fraction material match chosen','FontName','Helvetica','FontSize',18);
-        end
-    case 'weibull'
-        switch whichMatch
-            case 'colorMatch'
-                title(sprintf('Weibull fits for different material steps'),'FontName','Helvetica','FontSize',16);
-            case 'materialMatch'
-                title(sprintf('Weibull fits for different color steps'),'FontName','Helvetica','FontSize',16);
-        end
-end
+% switch whichFit
+%     case 'MLDS'
+%         text(-3, 1.05, sprintf('w = %.2f', returnedW), 'FontSize', 12);
+%         switch whichMatch
+%             case 'colorMatch'
+%                 title(sprintf('MLDS fits for different material steps'),'FontName','Helvetica','FontSize',16);
+%                 xlabel('Color Coordinates of the Material Match','FontName','Helvetica','FontSize',18);
+%                 ylabel('Fraction color match chosen','FontName','Helvetica','FontSize',18);
+%             case 'materialMatch'
+%                 title(sprintf('MLDS fits for different color steps'),'FontName','Helvetica','FontSize',16);
+%                 xlabel('Material Coordinates of the Color Match','FontName','Helvetica','FontSize',18);
+%                 ylabel('Fraction material match chosen','FontName','Helvetica','FontSize',18);
+%         end
+%     case 'weibull'
+%         switch whichMatch
+%             case 'colorMatch'
+%                 title(sprintf('Weibull fits for different material steps'),'FontName','Helvetica','FontSize',16);
+%             case 'materialMatch'
+%                 title(sprintf('Weibull fits for different color steps'),'FontName','Helvetica','FontSize',16);
+%         end
+% end
 
 

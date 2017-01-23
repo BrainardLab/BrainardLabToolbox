@@ -140,7 +140,7 @@ if weibullplots
     
     thisFig1 = ColorMaterialModelPlotFit(theSmoothVals, theSmoothPreds, params.colorMatchMaterialCoords, theDataProb,...
            'whichMatch', 'colorMatch', 'whichFit', 'weibull');
-    thisFig2 = ColorMaterialModelPlotWeibullFit(theSmoothValsReverseModel, theSmoothPredsReverseModel, params.materialMatchColorCoords, 1-theDataProb', ...
+    thisFig2 = ColorMaterialModelPlotFit(theSmoothValsReverseModel, theSmoothPredsReverseModel, params.materialMatchColorCoords, 1-theDataProb', ...
           'whichMatch', 'materialMatch', 'whichFit', 'weibull');
     
     if saveFig
@@ -185,7 +185,7 @@ for whichMaterialCoordinate = 1:length(params.colorMatchMaterialCoords)
 end
 rangeOfMaterialMatchColorCoordinates = repmat(rangeOfMaterialMatchColorCoordinates,[1, length(params.materialMatchColorCoords)]);
 thisFig3 = ColorMaterialModelPlotFit(rangeOfMaterialMatchColorCoordinates, modelPredictions, params.materialMatchColorCoords, theDataProb, ...
-    'whichMatch', 'materialMatch', 'whichFit', 'MLDS','returnedWeigth', returnedW);
+    'whichMatch', 'materialMatch', 'whichFit', 'MLDS','returnedWeight', returnedW);
 
 % Get values for reverse plotting
 for whichColorCoordinate = 1:length(params.materialMatchColorCoords)
@@ -208,7 +208,7 @@ for whichColorCoordinate = 1:length(params.materialMatchColorCoords)
 end
 rangeOfColorMatchMaterialCoordinates = repmat(rangeOfColorMatchMaterialCoordinates,[1, length(params.colorMatchMaterialCoords)]);
 thisFig4 = ColorMaterialModelPlotFit(rangeOfColorMatchMaterialCoordinates, modelPredictions2, params.colorMatchMaterialCoords, 1-theDataProb', ...
-    'whichMatch', 'materialMatch', 'whichFit', 'MLDS','returnedWeigth', returnedW);
+    'whichMatch', 'materialMatch', 'whichFit', 'MLDS','returnedWeight', returnedW);
 
  if saveFig
      FigureSave([subjectName, conditionCode, 'ModelFitColorXAxis'], thisFig3, 'pdf');

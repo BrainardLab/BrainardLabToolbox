@@ -98,8 +98,13 @@ if (DEMO)
     
     % Loop over blocks and stimulus pairs and simulate responses
     % We pair each color-difference stimulus with each material-difference stimulus
+    n = 0; 
     for whichColorOfTheMaterialMatch = 1:length(params.materialMatchColorCoords)
         for whichMaterialOfTheColorMatch = 1:length(params.colorMatchMaterialCoords)
+            rowIndex(whichColorOfTheMaterialMatch, whichMaterialOfTheColorMatch) = [whichColorOfTheMaterialMatch]; 
+            columnIndex(whichColorOfTheMaterialMatch, whichMaterialOfTheColorMatch) = [whichMaterialOfTheColorMatch]; 
+            n = n + 1; 
+            overallIndex(whichColorOfTheMaterialMatch, whichMaterialOfTheColorMatch) = n;  
             % The pair is a cell array containing two vectors.  The
             % first vector is the coordinates of the color match, the
             % second is the coordinates of the material match.  There
@@ -236,7 +241,7 @@ end
 % fmincon, which is actually somewhat hard to do in a more elegant way.
 [returnedParams, logLikelyFit, predictedProbabilitiesBasedOnSolution, k] = FitColorMaterialModelMLDS(...
     pairColorMatchColorCoords, pairMaterialMatchColorCoords,...
-    pairColorMatchMatrialCoordIndices, pairMaterialMatchMaterialCoords,...
+    pairColorMatchMaterialCoords, pairMaterialMatchMaterialCoords,...
     theResponsesFromSimulatedData,nTrials,params, ...
     'whichPositions',params.whichPositions,'whichWeight',params.whichWeight, ...
     'tryWeightValues',tryWeightValues,'trySpacingValues',trySpacingValues); %#ok<SAGROW>
@@ -245,10 +250,37 @@ fprintf('Returned weigth: %0.2f.\n', returnedW);
 fprintf('Log likelyhood of the solution: %0.2f.\n', logLikelyFit);
 
 %% Plot the solution
-ColorMaterialModelPlotSolution(theDataProb, predictedProbabilitiesBasedOnSolution, ...
+% Reformat probabilities to look only at color/material tradeoff
+overallIndex = overallIndex(:);
+rowIndex = rowIndex(:); 
+columnIndex = columnIndex(:); 
+for i = 1:length(rowIndex)
+        resizedDataProb(rowIndex((i)), columnIndex((i))) = theDataProb(overallIndex(i));
+        newProbabilitiesComputedForSimulatedData(rowIndex((i)), columnIndex((i))) = probabilitiesComputedForSimulatedData(overallIndex(i)); 
+end
+weibullplots = 1; 
+ColorMaterialModelPlotSolution(resizedDataProb, newProbabilitiesComputedForSimulatedData, ...
     returnedParams, params, params.subjectName, params.conditionCode, figDir, saveFig, weibullplots);
 %% Below is code we used for debugging initial program. 
-%
+% Get model predictions
+% for whichPair = 1:size(pair,1)
+%     probabilitiesComputedForSimulatedData2(whichPair) = ColorMaterialModelComputeProb(0,  0, ...
+%         pair{whichPair, 1}(colorCoordIndex), pair{whichPair,2}(colorCoordIndex), ...
+%         pair{whichPair, 1}(materialCoordIndex), pair{whichPair,2}(materialCoordIndex), returnedW, sigma);
+% end
+% 
+% for whichMaterialCoordinate = 1:length(params.colorMatchMaterialCoords)
+%     % Get the inferred color position for a range of material matches
+%     for whichColorCoordinate = 1:length(params.materialMatchColorCoords)
+%         
+%         % Compute the model predictions
+%         modelPredictions(whichColorCoordinate, whichMaterialCoordinate) = ColorMaterialModelComputeProb(params.targetColorCoord,params.targetMaterialCoord, ...
+%             returnedColorMatchColorCoord(4),returnedMaterialMatchColorCoord(whichColorCoordinate),...
+%             returnedColorMatchMaterialCoord(whichMaterialCoordinate), returnedMaterialMatchMaterialCoord(4), returnedW, returnedSigma);
+%         % Compute the model predictions
+%         
+%     end
+% end
 % Check that we can get the same predictions directly from the solution in ways we might want to do it
 % [logLikelyFit2,predictedProbabilitiesBasedOnSolution2] = ColorMaterialModelComputeLogLikelihood(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponsesFromSimulatedData,nTrials,...
 %     returnedColorMatchMaterialCoords,returnedMaterialMatchColorCoords,params.targetIndex,...
@@ -267,9 +299,9 @@ ColorMaterialModelPlotSolution(theDataProb, predictedProbabilitiesBasedOnSolutio
 % end
 %
 % Make sure the numbers we compute from the model now match those we computed in the demo program
-% if debugging
-%     figure; clf; hold on
-%     plot(predictedProbabilitiesBasedOnSolution(:),modelPredictions(:),'ro','MarkerSize',12,'MarkerFaceColor','r');
-%     plot(predictedProbabilitiesBasedOnSolution(:),modelPredictions2(:),'bo','MarkerSize',12,'MarkerFaceColor','b');
-%     xlim([0 1]); ylim([0,1]); axis('square');
-%end
+if debugging
+    figure; clf; hold on
+    plot(predictedProbabilitiesBasedOnSolution(:),modelPredictions(:),'ro','MarkerSize',12,'MarkerFaceColor','r');
+ %   plot(predictedProbabilitiesBasedOnSolution(:),modelPredictions2(:),'bo','MarkerSize',12,'MarkerFaceColor','b');
+    xlim([0 1]); ylim([0,1]); axis('square');
+end
