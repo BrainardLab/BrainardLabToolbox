@@ -215,6 +215,13 @@ for k1 = 1:length(p.Results.trySpacingValues)
             vub(end) = sigma;
             vlb(end) = sigma; 
             
+            % Print out log likelihood of where we started
+            [fTemp,predictedResponsesTemp] = FitColorMaterialModelMLDSFun(initialParams, ...
+                pairColorMatchColorsCoords,pairMaterialMatchColorCoords, ...
+                pairColorMatchMaterialCoords,pairMaterialMatchMaterialCoords, ...
+                theResponses,nTrials,params);
+            fprintf('Initial position log likelihood %0.2f.\n', -fTemp);
+            
             % Run the search
             switch (p.Results.whichPositions)
                 case 'smoothSpacing'

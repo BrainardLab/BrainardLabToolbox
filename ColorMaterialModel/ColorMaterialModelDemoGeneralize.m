@@ -38,20 +38,23 @@ params.whichPositions = 'full';
 params.smoothOrder = 3;
 
 % Initial position spacing values to try.
-trySpacingValues = [0.5 1 2];
+%trySpacingValues = [0.5 1 2];
+trySpacingValues = 1;
 params.trySpacingValues = trySpacingValues; 
 
 % Does material/color weight vary in fit?
 %  'weightVary' - yes, it does.
 %  'weightFixed' - fix weight to specified value in tryWeightValues(1);
 params.whichWeight = 'weightVary';
-tryWeightValues = [0.5 0.2 0.8];
+%tryWeightValues = [0.5 0.2 0.8];
+tryWeightValues = 0.5;
 params.tryWeightValues = tryWeightValues; 
 
 % Set figure directories
 figDir = pwd; 
 saveFig = 0; 
 weibullplots = 0; 
+
 %% We can use simulated data (DEMO == true) or some real data (DEMO == false)
 if (DEMO)
     
@@ -59,7 +62,6 @@ if (DEMO)
     % time we do this.
     rng('default');
     
-    % Set up some parameters for the demo
     % Make a stimulus list and set underlying parameters.
     targetMaterialCoord = 0;
     targetColorCoord = 0;
@@ -87,6 +89,7 @@ if (DEMO)
         stimuliMaterialMatch = [stimuliMaterialMatch, {[params.materialMatchColorCoords(i), targetMaterialCoord]}];
     end
     pair = [];
+    
     % Simulate the data
     %
     % Initialize the response structure
@@ -182,7 +185,8 @@ if (DEMO)
         params.materialMatchColorCoords(params.targetIndex), params.colorMatchMaterialCoords(params.targetIndex), ...
         w,sigma);
 
-    fprintf('Initial log likelihood %0.2f.\n', logLikely);
+    fprintf('True position log likelihood %0.2f.\n', logLikely);
+    
 % Here you could enter some real data and fit it, either to see the fit or to figure
 % out why the fitting is not working.
 else
@@ -250,6 +254,7 @@ fprintf('Returned weigth: %0.2f.\n', returnedW);
 fprintf('Log likelyhood of the solution: %0.2f.\n', logLikelyFit);
 
 %% Plot the solution
+%
 % Reformat probabilities to look only at color/material tradeoff
 overallIndex = overallIndex(:);
 rowIndex = rowIndex(:); 
@@ -261,6 +266,7 @@ end
 weibullplots = 1; 
 ColorMaterialModelPlotSolution(resizedDataProb, newProbabilitiesComputedForSimulatedData, ...
     returnedParams, params, params.subjectName, params.conditionCode, figDir, saveFig, weibullplots);
+
 %% Below is code we used for debugging initial program. 
 % Get model predictions
 % for whichPair = 1:size(pair,1)
