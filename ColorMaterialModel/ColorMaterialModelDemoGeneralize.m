@@ -11,7 +11,8 @@
 
 %% Initialize and parameter set
 clc; clear; close all;
-
+currentDir = pwd; 
+for xx = 1:2
 % Simulate up some data, or read in data.  DEMO == true means simulate.
 DEMO = true;
 
@@ -38,22 +39,24 @@ params.whichPositions = 'full';
 params.smoothOrder = 3;
 
 % Initial position spacing values to try.
-%trySpacingValues = [0.5 1 2];
-trySpacingValues = 1;
+trySpacingValues = 1%[0.5 1 2];
 params.trySpacingValues = trySpacingValues; 
 
 % Does material/color weight vary in fit?
 %  'weightVary' - yes, it does.
 %  'weightFixed' - fix weight to specified value in tryWeightValues(1);
+if xx == 1 || xx == 3
 params.whichWeight = 'weightVary';
-%tryWeightValues = [0.5 0.2 0.8];
-tryWeightValues = 0.5;
+elseif xx == 2 || xx == 4
+params.whichWeight = 'weightFixed';
+end
+tryWeightValues = [0.2] %0.2 0.8];
 params.tryWeightValues = tryWeightValues; 
 
 % Set figure directories
 figDir = pwd; 
 saveFig = 0; 
-weibullplots = 0; 
+weibullplots = 1; 
 
 %% We can use simulated data (DEMO == true) or some real data (DEMO == false)
 if (DEMO)
@@ -69,7 +72,11 @@ if (DEMO)
     stimuliColorMatch = [];
     scalePositions = 1; % scaling factor for input positions (we can try different ones to match our noise i.e. sigma of 1).
     sigma = 1;
-    w = 0.5;
+    if xx < 3
+        w = 0.2;
+    else
+        w = 0.75;
+    end
     params.scalePositions  = scalePositions; 
     params.subjectName = 'demoFixed'; 
     params.conditionCode = 'demo';
@@ -102,6 +109,7 @@ if (DEMO)
     % Loop over blocks and stimulus pairs and simulate responses
     % We pair each color-difference stimulus with each material-difference stimulus
     n = 0; 
+    clear rowIndex columnIndex overallIndex
     for whichColorOfTheMaterialMatch = 1:length(params.materialMatchColorCoords)
         for whichMaterialOfTheColorMatch = 1:length(params.colorMatchMaterialCoords)
             rowIndex(whichColorOfTheMaterialMatch, whichMaterialOfTheColorMatch) = [whichColorOfTheMaterialMatch]; 
@@ -263,9 +271,27 @@ for i = 1:length(rowIndex)
         resizedDataProb(rowIndex((i)), columnIndex((i))) = theDataProb(overallIndex(i));
         newProbabilitiesComputedForSimulatedData(rowIndex((i)), columnIndex((i))) = probabilitiesComputedForSimulatedData(overallIndex(i)); 
 end
-weibullplots = 1; 
-ColorMaterialModelPlotSolution(resizedDataProb, newProbabilitiesComputedForSimulatedData, ...
-    returnedParams, params, params.subjectName, params.conditionCode, figDir, saveFig, weibullplots);
+if xx == 1
+    cd('/Users/radonjic/Dropbox (Aguirre-Brainard Lab)/CNST_analysis/ColorMaterial')
+    save('params1')
+    cd(currentDir)
+elseif xx == 2
+    cd('/Users/radonjic/Dropbox (Aguirre-Brainard Lab)/CNST_analysis/ColorMaterial')
+    save('params2')
+    cd(currentDir)
+elseif xx == 3
+    cd('/Users/radonjic/Dropbox (Aguirre-Brainard Lab)/CNST_analysis/ColorMaterial')
+    save('params3')
+    cd(currentDir)
+elseif xx == 4
+    cd('/Users/radonjic/Dropbox (Aguirre-Brainard Lab)/CNST_analysis/ColorMaterial')
+    save('params4')
+    cd(currentDir)
+end
+end
+% weibullplots = 1; 
+% ColorMaterialModelPlotSolution(resizedDataProb, newProbabilitiesComputedForSimulatedData, ...
+%     returnedParams, params, params.subjectName, params.conditionCode, figDir, saveFig, weibullplots);
 
 %% Below is code we used for debugging initial program. 
 % Get model predictions
@@ -305,9 +331,9 @@ ColorMaterialModelPlotSolution(resizedDataProb, newProbabilitiesComputedForSimul
 % end
 %
 % Make sure the numbers we compute from the model now match those we computed in the demo program
-if debugging
-    figure; clf; hold on
-    plot(predictedProbabilitiesBasedOnSolution(:),modelPredictions(:),'ro','MarkerSize',12,'MarkerFaceColor','r');
- %   plot(predictedProbabilitiesBasedOnSolution(:),modelPredictions2(:),'bo','MarkerSize',12,'MarkerFaceColor','b');
-    xlim([0 1]); ylim([0,1]); axis('square');
-end
+% if debugging
+%     figure; clf; hold on
+%     plot(predictedProbabilitiesBasedOnSolution(:),modelPredictions(:),'ro','MarkerSize',12,'MarkerFaceColor','r');
+%  %   plot(predictedProbabilitiesBasedOnSolution(:),modelPredictions2(:),'bo','MarkerSize',12,'MarkerFaceColor','b');
+%     xlim([0 1]); ylim([0,1]); axis('square');
+% end
