@@ -1,6 +1,6 @@
 function ColorMaterialModelPlotSolution(theDataProb, predictedProbabilitiesBasedOnSolution, ...
-    modelParams, params, subjectName, conditionCode, figDir, saveFig, weibullplots)
-% ColorMaterialModelPlotSolution(theDataProb, predictedProbabilitiesBasedOnSolution, modelParams, params,  figDir, saveFig, weibullplots)
+    modelParams, params, subjectName, conditionCode, figDir, saveFig, weibullplots, computedProbs)
+% ColorMaterialModelPlotSolution(theDataProb, predictedProbabilitiesBasedOnSolution, modelParams, params,  figDir, saveFig, weibullplots, computedProbs)
 %
 % Make a nice plot of the data and MLDS-based model fit.
 %
@@ -14,8 +14,8 @@ function ColorMaterialModelPlotSolution(theDataProb, predictedProbabilitiesBased
 %   figDir -  specify figure directory
 %   saveFig - save figure or not
 %   weibullplots - flag indicating whether to save weibullplots or not
-% Outputs: 
-% h - figure handle
+
+
 % Unpack passed params. Set tolerance for recovered target position. 
 [returnedMaterialMatchColorCoords,returnedColorMatchMaterialCoords,returnedW,returnedSigma]  = ColorMaterialModelXToParams(modelParams, params); 
 
@@ -25,11 +25,13 @@ plot(theDataProb(:),predictedProbabilitiesBasedOnSolution(:),'ro','MarkerSize',1
 rmse = ComputeRealRMSE(theDataProb(:),predictedProbabilitiesBasedOnSolution(:)); 
 text(0.07, 0.87, sprintf('RMSE = %.4f', rmse), 'FontSize', 12); 
 
-if strcmp(subjectName,  'demo')
- %   plot(theDataProb(:),probabilitiesComputedForSimulatedData(:),'bo','MarkerSize',12,'MarkerFaceColor','b');
- %   legend('Fit Parameters', 'Actual Parameters', 'Location', 'NorthWest')
-  legend('Fit Parameters', 'Location', 'NorthWest')
-  legend boxoff
+if nargin > 9
+    plot(theDataProb(:),computedProbs(:),'bo','MarkerSize',12,'MarkerFaceColor','b');
+    rmseComp = ComputeRealRMSE(theDataProb(:),computedProbs(:)); 
+    text(0.07, 0.82, sprintf('RMSEComp = %.4f', rmseComp), 'FontSize', 12); 
+
+    legend('Fit Parameters', 'Actual Parameters', 'Location', 'NorthWest')
+    legend boxoff
 else
     legend('Fit Parameters', 'Location', 'NorthWest')
     legend boxoff

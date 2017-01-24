@@ -261,10 +261,10 @@ rowIndex = rowIndex(:);
 columnIndex = columnIndex(:); 
 for i = 1:length(rowIndex)
         resizedDataProb(rowIndex((i)), columnIndex((i))) = theDataProb(overallIndex(i));
-        newProbabilitiesComputedForSimulatedData(rowIndex((i)), columnIndex((i))) = probabilitiesComputedForSimulatedData(overallIndex(i)); 
+        resizePredictedProbabilitiesBasedOnSolution(rowIndex((i)), columnIndex((i))) = predictedProbabilitiesBasedOnSolution(overallIndex(i)); 
 end
 weibullplots = 1; 
-ColorMaterialModelPlotSolution(resizedDataProb, newProbabilitiesComputedForSimulatedData, ...
+ColorMaterialModelPlotSolution(resizedDataProb, resizePredictedProbabilitiesBasedOnSolution, ...
     returnedParams, params, params.subjectName, params.conditionCode, figDir, saveFig, weibullplots);
 
 %% Below is code we used for debugging initial program. 
