@@ -41,7 +41,7 @@ for i = 1:nPairs
             colorMatchMaterialCoord,materialMatchMaterialCoord, w, sigma);
     else
         rng(1);
-        nSimulate = 1000;
+        nSimulate = 100;
         predictedResponses = zeros(nSimulate,1);
         for kk = 1:nSimulate
             predictedResponses(kk) = ColorMaterialModelSimulateResponse(targetColorCoord, targetMaterialCoord, ...
