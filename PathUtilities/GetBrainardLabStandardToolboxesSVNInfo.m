@@ -20,7 +20,7 @@ function info = GetBrainardLabStandardToolboxesSVNInfo
 
 % Get a list of all directories in /Users/Shared/Matlab/Toolboxes.  We'll
 % consider each of these directories a possible SVN controlled folder.
-toolboxDir = '/Users/Shared/Matlab/Toolboxes';
+toolboxDir = '/Users/melanopsin/Documents/MATLAB/toolboxes';
 toolboxList = GetSubdirectories(toolboxDir);
 numToolboxes = length(toolboxList);
 

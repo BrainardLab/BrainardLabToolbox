@@ -16,5 +16,6 @@ function [measurement, S] = updateStimulusAndMeasure(obj, bgSettings, targetSett
     
     % and finally return results
     measurement = obj.radiometerObj.measurement.energy;
-    S           = WlsToS((obj.radiometerObj.measurement.spectralAxis)');
+    S           = WlsToS(obj.radiometerObj.measurement.spectralAxis(:))
+    %S           = WlsToS((obj.radiometerObj.measurement.spectralAxis)');
 end
