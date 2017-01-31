@@ -1,7 +1,7 @@
-function [logLikely, predictedResponses] = ColorMaterialModelComputeLogLikelihood(pairColorMatchColorCoords, pairMaterialMatchColorCoords,...
+function [logLikely, predictedProbabilities] = ColorMaterialModelComputeLogLikelihood(pairColorMatchColorCoords, pairMaterialMatchColorCoords,...
     pairColorMatchMaterialCoords, pairMaterialMatchMaterialCoords,...
      theResponses, nTrials,targetColorCoord,targetMaterialCoord,w,sigma)
-% [logLikely, predictedResponses] = ColorMaterialModelComputeLogLikelihood(pairColorMatchColorCoords, pairMaterialMatchColorCoords,...
+% [logLikely, predictedProbabilities] = ColorMaterialModelComputeLogLikelihood(pairColorMatchColorCoords, pairMaterialMatchColorCoords,...
 %    pairColorMatchMaterialCoords, pairMaterialMatchMaterialCoords,...
 %    theResponses, nTrials,targetColorCoord,targetMaterialCoord,w,sigma)
 % Computes cummulative log likelihood and predicted responses for a current weights and positions.
@@ -17,18 +17,16 @@ function [logLikely, predictedResponses] = ColorMaterialModelComputeLogLikelihoo
 %       w - current weight(s) for color/material axes.
 %
 %   Output:
-%       logLikelyFit -        log likelihood of the fit.
-%       predictedResponses -  responses predicted from the fit.
+%       logLikelyFit -            log likelihood of the fit.
+%       predictedProbabilities -  responses predicted from the fit.
 %
 % 11/16/16  ar  This function is adapted from equivalent function for our MLDS model.
 %               It is replaced with the new probability function and updated
 %               accordingly.
 
-% Get some basic info out
-nPairs = length(pairColorMatchMaterialCoords);
-
 % Compute the log likelihood
 logLikely = 0;
+nPairs = length(pairColorMatchMaterialCoords);
 for i = 1:nPairs
     
     colorMatchColorCoord = pairColorMatchColorCoords(i);
@@ -36,20 +34,32 @@ for i = 1:nPairs
     colorMatchMaterialCoord = pairColorMatchMaterialCoords(i);
     materialMatchMaterialCoord = pairMaterialMatchMaterialCoords(i);
     
-    predictedResponses(i) = ColorMaterialModelComputeProb(targetColorCoord, targetMaterialCoord, ...
-        colorMatchColorCoord, materialMatchColorCoord, ...
-        colorMatchMaterialCoord,materialMatchMaterialCoord, ...
-        w, sigma);
+    ANALYTIC = false;
+    if (ANALYTIC)
+        predictedProbabilities(i) = ColorMaterialModelComputeProb(targetColorCoord, targetMaterialCoord, ...
+            colorMatchColorCoord, materialMatchColorCoord, ...
+            colorMatchMaterialCoord,materialMatchMaterialCoord, w, sigma);
+    else
+        rng(1);
+        nSimulate = 100;
+        predictedResponses = zeros(nSimulate,1);
+        for kk = 1:nSimulate
+            predictedResponses(kk) = ColorMaterialModelSimulateResponse(targetColorCoord, targetMaterialCoord, ...
+                pairColorMatchColorCoords(i), pairMaterialMatchColorCoords(i), ...
+                pairColorMatchMaterialCoords(i), pairMaterialMatchMaterialCoords(i), w, sigma);
+        end
+        predictedProbabilities(i) = mean(predictedResponses);
+    end
     
-    if (isnan(predictedResponses(i)))
+    if (isnan(predictedProbabilities(i)))
         error('Returned probability is NaN');
     end
     
-    if (isinf(predictedResponses(i)))
+    if (isinf(predictedProbabilities(i)))
         error('Returend probability is Inf');
     end
     
-    logLikely = logLikely + theResponses(i)*log10(predictedResponses(i)) + (nTrials(i)-theResponses(i))*log10(1-predictedResponses(i));
+    logLikely = logLikely + theResponses(i)*log10(predictedProbabilities(i)) + (nTrials(i)-theResponses(i))*log10(1-predictedProbabilities(i));
 end
 
 % Something bad happened if this is true

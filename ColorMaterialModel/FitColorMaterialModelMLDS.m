@@ -166,7 +166,7 @@ for k1 = 1:length(p.Results.trySpacingValues)
                     error('Unknown whichPosition method specified');
                     
             end
-            initialParams = ColorMaterialModelParamsToX(initialColorMatchMaterialCoords,initialMaterialMatchColorCoords,tryWeights(k3),sigma,params);
+            initialParams = ColorMaterialModelParamsToX(initialColorMatchMaterialCoords,initialMaterialMatchColorCoords,tryWeights(k3),sigma);
             
             % Create bounds vectors and start with situation where no
             % parameters can vary.  This then gets adjusted according to
