@@ -39,7 +39,7 @@ params.whichPositions = 'full';
 params.smoothOrder = 3;
 
 % Initial position spacing values to try.
-trySpacingValues = 1; %[0.5 1 2];
+trySpacingValues = 0.5; %[0.5 1 2];
 params.trySpacingValues = trySpacingValues; 
 
 % Does material/color weight vary in fit?
@@ -251,7 +251,7 @@ end
     'whichPositions',params.whichPositions,'whichWeight',params.whichWeight, ...
     'tryWeightValues',tryWeightValues,'trySpacingValues',trySpacingValues); %#ok<SAGROW>
 [returnedMaterialMatchColorCoords,returnedColorMatchMaterialCoords,returnedW,returnedSigma]  = ColorMaterialModelXToParams(returnedParams, params); 
-fprintf('Returned weigth: %0.2f.\n', returnedW);  
+fprintf('Returned weight: %0.2f.\n', returnedW);  
 fprintf('Log likelyhood of the solution: %0.2f.\n', logLikelyFit);
 
 %% Plot the solution
