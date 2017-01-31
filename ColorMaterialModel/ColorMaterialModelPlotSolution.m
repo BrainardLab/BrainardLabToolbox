@@ -22,7 +22,7 @@ function ColorMaterialModelPlotSolution(theDataProb, predictedProbabilitiesBased
 %% Figure 1. Plot measured vs. predicted probabilities
 figure; hold on
 plot(theDataProb(:),predictedProbabilitiesBasedOnSolution(:),'ro','MarkerSize',12,'MarkerFaceColor','r');
-rmse = computeRealRMSE(theDataProb(:),predictedProbabilitiesBasedOnSolution(:)); 
+rmse = ComputeRealRMSE(theDataProb(:),predictedProbabilitiesBasedOnSolution(:)); 
 text(0.07, 0.87, sprintf('RMSE = %.4f', rmse), 'FontSize', 12); 
 
 if strcmp(subjectName,  'demo')
@@ -184,8 +184,8 @@ for whichMaterialCoordinate = 1:length(params.colorMatchMaterialCoords)
     end
 end
 rangeOfMaterialMatchColorCoordinates = repmat(rangeOfMaterialMatchColorCoordinates,[1, length(params.materialMatchColorCoords)]);
-thisFig3 = ColorMaterialModelPlotMLDSFit(rangeOfMaterialMatchColorCoordinates, modelPredictions, params.materialMatchColorCoords, theDataProb, ...
-    'whichMatch', 'materialMatch', 'whichFit', 'MLDS','returnedWeigth', returnedW);
+thisFig3 = ColorMaterialModelPlotFit(rangeOfMaterialMatchColorCoordinates, modelPredictions, params.materialMatchColorCoords, theDataProb, ...
+    'whichMatch', 'materialMatch', 'whichFit', 'MLDS','returnedWeight', returnedW);
 
 % Get values for reverse plotting
 for whichColorCoordinate = 1:length(params.materialMatchColorCoords)
@@ -208,7 +208,7 @@ for whichColorCoordinate = 1:length(params.materialMatchColorCoords)
 end
 rangeOfColorMatchMaterialCoordinates = repmat(rangeOfColorMatchMaterialCoordinates,[1, length(params.colorMatchMaterialCoords)]);
 thisFig4 = ColorMaterialModelPlotFit(rangeOfColorMatchMaterialCoordinates, modelPredictions2, params.colorMatchMaterialCoords, 1-theDataProb', ...
-    'whichMatch', 'materialMatch', 'whichFit', 'MLDS','returnedWeigth', returnedW);
+    'whichMatch', 'materialMatch', 'whichFit', 'MLDS','returnedWeight', returnedW);
 
  if saveFig
      FigureSave([subjectName, conditionCode, 'ModelFitColorXAxis'], thisFig3, 'pdf');

@@ -18,7 +18,7 @@ function h = ColorMaterialModelPlotFit(theSmoothVals,theSmoothPreds, theDeltaSte
 
 p = inputParser;
 p.addParameter('whichMatch',@ischar);
-p.addParameter('returnedWeigth',@isnumeric);
+p.addParameter('returnedWeight',@isnumeric);
 p.addParameter('whichFit',@ischar);
 p.parse(varargin{:});
 
@@ -46,10 +46,10 @@ axis([xMin xMax 0 1.05])
 set(gca,'FontName','Helvetica','FontSize',14);
 
 % add appropriate text
-switch whichFit
+switch p.Results.whichFit
     case 'MLDS'
-        text(-3, 1.05, sprintf('w = %.2f', returnedW), 'FontSize', 12);
-        switch whichMatch
+        text(-3, 1.05, sprintf('w = %.2f', p.Results.returnedWeight), 'FontSize', 12);
+        switch p.Results.whichMatch
             case 'colorMatch'
                 title(sprintf('MLDS fits for different material steps'),'FontName','Helvetica','FontSize',16);
                 xlabel('Color Coordinates of the Material Match','FontName','Helvetica','FontSize',18);
@@ -60,7 +60,7 @@ switch whichFit
                 ylabel('Fraction material match chosen','FontName','Helvetica','FontSize',18);
         end
     case 'weibull'
-        switch whichMatch
+        switch p.Results.whichMatch
             case 'colorMatch'
                 title(sprintf('Weibull fits for different material steps'),'FontName','Helvetica','FontSize',16);
             case 'materialMatch'
