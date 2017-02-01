@@ -16,37 +16,68 @@ targetMaterialCoord = 0;
 endPosition = 3;
 
 % Fixed temporary parameters. 
-nSamplePoints = 100; 
-materialMatchColorCoords = 2;
+nSamplePoints = 10; 
 materialMatchMaterialCoords = 1;
 weight = 0.3;
 
 % Set dimensions of interest (2 for now)
 colorMatchColorCoords = linspace(-endPosition,endPosition,nSamplePoints);
+materialMatchColorCoords = linspace(-endPosition,endPosition,nSamplePoints);
 colorMatchMaterialCoords =  linspace(-endPosition,endPosition,nSamplePoints);
 
 %% Define grid sample points
-[X,Y] = ndgrid(colorMatchMaterialCoords,colorMatchMaterialCoords);
+[colorMatchColorCoordGrid,materialMatchColorCoordGrid,colorMatchMaterialCoordGrid] = ...
+    ndgrid(colorMatchColorCoords,materialMatchColorCoords,colorMatchMaterialCoords);
 
 tic
+CMLookUp = zeros(size(colorMatchColorCoordGrid));
 for i = 1:length(colorMatchColorCoords)
-    for j = 1:length(colorMatchMaterialCoords)
-        %         for k = 1:length(materialMatchColorCoord)
-        %             for l = 1:length(materialMatchMaterialCoord)
-        %                 for m = 1:length(weight)
-        CMLookUp(i,j) = ColorMaterialModelComputeProb(targetColorCoord,targetMaterialCoord, ...
-            colorMatchColorCoords(i),materialMatchColorCoords,...
-            colorMatchMaterialCoords(j), materialMatchMaterialCoords, weight, sigma);
-        %                 end
+    for j = 1:length(materialMatchColorCoords)
+        for k = 1:length(colorMatchMaterialCoords)
+            %             for l = 1:length(materialMatchMaterialCoord)
+            %                 for m = 1:length(weight)
+            
+            
+            % Build the gridded data that we'll interpolate on
+            CMLookUp(i,j,k) = ColorMaterialModelComputeProb(targetColorCoord,targetMaterialCoord, ...
+                colorMatchColorCoordGrid(i,j,k),materialMatchColorCoordGrid(i,j,k),...
+                colorMatchMaterialCoordGrid(i,j,k), materialMatchMaterialCoords, weight, sigma);
+        end
         %             end
         %         end
     end
 end
 toc
+ 
+% Build interpolator
+F = griddedInterpolant(colorMatchColorCoordGrid,materialMatchColorCoordGrid,colorMatchMaterialCoordGrid,CMLookUp,'linear');
 
-% Extrapolate and visualize
-F = griddedInterpolant(X,Y,CMLookUp,'linear');
-mesh(X,Y,CMLookUp);
+save('test','F');
+
+% Apply interpolator
+tempValue = 2;
+[~,index] = min(abs(materialMatchColorCoords-tempValue));
+valueForMaterialMatchColorCoords = materialMatchColorCoords(index);
+
+newColorMatchColorCoords = [0.3322 2.47 -1.3];
+newMaterialMatchColorCoords = [valueForMaterialMatchColorCoords valueForMaterialMatchColorCoords valueForMaterialMatchColorCoords];
+newColorMatchMaterialCoords = [1.623774 0.001 2.38];
+newProbs = F(newColorMatchColorCoords,newMaterialMatchColorCoords,newColorMatchMaterialCoords);
+
+%[Xi,Yi] = ndgrid(newColorMatchColorCoords,newColorMatchMaterialCoords);
+%newProbs = F(Xi,Yi);
+[plotXGrid,plotZGrid] = ndgrid(colorMatchColorCoords,colorMatchMaterialCoords);
+plotYGrid = valueForMaterialMatchColorCoords*ones(size(plotXGrid));
+plotProbs = F(plotXGrid,plotYGrid,plotZGrid);
+
+% Visualize the 2D table we built and something we interpolated from it
+figure; clf; hold on;
+mesh(plotXGrid,plotZGrid,plotProbs);
+
+plot3(newColorMatchColorCoords,newColorMatchMaterialCoords,newProbs,'ko','MarkerSize',8,'MarkerFaceColor','k');
+xlabel('X'); ylabel('Y');
+
+
 
 
 
