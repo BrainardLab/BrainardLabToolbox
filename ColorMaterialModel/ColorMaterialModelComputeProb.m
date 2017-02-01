@@ -1,5 +1,5 @@
-function p = ColorMaterialModelComputeProb(targetColorCoord,targetMaterialCoord, colorMatchColorCoord,materialMatchColorCoord,colorMatchMatrialCoord, materialMatchMaterialCoord, w, sigma)
-% function p = ColorMaterialModelComputeProb(targetColorCoord,targetMaterialCoord, colorMatchColorCoord,materialMatchColorCoord,colorMatchMatrialCoord, materialMatchMaterialCoord, w, sigma)
+function p = ColorMaterialModelComputeProb(targetColorCoord,targetMaterialCoord, colorMatchColorCoord,materialMatchColorCoord,colorMatchMaterialCoord, materialMatchMaterialCoord, w, sigma)
+% function p = ColorMaterialModelComputeProb(targetColorCoord,targetMaterialCoord, colorMatchColorCoord,materialMatchColorCoord,colorMatchMaterialCoord, materialMatchMaterialCoord, w, sigma)
 %
 % This function is part of our modeling effort for our initial
 % color-material tradeoff experiments.  On each trial of these experiments,
@@ -120,7 +120,7 @@ end
 % parameter is needed so that the non-central chi-squared returns the
 % appropriate values for (cy1,my1).
 % Also take square root to get mean distance.
-deltaColorMatch = colorMatchColorCoord^2 + colorMatchMatrialCoord^2;
+deltaColorMatch = colorMatchColorCoord^2 + colorMatchMaterialCoord^2;
 
 % We'll also need the distance of the mean of the distribution of the colorMatch in the
 % perceptual space.
