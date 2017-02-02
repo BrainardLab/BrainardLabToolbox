@@ -16,19 +16,18 @@ targetMaterialCoord = 0;
 endPosition = 5;
 
 % Fixed temporary parameters. 
-nSamplePoints = 100; 
+nSamplePoints = 10; 
 nSimulate =  100; 
-weight = 0.3;
 
 % Set dimensions of interest (2 for now)
 colorMatchColorCoords = linspace(-endPosition,endPosition,nSamplePoints);
 materialMatchColorCoords = linspace(-endPosition,endPosition,nSamplePoints);
 colorMatchMaterialCoords =  linspace(-endPosition,endPosition,nSamplePoints);
 materialMatchMaterialCoords = linspace(-endPosition,endPosition,nSamplePoints);
-weigth = linspace(0,endPosition,1);
+weight = linspace(0,endPosition,nSamplePoints);
 %% Define grid sample points
-[colorMatchColorCoordGrid,materialMatchColorCoordGrid,colorMatchMaterialCoordGrid, materialMatchMaterialCoordsGrid, weigthGrid] = ...
-    ndgrid(colorMatchColorCoords,materialMatchColorCoords,colorMatchMaterialCoords, materialMatchMaterialCoords,weigth);
+[colorMatchColorCoordGrid,materialMatchColorCoordGrid,colorMatchMaterialCoordGrid, materialMatchMaterialCoordsGrid, weightGrid] = ...
+    ndgrid(colorMatchColorCoords,materialMatchColorCoords,colorMatchMaterialCoords, materialMatchMaterialCoords,weight);
 tic
 CMLookUp = zeros(size(colorMatchColorCoordGrid));
 for i = 1:length(colorMatchColorCoords)
@@ -39,7 +38,7 @@ for i = 1:length(colorMatchColorCoords)
                     % Build the gridded data that we'll interpolate on
                     CMLookUp(i,j,k,l,m) = ColorMaterialModelComputeProbBySimulation(nSimulate, targetColorCoord,targetMaterialCoord, ...
                         colorMatchColorCoordGrid(i,j,k,l,m),materialMatchColorCoordGrid(i,j,k,l,m),...
-                        colorMatchMaterialCoordGrid(i,j,k,l,m), materialMatchMaterialCoordsGrid(i,j,k,l,m), weight, sigma);
+                        colorMatchMaterialCoordGrid(i,j,k,l,m), materialMatchMaterialCoordsGrid(i,j,k,l,m), weightGrid(i,j,k,l,m), sigma);
                 end
             end
         end
@@ -48,7 +47,7 @@ end
 toc
  
 % Build interpolator
-F = griddedInterpolant(colorMatchColorCoordGrid,materialMatchColorCoordGrid,colorMatchMaterialCoordGrid,materialMatchMaterialCoordsGrid, weigthGrid, CMLookUp,'linear');
+F = griddedInterpolant(colorMatchColorCoordGrid,materialMatchColorCoordGrid,colorMatchMaterialCoordGrid,materialMatchMaterialCoordsGrid, weightGrid, CMLookUp,'linear');
 
 save('test','F');
 
