@@ -1,11 +1,11 @@
 function [f,predictedResponses] = FitColorMaterialModelMLDSFun(x,...
     pairColorMatchColorCoordPosition,pairMaterialMatchColorCoordPosition,...
     pairColorMatchMaterialCoordPosition,pairMaterialMatchMaterialCoordPosition,...
-    theResponses,nTrials,params)
+    theResponses,nTrials,params, varargin)
 % [f,predictedResponses] = FitColorMaterialModelMLDSFun(x,...
 %    pairColorMatchColorCoordPosition,pairMaterialMatchColorCoordPosition,...
 %    pairColorMatchMaterialCoordPosition,pairMaterialMatchMaterialCoordPosition,...
-%    theResponses,nTrials,params)
+%    theResponses,nTrials,params, varargin)
 
 % The error function we are minimizing in the numerical search, when we are
 % fitting a descriptive Weibull-based function to the data directly,
@@ -33,6 +33,8 @@ if (any(isnan(x)))
     error('Entry of x is NaN');
 end
 
+
+
 % We need to convert X to params here
 [materialMatchColorCoords,colorMatchMaterialCoords,w,sigma] = ColorMaterialModelXToParams(x,params); 
 
@@ -47,10 +49,12 @@ for i = 1:length(pairColorMatchColorCoordPosition)
 end
 
 % Compute negative log likelyhood of the current solution
+
 [logLikely,predictedResponses] = ColorMaterialModelComputeLogLikelihood(...
     pairColorMatchColorCoords, pairMaterialMatchColorCoords,...
     pairColorMatchMaterialCoords, pairMaterialMatchMaterialCoords,...
-    theResponses,nTrials,params.materialMatchColorCoords(params.targetIndex),params.colorMatchMaterialCoords(params.targetIndex),w,sigma);
+    theResponses,nTrials,params.materialMatchColorCoords(params.targetIndex),params.colorMatchMaterialCoords(params.targetIndex),w,sigma, ...
+    'Fobj', params.F, 'whichMethod', params.whichMethod, 'nSimulate', params.nSimulate);
 
 f = -logLikely;
 

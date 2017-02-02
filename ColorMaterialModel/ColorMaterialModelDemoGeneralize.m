@@ -78,6 +78,13 @@ if (DEMO)
     params.materialMatchColorCoords = scalePositions*params.materialMatchColorCoords;
     params.colorMatchMaterialCoords = scalePositions*params.colorMatchMaterialCoords;
    
+    % set up params for probablility computation
+    params.F = F; % for lookup.
+    params.whichMethod = 'lookup'; % could be also 'simulate' or 'analytic'
+    if strcmp(params.whichMethod,  'simulate')
+         params.nSimulate = 1000; % for method 'simulate'
+    end
+    
     % These are the coordinates of the color matches.  The color coordinate always matches the
     % target and the matrial coordinate varies.
     for i = 1:length(params.colorMatchMaterialCoords)
@@ -137,7 +144,6 @@ if (DEMO)
             {[targetColorCoord, params.colorMatchMaterialCoords(withinCategoryPairsMaterial(whichWithinMaterialPair, 1))]}, ...
             {[targetColorCoord, params.colorMatchMaterialCoords(withinCategoryPairsMaterial(whichWithinMaterialPair, 2))]}]; 
     end
-    probabilitiesComputedForSimulatedData  = zeros(1,size(pair,1));
     
     % Simulate out what the response is for this pair in this
     % block.
@@ -178,7 +184,7 @@ if (DEMO)
     % numerical integration and approximation involved. 
     probabilitiesComputedForSimulatedData = zeros(nPairs,1);
     for whichPair = 1:nPairs
-        probabilitiesComputedForSimulatedData(whichPair) = ColorMaterialModelGetProbabilityFromLookupTable(F,pairColorMatchColorCoords(whichPair), pairMaterialMatchColorCoords(whichPair), ...
+        probabilitiesComputedForSimulatedData(whichPair) = F(pairColorMatchColorCoords(whichPair), pairMaterialMatchColorCoords(whichPair), ...
                     pairColorMatchMaterialCoords(whichPair) , pairMaterialMatchMaterialCoords(whichPair), w);
         
         %         probabilitiesComputedForSimulatedData(whichPair) = ColorMaterialModelComputeProb(targetColorCoord, targetMaterialCoord, ...
@@ -268,13 +274,17 @@ rowIndex = rowIndex(:);
 columnIndex = columnIndex(:); 
 for i = 1:length(rowIndex)
         resizedDataProb(rowIndex((i)), columnIndex((i))) = probabilitiesFromSimulatedData(overallColorMaterialPairIndices(i));
+        resizedSolutionProb(rowIndex((i)), columnIndex((i))) = predictedProbabilitiesBasedOnSolution(overallColorMaterialPairIndices(i));
         newProbabilitiesComputedForSimulatedData(rowIndex((i)), columnIndex((i))) = probabilitiesComputedForSimulatedData(overallColorMaterialPairIndices(i)); 
 end
-
-ColorMaterialModelPlotSolution(resizedDataProb, newProbabilitiesComputedForSimulatedData, ...
-    returnedParams, params, params.subjectName, params.conditionCode, figDir, saveFig, weibullplots);
-
-%% Below is code we used for debugging initial program. 
+if DEMO
+     ColorMaterialModelPlotSolution(resizedDataProb, resizedSolutionProb, ...
+        returnedParams, params, params.subjectName, params.conditionCode, figDir, saveFig, weibullplots,newProbabilitiesComputedForSimulatedData);
+else
+    ColorMaterialModelPlotSolution(resizedDataProb, resizedSolutionProb, ...
+        returnedParams, params, params.subjectName, params.conditionCode, figDir, saveFig, weibullplots,newProbabilitiesComputedForSimulatedData);
+end
+%% Below is code we used for debugging initial program.
 % Get model predictions
 % for whichPair = 1:size(pair,1)
 %     probabilitiesComputedForSimulatedData2(whichPair) = ColorMaterialModelComputeProb(0,  0, ...

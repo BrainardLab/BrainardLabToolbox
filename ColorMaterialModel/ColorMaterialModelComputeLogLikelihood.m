@@ -56,7 +56,7 @@ for i = 1:nPairs
                 colorMatchMaterialCoord,materialMatchMaterialCoord, w, sigma);
             rng(s);
         case 'lookup'
-            predictedProbabilities(i) = p.Results.Fobj(colorMatchColorCoordGrid,materialMatchColorCoordGrid,colorMatchMaterialCoordGrid,materialMatchMaterialCoordsGrid, weightGrid);
+            predictedProbabilities(i) = p.Results.Fobj(colorMatchColorCoord,materialMatchColorCoord,colorMatchMaterialCoord,materialMatchMaterialCoord, w);
     end
     
     if (isnan(predictedProbabilities(i)))
