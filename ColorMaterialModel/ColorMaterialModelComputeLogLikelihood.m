@@ -1,6 +1,6 @@
-function [logLikely, predictedProbabilities] = ColorMaterialModelComputeLogLikelihood(F,pairColorMatchColorCoords, pairMaterialMatchColorCoords,...
+function [logLikely, predictedProbabilities] = ColorMaterialModelComputeLogLikelihood(pairColorMatchColorCoords, pairMaterialMatchColorCoords,...
     pairColorMatchMaterialCoords, pairMaterialMatchMaterialCoords,...
-     theResponses, nTrials,targetColorCoord,targetMaterialCoord,w,sigma)
+     theResponses, nTrials,targetColorCoord,targetMaterialCoord,w,sigma, varargin)
 % [logLikely, predictedProbabilities] = ColorMaterialModelComputeLogLikelihood(F, pairColorMatchColorCoords, pairMaterialMatchColorCoords,...
 %    pairColorMatchMaterialCoords, pairMaterialMatchMaterialCoords,...
 %    theResponses, nTrials,targetColorCoord,targetMaterialCoord,w,sigma)
@@ -15,7 +15,9 @@ function [logLikely, predictedProbabilities] = ColorMaterialModelComputeLogLikel
 %       materialMatchColorCoords - current inferred position for material matches on the color axis.
 %       sigma -fixed standard deviation
 %       w - current weight(s) for color/material axes.
-%
+%       F - object that contains the precomputed lookup table
+%       whichMethod - method used to recover probabilities. 
+%       nSimulate - define the number of simulations for the simulate method.     
 %   Output:
 %       logLikelyFit -            log likelihood of the fit.
 %       predictedProbabilities -  responses predicted from the fit.
@@ -23,6 +25,14 @@ function [logLikely, predictedProbabilities] = ColorMaterialModelComputeLogLikel
 % 11/16/16  ar  This function is adapted from equivalent function for our MLDS model.
 %               It is replaced with the new probability function and updated
 %               accordingly.
+
+% Unpack parameters
+p = inputParser;
+p.addParameter('nSimulate',1000, @isnumeric);
+p.addParameter('whichMethod','lookup', @ischar);
+p.addParameter('Fobj',null, @isobj);
+p.parse(varargin{:});
+
 
 % Compute the log likelihood
 logLikely = 0;
@@ -34,22 +44,19 @@ for i = 1:nPairs
     colorMatchMaterialCoord = pairColorMatchMaterialCoords(i);
     materialMatchMaterialCoord = pairMaterialMatchMaterialCoords(i);
     
-    WHICH_METHOD = 'lookup';
-    switch (WHICH_METHOD)
+    switch p.Results.whichMethod
         case 'analytic'
             predictedProbabilities(i) = ColorMaterialModelComputeProb(targetColorCoord, targetMaterialCoord, ...
                 colorMatchColorCoord, materialMatchColorCoord, ...
                 colorMatchMaterialCoord,materialMatchMaterialCoord, w, sigma);
         case 'simulate'
-             nSimulate = 1000;
              s = rng(173);
-             predictedProbabilities(i) = ColorMaterialModelComputeProbBySimulation(nSimulate,targetColorCoord, targetMaterialCoord, ...
+             predictedProbabilities(i) = ColorMaterialModelComputeProbBySimulation(p.Results.nSimulate,targetColorCoord, targetMaterialCoord, ...
                 colorMatchColorCoord, materialMatchColorCoord, ...
                 colorMatchMaterialCoord,materialMatchMaterialCoord, w, sigma);
             rng(s);
         case 'lookup'
-            predictedProbabilities(i) = ColorMaterialModelGetProbabilityFromLookupTable(F,colorMatchColorCoord,materialMatchColorCoord,...
-            colorMatchMaterialCoord,materialMatchMaterialCoord, w);
+            predictedProbabilities(i) = p.Results.Fobj(colorMatchColorCoordGrid,materialMatchColorCoordGrid,colorMatchMaterialCoordGrid,materialMatchMaterialCoordsGrid, weightGrid);
     end
     
     if (isnan(predictedProbabilities(i)))

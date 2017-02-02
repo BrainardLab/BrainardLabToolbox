@@ -187,11 +187,11 @@ if (DEMO)
     end
      
     nTrials = nBlocks*ones(size(responsesFromSimulatedData));
-    [logLikely, predictedResponses] = ColorMaterialModelComputeLogLikelihood(F,pairColorMatchColorCoords, pairMaterialMatchColorCoords,...
+    [logLikely, predictedResponses] = ColorMaterialModelComputeLogLikelihood(pairColorMatchColorCoords, pairMaterialMatchColorCoords,...
         pairColorMatchMaterialCoords, pairMaterialMatchMaterialCoords,...
         responsesFromSimulatedData, nTrials,...
         params.materialMatchColorCoords(params.targetIndex), params.colorMatchMaterialCoords(params.targetIndex), ...
-        w,sigma);
+        w,sigma,'Fobj', F, 'whichMethod', 'lookup');
     fprintf('True position log likelihood %0.2f.\n', logLikely);
     
 % Here you could enter some real data and fit it, either to see the fit or to figure
@@ -271,7 +271,6 @@ for i = 1:length(rowIndex)
         newProbabilitiesComputedForSimulatedData(rowIndex((i)), columnIndex((i))) = probabilitiesComputedForSimulatedData(overallColorMaterialPairIndices(i)); 
 end
 
-weibullplots = 1; 
 ColorMaterialModelPlotSolution(resizedDataProb, newProbabilitiesComputedForSimulatedData, ...
     returnedParams, params, params.subjectName, params.conditionCode, figDir, saveFig, weibullplots);
 
