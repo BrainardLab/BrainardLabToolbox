@@ -40,16 +40,18 @@ for i = 1:nPairs
             colorMatchColorCoord, materialMatchColorCoord, ...
             colorMatchMaterialCoord,materialMatchMaterialCoord, w, sigma);
     else
-        nSimulate = 1000;
-        predictedResponses = zeros(nSimulate,1);
-        s = rng(173);
-        for kk = 1:nSimulate
-            predictedResponses(kk) = ColorMaterialModelSimulateResponse(targetColorCoord, targetMaterialCoord, ...
-                pairColorMatchColorCoords(i), pairMaterialMatchColorCoords(i), ...
-                pairColorMatchMaterialCoords(i), pairMaterialMatchMaterialCoords(i), w, sigma);
-        end
-        rng(s);
-        predictedProbabilities(i) = mean(predictedResponses);
+        predictedProbabilities(i) = ColorMaterialModelGetProbabilityFromLookupTable(colorMatchColorCoord,materialMatchColorCoord,...
+            colorMatchMaterialCoord,materialMatchMaterialCoord, w);
+        %         nSimulate = 1000;
+        %         predictedResponses = zeros(nSimulate,1);
+        %         s = rng(173);
+        %         for kk = 1:nSimulate
+        %             predictedResponses(kk) = ColorMaterialModelSimulateResponse(targetColorCoord, targetMaterialCoord, ...
+        %                 pairColorMatchColorCoords(i), pairMaterialMatchColorCoords(i), ...
+        %                 pairColorMatchMaterialCoords(i), pairMaterialMatchMaterialCoords(i), w, sigma);
+        %         end
+        %         rng(s);
+        %         predictedProbabilities(i) = mean(predictedResponses);
     end
     
     if (isnan(predictedProbabilities(i)))

@@ -45,7 +45,7 @@ params.trySpacingValues = trySpacingValues;
 % Does material/color weight vary in fit?
 %  'weightVary' - yes, it does.
 %  'weightFixed' - fix weight to specified value in tryWeightValues(1);
-tryWeightValues = [0.8]; %0.2 0.8];
+tryWeightValues = [0.5]; %[ 0.5 0.2 0.8];
 params.tryWeightValues = tryWeightValues; 
 
 % Set figure directories
@@ -175,9 +175,12 @@ if (DEMO)
     % numerical integration and approximation involved. 
     probabilitiesComputedForSimulatedData = zeros(nPairs,1);
     for whichPair = 1:nPairs
-        probabilitiesComputedForSimulatedData(whichPair) = ColorMaterialModelComputeProb(targetColorCoord, targetMaterialCoord, ...
-            pairColorMatchColorCoords(whichPair), pairMaterialMatchColorCoords(whichPair), ...
-            pairColorMatchMaterialCoords(whichPair) , pairMaterialMatchMaterialCoords(whichPair), w, sigma);
+        probabilitiesComputedForSimulatedData(whichPair) = ColorMaterialModelGetProbabilityFromLookupTable(pairColorMatchColorCoords(whichPair), pairMaterialMatchColorCoords(whichPair), ...
+                    pairColorMatchMaterialCoords(whichPair) , pairMaterialMatchMaterialCoords(whichPair), w);
+        
+        %         probabilitiesComputedForSimulatedData(whichPair) = ColorMaterialModelComputeProb(targetColorCoord, targetMaterialCoord, ...
+        %             pairColorMatchColorCoords(whichPair), pairMaterialMatchColorCoords(whichPair), ...
+        %             pairColorMatchMaterialCoords(whichPair) , pairMaterialMatchMaterialCoords(whichPair), w, sigma);
     end
      
     nTrials = nBlocks*ones(size(responsesFromSimulatedData));
