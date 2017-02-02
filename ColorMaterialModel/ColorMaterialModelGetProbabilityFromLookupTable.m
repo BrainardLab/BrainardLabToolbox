@@ -1,6 +1,6 @@
-% function probability = ColorMaterialModelGetProbabilityFromLookupTable(colorMatchColorCoordGrid,materialMatchColorCoordGrid,...
+% function probability = ColorMaterialModelGetProbabilityFromLookupTable(F,colorMatchColorCoordGrid,materialMatchColorCoordGrid,...
 %     colorMatchMaterialCoordGrid,materialMatchMaterialCoordsGrid, weightGrid)
-function probability = ColorMaterialModelGetProbabilityFromLookupTable(colorMatchColorCoordGrid,materialMatchColorCoordGrid,...
+function probability = ColorMaterialModelGetProbabilityFromLookupTable(F,colorMatchColorCoordGrid,materialMatchColorCoordGrid,...
     colorMatchMaterialCoordGrid,materialMatchMaterialCoordsGrid, weightGrid)
 
 % Read probabilities from the lookup table
@@ -14,9 +14,6 @@ function probability = ColorMaterialModelGetProbabilityFromLookupTable(colorMatc
 %   probability - 
 
 % 2/2/17 ar Wrote it. 
-
-% Load lookup table
-load('test');
 
 probability = F(colorMatchColorCoordGrid,materialMatchColorCoordGrid,colorMatchMaterialCoordGrid,materialMatchMaterialCoordsGrid, weightGrid);
 

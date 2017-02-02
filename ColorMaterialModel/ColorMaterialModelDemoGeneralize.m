@@ -16,6 +16,9 @@ currentDir = pwd;
 % Simulate up some data, or read in data.  DEMO == true means simulate.
 DEMO = true;
 
+% Load lookup table
+load test
+
 %% Load structure giving experiment design parameters. 
 %
 % Here we use the example structure that mathes the experimental design of
@@ -175,7 +178,7 @@ if (DEMO)
     % numerical integration and approximation involved. 
     probabilitiesComputedForSimulatedData = zeros(nPairs,1);
     for whichPair = 1:nPairs
-        probabilitiesComputedForSimulatedData(whichPair) = ColorMaterialModelGetProbabilityFromLookupTable(pairColorMatchColorCoords(whichPair), pairMaterialMatchColorCoords(whichPair), ...
+        probabilitiesComputedForSimulatedData(whichPair) = ColorMaterialModelGetProbabilityFromLookupTable(F,pairColorMatchColorCoords(whichPair), pairMaterialMatchColorCoords(whichPair), ...
                     pairColorMatchMaterialCoords(whichPair) , pairMaterialMatchMaterialCoords(whichPair), w);
         
         %         probabilitiesComputedForSimulatedData(whichPair) = ColorMaterialModelComputeProb(targetColorCoord, targetMaterialCoord, ...
@@ -184,7 +187,7 @@ if (DEMO)
     end
      
     nTrials = nBlocks*ones(size(responsesFromSimulatedData));
-    [logLikely, predictedResponses] = ColorMaterialModelComputeLogLikelihood(pairColorMatchColorCoords, pairMaterialMatchColorCoords,...
+    [logLikely, predictedResponses] = ColorMaterialModelComputeLogLikelihood(F,pairColorMatchColorCoords, pairMaterialMatchColorCoords,...
         pairColorMatchMaterialCoords, pairMaterialMatchMaterialCoords,...
         responsesFromSimulatedData, nTrials,...
         params.materialMatchColorCoords(params.targetIndex), params.colorMatchMaterialCoords(params.targetIndex), ...
