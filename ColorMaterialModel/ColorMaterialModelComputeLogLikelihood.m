@@ -30,7 +30,7 @@ function [logLikely, predictedProbabilities] = ColorMaterialModelComputeLogLikel
 p = inputParser;
 p.addParameter('nSimulate',1000, @isnumeric);
 p.addParameter('whichMethod','lookup', @ischar);
-p.addParameter('Fobj',null, @isobj);
+p.addParameter('Fobj',[], @(x)(isempty(x) || isa(x,'griddedInterpolant')));
 p.parse(varargin{:});
 
 
