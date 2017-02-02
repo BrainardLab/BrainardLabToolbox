@@ -3,53 +3,55 @@
 % Build a table to allow lookup of probabilities for various positions and
 % dimension weight.
 
-% Initialize; 
+%% Initialize; 
 clear; close all; 
 
 %% It's a 5D table
 % We're trying 2D first. 
 
-% Fixed general parameters.  
+%% Fixed general parameters.  
 sigma = 1; 
 targetColorCoord = 0; 
 targetMaterialCoord = 0; 
 endPosition = 5;
 
-% Fixed temporary parameters. 
-nSamplePoints = 10; 
-nSimulate =  100; 
+%% Fixed temporary parameters. 
+nSamplePoints = 20; 
+nSimulate =  1000; 
 
-% Set dimensions of interest (2 for now)
+%% Set dimensions of interest
 colorMatchColorCoords = linspace(-endPosition,endPosition,nSamplePoints);
 materialMatchColorCoords = linspace(-endPosition,endPosition,nSamplePoints);
 colorMatchMaterialCoords =  linspace(-endPosition,endPosition,nSamplePoints);
 materialMatchMaterialCoords = linspace(-endPosition,endPosition,nSamplePoints);
-weight = linspace(0,endPosition,nSamplePoints);
+weight = linspace(0,1,nSamplePoints/2);
+
 %% Define grid sample points
 [colorMatchColorCoordGrid,materialMatchColorCoordGrid,colorMatchMaterialCoordGrid, materialMatchMaterialCoordsGrid, weightGrid] = ...
     ndgrid(colorMatchColorCoords,materialMatchColorCoords,colorMatchMaterialCoords, materialMatchMaterialCoords,weight);
-tic
 CMLookUp = zeros(size(colorMatchColorCoordGrid));
 for i = 1:length(colorMatchColorCoords)
     for j = 1:length(materialMatchColorCoords)
         for k = 1:length(colorMatchMaterialCoords)
             for l = 1:length(materialMatchMaterialCoords)
+                tic
                 for m = 1:length(weight)
+                    
                     % Build the gridded data that we'll interpolate on
                     CMLookUp(i,j,k,l,m) = ColorMaterialModelComputeProbBySimulation(nSimulate, targetColorCoord,targetMaterialCoord, ...
                         colorMatchColorCoordGrid(i,j,k,l,m),materialMatchColorCoordGrid(i,j,k,l,m),...
                         colorMatchMaterialCoordGrid(i,j,k,l,m), materialMatchMaterialCoordsGrid(i,j,k,l,m), weightGrid(i,j,k,l,m), sigma);
                 end
+                toc
             end
         end
     end
 end
-toc
  
 % Build interpolator
-F = griddedInterpolant(colorMatchColorCoordGrid,materialMatchColorCoordGrid,colorMatchMaterialCoordGrid,materialMatchMaterialCoordsGrid, weightGrid, CMLookUp,'linear');
+colorMaterialInterpolatorFunction = griddedInterpolant(colorMatchColorCoordGrid,materialMatchColorCoordGrid,colorMatchMaterialCoordGrid,materialMatchMaterialCoordsGrid, weightGrid, CMLookUp,'linear');
 
-save('test','F');
+save('colorMaterialInterpolateFunction','colorMaterialInterpolatorFunction','CMLookup','nSimulate','nSamplePoints','targetColorCoord','targetMaterialCoord','endPosition','sigma');
 
 % % Apply interpolator
 % tempValue = 2;

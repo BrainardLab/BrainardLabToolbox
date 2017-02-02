@@ -68,7 +68,7 @@ if (DEMO)
     scalePositions = 1; % scaling factor for input positions (we can try different ones to match our noise i.e. sigma of 1).
     sigma = 1;
     w = 0.8; 
-    params.whichWeight = 'weightFixed';
+    params.whichWeight = 'weightVary';
     params.scalePositions  = scalePositions; 
     params.subjectName = 'demoFixed'; 
     params.conditionCode = 'demo';
@@ -268,9 +268,9 @@ for i = 1:length(rowIndex)
         newProbabilitiesComputedForSimulatedData(rowIndex((i)), columnIndex((i))) = probabilitiesComputedForSimulatedData(overallColorMaterialPairIndices(i)); 
 end
 
-% weibullplots = 1; 
-% ColorMaterialModelPlotSolution(resizedDataProb, newProbabilitiesComputedForSimulatedData, ...
-%     returnedParams, params, params.subjectName, params.conditionCode, figDir, saveFig, weibullplots);
+weibullplots = 1; 
+ColorMaterialModelPlotSolution(resizedDataProb, newProbabilitiesComputedForSimulatedData, ...
+    returnedParams, params, params.subjectName, params.conditionCode, figDir, saveFig, weibullplots);
 
 %% Below is code we used for debugging initial program. 
 % Get model predictions

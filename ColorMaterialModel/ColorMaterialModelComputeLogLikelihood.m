@@ -34,24 +34,22 @@ for i = 1:nPairs
     colorMatchMaterialCoord = pairColorMatchMaterialCoords(i);
     materialMatchMaterialCoord = pairMaterialMatchMaterialCoords(i);
     
-    ANALYTIC = false;
-    if (ANALYTIC)
-        predictedProbabilities(i) = ColorMaterialModelComputeProb(targetColorCoord, targetMaterialCoord, ...
-            colorMatchColorCoord, materialMatchColorCoord, ...
-            colorMatchMaterialCoord,materialMatchMaterialCoord, w, sigma);
-    else
-        predictedProbabilities(i) = ColorMaterialModelGetProbabilityFromLookupTable(colorMatchColorCoord,materialMatchColorCoord,...
+    WHICH_METHOD = 'lookup';
+    switch (WHICH_METHOD)
+        case 'analytic'
+            predictedProbabilities(i) = ColorMaterialModelComputeProb(targetColorCoord, targetMaterialCoord, ...
+                colorMatchColorCoord, materialMatchColorCoord, ...
+                colorMatchMaterialCoord,materialMatchMaterialCoord, w, sigma);
+        case 'simulate'
+             nSimulate = 1000;
+             s = rng(173);
+             predictedProbabilities(i) = ColorMaterialModelComputeProbBySimulation(nSimulate,targetColorCoord, targetMaterialCoord, ...
+                colorMatchColorCoord, materialMatchColorCoord, ...
+                colorMatchMaterialCoord,materialMatchMaterialCoord, w, sigma);
+            rng(s);
+        case 'lookup'
+            predictedProbabilities(i) = ColorMaterialModelGetProbabilityFromLookupTable(colorMatchColorCoord,materialMatchColorCoord,...
             colorMatchMaterialCoord,materialMatchMaterialCoord, w);
-        %         nSimulate = 1000;
-        %         predictedResponses = zeros(nSimulate,1);
-        %         s = rng(173);
-        %         for kk = 1:nSimulate
-        %             predictedResponses(kk) = ColorMaterialModelSimulateResponse(targetColorCoord, targetMaterialCoord, ...
-        %                 pairColorMatchColorCoords(i), pairMaterialMatchColorCoords(i), ...
-        %                 pairColorMatchMaterialCoords(i), pairMaterialMatchMaterialCoords(i), w, sigma);
-        %         end
-        %         rng(s);
-        %         predictedProbabilities(i) = mean(predictedResponses);
     end
     
     if (isnan(predictedProbabilities(i)))
