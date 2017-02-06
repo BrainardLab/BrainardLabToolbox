@@ -34,7 +34,7 @@ for i = 1:length(colorMatchColorCoords)
     for j = 1:length(materialMatchColorCoords)
         for k = 1:length(colorMatchMaterialCoords)
             for l = 1:length(materialMatchMaterialCoords)
-                tic
+                
                 for m = 1:length(weight)
                     
                     % Build the gridded data that we'll interpolate on
@@ -42,7 +42,7 @@ for i = 1:length(colorMatchColorCoords)
                         colorMatchColorCoordGrid(i,j,k,l,m),materialMatchColorCoordGrid(i,j,k,l,m),...
                         colorMatchMaterialCoordGrid(i,j,k,l,m), materialMatchMaterialCoordsGrid(i,j,k,l,m), weightGrid(i,j,k,l,m), sigma);
                 end
-                toc
+                
             end
         end
     end
@@ -51,7 +51,7 @@ end
 % Build interpolator
 colorMaterialInterpolatorFunction = griddedInterpolant(colorMatchColorCoordGrid,materialMatchColorCoordGrid,colorMatchMaterialCoordGrid,materialMatchMaterialCoordsGrid, weightGrid, CMLookUp,'linear');
 
-save('colorMaterialInterpolateFunction','colorMaterialInterpolatorFunction','CMLookup','nSimulate','nSamplePoints','targetColorCoord','targetMaterialCoord','endPosition','sigma');
+save('colorMaterialInterpolateFunction','colorMaterialInterpolatorFunction','CMLookUp','nSimulate','nSamplePoints','targetColorCoord','targetMaterialCoord','endPosition','sigma');
 
 % % Apply interpolator
 % tempValue = 2;
