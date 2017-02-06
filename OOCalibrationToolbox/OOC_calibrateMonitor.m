@@ -310,7 +310,7 @@ function [displaySettings, calibratorOptions] = generateConfigurationForInVivoSe
     % These can be set once only, at the time the @Calibrator object is instantiated.
     displaySettings = { ...
         'screenToCalibrate',        1, ...                          % which display to calibrate. main screen = 1, second display = 2
-        'desiredScreenSizePixel',   [1920 1080], ...                % pixels along the width and height of the display to be calibrated
+        'desiredScreenSizePixel',   [1600 900], ...                % pixels along the width and height of the display to be calibrated
         'desiredRefreshRate',       [], ...                         % refresh rate in Hz
         'displayPrimariesNum',      3, ...                          % for regular displays this is always 3 (RGB) 
         'displayDeviceType',        'monitor', ...                  % this should always be set to 'monitor' for now
