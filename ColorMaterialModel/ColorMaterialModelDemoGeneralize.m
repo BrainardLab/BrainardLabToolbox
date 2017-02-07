@@ -14,7 +14,7 @@ clear; %close all;
 currentDir = pwd; 
 
 % Simulate up some data, or read in data.  DEMO == true means simulate.
-DEMO = true;
+DEMO = false;
 
 lookupMethod = 'linear';
 % Load lookup table
@@ -236,7 +236,7 @@ else
             pairMaterialMatchMaterialCoords  = materialMatchMaterialCoord;
             params.whichWeight = 'weightVary';
             params.whichPositions = 'full';
-            params.F = F; % for lookup.
+            params.F = colorMaterialInterpolatorFunction; % for lookup.
             params.whichMethod = 'lookup'; % could be also 'simulate' or 'analytic'
             params.nSimulate = 1000; 
             
@@ -299,7 +299,7 @@ end
 figure; hold on
 plot(probabilitiesFromSimulatedData,predictedProbabilitiesBasedOnSolution(:),'ro','MarkerSize',12,'MarkerFaceColor','r');
 rmse = ComputeRealRMSE(probabilitiesFromSimulatedData,predictedProbabilitiesBasedOnSolution(:)); 
-logLikely1 = computeLogLikelihood(probabilitiesFromSimulatedData,predictedProbabilitiesBasedOnSolution, nTrials); 
+logLikely1 = ColorMaterialModelComputeLogLikelihoodSimple(responsesFromSimulatedData,predictedProbabilitiesBasedOnSolution, nTrials); 
 fprintf('Log likelyhood 1: %0.2f.\n', logLikely1);
 
 text(0.07, 0.87, sprintf('RMSEFit = %.4f', rmse), 'FontSize', 12); 
@@ -308,7 +308,7 @@ if DEMO
     plot(probabilitiesFromSimulatedData,probabilitiesForActualPositions(:),'bo','MarkerSize',12,'MarkerFaceColor','b');
     rmseComp = ComputeRealRMSE(probabilitiesFromSimulatedData,probabilitiesForActualPositions(:));
     text(0.07, 0.82, sprintf('RMSEActual = %.4f', rmseComp), 'FontSize', 12);
-    logLikely2 = computeLogLikelihood(probabilitiesFromSimulatedData,probabilitiesForActualPositions,nTrials);
+    logLikely2 = ColorMaterialModelComputeLogLikelihoodSimple(responsesFromSimulatedData,probabilitiesForActualPositions,nTrials);
     fprintf('Log likelyhood 2: %0.2f.\n', logLikely2);
 
     legend('Fit Parameters', 'Actual Parameters', 'Location', 'NorthWest')
