@@ -35,3 +35,4 @@
 % SpectralData           		- Misc spectral data.
 % Strings                		- String utilities from Matlab Central.  Routine strsplit or something much
 %                          		  like it appeared in Matlab 2013a.
+% StructUtils                   - Utilities for working with structs.
