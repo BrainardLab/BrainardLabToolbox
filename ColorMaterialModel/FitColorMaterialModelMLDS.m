@@ -140,7 +140,7 @@ end
 
 % Standard fmincon options
 options = optimset('fmincon');
-options = optimset(options,'Diagnostics','off','Display','iter','LargeScale','off','Algorithm','active-set','MaxIter',300);
+options = optimset(options,'Diagnostics','off','Display','off','LargeScale','off','Algorithm','active-set','MaxIter',300);
 
 %% Search
 %
@@ -150,7 +150,7 @@ options = optimset(options,'Diagnostics','off','Display','iter','LargeScale','of
 logLikelyFit = -Inf;
 for k1 = 1:length(p.Results.trySpacingValues)
     for k2 = 1:length(p.Results.trySpacingValues)
-        for k3 = 1:length(tryWeights)
+        for k3 = 1:length(p.Results.tryWeightValues)
             % Choose initial competitor positions based on current spacing to try.
             switch (p.Results.whichPositions)
                 case 'smoothSpacing'
@@ -216,11 +216,11 @@ for k1 = 1:length(p.Results.trySpacingValues)
             vlb(end) = sigma; 
             
             % Print out log likelihood of where we started
-            [fTemp,predictedResponsesTemp] = FitColorMaterialModelMLDSFun(initialParams, ...
-                pairColorMatchColorsCoords,pairMaterialMatchColorCoords, ...
-                pairColorMatchMaterialCoords,pairMaterialMatchMaterialCoords, ...
-                theResponses,nTrials,params);
-            fprintf('Initial position log likelihood %0.2f.\n', -fTemp);
+%             [fTemp,~] = FitColorMaterialModelMLDSFun(initialParams, ...
+%                 pairColorMatchColorsCoords,pairMaterialMatchColorCoords, ...
+%                 pairColorMatchMaterialCoords,pairMaterialMatchMaterialCoords, ...
+%                 theResponses,nTrials,params);
+%            fprintf('Initial position log likelihood %0.2f.\n', -fTemp);
             
             % Run the search
             switch (p.Results.whichPositions)
@@ -249,15 +249,16 @@ for k1 = 1:length(p.Results.trySpacingValues)
                 pairColorMatchColorsCoords,pairMaterialMatchColorCoords, ...
                 pairColorMatchMaterialCoords,pairMaterialMatchMaterialCoords, ...
                 theResponses,nTrials,params);
-            if (-fTemp > logLikelyFit)
+            if (fTemp > logLikelyFit)
                 x = xTemp;
-                logLikelyFit = -fTemp;
+                logLikelyFit = fTemp;
                 predictedResponses = predictedResponsesTemp;
                 
                 % Record which loop settings were best, for debugging
                 k.k1 = k1; 
                 k.k2 = k2; 
                 k.k3 = k3; 
+                fprintf('Current solution log likelihood %0.2f.\n', -fTemp)
             end
         end
     end

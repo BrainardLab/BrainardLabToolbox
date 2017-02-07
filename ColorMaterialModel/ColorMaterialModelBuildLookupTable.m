@@ -53,29 +53,29 @@ colorMaterialInterpolatorFunction = griddedInterpolant(colorMatchColorCoordGrid,
 
 save('colorMaterialInterpolateFunction','colorMaterialInterpolatorFunction','CMLookUp','nSimulate','nSamplePoints','targetColorCoord','targetMaterialCoord','endPosition','sigma');
 
-% % Apply interpolator
-% tempValue = 2;
-% [~,index] = min(abs(materialMatchColorCoords-tempValue));
-% valueForMaterialMatchColorCoords = materialMatchColorCoords(index);
-% 
-% newColorMatchColorCoords = [0.3322 2.47 -1.3];
-% newMaterialMatchColorCoords = [valueForMaterialMatchColorCoords valueForMaterialMatchColorCoords valueForMaterialMatchColorCoords];
-% newColorMatchMaterialCoords = [1.623774 0.001 2.38];
-% 
-%% newProbs = F(newColorMatchColorCoords,newMaterialMatchColorCoords,newColorMatchMaterialCoords);
-% 
-% %[Xi,Yi] = ndgrid(newColorMatchColorCoords,newColorMatchMaterialCoords);
-% %newProbs = F(Xi,Yi);
-% [plotXGrid,plotZGrid] = ndgrid(colorMatchColorCoords,colorMatchMaterialCoords);
-% plotYGrid = valueForMaterialMatchColorCoords*ones(size(plotXGrid));
-% %plotProbs = F(plotXGrid,plotYGrid,plotZGrid);
-% 
-% % Visualize the 2D table we built and something we interpolated from it
-% figure; clf; hold on;
-% mesh(plotXGrid,plotZGrid,plotProbs);
-% 
-% plot3(newColorMatchColorCoords,newColorMatchMaterialCoords,newProbs,'ko','MarkerSize',8,'MarkerFaceColor','k');
-% xlabel('X'); ylabel('Y');
+% Apply interpolator
+tempValue = 2;
+[~,index] = min(abs(materialMatchColorCoords-tempValue));
+valueForMaterialMatchColorCoords = materialMatchColorCoords(index);
+
+newColorMatchColorCoords = [0.3322 2.47 -1.3];
+newMaterialMatchColorCoords = [valueForMaterialMatchColorCoords valueForMaterialMatchColorCoords valueForMaterialMatchColorCoords];
+newColorMatchMaterialCoords = [1.623774 0.001 2.38];
+
+% newProbs = F(newColorMatchColorCoords,newMaterialMatchColorCoords,newColorMatchMaterialCoords);
+
+%[Xi,Yi] = ndgrid(newColorMatchColorCoords,newColorMatchMaterialCoords);
+%newProbs = F(Xi,Yi);
+[plotXGrid,plotZGrid] = ndgrid(colorMatchColorCoords,colorMatchMaterialCoords);
+plotYGrid = valueForMaterialMatchColorCoords*ones(size(plotXGrid));
+%plotProbs = F(plotXGrid,plotYGrid,plotZGrid);
+
+% Visualize the 2D table we built and something we interpolated from it
+figure; clf; hold on;
+mesh(plotXGrid,plotZGrid,plotProbs);
+
+plot3(newColorMatchColorCoords,newColorMatchMaterialCoords,newProbs,'ko','MarkerSize',8,'MarkerFaceColor','k');
+xlabel('X'); ylabel('Y');
 
 
 

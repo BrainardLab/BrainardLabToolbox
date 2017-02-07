@@ -16,9 +16,16 @@ currentDir = pwd;
 % Simulate up some data, or read in data.  DEMO == true means simulate.
 DEMO = true;
 
+lookupMethod = 'linear';
 % Load lookup table
-load colorMaterialInterpolateFunction.mat
-
+switch lookupMethod
+    case  'linear'
+        load colorMaterialInterpolateFunctionLinear.mat
+        colorMaterialInterpolatorFunction = colorMaterialInterpolatorFunctionLinear;
+    case 'cubic'
+        load colorMaterialInterpolateFunctionCubic.mat
+        colorMaterialInterpolatorFunction = colorMaterialInterpolatorFunctionCubic;
+end
 %% Load structure giving experiment design parameters. 
 %
 % Here we use the example structure that mathes the experimental design of
@@ -42,13 +49,13 @@ params.whichPositions = 'full';
 params.smoothOrder = 3;
 
 % Initial position spacing values to try.
-trySpacingValues = 0.5; %[0.5 1 2];
+trySpacingValues =  [0.5 1 2];
 params.trySpacingValues = trySpacingValues; 
 
 % Does material/color weight vary in fit?
 %  'weightVary' - yes, it does.
 %  'weightFixed' - fix weight to specified value in tryWeightValues(1);
-tryWeightValues = [ 0.5 ]%0.2 0.8];
+tryWeightValues = [0.5 0.2 0.8];
 params.tryWeightValues = tryWeightValues; 
 
 % Set figure directories
@@ -180,9 +187,9 @@ if (DEMO)
     % This mainly serves as a check that our analytic function works
     % correctly.  Note that analytic is a bit too strong, there is some
     % numerical integration and approximation involved. 
-    probabilitiesComputedForSimulatedData = zeros(nPairs,1);
+    probabilitiesForActualPositions = zeros(nPairs,1);
     for whichPair = 1:nPairs
-        probabilitiesComputedForSimulatedData(whichPair) = colorMaterialInterpolatorFunction(pairColorMatchColorCoords(whichPair), pairMaterialMatchColorCoords(whichPair), ...
+        probabilitiesForActualPositions(whichPair) = colorMaterialInterpolatorFunction(pairColorMatchColorCoords(whichPair), pairMaterialMatchColorCoords(whichPair), ...
                     pairColorMatchMaterialCoords(whichPair) , pairMaterialMatchMaterialCoords(whichPair), w);
         
         %         probabilitiesComputedForSimulatedData(whichPair) = ColorMaterialModelComputeProb(targetColorCoord, targetMaterialCoord, ...
@@ -268,7 +275,7 @@ if DEMO
     for i = 1:length(rowIndex)
         resizedDataProb(rowIndex((i)), columnIndex((i))) = probabilitiesFromSimulatedData(overallColorMaterialPairIndices(i));
         resizedSolutionProb(rowIndex((i)), columnIndex((i))) = predictedProbabilitiesBasedOnSolution(overallColorMaterialPairIndices(i));
-        newProbabilitiesComputedForSimulatedData(rowIndex((i)), columnIndex((i))) = probabilitiesComputedForSimulatedData(overallColorMaterialPairIndices(i));
+        resizedProbabilitiesForActualPositions(rowIndex((i)), columnIndex((i))) = probabilitiesForActualPositions(overallColorMaterialPairIndices(i));
     end
 else
     load('pilotIndices.mat')
@@ -288,56 +295,33 @@ else
     resizedDataProb(4,4) = 0.5;
     resizedSolutionProb(4,4) = 0.5;
 end
-figure; plot(probabilitiesFromSimulatedData,  predictedProbabilitiesBasedOnSolution, 'ro'); 
+
+figure; hold on
+plot(probabilitiesFromSimulatedData,predictedProbabilitiesBasedOnSolution(:),'ro','MarkerSize',12,'MarkerFaceColor','r');
+rmse = ComputeRealRMSE(probabilitiesFromSimulatedData,predictedProbabilitiesBasedOnSolution(:)); 
+logLikely1 = computeLogLikelihood(probabilitiesFromSimulatedData,predictedProbabilitiesBasedOnSolution, nTrials); 
+fprintf('Log likelyhood 1: %0.2f.\n', logLikely1);
+
+text(0.07, 0.87, sprintf('RMSEFit = %.4f', rmse), 'FontSize', 12); 
+
+if DEMO
+    plot(probabilitiesFromSimulatedData,probabilitiesForActualPositions(:),'bo','MarkerSize',12,'MarkerFaceColor','b');
+    rmseComp = ComputeRealRMSE(probabilitiesFromSimulatedData,probabilitiesForActualPositions(:)); 
+    text(0.07, 0.82, sprintf('RMSEActual = %.4f', rmseComp), 'FontSize', 12); 
+    logLikely2 = computeLogLikelihood(probabilitiesFromSimulatedData,probabilitiesForActualPositions,nTrials); 
+fprintf('Log likelyhood 2: %0.2f.\n', logLikely2);
+
+    legend('Fit Parameters', 'Actual Parameters', 'Location', 'NorthWest')
+    legend boxoff
+else
+    legend('Fit Parameters', 'Location', 'NorthWest')
+    legend boxoff
+end
 
 if DEMO
      ColorMaterialModelPlotSolution(resizedDataProb, resizedSolutionProb, ...
-        returnedParams, params, params.subjectName, params.conditionCode, figDir, saveFig, weibullplots,newProbabilitiesComputedForSimulatedData);
+        returnedParams, params, params.subjectName, params.conditionCode, figDir, saveFig, weibullplots,resizedProbabilitiesForActualPositions);
 else
     ColorMaterialModelPlotSolution(resizedDataProb, resizedSolutionProb, ...
         returnedParams, params, params.subjectName, params.conditionCode, figDir, saveFig, weibullplots);
 end
-%% Below is code we used for debugging initial program.
-% Get model predictions
-% for whichPair = 1:size(pair,1)
-%     probabilitiesComputedForSimulatedData2(whichPair) = ColorMaterialModelComputeProb(0,  0, ...
-%         pair{whichPair, 1}(colorCoordIndex), pair{whichPair,2}(colorCoordIndex), ...
-%         pair{whichPair, 1}(materialCoordIndex), pair{whichPair,2}(materialCoordIndex), returnedW, sigma);
-% end
-% 
-% for whichMaterialCoordinate = 1:length(params.colorMatchMaterialCoords)
-%     % Get the inferred color position for a range of material matches
-%     for whichColorCoordinate = 1:length(params.materialMatchColorCoords)
-%         
-%         % Compute the model predictions
-%         modelPredictions(whichColorCoordinate, whichMaterialCoordinate) = ColorMaterialModelComputeProb(params.targetColorCoord,params.targetMaterialCoord, ...
-%             returnedColorMatchColorCoord(4),returnedMaterialMatchColorCoord(whichColorCoordinate),...
-%             returnedColorMatchMaterialCoord(whichMaterialCoordinate), returnedMaterialMatchMaterialCoord(4), returnedW, returnedSigma);
-%         % Compute the model predictions
-%         
-%     end
-% end
-% Check that we can get the same predictions directly from the solution in ways we might want to do it
-% [logLikelyFit2,predictedProbabilitiesBasedOnSolution2] = ColorMaterialModelComputeLogLikelihood(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponsesFromSimulatedData,nTrials,...
-%     returnedColorMatchMaterialCoords,returnedMaterialMatchColorCoords,params.targetIndex,...
-%     returnedW, returnedSigma);
-% [negLogLikelyFit3,predictedProbabilitiesBasedOnSolution3] = FitColorMaterialScalingFun(returnedParams,pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponsesFromSimulatedData,nTrials,params);
-% if (any(predictedProbabilitiesBasedOnSolution ~= predictedProbabilitiesBasedOnSolution3))
-%     error('Cannot recover the predictions 3 from the parameters right after we found them!');
-% end
-% if (any(predictedProbabilitiesBasedOnSolution ~= predictedProbabilitiesBasedOnSolution2))
-%     error('Cannot recover the predictions 2 from the parameters right after we found them!');
-% end
-% if debugging
-%     [~,modelPredictions2] = ColorMaterialModelComputeLogLikelihood(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponsesFromSimulatedData,nTrials,...
-%         returnedColorMatchMaterialCoords,returnedMaterialMatchColorCoords,params.targetIndex,...
-%         returnedW, returnedSigma);
-% end
-%
-% Make sure the numbers we compute from the model now match those we computed in the demo program
-% if debugging
-%     figure; clf; hold on
-%     plot(predictedProbabilitiesBasedOnSolution(:),modelPredictions(:),'ro','MarkerSize',12,'MarkerFaceColor','r');
-%  %   plot(predictedProbabilitiesBasedOnSolution(:),modelPredictions2(:),'bo','MarkerSize',12,'MarkerFaceColor','b');
-%     xlim([0 1]); ylim([0,1]); axis('square');
-% end
