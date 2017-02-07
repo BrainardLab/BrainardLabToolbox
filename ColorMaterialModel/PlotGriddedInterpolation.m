@@ -4,7 +4,7 @@
 clear; close all; 
 
 % lookup
-lookupMethod = 'linear';
+lookupMethod = 'cubic';
 
 % Load lookup table
 switch lookupMethod
@@ -15,12 +15,10 @@ switch lookupMethod
         load colorMaterialInterpolateFunctionCubic.mat
         colorMaterialInterpolatorFunction = colorMaterialInterpolatorFunctionCubic;
 end
-[plotXGrid,plotYGrid] = ndgrid(gridParams.colorMatchColorCoords,gridParams.colorMatchMaterialCoords);
 
 % we need to fix 3 dimensions
-value3 = gridParams.colorMatchMaterialCoords(randi(20)); 
-value4 = gridParams.materialMatchMaterialCoords(randi(20));
-value5 = gridParams.weightCoords(randi(10));
+value4 = gridParams.materialMatchMaterialCoords(4);
+value5 = gridParams.weightCoords(5);
 
 xSamples = linspace(-gridParams.endPosition,gridParams.endPosition,100); 
 ySamples = linspace(-gridParams.endPosition,gridParams.endPosition,100); 

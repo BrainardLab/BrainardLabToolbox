@@ -178,12 +178,12 @@ for k1 = 1:length(p.Results.trySpacingValues)
             switch (p.Results.whichPositions)
                 case 'smoothSpacing'
                     % Weights on coefficients should be bounded. 
-                    vlb(1:end-2) = -4;
-                    vub(1:end-2) = 4;
+                    vlb(1:end-2) = -5+0.1;
+                    vub(1:end-2) = 5-0.1;
                 case 'full'
                     % Loose bounds on positions
-                    vlb = -4*max(abs(initialParams))*ones(size(initialParams));
-                    vub = 4*max(abs(initialParams))*ones(size(initialParams));
+                    vlb = (-5+0.1)*ones(size(initialParams));
+                    vub = (5-0.1)*ones(size(initialParams));
                     
                     % Lock target into place
                     vlb(targetIndexMaterial) = 0;
@@ -249,9 +249,9 @@ for k1 = 1:length(p.Results.trySpacingValues)
                 pairColorMatchColorsCoords,pairMaterialMatchColorCoords, ...
                 pairColorMatchMaterialCoords,pairMaterialMatchMaterialCoords, ...
                 theResponses,nTrials,params);
-            if (fTemp > logLikelyFit)
+            if (-fTemp > logLikelyFit)
                 x = xTemp;
-                logLikelyFit = fTemp;
+                logLikelyFit = -fTemp;
                 predictedResponses = predictedResponsesTemp;
                 
                 % Record which loop settings were best, for debugging

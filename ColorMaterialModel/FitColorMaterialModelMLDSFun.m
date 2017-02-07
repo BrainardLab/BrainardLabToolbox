@@ -33,11 +33,8 @@ if (any(isnan(x)))
     error('Entry of x is NaN');
 end
 
-
-
 % We need to convert X to params here
 [materialMatchColorCoords,colorMatchMaterialCoords,w,sigma] = ColorMaterialModelXToParams(x,params); 
-
 
 % Remap pair indices into coordinates, based on the current solution
 for i = 1:length(pairColorMatchColorCoordPosition)
@@ -49,7 +46,6 @@ for i = 1:length(pairColorMatchColorCoordPosition)
 end
 
 % Compute negative log likelyhood of the current solution
-
 [logLikely,predictedResponses] = ColorMaterialModelComputeLogLikelihood(...
     pairColorMatchColorCoords, pairMaterialMatchColorCoords,...
     pairColorMatchMaterialCoords, pairMaterialMatchMaterialCoords,...
@@ -57,5 +53,9 @@ end
     'Fobj', params.F, 'whichMethod', params.whichMethod, 'nSimulate', params.nSimulate);
 
 f = -logLikely;
+
+if (f < 0)
+    error('Cannot have logLikelihood > 0');
+end
 
 end

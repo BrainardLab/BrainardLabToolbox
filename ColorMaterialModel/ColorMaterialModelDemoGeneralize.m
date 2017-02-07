@@ -306,10 +306,10 @@ text(0.07, 0.87, sprintf('RMSEFit = %.4f', rmse), 'FontSize', 12);
 
 if DEMO
     plot(probabilitiesFromSimulatedData,probabilitiesForActualPositions(:),'bo','MarkerSize',12,'MarkerFaceColor','b');
-    rmseComp = ComputeRealRMSE(probabilitiesFromSimulatedData,probabilitiesForActualPositions(:)); 
-    text(0.07, 0.82, sprintf('RMSEActual = %.4f', rmseComp), 'FontSize', 12); 
-    logLikely2 = computeLogLikelihood(probabilitiesFromSimulatedData,probabilitiesForActualPositions,nTrials); 
-fprintf('Log likelyhood 2: %0.2f.\n', logLikely2);
+    rmseComp = ComputeRealRMSE(probabilitiesFromSimulatedData,probabilitiesForActualPositions(:));
+    text(0.07, 0.82, sprintf('RMSEActual = %.4f', rmseComp), 'FontSize', 12);
+    logLikely2 = computeLogLikelihood(probabilitiesFromSimulatedData,probabilitiesForActualPositions,nTrials);
+    fprintf('Log likelyhood 2: %0.2f.\n', logLikely2);
 
     legend('Fit Parameters', 'Actual Parameters', 'Location', 'NorthWest')
     legend boxoff
