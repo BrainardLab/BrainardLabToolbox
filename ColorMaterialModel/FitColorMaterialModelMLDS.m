@@ -150,7 +150,7 @@ options = optimset(options,'Diagnostics','off','Display','off','LargeScale','off
 logLikelyFit = -Inf;
 for k1 = 1:length(p.Results.trySpacingValues)
     for k2 = 1:length(p.Results.trySpacingValues)
-        for k3 = 1:length(p.Results.tryWeightValues)
+        for k3 = 1:length(tryWeights)
             % Choose initial competitor positions based on current spacing to try.
             switch (p.Results.whichPositions)
                 case 'smoothSpacing'

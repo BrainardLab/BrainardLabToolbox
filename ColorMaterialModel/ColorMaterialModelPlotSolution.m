@@ -21,22 +21,22 @@ function ColorMaterialModelPlotSolution(theDataProb, predictedProbabilitiesBased
 [returnedMaterialMatchColorCoords,returnedColorMatchMaterialCoords,returnedW,returnedSigma]  = ColorMaterialModelXToParams(modelParams, params); 
 
 %% Figure 1. Plot measured vs. predicted probabilities
-figure; hold on
-plot(theDataProb(:),predictedProbabilitiesBasedOnSolution(:),'ro','MarkerSize',12,'MarkerFaceColor','r');
-rmse = ComputeRealRMSE(theDataProb(:),predictedProbabilitiesBasedOnSolution(:)); 
-text(0.07, 0.87, sprintf('RMSEFit = %.4f', rmse), 'FontSize', 12); 
-
-if nargin > 9
-    plot(theDataProb(:),actualProbs(:),'bo','MarkerSize',12,'MarkerFaceColor','b');
-    rmseComp = ComputeRealRMSE(theDataProb(:),actualProbs(:)); 
-    text(0.07, 0.82, sprintf('RMSEActual = %.4f', rmseComp), 'FontSize', 12); 
-
-    legend('Fit Parameters', 'Actual Parameters', 'Location', 'NorthWest')
-    legend boxoff
-else
-    legend('Fit Parameters', 'Location', 'NorthWest')
-    legend boxoff
-end
+% figure; hold on
+% plot(theDataProb(:),predictedProbabilitiesBasedOnSolution(:),'ro','MarkerSize',12,'MarkerFaceColor','r');
+% rmse = ComputeRealRMSE(theDataProb(:),predictedProbabilitiesBasedOnSolution(:)); 
+% text(0.07, 0.87, sprintf('RMSEFit = %.4f', rmse), 'FontSize', 12); 
+% 
+% if nargin > 9
+%     plot(theDataProb(:),actualProbs(:),'bo','MarkerSize',12,'MarkerFaceColor','b');
+%     rmseComp = ComputeRealRMSE(theDataProb(:),actualProbs(:)); 
+%     text(0.07, 0.82, sprintf('RMSEActual = %.4f', rmseComp), 'FontSize', 12); 
+% 
+%     legend('Fit Parameters', 'Actual Parameters', 'Location', 'NorthWest')
+%     legend boxoff
+% else
+%     legend('Fit Parameters', 'Location', 'NorthWest')
+%     legend boxoff
+% end
 
 thisFontSize = 12; 
 line([0, 1], [0,1], 'color', 'k');
@@ -188,7 +188,7 @@ for whichMaterialCoordinate = 1:length(params.colorMatchMaterialCoords)
 end
 rangeOfMaterialMatchColorCoordinates = repmat(rangeOfMaterialMatchColorCoordinates,[1, length(params.materialMatchColorCoords)]);
 thisFig3 = ColorMaterialModelPlotFit(rangeOfMaterialMatchColorCoordinates, modelPredictions, params.materialMatchColorCoords, theDataProb, ...
-    'whichMatch', 'materialMatch', 'whichFit', 'MLDS','returnedWeight', returnedW);
+    'whichMatch', 'colorMatch', 'whichFit', 'MLDS','returnedWeight', returnedW);
 
 % Get values for reverse plotting
 for whichColorCoordinate = 1:length(params.materialMatchColorCoords)

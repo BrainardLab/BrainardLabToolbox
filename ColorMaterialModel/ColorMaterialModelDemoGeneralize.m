@@ -10,11 +10,11 @@
 % 11/18/16  ar  Wrote from color selection model version
 
 %% Initialize and parameter set
-clear; %close all;
+clear; close all;
 currentDir = pwd; 
-
+figDir = ['/Users/radonjic/Dropbox (Aguirre-Brainard Lab)/CNST_analysis/ColorMaterial/demoPlots'];
 % Simulate up some data, or read in data.  DEMO == true means simulate.
-DEMO = false;
+DEMO = true;
 
 lookupMethod = 'linear';
 % Load lookup table
@@ -60,8 +60,8 @@ params.tryWeightValues = tryWeightValues;
 
 % Set figure directories
 figDir = pwd; 
-saveFig = 0; 
-weibullplots = 1; 
+saveFig = 1; 
+weibullplots = 0; 
 
 %% We can use simulated data (DEMO == true) or some real data (DEMO == false)
 if (DEMO)
@@ -78,9 +78,9 @@ if (DEMO)
     scalePositions = 1; % scaling factor for input positions (we can try different ones to match our noise i.e. sigma of 1).
     sigma = 1;
     w = 0.75; 
-    params.whichWeight = 'weightVary';
+    params.whichWeight = 'weightFixed';
     params.scalePositions  = scalePositions; 
-    params.subjectName = 'demoFixed'; 
+    params.subjectName = ['demoFixed' num2str(w)]; 
     params.conditionCode = 'demo';
     params.materialMatchColorCoords = scalePositions*params.materialMatchColorCoords;
     params.colorMatchMaterialCoords = scalePositions*params.colorMatchMaterialCoords;
@@ -296,26 +296,37 @@ else
     resizedSolutionProb(4,4) = 0.5;
 end
 
+% Make the big figure
 figure; hold on
 plot(probabilitiesFromSimulatedData,predictedProbabilitiesBasedOnSolution(:),'ro','MarkerSize',12,'MarkerFaceColor','r');
-rmse = ComputeRealRMSE(probabilitiesFromSimulatedData,predictedProbabilitiesBasedOnSolution(:)); 
-logLikely1 = ColorMaterialModelComputeLogLikelihoodSimple(responsesFromSimulatedData,predictedProbabilitiesBasedOnSolution, nTrials); 
-fprintf('Log likelyhood 1: %0.2f.\n', logLikely1);
-
-text(0.07, 0.87, sprintf('RMSEFit = %.4f', rmse), 'FontSize', 12); 
-
+rmse = ComputeRealRMSE(probabilitiesFromSimulatedData,predictedProbabilitiesBasedOnSolution);
+plot(resizedDataProb,resizedSolutionProb,'ko','MarkerSize',12,'MarkerFaceColor','k');
+text(0.07, 0.87, sprintf('RMSEFit = %.4f', rmse), 'FontSize', 12);
 if DEMO
-    plot(probabilitiesFromSimulatedData,probabilitiesForActualPositions(:),'bo','MarkerSize',12,'MarkerFaceColor','b');
-    rmseComp = ComputeRealRMSE(probabilitiesFromSimulatedData,probabilitiesForActualPositions(:));
+    plot(probabilitiesFromSimulatedData,probabilitiesForActualPositions(:),'bo','MarkerSize',12);
+    rmseComp = ComputeRealRMSE(probabilitiesFromSimulatedData,probabilitiesForActualPositions);
     text(0.07, 0.82, sprintf('RMSEActual = %.4f', rmseComp), 'FontSize', 12);
     logLikely2 = ColorMaterialModelComputeLogLikelihoodSimple(responsesFromSimulatedData,probabilitiesForActualPositions,nTrials);
     fprintf('Log likelyhood 2: %0.2f.\n', logLikely2);
-
+    
     legend('Fit Parameters', 'Actual Parameters', 'Location', 'NorthWest')
     legend boxoff
 else
     legend('Fit Parameters', 'Location', 'NorthWest')
     legend boxoff
+end
+thisFontSize = 12;
+line([0, 1], [0,1], 'color', 'k');
+axis('square')
+axis([0 1 0 1]);
+set(gca,  'FontSize', thisFontSize);
+xlabel('Measured p');
+ylabel('Predicted p');
+set(gca, 'xTick', [0, 0.5, 1]);
+set(gca, 'yTick', [0, 0.5, 1]);
+if saveFig
+    cd(figDir)
+    FigureSave([params.subjectName, params.conditionCode, 'MeasuredVsPredictedProb'], gcf, 'pdf');
 end
 
 if DEMO

@@ -13,11 +13,11 @@ clear; close all;
 sigma = 1; 
 targetColorCoord = 0; 
 targetMaterialCoord = 0; 
-endPosition = 5;
+endPosition = 10;
 
 %% Fixed temporary parameters. 
 nSamplePoints = 20; 
-nSimulate =  1000; 
+nSimulate =  2000; 
 
 %% Set dimensions of interest
 colorMatchColorCoords = linspace(-endPosition,endPosition,nSamplePoints);
@@ -30,6 +30,7 @@ weight = linspace(0,1,nSamplePoints/2);
 [colorMatchColorCoordGrid,materialMatchColorCoordGrid,colorMatchMaterialCoordGrid, materialMatchMaterialCoordsGrid, weightGrid] = ...
     ndgrid(colorMatchColorCoords,materialMatchColorCoords,colorMatchMaterialCoords, materialMatchMaterialCoords,weight);
 CMLookUp = zeros(size(colorMatchColorCoordGrid));
+tic
 for i = 1:length(colorMatchColorCoords)
     for j = 1:length(materialMatchColorCoords)
         for k = 1:length(colorMatchMaterialCoords)
@@ -47,7 +48,7 @@ for i = 1:length(colorMatchColorCoords)
         end
     end
 end
- 
+toc 
 % Build interpolator
 colorMaterialInterpolatorFunction = griddedInterpolant(colorMatchColorCoordGrid,materialMatchColorCoordGrid,colorMatchMaterialCoordGrid,materialMatchMaterialCoordsGrid, weightGrid, CMLookUp,'linear');
 
