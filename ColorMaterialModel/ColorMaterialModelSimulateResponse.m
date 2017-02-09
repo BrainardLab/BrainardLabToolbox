@@ -30,16 +30,25 @@ function response = ColorMaterialModelSimulateResponse(targetColorCoord, targetM
 %   'doApprox'- true/false (default false). Use an approximation where the
 %       two distances are scaled by w and (1-w), rather than the underlying
 %       dimensions.
+%   'addNoiseToTarget' - true/false (default false). Add noise to the
+%       target position as well as to the comparisons.  This is what we
+%       really think is happening psychophysically, but we don't know how
+%       to model it analytically. When we were trying to model using
+%       analytical calculations, we needed it off.  But now that we are
+%       modeling via simulation and lookup table we can have it on and be
+%       more realistic.
 
 % Nov 2016 ar      Wrote it
 % Nov 2016 ar, dhb Edits and comments. 
 % 12/21/16 dhb, ar Add input parser.
 %                  Make use of w consistent with w being applied to color
 %                  coordinate for both approx and non-approx conditions.
+% 2/9/16   dhb     Added addNoiseToTarget option.
 
 %% Parse key/value pairs
 p = inputParser;
 p.addParameter('doApprox', false, @islogical);
+p.addParameter('addNoiseToTarget', false, @islogical);
 p.parse(varargin{:});
 
 %% Prevent pathological values of w
@@ -56,6 +65,12 @@ colorMatchColorCoord = colorMatchColorCoord + normrnd(0,sigma);
 materialMatchColorCoord = materialMatchColorCoord + normrnd(0,sigma); 
 colorMatchMaterialCoord = colorMatchMaterialCoord + normrnd(0,sigma); 
 materialMatchMaterialCoord = materialMatchMaterialCoord + normrnd(0,sigma); 
+
+% Optional add of noise to target to
+if (p.Results.addNoiseToTarget)
+    targetColorCoord = targetColorCoord + normrnd(0,sigma); 
+    targetMaterialCoord = targetMaterialCoord + normrnd(0,sigma);
+end
 
 % In the approximation case, we apply the weights to the distances rather
 % than to the coordinates.  This is not really want we want, but is where
