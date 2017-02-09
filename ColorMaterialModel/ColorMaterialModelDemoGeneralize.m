@@ -57,10 +57,11 @@ params.trySpacingValues = trySpacingValues;
 %  'weightFixed' - fix weight to specified value in tryWeightValues(1);
 tryWeightValues = [0.5 0.2 0.8];
 params.tryWeightValues = tryWeightValues; 
+addNoise = true; 
 
 % Set figure directories
 figDir = pwd; 
-saveFig = 1; 
+saveFig = 0; 
 weibullplots = 0; 
 
 %% We can use simulated data (DEMO == true) or some real data (DEMO == false)
@@ -77,14 +78,14 @@ if (DEMO)
     stimuliColorMatch = [];
     scalePositions = 1; % scaling factor for input positions (we can try different ones to match our noise i.e. sigma of 1).
     sigma = 1;
-    w = 0.75; 
-    params.whichWeight = 'weightFixed';
+    w = 0.5; 
+    params.whichWeight = 'weightVary';
     params.scalePositions  = scalePositions; 
     params.subjectName = ['demoFixed' num2str(w)]; 
     params.conditionCode = 'demo';
     params.materialMatchColorCoords = scalePositions*params.materialMatchColorCoords;
     params.colorMatchMaterialCoords = scalePositions*params.colorMatchMaterialCoords;
-   
+    
     % set up params for probablility computation
     params.F = colorMaterialInterpolatorFunction; % for lookup.
     params.whichMethod = 'lookup'; % could be also 'simulate' or 'analytic'
@@ -172,7 +173,7 @@ if (DEMO)
             % Simulate one response.
             responsesForOneBlock(whichPair) = ColorMaterialModelSimulateResponse(targetColorCoord, targetMaterialCoord, ...
                 pairColorMatchColorCoords(whichPair), pairMaterialMatchColorCoords(whichPair), ...
-                pairColorMatchMaterialCoords(whichPair), pairMaterialMatchMaterialCoords(whichPair), w, sigma); 
+                pairColorMatchMaterialCoords(whichPair), pairMaterialMatchMaterialCoords(whichPair), w, sigma, 'addNoiseToTarget', addNoise); 
         end
         
         % Track cummulative response over blocks
@@ -295,43 +296,9 @@ else
     resizedDataProb(4,4) = 0.5;
     resizedSolutionProb(4,4) = 0.5;
 end
-
-% Make the big figure
-figure; hold on
-plot(probabilitiesFromSimulatedData,predictedProbabilitiesBasedOnSolution(:),'ro','MarkerSize',12,'MarkerFaceColor','r');
-rmse = ComputeRealRMSE(probabilitiesFromSimulatedData,predictedProbabilitiesBasedOnSolution);
-plot(resizedDataProb,resizedSolutionProb,'ko','MarkerSize',12,'MarkerFaceColor','k');
-text(0.07, 0.87, sprintf('RMSEFit = %.4f', rmse), 'FontSize', 12);
 if DEMO
-    plot(probabilitiesFromSimulatedData,probabilitiesForActualPositions(:),'bo','MarkerSize',12);
-    rmseComp = ComputeRealRMSE(probabilitiesFromSimulatedData,probabilitiesForActualPositions);
-    text(0.07, 0.82, sprintf('RMSEActual = %.4f', rmseComp), 'FontSize', 12);
-    logLikely2 = ColorMaterialModelComputeLogLikelihoodSimple(responsesFromSimulatedData,probabilitiesForActualPositions,nTrials);
-    fprintf('Log likelyhood 2: %0.2f.\n', logLikely2);
-    
-    legend('Fit Parameters', 'Actual Parameters', 'Location', 'NorthWest')
-    legend boxoff
-else
-    legend('Fit Parameters', 'Location', 'NorthWest')
-    legend boxoff
-end
-thisFontSize = 12;
-line([0, 1], [0,1], 'color', 'k');
-axis('square')
-axis([0 1 0 1]);
-set(gca,  'FontSize', thisFontSize);
-xlabel('Measured p');
-ylabel('Predicted p');
-set(gca, 'xTick', [0, 0.5, 1]);
-set(gca, 'yTick', [0, 0.5, 1]);
-if saveFig
-    cd(figDir)
-    FigureSave([params.subjectName, params.conditionCode, 'MeasuredVsPredictedProb'], gcf, 'pdf');
-end
-
-if DEMO
-     ColorMaterialModelPlotSolution(resizedDataProb, resizedSolutionProb, ...
-        returnedParams, params, params.subjectName, params.conditionCode, figDir, saveFig, weibullplots,resizedProbabilitiesForActualPositions);
+     ColorMaterialModelPlotSolution(probabilitiesFromSimulatedData,predictedProbabilitiesBasedOnSolution, resizedDataProb, resizedSolutionProb, ...
+        returnedParams, params, params.subjectName, params.conditionCode, figDir, saveFig, weibullplots,probabilitiesForActualPositions);
 else
     ColorMaterialModelPlotSolution(resizedDataProb, resizedSolutionProb, ...
         returnedParams, params, params.subjectName, params.conditionCode, figDir, saveFig, weibullplots);
