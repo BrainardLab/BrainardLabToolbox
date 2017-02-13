@@ -12,7 +12,7 @@
 %% Initialize and parameter set
 clear; close all;
 currentDir = pwd; 
-figDir = ['/Users/radonjic/Dropbox (Aguirre-Brainard Lab)/CNST_analysis/ColorMaterial/demoPlots'];
+figDir = ['/Users/ana/Dropbox (Aguirre-Brainard Lab)/CNST_analysis/ColorMaterial/demoPlots'];
 % Simulate up some data, or read in data.  DEMO == true means simulate.
 DEMO = true;
 
@@ -57,7 +57,7 @@ params.trySpacingValues = trySpacingValues;
 %  'weightFixed' - fix weight to specified value in tryWeightValues(1);
 tryWeightValues = [0.5 0.2 0.8];
 params.tryWeightValues = tryWeightValues; 
-addNoise = true; 
+addNoise = false; 
 
 % Set figure directories
 figDir = pwd; 
@@ -80,8 +80,13 @@ if (DEMO)
     sigma = 1;
     w = 0.5; 
     params.whichWeight = 'weightVary';
-    params.scalePositions  = scalePositions; 
-    params.subjectName = ['demoFixed' num2str(w)]; 
+    params.scalePositions  = scalePositions;
+    switch params.whichWeight
+        case 'weightFixed'
+            params.subjectName = ['demoFixed' num2str(w) '-' num2str(tryWeightValues(1))];
+        case 'weightVary';
+            params.subjectName = ['demoVary' num2str(w)];
+    end
     params.conditionCode = 'demo';
     params.materialMatchColorCoords = scalePositions*params.materialMatchColorCoords;
     params.colorMatchMaterialCoords = scalePositions*params.colorMatchMaterialCoords;
@@ -101,7 +106,7 @@ if (DEMO)
     % coordinate varies and the material coordinate always matches the
     % target.
     for i = 1:length(params.materialMatchColorCoords)
-        stimuliMaterialMatch = [stimuliMaterialMatch, {[params.materialMatchColorCoords(i), targetMaterialCoord]}];
+            stimuliMaterialMatch = [stimuliMaterialMatch, {[params.materialMatchColorCoords(i), targetMaterialCoord]}];
     end
     pair = [];
     
@@ -116,7 +121,9 @@ if (DEMO)
     
     % Loop over blocks and stimulus pairs and simulate responses
     % We pair each color-difference stimulus with each material-difference stimulus
-    n = 0; 
+    n = 0;
+    matIndex = [];
+    colIndex = [];
     clear rowIndex columnIndex overallIndex
     for whichColorOfTheMaterialMatch = 1:length(params.materialMatchColorCoords)
         for whichMaterialOfTheColorMatch = 1:length(params.colorMatchMaterialCoords)
@@ -132,23 +139,37 @@ if (DEMO)
             pair = [pair; ...
                 {stimuliColorMatch{whichMaterialOfTheColorMatch}, ...
                 stimuliMaterialMatch{whichColorOfTheMaterialMatch} }];
+            if whichMaterialOfTheColorMatch == 4
+                matIndex = [matIndex, n];
+            end
+            if whichColorOfTheMaterialMatch == 4
+                colIndex = [colIndex, n];
+            end
         end
     end
         
     % Within color category (so material cooredinate == target material coord)
-    withinCategoryPairsColor  =  nchoosek(1:length(params.materialMatchColorCoords),2);
+    withinCategoryPairsColor  =  nchoosek(setdiff(1:length(params.materialMatchColorCoords), params.targetIndex),2);
+    
     for whichWithinColorPair = 1:size(withinCategoryPairsColor,1)
-        pair = [pair; ...
-            {[params.materialMatchColorCoords(withinCategoryPairsColor(whichWithinColorPair, 1)), targetMaterialCoord]}, ...
-            {[params.materialMatchColorCoords(withinCategoryPairsColor(whichWithinColorPair, 2)), targetMaterialCoord]}];
+        if whichWithinColorPair ~= 4
+            n = n+1;
+            pair = [pair; ...
+                {[params.materialMatchColorCoords(withinCategoryPairsColor(whichWithinColorPair, 1)), targetMaterialCoord]}, ...
+                {[params.materialMatchColorCoords(withinCategoryPairsColor(whichWithinColorPair, 2)), targetMaterialCoord]}];
+            colIndex = [colIndex, n];
+        end
     end
-   
+    
     % Within material category (so color cooredinate == target color coord)
-    withinCategoryPairsMaterial  =  nchoosek(1:length(params.colorMatchMaterialCoords),2);
+    withinCategoryPairsMaterial  =  nchoosek(setdiff(1:length(params.colorMatchMaterialCoords), params.targetIndex),2);
     for whichWithinMaterialPair = 1:size(withinCategoryPairsMaterial,1)
+        n = n+1;
+        
         pair = [pair; ...
             {[targetColorCoord, params.colorMatchMaterialCoords(withinCategoryPairsMaterial(whichWithinMaterialPair, 1))]}, ...
-            {[targetColorCoord, params.colorMatchMaterialCoords(withinCategoryPairsMaterial(whichWithinMaterialPair, 2))]}]; 
+            {[targetColorCoord, params.colorMatchMaterialCoords(withinCategoryPairsMaterial(whichWithinMaterialPair, 2))]}];
+        matIndex = [matIndex, n];
     end
     
     % Simulate out what the response is for this pair in this
@@ -298,7 +319,7 @@ else
 end
 if DEMO
      ColorMaterialModelPlotSolution(probabilitiesFromSimulatedData,predictedProbabilitiesBasedOnSolution, resizedDataProb, resizedSolutionProb, ...
-        returnedParams, params, params.subjectName, params.conditionCode, figDir, saveFig, weibullplots,probabilitiesForActualPositions);
+        returnedParams, params, params.subjectName, params.conditionCode, figDir, saveFig, weibullplots,colIndex, matIndex, probabilitiesForActualPositions, resizedProbabilitiesForActualPositions);
 else
     ColorMaterialModelPlotSolution(resizedDataProb, resizedSolutionProb, ...
         returnedParams, params, params.subjectName, params.conditionCode, figDir, saveFig, weibullplots);
