@@ -1,7 +1,7 @@
 % function predictedProbabilities = ColorMaterialModelComputeProbBySimulation(nSimulate,targetColorCoord,targetMaterialCoord, ...
-%     colorMatchColorCoord,materialMatchColorCoord,colorMatchMaterialCoord, materialMatchMaterialCoord, w, sigma)
+%     colorMatchColorCoord,materialMatchColorCoord,colorMatchMaterialCoord, materialMatchMaterialCoord, w, sigma, addNoise)
 function predictedProbabilities = ColorMaterialModelComputeProbBySimulation(nSimulate,targetColorCoord,targetMaterialCoord, ...
-    colorMatchColorCoord,materialMatchColorCoord,colorMatchMaterialCoord, materialMatchMaterialCoord, w, sigma)
+    colorMatchColorCoord,materialMatchColorCoord,colorMatchMaterialCoord, materialMatchMaterialCoord, w, sigma, addNoise)
 % 
 % Computes probabilities for a given pair of stimuli by simulating certain
 % number of trials. 
@@ -15,6 +15,7 @@ function predictedProbabilities = ColorMaterialModelComputeProbBySimulation(nSim
 %   materialMatchMaterialCoord - inferred position on the material dimension for the second competitor in the pair
 %   w - weight for color dimension.
 %   sigma - noise around the target position (we assume it is equal to 1).
+%   addNoise  -  add noise to the target (true) or not (false)
 % Output
 %   predictedProbabilities - mean probabilities over n simulations.
 
@@ -24,7 +25,7 @@ predictedResponses = zeros(nSimulate,1);
 for kk = 1:nSimulate
     predictedResponses(kk) = ColorMaterialModelSimulateResponse(targetColorCoord, targetMaterialCoord, ...
         colorMatchColorCoord, materialMatchColorCoord, ...
-        colorMatchMaterialCoord, materialMatchMaterialCoord, w, sigma);
+        colorMatchMaterialCoord, materialMatchMaterialCoord, w, sigma, 'addNoiseToTarget', addNoise);
 end
 predictedProbabilities = mean(predictedResponses);
 
