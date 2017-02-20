@@ -39,8 +39,10 @@ p.addParameter('whichPositions','full',@ischar);
 p.addParameter('whichWeight','weightVary',@ischar);
 p.addParameter('tryWeightValues',[0.5 0.2 0.8],@isnumeric);
 p.addParameter('trySpacingValues',[0.5 1 2],@isnumeric);
-p.parse(varargin{:});
+p.addParameter('maxPositionValue',10,@isnumeric);
 
+p.parse(varargin{:});
+maxPosValue = p.Results.maxPositionValue; 
 %% Load and unwrap parameter structure which contains all fixed parameters. 
 targetPosition = params.targetPosition;
 targetIndexColor = params.targetIndexColor; % target position in the color position vector.
@@ -178,12 +180,12 @@ for k1 = 1:length(p.Results.trySpacingValues)
             switch (p.Results.whichPositions)
                 case 'smoothSpacing'
                     % Weights on coefficients should be bounded. 
-                    vlb(1:end-2) = -5+0.1;
-                    vub(1:end-2) = 5-0.1;
+                    vlb(1:end-2) = -maxPosValue+0.1;
+                    vub(1:end-2) = maxPosValue-0.1;
                 case 'full'
                     % Loose bounds on positions
-                    vlb = (-5+0.1)*ones(size(initialParams));
-                    vub = (5-0.1)*ones(size(initialParams));
+                    vlb = (-maxPosValue+0.1)*ones(size(initialParams));
+                    vub = (maxPosValue-0.1)*ones(size(initialParams));
                     
                     % Lock target into place
                     vlb(targetIndexMaterial) = 0;
