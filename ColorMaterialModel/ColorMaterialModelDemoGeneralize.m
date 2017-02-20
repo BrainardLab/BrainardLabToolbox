@@ -8,30 +8,42 @@
 % Requires optimization toolbox.
 %
 % 11/18/16  ar  Wrote from color selection model version
+% 01/xx/17  ar  Modified it for the Generalize code branch
+% 02/17/17  ar  Streamline and organize
 
-%% Initialize and parameter set
+%% Initialize and set directories and some plotting params. 
 clear; close all;
 currentDir = pwd;
 figDir = ['/Users/ana/Dropbox (Aguirre-Brainard Lab)/CNST_analysis/ColorMaterial/demoPlots'];
-% Simulate up some data, or read in data.  DEMO == true means simulate.
-DEMO = true;
+saveFig = 0;
+weibullplots = 0;
 
+%% Simulate up some data, or read in data.  DEMO == true means simulate.
+DEMO = true;
+%% Load structure giving experiment design parameters.
+% Here we use the example structure that mathes the experimental design of
+% our initial experiments.
+load('ColorMaterialExampleStructure.mat')
+
+%% Set parameters for probability computation
+params.whichMethod = 'lookup'; % could be also 'simulate' or 'analytic'
+params.nSimulate = 1000; % for method 'simulate'
 lookupMethod = 'linear';
 % Load lookup table
 switch lookupMethod
     case  'linear'
         load colorMaterialInterpolateFunctionLinear.mat
-        colorMaterialInterpolatorFunction = colorMaterialInterpolatorFunctionLinear;
+        colorMaterialInterpolatorFunction = colorMaterialInterpolatorFunction;
+        interpCode = 'L'; 
     case 'cubic'
         load colorMaterialInterpolateFunctionCubic.mat
-        colorMaterialInterpolatorFunction = colorMaterialInterpolatorFunctionCubic;
+        colorMaterialInterpolatorFunction = colorMaterialInterpolatorFunction;
+        interpCode = 'C'; 
 end
-%% Load structure giving experiment design parameters.
-%
-% Here we use the example structure that mathes the experimental design of
-% our initial experiments.
-load('ColorMaterialExampleStructure.mat')
+params.F = colorMaterialInterpolatorFunction; % for lookup.
 
+
+%% Other parameters
 % After iniatial parameters are imported we need to specify the following info
 % and add it to the params structure
 %
@@ -46,30 +58,17 @@ params.colorMatchMaterialCoords  =  params.competitorsRangeNegative(1):1:params.
 %  'full' - Weights vary
 %  'smoothSpacing' - Weights computed according to a polynomial fit.
 params.whichPositions = 'full';
-params.smoothOrder = 3;
+params.smoothOrder = 3; % this option is only for smoothSpacing
 
 % Initial position spacing values to try.
-trySpacingValues =  [0.5 1 2];
-params.trySpacingValues = trySpacingValues;
-
+params.trySpacingValues = [0.5 1 2];
+params.maxPositionValue = 10; 
 % Does material/color weight vary in fit?
 %  'weightVary' - yes, it does.
 %  'weightFixed' - fix weight to specified value in tryWeightValues(1);
 params.whichWeight = 'weightVary';
-tryWeightValues = [0.5 0.2 0.8];
-addNoise = false;
-
-% Set figure directories
-%figDir = pwd;
-saveFig = 0;
-weibullplots = 0;
-fixedWValue = [0.1:0.1:0.9];
-simulateWeigth = [0.25, 0.5, 0.75];
-
-% set up params for probablility computation
-params.F = colorMaterialInterpolatorFunction; % for lookup.
-params.whichMethod = 'lookup'; % could be also 'simulate' or 'analytic'
-params.nSimulate = 1000; % for method 'simulate'
+tryWeightValues = [0.5 0.2 0.8]; 
+params.addNoise = true;
 
 % Make a stimulus list and set underlying parameters.
 targetMaterialCoord = 0;
@@ -79,20 +78,31 @@ stimuliColorMatch = [];
 sigma = 1;
 scalePositions = 2; % scaling factor for input positions (we can try different ones to match our noise i.e. sigma of 1).
 params.scalePositions  = scalePositions;
+
 params.materialMatchColorCoords = scalePositions*params.materialMatchColorCoords;
 params.colorMatchMaterialCoords = scalePositions*params.colorMatchMaterialCoords;
 
+% Parameters for structufing pairs. 
+colorCoordIndex = 1;
+materialCoordIndex = 2;
+colorMatchIndexInPair = 1;
+materialMatchIndexInPair = 2;
+
 
 %% We can use simulated data (DEMO == true) or some real data (DEMO == false)
-%if (DEMO)
+if (DEMO)
     
-    
+    % Parameters specific to this demo simulation
+    nBlocks = 100;
+    fixedWValue = [0.1:0.1:0.9];
+    simulateWeigth = [0.25, 0.5, 0.75];
+
     % Make the random number generator seed start at the same place each
     % time we do this.
     rng('default');
     params.conditionCode = 'demo';
     
-    
+    %% This part of the code creates pairs. 
     % These are the coordinates of the color matches.  The color coordinate always matches the
     % target and the matrial coordinate varies.
     for i = 1:length(params.colorMatchMaterialCoords)
@@ -107,12 +117,6 @@ params.colorMatchMaterialCoords = scalePositions*params.colorMatchMaterialCoords
     end
     pair = [];
     
-    % Initialize the response structure
-    colorCoordIndex = 1;
-    materialCoordIndex = 2;
-    colorMatchIndexInPair = 1;
-    materialMatchIndexInPair = 2;
-    nBlocks = 100;
     
     % Loop over blocks and stimulus pairs and simulate responses
     % We pair each color-difference stimulus with each material-difference stimulus
@@ -120,7 +124,8 @@ params.colorMatchMaterialCoords = scalePositions*params.colorMatchMaterialCoords
     matIndex = [];
     colIndex = [];
     overallColorMaterialPairIndices = [];
-    
+    rowIndex = []; 
+    columnIndex = []; 
     clear rowIndex columnIndex overallIndex
     for whichColorOfTheMaterialMatch = 1:length(params.materialMatchColorCoords)
         for whichMaterialOfTheColorMatch = 1:length(params.colorMatchMaterialCoords)
@@ -170,24 +175,21 @@ params.colorMatchMaterialCoords = scalePositions*params.colorMatchMaterialCoords
     overallColorMaterialPairIndices = overallColorMaterialPairIndices(:);
     rowIndex = rowIndex(:);
     columnIndex = columnIndex(:);
-    
     nPairs = size(pair,1);
     
     for ww = 1:length(simulateWeigth)
         for www = 1%:length(fixedWValue)
             w = simulateWeigth(ww);
             
-            
             switch params.whichWeight
                 case 'weightFixed'
-                    clear tryWeightValues
-                    tryWeightValues = fixedWValue(www);
-                    params.subjectName = ['Scale' num2str(scalePositions) 'demoFixed' num2str(w) '-' num2str(tryWeightValues(1))];
+                    params.tryWeightValues = fixedWValue(www);
+                    params.subjectName = [interpCode num2str(nBlocks) 'Scale' num2str(scalePositions) 'demoFixed' num2str(w) '-' num2str(params.tryWeightValues(1))];
                 case 'weightVary';
-                    params.subjectName = ['Scale' num2str(scalePositions) 'demoVary' num2str(w)];
+                    params.subjectName = [interpCode num2str(nBlocks) 'Scale' num2str(scalePositions) 'demoVary' num2str(w)];
+                    params.tryWeightValues = tryWeightValues; 
             end
-            params.tryWeightValues = tryWeightValues;
-
+           
             % Simulate out what the response is for this pair in this
             % block.
             %
@@ -209,7 +211,7 @@ params.colorMatchMaterialCoords = scalePositions*params.colorMatchMaterialCoords
                     % Simulate one response.
                     responsesForOneBlock(whichPair) = ColorMaterialModelSimulateResponse(targetColorCoord, targetMaterialCoord, ...
                         pairColorMatchColorCoords(whichPair), pairMaterialMatchColorCoords(whichPair), ...
-                        pairColorMatchMaterialCoords(whichPair), pairMaterialMatchMaterialCoords(whichPair), w, sigma, 'addNoiseToTarget', addNoise);
+                        pairColorMatchMaterialCoords(whichPair), pairMaterialMatchMaterialCoords(whichPair), w, sigma, 'addNoiseToTarget', params.addNoise);
                 end
                 
                 % Track cummulative response over blocks
@@ -245,17 +247,14 @@ params.colorMatchMaterialCoords = scalePositions*params.colorMatchMaterialCoords
                 w,sigma,'Fobj', colorMaterialInterpolatorFunction, 'whichMethod', 'lookup');
             fprintf('True position log likelihood %0.2f.\n', logLikely);
             clear logLikely predictedResponses
+            
             % Here you could enter some real data and fit it, either to see the fit or to figure
             % out why the fitting is not working.
             %             else
             %
             %                 % Set up some params
             %                 % All this should be in the pair indices matrix.
-            %                 colorCoordIndex = 1;
-            %                 materialCoordIndex = 2;
-            %                 colorMatchIndexInPair = 1;
-            %                 materialMatchIndexInPair = 2;
-            %                 load('pairIndicesPilot.mat')
+                        %                 load('pairIndicesPilot.mat')
             %
             %                 whichOption = 'option1';
             %                 params.subjectName = whichOption;
@@ -274,11 +273,6 @@ params.colorMatchMaterialCoords = scalePositions*params.colorMatchMaterialCoords
             %                         pairMaterialMatchColorCoords = materialMatchColorCoord;
             %                         pairColorMatchMaterialCoords = colorMatchMaterialCoord;
             %                         pairMaterialMatchMaterialCoords  = materialMatchMaterialCoord;
-            %                         params.whichWeight = 'weightVary';
-            %                         params.whichPositions = 'full';
-            %                         params.F = colorMaterialInterpolatorFunction; % for lookup.
-            %                         params.whichMethod = 'lookup'; % could be also 'simulate' or 'analytic'
-            %                         params.nSimulate = 1000;
             %
             %                 end
             %                 probabilitiesFromSimulatedData = responsesFromSimulatedData./nTrials;
@@ -288,7 +282,7 @@ params.colorMatchMaterialCoords = scalePositions*params.colorMatchMaterialCoords
             %                 responsesFromSimulatedData = responsesFromSimulatedData(:);
             %                 nTrials  = nTrials(:);
             
-        %end
+        % end
         %% Fit the data and extract parameters and other useful things from the solution
         %
         % We put the method into the params structure, so it flows to where we need
@@ -302,56 +296,61 @@ params.colorMatchMaterialCoords = scalePositions*params.colorMatchMaterialCoords
             pairColorMatchMaterialCoords, pairMaterialMatchMaterialCoords,...
             responsesFromSimulatedData,nTrials,params, ...
             'whichPositions',params.whichPositions,'whichWeight',params.whichWeight, ...
-            'tryWeightValues',tryWeightValues,'trySpacingValues',trySpacingValues); %#ok<SAGROW>
+            'tryWeightValues',params.tryWeightValues,'trySpacingValues',params.trySpacingValues, 'maxPositionValue', params.maxPositionValue); %#ok<SAGROW>
         saveRetParams{ww, www} = returnedParams;
         [returnedMaterialMatchColorCoords,returnedColorMatchMaterialCoords,returnedW,returnedSigma]  = ColorMaterialModelXToParams(returnedParams, params);
         fprintf('Returned weight: %0.2f.\n', returnedW);
         fprintf('Log likelyhood of the solution: %0.2f.\n', logLikelyFit);
         
         %% Plot the solution
-        %
         % Reformat probabilities to look only at color/material tradeoff
-        % if DEMO
-        clear resizedDataProb resizedSolutionProb resizedProbabilitiesForActualPositions
-        for i = 1:length(rowIndex)
-            resizedDataProb(rowIndex((i)), columnIndex((i))) = probabilitiesFromSimulatedData(overallColorMaterialPairIndices(i));
-            resizedSolutionProb(rowIndex((i)), columnIndex((i))) = predictedProbabilitiesBasedOnSolution(overallColorMaterialPairIndices(i));
-            resizedProbabilitiesForActualPositions(rowIndex((i)), columnIndex((i))) = probabilitiesForActualPositions(overallColorMaterialPairIndices(i));
+        if DEMO
+            clear resizedDataProb resizedSolutionProb resizedProbabilitiesForActualPositions
+            for i = 1:length(rowIndex)
+                resizedDataProb(rowIndex((i)), columnIndex((i))) = probabilitiesFromSimulatedData(overallColorMaterialPairIndices(i));
+                resizedSolutionProb(rowIndex((i)), columnIndex((i))) = predictedProbabilitiesBasedOnSolution(overallColorMaterialPairIndices(i));
+                resizedProbabilitiesForActualPositions(rowIndex((i)), columnIndex((i))) = probabilitiesForActualPositions(overallColorMaterialPairIndices(i));
+            end
+        else
+            load('pilotIndices.mat')
+            % entry % row % column % first or second
+            resizedDataProb = nan(7,7);
+            resizedSolutionProb = nan(7,7);
+            for i = 1:size(pilotIndices,1)
+                entryIndex = pilotIndices(i,1);
+                if pilotIndices(i,end) == 1
+                    resizedDataProb(pilotIndices(i,2), pilotIndices(i,3)) = probabilitiesFromSimulatedData(pilotIndices(i,1));
+                    resizedSolutionProb(pilotIndices(i,2), pilotIndices(i,3)) = predictedProbabilitiesBasedOnSolution(pilotIndices(i,1));
+                elseif pilotIndices(i,end) == 2
+                    resizedDataProb(pilotIndices(i,2), pilotIndices(i,3)) = 1- probabilitiesFromSimulatedData(pilotIndices(i,1));
+                    resizedSolutionProb(pilotIndices(i,2), pilotIndices(i,3)) = 1 - predictedProbabilitiesBasedOnSolution(pilotIndices(i,1));
+                end
+            end
+            resizedDataProb(4,4) = 0.5;
+            resizedSolutionProb(4,4) = 0.5;
         end
-        %         else
-        %             load('pilotIndices.mat')
-%             % entry % row % column % first or second
-%             resizedDataProb = nan(7,7);
-%             resizedSolutionProb = nan(7,7);
-%             for i = 1:size(pilotIndices,1)
-%                 entryIndex = pilotIndices(i,1);
-%                 if pilotIndices(i,end) == 1
-%                     resizedDataProb(pilotIndices(i,2), pilotIndices(i,3)) = probabilitiesFromSimulatedData(pilotIndices(i,1));
-%                     resizedSolutionProb(pilotIndices(i,2), pilotIndices(i,3)) = predictedProbabilitiesBasedOnSolution(pilotIndices(i,1));
-%                 elseif pilotIndices(i,end) == 2
-%                     resizedDataProb(pilotIndices(i,2), pilotIndices(i,3)) = 1- probabilitiesFromSimulatedData(pilotIndices(i,1));
-%                     resizedSolutionProb(pilotIndices(i,2), pilotIndices(i,3)) = 1 - predictedProbabilitiesBasedOnSolution(pilotIndices(i,1));
-%                 end
-%             end
-%             resizedDataProb(4,4) = 0.5;
-%             resizedSolutionProb(4,4) = 0.5;
-%         end
         
         % compute RMSEs
         rmse1(ww, www) = ComputeRealRMSE([probabilitiesFromSimulatedData(colIndex); probabilitiesFromSimulatedData(matIndex)],...
             [predictedProbabilitiesBasedOnSolution(colIndex)'; predictedProbabilitiesBasedOnSolution(matIndex)']);
         rmse2(ww, www) = ComputeRealRMSE(resizedDataProb,resizedSolutionProb);
         
-       % if DEMO
+        if DEMO
             ColorMaterialModelPlotSolution(probabilitiesFromSimulatedData,predictedProbabilitiesBasedOnSolution, ...
                 resizedDataProb, resizedSolutionProb, ...
                 returnedParams, params, params.subjectName, params.conditionCode, figDir, ...
                 saveFig, weibullplots,colIndex, matIndex, probabilitiesForActualPositions, resizedProbabilitiesForActualPositions);
-%         else
-%             ColorMaterialModelPlotSolution(resizedDataProb, resizedSolutionProb, ...
-%                 returnedParams, params, params.subjectName, params.conditionCode, figDir, saveFig, weibullplots);
-%         end
+        else
+             % needs to be edited. 
+%              ColorMaterialModelPlotSolution(resizedDataProb, resizedSolutionProb, ...
+%                  returnedParams, params, params.subjectName, params.conditionCode, figDir, saveFig, weibullplots);
+         end
     end
 end
-
-save('saveRetParamsVary', 'saveRetParams', 'rmse1', 'rmse2')
+end
+switch params.whichWeight
+    case 'weightFixed'
+        save([interpCode num2str(nBlocks) 'saveRetParamsFixed'])
+    case 'weightVary'
+        save([interpCode num2str(nBlocks) 'saveRetParamsVary'])
+end
