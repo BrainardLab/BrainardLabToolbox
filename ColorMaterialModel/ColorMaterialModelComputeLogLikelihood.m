@@ -67,6 +67,12 @@ for i = 1:nPairs
         error('Returend probability is Inf');
     end
     
+    if (predictedProbabilities(i) == 0)
+        predictedProbabilities(i) = 0.0001;
+    elseif (predictedProbabilities(i) == 1)
+        predictedProbabilities(i) = 0.9999;
+    end
+    
     logLikely = logLikely + theResponses(i)*log10(predictedProbabilities(i)) + (nTrials(i)-theResponses(i))*log10(1-predictedProbabilities(i));
 end
 
@@ -74,6 +80,8 @@ end
 if (isnan(logLikely))
     error('Returned likelihood is NaN');
 end
+
+
 
 end
 
