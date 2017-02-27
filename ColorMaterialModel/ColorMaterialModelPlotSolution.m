@@ -29,18 +29,19 @@ thisLineWidth = 1;
 
 %% Figure 1. Plot measured vs. predicted probabilities
 figure; hold on
+tmp1 = [allDataProbs(colIndex), allDataProbs(matIndex)]; 
+tmp2 = [allPredictedProbs(colIndex), allPredictedProbs(matIndex)]; 
 plot(allDataProbs(colIndex), allPredictedProbs(colIndex),'ro','MarkerSize',thisMarkerSize-2,'MarkerFaceColor','r');
 plot(allDataProbs(matIndex), allPredictedProbs(matIndex),'bo','MarkerSize',thisMarkerSize-2,'MarkerFaceColor','b');
 
-rmse = ComputeRealRMSE([allDataProbs(colIndex); allDataProbs(matIndex)],[allPredictedProbs(colIndex)'; allPredictedProbs(matIndex)']);
-
-text(0.07, 0.87, sprintf('RFit = %.4f', rmse), 'FontSize', thisFontSize);
+rmseWithin = ComputeRealRMSE(tmp1,tmp2);
+text(0.07, 0.87, sprintf('RFit = %.4f', rmseWithin), 'FontSize', thisFontSize);
 if nargin == 15
     plot(allDataProbs(colIndex),actualProbs(colIndex),'rx','MarkerSize',thisMarkerSize-2);
     plot(allDataProbs(matIndex),actualProbs(matIndex),'bx','MarkerSize',thisMarkerSize-2);
-    
-    rmseComp = ComputeRealRMSE(allDataProbs,actualProbs);
-    text(0.07, 0.82, sprintf('RActual = %.4f', rmseComp), 'FontSize', thisFontSize);
+    tmp11 = [actualProbs(colIndex), actualProbs(matIndex)];
+    rmseComp = ComputeRealRMSE(tmp1,tmp11); clear tmp1 tmp2 tmp11
+    text(0.07, 0.82, sprintf('RActual-ALL = %.4f', rmseComp), 'FontSize', thisFontSize);
     legend('Fit Parameters', 'Actual Parameters', 'Location', 'NorthWest')
     legend boxoff
 else
@@ -59,8 +60,8 @@ ax(1)=gca;
 
 figure; hold on
 plot(colorMaterialDataProb, colorMaterialPredictedProbs,'ro','MarkerSize',thisMarkerSize-2,'MarkerFaceColor','r');
-rmse = ComputeRealRMSE(colorMaterialDataProb,colorMaterialPredictedProbs);
-text(0.07, 0.87, sprintf('RFit = %.4f', rmse), 'FontSize', thisFontSize);
+rmseAcross = ComputeRealRMSE(colorMaterialDataProb(~isnan(colorMaterialDataProb(:))),colorMaterialPredictedProbs(~isnan(colorMaterialPredictedProbs(:))));
+text(0.07, 0.87, sprintf('RFit = %.4f', rmseAcross), 'FontSize', thisFontSize);
 if nargin == 15
     plot(allDataProbs,actualProbs,'bx','MarkerSize',thisMarkerSize-2)
     rmseComp = ComputeRealRMSE(colorMaterialDataProb(:),resizedColorMatActualProbabilities(:));
@@ -277,6 +278,9 @@ for i=1:nImages
      ylabel(get(get(ax(i),'ylabel'),'string'));
      title(get(get(ax(i),'title'),'string'));
      axis square
+     if i > 4
+         axis([-3.5 3.5 0 1.05])
+     end
 end
 cd (figDir)
 FigureSave([subjectName, conditionCode, 'Main'], gcf, 'pdf');

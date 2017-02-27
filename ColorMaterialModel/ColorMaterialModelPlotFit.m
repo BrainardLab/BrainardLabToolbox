@@ -49,15 +49,10 @@ for i = 1:size(theData,2)
         plot(theSmoothVals(:,i),theSmoothPreds(:,i),'color', stepColors{i}, 'LineWidth',thisLineWidth);
     end
 end
-plot(0, 0.5, 'kx', 'LineWidth',2)
-axis([xMin xMax 0 1.05])
-axis square
-thisGca = gca; 
-set(gca,'FontName','Helvetica','FontSize',thisFontSize,'FontSize', thisFontSize);
 
 switch p.Results.whichFit
     case 'MLDS'
-        text(-3, 1.02, sprintf('w = %.2f', p.Results.returnedWeight), 'FontSize', thisFontSize);
+        text(-3, 1.05, sprintf('w = %.2f', p.Results.returnedWeight), 'FontSize', thisFontSize);
         switch  p.Results.whichMatch
             case 'colorMatch'
           %      title(sprintf('MLDS fits for different material steps'),'FontName','Helvetica','FontSize',thisFontSize);
@@ -77,4 +72,9 @@ switch p.Results.whichFit
         end
 end
 
+plot(0, 0.5, 'kx', 'LineWidth',2)
+axis([xMin xMax 0 1.05])
+axis square
+set(gca,'FontName','Helvetica','FontSize',thisFontSize,'FontSize', thisFontSize);
+thisGca = gca; 
 
