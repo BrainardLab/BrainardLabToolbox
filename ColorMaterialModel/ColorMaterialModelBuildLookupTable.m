@@ -13,11 +13,11 @@ clear; close all;
 sigma = 1; 
 targetColorCoord = 0; 
 targetMaterialCoord = 0; 
-endPosition = 10;
+endPosition = 20;
 
 %% Fixed temporary parameters. 
-nSamplePoints = 20; 
-nSimulate =  2000; 
+nSamplePoints = 15; 
+nSimulate =  1000; 
 
 %% Set dimensions of interest
 colorMatchColorCoords = linspace(-endPosition,endPosition,nSamplePoints);
