@@ -49,6 +49,7 @@ for i = 1:length(colorMatchColorCoords)
     end
 end
 toc 
+save('LookUpCurrent', 'CMLookUp');
 % Build interpolator
 colorMaterialInterpolatorFunction = griddedInterpolant(colorMatchColorCoordGrid,materialMatchColorCoordGrid,colorMatchMaterialCoordGrid,materialMatchMaterialCoordsGrid, weightGrid, CMLookUp,'linear');
 save('colorMaterialInterpolateFunctionLinear','colorMaterialInterpolatorFunction','CMLookUp','nSimulate','nSamplePoints','targetColorCoord','targetMaterialCoord','endPosition','sigma', 'addNoise');
