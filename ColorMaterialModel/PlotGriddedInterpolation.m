@@ -2,18 +2,24 @@
 
 % Initialize
 clear; close all;
-
+for aaa =2%1:2
+    if aaa == 1
+        lookupMethod = 'cubic';
+    elseif aaa == 2
+        lookupMethod = 'linear';
+    end
 % lookup
-lookupMethod = 'cubic';
 load('gridParams.mat');
 % Load lookup table
 switch lookupMethod
     case  'linear'
         load colorMaterialInterpolateFunctionLinear.mat
         colorMaterialInterpolatorFunction = colorMaterialInterpolatorFunction;
+        interpCode = 'L';
     case 'cubic'
         load colorMaterialInterpolateFunctionCubic.mat
         colorMaterialInterpolatorFunction = colorMaterialInterpolatorFunction;
+        interpCode = 'C';
 end
 frameRate = 5;
 quality = 100;
@@ -21,8 +27,8 @@ nSamples = 100;
 nDim = length(size(colorMaterialInterpolatorFunction.Values));
 
 % we need to fix 2 dimensions
-randValue1 = randi(nSamples);
-randValue2 = randi(nSamples);
+randValue1 = 50;
+randValue2 = 50;
 
 comb = nchoosek(1:nDim,3);
 for i  = 1:size(comb,1)
@@ -41,7 +47,7 @@ for ii = 1:size(comb,1)
     [newXgrid,newYgrid] = ndgrid(eval(setValues{(comb(ii,1))}),  eval(setValues{(comb(ii,2))}));
     
     % video writer object (MPEG-4)
-    writerObj = VideoWriter(['Grid' num2str(comb(ii,1)) num2str(comb(ii,2)) num2str(comb(ii,3)) '.mp4'], 'MPEG-4');
+    writerObj = VideoWriter([interpCode, 'Grid' num2str(comb(ii,1)) num2str(comb(ii,2)) num2str(comb(ii,3)) '.mp4'], 'MPEG-4');
     writerObj.FrameRate = frameRate;
     writerObj.Quality = quality;
     open(writerObj);
@@ -52,10 +58,11 @@ for ii = 1:size(comb,1)
         [setValues{comb2(ii,1)} '(randValue1)'], [setValues{comb2(ii,2)} '(randValue2)']};
     toEval = ['colorMaterialInterpolatorFunction('];
     for kk = 1:length(currentOrder)
+        tmpIndex = find(currentOrder==kk); 
         if kk == length(currentOrder)
-            toEval = [toEval, [tempString{kk}, ')']];
+            toEval = [toEval, [tempString{tmpIndex}, ')']];
         else
-            toEval = [toEval, [tempString{kk}, ',']];
+            toEval = [toEval, [tempString{tmpIndex}, ',']];
         end
     end
     
@@ -63,12 +70,11 @@ for ii = 1:size(comb,1)
     for k = 1:length(eval(setValues{comb(ii,3)}))
         for i = 1:length(eval(setValues{comb(ii,1)}))
             for j = 1:length(eval(setValues{comb(ii,2)}))
-                
-                newProbs(i,j) = eval(toEval);
+                newProbs{k}(i,j) = eval(toEval);
             end
         end
         
-        mesh(newXgrid,newYgrid,newProbs);
+        mesh(newXgrid,newYgrid,newProbs{k});
         view(60,45)
         
         % create correct axis
@@ -89,4 +95,5 @@ for ii = 1:size(comb,1)
         writeVideo(writerObj,getframe(theFig));
     end
     close(writerObj);
+end
 end
