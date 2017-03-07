@@ -29,6 +29,7 @@ function [f,predictedResponses] = FitColorMaterialModelMLDSFun(x,...
 %   f - negative log likelihood for the current solution.
 
 % Sanity check - is the solution to any of our parameters NaN
+
 if (any(isnan(x)))
     error('Entry of x is NaN');
 end
@@ -56,6 +57,13 @@ f = -logLikely;
 
 if (f < 0)
     error('Cannot have logLikelihood > 0');
+end
+
+
+if (~isreal(f)) || (isnan(f))
+    f = Inf;
+    disp('------')
+    disp(x')
 end
 
 end
