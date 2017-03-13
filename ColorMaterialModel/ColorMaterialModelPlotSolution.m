@@ -92,15 +92,10 @@ ax(2)=gca;
 xMinTemp = floor(min([returnedMaterialMatchColorCoords, returnedColorMatchMaterialCoords]))-0.5; 
 xMaxTemp = ceil(max([returnedMaterialMatchColorCoords, returnedColorMatchMaterialCoords]))+0.5;
 xTemp = max(abs([xMinTemp xMaxTemp]));
-% xMin = -xTemp;
-% xMax = xTemp;
-% yMin = xMin; 
-% yMax = xMax;
-
-yMin = -10; 
-yMax = 10; 
-xMin = -10; 
-xMax = 10; 
+xMin = -params.maxPositionValue;
+xMax = params.maxPositionValue;
+yMin = -params.maxPositionValue; 
+yMax = params.maxPositionValue;
 
 splineOverX = linspace(xMin,xMax,1000);
 splineOverX(splineOverX>max(params.materialMatchColorCoords))=NaN;
