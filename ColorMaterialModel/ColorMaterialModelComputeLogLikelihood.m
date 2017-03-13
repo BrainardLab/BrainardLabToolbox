@@ -67,9 +67,9 @@ for i = 1:nPairs
         error('Returend probability is Inf');
     end
     
-    if (predictedProbabilities(i) == 0)
+    if (predictedProbabilities(i) <= 0.0001)
         predictedProbabilities(i) = 0.0001;
-    elseif (predictedProbabilities(i) == 1)
+    elseif (predictedProbabilities(i) >= 0.9999)
         predictedProbabilities(i) = 0.9999;
     end
     
