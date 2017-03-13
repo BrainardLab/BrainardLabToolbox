@@ -12,7 +12,7 @@ if (any(isnan(x)))
 end
 
 % We need to convert X to params here
-[materialMatchColorCoords,colorMatchMaterialCoords,w,sigma] = ColorMaterialModelXToParams(x,params); 
+[materialMatchColorCoords,colorMatchMaterialCoords,w,sigma] = ColorMaterialModelXToParams(x); 
            
 cVec1 = diff(materialMatchColorCoords);
 cVec2 = diff(colorMatchMaterialCoords);

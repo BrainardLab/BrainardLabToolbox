@@ -1,5 +1,5 @@
-function h = ColorMaterialModelPlotFit(theSmoothVals,theSmoothPreds, theDeltaSteps, theData, varargin)
-% ColorMaterialModelPlotWeibullFit(theSmoothVals,theSmoothPreds, theDeltaSteps, theData, whichMatch, xMin, xMax)
+function [h, thisGca] = ColorMaterialModelPlotFit(theSmoothVals,theSmoothPreds, theDeltaSteps, theData, varargin)
+% ColorMaterialModelPlotWeibullFit(theSmoothVals,theSmoothPreds, theDeltaSteps, theData, varargin)
 % 
 % Plots the fit of the descriptive Weibull model to the data.
 %
@@ -17,10 +17,18 @@ function h = ColorMaterialModelPlotFit(theSmoothVals,theSmoothPreds, theDeltaSte
 %   Dec 2016 ar Wrote it
 
 p = inputParser;
-p.addParameter('whichMatch',@ischar);
-p.addParameter('returnedWeight',@isnumeric);
-p.addParameter('whichFit',@ischar);
+p.addParameter('whichMatch','colorMatch', @ischar);
+p.addParameter('returnedWeight',0.5, @isnumeric);
+p.addParameter('whichFit','MLDS', @ischar);
+p.addParameter('fontSize', 12, @isnumeric); 
+p.addParameter('lineWidth', 12, @isnumeric); 
+p.addParameter('markerSize', 12, @isnumeric); 
 p.parse(varargin{:});
+
+thisMarkerSize = p.Results.markerSize-2; 
+thisLineWidth = p.Results.lineWidth; 
+thisFontSize = p.Results.fontSize; 
+
 
 % Set up some plotting parameters
 blue = [28, 134, 238]./255; 
@@ -34,38 +42,39 @@ xMax =  theDeltaSteps(end)+0.5;
 h = figure; clf; hold on
 for i = 1:size(theData,2)
     if i < 4
-        plot(theDeltaSteps,theData(:,i),'o','MarkerEdgeColor',stepColors{i},'MarkerSize',12, 'LineWidth', 2);
-        plot(theSmoothVals(:,i),theSmoothPreds(:,i),'--','color', stepColors{i}, 'LineWidth',2);
+        plot(theDeltaSteps,theData(:,i),'o','MarkerEdgeColor',stepColors{i},'MarkerSize',thisMarkerSize, 'LineWidth', thisLineWidth);
+        plot(theSmoothVals(:,i),theSmoothPreds(:,i),'--','color', stepColors{i}, 'LineWidth',thisLineWidth);
     else
-        plot(theDeltaSteps,theData(:,i),'o','MarkerFaceColor',stepColors{i},'MarkerEdgeColor',stepColors{i},'MarkerSize',12);
-        plot(theSmoothVals(:,i),theSmoothPreds(:,i),'color', stepColors{i}, 'LineWidth',2);
+        plot(theDeltaSteps,theData(:,i),'o','MarkerFaceColor',stepColors{i},'MarkerEdgeColor',stepColors{i},'MarkerSize',thisMarkerSize);
+        plot(theSmoothVals(:,i),theSmoothPreds(:,i),'color', stepColors{i}, 'LineWidth',thisLineWidth);
     end
 end
-plot(0, 0.5, 'kx', 'LineWidth',2)
-axis([xMin xMax 0 1.05])
-set(gca,'FontName','Helvetica','FontSize',14);
 
-% add appropriate text
 switch p.Results.whichFit
     case 'MLDS'
-        text(-3, 1.05, sprintf('w = %.2f', p.Results.returnedWeight), 'FontSize', 12);
-        switch p.Results.whichMatch
+        text(-3, 1.05, sprintf('w = %.2f', p.Results.returnedWeight), 'FontSize', thisFontSize);
+        switch  p.Results.whichMatch
             case 'colorMatch'
-                title(sprintf('MLDS fits for different material steps'),'FontName','Helvetica','FontSize',16);
-                xlabel('Color Coordinates of the Material Match','FontName','Helvetica','FontSize',18);
-                ylabel('Fraction color match chosen','FontName','Helvetica','FontSize',18);
+          %      title(sprintf('MLDS fits for different material steps'),'FontName','Helvetica','FontSize',thisFontSize);
+                xlabel('ColorCoords MaterialMatch','FontName','Helvetica','FontSize',thisFontSize);
+                ylabel('p ColorM chosen','FontName','Helvetica','FontSize',thisFontSize);
             case 'materialMatch'
-                title(sprintf('MLDS fits for different color steps'),'FontName','Helvetica','FontSize',16);
-                xlabel('Material Coordinates of the Color Match','FontName','Helvetica','FontSize',18);
-                ylabel('Fraction material match chosen','FontName','Helvetica','FontSize',18);
+        %        title(sprintf('MLDS fits for different color steps'),'FontName','Helvetica','FontSize',thisFontSize);
+                xlabel('MaterialCoords ColorMatch','FontName','Helvetica','FontSize',thisFontSize);
+                ylabel('p MaterialM chosen','FontName','Helvetica','FontSize',thisFontSize);
         end
     case 'weibull'
         switch p.Results.whichMatch
             case 'colorMatch'
-                title(sprintf('Weibull fits for different material steps'),'FontName','Helvetica','FontSize',16);
+                title(sprintf('Weibull fits for different material steps'),'FontName','Helvetica','FontSize',thisFontSize);
             case 'materialMatch'
-                title(sprintf('Weibull fits for different color steps'),'FontName','Helvetica','FontSize',16);
+                title(sprintf('Weibull fits for different color steps'),'FontName','Helvetica','FontSize',thisFontSize);
         end
 end
 
+plot(0, 0.5, 'kx', 'LineWidth',2)
+axis([xMin xMax 0 1.05])
+axis square
+set(gca,'FontName','Helvetica','FontSize',thisFontSize,'FontSize', thisFontSize);
+thisGca = gca; 
 

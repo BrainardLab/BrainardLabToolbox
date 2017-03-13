@@ -1,4 +1,7 @@
-function [x, logLikelyFit, predictedResponses, k] = FitColorMaterialModelMLDS(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponses,nTrials, params, varargin)
+function [x, logLikelyFit, predictedResponses, k] = FitColorMaterialModelMLDS(...
+    pairColorMatchColorsCoords, pairMaterialMatchColorCoords,...
+    pairColorMatchMaterialCoords, pairMaterialMatchMaterialCoords,...
+    theResponses,nTrials, params, varargin)
 % [x, logLikelyFit, predictedResponses, k] = FitColorMaterialModelMLDS(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponses,nTrials, params, varargin)
 
 % This is the main fitting/search routine in the model. 
@@ -36,8 +39,10 @@ p.addParameter('whichPositions','full',@ischar);
 p.addParameter('whichWeight','weightVary',@ischar);
 p.addParameter('tryWeightValues',[0.5 0.2 0.8],@isnumeric);
 p.addParameter('trySpacingValues',[0.5 1 2],@isnumeric);
-p.parse(varargin{:});
+p.addParameter('maxPositionValue',10,@isnumeric);
 
+p.parse(varargin{:});
+maxPosValue = p.Results.maxPositionValue; 
 %% Load and unwrap parameter structure which contains all fixed parameters. 
 targetPosition = params.targetPosition;
 targetIndexColor = params.targetIndexColor; % target position in the color position vector.
@@ -137,7 +142,7 @@ end
 
 % Standard fmincon options
 options = optimset('fmincon');
-options = optimset(options,'Diagnostics','off','Display','iter','LargeScale','off','Algorithm','active-set','MaxIter',300);
+options = optimset(options,'Diagnostics','off','Display','off','LargeScale','off','Algorithm','active-set','MaxIter',300);
 
 %% Search
 %
@@ -163,7 +168,7 @@ for k1 = 1:length(p.Results.trySpacingValues)
                     error('Unknown whichPosition method specified');
                     
             end
-            initialParams = ColorMaterialModelParamsToX(initialColorMatchMaterialCoords,initialMaterialMatchColorCoords,tryWeights(k3),sigma,params);
+            initialParams = ColorMaterialModelParamsToX(initialColorMatchMaterialCoords,initialMaterialMatchColorCoords,tryWeights(k3),sigma);
             
             % Create bounds vectors and start with situation where no
             % parameters can vary.  This then gets adjusted according to
@@ -175,12 +180,12 @@ for k1 = 1:length(p.Results.trySpacingValues)
             switch (p.Results.whichPositions)
                 case 'smoothSpacing'
                     % Weights on coefficients should be bounded. 
-                    vlb(1:end-2) = -20;
-                    vub(1:end-2) = 20;
+                    vlb(1:end-2) = -maxPosValue+0.1;
+                    vub(1:end-2) = maxPosValue-0.1;
                 case 'full'
                     % Loose bounds on positions
-                    vlb = -20*max(abs(initialParams))*ones(size(initialParams));
-                    vub = 20*max(abs(initialParams))*ones(size(initialParams));
+                    vlb = (-maxPosValue+0.1)*ones(size(initialParams));
+                    vub = (maxPosValue-0.1)*ones(size(initialParams));
                     
                     % Lock target into place
                     vlb(targetIndexMaterial) = 0;
@@ -212,16 +217,29 @@ for k1 = 1:length(p.Results.trySpacingValues)
             vub(end) = sigma;
             vlb(end) = sigma; 
             
+            % Print out log likelihood of where we started
+%             [fTemp,~] = FitColorMaterialModelMLDSFun(initialParams, ...
+%                 pairColorMatchColorsCoords,pairMaterialMatchColorCoords, ...
+%                 pairColorMatchMaterialCoords,pairMaterialMatchMaterialCoords, ...
+%                 theResponses,nTrials,params);
+%            fprintf('Initial position log likelihood %0.2f.\n', -fTemp);
+            
             % Run the search
             switch (p.Results.whichPositions)
                 case 'smoothSpacing'
                     % Need to use nonlinear constraint function for this
                     % version.
-                    xTemp = fmincon(@(x)FitColorMaterialModelMLDSFun(x, pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices, theResponses, nTrials, params),initialParams,A,b,[],[],vlb,vub,@(x)FitColorMaterialModelMLDSConstraint(x,params),options);                 
+                    xTemp = fmincon(@(x)FitColorMaterialModelMLDSFun(x, ...
+                        pairColorMatchColorsCoords,pairMaterialMatchColorCoords, ...
+                        pairColorMatchMaterialCoords,pairMaterialMatchMaterialCoords, ...
+                        theResponses, nTrials, params),initialParams,A,b,[],[],vlb,vub,@(x)FitColorMaterialModelMLDSConstraint(x,params),options);
                 case 'full'
                     % Constraints are linear in parameter, so don't call
                     % nonlinear constraint function here.
-                    xTemp = fmincon(@(x)FitColorMaterialModelMLDSFun(x, pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices, theResponses, nTrials, params),initialParams,A,b,[],[],vlb,vub,[],options);      
+                    xTemp = fmincon(@(x)FitColorMaterialModelMLDSFun(x,...
+                        pairColorMatchColorsCoords,pairMaterialMatchColorCoords, ...
+                        pairColorMatchMaterialCoords,pairMaterialMatchMaterialCoords, ...
+                        theResponses, nTrials, params),initialParams,A,b,[],[],vlb,vub,[],options);      
                 otherwise
                     error('Unknown whichPosition method specified');
             end
@@ -229,7 +247,10 @@ for k1 = 1:length(p.Results.trySpacingValues)
             % Compute log likelihood for this solution.  Keep track of the best
             % solution that comes out of the multiple starting points.
             % Save this solution if it's better than the current best.
-            [fTemp,predictedResponsesTemp] = FitColorMaterialModelMLDSFun(xTemp,pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponses,nTrials,params);
+            [fTemp,predictedResponsesTemp] = FitColorMaterialModelMLDSFun(xTemp, ...
+                pairColorMatchColorsCoords,pairMaterialMatchColorCoords, ...
+                pairColorMatchMaterialCoords,pairMaterialMatchMaterialCoords, ...
+                theResponses,nTrials,params);
             if (-fTemp > logLikelyFit)
                 x = xTemp;
                 logLikelyFit = -fTemp;
@@ -239,6 +260,7 @@ for k1 = 1:length(p.Results.trySpacingValues)
                 k.k1 = k1; 
                 k.k2 = k2; 
                 k.k3 = k3; 
+                fprintf('Current solution log likelihood %0.2f.\n', -fTemp)
             end
         end
     end

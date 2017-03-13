@@ -1,9 +1,11 @@
-function [logLikely, predictedResponses] = ColorMaterialModelComputeLogLikelihood(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices, ...
-     theResponses,nTrials,colorMatchMaterialCoords,materialMatchColorCoords,targetIndex,w,sigma)
-% function [logLikely, predictedResponses] = ColorMaterialModelComputeLogLikelihood(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices, ...
-%    theResponses,nTrials,colorMatchMaterialCoords,materialMatchColorCoords,targetIndex,w,sigma)
-%
+function [logLikely, predictedProbabilities] = ColorMaterialModelComputeLogLikelihood(pairColorMatchColorCoords, pairMaterialMatchColorCoords,...
+    pairColorMatchMaterialCoords, pairMaterialMatchMaterialCoords,...
+     theResponses, nTrials,targetColorCoord,targetMaterialCoord,w,sigma, varargin)
+% [logLikely, predictedProbabilities] = ColorMaterialModelComputeLogLikelihood(F, pairColorMatchColorCoords, pairMaterialMatchColorCoords,...
+%    pairColorMatchMaterialCoords, pairMaterialMatchMaterialCoords,...
+%    theResponses, nTrials,targetColorCoord,targetMaterialCoord,w,sigma)
 % Computes cummulative log likelihood and predicted responses for a current weights and positions.
+
 %   Input:
 %       pairColorMatchMatrialCoordIndices - index to get color match material coordinate for each trial type.
 %       pairMaterialMatchColorCoordIndices - index to get material match color coordinate for each trial type.
@@ -13,50 +15,73 @@ function [logLikely, predictedResponses] = ColorMaterialModelComputeLogLikelihoo
 %       materialMatchColorCoords - current inferred position for material matches on the color axis.
 %       sigma -fixed standard deviation
 %       w - current weight(s) for color/material axes.
-%
+%       F - object that contains the precomputed lookup table
+%       whichMethod - method used to recover probabilities. 
+%       nSimulate - define the number of simulations for the simulate method.     
 %   Output:
-%       logLikelyFit -        log likelihood of the fit.
-%       predictedResponses -  responses predicted from the fit.
+%       logLikelyFit -            log likelihood of the fit.
+%       predictedProbabilities -  responses predicted from the fit.
 %
 % 11/16/16  ar  This function is adapted from equivalent function for our MLDS model.
 %               It is replaced with the new probability function and updated
 %               accordingly.
 
-% Get some basic info out
-nPairs = size(pairColorMatchMatrialCoordIndices,1);
-targetColorCoord = materialMatchColorCoords(targetIndex);
-colorMatchColorCoord = targetColorCoord;
-targetMaterialCoord = colorMatchMaterialCoords(targetIndex);
-materialMatchMaterialCoord = targetMaterialCoord;
+% Unpack parameters
+p = inputParser;
+p.addParameter('nSimulate',1000, @isnumeric);
+p.addParameter('whichMethod','lookup', @ischar);
+p.addParameter('Fobj',[], @(x)(isempty(x) || isa(x,'griddedInterpolant')));
+p.parse(varargin{:});
 
-% Check that should be true in our current implementation
-tolerance = 1e-7;
-if (abs(colorMatchColorCoord) > tolerance || abs(materialMatchMaterialCoord) > tolerance)
-    error('A coordinate that should be locked at zero is not');
-end
 
 % Compute the log likelihood
 logLikely = 0;
+nPairs = length(pairColorMatchMaterialCoords);
 for i = 1:nPairs
-    predictedResponses(i) = ColorMaterialModelComputeProb(targetColorCoord, targetMaterialCoord, ...
-        colorMatchColorCoord, materialMatchColorCoords(pairMaterialMatchColorCoordIndices(i)), ...
-        colorMatchMaterialCoords(pairColorMatchMatrialCoordIndices(i)),materialMatchMaterialCoord, ...
-        w, sigma);
     
-    if (isnan(predictedResponses(i)))
+    colorMatchColorCoord = pairColorMatchColorCoords(i);
+    materialMatchColorCoord = pairMaterialMatchColorCoords(i);
+    colorMatchMaterialCoord = pairColorMatchMaterialCoords(i);
+    materialMatchMaterialCoord = pairMaterialMatchMaterialCoords(i);
+    
+    switch p.Results.whichMethod
+        case 'analytic'
+            predictedProbabilities(i) = ColorMaterialModelComputeProb(targetColorCoord, targetMaterialCoord, ...
+                colorMatchColorCoord, materialMatchColorCoord, ...
+                colorMatchMaterialCoord,materialMatchMaterialCoord, w, sigma);
+        case 'simulate'
+             s = rng(173);
+             predictedProbabilities(i) = ColorMaterialModelComputeProbBySimulation(p.Results.nSimulate,targetColorCoord, targetMaterialCoord, ...
+                colorMatchColorCoord, materialMatchColorCoord, ...
+                colorMatchMaterialCoord,materialMatchMaterialCoord, w, sigma);
+            rng(s);
+        case 'lookup'
+            predictedProbabilities(i) = p.Results.Fobj(colorMatchColorCoord,materialMatchColorCoord,colorMatchMaterialCoord,materialMatchMaterialCoord, w);
+    end
+    
+    if (isnan(predictedProbabilities(i)))
         error('Returned probability is NaN');
     end
-    if (isinf(predictedResponses(i)))
+    
+    if (isinf(predictedProbabilities(i)))
         error('Returend probability is Inf');
     end
     
-    logLikely = logLikely + theResponses(i)*log10(predictedResponses(i)) + (nTrials(i)-theResponses(i))*log10(1-predictedResponses(i));
+    if (predictedProbabilities(i) == 0)
+        predictedProbabilities(i) = 0.0001;
+    elseif (predictedProbabilities(i) == 1)
+        predictedProbabilities(i) = 0.9999;
+    end
+    
+    logLikely = logLikely + theResponses(i)*log10(predictedProbabilities(i)) + (nTrials(i)-theResponses(i))*log10(1-predictedProbabilities(i));
 end
 
 % Something bad happened if this is true
 if (isnan(logLikely))
     error('Returned likelihood is NaN');
 end
+
+
 
 end
 

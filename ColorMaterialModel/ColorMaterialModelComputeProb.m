@@ -1,5 +1,5 @@
-function p = ColorMaterialModelComputeProb(targetColorCoord,targetMaterialCoord, colorMatchColorCoord,materialMatchColorCoord,colorMatchMatrialCoord, materialMatchMaterialCoord, w, sigma)
-% function p = ColorMaterialModelComputeProb(targetColorCoord,targetMaterialCoord, colorMatchColorCoord,materialMatchColorCoord,colorMatchMatrialCoord, materialMatchMaterialCoord, w, sigma)
+function p = ColorMaterialModelComputeProb(targetColorCoord,targetMaterialCoord, colorMatchColorCoord,materialMatchColorCoord,colorMatchMaterialCoord, materialMatchMaterialCoord, w, sigma)
+% function p = ColorMaterialModelComputeProb(targetColorCoord,targetMaterialCoord, colorMatchColorCoord,materialMatchColorCoord,colorMatchMaterialCoord, materialMatchMaterialCoord, w, sigma)
 %
 % This function is part of our modeling effort for our initial
 % color-material tradeoff experiments.  On each trial of these experiments,
@@ -98,11 +98,6 @@ if (abs(sigma-1) > numTolerance)
     error('Code assumes that sigma is 1');
 end
 
-% We assume that cy1 is 0 and my2 is 0, check
-if (abs(colorMatchColorCoord) > numTolerance || abs(materialMatchMaterialCoord) > numTolerance)
-    error('Assumption that competitors lie on the axes is violated.');
-end
-
 % Check w and also avoid numerical problems for very small w or (1-w)
 if ~(w > -numTolerance || abs(w-1)  > numTolerance)
     error('w must be between 0 and 1 inclusive');
@@ -125,7 +120,7 @@ end
 % parameter is needed so that the non-central chi-squared returns the
 % appropriate values for (cy1,my1).
 % Also take square root to get mean distance.
-deltaColorMatch = colorMatchColorCoord^2 + colorMatchMatrialCoord^2;
+deltaColorMatch = colorMatchColorCoord^2 + colorMatchMaterialCoord^2;
 
 % We'll also need the distance of the mean of the distribution of the colorMatch in the
 % perceptual space.
