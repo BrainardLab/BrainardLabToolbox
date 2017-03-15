@@ -125,7 +125,7 @@ function plotDeviationData(obj, figureGroupIndex)
     subplot(1,3,3); hold on
     plot(nominalxyY(3,:),deviationsxyY1(3,:),'r+', 'MarkerFaceColor', 'none', 'MarkerSize', 6);
     plot(nominalxyY(3,:),deviationsxyY2(3,:),'b+', 'MarkerFaceColor', 'none', 'MarkerSize', 6);
-    xlim([min(nominalxyY(3,:))-1 max(nominalxyY(3,:))+1]); ylim([-5 5]);
+    xlim([min(nominalxyY(3,:))-1 max(nominalxyY(3,:))+1]); ylim([-10 10]);
     hleg = legend('meas #1', 'meas #2', 'Location', 'SouthEast');
     set(hleg,'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 10);
     box on;
