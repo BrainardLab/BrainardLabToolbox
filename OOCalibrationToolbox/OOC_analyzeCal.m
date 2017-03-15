@@ -1,7 +1,7 @@
 function OOC_analyzeCal
 
     % Load a calibration file
-    defaultCalFile = 'Right_SONY_PVM_OLED';
+    defaultCalFile = 'BOLDScreen';
     try
         [cal, calFilename] = GetCalibrationStructure('Enter calibration filename',defaultCalFile,[]);
     catch err

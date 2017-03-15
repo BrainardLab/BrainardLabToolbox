@@ -122,7 +122,7 @@ function OOC_calibrateMonitor
 end
 
 
-% configuration function for BoldScreen
+% configuration function for SONYScreen
 function [displaySettings, calibratorOptions] = generateConfigurationForSONY_PVM2541A(LeftOrRight)
     % Specify where to send the 'Calibration Done' notification email
     emailAddressForNotification = 'cottaris@sas.upenn.edu';
@@ -176,7 +176,7 @@ end
 % configuration function for BOLDScreen
 function [displaySettings, calibratorOptions] = generateConfigurationForBOLDScreen()
     % Specify where to send the 'Calibration Done' notification email
-    emailAddressForNotification = 'mspits@sas.upenn.edu';
+    emailAddressForNotification = 'cottaris@upenn.edu';
     
     % Specify the @Calibrator's initialization params. 
     % Users should tailor these according to their hardware specs. 
@@ -184,7 +184,7 @@ function [displaySettings, calibratorOptions] = generateConfigurationForBOLDScre
     displaySettings = { ...
         'screenToCalibrate',        2, ...                          % which display to calibrate. main screen = 1, second display = 2
         'desiredScreenSizePixel',   [1920 1080], ...                % pixels along the width and height of the display to be calibrated
-        'desiredRefreshRate',       60, ...                         % refresh rate in Hz
+        'desiredRefreshRate',       120, ...                        % refresh rate in Hz
         'displayPrimariesNum',      3, ...                          % for regular displays this is always 3 (RGB) 
         'displayDeviceType',        'monitor', ...                  % this should always be set to 'monitor' for now
         'displayDeviceName',        'BOLDScreen', ...               % a name for the display been calibrated
