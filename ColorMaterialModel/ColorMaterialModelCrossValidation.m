@@ -63,7 +63,7 @@ for kk = 1:nFolds
     % Compute the probabilities from the test data.
     % This is what we will compare with the predictions based on the
     % training data
-    pTestData = sum(thisSubject.condition{whichCondition}.chosenAcrossTrials(:, trainingIndex),2)./sum(testIndex);  
+    pTestData = sum(thisSubject.condition{whichCondition}.chosenAcrossTrials(:, testIndex),2)./sum(testIndex);  
     params.whichPositions = 'smoothSpacing'; 
     
     % Get the predictions from the smooth spacing model
