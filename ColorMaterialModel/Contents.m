@@ -25,8 +25,24 @@
 % FitColorMaterialModelMLDSFun             - Error function (what to minimize) for the MLDS-based model fitting.
 % FitColorMaterialModelWeibull             - Fit the descriptive Weibull model to data.
 % FitColorMaterialWeibullFun               - Error function (what to minimize) for the descriptive Weibull function fitting.
+% colorMaterialInterpolateFunctionCubic.mat  - cubic interpolation of the current probabilities lookup table. 
+% colorMaterialInterpolateFunctionLinear.mat - cubic interpolation of the current probabilities lookup table. 
+% PlotGriddedInterpolation.m                 - make movies of probabilities interpolated from the look up table three dimensions of the time.  
+
+% ColorMaterialModelGetProbabilityFromLookupTable.m - get probability from the lookup table. Oneliner. 
+%                                                     In the model code we use the one-line call rather than calling this function. 
+
+% LookUpCurrentMarch62017.mat               - Result of the current build lookup table
+% gridParams.mat                            - temporary. we should probably get rid of them saved in the main function
+
 % pairIndices                              - Matrix describing competitor pairing in our initial experiment.
 %                                            In the long run, this might come out of the toolbox itself.
-% PlotsWithSavedParams                     - Temporary Ana routine that does something and will go away.
+
+% pairIndicesPilot.mat - these two matrices are required in order to fit the pilot data
+% pilotIndices.mat
+
+% what to do with these old function. 
+% xOldColorMaterialModelDemo.m
+% ColorMaterialModelDemoGeneralize.m ? need to figure out 
 
 

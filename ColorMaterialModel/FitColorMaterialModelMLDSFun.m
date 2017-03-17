@@ -59,11 +59,4 @@ if (f < 0)
     error('Cannot have logLikelihood > 0');
 end
 
-
-if (~isreal(f)) || (isnan(f))
-    f = Inf;
-    disp('------')
-    disp(x')
-end
-
 end

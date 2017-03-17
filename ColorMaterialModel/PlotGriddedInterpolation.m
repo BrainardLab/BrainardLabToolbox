@@ -1,17 +1,52 @@
-% plot Gridded Interpolation
+% PlotGriddedInterpolation
+% The script makes the movies of three dimensional cross sections (two
+% dimensions + time) showing the extrapolation of probabilities from the
+% look up table. Two remaining dimensions are always set to the middle of
+% the parameter range. 
+
+% 03/01/16 ar Wrote it
 
 % Initialize
 clear; close all;
 figDir = '/Users/radonjic/Dropbox (Aguirre-Brainard Lab)/CNST_analysis/ColorMaterial/Pilot';
 cd(figDir)
-for aaa =1:2
-    if aaa == 1
+
+% Needed in the current iteration on the grid search. 
+% We will delete this once we have it being saved as the lookup table is
+% being computed. 
+load('gridParams.mat');
+ 
+% movie parametes. 
+frameRate = 5;
+quality = 100;
+
+% interpolation parameters
+nSamples = 100;
+setValues = {'xSamples', 'ySamples', 'zSamples', 'wSamples', 'qSamples'};
+labels = {'CMCol', 'MMCol', 'CMMat', 'MMMat', 'w'};
+nDim = length(labels);
+
+% Set of varied dimensions for each movie.
+comb = nchoosek(1:nDim,3);
+
+% Set of fixed dimensions for each movie.
+for i  = 1:size(comb,1)
+    comb2(i,:) = setdiff([1:5], comb(i,:));
+end
+    
+% fix 2 dimensions in the middle (there are 100 samples)
+randValue1 = 50;
+randValue2 = 50;
+    
+% Loops through different dimension combination for linear and cubic
+% interpolation from the lookup table. 
+for whichInterpolation =1:2 
+    if whichInterpolation == 1
         lookupMethod = 'cubic';
-    elseif aaa == 2
+    elseif whichInterpolation == 2
         lookupMethod = 'linear';
     end
-    % lookup
-    load('gridParams.mat');
+    
     % Load lookup table
     switch lookupMethod
         case  'linear'
@@ -23,19 +58,6 @@ for aaa =1:2
             colorMaterialInterpolatorFunction = colorMaterialInterpolatorFunction;
             interpCode = 'C';
     end
-    frameRate = 5;
-    quality = 100;
-    nSamples = 100;
-    nDim = length(size(colorMaterialInterpolatorFunction.Values));
-    
-    % we need to fix 2 dimensions
-    randValue1 = 50;
-    randValue2 = 50;
-    
-    comb = nchoosek(1:nDim,3);
-    for i  = 1:size(comb,1)
-        comb2(i,:) = setdiff([1:5], comb(i,:));
-    end
     
     for ii = 1:size(comb,1)
         close all
@@ -44,8 +66,6 @@ for aaa =1:2
         zSamples = linspace(-gridParams.endPosition,gridParams.endPosition,nSamples);
         wSamples = linspace(-gridParams.endPosition,gridParams.endPosition,nSamples);
         qSamples = linspace(gridParams.weightCoords(1),gridParams.weightCoords(end),nSamples);
-        setValues = {'xSamples', 'ySamples', 'zSamples', 'wSamples', 'qSamples'};
-        labels = {'CMCol', 'MMCol', 'CMMat', 'MMMat', 'w'};
         [newXgrid,newYgrid] = ndgrid(eval(setValues{(comb(ii,1))}),  eval(setValues{(comb(ii,2))}));
         
         % video writer object (MPEG-4)
@@ -54,7 +74,8 @@ for aaa =1:2
         writerObj.Quality = quality;
         open(writerObj);
         
-        % here I need to write the correct string to implement this.
+        % Careful building of the executable string to make the correct
+        % intrerpolation. 
         currentOrder = [comb(ii,:) comb2(ii,:)];
         tempString = {[setValues{comb(ii,1)} '(i)'], [setValues{comb(ii,2)}  '(j)'], [setValues{comb(ii,3)}  '(k)'], ...
             [setValues{comb2(ii,1)} '(randValue1)'], [setValues{comb2(ii,2)} '(randValue2)']};
@@ -79,7 +100,7 @@ for aaa =1:2
             mesh(newXgrid,newYgrid,newProbs{k});
             view(60,45)
             
-            % create correct axis
+            % Create correct axis
             x1 = eval(setValues{(comb(ii,1))});
             y1 = eval(setValues{(comb(ii,2))});
             z1 = eval(setValues{(comb(ii,3))});
@@ -91,7 +112,7 @@ for aaa =1:2
             ylabel(labels(comb(ii,2)))
             zlabel('prob')
             
-            % create a correct title.
+            % Labels with the right title.
             title([labels{comb(ii,3)} '=' num2str(z1(k)) ' '  labels{comb2(ii,1)} '=' num2str(w1(randValue1))  ' ' labels{comb2(ii,2)} '=' num2str(q1(randValue2))])
             drawnow;
             writeVideo(writerObj,getframe(theFig));

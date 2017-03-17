@@ -21,8 +21,11 @@ clear; close all;
 
 % First thing to do is take a set of test data and organize it so that 
 % each block is a column and each row is a set of trials
-load('/Users/radonjic/Dropbox (Aguirre-Brainard Lab)/CNST_analysis/ColorMaterial/Experiment1/mdcSummarizedData.mat') % data
-load('/Users/radonjic/Dropbox (Aguirre-Brainard Lab)/CNST_analysis/ColorMaterial/Experiment1/pairIndicesE1P2.mat');  % pair indices
+mainDir = '/Users/ana/Dropbox (Aguirre-Brainard Lab)/CNST_analysis/ColorMaterial/'; 
+load([mainDir, 'Experiment1/mdcSummarizedData.mat']); % data
+% adjust this. 
+load([mainDir, 'Experiment1/pairIndicesE1P2.mat']);  % pair indices
+
 load('ColorMaterialExampleStructure.mat')  % other params. 
 params.materialMatchColorCoords  =  params.competitorsRangeNegative(1):1:params.competitorsRangePositive(end); 
 params.colorMatchMaterialCoords  =  params.competitorsRangeNegative(1):1:params.competitorsRangePositive(end); 
@@ -30,19 +33,14 @@ params.smoothOrder = 3;
 trySpacingValues = [0.5 1 2];
 tryWeightValues = 0.5; 
 params.trySpacingValues = trySpacingValues; 
-
-nReplications = size(thisSubject.block,2);  
-
-% colorCoordIndex = 1;
-% materialCoordIndex = 2;
-% colorMatchIndexInPair = 1;
-% materialMatchIndexInPair = 2;
+whichCondition = 1; 
+params.whichWeight = 'weightVary'; 
+nTrials = size(thisSubject.block,2);  
 
 % Arbitrarily decide nFolds
-nFolds = 8; 
+nFolds = 5; 
 
-% I am not sure yet, what other things we need to pass. 
-c = cvpartition(nReplications,'Kfold',nFolds);
+c = cvpartition(nTrials,'Kfold',nFolds);
 for kk = 1:nFolds
     
     % We keep the code below, that looks like it's standard.
@@ -59,37 +57,52 @@ for kk = 1:nFolds
     % Here use the data to figure out how the two models compare.
     
     % Separate the training from test data
-    trainingData = sum(thisSubject.condition{1}.chosenAcrossTrials(:, trainingIndex),2); %./sum(trainingIndex);
-    testData = sum(thisSubject.condition{1}.chosenAcrossTrials(:, trainingIndex),2); %./sum(trainingIndex);
+    trainingData = sum(thisSubject.condition{whichCondition}.chosenAcrossTrials(:, trainingIndex),2); %./sum(trainingIndex);
+    testData = sum(thisSubject.condition{whichCondition}.chosenAcrossTrials(:, trainingIndex),2); %./sum(trainingIndex);
     
     % Compute the probabilities from the test data.
     % This is what we will compare with the predictions based on the
     % training data
-    pTestData = sum(thisSubject.condition{1}.chosenAcrossTrials(:, trainingIndex),2)./sum(testIndex);  
+    pTestData = sum(thisSubject.condition{whichCondition}.chosenAcrossTrials(:, trainingIndex),2)./sum(testIndex);  
     params.whichPositions = 'smoothSpacing'; 
-   
+    
     % Get the predictions from the smooth spacing model
     [returnedParamsTrainingSmooth(kk,:), logLikelyFitTrainingSmooth(kk), predictedProbabilitiesBasedOnSolutionTrainingSmooth(kk,:), kTrainingSmooth(kk)] = ...
-           ColorMaterialModelMain(pairColorMatchMaterialCoordIndices,pairMaterialMatchColorCoordIndices,...
+        ColorMaterialModelMain(pairColorMatchColorCoords, pairMaterialMatchColorCoords,...
+        pairColorMatchMaterialCoords, pairMaterialMatchMaterialCoords,...
         trainingData,sum(trainingIndex)*[ones(size(trainingData))],params, ...
-        'whichPositions', 'smoothSpacing','whichWeight','weightFixed', ...
-        'tryWeightValues',tryWeightValues,'trySpacingValues',trySpacingValues); %#ok<SAGROW>
+        'whichPositions',params.whichPositions,'whichWeight',params.whichWeight, ...
+        'tryWeightValues',params.tryWeightValues,'trySpacingValues',params.trySpacingValues, ...
+        'maxPositionValue', params.maxPositionValue); %#ok<SAGROW>
     
-    params.whichPositions = 'full'; 
+    params.whichPositions = 'full';
     % Get the predictions from the full positions model
     [returnedParamsTrainingFull(kk,:), logLikelyFitTrainingFull(kk), predictedProbabilitiesBasedOnSolutionTrainingFull(kk,:), kTrainingFull(kk)] = ...
-        ColorMaterialModelMain(pairColorMatchMaterialCoordIndices,pairMaterialMatchColorCoordIndices,...
+        ColorMaterialModelMain(pairColorMatchColorCoords, pairMaterialMatchColorCoords,...
+        pairColorMatchMaterialCoords, pairMaterialMatchMaterialCoords,...
         trainingData,sum(trainingIndex)*[ones(size(trainingData))],params, ...
-        'whichPositions', 'full','whichWeight','weightFixed', ...
-        'tryWeightValues',tryWeightValues,'trySpacingValues',trySpacingValues); %#ok<SAGROW>
- 
-    % compute the error for each kk 
-    SmoothPositionsRMSError(kk) = computeRealRMSE(pTestData, predictedProbabilitiesBasedOnSolutionTrainingSmooth(kk,:)'); 
-    FullPositionsRMSError(kk) = computeRealRMSE(pTestData, predictedProbabilitiesBasedOnSolutionTrainingFull(kk,:)'); 
+        'whichPositions', params.whichPositions,'whichWeight',params.whichWeight, ...
+        'tryWeightValues',params.tryWeightValues,'trySpacingValues',params.trySpacingValues, ...
+        'maxPositionValue', params.maxPositionValue); %#ok<SAGROW>
+
+    switch whichError
+        case 'rmse'
+            SmoothPositionsRMSError(kk) = computeRealRMSE(pTestData, predictedProbabilitiesBasedOnSolutionTrainingSmooth(kk,:)');
+            FullPositionsRMSError(kk) = computeRealRMSE(pTestData, predictedProbabilitiesBasedOnSolutionTrainingFull(kk,:)');
+        case 'loglikelihood'
+            SmoothPositionsLogLikelyhood(kk) = ColorMaterialModelComputeLogLikelihoodSimple(pTestData, predictedProbabilitiesBasedOnSolutionTrainingSmooth(kk,:)',nTrials);
+            FullPositionsLogLikelyhood(kk) = ColorMaterialModelComputeLogLikelihoodSimple(pTestData, predictedProbabilitiesBasedOnSolutionTrainingFull(kk,:)',nTrials);
+    end
 end
 
 % Get mean error for two types of model
-meanSmoothPositionsError = mean(SmoothPositionsRMSError);
-meanFullPositionsError = mean(FullPositionsRMSError);
-cd('/Users/radonjic/Dropbox (Aguirre-Brainard Lab)/CNST_analysis/ColorMaterial/Experiment1/')
-save('crossValidationTake8')
+switch whichError
+    case 'rmse'
+        meanSmoothPositionsError = mean(SmoothPositionsRMSError);
+        meanFullPositionsError = mean(FullPositionsRMSError);
+    case 'loglikelihood'
+        meanLogLikelihoodSmoothPositions = mean(SmoothPositionsLogLikelyhood);
+        meanLogLikelihoodFullPositions = mean(FullPositionsLogLikelyhood);
+end
+cd([mainDir' 'Experiment1/']); 
+save(['crossValidation' num2str(nFolds) 'Folds']);
