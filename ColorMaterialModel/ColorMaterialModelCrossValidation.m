@@ -1,108 +1,112 @@
 % ColorMaterialModelCrossValidation
 %
-% Write a skeleton to do cross validation. 
-% Use cvpartition
+% Perform cross valiadation to establish the quality of the model.
 %
-% We want to be able to compare two instancies of our model using cross
+% We want to be able to compare several instancies of our model using cross
 % validation. The main goal is to figure out whether we're overfitting with
-% our many parameters. 
+% our many parameters.
 %
-% A thing we know so far is that full positions + weights fixed model (12 params) works
-% equally well as the full positions + weights vary model. It looks like
-% any crazy inappropriate weight can be 'countered' by recovering certain
-% (crazy) position. We therefore suspect our 12 params model might be
-% overfitting the data. To test for the possibility of overfitting with the increasing number of 
-% parameters in smoothPositions vs. fullPositions we want to use cross validation
-%
-% Basic cross validation for one model option 
+% 03/17/2017 ar Wrote it.
 
 % Initialize
-clear; close all; 
+clear; close all;
 
-% First thing to do is take a set of test data and organize it so that 
-% each block is a column and each row is a set of trials
-mainDir = '/Users/ana/Dropbox (Aguirre-Brainard Lab)/CNST_analysis/ColorMaterial/'; 
-load([mainDir, 'Experiment1/mdcSummarizedData.mat']); % data
-% adjust this. 
+% Set directories and load the subject data
+subjectList = {'mdc'};
+mainDir = '/Users/ana/Dropbox (Aguirre-Brainard Lab)/CNST_analysis/ColorMaterial/';
 load([mainDir, 'Experiment1/pairIndicesE1P2.mat']);  % pair indices
+load('ColorMaterialExampleStructure.mat')  % other params.
+load colorMaterialInterpolateFunctionCubic.mat
 
-load('ColorMaterialExampleStructure.mat')  % other params. 
-params.materialMatchColorCoords  =  params.competitorsRangeNegative(1):1:params.competitorsRangePositive(end); 
-params.colorMatchMaterialCoords  =  params.competitorsRangeNegative(1):1:params.competitorsRangePositive(end); 
-params.smoothOrder = 3;
-trySpacingValues = [0.5 1 2];
-tryWeightValues = 0.5; 
-params.trySpacingValues = trySpacingValues; 
-whichCondition = 1; 
-params.whichWeight = 'weightVary'; 
-nTrials = size(thisSubject.block,2);  
-
+params.materialMatchColorCoords  =  params.competitorsRangeNegative(1):1:params.competitorsRangePositive(end);
+params.colorMatchMaterialCoords  =  params.competitorsRangeNegative(1):1:params.competitorsRangePositive(end);
+params.tryWeightValues = 0.5;
+params.trySpacingValues = [0.5 1 2];
+params.maxPositionValue = 20;
+params.whichMethod = 'lookup';
+params.nSimulate = 1000;
+params.F = colorMaterialInterpolatorFunction;
 % Arbitrarily decide nFolds
-nFolds = 5; 
+nFolds = 6;
+nModelTypes = 3;
+nConditions = 1;
 
-c = cvpartition(nTrials,'Kfold',nFolds);
-for kk = 1:nFolds
+whichError = 'loglikelihood';
+for s = 1:length(subjectList)
+    load([mainDir, 'Experiment1/' subjectList{s} 'SummarizedData.mat']); % data
+    nTrials = size(thisSubject.block,2);
     
-    % We keep the code below, that looks like it's standard.
-    % Get indices for kkth fold
-    trainingIndex = c.training(kk);
-    testIndex = c.test(kk);
-    
-    % sanity check
-    check = trainingIndex + testIndex;
-    if (any(check ~= 1))
-        error('We do not understand cvparitiion''s kFold indexing scheme');
+    for whichModelType = 1:nModelTypes
+        if whichModelType == 1
+            params.whichWeight = 'weightVary';
+            params.whichPositions = 'full';
+            thisSubject.model{whichModelType} = 'Full-Vary';
+        elseif whichModelType == 2
+            params.whichWeight = 'weightVary';
+            params.whichPositions = 'smoothSpacing';
+            params.smoothOrder = 1;
+            params.model{whichModelType} = 'SmoothLinear-Vary';
+        elseif whichModelType == 3
+            params.whichWeight = 'weightVary';
+            params.whichPositions = 'smoothSpacing';
+            params.smoothOrder = 2;
+            params.model{whichModelType} = 'SmoothCubic-Vary';
+        end
+        
+        for whichCondition = 1:nConditions
+            
+            % partition for cross validation.
+            c = cvpartition(nTrials,'Kfold',nFolds);
+            for kk = 1:nFolds
+                
+                clear trainingIndex testIndex trainingData testData nTrainingTrials nTestTrials probabilitiesTestData
+                % Get indices for kkth fold
+                trainingIndex = c.training(kk);
+                testIndex = c.test(kk);
+                
+                % Separate the training from test data
+                trainingData = sum(responsesAcrossBlocks(:,trainingIndex),2);
+                testData = sum(responsesAcrossBlocks(:,testIndex),2);
+                nTrainingTrials = c.TrainSize(kk)*ones(size(trainingData));
+                nTestTrials = c.TestSize(kk)*ones(size(testData));
+                pTestData = testData./nTestTrials;
+                
+                % Get the predictions from the model for current parameters
+                [thisSubject.condition{whichCondition}.crossVal(whichModelType).returnedParamsTraining(kk,:), ...
+                    thisSubject.condition{whichCondition}.crossVal(whichModelType).logLikelyFitTraining(kk), ...
+                    thisSubject.condition{whichCondition}.crossVal(whichModelType).predictedProbabilitiesBasedOnSolutionTraining(kk,:), ...
+                    thisSubject.condition{whichCondition}.crossVal(whichModelType).kTraining(kk)] = ...
+                    FitColorMaterialModelMLDS(pairColorMatchColorCoords, pairMaterialMatchColorCoords,...
+                    pairColorMatchMaterialCoords, pairMaterialMatchMaterialCoords,...
+                    trainingData, c.TrainSize(kk)*ones(size(trainingData)),...
+                    params, 'whichPositions',params.whichPositions,'whichWeight',params.whichWeight, ...
+                    'tryWeightValues',params.tryWeightValues,'trySpacingValues',params.trySpacingValues, ...
+                    'maxPositionValue', params.maxPositionValue);
+                
+                % Now use these parameters to predict the response for the test data.
+                [negLogLikely,predictedResponses] = FitColorMaterialModelMLDSFun(thisSubject.condition{whichCondition}.crossVal(whichModelType).returnedParamsTraining(kk,:),...
+                    pairColorMatchColorCoords,pairMaterialMatchColorCoords,...
+                    pairColorMatchMaterialCoords,pairMaterialMatchMaterialCoords,...
+                    testData, nTestTrials, params);
+                
+                thisSubject.condition{whichCondition}.crossVal(whichModelType).LogLikelyhood(kk) = -negLogLikely;
+                thisSubject.condition{whichCondition}.crossVal(whichModelType).predictedProbabilities(kk,:) = predictedResponses;
+                
+                % Compute RMSE (it's easy enough and we might want to look at
+                % some point)
+                thisSubject.condition{whichCondition}.crossVal(whichModelType).RMSError(kk) = ...
+                    ComputeRealRMSE(predictedResponses, pTestData);
+                clear negLogLikely predictedResponses
+            end
+            
+            % Compute mean error for both rmse and log likelihood.
+            thisSubject.condition{whichCondition}.crossVal(whichModelType).meanRMSError = ...
+                mean(thisSubject.condition{whichCondition}.crossVal(whichModelType).RMSError);
+            thisSubject.condition{whichCondition}.crossVal(whichModelType).meanLogLikelihood = ...
+                mean(thisSubject.condition{whichCondition}.crossVal(whichModelType).LogLikelyhood);
+        end
     end
     
-    % Here use the data to figure out how the two models compare.
-    
-    % Separate the training from test data
-    trainingData = sum(thisSubject.condition{whichCondition}.chosenAcrossTrials(:, trainingIndex),2); %./sum(trainingIndex);
-    testData = sum(thisSubject.condition{whichCondition}.chosenAcrossTrials(:, trainingIndex),2); %./sum(trainingIndex);
-    
-    % Compute the probabilities from the test data.
-    % This is what we will compare with the predictions based on the
-    % training data
-    pTestData = sum(thisSubject.condition{whichCondition}.chosenAcrossTrials(:, testIndex),2)./sum(testIndex);  
-    params.whichPositions = 'smoothSpacing'; 
-    
-    % Get the predictions from the smooth spacing model
-    [returnedParamsTrainingSmooth(kk,:), logLikelyFitTrainingSmooth(kk), predictedProbabilitiesBasedOnSolutionTrainingSmooth(kk,:), kTrainingSmooth(kk)] = ...
-        ColorMaterialModelMain(pairColorMatchColorCoords, pairMaterialMatchColorCoords,...
-        pairColorMatchMaterialCoords, pairMaterialMatchMaterialCoords,...
-        trainingData,sum(trainingIndex)*[ones(size(trainingData))],params, ...
-        'whichPositions',params.whichPositions,'whichWeight',params.whichWeight, ...
-        'tryWeightValues',params.tryWeightValues,'trySpacingValues',params.trySpacingValues, ...
-        'maxPositionValue', params.maxPositionValue); %#ok<SAGROW>
-    
-    params.whichPositions = 'full';
-    % Get the predictions from the full positions model
-    [returnedParamsTrainingFull(kk,:), logLikelyFitTrainingFull(kk), predictedProbabilitiesBasedOnSolutionTrainingFull(kk,:), kTrainingFull(kk)] = ...
-        ColorMaterialModelMain(pairColorMatchColorCoords, pairMaterialMatchColorCoords,...
-        pairColorMatchMaterialCoords, pairMaterialMatchMaterialCoords,...
-        trainingData,sum(trainingIndex)*[ones(size(trainingData))],params, ...
-        'whichPositions', params.whichPositions,'whichWeight',params.whichWeight, ...
-        'tryWeightValues',params.tryWeightValues,'trySpacingValues',params.trySpacingValues, ...
-        'maxPositionValue', params.maxPositionValue); %#ok<SAGROW>
-
-    switch whichError
-        case 'rmse'
-            SmoothPositionsRMSError(kk) = computeRealRMSE(pTestData, predictedProbabilitiesBasedOnSolutionTrainingSmooth(kk,:)');
-            FullPositionsRMSError(kk) = computeRealRMSE(pTestData, predictedProbabilitiesBasedOnSolutionTrainingFull(kk,:)');
-        case 'loglikelihood'
-            SmoothPositionsLogLikelyhood(kk) = ColorMaterialModelComputeLogLikelihoodSimple(pTestData, predictedProbabilitiesBasedOnSolutionTrainingSmooth(kk,:)',nTrials);
-            FullPositionsLogLikelyhood(kk) = ColorMaterialModelComputeLogLikelihoodSimple(pTestData, predictedProbabilitiesBasedOnSolutionTrainingFull(kk,:)',nTrials);
-    end
+    cd([mainDir' 'Experiment1/CrossVal']);
+    save([subjectList{s} 'CV' num2str(nFolds) 'Folds'],  'thisSubject');
 end
-
-% Get mean error for two types of model
-switch whichError
-    case 'rmse'
-        meanSmoothPositionsError = mean(SmoothPositionsRMSError);
-        meanFullPositionsError = mean(FullPositionsRMSError);
-    case 'loglikelihood'
-        meanLogLikelihoodSmoothPositions = mean(SmoothPositionsLogLikelyhood);
-        meanLogLikelihoodFullPositions = mean(FullPositionsLogLikelyhood);
-end
-cd([mainDir' 'Experiment1/']); 
-save(['crossValidation' num2str(nFolds) 'Folds']);

@@ -19,8 +19,7 @@ function [colorMatchMaterialCoords,materialMatchColorCoords,w,sigma] = ColorMate
 
 % 11/20/2016 ar Wrote it
 % 12/3/2016  dhb, ar Clean up smoothSpacing option.
-
-switch (params.whichPositions)
+switch params.whichPositions
     case 'smoothSpacing'
         % In the smooth spacing condition, the initial parameters in x are
         % the coefficients on polynomials of order params.smoothOrder for

@@ -1,6 +1,6 @@
 function ColorMaterialModelPlotSolution(allDataProbs,allPredictedProbs,colorMaterialDataProb, colorMaterialPredictedProbs, ...
     modelParams, params, subjectName, conditionCode, figDir, saveFig, weibullplots, ...
-    colIndex, matIndex, actualProbs, resizedColorMatActualProbabilities)
+    factualProbs, resizedColorMatActualProbabilities)
 % ColorMaterialModelPlotSolution(theDataProb, predictedProbabilitiesBasedOnSolution, modelParams, params,  figDir, saveFig, weibullplots, actualProbs)
 %
 % Make a nice plot of the data and MLDS-based model fit.
@@ -29,42 +29,12 @@ thisLineWidth = 1;
 
 %% Figure 1. Plot measured vs. predicted probabilities
 figure; hold on
-tmp1 = [allDataProbs(colIndex), allDataProbs(matIndex)]; 
-tmp2 = [allPredictedProbs(colIndex), allPredictedProbs(matIndex)]; 
-plot(allDataProbs(colIndex), allPredictedProbs(colIndex),'ro','MarkerSize',thisMarkerSize-2,'MarkerFaceColor','r');
-plot(allDataProbs(matIndex), allPredictedProbs(matIndex),'bo','MarkerSize',thisMarkerSize-2,'MarkerFaceColor','b');
-
-rmseWithin = ComputeRealRMSE(tmp1,tmp2);
-text(0.07, 0.87, sprintf('RFit = %.4f', rmseWithin), 'FontSize', thisFontSize);
+plot(allDataProbs, allPredictedProbs,'ro','MarkerSize',thisMarkerSize-2,'MarkerFaceColor','r');
+rmse = ComputeRealRMSE(allDataProbs,allPredictedProbs);
+text(0.07, 0.92, sprintf('RFit = %.4f', rmse), 'FontSize', thisFontSize);
 if nargin == 15
-    plot(allDataProbs(colIndex),actualProbs(colIndex),'rx','MarkerSize',thisMarkerSize-2);
-    plot(allDataProbs(matIndex),actualProbs(matIndex),'bx','MarkerSize',thisMarkerSize-2);
-    tmp11 = [actualProbs(colIndex), actualProbs(matIndex)];
-    rmseComp = ComputeRealRMSE(tmp1,tmp11); clear tmp1 tmp2 tmp11
-    text(0.07, 0.82, sprintf('RActual-ALL = %.4f', rmseComp), 'FontSize', thisFontSize);
-    legend('Fit Parameters', 'Actual Parameters', 'Location', 'NorthWest')
-    legend boxoff
-else
-    legend('Fit Parameters', 'Location', 'NorthWest')
-    legend boxoff
-end
-line([0, 1], [0,1], 'color', 'k');
-axis('square')
-axis([0 1 0 1]);
-set(gca,  'FontSize', thisFontSize);
-xlabel('Measured p');
-ylabel('Predicted p');
-set(gca, 'xTick', [0, 0.5, 1]);
-set(gca, 'yTick', [0, 0.5, 1]);
-ax(1)=gca;
-
-figure; hold on
-plot(colorMaterialDataProb, colorMaterialPredictedProbs,'ro','MarkerSize',thisMarkerSize-2,'MarkerFaceColor','r');
-rmseAcross = ComputeRealRMSE(colorMaterialDataProb(~isnan(colorMaterialDataProb(:))),colorMaterialPredictedProbs(~isnan(colorMaterialPredictedProbs(:))));
-text(0.07, 0.87, sprintf('RFit = %.4f', rmseAcross), 'FontSize', thisFontSize);
-if nargin == 15
-    plot(allDataProbs,actualProbs,'bx','MarkerSize',thisMarkerSize-2)
-    rmseComp = ComputeRealRMSE(colorMaterialDataProb(:),resizedColorMatActualProbabilities(:));
+    plot(allDataProbs,actualProbs,'bo','MarkerSize',thisMarkerSize-2);
+    rmseComp = ComputeRealRMSE(allDataProbs,actualProbs); 
     text(0.07, 0.82, sprintf('RActual = %.4f', rmseComp), 'FontSize', thisFontSize);
     legend('Fit Parameters', 'Actual Parameters', 'Location', 'NorthWest')
     legend boxoff
@@ -80,12 +50,7 @@ xlabel('Measured p');
 ylabel('Predicted p');
 set(gca, 'xTick', [0, 0.5, 1]);
 set(gca, 'yTick', [0, 0.5, 1]);
-ax(2)=gca;
-
-% if saveFig
-%     cd(figDir)
-%     FigureSave([subjectName, conditionCode, 'MeasuredVsPredictedProb'], gcf, 'pdf'); 
-% end
+ax(1)=gca;
 
 %% Prepare for figure 2. Fit cubic spline to the data
 % We do this separately for color and material dimension
@@ -111,33 +76,33 @@ inferredPositionsMaterial  = FMaterial(splineOverX);
 
 %% Figure 2. Plot positions from fit versus actual simulated positions 
 fColor = figure; hold on; 
-%subplot(1,2,1); hold on % plot of material positions
-plot(params.materialMatchColorCoords,returnedMaterialMatchColorCoords,'ro',splineOverX, inferredPositionsColor, 'r', 'MarkerSize', thisMarkerSize);
 plot(params.colorMatchMaterialCoords,returnedColorMatchMaterialCoords,'bo',splineOverX,inferredPositionsMaterial, 'b', 'MarkerSize', thisMarkerSize);
 plot([xMin xMax],[yMin yMax],'--', 'LineWidth', thisLineWidth, 'color', [0.5 0.5 0.5]);
 %title('Color dimension')
 axis([xMin, xMax,yMin, yMax])
 axis('square')
-xlabel('"True" position');
+xlabel('Color "true" position');
+ylabel('Inferred position');
+set(gca, 'xTick', [xMin, 0, xMax],'FontSize', thisFontSize);
+set(gca, 'yTick', [yMin, 0, yMax],'FontSize', thisFontSize);
+ax(2)=gca;
+
+%% Figure 2. Plot positions from fit versus actual simulated positions 
+fMaterial = figure; hold on; 
+plot(params.materialMatchColorCoords,returnedMaterialMatchColorCoords,'ro',splineOverX, inferredPositionsColor, 'r', 'MarkerSize', thisMarkerSize);
+plot([xMin xMax],[yMin yMax],'--', 'LineWidth', thisLineWidth, 'color', [0.5 0.5 0.5]);
+%title('Material dimension')
+axis([xMin, xMax,yMin, yMax])
+axis('square')
+xlabel('Material "true" position');
 ylabel('Inferred position');
 set(gca, 'xTick', [xMin, 0, xMax],'FontSize', thisFontSize);
 set(gca, 'yTick', [yMin, 0, yMax],'FontSize', thisFontSize);
 ax(3)=gca;
 
-% % Set large range of values for fittings
-% fMaterial = figure; hold on; %subplot(1,2,2); hold on % plot of material positions
-% %title('Material dimension')
-% plot([xMin xMax],[yMin yMax],'--', 'LineWidth', thisLineWidth, 'color', [0.5 0.5 0.5]);
-% axis([xMin, xMax,yMin, yMax])
-% axis('square')
-% xlabel('"True" position');
-% ylabel('Inferred position');
-% set(gca, 'xTick', [xMin, 0, xMax],'FontSize', thisFontSize);
-% set(gca, 'yTick', [yMin, 0, yMax],'FontSize', thisFontSize);
-% ax(3)=gca;
 if saveFig
     FigureSave([subjectName, conditionCode, 'RecoveredPositionsSpline'], fColor, 'pdf'); 
-  %  FigureSave([subjectName, conditionCode, 'RecoveredPositionsSpline'], fMaterial, 'pdf'); 
+    FigureSave([subjectName, conditionCode, 'RecoveredPositionsSpline'], fMaterial, 'pdf'); 
 end
 
 %% Plot the color and material of the stimuli obtained from the fit in the 2D representational space
@@ -274,7 +239,9 @@ for i=1:nImages
      title(get(get(ax(i),'title'),'string'));
      axis square
      if i > 4
-         axis([-3.5 3.5 0 1.05])
+         axis([params.colorMatchMaterialCoords(1) params.colorMatchMaterialCoords(end) 0 1.05])
+     elseif i == 1
+         axis([0 1.05 0 1.05])
      end
 end
 cd (figDir)
