@@ -46,7 +46,8 @@ function response = ColorMaterialModelSimulateResponse(targetColorCoord, targetM
 % 12/21/16 dhb, ar Add input parser.
 %                  Make use of w consistent with w being applied to color
 %                  coordinate for both approx and non-approx conditions.
-% 2/9/16   dhb     Added addNoiseToTarget option.
+% 2/9/17   dhb     Added addNoiseToTarget option.
+% 3/20/17   ar     Add option to compute distance using preferred distance metric. 
 
 %% Parse key/value pairs
 p = inputParser;
@@ -102,40 +103,11 @@ if (p.Results.doApprox)
         response = 0;
     end
     
-    % Here we apply the weights to the differences in each dimension
 else
-    switch p.Results.whichDistance
-        case 'euclidean'
-            colorMatchColorCoordDiff = w*(colorMatchColorCoord-targetColorCoord);
-            materialMatchColorCoordDiff = w*(materialMatchColorCoord-targetColorCoord);
-            colorMatchMaterialCoordDiff = (1-w)*(colorMatchMaterialCoord-targetMaterialCoord);
-            materialMatchMaterialCoordDiff = (1-w)*(materialMatchMaterialCoord-targetMaterialCoord);
-            
-            % Compute squared distance and compare WRONG?
-            colorMatchDist2 = colorMatchColorCoordDiff^2 + colorMatchMaterialCoordDiff^2;
-            materialMatchDist2 = materialMatchColorCoordDiff^2 + materialMatchMaterialCoordDiff^2;
-            
-            colorMatchDist3 = sqrt(colorMatchColorCoordDiff^2 + colorMatchMaterialCoordDiff^2);
-            materialMatchDist3 = sqrt(materialMatchColorCoordDiff^2 + materialMatchMaterialCoordDiff^2);
-            
-            % altearnative using pdist
-            colorMatchDist = pdist([w*colorMatchColorCoord, (1-w)*colorMatchMaterialCoord; w*targetColorCoord, (1-w)*targetMaterialCoord],p.Results.whichDistance);
-            materialMatchDist = pdist([w*materialMatchColorCoord, (1-w)*materialMatchMaterialCoord; w*targetColorCoord, (1-w)*targetMaterialCoord],p.Results.whichDistance);
-        
-        case 'cityblock'
-%             % ALL CASES 
-%             colorMatchDist5 = pdist([w*colorMatchColorCoord, (1-w)*colorMatchMaterialCoord; w*targetColorCoord, (1-w)*targetMaterialCoord],p.Results.whichDistance);
-%             materialMatchDist5 = pdist([w*materialMatchColorCoord, (1-w)*materialMatchMaterialCoord; w*targetColorCoord, (1-w)*targetMaterialCoord],p.Results.whichDistance)
-         
-            colorMatchDist4 = w*(abs(colorMatchColorCoord-targetColorCoord)) + (1-w)*(abs(colorMatchMaterialCoord-targetMaterialCoord)); 
-            materialMatchDist4 = w*(abs(materialMatchColorCoord-targetColorCoord)) + (1-w)*(abs(materialMatchMaterialCoord-targetMaterialCoord)); 
-            
-            colorMatchDist6 = pdist([w*colorMatchColorCoord, (1-w)*colorMatchMaterialCoord; w*targetColorCoord, (1-w)*targetMaterialCoord], 'cityblock');
-            materialMatchDist6 = pdist([w*materialMatchColorCoord, (1-w)*materialMatchMaterialCoord; w*targetColorCoord, (1-w)*targetMaterialCoord],'cityblock')
-        otherwise
-            error('Error. This distance metric is not yet implemented.')
-    end
-    
+    % Compute the color/material match distance using selected metric. 
+    colorMatchDist = pdist([w*colorMatchColorCoord, (1-w)*colorMatchMaterialCoord; w*targetColorCoord, (1-w)*targetMaterialCoord],p.Results.whichDistance);
+    materialMatchDist = pdist([w*materialMatchColorCoord, (1-w)*materialMatchMaterialCoord; w*targetColorCoord, (1-w)*targetMaterialCoord],p.Results.whichDistance);
+   
     if (colorMatchDist-materialMatchDist <= 0)
         response = 1;
     else

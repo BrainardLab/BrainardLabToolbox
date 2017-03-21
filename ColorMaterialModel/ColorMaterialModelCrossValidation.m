@@ -50,7 +50,7 @@ for s = 1:length(subjectList)
             params.whichWeight = 'weightVary';
             params.whichPositions = 'smoothSpacing';
             params.smoothOrder = 2;
-            params.model{whichModelType} = 'SmoothCubic-Vary';
+            params.model{whichModelType} = 'SmoothQuadratic-Vary';
         end
         
         for whichCondition = 1:nConditions
