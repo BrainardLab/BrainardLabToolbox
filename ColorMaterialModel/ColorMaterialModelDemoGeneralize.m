@@ -18,9 +18,6 @@ figDir = ['/Users/radonjic/Dropbox (Aguirre-Brainard Lab)/CNST_analysis/ColorMat
 saveFig = 0;
 weibullplots = 0;
 
-lookupMethod = 'linear';
-nBlocks = 24;
-
 %% Simulate up some data, or read in data.  DEMO == true means simulate.
 DEMO = true;
 %% Load structure giving experiment design parameters.
@@ -31,9 +28,14 @@ load('ColorMaterialExampleStructure.mat')
 %% Set parameters for probability computation
 params.whichMethod = 'lookup'; % could be also 'simulate' or 'analytic'
 params.nSimulate = 1000; % for method 'simulate'
+params.whichDistance = 'euclidean'; 
+lookupTable = 'cubic';
+nBlocks = 24;
+
+
 % lookupMethod = 'linear';
 % Load lookup table
-switch lookupMethod
+switch lookupTable
     case  'linear'
         load colorMaterialInterpolateFunctionLinear.mat
         colorMaterialInterpolatorFunction = colorMaterialInterpolatorFunction;
@@ -212,7 +214,8 @@ for ww = 1:length(simulateWeigth)
                 % Simulate one response.
                 responsesForOneBlock(whichPair) = ColorMaterialModelSimulateResponse(targetColorCoord, targetMaterialCoord, ...
                     pairColorMatchColorCoords(whichPair), pairMaterialMatchColorCoords(whichPair), ...
-                    pairColorMatchMaterialCoords(whichPair), pairMaterialMatchMaterialCoords(whichPair), w, sigma, 'addNoiseToTarget', params.addNoise);
+                    pairColorMatchMaterialCoords(whichPair), pairMaterialMatchMaterialCoords(whichPair), w, sigma, ...
+                    'addNoiseToTarget', params.addNoise, 'whichDistance', params.whichDistance);
             end
             
             % Track cummulative response over blocks

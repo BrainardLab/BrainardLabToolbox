@@ -17,7 +17,6 @@ currentDir = pwd;
 figDir = ['/Users/ana/Dropbox (Aguirre-Brainard Lab)/CNST_analysis/ColorMaterial/demoPlots'];
 saveFig = 0;
 weibullplots = 0;
-nBlocks = 24;
 
 %% Load structure giving experiment design parameters.
 % Here we use the example structure that mathes the experimental design of
@@ -27,10 +26,12 @@ load('ColorMaterialExampleStructure.mat')
 %% Set parameters for probability computation
 params.whichMethod = 'lookup'; % could be also 'simulate' or 'analytic'
 params.nSimulate = 1000; % for method 'simulate'
-lookupMethod = 'cubic';
+lookupTable = 'cubic';
+params.whichDistance = 'euclidean'; % define distance for the model and simulated data. 
+nBlocks = 24;
 
 % Load lookup table
-switch lookupMethod
+switch lookupTable
     case  'linear'
         load colorMaterialInterpolateFunctionLinear.mat
         colorMaterialInterpolatorFunction = colorMaterialInterpolatorFunction;
@@ -69,7 +70,6 @@ params.maxPositionValue = 20;
 params.whichWeight = 'weightFixed';
 tryWeightValues = [0.5 0.2 0.8];
 params.addNoise = true;
-params.whichDistance = 'euclidean'; 
 % Make a stimulus list and set underlying parameters.
 targetMaterialCoord = 0;
 targetColorCoord = 0;
@@ -89,7 +89,6 @@ colorCoordIndex = 1;
 materialCoordIndex = 2;
 colorMatchIndexInPair = 1;
 materialMatchIndexInPair = 2;
-
 
 %% We can use simulated data (DEMO == true) or some real data (DEMO == false)
 

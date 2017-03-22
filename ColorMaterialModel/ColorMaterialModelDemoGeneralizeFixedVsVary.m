@@ -27,11 +27,12 @@ load('ColorMaterialExampleStructure.mat')
 %% Set parameters for probability computation
 params.whichMethod = 'lookup'; % could be also 'simulate' or 'analytic'
 params.nSimulate = 1000; % for method 'simulate'
-lookupMethod = 'linear';
+params.whichDistance = 'euclidean'; 
+lookupTable = 'cubic';
 nBlocks = 24;
 
 % Load lookup table
-switch lookupMethod
+switch lookupTable
     case  'linear'
         load colorMaterialInterpolateFunctionLinear.mat
         colorMaterialInterpolatorFunction = colorMaterialInterpolatorFunction;
@@ -206,7 +207,8 @@ for ww = 1:length(simulateWeigth)
                 % Simulate one response.
                 responsesForOneBlock(whichPair) = ColorMaterialModelSimulateResponse(targetColorCoord, targetMaterialCoord, ...
                     pairColorMatchColorCoords(whichPair), pairMaterialMatchColorCoords(whichPair), ...
-                    pairColorMatchMaterialCoords(whichPair), pairMaterialMatchMaterialCoords(whichPair), w, sigma, 'addNoiseToTarget', params.addNoise);
+                    pairColorMatchMaterialCoords(whichPair), pairMaterialMatchMaterialCoords(whichPair), w, sigma, ...
+                    'addNoiseToTarget', params.addNoise, 'whichDistance', params.whichDistance);
             end
             
             % Track cummulative response over blocks
@@ -231,7 +233,7 @@ for ww = 1:length(simulateWeigth)
                 case 'analytic'
                     probabilitiesComputedForSimulatedData(whichPair) = ColorMaterialModelComputeProb(targetColorCoord, targetMaterialCoord, ...
                         pairColorMatchColorCoords(whichPair), pairMaterialMatchColorCoords(whichPair), ...
-                        pairColorMatchMaterialCoords(whichPair) , pairMaterialMatchMaterialCoords(whichPair) w, sigma);
+                        pairColorMatchMaterialCoords(whichPair), pairMaterialMatchMaterialCoords(whichPair), w, sigma);
                 otherwise
                     error('This method is not implemented here.')
             end

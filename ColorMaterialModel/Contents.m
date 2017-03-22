@@ -14,6 +14,7 @@
 % ColorMaterialModelComputeWeibullProb     - Compute probability of responses for descriptive Weibull model
 % ColorMaterialModelCrossValidation        - Demo program for cross-validating MLDS fits.
 % ColorMaterialModelDemo                   - Demo program that fits the model to simulated or example data.
+% ColorMaterialModelDemoFixedVsVary        - Demo program that fits the model to simulated or example data - for fixed and varying weight useful for params comparison.
 % ColorMaterialModelParamsToX              - Unpack parameters for MLDS-based model to a vector for search.
 % ColorMaterialModelPlotFit                - Make a nice plot of either Weibull or MLDS-based model fit
 % ColorMaterialModelPlotSolution           - Make all sorts of nice plots of the data and the MLDS solution. 
@@ -32,6 +33,9 @@
 % ColorMaterialModelGetProbabilityFromLookupTable.m - get probability from the lookup table. Oneliner. 
 %                                                     In the model code we use the one-line call rather than calling this function. 
 
+% ColorMaterialModelDemoGeneralize         - Old demo program (last iteration before branch merging). We are saving it for now. 
+
+% to delete after next tables are computed. 
 % LookUpCurrentMarch62017.mat               - Result of the current build lookup table
 % gridParams.mat                            - temporary. we should probably get rid of them saved in the main function
 
@@ -43,6 +47,5 @@
 
 % what to do with these old function. 
 % xOldColorMaterialModelDemo.m
-% ColorMaterialModelDemoGeneralize.m ? need to figure out 
 
 
