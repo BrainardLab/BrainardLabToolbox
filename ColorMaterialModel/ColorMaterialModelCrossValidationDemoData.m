@@ -23,12 +23,17 @@ params.trySpacingValues = [0.5 1 2 3];
 params.maxPositionValue = 20;
 params.whichMethod = 'lookup';
 params.nSimulate = 1000;
-
+LINEAR = 0; 
 % Set cross validation paramters
 nFolds = 6;
-load(['demoSimulatedData.mat']); % data
+if LINEAR
+    load(['demoSimulatedData-' date '.mat']); % data
+else
+    load(['demoSimulatedDataNonLin-' date '.mat']); % data
+end
 nModelTypes = 3;
 nConditions = 1;
+nTrials = nBlocks*ones(size(responsesFromSimulatedData));
 nTrials = nTrials(1);
 for whichModelType = 1:nModelTypes
     if whichModelType == 1
@@ -39,19 +44,19 @@ for whichModelType = 1:nModelTypes
         params.whichWeight = 'weightVary';
         params.whichPositions = 'smoothSpacing';
         params.smoothOrder = 1;
-        params.model{whichModelType} = 'SmoothLinear-Vary';
+        thisSubject.model{whichModelType}  = 'SmoothLinear-Vary';
     elseif whichModelType == 3
         params.whichWeight = 'weightVary';
         params.whichPositions = 'smoothSpacing';
         params.smoothOrder = 2;
-        params.model{whichModelType} = 'SmoothCubic-Vary';
+        thisSubject.model{whichModelType}  = 'SmoothCubic-Vary';
     end
     
     for whichCondition = 1:nConditions
        
         % partition for cross validation.
         c = cvpartition(nTrials,'Kfold',nFolds);
-        for kk = 1:nFolds
+        for kk = 1:c.NumTestSets
             
             clear trainingIndex testIndex trainingData testData nTrainingTrials nTestTrials probabilitiesTestData
             % Get indices for kkth fold
@@ -86,8 +91,8 @@ for whichModelType = 1:nModelTypes
             thisSubject.condition{whichCondition}.crossVal(whichModelType).LogLikelyhood(kk) = -negLogLikely; 
             thisSubject.condition{whichCondition}.crossVal(whichModelType).predictedProbabilities(kk,:) = predictedResponses; 
             
-            % Compute RMSE (it's easy enough and we might want to look at
-            % some point)
+%           Compute RMSE (it's easy enough and we might want to look at
+%           some point)
             thisSubject.condition{whichCondition}.crossVal(whichModelType).RMSError(kk) = ...
                 ComputeRealRMSE(predictedResponses, pTestData); 
             clear negLogLikely predictedResponses
@@ -101,4 +106,34 @@ for whichModelType = 1:nModelTypes
     end
 end
 cd(mainDir);
-save(['demoCV' num2str(nFolds) 'Folds'],  'thisSubject');
+if LINEAR
+    save(['demoCV' num2str(nFolds) 'NonLinFolds' date],  'thisSubject');
+else
+    save(['demoCV' num2str(nFolds) 'LinFolds' date],  'thisSubject');
+end
+for i = 1:3
+k(i) = thisSubject.condition{1}.crossVal(i).meanLogLikelihood; end
+fprintf('meanLogLikely: Full %.4f, Linear %.4f, Quadratic %.4f.\n', k(1), k(2),k(3)); 
+
+
+for i = 1:3
+k(i) = thisSubject.condition{1}.crossVal(i).meanRMSError; end
+fprintf('meanRMSE: Full %.4f, Linear %.4f, Quadratic %.4f.\n', k(1), k(2),k(3)); 
+
+[H,P,CI,STATS] = ttest2(thisSubject.condition{1}.crossVal(1).LogLikelyhood, thisSubject.condition{1}.crossVal(2).LogLikelyhood); 
+fprintf('Full Vs Linear LogLikely: t(%d) = %.2f, p = %.4f, \n', STATS.df, STATS.tstat, P); 
+
+[H,P,CI,STATS] = ttest2(thisSubject.condition{1}.crossVal(2).LogLikelyhood, thisSubject.condition{1}.crossVal(3).LogLikelyhood); 
+fprintf('Linear Vs Quadratic LogLikely: t(%d) = %.2f, p = %.4f, \n', STATS.df, STATS.tstat, P); 
+
+[H,P,CI,STATS] = ttest2(thisSubject.condition{1}.crossVal(1).LogLikelyhood, thisSubject.condition{1}.crossVal(3).LogLikelyhood); 
+fprintf('Full Vs Quadratic LogLikely: t(%d) = %.2f, p = %.4f, \n', STATS.df, STATS.tstat, P); 
+
+[H,P,CI,STATS] = ttest2(thisSubject.condition{1}.crossVal(1).RMSError, thisSubject.condition{1}.crossVal(2).RMSError); 
+fprintf('Full Vs Linear RMSE: t(%d) = %.2f, p = %.4f, \n', STATS.df, STATS.tstat, P); 
+
+[H,P,CI,STATS] = ttest2(thisSubject.condition{1}.crossVal(2).RMSError, thisSubject.condition{1}.crossVal(3).RMSError); 
+fprintf('Linear Vs Quadratic RMSE: t(%d) = %.2f, p = %.4f, \n', STATS.df, STATS.tstat, P); 
+
+[H,P,CI,STATS] = ttest2(thisSubject.condition{1}.crossVal(1).RMSError, thisSubject.condition{1}.crossVal(3).RMSError); 
+fprintf('Full Vs Quadratic RMSE: t(%d) = %.2f, p = %.4f, \n', STATS.df, STATS.tstat, P); 
