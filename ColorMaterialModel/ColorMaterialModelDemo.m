@@ -80,9 +80,14 @@ scalePositions = 2; % scaling factor for input positions (we can try different o
 w = 0.5;
 
 params.scalePositions  = scalePositions;
-
-params.materialMatchColorCoords = scalePositions*params.materialMatchColorCoords;
-params.colorMatchMaterialCoords = scalePositions*params.colorMatchMaterialCoords;
+NONLINEAR = 1; % flag - should we have non-lin position spacing or not. 
+if NONLINEAR
+    params.materialMatchColorCoords = [-5 -1 -0.5 0 2.3 2.5 3]; %scalePositions*params.materialMatchColorCoords;
+    params.colorMatchMaterialCoords = [-6.4 -5 -3 0 0.1 0.8 4.9]; %scalePositions*params.colorMatchMaterialCoords;
+else
+    params.materialMatchColorCoords = scalePositions*params.materialMatchColorCoords;
+    params.colorMatchMaterialCoords = scalePositions*params.colorMatchMaterialCoords;
+end
 
 % Parameters for structufing pairs.
 colorCoordIndex = 1;
@@ -91,8 +96,6 @@ colorMatchIndexInPair = 1;
 materialMatchIndexInPair = 2;
 
 %% We can use simulated data (DEMO == true) or some real data (DEMO == false)
-
-
 % Make the random number generator seed start at the same place each
 % time we do this.
 rng('default');
@@ -175,7 +178,7 @@ nPairs = size(pair,1);
 params.subjectName = ['demo' interpCode num2str(nBlocks) 'Scale' num2str(scalePositions) 'demoVary' num2str(w)];
 params.tryWeightValues = tryWeightValues;
 
-% Simulate out what the response is for this pair in this
+% Simulate out  what the response is for this pair in this
 % block.
 %
 % Note that the first competitor passed is always a color
@@ -199,11 +202,15 @@ for b = 1:nBlocks
             pairColorMatchMaterialCoords(whichPair), pairMaterialMatchMaterialCoords(whichPair), w, sigma, ...
             'addNoiseToTarget', params.addNoise, 'whichDistance', params.whichDistance);
     end
-    
+    responsesAcrossBlocks(:, b) = responsesForOneBlock; 
     % Track cummulative response over blocks
     responsesFromSimulatedData = responsesFromSimulatedData+responsesForOneBlock;
 end
-
+if NONLINEAR
+    save(['demoSimulatedDataNonLin-' date])
+else
+    save(['demoSimulatedData-' date])
+end
 clear probabilitiesFromSimulatedData
 % Compute response probabilities for each pair, just divide by nBlocks
 probabilitiesFromSimulatedData = responsesFromSimulatedData ./ nBlocks;
