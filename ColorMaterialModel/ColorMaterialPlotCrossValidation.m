@@ -1,5 +1,6 @@
-% PlotCrossValidationResults
+% ColorMaterialPlotCrossValidation
 % Plots results of cross validation for WeightFixed and WeightVaried results for the real experimental data. 
+%
 % April 15, 2017 ar     Wrote it. 
 
 % Initialize

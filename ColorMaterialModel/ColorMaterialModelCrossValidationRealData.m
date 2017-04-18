@@ -25,7 +25,6 @@ switch whichExperiment
         load([figAndDataDir  'ParamsPilot.mat'])
     case 'E1P2FULL'
         figAndDataDir = ['/Users/ana/Dropbox (Aguirre-Brainard Lab)/CNST_analysis/ColorMaterial/Experiment1/'];
-        
         % Specify other experimental parameters
         subjectList = {'mdc','nsk'};
         conditionCode = {'NC', 'CY', 'CB'};
@@ -145,7 +144,6 @@ for s = 1:nSubjects
                 else
                     save([subjectList{s} conditionCode{whichCondition} params.whichWeight '-' num2str(fixedWValue(ww)) num2str(nFolds) 'Folds' date],  'thisSubject');
                 end
-                
             end
         end
     end    
