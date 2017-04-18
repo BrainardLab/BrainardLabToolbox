@@ -42,8 +42,8 @@ xMax =  theDeltaSteps(end)+0.5;
 h = figure; clf; hold on
 for i = 1:size(theData,2)
     if i < 4
-        plot(theDeltaSteps,theData(:,i),'o','MarkerEdgeColor',stepColors{i},'MarkerSize',thisMarkerSize, 'LineWidth', thisLineWidth);
-        plot(theSmoothVals(:,i),theSmoothPreds(:,i),'--','color', stepColors{i}, 'LineWidth',thisLineWidth);
+         plot(theDeltaSteps,theData(:,i),'o','MarkerEdgeColor',stepColors{i},'MarkerSize',thisMarkerSize, 'LineWidth', thisLineWidth);
+         plot(theSmoothVals(:,i),theSmoothPreds(:,i),'--','color', stepColors{i}, 'LineWidth',thisLineWidth);
     else
         plot(theDeltaSteps,theData(:,i),'o','MarkerFaceColor',stepColors{i},'MarkerEdgeColor',stepColors{i},'MarkerSize',thisMarkerSize);
         plot(theSmoothVals(:,i),theSmoothPreds(:,i),'color', stepColors{i}, 'LineWidth',thisLineWidth);
@@ -56,12 +56,12 @@ switch p.Results.whichFit
         switch  p.Results.whichMatch
             case 'colorMatch'
           %      title(sprintf('MLDS fits for different material steps'),'FontName','Helvetica','FontSize',thisFontSize);
-                xlabel('ColorCoords MaterialMatch','FontName','Helvetica','FontSize',thisFontSize);
-                ylabel('p ColorM chosen','FontName','Helvetica','FontSize',thisFontSize);
+                xlabel('MaterialMatch Color Coords ','FontName','Helvetica','FontSize',thisFontSize);
+                ylabel('p ColorMatch chosen','FontName','Helvetica','FontSize',thisFontSize);
             case 'materialMatch'
         %        title(sprintf('MLDS fits for different color steps'),'FontName','Helvetica','FontSize',thisFontSize);
-                xlabel('MaterialCoords ColorMatch','FontName','Helvetica','FontSize',thisFontSize);
-                ylabel('p MaterialM chosen','FontName','Helvetica','FontSize',thisFontSize);
+                xlabel('ColorMatch Material Coords ','FontName','Helvetica','FontSize',thisFontSize);
+                ylabel('p MaterialMatch chosen','FontName','Helvetica','FontSize',thisFontSize);
         end
     case 'weibull'
         switch p.Results.whichMatch
@@ -72,7 +72,7 @@ switch p.Results.whichFit
         end
 end
 
-plot(0, 0.5, 'kx', 'LineWidth',2)
+%plot(0, 0.5, 'kx', 'LineWidth',2)
 axis([xMin xMax 0 1.05])
 axis square
 set(gca,'FontName','Helvetica','FontSize',thisFontSize,'FontSize', thisFontSize);
