@@ -14,7 +14,7 @@ whichExperiment = 'Pilot';
 % Set paramters for a given expeirment.
 switch whichExperiment
     case 'Pilot'
-        figAndDataDir = ['/Users/ana/Dropbox (Aguirre-Brainard Lab)/CNST_analysis/ColorMaterial/' whichExperiment '/'];
+        figAndDataDir = ['/Users/radonjic/Dropbox (Aguirre-Brainard Lab)/CNST_analysis/ColorMaterial/Pilot/'];
         subjectList = {'zhr', 'vtr', 'scd', 'mcv', 'flj'};
         conditionCode = {'NC'};
         nFolds = 5;
@@ -22,7 +22,7 @@ switch whichExperiment
         load([figAndDataDir 'pairIndicesPilot.mat'])
         load([figAndDataDir  'ParamsPilot.mat'])
     case 'E1P2FULL'
-        figAndDataDir = ['/Users/ana/Dropbox (Aguirre-Brainard Lab)/CNST_analysis/ColorMaterial/Experiment1/'];
+        figAndDataDir = ['/Users/radonjic/Dropbox (Aguirre-Brainard Lab)/CNST_analysis/ColorMaterial/Experiment1/'];
         subjectList = {'mdc','nsk'};
         conditionCode = {'NC', 'CY', 'CB'};
         nFolds = 6;
@@ -43,7 +43,7 @@ params.nSimulate = 1000;
 whichWeight = 'weightVary';
 
 % Set cross validation parameters
-nModelTypes = 1; 
+nModelTypes = 3; 
 for s = 1:nSubjects
     switch whichExperiment
         case 'Pilot'
@@ -108,8 +108,8 @@ for s = 1:nSubjects
                     pairColorMatchMaterialCoords,pairMaterialMatchMaterialCoords,...
                     testData, nTestTrials, params);
                 
-                thisSubject.condition{whichCondition}.crossVal(whichModelType,ww).LogLikelyhood(kk) = -negLogLikely;
-                thisSubject.condition{whichCondition}.crossVal(whichModelType,ww).predictedProbabilities(kk,:) = predictedResponses;
+                thisSubject.condition{whichCondition}.crossVal(whichModelType).LogLikelyhood(kk) = -negLogLikely;
+                thisSubject.condition{whichCondition}.crossVal(whichModelType).predictedProbabilities(kk,:) = predictedResponses;
                 
                 %  Compute RMSE, in case we want to look at them at some point in the future)
                 thisSubject.condition{whichCondition}.crossVal(whichModelType).RMSError(kk) = ...
