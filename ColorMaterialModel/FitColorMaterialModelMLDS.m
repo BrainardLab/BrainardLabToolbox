@@ -1,8 +1,8 @@
-function [x, logLikelyFit, predictedResponses, k] = FitColorMaterialModelMLDS(...
+function [x, logLikelyFit, predictedResponses] = FitColorMaterialModelMLDS(...
     pairColorMatchColorsCoords, pairMaterialMatchColorCoords,...
     pairColorMatchMaterialCoords, pairMaterialMatchMaterialCoords,...
     theResponses,nTrials, params, varargin)
-% [x, logLikelyFit, predictedResponses, k] = FitColorMaterialModelMLDS(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponses,nTrials, params, varargin)
+% [x, logLikelyFit, predictedResponses] = FitColorMaterialModelMLDS(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponses,nTrials, params, varargin)
 
 % This is the main fitting/search routine in the model. 
 % It takes the data (from experiment or simulation) and returns inferred position of the
@@ -29,7 +29,8 @@ function [x, logLikelyFit, predictedResponses, k] = FitColorMaterialModelMLDS(..
 %     'weightVary' - Allow the weight to vary
 %     'weightFixed' - Fix the weight at value in tryWeightValues(1).
 %   'tryWeightValues' - vector (default [0.5 0.2 0.8]). Value to use when fixing weight.
-%   'trySpacingValues' - vector (default [0.5 1 2]).  Values to try for spacings.
+%   'tryColorSpacingValues' - vector (default [0.5 1 2]).  Values to try for color spacings.
+%   'tryMaterialSpacingValues' - vector (default [0.5 1 2]).  Values to try for material spacings.
 
 
 %% Parse variable input key/value pairs
@@ -38,11 +39,12 @@ p = inputParser;
 p.addParameter('whichPositions','full',@ischar);
 p.addParameter('whichWeight','weightVary',@ischar);
 p.addParameter('tryWeightValues',[0.5 0.2 0.8],@isnumeric);
-p.addParameter('trySpacingValues',[0.5 1 2],@isnumeric);
+p.addParameter('tryColorSpacingValues',[0.5 1 2],@isnumeric);
+p.addParameter('tryMaterialSpacingValues',[0.5 1 2],@isnumeric);
 p.addParameter('maxPositionValue',10,@isnumeric);
-
 p.parse(varargin{:});
 maxPosValue = p.Results.maxPositionValue; 
+
 %% Load and unwrap parameter structure which contains all fixed parameters. 
 targetPosition = params.targetPosition;
 targetIndexColor = params.targetIndexColor; % target position in the color position vector.
@@ -150,8 +152,8 @@ options = optimset(options,'Diagnostics','off','Display','off','LargeScale','off
 % There are two loops. One sets the positions of the competitors
 % in the solution in the color dimension, the other tries different initial spacings for material dimension.
 logLikelyFit = -Inf;
-for k1 = 1:length(p.Results.trySpacingValues)
-    for k2 = 1:length(p.Results.trySpacingValues)
+for k1 = 1:length(p.Results.tryMaterialSpacingValues)
+    for k2 = 1:length(p.Results.tryColorSpacingValues)
         for k3 = 1:length(tryWeights)
             % Choose initial competitor positions based on current spacing to try.
             switch (p.Results.whichPositions)
@@ -159,11 +161,11 @@ for k1 = 1:length(p.Results.trySpacingValues)
                     % In this method, the positions are just specified by
                     % the spacing, so we simply use the regular variable to
                     % specify it.
-                    initialColorMatchMaterialCoords = [p.Results.trySpacingValues(k1) zeros(1,params.smoothOrder-1)];
-                    initialMaterialMatchColorCoords = [p.Results.trySpacingValues(k2) zeros(1,params.smoothOrder-1)];
+                    initialColorMatchMaterialCoords = [p.Results.tryMaterialSpacingValues(k1) zeros(1,params.smoothOrder-1)];
+                    initialMaterialMatchColorCoords = [p.Results.tryColorSpacingValues(k2) zeros(1,params.smoothOrder-1)];
                 case 'full'
-                    initialColorMatchMaterialCoords = p.Results.trySpacingValues(k1)*[linspace(competitorsRangeNegative(1),competitorsRangeNegative(2), numberOfCompetitorsNegative),targetPosition,linspace(competitorsRangePositive(1),competitorsRangePositive(2), numberOfCompetitorsPositive)];
-                    initialMaterialMatchColorCoords = p.Results.trySpacingValues(k2)*[linspace(competitorsRangeNegative(1),competitorsRangeNegative(2), numberOfCompetitorsNegative),targetPosition,linspace(competitorsRangePositive(1),competitorsRangePositive(2), numberOfCompetitorsPositive)];
+                    initialColorMatchMaterialCoords = p.Results.tryMaterialSpacingValues(k1)*[linspace(competitorsRangeNegative(1),competitorsRangeNegative(2), numberOfCompetitorsNegative),targetPosition,linspace(competitorsRangePositive(1),competitorsRangePositive(2), numberOfCompetitorsPositive)];
+                    initialMaterialMatchColorCoords = p.Results.tryColorSpacingValues(k2)*[linspace(competitorsRangeNegative(1),competitorsRangeNegative(2), numberOfCompetitorsNegative),targetPosition,linspace(competitorsRangePositive(1),competitorsRangePositive(2), numberOfCompetitorsPositive)];
                 otherwise
                     error('Unknown whichPosition method specified');
                     
@@ -256,10 +258,7 @@ for k1 = 1:length(p.Results.trySpacingValues)
                 logLikelyFit = -fTemp;
                 predictedResponses = predictedResponsesTemp;
                 
-                % Record which loop settings were best, for debugging
-                k.k1 = k1; 
-                k.k2 = k2; 
-                k.k3 = k3; 
+                % Report log likelihood
                 fprintf('Current solution log likelihood %0.2f.\n', -fTemp)
             end
         end
