@@ -20,3 +20,36 @@ for whichWeight = 1:length(w)
         
     end
 end
+xMin = -20;
+yMin = xMin;
+xMax = 20;
+yMax = xMax;
+thisMarkerSize = 10;
+thisFontSize = 10; thisLineWidth = 1;
+figure; clf; hold on; 
+for whichSet = 1:10
+    subplot(1,2,1); hold on % plot of material positions
+    plot([-3:3], a.dataSet{whichSet}.returnedParams(8:14),'ro-', 'MarkerSize', thisMarkerSize);
+    %plot([-3:3], b.dataSet{whichSet}.returnedParams(8:14),'bo-', 'MarkerSize', thisMarkerSize);
+    pause
+    plot([xMin xMax],[yMin yMax],'--', 'LineWidth', thisLineWidth, 'color', [0.5 0.5 0.5]);
+    axis([xMin, xMax,yMin, yMax])
+    axis('square')
+    xlabel('"True" position');
+    ylabel('Inferred position');
+    set(gca, 'xTick', [xMin, 0, xMax],'FontSize', thisFontSize);
+    set(gca, 'yTick', [yMin, 0, yMax],'FontSize', thisFontSize);
+    
+    subplot(1,2,2); hold on % plot of material positions
+    plot([-3:3], a.dataSet{whichSet}.returnedParams(1:7),'ro-', 'MarkerSize', thisMarkerSize);
+    %plot([-3:3], b.dataSet{whichSet}.returnedParams(1:7),'bo-', 'MarkerSize', thisMarkerSize);
+    
+    plot([xMin xMax],[yMin yMax],'--', 'LineWidth', thisLineWidth, 'color', [0.5 0.5 0.5]);
+    axis([xMin, xMax,yMin, yMax])
+    axis('square')
+    xlabel('"True" position');
+    ylabel('Inferred position');
+    set(gca, 'xTick', [xMin, 0, xMax],'FontSize', thisFontSize);
+    set(gca, 'yTick', [yMin, 0, yMax],'FontSize', thisFontSize);
+end
+

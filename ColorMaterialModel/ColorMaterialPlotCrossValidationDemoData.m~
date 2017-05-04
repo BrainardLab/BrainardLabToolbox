@@ -66,21 +66,21 @@ for whichCondition = 1:nConditions
         
         for whichModelType = 1:nModelTypes
             if whichModelType == 1
-                params.whichWeight = 'weightVary';
+                params.whichWeight = whichWeight;
                 params.whichPositions = 'smoothSpacing';
                 params.smoothOrder = 1;
                 params.tryColorSpacingValues = params.trySpacingValues;
                 params.tryMaterialSpacingValues = params.trySpacingValues;
                 params.tryWeightValues = params.tryWeightValues;
             elseif whichModelType == 2
-                params.whichWeight = 'weightVary';
+                params.whichWeight = whichWeight;
                 params.whichPositions = 'smoothSpacing';
                 params.smoothOrder = 3;
                 params.tryColorSpacingValues = [params.trySpacingValues linearSolutionColorSlope];
                 params.tryMaterialSpacingValues = [params.trySpacingValues linearSolutionMaterialSlope];
                 params.tryWeightValues = [params.tryWeightValues linearSolutionWeight];
             elseif whichModelType == 3
-                params.whichWeight = 'weightVary';
+                params.whichWeight = whichWeight;
                 params.whichPositions = 'full';
                 params.tryColorSpacingValues = [params.trySpacingValues linearSolutionColorSlope];
                 params.tryMaterialSpacingValues = [params.trySpacingValues linearSolutionMaterialSlope];
@@ -116,8 +116,8 @@ for whichCondition = 1:nConditions
                 pairColorMatchMaterialCoords,pairMaterialMatchMaterialCoords,...
                 testData, nTestTrials, params);
             
-            thisSubject.condition{whichCondition}.crossVal(whichModelType).LogLikelyhood(kk) = -negLogLikely;
-            thisSubject.condition{whichCondition}.crossVal(whichModelType).predictedProbabilities(kk,:) = predictedResponses;
+            thisSubject.condition{whichCondition}.crossVal(whichModelType,ww).LogLikelyhood(kk) = -negLogLikely;
+            thisSubject.condition{whichCondition}.crossVal(whichModelType,ww).predictedProbabilities(kk,:) = predictedResponses;
             
             %  Compute RMSE, in case we want to look at them at some point in the future)
             thisSubject.condition{whichCondition}.crossVal(whichModelType).RMSError(kk) = ...
@@ -128,7 +128,7 @@ for whichCondition = 1:nConditions
     
     % Compute mean error for both log likelihood and rmse.
     thisSubject.condition{whichCondition}.crossVal(whichModelType).meanRMSError = ...
-        ;
+        mean(thisSubject.condition{whichCondition}.crossVal(whichModelType).RMSError);
     thisSubject.condition{whichCondition}.crossVal(whichModelType).meanLogLikelihood = ...
         mean(thisSubject.condition{whichCondition}.crossVal(whichModelType).LogLikelyhood);
     
@@ -145,29 +145,29 @@ end
 
 %% Print outputs
 for i = 1:nModelTypes
-    k(i) = mean(thisSubject.condition{whichCondition}.crossVal(whichModelType).meanLogLikelihood);
+    k(i) = thisSubject.condition{1}.crossVal(i).meanLogLikelihood;
 end
-fprintf('meanLogLikely: Linear %.4f, Cubic %.4f, Full %.4f.\n', k(1), k(2),k(3)); 
+fprintf('meanLogLikely: Full %.4f, Linear %.4f, Cubic %.4f.\n', k(1), k(2),k(3)); 
 
 for i = 1:nModelTypes
-    k(i) = mean(thisSubject.condition{whichCondition}.crossVal(whichModelType).RMSError);
+    k(i) = thisSubject.condition{1}.crossVal(i).meanRMSError;
 end
-fprintf('meanRMSE: Linear %.4f, Cubic %.4f, Full %.4f.\n', k(1), k(2),k(3));
+fprintf('meanRMSE: Full %.4f, Linear %.4f, Cubic %.4f.\n', k(1), k(2),k(3));
 
 [H,P,CI,STATS] = ttest(thisSubject.condition{1}.crossVal(1).LogLikelyhood, thisSubject.condition{1}.crossVal(2).LogLikelyhood); 
-fprintf('Linear Vs Cubic LogLikely: t(%d) = %.2f, p = %.4f, \n', STATS.df, STATS.tstat, P); 
+fprintf('Full Vs Linear LogLikely: t(%d) = %.2f, p = %.4f, \n', STATS.df, STATS.tstat, P); 
 
 [H,P,CI,STATS] = ttest(thisSubject.condition{1}.crossVal(2).LogLikelyhood, thisSubject.condition{1}.crossVal(3).LogLikelyhood); 
-fprintf('Cubic Vs Full LogLikely: t(%d) = %.2f, p = %.4f, \n', STATS.df, STATS.tstat, P); 
+fprintf('Linear Vs Cubic LogLikely: t(%d) = %.2f, p = %.4f, \n', STATS.df, STATS.tstat, P); 
 
 [H,P,CI,STATS] = ttest(thisSubject.condition{1}.crossVal(1).LogLikelyhood, thisSubject.condition{1}.crossVal(3).LogLikelyhood); 
-fprintf('Linear Vs Full LogLikely: t(%d) = %.2f, p = %.4f, \n', STATS.df, STATS.tstat, P); 
+fprintf('Full Vs Cubic LogLikely: t(%d) = %.2f, p = %.4f, \n', STATS.df, STATS.tstat, P); 
 
 [H,P,CI,STATS] = ttest(thisSubject.condition{1}.crossVal(1).RMSError, thisSubject.condition{1}.crossVal(2).RMSError); 
-fprintf('Linear Vs Cubic RMSE: t(%d) = %.2f, p = %.4f, \n', STATS.df, STATS.tstat, P); 
+fprintf('Full Vs Linear RMSE: t(%d) = %.2f, p = %.4f, \n', STATS.df, STATS.tstat, P); 
 
 [H,P,CI,STATS] = ttest(thisSubject.condition{1}.crossVal(2).RMSError, thisSubject.condition{1}.crossVal(3).RMSError); 
-fprintf('Cubic Vs Full RMSE: t(%d) = %.2f, p = %.4f, \n', STATS.df, STATS.tstat, P); 
+fprintf('Linear Vs Cubic RMSE: t(%d) = %.2f, p = %.4f, \n', STATS.df, STATS.tstat, P); 
 
-[H,P,CI,STATS] = ttest(thisSubject.condition{1}.crossVal(1).RMSError, thisSubject.condition{1}.crossVal(3).RMSError); 
-fprintf('Linear Vs Full RMSE: t(%d) = %.2f, p = %.4f, \n', STATS.df, STATS.tstat, P); 
+[H,P,CI,STATS] = ttest2(thisSubject.condition{1}.crossVal(1).RMSError, thisSubject.condition{1}.crossVal(3).RMSError); 
+fprintf('Full Vs Cubic RMSE: t(%d) = %.2f, p = %.4f, \n', STATS.df, STATS.tstat, P); 
