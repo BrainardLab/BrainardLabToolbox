@@ -14,7 +14,7 @@ whichExperiment = 'Pilot';
 % Set paramters for a given expeirment.
 switch whichExperiment
     case 'Pilot'
-        figAndDataDir = ['/Users/ana/Dropbox (Aguirre-Brainard Lab)/CNST_analysis/ColorMaterial/' whichExperiment '/'];
+        figAndDataDir = ['/Users/radonjic/Dropbox (Aguirre-Brainard Lab)/CNST_analysis/ColorMaterial/' whichExperiment '/'];
         subjectList = {'zhr', 'vtr', 'scd', 'mcv', 'flj'};
         conditionCode = {'NC'};
         nFolds = 5;
@@ -22,7 +22,7 @@ switch whichExperiment
         load([figAndDataDir 'pairIndicesPilot.mat'])
         load([figAndDataDir  'ParamsPilot.mat'])
     case 'E1P2FULL'
-        figAndDataDir = ['/Users/ana/Dropbox (Aguirre-Brainard Lab)/CNST_analysis/ColorMaterial/Experiment1/'];
+        figAndDataDir = ['/Users/radonjic/Dropbox (Aguirre-Brainard Lab)/CNST_analysis/ColorMaterial/Experiment1/'];
         subjectList = {'mdc','nsk'};
         conditionCode = {'NC', 'CY', 'CB'};
         nFolds = 6;
@@ -43,8 +43,7 @@ params.nSimulate = 1000;
 whichWeight = 'weightVary';
 
 % Set cross validation parameters
-nModelTypes = ;
-nRepetitions = 100; 
+nRepetitions = 33; 
 for s = 1:nSubjects
     switch whichExperiment
         case 'Pilot'
@@ -60,7 +59,7 @@ for s = 1:nSubjects
         % Get samples for bootstrapping.
         id = ceil(rand(nBlocks,nRepetitions)*nBlocks);
         
-        for kk = 1:size(id,1)
+        for kk = 1:size(id,2)
             
             clear bootstrapIndices bootstrapData
             
@@ -71,7 +70,7 @@ for s = 1:nSubjects
             bootstrapData = sum(thisSubject.condition{whichCondition}.firstChosenPerTrial(:,bootstrapIndices),2);
             nBootstrapTrials = nBlocks*ones(size(bootstrapData));
             
-            for whichModelType = 1:nModelTypes
+            for whichModelType = 1%:nModelTypes
               
                     params.whichWeight = whichWeight;
                     params.whichPositions = 'full';
