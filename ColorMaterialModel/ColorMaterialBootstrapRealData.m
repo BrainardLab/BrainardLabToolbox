@@ -43,7 +43,7 @@ params.nSimulate = 1000;
 whichWeight = 'weightVary';
 
 % Set cross validation parameters
-nRepetitions = 33; 
+nRepetitions = 150; 
 for s = 1:nSubjects
     switch whichExperiment
         case 'Pilot'
@@ -56,19 +56,19 @@ for s = 1:nSubjects
     
     for whichCondition = 1:nConditions
         
-        % Get samples for bootstrapping.
-        id = ceil(rand(nBlocks,nRepetitions)*nBlocks);
-        
-        for kk = 1:size(id,2)
-            
-            clear bootstrapIndices bootstrapData
-            
-            % Get indices for kkth fold
-            bootstrapIndices = id(:,kk); 
-            
+        for kk = 1:nRepetitions
+                        
             % Separate the training from test data
-            bootstrapData = sum(thisSubject.condition{whichCondition}.firstChosenPerTrial(:,bootstrapIndices),2);
-            nBootstrapTrials = nBlocks*ones(size(bootstrapData));
+            nTrialTypes = size(thisSubject.condition{whichCondition}.firstChosenPerTrial,1);
+            if (size(thisSubject.condition{whichCondition}.firstChosenPerTrial,2) ~= nBlocks)
+                error('Oops');
+            end
+            bootstrapData = zeros(nTrialTypes,1);
+            for bb = 1:nTrialTypes
+                id = randi(nBlocks,[nBlocks 1]);
+                bootstrapData(bb) = sum(thisSubject.condition{whichCondition}.firstChosenPerTrial(bb,id));
+            end
+            nBootstrapTrials = nBlocks*ones(nTrialTypes,1);
             
             for whichModelType = 1%:nModelTypes
               
