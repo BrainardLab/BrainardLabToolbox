@@ -14,7 +14,7 @@ whichExperiment = 'Pilot';
 % Set paramters for a given expeirment.
 switch whichExperiment
     case 'Pilot'
-        figAndDataDir = ['/Users/radonjic/Dropbox (Aguirre-Brainard Lab)/CNST_analysis/ColorMaterial/' whichExperiment '/'];
+        figAndDataDir = ['/Volumes/Users1/Dropbox (Aguirre-Brainard Lab)/CNST_analysis/ColorMaterial/' whichExperiment '/'];
         subjectList = {'zhr', 'vtr', 'scd', 'mcv', 'flj'};
         conditionCode = {'NC'};
         nFolds = 5;

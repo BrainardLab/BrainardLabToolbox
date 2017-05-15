@@ -85,15 +85,15 @@ for s = 1:nSubjects
                     params.whichWeight = whichWeight;
                     params.whichPositions = 'smoothSpacing';
                     params.smoothOrder = 3;
-                    params.tryColorSpacingValues = [params.trySpacingValues linearSolutionColorSlope];
-                    params.tryMaterialSpacingValues = [params.trySpacingValues linearSolutionMaterialSlope];
-                    params.tryWeightValues = [params.tryWeightValues linearSolutionWeight]; 
+                    params.tryColorSpacingValues = [linearSolutionColorSlope];
+                    params.tryMaterialSpacingValues = [linearSolutionMaterialSlope];
+                    params.tryWeightValues = [params.tryWeightValues]; 
                 elseif whichModelType == 3
                     params.whichWeight = whichWeight;
                     params.whichPositions = 'full';
-                    params.tryColorSpacingValues = [params.trySpacingValues linearSolutionColorSlope];
-                    params.tryMaterialSpacingValues = [params.trySpacingValues linearSolutionMaterialSlope];
-                    params.tryWeightValues = [params.tryWeightValues linearSolutionWeight]; 
+                    params.tryColorSpacingValues = [linearSolutionColorSlope];
+                    params.tryMaterialSpacingValues = [linearSolutionMaterialSlope];
+                    params.tryWeightValues = [params.tryWeightValues]; 
                 end
                 
                 % Get the predictions from the model for current parameters
@@ -109,9 +109,6 @@ for s = 1:nSubjects
                 
                 % For linear model, grab solution to use as a start when we search for
                 % the cubic and full solutions.
-                %
-                % ANA TO CHECK WHICH IS MATERIAL SLOPE AND WHICH ONE IS THE
-                % COLOR SLOPE.
                 if (whichModelType == 1)
                     linearSolutionParameters = thisSubject.condition{whichCondition}.crossVal(whichModelType).returnedParamsTraining(kk,:);
                     linearSolutionMaterialSlope = linearSolutionParameters(1);
