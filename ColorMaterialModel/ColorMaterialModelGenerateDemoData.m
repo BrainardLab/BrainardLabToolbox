@@ -8,6 +8,10 @@
 clear; close all;
 currentDir = pwd;
 
+%% Set relevant preferences
+%setpref('ColorMaterialModel','demoDataDir','/Users/Shared/Matlab/Toolboxes/BrainardLabToolbox/ColorMaterialModel/DemoData/');
+setpref('ColorMaterialModel','demoDataDir','/Users/dhb/Documents/Matlab/toolboxes/BrainardLabToolbox/ColorMaterialModel/DemoData/');
+
 %% Explicitely state all underlying parameters that we need to generate/fit the data. 
 params.targetIndex = 4; 
 params.competitorsRangePositive = [1 3]; 
@@ -20,6 +24,9 @@ params.targetPosition = 0;
 params.targetIndexColor =  11; 
 params.targetIndexMaterial = 4; 
 params.scalePositions  = 2;
+
+%% This lets us only generate stimuli that vary along the color dimension
+params.colorStimOnly = true;
 
 % Initial material and color positions.  If we don't at some point muck
 % with the example structure, these go from -3 to 3 in steps of 1 for a
@@ -72,58 +79,71 @@ for i = 1:length(params.materialMatchColorCoords)
 end
 pair = [];
 
-% We pair each color-difference stimulus with each material-difference
-% stimulus. We record the overall 
+% Initialize info about pairs
 n = 0;
-matIndex = [];
-colIndex = [];
+materialIndex = [];
+colorIndex = [];
+columnIndex = [];
+rowIndex = [];
 overallColorMaterialPairIndices = [];
 
-clear rowIndex columnIndex overallIndex
-for whichColorOfTheMaterialMatch = 1:length(params.materialMatchColorCoords)
-    for whichMaterialOfTheColorMatch = 1:length(params.colorMatchMaterialCoords)
-        rowIndex(whichColorOfTheMaterialMatch, whichMaterialOfTheColorMatch) = [whichColorOfTheMaterialMatch];
-        columnIndex(whichColorOfTheMaterialMatch, whichMaterialOfTheColorMatch) = [whichMaterialOfTheColorMatch];
-        n = n + 1;
-        overallColorMaterialPairIndices(whichColorOfTheMaterialMatch, whichMaterialOfTheColorMatch) = n;
-        
-        % The pair is a cell array containing two vectors.  The
-        % first vector is the coordinates of the color match, the
-        % second is the coordinates of the material match.  There
-        % is one such pair for each trial type.
-        pair = [pair; ...
-            {stimuliColorMatch{whichMaterialOfTheColorMatch}, ...
-            stimuliMaterialMatch{whichColorOfTheMaterialMatch} }];
-        if whichMaterialOfTheColorMatch == 4
-            matIndex = [matIndex, n];
-        end
-        if whichColorOfTheMaterialMatch == 4
-            colIndex = [colIndex, n];
+% We pair each color-difference stimulus with each material-difference
+% stimulus, unless we are only doing the color-vary stimuli.
+if (~params.colorStimOnly)
+    clear rowIndex columnIndex overallIndex
+    for whichColorOfTheMaterialMatch = 1:length(params.materialMatchColorCoords)
+        for whichMaterialOfTheColorMatch = 1:length(params.colorMatchMaterialCoords)
+            rowIndex(whichColorOfTheMaterialMatch, whichMaterialOfTheColorMatch) = [whichColorOfTheMaterialMatch];
+            columnIndex(whichColorOfTheMaterialMatch, whichMaterialOfTheColorMatch) = [whichMaterialOfTheColorMatch];
+            n = n + 1;
+            overallColorMaterialPairIndices(whichColorOfTheMaterialMatch, whichMaterialOfTheColorMatch) = n;
+            
+            % The pair is a cell array containing two vectors.  The
+            % first vector is the coordinates of the color match, the
+            % second is the coordinates of the material match.  There
+            % is one such pair for each trial type.
+            pair = [pair; ...
+                {stimuliColorMatch{whichMaterialOfTheColorMatch}, ...
+                stimuliMaterialMatch{whichColorOfTheMaterialMatch} }];
+            if whichMaterialOfTheColorMatch == 4
+                materialIndex = [materialIndex, n];
+            end
+            if whichColorOfTheMaterialMatch == 4
+                colorIndex = [colorIndex, n];
+            end
         end
     end
 end
 
 % Within color category (so material cooredinate == target material coord)
-withinCategoryPairsColor  =  nchoosek(setdiff(1:length(params.materialMatchColorCoords), params.targetIndex),2);
+if (params.colorStimOnly)
+    withinCategoryPairsColor  =  nchoosek(1:length(params.materialMatchColorCoords),2);
+else
+    withinCategoryPairsColor  =  nchoosek(setdiff(1:length(params.materialMatchColorCoords), params.targetIndex),2);
+end
 for whichWithinColorPair = 1:size(withinCategoryPairsColor,1)
-    if whichWithinColorPair ~= 4
+    if (whichWithinColorPair ~= 4 | params.colorStimOnly)
         n = n+1;
         pair = [pair; ...
             {[params.materialMatchColorCoords(withinCategoryPairsColor(whichWithinColorPair, 1)), targetMaterialCoord]}, ...
             {[params.materialMatchColorCoords(withinCategoryPairsColor(whichWithinColorPair, 2)), targetMaterialCoord]}];
-        colIndex = [colIndex, n];
+        colorIndex = [colorIndex, n];
     end
 end
 
 % Within material category (so color cooredinate == target color coord)
-withinCategoryPairsMaterial  =  nchoosek(setdiff(1:length(params.colorMatchMaterialCoords), params.targetIndex),2);
-for whichWithinMaterialPair = 1:size(withinCategoryPairsMaterial,1)
-    n = n+1;
-    pair = [pair; ...
-        {[targetColorCoord, params.colorMatchMaterialCoords(withinCategoryPairsMaterial(whichWithinMaterialPair, 1))]}, ...
-        {[targetColorCoord, params.colorMatchMaterialCoords(withinCategoryPairsMaterial(whichWithinMaterialPair, 2))]}];
-    matIndex = [matIndex, n];
-end
+%if (~params.colorStimOnly)
+    withinCategoryPairsMaterial  =  nchoosek(setdiff(1:length(params.colorMatchMaterialCoords), params.targetIndex),2);
+    for whichWithinMaterialPair = 1:size(withinCategoryPairsMaterial,1)
+        n = n+1;
+        pair = [pair; ...
+            {[targetColorCoord, params.colorMatchMaterialCoords(withinCategoryPairsMaterial(whichWithinMaterialPair, 1))]}, ...
+            {[targetColorCoord, params.colorMatchMaterialCoords(withinCategoryPairsMaterial(whichWithinMaterialPair, 2))]}];
+        materialIndex = [materialIndex, n];
+    end
+%end
+
+% Update bookkeeping
 overallColorMaterialPairIndices = overallColorMaterialPairIndices(:);
 rowIndex = rowIndex(:);
 columnIndex = columnIndex(:);
@@ -181,5 +201,11 @@ for whichSet = 1:nDataSets
     dataSet{whichSet}.rmseSimulatedVsComputedProbabilities = ComputeRealRMSE(dataSet{whichSet}.probabilitiesForActualPositions,...
             dataSet{whichSet}.probabilitiesFromSimulatedData);
 end
-cd('/Users/Shared/Matlab/Toolboxes/BrainardLabToolbox/ColorMaterialModel/DemoData/')
-save(['DemoData' num2str(params.w) 'W' num2str(nBlocks) 'Blocks' num2str(nDataSets) 'Lin.mat']); 
+curDir = pwd;
+cd(getpref('ColorMaterialModel','demoDataDir'));
+if (params.colorStimOnly)
+    save(['DemoData' num2str(params.w) 'W' num2str(nBlocks) 'Blocks' num2str(nDataSets) 'LinColorOnly.mat']);
+else
+    save(['DemoData' num2str(params.w) 'W' num2str(nBlocks) 'Blocks' num2str(nDataSets) 'Lin.mat']);
+end
+cd(curDir);
