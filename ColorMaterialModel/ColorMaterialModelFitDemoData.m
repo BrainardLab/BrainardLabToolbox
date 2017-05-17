@@ -28,7 +28,7 @@ weibullplots = 0;
 % fileName = ['DemoData' num2str(w) 'W' num2str(nBlocks) 'Blocks10Sets.mat']; 
 nBlocks = 24; 
 w = 0.2; 
-fileName = ['DemoData' num2str(w) 'W' num2str(nBlocks) 'Blocks1LinColorOnly.mat']; 
+fileName = ['DemoData' num2str(w) 'W' num2str(nBlocks) 'Blocks4Lin.mat']; 
 cd([dataDir '/'])
 load(fileName); 
 
@@ -47,12 +47,12 @@ params.smoothOrder = 3; % this option is only for smoothSpacing
 % Does material/color weight vary in fit?
 %  'weightVary' - yes, it does.
 %  'weightFixed' - fix weight to specified value in tryWeightValues(1);
-params.whichWeight = 'weightFixed';
+params.whichWeight = 'weightVary';
 
 % Initial position spacing values to try.
 params.trySpacingValues = [0.5 1 2];
 params.maxPositionValue = 20;
-params.tryWeightValues = [0.8];
+params.tryWeightValues = [0.2 0.5 0.8];
 params.addNoise = true;
 
 % Loop over n dataSets and extract the solution

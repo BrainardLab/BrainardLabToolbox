@@ -23,10 +23,10 @@ params.sigmaFactor = 4;
 params.targetPosition = 0; 
 params.targetIndexColor =  11; 
 params.targetIndexMaterial = 4; 
-params.scalePositions  = 2;
+params.scalePositions  = 2.5;
 
 %% This lets us only generate stimuli that vary along the color dimension
-params.colorStimOnly = true;
+params.colorStimOnly = false;
 
 % Initial material and color positions.  If we don't at some point muck
 % with the example structure, these go from -3 to 3 in steps of 1 for a
@@ -56,10 +56,10 @@ params.whichDistance = 'euclidean';
 % Set up parameters for this particular data set. 
 fprintf('Set up parameters for simulation \n'); 
 params.seedFixed = GetWithDefault('Fix random seed?',0); % Fix random seed or not. 
+commandwindow;
 nBlocks = GetWithDefault('How many blocks of trials?',24); % Set the number of blocks of trials in an experiment.
 params.w = GetWithDefault('Set underlying weigth: ',0.5);  % Set up the underlying weight for simulation
 nDataSets = GetWithDefault('How many data sets to simulate?',1); 
-
 
 %% Create pairs.
 stimuliMaterialMatch = [];
