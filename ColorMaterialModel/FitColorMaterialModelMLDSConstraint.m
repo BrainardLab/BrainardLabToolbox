@@ -16,7 +16,7 @@ end
            
 cVec1 = diff(materialMatchColorCoords);
 cVec2 = diff(colorMatchMaterialCoords);
-c = -[cVec1 cVec2]' + params.sigma/params.sigmaFactor;
+c = -[cVec1 cVec2]' + sigma/params.sigmaFactor;
 ceq = 0;
 
 end
