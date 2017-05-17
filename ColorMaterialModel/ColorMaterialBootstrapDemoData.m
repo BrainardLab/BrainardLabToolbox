@@ -1,13 +1,8 @@
-% ColorMaterialModelCrossValidation
-% Perform cross valiadation to establish the quality of the model.
+% ColorMaterialModelBootstrapDemoData
+% Perform bootstraping to find confidence intervals for model paramters.
 %
-% We want to be able to compare several instancies of our model using cross
-% validation. The main goal is to figure out whether we're overfitting with
-% our many parameters. Here we use the simulated demo data to learn more
-% about diffferent models by examining the cross validation
-%
-% 03/17/2017 ar Wrote it.
-% 04/30/2017 ar Clean up and comment.
+% 04/30/2017 ar Wrote it from cross-validation code. 
+% 04/30/2017 ar Added comments.
 
 % Initialize
 clear; close all;

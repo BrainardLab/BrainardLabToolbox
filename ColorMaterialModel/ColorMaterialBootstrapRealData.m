@@ -2,7 +2,7 @@
 % Perform bootstraping to find confidence intervals for model paramters.
 %
 % 04/30/2017 ar Wrote it from cross-validation code. 
-% 04/30/2017 ar Added comments.
+% 05/16/2017 ar Added comments.
 
 % Initialize
 clear; close all;
@@ -30,6 +30,10 @@ switch whichExperiment
         load([figAndDataDir 'pairIndicesE1P2Complete.mat'])
         load([figAndDataDir 'ParamsE1P2FULL.mat'])
 end
+
+CIrange = 95; 
+CIlo = (1-CIrange/100)/2; 
+CIhi = 1-CIlo; 
 
 nSubjects = length(subjectList);
 nConditions = length(conditionCode);
