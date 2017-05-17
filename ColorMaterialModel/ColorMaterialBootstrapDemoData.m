@@ -32,7 +32,14 @@ params.whichMethod = 'lookup';
 params.nSimulate = 1000;
 whichWeight = 'weightVary';
 nRepetitions = 150; 
-for whichCondition = 1%:nConditions
+nConditions = 1; 
+nModelTypes = 1; 
+
+CIrange = 95; 
+CIlo = (1-CIrange/100)/2; 
+CIhi = 1-CIlo; 
+
+for whichCondition = 1:nConditions
     for kk = 1:nRepetitions
         
         % Separate the training from test data
@@ -47,34 +54,36 @@ for whichCondition = 1%:nConditions
         end
         nBootstrapTrials = nBlocks*ones(nTrialTypes,1);
         
-        
-        for whichModelType = 1%:nModelTypes
-            params.whichWeight = whichWeight;
-            params.whichPositions = 'full';
-            params.tryColorSpacingValues = [params.trySpacingValues];
-            params.tryMaterialSpacingValues = [params.trySpacingValues];
-            params.tryWeightValues = [params.tryWeightValues];
-            
+        for whichModelType = 1:nModelTypes
+            if whichModelType == 1
+                params.whichWeight = whichWeight;
+                params.whichPositions = 'full';
+                params.tryColorSpacingValues = [params.trySpacingValues];
+                params.tryMaterialSpacingValues = [params.trySpacingValues];
+                params.tryWeightValues = [params.tryWeightValues];
+            else
+                error('Model type not implemented. ')
+            end
             % Get the predictions from the model for current parameters
-            [thisSubject.condition{whichCondition}.bootstrap(whichModelType).returnedParamsTraining(kk,:), ...
-                thisSubject.condition{whichCondition}.bootstrap(whichModelType).logLikelyFitTraining(kk), ...
-                thisSubject.condition{whichCondition}.bootstrap(whichModelType).predictedProbabilitiesBasedOnSolutionTraining(kk,:)] = ...
+            [thisSubject.condition{whichCondition}.bootstrap(whichModelType).returnedParams(kk,:), ...
+                thisSubject.condition{whichCondition}.bootstrap(whichModelType).logLikelyFit(kk), ...
+                thisSubject.condition{whichCondition}.bootstrap(whichModelType).predictedProbabilitiesBasedOnSolution(kk,:)] = ...
                 FitColorMaterialModelMLDS(pairColorMatchColorCoords, pairMaterialMatchColorCoords,...
                 pairColorMatchMaterialCoords, pairMaterialMatchMaterialCoords,...
                 bootstrapData, nBootstrapTrials,params, ...
                 'whichPositions',params.whichPositions,'whichWeight',params.whichWeight, ...
                 'tryWeightValues',params.tryWeightValues,'tryColorSpacingValues',params.tryColorSpacingValues,'tryMaterialSpacingValues',params.tryMaterialSpacingValues, ...
-                     'maxPositionValue', params.maxPositionValue);
+                'maxPositionValue', params.maxPositionValue);
         end
     end
     
-%     % Compute mean error for both log likelihood and rmse.
-%     thisSubject.condition{whichCondition}.crossVal(whichModelType).meanRMSError = ...
-%         ;
-%     thisSubject.condition{whichCondition}.crossVal(whichModelType).meanLogLikelihood = ...
-%         mean(thisSubject.condition{whichCondition}.crossVal(whichModelType).LogLikelyhood);
+    for jj = 1:size(thisSubject.condition{whichCondition}.bootstrap.returnedParamsTraining,2)
+        subject{s}.thisSubject.condition{whichCondition}.bootstrapMeans(jj) = mean(thisSubject.condition{whichCondition}.bootstrap.returnedParamsTraining(:,jj));
+        subject{s}.thisSubject.condition{whichCondition}.bootstrapCI(jj,1) = prctile(thisSubject.condition{whichCondition}.bootstrap.returnedParamsTraining(:,jj),100*CIlo);
+        subject{s}.thisSubject.condition{whichCondition}.bootstrapCI(jj,2) = prctile(thisSubject.condition{whichCondition}.bootstrap.returnedParamsTraining(:,jj),100*CIhi);
+    end
+    % Save in the right folder.
     
-      % Save in the right folder.
-        cd(mainDir);
-        save(['demo' params.whichWeight '-Bootstrap'],  'thisSubject');
+    cd(mainDir);
+    save(['demo' params.whichWeight '-Bootstrap'],  'thisSubject');
 end

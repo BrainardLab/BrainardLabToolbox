@@ -1,8 +1,8 @@
-% ColorMaterialModelCrossValidationRealData
-% Perform cross valiadation on uses it to extract model paramters.
+% ColorMaterialModelBootstrapRealData
+% Perform bootstraping to find confidence intervals for model paramters.
 %
-% 03/17/2017 ar Wrote it.
-% 04/30/2017 ar Clean up. Adding comments.
+% 04/30/2017 ar Wrote it from cross-validation code. 
+% 04/30/2017 ar Added comments.
 
 % Initialize
 clear; close all;
@@ -14,7 +14,7 @@ whichExperiment = 'Pilot';
 % Set paramters for a given expeirment.
 switch whichExperiment
     case 'Pilot'
-        figAndDataDir = ['/Volumes/Users1/Dropbox (Aguirre-Brainard Lab)/CNST_analysis/ColorMaterial/' whichExperiment '/'];
+        figAndDataDir = ['/Users/ana/Dropbox (Aguirre-Brainard Lab)/CNST_analysis/ColorMaterial/' whichExperiment '/'];
         subjectList = {'zhr', 'vtr', 'scd', 'mcv', 'flj'};
         conditionCode = {'NC'};
         nFolds = 5;
@@ -22,7 +22,7 @@ switch whichExperiment
         load([figAndDataDir 'pairIndicesPilot.mat'])
         load([figAndDataDir  'ParamsPilot.mat'])
     case 'E1P2FULL'
-        figAndDataDir = ['/Users/radonjic/Dropbox (Aguirre-Brainard Lab)/CNST_analysis/ColorMaterial/Experiment1/'];
+        figAndDataDir = ['/Users/ana/Dropbox (Aguirre-Brainard Lab)/CNST_analysis/ColorMaterial/Experiment1/'];
         subjectList = {'mdc','nsk'};
         conditionCode = {'NC', 'CY', 'CB'};
         nFolds = 6;
@@ -41,7 +41,7 @@ params.maxPositionValue = 20;
 params.whichMethod = 'lookup';
 params.nSimulate = 1000;
 whichWeight = 'weightVary';
-
+nModelTypes = 1; 
 % Set cross validation parameters
 nRepetitions = 150; 
 for s = 1:nSubjects
@@ -58,7 +58,7 @@ for s = 1:nSubjects
         
         for kk = 1:nRepetitions
                         
-            % Separate the training from test data
+            % Find indices for bootstrap data. 
             nTrialTypes = size(thisSubject.condition{whichCondition}.firstChosenPerTrial,1);
             if (size(thisSubject.condition{whichCondition}.firstChosenPerTrial,2) ~= nBlocks)
                 error('Oops');
@@ -70,38 +70,35 @@ for s = 1:nSubjects
             end
             nBootstrapTrials = nBlocks*ones(nTrialTypes,1);
             
-            for whichModelType = 1%:nModelTypes
-              
+            for whichModelType = 1:nModelTypes
+                if whichModelType
                     params.whichWeight = whichWeight;
                     params.whichPositions = 'full';
                     params.tryColorSpacingValues = [params.trySpacingValues];
                     params.tryMaterialSpacingValues = [params.trySpacingValues];
-                    params.tryWeightValues = [params.tryWeightValues]; 
-               
+                    params.tryWeightValues = [params.tryWeightValues];
+                else
+                    error('Model type not yet implemented. ')
+                end
+                
                 % Get the predictions from the model for current parameters
-                [thisSubject.condition{whichCondition}.bootstrap(whichModelType).returnedParamsTraining(kk,:), ...
-                    thisSubject.condition{whichCondition}.bootstrap(whichModelType).logLikelyFitTraining(kk), ...
-                    thisSubject.condition{whichCondition}.bootstrap(whichModelType).predictedProbabilitiesBasedOnSolutionTraining(kk,:)] = ...
+                [thisSubject.condition{whichCondition}.bootstrap(whichModelType).returnedParams(kk,:), ...
+                    thisSubject.condition{whichCondition}.bootstrap(whichModelType).logLikelyFit(kk), ...
+                    thisSubject.condition{whichCondition}.bootstrap(whichModelType).predictedProbabilitiesBasedOnSolution(kk,:)] = ...
                     FitColorMaterialModelMLDS(pairColorMatchColorCoords, pairMaterialMatchColorCoords,...
                     pairColorMatchMaterialCoords, pairMaterialMatchMaterialCoords,...
                     bootstrapData, nBootstrapTrials,params, ...
                     'whichPositions',params.whichPositions,'whichWeight',params.whichWeight, ...
                     'tryWeightValues',params.tryWeightValues,'tryColorSpacingValues',params.tryColorSpacingValues,'tryMaterialSpacingValues',params.tryMaterialSpacingValues, ...
                     'maxPositionValue', params.maxPositionValue);
-                
-                % For linear model, grab solution to use as a start when we search for
-                % the cubic and full solutions.
-                %
-                % ANA TO CHECK WHICH IS MATERIAL SLOPE AND WHICH ONE IS THE
-                % COLOR SLOPE.
-%                 if (whichModelType == 1)
-%                     linearSolutionParameters = thisSubject.condition{whichCondition}.bootstrap(whichModelType).returnedParamsTraining(kk,:);
-%                     linearSolutionMaterialSlope = linearSolutionParameters(1);
-%                     linearSolutionColorSlope = linearSolutionParameters(2);
-%                     linearSolutionWeight = linearSolutionParameters(3);
-%                 end
             end
-        end 
+        end
+        
+        for jj = 1:size(thisSubject.condition{whichCondition}.bootstrap.returnedParamsTraining,2)
+            subject{s}.thisSubject.condition{whichCondition}.bootstrapMeans(jj) = mean(thisSubject.condition{whichCondition}.bootstrap.returnedParamsTraining(:,jj));
+            subject{s}.thisSubject.condition{whichCondition}.bootstrapCI(jj,1) = prctile(thisSubject.condition{whichCondition}.bootstrap.returnedParamsTraining(:,jj),100*CIlo);
+            subject{s}.thisSubject.condition{whichCondition}.bootstrapCI(jj,2) = prctile(thisSubject.condition{whichCondition}.bootstrap.returnedParamsTraining(:,jj),100*CIhi);
+        end
         
        % Save in the right folder.
         cd(figAndDataDir);
