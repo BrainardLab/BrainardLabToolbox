@@ -53,6 +53,8 @@ function plotData(data, timeAxis, channelLabels)
     set(hFig, 'Position', [10 10 850 40+200*recordedChannelsNum]);
     for channel = 1:recordedChannelsNum
         range = [minVoltage(channel) maxVoltage(channel)];
+        dR = range(2)-range(1);
+        range = [range(1)-0.1*dR range(2)+0.1*dR];
         if (range(2)-range(1) < 0.2)
             range = (range(1)+range(2))/2 + [-0.1 0.1];
         end

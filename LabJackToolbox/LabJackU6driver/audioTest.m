@@ -3,7 +3,7 @@ function audioTest
     frequencyHz = 30;
     samplingFrequencyHz = 50000;
     dt = 1/samplingFrequencyHz;
-    duration = 5.0;
+    duration = 10.0;
     t = 0:dt:duration;
     tt = t-mean(t);
     sigma = mean(t)/6;
@@ -12,6 +12,6 @@ function audioTest
     figure(1); clf;
     plot(t,y);
     drawnow;
-    audiowrite('30Hz.wav',y, samplingFrequencyHz);
+    audiowrite(sprintf('%2.0fHz.wav', frequencyHz),y, samplingFrequencyHz);
 end
 
