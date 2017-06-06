@@ -1,6 +1,6 @@
 function audioTest
 
-    frequencyHz = 30;
+    frequencyHz = 500;
     samplingFrequencyHz = 50000;
     dt = 1/samplingFrequencyHz;
     duration = 10.0;
@@ -12,6 +12,6 @@ function audioTest
     figure(1); clf;
     plot(t,y);
     drawnow;
-    audiowrite(sprintf('%2.0fHz.wav', frequencyHz),y, samplingFrequencyHz);
+    audiowrite(sprintf('%2.0fHz.wav', frequencyHz),y, samplingFrequencyHz, 'BitsPerSample', 32);
 end
 
