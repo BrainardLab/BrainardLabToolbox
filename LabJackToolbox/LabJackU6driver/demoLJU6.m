@@ -53,11 +53,13 @@ function plotData(data, timeAxis, channelLabels)
     set(hFig, 'Position', [10 10 850 40+200*recordedChannelsNum]);
     for channel = 1:recordedChannelsNum
         range = [minVoltage(channel) maxVoltage(channel)];
-        if (range(2)-range(1) < 1)
-            range = (range(1)+range(2))/2 + [-0.5 0.5];
+        if (range(2)-range(1) < 0.2)
+            range = (range(1)+range(2))/2 + [-0.1 0.1];
         end
         subplot(recordedChannelsNum,1,channel);
+        plot(timeAxis, timeAxis*0, 'k-', 'LineWidth', 1.0);
         plot(timeAxis, squeeze(data(:,channel)), 'r-', 'LineWidth', 1.5);
+        hold off;
         if (channel == recordedChannelsNum)
             xlabel('time (seconds)', 'FontWeight', 'bold');
         end
