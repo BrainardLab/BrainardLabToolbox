@@ -26,8 +26,11 @@
 % FitColorMaterialModelMLDSFun             - Error function (what to minimize) for the MLDS-based model fitting.
 % FitColorMaterialModelWeibull             - Fit the descriptive Weibull model to data.
 % FitColorMaterialWeibullFun               - Error function (what to minimize) for the descriptive Weibull function fitting.
-% colorMaterialInterpolateFunctionCubic.mat  - cubic interpolation of the current probabilities lookup table. 
-% colorMaterialInterpolateFunctionLinear.mat - cubic interpolation of the current probabilities lookup table. 
+% colorMaterialInterpolateFunCubiceuclidean.mat  - cubic interpolation of the current probabilities lookup table based on euclidean distances. 
+% colorMaterialInterpolateFunLineareuclidean.mat - linear interpolation of the current probabilities lookup table based on euclidean distances. 
+% colorMaterialInterpolateFunCubiccityblock.mat  - cubic interpolation of the current probabilities lookup table based on cityblock distances. 
+% colorMaterialInterpolateFunLinearcityblock.mat - cubic interpolation of the current probabilities lookup table based on cityblock distances. 
+
 % PlotGriddedInterpolation.m                 - make movies of probabilities interpolated from the look up table three dimensions of the time.  
 
 % ColorMaterialModelGetProbabilityFromLookupTable.m - get probability from the lookup table. Oneliner. 
@@ -35,13 +38,8 @@
 
 % ColorMaterialModelDemoGeneralize         - Old demo program (last iteration before branch merging). We are saving it for now. 
 
-% to delete after next tables are computed. 
-% LookUpCurrentMarch62017.mat               - Result of the current build lookup table
-% gridParams.mat                            - temporary. we should probably get rid of them saved in the main function
-
 % pairIndices                              - Matrix describing competitor pairing in our initial experiment.
 %                                            In the long run, this might come out of the toolbox itself.
-
 % pairIndicesPilot.mat - these two matrices are required in order to fit the pilot data
 % pilotIndices.mat
 

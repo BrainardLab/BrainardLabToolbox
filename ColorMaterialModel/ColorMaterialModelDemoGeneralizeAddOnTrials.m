@@ -132,56 +132,55 @@ rowIndex = [];
 columnIndex = [];
 clear rowIndex columnIndex overallIndex
 
-for whichColorOfTheMaterialMatch = 1:length(params.materialMatchColorCoords)
-    for whichMaterialOfTheColorMatch = 1:length(params.colorMatchMaterialCoords)
-        rowIndex(whichColorOfTheMaterialMatch, whichMaterialOfTheColorMatch) = [whichColorOfTheMaterialMatch];
-        columnIndex(whichColorOfTheMaterialMatch, whichMaterialOfTheColorMatch) = [whichMaterialOfTheColorMatch];
-        n = n + 1;
-        overallColorMaterialPairIndices(whichColorOfTheMaterialMatch, whichMaterialOfTheColorMatch) = n;
-        
-        % The pair is a cell array containing two vectors.  The
-        % first vector is the coordinates of the color match, the
-        % second is the coordinates of the material match.  There
-        % is one such pair for each trial type.
-        pair = [pair; ...
-            {stimuliColorMatch{whichMaterialOfTheColorMatch}, ...
-            stimuliMaterialMatch{whichColorOfTheMaterialMatch} }];
-        if whichMaterialOfTheColorMatch == 4
-            matIndex = [matIndex, n];
-        end
-        if whichColorOfTheMaterialMatch == 4
-            colIndex = [colIndex, n];
-        end
-    end
-end
+% for whichColorOfTheMaterialMatch = 1:length(params.materialMatchColorCoords)
+%     for whichMaterialOfTheColorMatch = 1:length(params.colorMatchMaterialCoords)
+%         rowIndex(whichColorOfTheMaterialMatch, whichMaterialOfTheColorMatch) = [whichColorOfTheMaterialMatch];
+%         columnIndex(whichColorOfTheMaterialMatch, whichMaterialOfTheColorMatch) = [whichMaterialOfTheColorMatch];
+%         n = n + 1;
+%         overallColorMaterialPairIndices(whichColorOfTheMaterialMatch, whichMaterialOfTheColorMatch) = n;
+%         
+%         % The pair is a cell array containing two vectors.  The
+%         % first vector is the coordinates of the color match, the
+%         % second is the coordinates of the material match.  There
+%         % is one such pair for each trial type.
+%         pair = [pair; ...
+%             {stimuliColorMatch{whichMaterialOfTheColorMatch}, ...
+%             stimuliMaterialMatch{whichColorOfTheMaterialMatch} }];
+%         if whichMaterialOfTheColorMatch == 4
+%             matIndex = [matIndex, n];
+%         end
+%         if whichColorOfTheMaterialMatch == 4
+%             colIndex = [colIndex, n];
+%         end
+%     end
+% end
+% 
+% % Within color category (so material cooredinate == target material coord)
+% withinCategoryPairsColor  =  nchoosek(setdiff(1:length(params.materialMatchColorCoords), params.targetIndex),2);
 
-% Within color category (so material cooredinate == target material coord)
-withinCategoryPairsColor  =  nchoosek(setdiff(1:length(params.materialMatchColorCoords), params.targetIndex),2);
-
-for whichWithinColorPair = 1:size(withinCategoryPairsColor,1)
-    if whichWithinColorPair ~= 4
-        n = n+1;
-        pair = [pair; ...
-            {[params.materialMatchColorCoords(withinCategoryPairsColor(whichWithinColorPair, 1)), targetMaterialCoord]}, ...
-            {[params.materialMatchColorCoords(withinCategoryPairsColor(whichWithinColorPair, 2)), targetMaterialCoord]}];
-        colIndex = [colIndex, n];
-    end
-end
+% for whichWithinColorPair = 1:size(withinCategoryPairsColor,1)
+%     if whichWithinColorPair ~= 4
+%         n = n+1;
+%         pair = [pair; ...
+%             {[params.materialMatchColorCoords(withinCategoryPairsColor(whichWithinColorPair, 1)), targetMaterialCoord]}, ...
+%             {[params.materialMatchColorCoords(withinCategoryPairsColor(whichWithinColorPair, 2)), targetMaterialCoord]}];
+%         colIndex = [colIndex, n];
+%     end
+% end
 
 % Within material category (so color cooredinate == target color coord)
-withinCategoryPairsMaterial  =  nchoosek(setdiff(1:length(params.colorMatchMaterialCoords), params.targetIndex),2);
-for whichWithinMaterialPair = 1:size(withinCategoryPairsMaterial,1)
-    n = n+1;
-    pair = [pair; ...
-        {[targetColorCoord, params.colorMatchMaterialCoords(withinCategoryPairsMaterial(whichWithinMaterialPair, 1))]}, ...
-        {[targetColorCoord, params.colorMatchMaterialCoords(withinCategoryPairsMaterial(whichWithinMaterialPair, 2))]}];
-    matIndex = [matIndex, n];
-end
+% withinCategoryPairsMaterial  =  nchoosek(setdiff(1:length(params.colorMatchMaterialCoords), params.targetIndex),2);
+% for whichWithinMaterialPair = 1:size(withinCategoryPairsMaterial,1)
+%     n = n+1;
+%     pair = [pair; ...
+%         {[targetColorCoord, params.colorMatchMaterialCoords(withinCategoryPairsMaterial(whichWithinMaterialPair, 1))]}, ...
+%         {[targetColorCoord, params.colorMatchMaterialCoords(withinCategoryPairsMaterial(whichWithinMaterialPair, 2))]}];
+%     matIndex = [matIndex, n];
+% end
 
 % % AddOnPairs
 for i = 1:size(addOnPairs,1)
     for j = 1:length(params.colorMatchMaterialCoords)
-        % AddOnPairsAddOnPairs;
         pair = [pair; {[addOnPairs(i,:)]}, {[params.targetIndex, params.colorMatchMaterialCoords(j)]}];
     end
 end
@@ -192,8 +191,8 @@ for i = 1:size(addOnPairs,1)
 end
 
 overallColorMaterialPairIndices = overallColorMaterialPairIndices(:);
-rowIndex = rowIndex(:);
-columnIndex = columnIndex(:);
+% rowIndex = rowIndex(:);
+% columnIndex = columnIndex(:);
 nPairs = size(pair,1);
 if strcmp(params.whichWeight, 'weightVary')
     fixedWValue = fixedWValue(1);
@@ -277,12 +276,12 @@ for ww = 1:length(simulateWeigth)
         % fmincon, which is actually somewhat hard to do in a more elegant way.
 %         clear returnedParams logLikelyFit predictedProbabilitiesBasedOnSolution k returnedMaterialMatchColorCoords
         clear returnedColorMatchMaterialCoords returnedW returnedSigma
-        [returnedParams{ww, www}, logLikelyFit{ww,www}, predictedProbabilitiesBasedOnSolution{ww, www}, k{ww, www}] = FitColorMaterialModelMLDS(...
+        [returnedParams{ww, www}, logLikelyFit{ww,www}, predictedProbabilitiesBasedOnSolution{ww, www}] = FitColorMaterialModelMLDS(...
             pairColorMatchColorCoords, pairMaterialMatchColorCoords,...
             pairColorMatchMaterialCoords, pairMaterialMatchMaterialCoords,...
             responsesFromSimulatedData,nTrials,params, ...
             'whichPositions',params.whichPositions,'whichWeight',params.whichWeight, ...
-            'tryWeightValues',params.tryWeightValues,'trySpacingValues',params.trySpacingValues, 'maxPositionValue', params.maxPositionValue); %#ok<SAGROW>
+            'tryWeightValues',params.tryWeightValues,'tryColorSpacingValues',params.trySpacingValues, 'tryMaterialSpacingValues',params.trySpacingValues, 'maxPositionValue', params.maxPositionValue); %#ok<SAGROW>
         
         
         [returnedMaterialMatchColorCoords,returnedColorMatchMaterialCoords,returnedW,returnedSigma]  = ColorMaterialModelXToParams(returnedParams{ww, www}, params);
