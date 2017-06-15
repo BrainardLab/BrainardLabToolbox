@@ -29,7 +29,6 @@ params.targetPosition = 0;
 params.targetIndexColor =  11; % target position on the color dimension in the set of all paramters. 
 params.targetIndexMaterial = 4; % target position on the material dimension in the set of all paramters. 
 
-
 % Initial material and color positions.  These go from -3 to 3 in steps of 1 for a
 % total of 7 stimuli arrayed along each dimension.
 params.materialMatchColorCoords  =  params.competitorsRangeNegative(1):1:params.competitorsRangePositive(end);
@@ -197,6 +196,18 @@ for whichSet = 1:nDataSets
     dataSet{whichSet}.rmseSimulatedVsComputedProbabilities = ComputeRealRMSE(dataSet{whichSet}.probabilitiesForActualPositions,...
             dataSet{whichSet}.probabilitiesFromSimulatedData);
 end
+
+% Assign pair data and index data to structures that need to be saved and
+% passed. 
+pairInfo.pairColorMatchColorCoords = pairColorMatchColorCoords;
+pairInfo.pairMaterialMatchColorCoords = pairMaterialMatchColorCoords; 
+pairInfo.pairColorMatchMaterialCoords = pairColorMatchMaterialCoords; 
+pairInfo.pairMaterialMatchMaterialCoords = pairMaterialMatchMaterialCoords; 
+   
+indexMatrix.rowIndex = rowIndex; 
+indexMatrix.columnIndex = columnIndex; 
+indexMatrix.overallColorMaterialPairIndices = overallColorMaterialPairIndices; 
+
 cd(dataDir);
-save(dataSetName);
+save(dataSetName, 'dataSet', 'params', 'pairInfo', 'indexMatrix');
 cd(currentDir);

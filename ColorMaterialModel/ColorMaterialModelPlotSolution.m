@@ -1,40 +1,50 @@
-function ColorMaterialModelPlotSolution(allDataProbs,allPredictedProbs,colorMaterialDataProb, ...
-    modelParams, params, subjectName, conditionCode, figDir, saveFig, weibullplots)
-% ColorMaterialModelPlotSolution(theDataProb, predictedProbabilitiesBasedOnSolution, modelParams, params,  figDir, saveFig, weibullplots, actualProbs)
-%
+function ColorMaterialModelPlotSolution(theDataProb, predictedProbabilitiesBasedOnSolution, returnedModelParams,...
+    indexMatrix, params, figDir, saveFig, weibullplots, actualProbs)
+% ColorMaterialModelPlotSolution(theDataProb, predictedProbabilitiesBasedOnSolution, returnedModelParams,...
+%    indexMatrix, params, figDir, saveFig, weibullplots, actualProbs)
 % Make a nice plot of the data and MLDS-based model fit.
 %
 % Inputs:
 %   theDataProb - the data probabilities measured in the experiment
 %   predictedProbabilitiesBasedOnSolution - predictions based on solutions
-%   modelParams - set of model parameters
-%   params - exp. specifications
-%   subjectName - which subject to plot 
-%   conditionCode - which condition to plot
+%   returnedModelParams - returned model parameters
+%   indexMatrix - matrix of indices needed for extracting only the
+%                 probabilities for color/material trade-off
+%   params -  standard experiment specifications structure
 %   figDir -  specify figure directory
 %   saveFig - save figure or not
 %   weibullplots - flag indicating whether to save weibullplots or not
 %   actualProbs -  probabilities for actual parameters (ground truth) which
-%                  we know when we do the simulation
+%                  we is known for simulated data
 
-% Unpack passed params. Set tolerance for recovered target position. 
-[returnedMaterialMatchColorCoords,returnedColorMatchMaterialCoords,returnedW,returnedSigma]  = ColorMaterialModelXToParams(modelParams, params); 
+% 06/15/2017 ar Added comments and made small changes to the code. 
 
-%% parameters for plots
+% Close all open figures; 
 close all; 
+
+% Reformat probabilities to look only at color/material tradeoff
+% Indices that reformating is based on are saved in the data matrix
+% that we loaded.
+colorMaterialDataProb = ColorMaterialModelResizeProbabilities(theDataProb, indexMatrix);
+colorMaterialSolutionProb = ColorMaterialModelResizeProbabilities(predictedProbabilitiesBasedOnSolution, indexMatrix);
+
+% Unpack passed params.  
+[returnedMaterialMatchColorCoords,returnedColorMatchMaterialCoords,returnedW,returnedSigma]  = ColorMaterialModelXToParams(returnedModelParams, params); 
+
+% Set plot parameters 
 thisFontSize = 6; 
 thisMarkerSize = 6; 
 thisLineWidth = 1; 
 
 %% Figure 1. Plot measured vs. predicted probabilities
 figure; hold on
-plot(allDataProbs, allPredictedProbs,'ro','MarkerSize',thisMarkerSize-2,'MarkerFaceColor','r');
-rmse = ComputeRealRMSE(allDataProbs,allPredictedProbs);
-text(0.07, 0.92, sprintf('RFit = %.4f', rmse), 'FontSize', thisFontSize);
-if nargin == 15
-    plot(allDataProbs,actualProbs,'bo','MarkerSize',thisMarkerSize-2);
-    rmseComp = ComputeRealRMSE(allDataProbs,actualProbs); 
-    text(0.07, 0.82, sprintf('RActual = %.4f', rmseComp), 'FontSize', thisFontSize);
+plot(theDataProb, predictedProbabilitiesBasedOnSolution,'ro','MarkerSize',thisMarkerSize-2,'MarkerFaceColor','r');
+rmse = ComputeRealRMSE(theDataProb,predictedProbabilitiesBasedOnSolution);
+text(0.07, 0.92, sprintf('rmseFit = %.4f', rmse), 'FontSize', thisFontSize);
+if nargin == 9
+    plot(theDataProb,actualProbs,'bo','MarkerSize',thisMarkerSize-2);
+    rmseComp = ComputeRealRMSE(theDataProb,actualProbs); 
+    text(0.07, 0.82, sprintf('rmseActual = %.4f', rmseComp), 'FontSize', thisFontSize);
     legend('Fit Parameters', 'Actual Parameters', 'Location', 'NorthWest')
     legend boxoff
 else
@@ -42,8 +52,7 @@ else
     legend boxoff
 end
 line([0, 1], [0,1], 'color', 'k');
-axis('square')
-axis([0 1 0 1]);
+axis('square'); axis([0 1 0 1]);
 set(gca,  'FontSize', thisFontSize);
 xlabel('Measured p');
 ylabel('Predicted p');
@@ -51,11 +60,10 @@ set(gca, 'xTick', [0, 0.5, 1]);
 set(gca, 'yTick', [0, 0.5, 1]);
 ax(1)=gca;
 
-%% Prepare for figure 2. Fit cubic spline to the data
+% Prepare for figure 2. Fit cubic spline to the data
 % We do this separately for color and material dimension
 xMinTemp = floor(min([returnedMaterialMatchColorCoords, returnedColorMatchMaterialCoords]))-0.5; 
 xMaxTemp = ceil(max([returnedMaterialMatchColorCoords, returnedColorMatchMaterialCoords]))+0.5;
-xTemp = max(abs([xMinTemp xMaxTemp]));
 xMin = -params.maxPositionValue;
 xMax = params.maxPositionValue;
 yMin = -params.maxPositionValue; 
@@ -65,9 +73,9 @@ splineOverX = linspace(xMin,xMax,1000);
 splineOverX(splineOverX>max(params.materialMatchColorCoords))=NaN;
 splineOverX(splineOverX<min(params.materialMatchColorCoords))=NaN; 
 
-% Find a linear fit to the data for both color and material. 
-FColor = griddedInterpolant(params.materialMatchColorCoords, returnedMaterialMatchColorCoords,'linear');
-FMaterial = griddedInterpolant(params.colorMatchMaterialCoords, returnedColorMatchMaterialCoords,'linear');
+% Find a cubic fit to the data for both color and material. 
+FColor = griddedInterpolant(params.materialMatchColorCoords, returnedMaterialMatchColorCoords,'cubic');
+FMaterial = griddedInterpolant(params.colorMatchMaterialCoords, returnedColorMatchMaterialCoords,'cubic');
 
 % We evaluate this function at all values of X we're interested in. 
 inferredPositionsColor = FColor(splineOverX); 
@@ -100,8 +108,8 @@ set(gca, 'yTick', [yMin, 0, yMax],'FontSize', thisFontSize);
 ax(3)=gca;
 
 if saveFig
-    FigureSave([subjectName, conditionCode, 'RecoveredPositionsSpline'], fColor, 'pdf'); 
-    FigureSave([subjectName, conditionCode, 'RecoveredPositionsSpline'], fMaterial, 'pdf'); 
+    FigureSave([subjectName, 'RecoveredPositionsSpline'], fColor, 'pdf'); 
+    FigureSave([subjectName, 'RecoveredPositionsSpline'], fMaterial, 'pdf'); 
 end
 
 %% Plot the color and material of the stimuli obtained from the fit in the 2D representational space
@@ -118,8 +126,8 @@ xlabel('color positions', 'FontSize', thisFontSize);
 ylabel('material positions','FontSize', thisFontSize);
 ax(4)=gca;
 if saveFig
-    savefig(f2, [subjectName, conditionCode, 'RecoveredPositions2D.fig'])
-    FigureSave([subjectName, conditionCode, 'RecoveredPositions2D'], f2, 'pdf'); 
+    savefig(f2, [subjectName, 'RecoveredPositions2D.fig'])
+    FigureSave([subjectName, 'RecoveredPositions2D'], f2, 'pdf'); 
 end
 %% Figure 3. Plot descriptive Weibull fits to the data. 
 if weibullplots
@@ -146,8 +154,8 @@ if weibullplots
           'whichMatch', 'materialMatch', 'whichFit', 'weibull', 'fontSize', thisFontSize, 'markerSize', thisMarkerSize, 'lineWidth', thisLineWidth);
     
     if saveFig
-        FigureSave([subjectName, conditionCode, 'WeibullFitColorXAxis'], thisFig1, 'pdf');
-        FigureSave([subjectName, conditionCode, 'WeibullFitMaterialXAxis'],thisFig2, 'pdf');
+        FigureSave([subjectName, 'WeibullFitColorXAxis'], thisFig1, 'pdf');
+        FigureSave([subjectName, 'WeibullFitMaterialXAxis'],thisFig2, 'pdf');
     end
 end
 %% Plot predictions of the model through the actual data
@@ -190,6 +198,7 @@ rangeOfMaterialMatchColorCoordinates = repmat(rangeOfMaterialMatchColorCoordinat
     'whichMatch', 'colorMatch', 'whichFit', 'MLDS','returnedWeight', returnedW, ...
     'fontSize', thisFontSize, 'markerSize', thisMarkerSize, 'lineWidth', thisLineWidth);
 ax(5)=thisAxis3;
+
 % Get values for reverse plotting
 for whichColorCoordinate = 1:length(params.materialMatchColorCoords)
 
@@ -214,25 +223,26 @@ rangeOfColorMatchMaterialCoordinates = repmat(rangeOfColorMatchMaterialCoordinat
     'whichMatch', 'materialMatch', 'whichFit', 'MLDS','returnedWeight', returnedW, ...
     'fontSize', thisFontSize, 'markerSize', thisMarkerSize, 'lineWidth', thisLineWidth);
 ax(6)=thisAxis4;
-
 if saveFig
-    FigureSave([subjectName, conditionCode, 'ModelFitColorXAxis'], thisFig3, 'pdf');
-    FigureSave([subjectName, conditionCode, 'ModelFitMaterialXAxis'], thisFig4, 'pdf');
+    FigureSave([subjectName, 'ModelFitColorXAxis'], thisFig3, 'pdf');
+    FigureSave([subjectName, 'ModelFitMaterialXAxis'], thisFig4, 'pdf');
 end
+
+% Combine all figures into one big figure. 
 nImagesPerRow = 3;
 nImages = length(ax);
 figure;
 for i=1:nImages
-    % create and get handle to the subplot axes
+    % Create and get handle to the subplot axes
     sPlot(i) = subplot(ceil(nImages/nImagesPerRow),nImagesPerRow,i);
-     % get handle to all the children in the figure
+     % Get handle to all the children in the figure
      aux=get(ax(i),'children');
      for j=1:size(aux)
          tmpFig(i) = aux(j);
          copyobj(tmpFig(i),sPlot(i));
          hold on
      end
-     % copy children to new parent axes i.e. the subplot axes
+     % Copy children to new parent axes i.e. the subplot axes
      xlabel(get(get(ax(i),'xlabel'),'string'));
      ylabel(get(get(ax(i),'ylabel'),'string'));
      title(get(get(ax(i),'title'),'string'));
@@ -244,5 +254,5 @@ for i=1:nImages
      end
 end
 cd (figDir)
-FigureSave([subjectName, conditionCode, 'Main'], gcf, 'pdf');
+FigureSave([params.subjectName, 'Main'], gcf, 'pdf');
 end

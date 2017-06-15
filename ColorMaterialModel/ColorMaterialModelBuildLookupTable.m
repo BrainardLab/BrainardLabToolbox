@@ -1,48 +1,50 @@
 % ColorMaterialModelBuildLookupTable
 %
-% Build a table to allow lookup of probabilities for various positions and
+% Build a 5-dimensional table to allow lookup of probabilities for various positions and
 % dimension weight.
+
+% 05/16/2017 ar Reviewed,added comments and gridParams structure. 
 
 %% Initialize; 
 clear; close all; 
 
-%% It's a 5D table
-% We're trying 2D first. 
-
 %% Fixed general parameters.  
-sigma = 1; 
-targetColorCoord = 0; 
-targetMaterialCoord = 0; 
-endPosition = 20;
-whichDistance = 'euclidean';
+gridParams.sigma = 1; 
+gridParams.targetColorCoord = 0; 
+gridParams.targetMaterialCoord = 0; 
+gridParams.endPosition = 20;
+gridParams.whichDistance = 'euclidean';
+
 %% Fixed temporary parameters. 
-nSamplePoints = 20; 
-nSimulate =  3000; 
+gridParams.nSamplePoints = 20; 
+gridParams.nSimulate =  3000; 
 
 %% Set dimensions of interest
-colorMatchColorCoords = linspace(-endPosition,endPosition,nSamplePoints);
-materialMatchColorCoords = linspace(-endPosition,endPosition,nSamplePoints);
-colorMatchMaterialCoords =  linspace(-endPosition,endPosition,nSamplePoints);
-materialMatchMaterialCoords = linspace(-endPosition,endPosition,nSamplePoints);
-weight = linspace(0,1,nSamplePoints/2);
-addNoise = true; 
+gridParams.colorMatchColorCoords = linspace(-gridParams.endPosition,gridParams.endPosition,gridParams.nSamplePoints);
+gridParams.materialMatchColorCoords = linspace(-gridParams.endPosition,gridParams.endPosition,gridParams.nSamplePoints);
+gridParams.colorMatchMaterialCoords =  linspace(-gridParams.endPosition,gridParams.endPosition,gridParams.nSamplePoints);
+gridParams.materialMatchMaterialCoords = linspace(-gridParams.endPosition,gridParams.endPosition,gridParams.nSamplePoints);
+gridParams.weight = linspace(0,1,gridParams.nSamplePoints/2);
+gridParams.addNoise = true; 
+
 %% Define grid sample points
-[colorMatchColorCoordGrid,materialMatchColorCoordGrid,colorMatchMaterialCoordGrid, materialMatchMaterialCoordsGrid, weightGrid] = ...
-    ndgrid(colorMatchColorCoords,materialMatchColorCoords,colorMatchMaterialCoords, materialMatchMaterialCoords,weight);
-CMLookUp = zeros(size(colorMatchColorCoordGrid));
+[gridParams.colorMatchColorCoordGrid,gridParams.materialMatchColorCoordGrid,gridParams.colorMatchMaterialCoordGrid, ...
+    gridParams.materialMatchMaterialCoordsGrid, gridParams.weightGrid] = ...
+    ndgrid(gridParams.colorMatchColorCoords,gridParams.materialMatchColorCoords,...
+    gridParams.colorMatchMaterialCoords, gridParams.materialMatchMaterialCoords, gridParams.weight);
+CMLookUp = zeros(size(gridParams.colorMatchColorCoordGrid));
 tic
-for i = 1:length(colorMatchColorCoords)
-    for j = 1:length(materialMatchColorCoords)
-        for k = 1:length(colorMatchMaterialCoords)
-            for l = 1:length(materialMatchMaterialCoords)
-                
-                for m = 1:length(weight)
+for i = 1:length(gridParams.colorMatchColorCoords)
+    for j = 1:length(gridParams.materialMatchColorCoords)
+        for k = 1:length(gridParams.colorMatchMaterialCoords)
+            for l = 1:length(gridParams.materialMatchMaterialCoords)
+                for m = 1:length(gridParams.weight)
                     
                     % Build the gridded data that we'll interpolate on
-                    CMLookUp(i,j,k,l,m) = ColorMaterialModelComputeProbBySimulation(nSimulate, targetColorCoord,targetMaterialCoord, ...
-                        colorMatchColorCoordGrid(i,j,k,l,m),materialMatchColorCoordGrid(i,j,k,l,m),...
-                        colorMatchMaterialCoordGrid(i,j,k,l,m), materialMatchMaterialCoordsGrid(i,j,k,l,m), weightGrid(i,j,k,l,m), ...
-                        sigma, addNoise, whichDistance);
+                    CMLookUp(i,j,k,l,m) = ColorMaterialModelComputeProbBySimulation(gridParams.nSimulate, gridParams.targetColorCoord,gridParams.targetMaterialCoord, ...
+                        gridParams.colorMatchColorCoordGrid(i,j,k,l,m),gridParams.materialMatchColorCoordGrid(i,j,k,l,m),...
+                        gridParams.colorMatchMaterialCoordGrid(i,j,k,l,m), gridParams.materialMatchMaterialCoordsGrid(i,j,k,l,m), gridParams.weightGrid(i,j,k,l,m), ...
+                        gridParams.sigma, gridParams.addNoise, gridParams.whichDistance);
                 end
                 
             end
@@ -50,29 +52,15 @@ for i = 1:length(colorMatchColorCoords)
     end
 end
 toc 
-save('LookUpCurrent', 'CMLookUp');
+
 % Build interpolator
-
-gridParams.colorMatchColorCoords = colorMatchColorCoords;
-gridParams.materialMatchColorCoords = materialMatchColorCoords;
-gridParams.colorMatchMaterialCoords = colorMatchMaterialCoords;
-gridParams.materialMatchMaterialCoords = materialMatchMaterialCoords;
-gridParams.weight = weight; 
-gridParams.nSamplePoints = nSamplePoints;
-gridParams.nSimulate = nSimulate;
-gridParams.sigma = sigma;
-gridParams.targetColorCoord = targetColorCoord;
-gridParams.targetMaterialCoord = targetMaterialCoord; 
-gridParams.endPosition = endPosition;
-gridParams.colorMatchColorCoordGrid = colorMatchColorCoordGrid;
-gridParams.materialMatchColorCoordGrid = materialMatchColorCoordGrid;
-gridParams.colorMatchMaterialCoordGrid = colorMatchMaterialCoordGrid;
-gridParams.materialMatchMaterialCoordsGrid = materialMatchMaterialCoordsGrid;
-gridParams.weightGrid = weightGrid;
-gridParams.addNoise = addNoise; 
-
-colorMaterialInterpolatorFunction = griddedInterpolant(colorMatchColorCoordGrid,materialMatchColorCoordGrid,colorMatchMaterialCoordGrid,materialMatchMaterialCoordsGrid, weightGrid, CMLookUp,'linear');
-save(['colorMaterialInterpolateFunLinear' whichDistance],'colorMaterialInterpolatorFunction','CMLookUp','gridParams');
+colorMaterialInterpolatorFunction = griddedInterpolant(gridParams.colorMatchColorCoordGrid,gridParams.materialMatchColorCoordGrid,...
+    gridParams.colorMatchMaterialCoordGrid,gridParams.materialMatchMaterialCoordsGrid, gridParams.weightGrid, CMLookUp,'linear');
+save(['colorMaterialInterpolateFunLinear' gridParams.whichDistance],'colorMaterialInterpolatorFunction','CMLookUp','gridParams');
 clear colorMaterialInterpolatorFunction
-colorMaterialInterpolatorFunction = griddedInterpolant(colorMatchColorCoordGrid,materialMatchColorCoordGrid,colorMatchMaterialCoordGrid,materialMatchMaterialCoordsGrid, weightGrid, CMLookUp,'cubic');
-save(['colorMaterialInterpolateFunCubic' whichDistance],'colorMaterialInterpolatorFunction','CMLookUp','gridParams'); 
+colorMaterialInterpolatorFunction = griddedInterpolant(gridParams.colorMatchColorCoordGrid,...
+    gridParams.materialMatchColorCoordGrid,gridParams.colorMatchMaterialCoordGrid,...
+    gridParams.materialMatchMaterialCoordsGrid, gridParams.weightGrid, CMLookUp,'cubic');
+
+% Save all parameters. 
+save(['colorMaterialInterpolateFunCubic' gridParams.whichDistance],'colorMaterialInterpolatorFunction','CMLookUp','gridParams'); 

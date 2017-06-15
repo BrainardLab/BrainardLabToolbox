@@ -15,9 +15,12 @@ function [logLikely, predictedProbabilities] = ColorMaterialModelComputeLogLikel
 %       materialMatchColorCoords - current inferred position for material matches on the color axis.
 %       sigma -fixed standard deviation
 %       w - current weight(s) for color/material axes.
-%       F - object that contains the precomputed lookup table
+%       nSimulate - define the number of simulations for the simulate method.    
 %       whichMethod - method used to recover probabilities. 
-%       nSimulate - define the number of simulations for the simulate method.     
+%       whichDistance - which method for computing distance should be used (e.g. 'euclidean', 'cityblock'). Check help 
+%       pdist for options.  
+%       F - object that contains the precomputed lookup table
+%       addNoise - option to add noise to the target. 
 %   Output:
 %       logLikelyFit -            log likelihood of the fit.
 %       predictedProbabilities -  responses predicted from the fit.
@@ -30,9 +33,10 @@ function [logLikely, predictedProbabilities] = ColorMaterialModelComputeLogLikel
 p = inputParser;
 p.addParameter('nSimulate',1000, @isnumeric);
 p.addParameter('whichMethod','lookup', @ischar);
+p.addParameter('whichDistance','euclidean', @ischar);
 p.addParameter('Fobj',[], @(x)(isempty(x) || isa(x,'griddedInterpolant')));
+p.addParameter('addNoise',true, @islogical);
 p.parse(varargin{:});
-
 
 % Compute the log likelihood
 logLikely = 0;
@@ -53,7 +57,7 @@ for i = 1:nPairs
              s = rng(173);
              predictedProbabilities(i) = ColorMaterialModelComputeProbBySimulation(p.Results.nSimulate,targetColorCoord, targetMaterialCoord, ...
                 colorMatchColorCoord, materialMatchColorCoord, ...
-                colorMatchMaterialCoord,materialMatchMaterialCoord, w, sigma);
+                colorMatchMaterialCoord,materialMatchMaterialCoord, w, sigma, p.Results.addNoise, p.Results.whichDistance);
             rng(s);
         case 'lookup'
             predictedProbabilities(i) = p.Results.Fobj(colorMatchColorCoord,materialMatchColorCoord,colorMatchMaterialCoord,materialMatchMaterialCoord, w);
@@ -76,12 +80,10 @@ for i = 1:nPairs
     logLikely = logLikely + theResponses(i)*log10(predictedProbabilities(i)) + (nTrials(i)-theResponses(i))*log10(1-predictedProbabilities(i));
 end
 
-% Something bad happened if this is true
+% Something bad will happen if returned loglikelihood is NaN. 
 if (isnan(logLikely))
     error('Returned likelihood is NaN');
 end
-
-
 
 end
 

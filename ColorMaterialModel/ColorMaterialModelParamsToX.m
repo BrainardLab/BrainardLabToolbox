@@ -1,12 +1,12 @@
-function [x] = ColorMaterialModelParamsToX(colorMatchMaterialCoords,materialMatchColorCoords,w,sigma)
-% [x] = ColorMaterialModelParamsToX(colorMatchMaterialCoords,materialMatchColorCoords,w,sigma)
+function x = ColorMaterialModelParamsToX(colorMatchMaterialCoords,materialMatchColorCoords,weight,sigma)
+% x = ColorMaterialModelParamsToX(colorMatchMaterialCoords,materialMatchColorCoords,weight,sigma)
 %
-% Packk the parameter vector for ColorMaterialModel
+% Pack the parameter vector for ColorMaterialModel
 %
 % Input: 
-%   colorPositions - inferred positions on color dimensions for a material match
-%   materialPositions - inferred positions on material dimensions for a color match
-%   w - weighting of color, relative to material. 
+%   materialMatchColorCoords - inferred positions on material dimensions for a color match
+%   colorMatchMaterialCoords - inferred positions on color dimensions for a material match
+%   weight - weighting of color, relative to material. 
 %   sigma - noise, fixed to 1.
 %
 % Output: 
@@ -18,7 +18,7 @@ function [x] = ColorMaterialModelParamsToX(colorMatchMaterialCoords,materialMatc
 
 % 12/2/2016 ar, dhb Wrote it
 
-x = [colorMatchMaterialCoords materialMatchColorCoords w sigma]';
+x = [colorMatchMaterialCoords materialMatchColorCoords weight sigma]';
 
 end
 
