@@ -32,6 +32,6 @@ if (useGamePad)
     end
 % Keyboard branch
 else
-    % Put keyboard waiting code here
-    
+    % Waits for keyboard input 
+    GetKbChar;
 end
