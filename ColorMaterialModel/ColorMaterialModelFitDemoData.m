@@ -19,9 +19,9 @@ dataDir = '/Users/ana/Dropbox (Aguirre-Brainard Lab)/CNST_analysis/ColorMaterial
 figDir = dataDir; 
 %% Load a data set (given the params)
 nBlocks = 24; 
-whichW = 0.5; 
-howManyDataSets = 1; 
-fileName = ['DemoData' num2str(whichW) 'W' num2str(nBlocks) 'Blocks' num2str(howManyDataSets) 'New.mat']; 
+simulatedW = 0.5; 
+nDataSets = 1; 
+fileName = ['DemoData' num2str(simulatedW) 'W' num2str(nBlocks) 'Blocks' num2str(nDataSets) 'New.mat']; 
 cd([dataDir '/'])
 load(fileName); 
 
