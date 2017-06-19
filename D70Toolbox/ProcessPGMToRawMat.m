@@ -22,12 +22,14 @@
 % 11/10/10  dhb           Remove computation of scale factor and demosaicImageScaled, because these were not used.
 %           dhb           Change variable name "path" to "imageDir" to avoid name collision with path function
 % 7/5/11    dhb           Handle displayRaw not passed.
+% 6/16/17   dhb           Added explicit end statement to displayRaw arg
+%                         check line.  I guess Matlab behaves differently now.
 
 
 function ProcessPGMToRawMat(silent, imageDir, displayRaw)
     if (nargin == 0 || isempty(silent)) silent = 0; end;
     
-    if (nargin < 3 || isempty(displayRaw)) displayRaw = 0;
+    if (nargin < 3 || isempty(displayRaw)) displayRaw = 0; end;
 
     %% List NEF files of given directory
     if (silent == 0)

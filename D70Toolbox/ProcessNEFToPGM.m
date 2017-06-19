@@ -16,6 +16,7 @@
 % 01/28/10  cb, ar        Added a command to call the specified directory.
 % 06/25/10  gt            Changed into a function.
 % 12/31/10  dhb           Optional dcrawversion.
+% 6/18/17   dhb           Use fullfile to create dcraw command.
 
 
 function ProcessNEFToPGM(silent, path, dcrawpath, dcrawversion)
@@ -63,14 +64,13 @@ function ProcessNEFToPGM(silent, path, dcrawpath, dcrawversion)
         fprintf('\t\tISO %g\n',imageInfo(f).ISO);
 
         % Use dcraw to conver the image to raw PGM format
-        dcrawCmd = [dcrawpath 'dcraw.' dcrawversion ' -4 -d ' filename '.NEF'];
+        dcrawCmd = [fullfile(dcrawpath,['dcraw.' dcrawversion]) ' -4 -d ' filename '.NEF'];
         unix(dcrawCmd);
         
         % For the record, create a text file that has dcraw's view of what version
         % it was.
-        dcrawVerCmd = [dcrawpath 'dcraw.' dcrawversion ' >& ' filename '.dcrawverinfo.txt'];
+        dcrawVerCmd = [fullfile(dcrawpath,['dcraw.' dcrawversion]) ' >& ' filename '.dcrawverinfo.txt'];
         unix(dcrawVerCmd);
-
 
         % Space
         fprintf('\n');
