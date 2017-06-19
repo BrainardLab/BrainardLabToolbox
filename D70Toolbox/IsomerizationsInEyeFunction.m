@@ -9,6 +9,15 @@ function [lRate,mRate,sRate] = IsomerizationsInEyeFunction(spd,S_spd)
 %
 % 12/13/09  dhb  Wrote it, once again since original was lost.
 % 05/24/14  dhb  Updated but did not test.  
+% 06/19/17  dhb  This was broken, because there was no source for pupil
+%                diameter.  This might be because the behavior of
+%                DefaultPhotoreceptors changed.
+%                Fixed by setting this field to what the comments below say
+%                it should be.  Not 100% sure behavior is what it used to
+%                be.  The peak isomerization probs are close to but not
+%                exactly the same as those in the comments below.  (Now get
+%                0.384, 0.353, and 0.084].)  The parameter sources do,
+%                however, match up with the comments.
 
 %% Set some photoreceptor properties.  Here are is the parameter
 % info filled in:
@@ -47,6 +56,8 @@ function [lRate,mRate,sRate] = IsomerizationsInEyeFunction(spd,S_spd)
 whatCalc = 'LivingHumanFovea';
 photoreceptors = DefaultPhotoreceptors(whatCalc);
 photoreceptors = FillInPhotoreceptors(photoreceptors);
+photoreceptors.pupilDiameter.source = 'PokornySmith';
+photoreceptors.pupilDiameter.value = [];
 
 %% Define common wavelength sampling for this script.
 S = photoreceptors.nomogram.S;
