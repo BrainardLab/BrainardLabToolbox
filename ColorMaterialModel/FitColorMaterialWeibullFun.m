@@ -23,16 +23,14 @@ theShape = x(3);
 theMin = x(4);
 theRange = x(5);
 
-% Compute error only if we provide the actual data. Otherwise, just produce
-% return the values of a Weibul fit that correspond to the current paramters given our set of input values. 
+% Compute error only if we provide the actual data. Otherwise, return the values of a Weibull fit
+% that correspond to the current paramters given our set of input values. 
 thePreds = ColorMaterialModelComputeWeibullProb(theVals,theScaleNeg,theScalePos,theShape,theMin,theRange);
+
+% NOT SURE WHY THIS FUNCTION DOES NOT CRASH IF NARGIN =< 2???? 
 if (nargin > 2)
-    theDiff = theData-thePreds;
-    f = sqrt(mean(theDiff.^2));
+    f = ComputeRealRMSE(theData,thePreds); 
 else
     f = [];
 end
 end
-
-
-
