@@ -21,6 +21,11 @@ function [LogLikelyhood, RMSError, params] = ColorMaterialModelCrossValidation(t
 % March 2017 ar Wrote it. 
 % 06/17/2017 ar Functionalized it, added comments. 
 
+% Sanity check
+if (size(theData,2) ~= nBlocks)
+    error('Oops');
+end
+    
 % Partition data for cross validation.
 c = cvpartition(nBlocks,'Kfold',nFolds);
 

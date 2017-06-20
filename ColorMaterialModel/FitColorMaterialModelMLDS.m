@@ -33,6 +33,7 @@ function [x, logLikelyFit, predictedResponses] = FitColorMaterialModelMLDS(...
 
 %% Run some sanity checks.
 %
+tic
 % These are the same checks we were implemented for the MLDSColorSelection model.
 % And it seems reasonable to do them here as well. Check this and throw error message if it does not hold.
 if (length(theResponses(:)) ~= length(nTrials(:)))

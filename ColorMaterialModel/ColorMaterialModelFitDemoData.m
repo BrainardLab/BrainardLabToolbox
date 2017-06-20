@@ -10,19 +10,28 @@
 
 %% Initialize and set directories and some plotting params.
 clear; close all;
-currentDir = pwd;
 
 %% Set relevant preferences and directories. 
 %setpref('ColorMaterialModel','demoDataDir','/Users/Shared/Matlab/Toolboxes/BrainardLabToolbox/ColorMaterialModel/DemoData/');
 setpref('ColorMaterialModel','demoDataDir','/Users/dhb/Documents/Matlab/toolboxes/BrainardLabToolbox/ColorMaterialModel/DemoData/');
-dataDir = '/Users/ana/Dropbox (Aguirre-Brainard Lab)/CNST_analysis/ColorMaterial/demoPlots'; 
-figDir = dataDir; 
+
+% Main demo for the toolbox and larger audience. 
+% If this is set to false, then the data is saved on dropbox and analyzed
+% separately (as a part of the main model/experimental analysis. 
+MAINDEMO = true; 
+if MAINDEMO
+    dataDir = '/Users/Shared/Matlab/Toolboxes/BrainardLabToolbox/ColorMaterialModel/DemoData/';
+else
+    dataDir = '/Users/ana/Dropbox (Aguirre-Brainard Lab)/CNST_analysis/ColorMaterial/DemoData/';
+end
+figDir = dataDir;
+
 %% Load a data set (given the params)
 nBlocks = 24; 
 simulatedW = 0.5; 
 nDataSets = 1; 
 fileName = ['DemoData' num2str(simulatedW) 'W' num2str(nBlocks) 'Blocks' num2str(nDataSets) 'New.mat']; 
-cd([dataDir '/'])
+cd(dataDir)
 load(fileName); 
 
 % Plot the solution? Save the plots? Include Weibull plots?
@@ -104,4 +113,5 @@ for whichSet = 1:length(dataSet)
     end
 end
 % Save current fit
+cd(dataDir)
 save([fileName num2str(nBlocks) params.whichWeight 'Fit'])

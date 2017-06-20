@@ -11,8 +11,12 @@ currentDir = pwd;
 %% Set relevant preferences and directories. 
 setpref('ColorMaterialModel','demoDataDir','/Users/Shared/Matlab/Toolboxes/BrainardLabToolbox/ColorMaterialModel/DemoData/');
 %setpref('ColorMaterialModel','demoDataDir','/Users/dhb/Documents/Matlab/toolboxes/BrainardLabToolbox/ColorMaterialModel/DemoData/');
-dataDir = '/Users/ana/Dropbox (Aguirre-Brainard Lab)/CNST_analysis/ColorMaterial/demoPlots'; 
-
+MAINDEMO = true; % Main demo for the toolbox and larger audience. 
+if MAINDEMO
+    dataDir = '/Users/Shared/Matlab/Toolboxes/BrainardLabToolbox/ColorMaterialModel/DemoData/';
+else
+    dataDir = '/Users/ana/Dropbox (Aguirre-Brainard Lab)/CNST_analysis/ColorMaterial/demoPlots';
+end
 
 %% Explicitely state all underlying parameters that we need to generate/fit the data. 
 % Experimental parameters (that capture the design of our experiment)
