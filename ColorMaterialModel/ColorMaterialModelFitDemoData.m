@@ -30,7 +30,7 @@ figDir = dataDir;
 nBlocks = 24; 
 simulatedW = 0.5; 
 nDataSets = 1; 
-fileName = ['DemoData' num2str(simulatedW) 'W' num2str(nBlocks) 'Blocks' num2str(nDataSets) 'New.mat']; 
+fileName = ['DemoData' num2str(simulatedW) 'W' num2str(nBlocks) 'Blocks' num2str(nDataSets) 'Lin.mat']; 
 cd(dataDir)
 load(fileName); 
 
@@ -38,7 +38,7 @@ load(fileName);
 plotSolution = 1;
 saveFig = 0; 
 weibullplots = 0; 
-params.subjectName = ['demo' datetime]; 
+params.subjectName = fileName(1:end-4); 
 
 %% Set model parameters 
 % Specify which method to use for looking up probabilities. 
@@ -114,4 +114,4 @@ for whichSet = 1:length(dataSet)
 end
 % Save current fit
 cd(dataDir)
-save([fileName num2str(nBlocks) params.whichWeight 'Fit'])
+save([params.subjectName 'Fit.mat'], 'dataSet', 'params', 'pairInfo')

@@ -8,14 +8,9 @@
 
 % Initialize
 clear; close all;
-figDir = '/Users/radonjic/Dropbox (Aguirre-Brainard Lab)/CNST_analysis/ColorMaterial/Pilot';
+figDir = '/Users/radonjic/Dropbox (Aguirre-Brainard Lab)/CNST_analysis/ColorMaterial/DemoData';
 cd(figDir)
 
-% Needed in the current iteration on the grid search. 
-% We will delete this once we have it being saved as the lookup table is
-% being computed. 
-load('gridParams.mat');
- 
 % movie parametes. 
 frameRate = 5;
 quality = 100;
@@ -37,26 +32,38 @@ end
 % fix 2 dimensions in the middle (there are 100 samples)
 randValue1 = 50;
 randValue2 = 50;
-    
+
+% Which distance metric is used to compute the table? 
+% Options: Euclidean or CityBlock
+distance = 'Euclidean'; 
+
 % Loops through different dimension combination for linear and cubic
 % interpolation from the lookup table. 
 for whichInterpolation =1:2 
     if whichInterpolation == 1
-        lookupMethod = 'cubic';
+        lookupMethod = ['cubic' distance];
     elseif whichInterpolation == 2
-        lookupMethod = 'linear';
+        lookupMethod = ['linear' distance];
     end
     
     % Load lookup table
     switch lookupMethod
-        case  'linear'
-            load colorMaterialInterpolateFunctionLinear.mat
+        case  'linearEuclidean'
+            load colorMaterialInterpolateFunLineareuclidean.mat
             colorMaterialInterpolatorFunction = colorMaterialInterpolatorFunction;
-            interpCode = 'L';
-        case 'cubic'
-            load colorMaterialInterpolateFunctionCubic.mat
+            interpCode = 'L-Euc';
+        case 'cubicEuclidean'
+            load colorMaterialInterpolateFunCubiceuclidean.mat
             colorMaterialInterpolatorFunction = colorMaterialInterpolatorFunction;
-            interpCode = 'C';
+            interpCode = 'C-Euc';
+        case  'linearcityblock'
+            load colorMaterialInterpolateFunLinearcityblock.mat
+            colorMaterialInterpolatorFunction = colorMaterialInterpolatorFunction;
+            interpCode = 'L-CB';
+        case 'cubiccityblock'
+            load colorMaterialInterpolateFunCubiccityblock.mat
+            colorMaterialInterpolatorFunction = colorMaterialInterpolatorFunction;
+            interpCode = 'C-CB';
     end
     
     for ii = 1:size(comb,1)

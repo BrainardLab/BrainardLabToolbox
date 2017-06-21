@@ -136,10 +136,7 @@ if weibullplots
     % match being chosen. Each column is a fixed material step (i.e., color
     % varies across). Each row is a fixed color step (material varies). 
     % We plot column by column (i.e. each column is going to be one line in
-    % the plot). This line shows how the probability of choosing a color match  
-    % of a fixed material step (index i below) varies for different degrees of 
-    % color variation of the material match (x axis). Each line (column) is a fixed
-    % material step. 
+    % the plot). This line is color variation of a material match 
     for i = 1:size(colorMaterialDataProb,2);
         if i == 4
             fixMidPoint = 1;
@@ -168,6 +165,9 @@ if weibullplots
     end
 end
 %% Plot predictions of the model through the actual data
+% Version 1: color for the x-axis
+% First check the positions of color (material) match on color (material) axis.  
+% Signal if there is an error.
 returnedColorMatchColorCoord =  FColor(params.targetColorCoord);
 returnedMaterialMatchMaterialCoord = FMaterial(params.targetMaterialCoord);
 
@@ -181,9 +181,9 @@ rangeOfColorMatchMaterialCoordinates =  linspace(min(params.colorMatchMaterialCo
 % curve for each one.
 
 for whichMaterialCoordinate = 1:length(params.colorMatchMaterialCoords)
-    
+
     % Get the inferred material position for this color match
-    % Note that this is read from cubic spline fit.
+    % Note that this is read from cubic spline fit.  
     returnedColorMatchMaterialCoord(whichMaterialCoordinate) = FMaterial(params.colorMatchMaterialCoords(whichMaterialCoordinate));
     
     % Get the inferred color position for a range of material matches
@@ -195,6 +195,8 @@ for whichMaterialCoordinate = 1:length(params.colorMatchMaterialCoords)
         modelPredictions(whichColorCoordinate, whichMaterialCoordinate) = ColorMaterialModelComputeProb(params.targetColorCoord,params.targetMaterialCoord, ...
             returnedColorMatchColorCoord,returnedMaterialMatchColorCoord(whichColorCoordinate),...
             returnedColorMatchMaterialCoord(whichMaterialCoordinate), returnedMaterialMatchMaterialCoord, returnedW, returnedSigma);
+        % Compute the model predictions
+        
     end
 end
 rangeOfMaterialMatchColorCoordinates = repmat(rangeOfMaterialMatchColorCoordinates,[1, length(params.materialMatchColorCoords)]);
