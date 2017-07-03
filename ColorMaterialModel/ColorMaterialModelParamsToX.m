@@ -1,5 +1,5 @@
-function x = ColorMaterialModelParamsToX(colorMatchMaterialCoords,materialMatchColorCoords,weight,sigma)
-% x = ColorMaterialModelParamsToX(colorMatchMaterialCoords,materialMatchColorCoords,weight,sigma)
+function x = ColorMaterialModelParamsToX(materialMatchColorCoords,colorMatchMaterialCoords,weight,sigma)
+% x = ColorMaterialModelParamsToX(materialMatchColorCoords,colorMatchMaterialCoords,weight,sigma)
 %
 % Pack the parameter vector for ColorMaterialModel
 %
@@ -18,7 +18,7 @@ function x = ColorMaterialModelParamsToX(colorMatchMaterialCoords,materialMatchC
 
 % 12/2/2016 ar, dhb Wrote it
 
-x = [colorMatchMaterialCoords materialMatchColorCoords weight sigma]';
+x = [materialMatchColorCoords colorMatchMaterialCoords weight sigma]';
 
 end
 

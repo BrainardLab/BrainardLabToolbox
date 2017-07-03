@@ -1,5 +1,5 @@
 %function bootstrapStructure = ColorMaterialModelBootstrapData(theData, nBlocks, nRepetitions, pairInfo, params)
-function bootstrapStructure = ColorMaterialModelBootstrapData(theData, nBlocks, nRepetitions, pairInfo, params)
+function bootstrapData = ColorMaterialModelBootstrapData(theData, nBlocks, nRepetitions, pairInfo, params)
 % Perform bootstraping to find confidence intervals for model paramters. 
 % 
 % Input: 

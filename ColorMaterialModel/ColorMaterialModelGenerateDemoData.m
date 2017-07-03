@@ -74,6 +74,7 @@ n = 0;
 % colorIndex = [];
 columnIndex = [];
 rowIndex = [];
+colorMatchFirst = []; 
 overallColorMaterialPairIndices = [];
 
 % These are the coordinates of the color matches.  The color coordinate always matches the
@@ -100,6 +101,9 @@ for whichColorOfTheMaterialMatch = 1:length(params.materialMatchColorCoords)
         columnIndex(whichColorOfTheMaterialMatch, whichMaterialOfTheColorMatch) = whichMaterialOfTheColorMatch;
         n = n + 1;
         overallColorMaterialPairIndices(whichColorOfTheMaterialMatch, whichMaterialOfTheColorMatch) = n;
+        
+        % color match is always first, by default. 
+        colorMatchFirst(whichColorOfTheMaterialMatch, whichMaterialOfTheColorMatch) = 1; 
         
         % The pair is a cell array containing two vectors.  The
         % first vector is the coordinates of the color match, the
@@ -209,7 +213,7 @@ pairInfo.pairMaterialMatchMaterialCoords = pairMaterialMatchMaterialCoords;
 indexMatrix.rowIndex = rowIndex; 
 indexMatrix.columnIndex = columnIndex; 
 indexMatrix.overallColorMaterialPairIndices = overallColorMaterialPairIndices; 
-
+indexMatrix.colorMatchFirst = colorMatchFirst; 
 cd(dataDir);
 save(dataSetName, 'dataSet', 'params', 'pairInfo', 'indexMatrix');
 cd(currentDir);

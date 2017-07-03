@@ -4,18 +4,18 @@ function [x, logLikelyFit, predictedResponses] = FitColorMaterialModelMLDS(...
     theResponses,nTrials, params)
 % [x, logLikelyFit, predictedResponses] = FitColorMaterialModelMLDS(pairColorMatchMatrialCoordIndices,pairMaterialMatchColorCoordIndices,theResponses,nTrials, params, varargin)
 
-% This is the main fitting/search routine in the model. 
+% This is the main fitting/search routine in the model.
 % It takes the data (from experiment or simulation) and returns inferred position of the
 % competitors on color and material dimension as well as the weigths.
-% 
-% Input: 
+%
+% Input:
 %   pairColorMatchMatrialCoordIndices - index to get color match material coordinate for each trial type.
 %   pairMaterialMatchColorCoordIndices - index to get material match color coordinate for each trial type.
-%   theResponses - set of responses for this pair (number of times color match is chosen. 
+%   theResponses - set of responses for this pair (number of times color match is chosen.
 %   nTrials - total number of trials run. Vector of same size as theResponses.
 %   params - structure giving experiment design parameters
 %
-% Output: 
+% Output:
 %   x - returned parameters. needs to be converted using xToParams routine to get the positions and weigths.
 %   logLikelyFit - log likelihood of the fit.
 %   predictedResponses - responses predicted from the fit.
@@ -124,28 +124,29 @@ for k1 = 1:length(params.tryMaterialSpacingValues)
                     initialColorMatchMaterialCoords = [params.tryMaterialSpacingValues(k1) zeros(1,params.smoothOrder-1)];
                     initialMaterialMatchColorCoords = [params.tryColorSpacingValues(k2) zeros(1,params.smoothOrder-1)];
                 case 'full'
-                    initialColorMatchMaterialCoords = params.tryMaterialSpacingValues(k1)*[linspace(params.competitorsRangeNegative(1),params.competitorsRangeNegative(2), ...
-                        params.numberOfCompetitorsNegative),params.targetMaterialCoord,linspace(params.competitorsRangePositive(1),params.competitorsRangePositive(2), ...
-                        params.numberOfCompetitorsPositive)];
                     initialMaterialMatchColorCoords = params.tryColorSpacingValues(k2)*[linspace(params.competitorsRangeNegative(1),...
                         params.competitorsRangeNegative(2), params.numberOfCompetitorsNegative),params.targetColorCoord,...
                         linspace(params.competitorsRangePositive(1),params.competitorsRangePositive(2), params.numberOfCompetitorsPositive)];
+                    initialColorMatchMaterialCoords = params.tryMaterialSpacingValues(k1)*[linspace(params.competitorsRangeNegative(1),params.competitorsRangeNegative(2), ...
+                        params.numberOfCompetitorsNegative),params.targetMaterialCoord,linspace(params.competitorsRangePositive(1),params.competitorsRangePositive(2), ...
+                        params.numberOfCompetitorsPositive)];
+                    
                 otherwise
                     error('Unknown whichPosition method specified');
                     
             end
-            initialParams = ColorMaterialModelParamsToX(initialColorMatchMaterialCoords,initialMaterialMatchColorCoords,params.tryWeightValues(k3),params.sigma);
+            initialParams = ColorMaterialModelParamsToX(initialMaterialMatchColorCoords,initialColorMatchMaterialCoords,params.tryWeightValues(k3),params.sigma);
             
             % Create bounds vectors and start with situation where no
             % parameters can vary.  This then gets adjusted according to
             % the particular fit method we are running, just below.
             vlb = initialParams; vub = initialParams;
-
+            
             % Set reasonable upper and lower bounds on position parameters
             % for each method.
             switch (params.whichPositions)
                 case 'smoothSpacing'
-                    % Weights on coefficients should be bounded. 
+                    % Weights on coefficients should be bounded.
                     vlb(1:end-2) = -params.maxPositionValue+0.1;
                     vub(1:end-2) = params.maxPositionValue-0.1;
                 case 'full'
@@ -164,7 +165,7 @@ for k1 = 1:length(params.tryMaterialSpacingValues)
             
             % Allow weight to vary, or not.
             switch (params.whichWeight)
-                case 'weightFixed'             
+                case 'weightFixed'
                     % Fix weight
                     vlb(end-1) = initialParams(end-1);
                     vub(end-1) = initialParams(end-1);
@@ -181,14 +182,14 @@ for k1 = 1:length(params.tryMaterialSpacingValues)
                 error('We really are assuming that sigma is 1 in our thinking, so check why it is not here');
             end
             vub(end) = params.sigma;
-            vlb(end) = params.sigma; 
+            vlb(end) = params.sigma;
             
             % Print out log likelihood of where we started
-%             [fTemp,~] = FitColorMaterialModelMLDSFun(initialParams, ...
-%                 pairColorMatchColorsCoords,pairMaterialMatchColorCoords, ...
-%                 pairColorMatchMaterialCoords,pairMaterialMatchMaterialCoords, ...
-%                 theResponses,nTrials,params);
-%            fprintf('Initial position log likelihood %0.2f.\n', -fTemp);
+            %             [fTemp,~] = FitColorMaterialModelMLDSFun(initialParams, ...
+            %                 pairColorMatchColorsCoords,pairMaterialMatchColorCoords, ...
+            %                 pairColorMatchMaterialCoords,pairMaterialMatchMaterialCoords, ...
+            %                 theResponses,nTrials,params);
+            %            fprintf('Initial position log likelihood %0.2f.\n', -fTemp);
             
             % Run the search
             switch (params.whichPositions)
@@ -205,7 +206,7 @@ for k1 = 1:length(params.tryMaterialSpacingValues)
                     xTemp = fmincon(@(x)FitColorMaterialModelMLDSFun(x,...
                         pairColorMatchColorsCoords,pairMaterialMatchColorCoords, ...
                         pairColorMatchMaterialCoords,pairMaterialMatchMaterialCoords, ...
-                        theResponses, nTrials, params),initialParams,A,b,[],[],vlb,vub,[],options);      
+                        theResponses, nTrials, params),initialParams,A,b,[],[],vlb,vub,[],options);
                 otherwise
                     error('Unknown whichPosition method specified');
             end

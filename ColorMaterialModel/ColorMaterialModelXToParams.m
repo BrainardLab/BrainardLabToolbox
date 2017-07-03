@@ -1,5 +1,5 @@
-function [colorMatchMaterialCoords,materialMatchColorCoords,w,sigma] = ColorMaterialModelXToParams(x,params)
-% [colorMatchMaterialCoords,materialMatchColorCoords,w,sigma] = ColorMaterialModelXToParams(x,params)
+function [materialMatchColorCoords,colorMatchMaterialCoords,w,sigma] = ColorMaterialModelXToParams(x,params)
+% [materialMatchColorCoords,colorMatchMaterialCoords,w,sigma] = ColorMaterialModelXToParams(x,params)
 %
 % Unpack the parameter vector for ColorMaterialModel
 %
@@ -25,21 +25,23 @@ switch params.whichPositions
         % the coefficients on polynomials of order params.smoothOrder for
         % both the color match material coordinates and the material match
         % color coordinates.  Extract these.
-        materialCoordSpacing = x(1:params.smoothOrder);
-        colorCoordSpacing = x(params.smoothOrder+1:params.smoothOrder+params.smoothOrder);
+        colorCoordSpacing = x(1:params.smoothOrder);
+        materialCoordSpacing  = x(params.smoothOrder+1:params.smoothOrder+params.smoothOrder);
         
         % We need to apply the polynomial so that what we return from this routine is the 
         % actual positions.  To do this, we get the nominal stimulus positions and then
         % apply the polynomial to them.  To get the nominal stimulus position, we rely
         % on information in the params structure, plus the fact that the target position is
         % 0 for both dimensions.  This gets us to the nominal positions.
-        numberOfCompetitorsPositive = params.numberOfCompetitorsPositive;
-        numberOfCompetitorsNegative = params.numberOfCompetitorsNegative;
-        competitorsRangePositive = params.competitorsRangePositive;
-        competitorsRangeNegative = params.competitorsRangeNegative;
-        targetPosition = 0;
-        nominalColorMatchMaterialCoords = [linspace(competitorsRangeNegative(1),competitorsRangeNegative(2), numberOfCompetitorsNegative),targetPosition,linspace(competitorsRangePositive(1),competitorsRangePositive(2), numberOfCompetitorsPositive)];
-        nominalMaterialMatchColorCoords = [linspace(competitorsRangeNegative(1),competitorsRangeNegative(2), numberOfCompetitorsNegative),targetPosition,linspace(competitorsRangePositive(1),competitorsRangePositive(2), numberOfCompetitorsPositive)];
+        
+        nominalColorMatchMaterialCoords = [linspace(params.competitorsRangeNegative(1),params.competitorsRangeNegative(2), ...
+            params.numberOfCompetitorsNegative),...
+            params.targetMaterialCoord, ...
+            linspace(params.competitorsRangePositive(1),params.competitorsRangePositive(2), params.numberOfCompetitorsPositive)];
+        nominalMaterialMatchColorCoords = [linspace(params.competitorsRangeNegative(1),params.competitorsRangeNegative(2), ...
+            params.numberOfCompetitorsNegative),...
+            params.targetColorCoord, ...
+            linspace(params.competitorsRangePositive(1),params.competitorsRangePositive(2), params.numberOfCompetitorsPositive)];
 
         % Derive positions from spacing.  We compute a poloynomial of
         % order equal to the length of the provided coordinates.
@@ -58,8 +60,8 @@ switch params.whichPositions
     case 'full'
         % Here we just search on all the positions, so we just need to suck
         % them out of the parameters vector.
-        colorMatchMaterialCoords = x(1:params.numberOfColorCompetitors);
-        materialMatchColorCoords = x((1+params.numberOfColorCompetitors):(params.numberOfColorCompetitors+params.numberOfMaterialCompetitors));
+        materialMatchColorCoords  = x(1:params.numberOfColorCompetitors);
+        colorMatchMaterialCoords = x((1+params.numberOfColorCompetitors):(params.numberOfColorCompetitors+params.numberOfMaterialCompetitors));
     otherwise
         error('Unknown whichPositions method specified.')
 end
