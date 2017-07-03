@@ -20,7 +20,7 @@ setpref('ColorMaterialModel','demoDataDir','/Users/dhb/Documents/Matlab/toolboxe
 % separately (as a part of the main model/experimental analysis. 
 MAINDEMO = true; 
 if MAINDEMO
-    dataDir = '/Users/Shared/Matlab/Toolboxes/BrainardLabToolbox/ColorMaterialModel/DemoData/';
+    dataDir = '/Users/ana/Documents/MATLAB/toolboxes/BrainardLabToolbox/ColorMaterialModel/DemoData/';
 else
     dataDir = '/Users/ana/Dropbox (Aguirre-Brainard Lab)/CNST_analysis/ColorMaterial/DemoData/';
 end
@@ -30,7 +30,7 @@ figDir = dataDir;
 nBlocks = 24; 
 simulatedW = 0.5; 
 nDataSets = 1; 
-fileName = ['DemoData' num2str(simulatedW) 'W' num2str(nBlocks) 'Blocks' num2str(nDataSets) 'Lin.mat']; 
+fileName = ['DemoData' num2str(simulatedW) 'W' num2str(nBlocks) 'Blocks' num2str(nDataSets) '.mat']; 
 cd(dataDir)
 load(fileName); 
 

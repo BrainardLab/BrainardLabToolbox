@@ -13,7 +13,7 @@ setpref('ColorMaterialModel','demoDataDir','/Users/Shared/Matlab/Toolboxes/Brain
 %setpref('ColorMaterialModel','demoDataDir','/Users/dhb/Documents/Matlab/toolboxes/BrainardLabToolbox/ColorMaterialModel/DemoData/');
 MAINDEMO = true; % Main demo for the toolbox and larger audience. 
 if MAINDEMO
-    dataDir = '/Users/Shared/Matlab/Toolboxes/BrainardLabToolbox/ColorMaterialModel/DemoData/';
+    dataDir = '/Users/ana/Documents/MATLAB/toolboxes/BrainardLabToolbox/ColorMaterialModel/DemoData';
 else
     dataDir = '/Users/ana/Dropbox (Aguirre-Brainard Lab)/CNST_analysis/ColorMaterial/demoPlots';
 end
@@ -28,8 +28,6 @@ params.targetColorCoord = 0; % nominal position of the target within  a color di
 params.sigma = 1; % standard deviation. 
 params.sigmaFactor = 4; % factor by which we divide the standard deviation to enforce minimal spacing. 
 
-% ?????? why do we need this param?
-params.targetPosition = 0; 
 params.targetIndexColor =  11; % target position on the color dimension in the set of all paramters. 
 params.targetIndexMaterial = 4; % target position on the material dimension in the set of all paramters. 
 
