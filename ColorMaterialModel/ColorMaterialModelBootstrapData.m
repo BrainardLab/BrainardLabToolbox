@@ -1,5 +1,5 @@
-%function bootstrapStructure = ColorMaterialModelBootstrapData(theData, nBlocks, nRepetitions, pairInfo, params)
-function bootstrapData = ColorMaterialModelBootstrapData(theData, nBlocks, nRepetitions, pairInfo, params)
+%function bootstrappedDataStruct = ColorMaterialModelBootstrapData(theData, nBlocks, nRepetitions, pairInfo, params)
+ function bootstrappedDataStruct = ColorMaterialModelBootstrapData(theData, nBlocks, nRepetitions, pairInfo, params)
 % Perform bootstraping to find confidence intervals for model paramters. 
 % 
 % Input: 
@@ -12,7 +12,7 @@ function bootstrapData = ColorMaterialModelBootstrapData(theData, nBlocks, nRepe
 %          initialized. 
 % 
 % Output:
-% bootstrappedData - structure with the results (model fits for nRepetitions of the resampling)
+% bootstrappedDataStruct - structure with the results (model fits for nRepetitions of the resampling)
 
 % 03/??/2017 ar Wrote it.
 % 06/19/2017 ar Functionalized it, added comments.
@@ -42,9 +42,9 @@ for kk = 1:nRepetitions
     end
     
     nBootstrapTrials = nBlocks*ones(nTrialTypes,1);
-    [bootstrappedData.returnedParams(kk,:), ...
-        bootstrappedData.logLikelyFit(kk), ... 
-        bootstrappedData.predictedProbabilitiesBasedOnSolution(kk,:)] = ...
+    [bootstrappedDataStruct.returnedParams(kk,:), ...
+        bootstrappedDataStruct.logLikelyFit(kk), ... 
+        bootstrappedDataStruct.predictedProbabilitiesBasedOnSolution(kk,:)] = ...
         FitColorMaterialModelMLDS(pairInfo.pairColorMatchColorCoords, pairInfo.pairMaterialMatchColorCoords,...
         pairInfo.pairColorMatchMaterialCoords, pairInfo.pairMaterialMatchMaterialCoords,...
         bootstrapData, nBootstrapTrials,params);
