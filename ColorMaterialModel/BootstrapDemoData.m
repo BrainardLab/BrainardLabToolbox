@@ -11,12 +11,12 @@
 clear; close all;
 
 % Set directories and load the subject data
-analysisDir = '/Users/Shared/Matlab/Toolboxes/BrainardLabToolbox/ColorMaterialModel';
+analysisDir = '/Users/radonjic/Documents/MATLAB/toolboxes/BrainardLabToolbox/ColorMaterialModel/';
 MAINDEMO = true; 
 if MAINDEMO
-    dataDir = ([analysisDir, '/DemoData']);
+    dataDir = ([analysisDir, 'DemoData/']);
 else
-    dataDir = '/Users/ana/Dropbox (Aguirre-Brainard Lab)/CNST_analysis/ColorMaterial/DemoData';
+    dataDir = '/Users/radonjic/Documents/MATLAB/projects/ColorMaterial/SimulatedData/';
 end
 
 % Set parameters for the simulated data set we're cross-validating.
@@ -25,8 +25,8 @@ simulatedW = 0.5;
 nDataSets = 1; 
 
 % THERE IS SOME HARDCODING IN THE NAME HERE. Can be changed in the future if needed.
-subjectName = [demoDir 'DemoData' num2str(simulatedW) 'W' num2str(nBlocks) 'Blocks' num2str(nDataSets)  'Lin']; 
-load([subjectName '.mat']); % data
+subjectName = ['DemoData' num2str(simulatedW) 'W' num2str(nBlocks) 'Blocks' num2str(nDataSets)]; 
+load([dataDir subjectName '.mat']); % data
 
 % Set some parameters for bootstrapping. 
 nConditions = 1; % Demo case has just one condition, by default. 
@@ -80,13 +80,13 @@ for whichDataSet = 1:nDataSets
         for whichCondition = 1:nConditions
             dataSet{nDataSets}.condition{whichCondition}.bootstrap = ....
                 ColorMaterialModelBootstrapData(dataSet{nDataSets}.responsesAcrossBlocks, nBlocks, nRepetitions, pairInfo, params)
-            for jj = 1:size(bootstrap.returnedParamsTraining,2)
+            for jj = 1:size(dataSet{nDataSets}.condition{whichCondition}.bootstrap.returnedParams,2)
                 dataSet{nDataSets}.condition{whichCondition}.bootstrapMeans(jj) = ...
-                    mean(dataSet{nDataSets}.condition{whichCondition}.bootstrap.returnedParamsTraining(:,jj));
+                    mean(dataSet{nDataSets}.condition{whichCondition}.bootstrap.returnedParams(:,jj));
                 dataSet{nDataSets}.condition{whichCondition}.bootstrapCI(jj,1) = ...
-                    prctile(dataSet{nDataSets}.condition{whichCondition}.bootstrap.returnedParamsTraining(:,jj),100*params.CIlo);
+                    prctile(dataSet{nDataSets}.condition{whichCondition}.bootstrap.returnedParams(:,jj),100*params.CIlo);
                 dataSet{nDataSets}.condition{whichCondition}.bootstrapCI(jj,2) = ...
-                    prctile(dataSet{nDataSets}.condition{whichCondition}.bootstrap.returnedParamsTraining(:,jj),100*params.CIhi);
+                    prctile(dataSet{nDataSets}.condition{whichCondition}.bootstrap.returnedParams(:,jj),100*params.CIhi);
             end
         end
     end
@@ -94,10 +94,12 @@ for whichDataSet = 1:nDataSets
     %% Show results
     if showOutcome
         fprintf('Data Set %d\n', whichDataSet)
-        fprintf('Bootstrapped weight %.2f, CI = [%.2f, %.2f] \n', bootstrapMeans(end-1), bootstrapCI(end-1, 1), bootstrapCI(end-1, 2));
+        fprintf('Bootstrapped weight %.2f, CI = [%.2f, %.2f] \n', dataSet{nDataSets}.condition{whichCondition}.bootstrapMeans(end-1), ...
+            dataSet{nDataSets}.condition{whichCondition}.bootstrapCI(end-1,1),...
+            dataSet{nDataSets}.condition{whichCondition}.bootstrapCI(end-1,2));
     end
 end
 % Save in the right folder.
-cd(demoDir)
-save([subjectName '-' num2str(nFolds) 'BootstrapResults'],  'dataSet{nDataSets}');
+cd(dataDir)
+save([subjectName '-' num2str(nRepetitions) 'BootstrapResults.mat'],  'dataSet');
 cd(analysisDir)
