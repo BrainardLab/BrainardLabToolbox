@@ -99,5 +99,5 @@ for whichDataSet = 1:nDataSets
 end
 % Save in the right folder.
 cd(demoDir)
-save([subjectName '-' num2str(nFolds) 'FoldsCVResults'],  'dataSet{nDataSets}');
+save([subjectName '-' num2str(nFolds) 'BootstrapResults'],  'dataSet{nDataSets}');
 cd(analysisDir)
