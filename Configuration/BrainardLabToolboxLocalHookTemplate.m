@@ -5,27 +5,48 @@
 
 % 6/14/17  dhb, ar  Wrote it.
 
+%% Define project
+projectName = 'BrainardLabToolbox';
+
+%% Clear out old preferences
+if (ispref(projectName))
+    rmpref(projectName);
+end
+
+%% Clear out prefs named 'ColorMaterialModel', if they exist
+% 
+% We used to have these, but decided not to anymore
+if (ispref('ColorMaterialModel'))
+    rmpref('ColorMaterialModel');
+end
+
+%% Specify project location
+toolboxBaseDir = tbLocateToolbox('BrainardLabToolbox');
+
+% Figure out where baseDir for other kinds of data files is.
+sysInfo = GetComputerInfo();
+switch (sysInfo.localHostName)
+    case 'eagleray'
+        % DHB's desktop
+        baseDir = fullfile(filesep,'Volumes','Users1','Dropbox (Aguirre-Brainard Lab)');
+ 
+    otherwise
+        % Some unspecified machine, try user specific customization
+        switch(sysInfo.userShortName)
+            % Could put user specific things in, but at the moment generic
+            % is good enough.
+            otherwise
+                baseDir = ['/Users/' sysInfo.userShortName 'Dropbox (Aguirre-Brainard Lab)'];
+        end
+end
+
 %% ColorMaterialModel preferences
+%
+% These preferences have to do with the ColorMaterialModel section of the
+% BrainardLabToolbox
+setpref(projectName,'cmmCodeDir',fullfile(toolboxBaseDir,'ColorMaterialModel'));
+setpref(projectName,'cmmDemoDataDir', fullfile(toolboxBaseDir,'ColorMaterialModel','DemoData'));
 
-% We have some demo data, typically in the repository, so that our demos will run.  Where is it?
-setpref('ColorMaterialModel','demoDataDir','/Users/Shared/Matlab/Toolboxes/BrainardLabToolbox/ColorMaterialModel/DemoData/');
 
-% If we ever needed some user/machine specific preferences, this is one way
-% we could do that.
-% sysInfo = GetComputerInfo();
-% switch (sysInfo.localHostName)
-%     case 'eagleray'
-%         % DHB's desktop
-%         baseDir = fullfile(filesep,'Volumes','Users1','Dropbox (Aguirre-Brainard Lab)');
-%  
-%     otherwise
-%         % Some unspecified machine, try user specific customization
-%         switch(sysInfo.userShortName)
-%             % Could put user specific things in, but at the moment generic
-%             % is good enough.
-%             otherwise
-%                 baseDir = ['/Users/' sysInfo.userShortName 'Dropbox (Aguirre-Brainard Lab)'];
-%         end
-% end
 
 
