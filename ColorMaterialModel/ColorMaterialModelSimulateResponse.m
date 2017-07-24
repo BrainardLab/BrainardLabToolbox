@@ -18,7 +18,7 @@ function response = ColorMaterialModelSimulateResponse(targetColorCoord, targetM
 %       colorMatchColorCoord - inferred position on the color dimension for the first competitor in the pair
 %       materialMatchColorCoord - inferred position on the material dimension for the first competitor in the pair
 %       colorMatchMaterialCoord - inferred position on the color dimension for the second competitor in the pair
-%        materialMatchMaterialCoord - inferred position on the material dimension for the second competitor in the pair
+%       materialMatchMaterialCoord - inferred position on the material dimension for the second competitor in the pair
 %       w - weight for color coordinate.
 %       sigma - noise around the target position (we assume it is equal to 1 and the same
 %               for both color and material dimenesions).

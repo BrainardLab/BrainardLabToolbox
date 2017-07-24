@@ -1,6 +1,6 @@
 % ColorMaterialModelBuildLookupTable
 %
-% Build a 5-dimensional table to allow lookup of probabilities for various positions and
+% Build a 5-dimensional table to allow lookup of probabilities that color match is chosen, for various positions and
 % dimension weight.
 
 % 05/16/2017 ar Reviewed,added comments and gridParams structure. 

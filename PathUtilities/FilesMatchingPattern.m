@@ -62,4 +62,6 @@ function [p] = genPathString(d)
            p = [p genPathString(fullfile(d,dirname))];  
        end
     end
+    
+    length(p)
 end
