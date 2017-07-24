@@ -7,16 +7,17 @@ function OperateOnAllFilesWithMatchingPattern(rootDir, patternToMatch, operation
 %
 % Example usage:
 %   operateOnAllFilesWithMatchingPattern('/Volumes/Manta TM HD/Dropbox (Aguirre-Brainard Lab)', '*David Brainard''s conflicted copy*', 'delete');
-%
-% 7/24/1027   npc  Wrote it
-%
+
+% 7/24/s017   npc  Wrote it
+% 7/24/2017   hdb  filesMatchingPattern -> FilesMatchingPattern
+
 
     % List of valid operations 
     validOperationNames = {'delete', 'duplicate'};
     assert(ismember(operationName, validOperationNames), 'Not a valid operation');
     
     % Find all files matching the desired pattern
-    a = filesMatchingPattern(rootDir, patternToMatch);
+    a = FilesMatchingPattern(rootDir, patternToMatch);
 
     if (numel(a) > 0)
         fprintf('\nThe following list of %d files contain the ''%s'' pattern\n', numel(a), patternToMatch);
