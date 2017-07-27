@@ -18,8 +18,10 @@ function SendEmail(recipients, subject, body, sender)
 % sender (string) - Email address of the sender.  Default:
 %     colorlab@psych.upenn.edu
 
+% 7/27/17  dhb  Update for narginchk.
+
 % Validate the number of inputs.
-error(nargchk(3, 4, nargin));
+narginchk(3, 4);
 
 if ~exist('sender', 'var')
     sender = 'colorlab@psych.upenn.edu';
