@@ -8,6 +8,14 @@ function theStruct = UpdateStructWithStruct(theStruct, deltaStruct, varargin)
 % would be an error for there to be a field in the deltaStruct that wasn?t in theStruct.  
 % The deltaStruct could, however, be empty in which case theStruct would be returned unaltered
 %
+% Usage:
+% updatedStruct = UpdateStructWithStruct(originalStruct, deltaStruct, ...
+%        'assertMatchingFieldClass', true, ...   % Whether to test for matching field types
+%        'assertMatchingFieldLength', true ...   % Whether to test for matching field numerosities
+%        );
+    
+% See UpdateStructWithStructTests() for more tests.
+%
 % 8/3/17  NPC  Wrote it.
 
 %% Parse input
