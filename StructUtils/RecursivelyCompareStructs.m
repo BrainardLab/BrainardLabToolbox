@@ -1,5 +1,5 @@
 function result = RecursivelyCompareStructs(struct1Name, struct1, struct2Name, struct2, varargin)
-% result = RecursivelyCompareStructsTests(struct1Name, struct1, struct2Name, struct2, varargin)
+% result = RecursivelyCompareStructs(struct1Name, struct1, struct2Name, struct2, varargin)
 %
 % Method to compare nested structs with arbitrary internal organization.
 % Key/value pairs
@@ -10,7 +10,9 @@ function result = RecursivelyCompareStructs(struct1Name, struct1, struct2Name, s
 % Simple usage:
 % s1 = struct('a', 1);
 % s2 = struct('a', 2);
-% result = RecursivelyCompareStructs('s1', s1, 's2', s2)
+% result = RecursivelyCompareStructs('s1', s1, 's2', s2, ...
+%   'defaultTolerance', 0.01, ...
+%   )
 %
 % For more elabored usage examples see RecursivelyCompareStructsTests.
 %
