@@ -12,6 +12,7 @@ function theStruct = UpdateStructWithStruct(theStruct, deltaStruct, varargin)
 % updatedStruct = UpdateStructWithStruct(originalStruct, deltaStruct, ...
 %        'assertMatchingFieldClass', true, ...   % Whether to test for matching field types
 %        'assertMatchingFieldLength', true ...   % Whether to test for matching field numerosities
+%        'allowStructFields', false, ...         % Whether the matching fields can be structs (but no recursion is performed)
 %        );
     
 % See UpdateStructWithStructTests() for more tests.
@@ -22,9 +23,11 @@ function theStruct = UpdateStructWithStruct(theStruct, deltaStruct, varargin)
 p = inputParser;
 p.addParameter('assertMatchingFieldClass', false, @islogical);
 p.addParameter('assertMatchingFieldLength', false, @islogical);
+p.addParameter('allowStructFields',false, @islogical);
 p.parse(varargin{:});
 assertMatchingFieldClass = p.Results.assertMatchingFieldClass;
 assertMatchingFieldLength = p.Results.assertMatchingFieldLength;
+allowStructFields = p.Results.allowStructFields;
 
 % Return theStruct unaltered if deltaStruct is empty.
 if (isempty(deltaStruct))
@@ -46,7 +49,7 @@ if (assertMatchingFieldClass)
     end
 end
 
-% Assert that the marched fields have the same numerosities
+% Assert that the matched fields have the same numerosities
 if (assertMatchingFieldLength)
     for fieldIndex = 1:numel(theDeltaStructFieldnames)
         targetFieldname = theDeltaStructFieldnames{fieldIndex};
@@ -60,10 +63,12 @@ if (assertMatchingFieldLength)
 end
 
 % Assert that theDeltaStructFieldnames are not structs themselves - otherwise we would need recursion
-for fieldIndex = 1:numel(theDeltaStructFieldnames)
-    targetFieldname = theDeltaStructFieldnames{fieldIndex};
-    assert(~isstruct(theStruct.(targetFieldname)), sprintf('The field ''%s'' in the first struct cannot not be a struct.', targetFieldname));
-    assert(~isstruct(deltaStruct.(targetFieldname)), sprintf('The field ''%s'' in the first struct cannot not be a struct.', targetFieldname));
+if (allowStructFields)
+    for fieldIndex = 1:numel(theDeltaStructFieldnames)
+        targetFieldname = theDeltaStructFieldnames{fieldIndex};
+        assert(~isstruct(theStruct.(targetFieldname)), sprintf('The field ''%s'' in the first struct cannot not be a struct.', targetFieldname));
+        assert(~isstruct(deltaStruct.(targetFieldname)), sprintf('The field ''%s'' in the first struct cannot not be a struct.', targetFieldname));
+    end
 end
 
 % Replace the value of each field in theStruct with the value 
