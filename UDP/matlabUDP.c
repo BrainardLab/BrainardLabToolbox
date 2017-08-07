@@ -20,7 +20,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     char *command=NULL;
     char local[16], remote[16];
     int buf_len;
-    int dims[2],i;
+    size_t dims[2];
+    int i;
     unsigned short *outPtr;
 
     // If no arguments given, print usage string
@@ -102,7 +103,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
             // always provide at least an empty return value
             dims[1] = i;
-            if(!(plhs[0] = mxCreateCharArray(2, dims)))
+            if(!(plhs[0] = mxCreateCharArray((size_t) 2, dims)))
                 mexErrMsgTxt("matlabUDP: mxCreateCharArray failed.");
             
             // fill in report with any new bytes
@@ -163,7 +164,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             mat_UDP_close();
         
         // always return socket index
-        if(nlhs=1){
+        if(nlhs==1){
             if(!(plhs[0] = mxCreateDoubleScalar((double)mat_UDP_sockfd)))
                 mexErrMsgTxt("matlabUDP: mxCreateNumericArray failed.");
         }
