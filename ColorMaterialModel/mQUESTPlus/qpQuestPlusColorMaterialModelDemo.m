@@ -10,44 +10,134 @@ function qpQuestPlusColorMaterialModelDemo
 %% Close out stray figures
 close all;
 
+%% Change to our pwd
+cd(fileparts(mfilename('fullpath')));
+
 %% We need the lookup table.  Load it.
 theLookupTable = load('../colorMaterialInterpolateFunLineareuclidean');
 
 %% Define psychometric function in terms of lookup table
 qpPFFun = @(stimParams,psiParams) qpPFColorMaterialModel(stimParams,psiParams,theLookupTable.colorMaterialInterpolatorFunction);
 
-%% qpRun estimating color material model parameters.
-fprintf('*** qpRun, Estimate color material parameters:\n');
-rng(3010);
-simulatedPsiParams = [-2 1 0.2];
-questData = qpRun(128, ...
-    'stimParamsDomainList',{-3:3, -3:3, -3:3, -3:3}, ...
-    'psiParamsDomainList',{-5:1:5 -5:1:5 0:0.2:1}, ...
-    'qpPF',qpPFFun, ...
-    'qpOutcomeF',@(x) qpSimulatedObserver(x,qpPFFun,simulatedPsiParams), ...
-    'nOutcomes', 2, ...
-    'chooseRule','randomFromBestN','chooseRuleN',3, ...
-    'verbose',true);
-psiParamsIndex = qpListMaxArg(questData.posterior);
-psiParamsQuest = questData.psiParamsDomain(psiParamsIndex,:);
-fprintf('Simulated parameters: %0.1f, %0.1f, %0.1f\n', ...
-    simulatedPsiParams(1),simulatedPsiParams(2),simulatedPsiParams(3));
-fprintf('Max posterior QUEST+ parameters: %0.1f, %0.1f, %0.1f\n', ...
-    psiParamsQuest(1),psiParamsQuest(2),psiParamsQuest(3));
-% psiParamsCheck = [30000 20944 38397];
-% assert(all(psiParamsCheck == round(10000*psiParamsQuest)),'No longer get same QUEST+ estimate for this case');
+%% Initialize three QUEST+ structures
+%
+% Each one has a different upper end of stimulus regime
+% The last of these should be the most inclusive, and
+% include stimuli that could come from any of them.
+stimUpperEnds = [1 2 3];
+nQuests = length(stimUpperEnds);
+for qq = 1:nQuests
+    fprintf('Initializing quest structure %d\n',qq)
+    qTemp = qpParams( ...
+        'qpPF',qpPFFun, ...
+        'stimParamsDomainList',{-stimUpperEnds(qq):stimUpperEnds(qq), -stimUpperEnds(qq):stimUpperEnds(qq), -stimUpperEnds(qq):stimUpperEnds(qq), -stimUpperEnds(qq):stimUpperEnds(qq)}, ...
+        'psiParamsDomainList',{0:1:5 0:1:5 0:0.2:1} ...
+        );
+    questData{qq} = qpInitialize(qTemp);
+end
 
-% Maximum likelihood fit.  Use psiParams from QUEST+ as the starting
-% parameter for the search, and impose as parameter bounds the range
-% provided to QUEST+.
-psiParamsFit = qpFit(questData.trialData,questData.qpPF,psiParamsQuest,questData.nOutcomes,...
-    'lowerBounds', [-5 -5 0],'upperBounds',[5 5 1]);
-fprintf('Maximum likelihood fit parameters: %0.1f, %0.1f, %0.1f\n', ...
-    psiParamsFit(1),psiParamsFit(2),psiParamsFit(3));
-% psiParamsCheck = [38831 21951 37488];
-% assert(all(psiParamsCheck == round(10000*psiParamsFit)),'No longer get same ML estimate for this case');
- 
-%% Plot trial locations
+%% Define a questStructure that has all the stimuli
+%
+% We use this as a simple way to account for every
+% stimulus in the analysis at the end.
+questDataAllTrials = questData{end};
+
+%% Save out initialized quests
+save(fullfile(tempdir,'initalizedQuests'),'questData','questDataAllTrials');
+
+%% Set up simulated observer function
+simulatedPsiParams = [2 0.7 0.3];
+simulatedObserverFun = @(x) qpSimulatedObserver(x,qpPFFun,simulatedPsiParams);
+
+%% Run multiple simulations
+nSimulations = 100;
+nTrialsPerQuest = 30;
+questOrderIn = [0 1 2 3 3 3];
+histFigure = figure; clf;
+for ss = 1:nSimulations
+    % Load in the initialized quest structures
+    fprintf('Simulation %d of %d\n',ss,nSimulations);
+    clear questData questDataAllTrials
+    load(fullfile(tempdir,'initalizedQuests'));
+    
+    % Run simulated trials, using QUEST+ to tell us what contrast to
+    %
+    % Define how many of each type of trial selection we'll do each time through.
+    % 0 -> choose at random from all trials.
+    for tt = 1:nTrialsPerQuest
+        fprintf('\tTrial block %d of %d\n',tt,nTrialsPerQuest');
+        
+        % Set the order for the specified quests and random
+        questOrder = randperm(length(questOrderIn));
+        for qq = 1:length(questOrderIn)
+            theQuest = questOrderIn(qq);
+            
+            % Get stimulus for this trial, either from one of the quests or at random.
+            if (theQuest > 0)
+                stim = qpQuery(questData{theQuest});
+            else
+                nStimuli = size(questDataAllTrials.stimParamsDomain,1);
+                stim = questDataAllTrials.stimParamsDomain(randi(nStimuli),:);
+            end
+            
+            % Simulate outcome
+            outcome = simulatedObserverFun(stim);
+            
+            % Update quest data structure, if not a randomly inserted trial
+            if (theQuest > 0)
+                questData{theQuest} = qpUpdate(questData{theQuest},stim,outcome);
+            end
+            questDataAllTrials = qpUpdate(questDataAllTrials,stim,outcome);
+        end
+    end
+    
+    % Find out QUEST+'s estimate of the stimulus parameters, obtained
+    % on the gridded parameter domain.
+    psiParamsIndex = qpListMaxArg(questDataAllTrials.posterior);
+    psiParamsQuest(ss,:) = questDataAllTrials.psiParamsDomain(psiParamsIndex,:);
+    fprintf('Simulated parameters: %0.1f, %0.1f, %0.2f\n', ...
+        simulatedPsiParams(1),simulatedPsiParams(2),simulatedPsiParams(3));
+    fprintf('Max posterior QUEST+ parameters: %0.1f, %0.1f, %0.2f\n', ...
+        psiParamsQuest(ss,1),psiParamsQuest(ss,2),psiParamsQuest(ss,3));
+    
+    % Maximum likelihood fit.  Use psiParams from QUEST+ as the starting
+    % parameter for the search, and impose as parameter bounds the range
+    % provided to QUEST+.
+    psiParamsFit(ss,:) = qpFit(questDataAllTrials.trialData,questDataAllTrials.qpPF,psiParamsQuest(ss,:),questDataAllTrials.nOutcomes,...
+        'lowerBounds', [-5 -5 0],'upperBounds',[5 5 1]);
+    fprintf('Maximum likelihood fit parameters: %0.1f, %0.1f, %0.2f\n', ...
+        psiParamsFit(ss,1),psiParamsFit(ss,2),psiParamsFit(ss,3));
+    fprintf('\n');
+    
+    % Make a histogram of the fit parameters
+    
+    figure(histFigure); clf;
+    subplot(1,3,1); hold on;
+    hist(psiParamsFit(:,1));
+    plot(simulatedPsiParams(1),2,'r*','MarkerSize',12);
+    xlim([0 5]);
+    xlabel('First Slope');
+    ylabel('Count');
+    
+    subplot(1,3,2); hold on;
+    hist(psiParamsFit(:,2));
+    plot(simulatedPsiParams(2),2,'r*','MarkerSize',12);
+    xlim([0 1]);
+    xlabel('Second Slope');
+    ylabel('Count');
+    
+    subplot(1,3,3); hold on;
+    hist(psiParamsFit(:,3));
+    plot(simulatedPsiParams(3),2,'r*','MarkerSize',12);
+    xlim([0 5]);
+    xlabel('Weight');
+    ylabel('Count');
+    drawnow;
+end
+
+
+
+%% Plot for last run
 %
 % Point transparancy visualizes number of trials (more opaque -> more
 % trials), while point color visualizes dominant response.  The proportion plotted
@@ -55,9 +145,9 @@ fprintf('Maximum likelihood fit parameters: %0.1f, %0.1f, %0.1f\n', ...
 % as the Mathematica plot showin in Figure 17 of the paper, but conveys the same
 % general idea of what happened.
 figure; clf; hold on
-stimCounts = qpCounts(qpData(questData.trialData),questData.nOutcomes);
-stimProportions = qpProportions(stimCounts,questData.nOutcomes);
-stim = zeros(length(stimCounts),questData.nStimParams);
+stimCounts = qpCounts(qpData(questDataAllTrials.trialData),questDataAllTrials.nOutcomes);
+stimProportions = qpProportions(stimCounts,questDataAllTrials.nOutcomes);
+stim = zeros(length(stimCounts),questDataAllTrials.nStimParams);
 for cc = 1:length(stimCounts)
     stim(cc,:) = stimCounts(cc).stim;
     nTrials(cc) = sum(stimCounts(cc).outcomeCounts);
@@ -78,12 +168,12 @@ for cc = 1:length(stimCounts)
     scatter3(stim(cc,2),stim(cc,4),1,100,'o', ...
         'MarkerEdgeColor',[stimProportions(cc).outcomeProportions(1) 1-stimProportions(cc).outcomeProportions(1) 0], ...
         'MarkerFaceColor',[stimProportions(cc).outcomeProportions(1) 1-stimProportions(cc).outcomeProportions(1) 0], ...
-        'MarkerFaceAlpha',nTrials(cc)/max(nTrials),'MarkerEdgeAlpha',nTrials(cc)/max(nTrials));       
+        'MarkerFaceAlpha',nTrials(cc)/max(nTrials),'MarkerEdgeAlpha',nTrials(cc)/max(nTrials));
 end
 xlim([-3 3]);
 ylim([-3 3]);
 zlim([0 1]);
-xlabel('Color Cooridnate');
+xlabel('Color Coordinate');
 ylabel('Material Coordinate');
 zlabel('Stim Indicator');
 title({'Color Material Model',''});
@@ -91,8 +181,8 @@ drawnow;
 
 %% Plot of posterior entropy versus trial number
 figure; clf; hold on
-plot(questData.entropyAfterTrial,'ro','MarkerSize',8,'MarkerFaceColor','r');
-ylim([0 ceil(max(questData.entropyAfterTrial))]);
+plot(questDataAllTrials.entropyAfterTrial,'ro','MarkerSize',8,'MarkerFaceColor','r');
+ylim([0 ceil(max(questDataAllTrials.entropyAfterTrial))]);
 xlabel('Trial Number')
 ylabel('Entropy')
 title({'Color Material Model',''});
@@ -101,10 +191,10 @@ title({'Color Material Model',''});
 %
 % Posterior versus material slope and weight
 figure; clf; hold on;
-index1 = find(questData.psiParamsDomain(:,1) == psiParamsQuest(1));
-posterior1 = questData.posterior(index1);
-plotX = questData.psiParamsDomainList{2};
-plotY = questData.psiParamsDomainList{3};
+index1 = find(questDataAllTrials.psiParamsDomain(:,1) == psiParamsQuest(end,1));
+posterior1 = questDataAllTrials.posterior(index1);
+plotX = questDataAllTrials.psiParamsDomainList{2};
+plotY = questDataAllTrials.psiParamsDomainList{3};
 plotZ = reshape(posterior1,length(plotY),length(plotX));
 surf(plotX',plotY',plotZ);
 shading interp
@@ -116,10 +206,10 @@ set(gca,'View',[20 80]);
 
 % Posterior versus color slope and weight
 figure; clf; hold on;
-index1 = find(questData.psiParamsDomain(:,2) == psiParamsQuest(2));
-posterior1 = questData.posterior(index1);
-plotX = questData.psiParamsDomainList{1};
-plotY = questData.psiParamsDomainList{3};
+index1 = find(questDataAllTrials.psiParamsDomain(:,2) == psiParamsQuest(end,2));
+posterior1 = questDataAllTrials.posterior(index1);
+plotX = questDataAllTrials.psiParamsDomainList{1};
+plotY = questDataAllTrials.psiParamsDomainList{3};
 plotZ = reshape(posterior1,length(plotY),length(plotX));
 surf(plotX',plotY',plotZ);
 shading interp
@@ -131,10 +221,10 @@ set(gca,'View',[20 80]);
 
 % Posterior versus color slope and material slope
 figure; clf; hold on;
-index1 = find(questData.psiParamsDomain(:,3) == psiParamsQuest(3));
-posterior1 = questData.posterior(index1);
-plotX = questData.psiParamsDomainList{1};
-plotY = questData.psiParamsDomainList{2};
+index1 = find(questDataAllTrials.psiParamsDomain(:,3) == psiParamsQuest(end,3));
+posterior1 = questDataAllTrials.posterior(index1);
+plotX = questDataAllTrials.psiParamsDomainList{1};
+plotY = questDataAllTrials.psiParamsDomainList{2};
 plotZ = reshape(posterior1,length(plotY),length(plotX));
 surf(plotX',plotY',plotZ);
 shading interp
