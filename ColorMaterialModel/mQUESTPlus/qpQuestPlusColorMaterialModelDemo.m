@@ -31,7 +31,7 @@ for qq = 1:nQuests
     qTemp = qpParams( ...
         'qpPF',qpPFFun, ...
         'stimParamsDomainList',{-stimUpperEnds(qq):stimUpperEnds(qq), -stimUpperEnds(qq):stimUpperEnds(qq), -stimUpperEnds(qq):stimUpperEnds(qq), -stimUpperEnds(qq):stimUpperEnds(qq)}, ...
-        'psiParamsDomainList',{0:1:5 0:1:5 0:0.2:1} ...
+        'psiParamsDomainList',{[0.25 0.5 1 2 4] [0.25 0.5 1 2 4] [0.05:0.15:0.95]} ...
         );
     questData{qq} = qpInitialize(qTemp);
 end
@@ -46,13 +46,13 @@ questDataAllTrials = questData{end};
 save(fullfile(tempdir,'initalizedQuests'),'questData','questDataAllTrials');
 
 %% Set up simulated observer function
-simulatedPsiParams = [2 0.7 0.3];
+simulatedPsiParams = [2 0.7 0.8];
 simulatedObserverFun = @(x) qpSimulatedObserver(x,qpPFFun,simulatedPsiParams);
 
 %% Run multiple simulations
 nSimulations = 100;
 nTrialsPerQuest = 30;
-questOrderIn = [0 1 2 3 3 3];
+questOrderIn = [0 0 1 2 3 3 3 3];
 histFigure = figure; clf;
 for ss = 1:nSimulations
     % Load in the initialized quest structures
@@ -122,20 +122,21 @@ for ss = 1:nSimulations
     subplot(1,3,2); hold on;
     hist(psiParamsFit(:,2));
     plot(simulatedPsiParams(2),2,'r*','MarkerSize',12);
-    xlim([0 1]);
+    xlim([0 5]);
     xlabel('Second Slope');
     ylabel('Count');
     
     subplot(1,3,3); hold on;
     hist(psiParamsFit(:,3));
     plot(simulatedPsiParams(3),2,'r*','MarkerSize',12);
-    xlim([0 5]);
+    xlim([0 1]);
     xlabel('Weight');
     ylabel('Count');
     drawnow;
 end
 
-
+%% Save
+save qpQuestPlusColorMaterialModelDemo
 
 %% Plot for last run
 %
