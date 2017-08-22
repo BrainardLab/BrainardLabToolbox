@@ -16,7 +16,7 @@ function newRGB = Recontrast(rgbValue, contrast)
 % newRGB (Mx3) - Transformed RGB value(s).
 
 % Make sure we have the right number of input arguments.
-error(nargchk(2, 2, nargin));
+narginchk(2, 2);
 
 % Figure out what the minimum value is when we set the contrast the
 % desired level.  This will be essentially be half our actual range (0.5)

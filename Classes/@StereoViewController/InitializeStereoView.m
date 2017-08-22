@@ -7,7 +7,7 @@ function obj = InitializeStereoView(obj)
 %
 % 3/15/2013  npc   Wrote it.
 %
-    error(nargchk(1, 1, nargin));
+    narginchk(1, 1);
     
     if (obj.isInitialized == false)
         

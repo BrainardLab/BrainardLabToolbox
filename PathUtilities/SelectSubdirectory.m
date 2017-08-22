@@ -27,7 +27,7 @@ function subdir = SelectSubdirectory(parentDir, exclusions, promptTitle, promptM
 % Output:
 % subdir (string) - The name of the selected subdirectory.
 
-error(nargchk(1, 5, nargin));
+narginchk(1, 5);
 
 % Setup some defaults.
 if ~exist('exclusions', 'var')

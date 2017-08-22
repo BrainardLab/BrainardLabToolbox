@@ -16,7 +16,7 @@ function tex = mglCreateGratingTexture(spatialFreq, pxDims, phaseShift)
 
 global MGL;
 
-error(nargchk(1, 3, nargin));
+narginchk(1, 3);
 
 % Make sure that an MGL window is open before creating the texture.
 if isempty(MGL) || MGL.displayNumber == -1

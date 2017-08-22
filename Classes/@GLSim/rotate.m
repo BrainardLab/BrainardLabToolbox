@@ -1,7 +1,7 @@
 function obj = rotate(obj, rotDeg, x, y, z)
 
 % Validate the number of inputs.
-error(nargchk(4, 5, nargin));
+narginchk(4, 5);
 
 if nargin == 4
 	z = 0;

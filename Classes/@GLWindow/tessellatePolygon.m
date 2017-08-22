@@ -23,11 +23,8 @@ function tessVerts = tessellatePolygon(polyVerts)
 %
 % 10/14/11 TYL commented out plot function at the end
 
-if verLessThan('matlab', '7.13')
-	nargchk(1, 2, nargin); %#ok<NCHKI>
-else
-	narginchk(1, 2);
-end
+% Arg check
+narginchk(1, 2);
 
 if nargin == 1
 	polyDepth = 0;

@@ -1,7 +1,7 @@
 function obj = translate(obj, x, y, z)
 
 % Validate the number of inputs.
-error(nargchk(4, 4, nargin));
+narginchk(4, 4);
 
 % We want to stick the new transformation at the end of the transformations
 % queue.

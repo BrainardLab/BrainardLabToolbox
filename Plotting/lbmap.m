@@ -34,8 +34,8 @@ function map = lbmap(n,scheme)
 % Copyright 2007-2010 The MathWorks, Inc.
 
 %defensive programming
-error(nargchk(0,2,nargin))
-error(nargoutchk(0,1,nargout))
+narginchk(0,2);
+nargoutchk(0,1);
 
 %defaults
 if nargin<2

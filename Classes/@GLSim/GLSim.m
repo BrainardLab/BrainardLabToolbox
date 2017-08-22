@@ -34,7 +34,7 @@ classdef GLSim
 	methods
 		function obj = GLSim(x, y, z)
 			% Validate the number of inputs.
-			error(nargchk(3, 3, nargin));
+			narginchk(3, 3);
 			
 			obj.X = x;
 			obj.Y = y;

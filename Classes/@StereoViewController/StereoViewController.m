@@ -132,7 +132,7 @@ classdef StereoViewController < handle
             % check that we have the right number of arguments
             minNumOfInputs = 3;
             maxNumOfInputs = Inf;
-            error(nargchk(minNumOfInputs, maxNumOfInputs, nargin));
+            narginchk(minNumOfInputs, maxNumOfInputs);
          
             %%% Unload the required input argument
             obj.instanceName                = instanceName;

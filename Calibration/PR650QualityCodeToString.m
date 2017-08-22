@@ -18,7 +18,7 @@ function qualityString = PR650QualityCodeToString(qualityCode)
 % qualityString (string) - The string form of the quality code.
 
 % Check the number of inputs.
-error(nargchk(1, 1, nargin));
+narginchk(1, 1);
 
 % Validate the input.
 assert(isscalar(qualityCode), 'PR650QualityCodeToString:NonScalarInput', ...

@@ -13,7 +13,7 @@ function wipe(GLWObj, exclusions)
 % exclusions (string|1xN cell) - List of object names that shouldn't be
 %     wiped.
 
-error(nargchk(1, 2, nargin));
+narginchk(1, 2);
 
 if nargin == 1
 	exclusions = [];

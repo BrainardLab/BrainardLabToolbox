@@ -23,7 +23,7 @@ function addWedge(GLWObj, center, innerRadius, outerRadius, startAngle, sweep, r
 % wedgeOptions (key/value) - Set of key/value pairs defining optional
 %     information about the wedge.
 
-error(nargchk(7, Inf, nargin));
+narginchk(7, Inf);
 
 parser = inputParser;
 

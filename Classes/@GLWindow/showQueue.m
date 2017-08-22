@@ -16,7 +16,7 @@ function objectList = showQueue(GLWObj, quiet)
 % objectList (1xN cell) - Cell array of the object names in the queue.
 
 % Validate the number of inputs.
-error(nargchk(1, 2, nargin));
+narginchk(1, 2);
 
 if nargin == 1
 	quiet = false;

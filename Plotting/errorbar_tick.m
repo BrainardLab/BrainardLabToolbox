@@ -23,7 +23,7 @@ function errorbar_tick(h,w,xtype)
 % It was further modified by Arnaud Laurent and Jerome Briot.
 
 % Check numbers of arguments
-error(nargchk(1,3,nargin))
+narginchk(1,3)
 
 % Check for the use of V6 flag ( even if it is depreciated ;) )
 flagtype = get(h,'type');

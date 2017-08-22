@@ -32,7 +32,7 @@ if isempty(GL)
 end
 
 % Check the number of inputs.
-error(nargchk(2, 4, nargin));
+narginchk(2, 4);
 
 % Setup some defaults.
 if ~exist('rotation', 'var') || isempty(rotation)
