@@ -13,7 +13,7 @@ function disableAllObjects(GLWObj, objectExclusions)
 %	that should be excluded from this command and instead be set to
 %	enabled.
 
-error(nargchk(1, 2, nargin));
+narginchk(1, 2);
 
 if nargin == 1
 	objectExclusions = '';

@@ -21,7 +21,7 @@ function addText(GLWObj, textToDisplay, varargin)
 % win.open;
 % win.draw;
 
-error(nargchk(2, 12, nargin));
+narginchk(2, 12);
 
 if nargin < 2
 	error('Usage: addText(textToDisplay, [textOpts])');

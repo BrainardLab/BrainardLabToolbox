@@ -12,7 +12,7 @@ function enableAllObjects(GLWObj, objectExclusions)
 % objectExclusions (string|1xN cell) - A string or cell array of strings
 %     containing the objects to be disabled.
 
-error(nargchk(1, 2, nargin));
+narginchk(1, 2);
 
 if nargin == 1
 	objectExclusions = [];
