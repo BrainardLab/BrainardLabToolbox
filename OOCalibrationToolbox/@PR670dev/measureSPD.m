@@ -64,6 +64,14 @@ function measureSPD(obj)
             % Convert to our units standard, i.e., multiply by sampling interval
             obj.nativeMeasurement.energy = obj.nativeS(2) * obj.nativeMeasurement.energy;
                 
+        case -2 % Too bright
+            fprintf('\n<strong>Quality code: %d. Low bright level!. Returning Inf.</strong>\n', qual);
+            % return Infinite
+            nativeSamples = obj.nativeS(3);
+            spectralAxis = SToWls(obj.nativeS);
+            obj.nativeMeasurement.spectralAxis = spectralAxis(:);
+            obj.nativeMeasurement.energy = zeros(1,nativeSamples) + inf;
+            
         case -8 % Too dark
             fprintf('\n<strong>Quality code: %d. Low light level!. Returning zeros.</strong>\n', qual);
             % return zeros
@@ -76,7 +84,7 @@ function measureSPD(obj)
             error('Could not sync to source. Turning off ''AUTO'' sync mode.\n');
             
         otherwise
-            error('Bad return code %g from meter', qual);
+            error(2,'Bad return code %g from meter', qual);
     end
 end
 
