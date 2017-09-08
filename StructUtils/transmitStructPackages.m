@@ -1,5 +1,15 @@
 function transmitStructPackages
+%transmitStructPackages  Demonstrates how to encode a struct into a bytestream  
+%                        (via the undocumented function getByteStreamFromArray)
+%                        and transmit it over a UPD channel.
+%
+% Also see receiveStructPackages
+%
+% 9/8/2017  npc   Wrote it.
 
+    % We need the BrainardLabToolbox for the matlabUDP function and
+    % the UnitTestToolbox to display the struct
+    
     %tbUse({'BrainardLabToolbox', 'UnitTestToolbox'});
     
     % Open UDP channel

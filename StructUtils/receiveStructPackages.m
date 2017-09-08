@@ -1,4 +1,15 @@
 function receiveStructPackages
+%receiveStructPackages  Demonstrates how to receive (over a UDP channel) and decode 
+%                       (via the undocumented function getArrayFromByteStream) 
+%                       a byte stream into a struct
+%
+% Also see transmitStructPackages
+%
+% 9/8/2017  npc   Wrote it.
+
+    % We need the BrainardLabToolbox for the matlabUDP function and
+    % the UnitTestToolbox to display the struct
+    
     %tbUse({'BrainardLabToolbox', 'UnitTestToolbox'});
     
     % Open UDP channel
