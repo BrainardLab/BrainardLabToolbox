@@ -33,6 +33,7 @@
 % Plotting               		- Support for plotting.
 % Psychometric           		- Support for psychometric calculations.
 % PTBSupport             		- Do useful things in Psychtoolbox display environment.
+% RadiometerChecks              - Code we use to check our radiometers.
 % SpectralData           		- Misc spectral data.
 % Strings                		- String utilities from Matlab Central.  Routine strsplit or something much
 %                          		  like it appeared in Matlab 2013a.

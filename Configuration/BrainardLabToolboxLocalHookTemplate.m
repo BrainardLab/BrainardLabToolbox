@@ -36,7 +36,7 @@ switch (sysInfo.localHostName)
             % Could put user specific things in, but at the moment generic
             % is good enough.
             otherwise
-                baseDir = ['/Users/' sysInfo.userShortName 'Dropbox (Aguirre-Brainard Lab)'];
+                baseDir = ['/Users/' sysInfo.userShortName '/Dropbox (Aguirre-Brainard Lab)'];
         end
 end
 
@@ -46,6 +46,13 @@ end
 % BrainardLabToolbox
 setpref(projectName,'cmmCodeDir',fullfile(toolboxBaseDir,'ColorMaterialModel'));
 setpref(projectName,'cmmDemoDataDir', fullfile(toolboxBaseDir,'ColorMaterialModel','DemoData'));
+
+%% RadiometerChecks preferences
+%
+% These preferences have to do with the RadiometerChecks section of the
+% BrainardLabToolbox
+setpref(projectName,'RadiometerChecksDir',fullfile(baseDir,'MELA_admin','RadiometerChecks'));
+
 
 
 
