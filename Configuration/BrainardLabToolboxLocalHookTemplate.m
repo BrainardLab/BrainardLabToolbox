@@ -54,7 +54,7 @@ setpref(projectName,'cmmDemoDataDir', fullfile(toolboxBaseDir,'ColorMaterialMode
 setpref(projectName,'RadiometerChecksDir',fullfile(baseDir,'MELA_admin','RadiometerChecks'));
 
 % Add PTB PsychJava to the path
-JavaAddToPath('/Users/Shared/Matlab/Toolboxes/Psychtoolbox-3/Psychtoolbox/PsychJava','Psychtoolbox/PsychJava');
+JavaAddToPath(sprintf('/Users/%s/Documents/Matlab/Toolboxes/Psychtoolbox-3/Psychtoolbox/PsychJava',sysInfo.userShortName), 'Psychtoolbox/PsychJava');
 
 
 
