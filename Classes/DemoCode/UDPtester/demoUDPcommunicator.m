@@ -49,7 +49,7 @@ function demoUDPcommunicator
             'maxAttemptsNum', 1 ...
         );
         % Feedback to user
-        fprintf('''%s'' sent ''%s'' and received the following acknowledgment: ''%s''\n', systemInfo.networkName, syncMessageLabel, ackReceived);
+        fprintf('\n''%s'' sent ''%s'' and received the following acknowledgment: ''%s''\n', systemInfo.networkName, syncMessageLabel, ackReceived);
     end
 
     UDPobj.shutDown();
