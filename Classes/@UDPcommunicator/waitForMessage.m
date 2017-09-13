@@ -25,7 +25,7 @@ function response = waitForMessage(obj, msgLabel, varargin)
     timeOutSecs = p.Results.timeOutSecs;
     callingFunctionName = p.Results.callingFunctionName;
     
-    if (strcmp(callingFunctionName, ' '))
+    if (strcmp(callingFunctionName, ' ')) || (~strcmp(obj.verbosity, 'max'))
         callingFunctionSignature = '';
     else
         callingFunctionSignature = sprintf('[called from <strong>%s</strong>]:', callingFunctionName);

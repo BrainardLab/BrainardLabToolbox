@@ -1,5 +1,6 @@
 function demoUDPcommunicator
-
+    clc;
+    
     % Get computer info
     systemInfo = GetComputerInfo();
     
@@ -38,6 +39,7 @@ function demoUDPcommunicator
     else
         fprintf('Is ''%s'' running on the slave computer?. Hit enter if so.\n', mfilename);
         pause;
+        clc;
         % Wait for 4 secs to receive ack that the syncMessage was received
         acknowledgmentTimeOutSecs = 4;   
         % Send the SYNC message
