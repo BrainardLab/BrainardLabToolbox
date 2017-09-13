@@ -41,9 +41,9 @@ function response = waitForMessage(obj, msgLabel, varargin)
     if (~strcmp(obj.verbosity,'min')) && (~strcmp(obj.verbosity,'none'))
         % give some feedback
         if isinf(timeOutSecs)
-            fprintf('%s Waiting for ever to receive a ''%s'' message .... ', signature, expectedMessageLabel);
+            fprintf('%s  Waiting for ever to receive a ''%s'' message .... ', signature, expectedMessageLabel);
         else
-            fprintf('%s Waiting for %2.2f seconds to receive a ''%s'' message ... ', signature, timeOutSecs, expectedMessageLabel);
+            fprintf('%s  Waiting for %2.2f seconds to receive a ''%s'' message ... ', signature, timeOutSecs, expectedMessageLabel);
         end
     end
     
@@ -90,7 +90,7 @@ function response = waitForMessage(obj, msgLabel, varargin)
             % Do not send back an TRANSMITTED_MESSAGE_MATCHES_EXPECTED message 
             % when we were expecting a TRANSMITTED_MESSAGE_MATCHES_EXPECTED and we received it
             if (strcmp(expectedMessageLabel, obj.TRANSMITTED_MESSAGE_MATCHES_EXPECTED))
-                if (~strcmp(obj.verbosity,'min'))  && (~strcmp(obj.verbosity,'none'))
+                if (strcmp(obj.verbosity,'max'))
                     fprintf('%s %s Received expected message (''%s'')\n', signature, callingFunctionSignature, expectedMessageLabel);
                 end
             else 

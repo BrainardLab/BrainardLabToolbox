@@ -26,12 +26,13 @@ function demoUDPcommunicator
 
     %% We begin by setting up 'manta' as a slave (listener) and 'ionean' as master (emitter)
     % Configure the message we are expecting and how long we should wait for it
-    syncMessage = 'GO !';
+    syncMessageLabel = 'GO !';
+    syncMessageValue = 2.34;
     if (strfind(systemInfo.networkName, 'manta'))
         % Wait for ever to receive the syncMessage
         receiverTimeOutSecs = Inf;   
         % Start listening
-        messageReceived = UDPobj.waitForMessage(syncMessage, ...
+        messageReceived = UDPobj.waitForMessage(syncMessageLabel, ...
             'timeOutSecs', receiverTimeOutSecs...
             );
         % Feedback to user
@@ -40,10 +41,11 @@ function demoUDPcommunicator
         fprintf('Is ''%s'' running on the slave computer?. Hit enter if so.\n', mfilename);
         pause;
         clc;
-        % Wait for 4 secs to receive ack that the syncMessage was received
+        % Wait for 4 secs to receive an ack that the syncMessage was received
         acknowledgmentTimeOutSecs = 4;   
         % Send the SYNC message
-        ackReceived = UDPobj.sendMessage(syncMessage, ...
+        ackReceived = UDPobj.sendMessage(syncMessageLabel, ...
+            'withValue', syncMessageValue, ...
             'timeOutSecs', acknowledgmentTimeOutSecs, ...
             'maxAttemptsNum', 1 ...
         );
