@@ -36,6 +36,8 @@ function demoUDPcommunicator
         % Feedback to user
         fprintf('''%s'' received: ''%s''\n', systemInfo.networkName, messageReceived);
     else
+        fprintf('Is ''%s'' running on the slave computer ?. Hit enter if so.\n', mfilename);
+        pause;
         % Wait for 4 secs to receive ack that the syncMessage was received
         acknowledgmentTimeOutSecs = 4;   
         % Send the SYNC message
