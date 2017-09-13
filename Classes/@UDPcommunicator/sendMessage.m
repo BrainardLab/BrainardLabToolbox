@@ -71,7 +71,7 @@ function status = sendMessage(obj, msgLabel, msgValue, varargin)
         error('%s %s Do not know how to process this type or argument.', obj.sendMessageSignature, callingFunctionSignature);
     end
     
-    if strcmp(obj.verbosity,'max')
+    if (strcmp(obj.verbosity,'max'))
         if (doNotReplyToThisMessage)
             fprintf('%s %s Will send ''%s'' and return.', obj.sendMessageSignature, callingFunctionSignature, commandString);
         else
