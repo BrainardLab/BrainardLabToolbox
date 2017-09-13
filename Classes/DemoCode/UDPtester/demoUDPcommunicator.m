@@ -47,7 +47,7 @@ function startSlaveCommunication(UDPobj, expectedMessage)
         'timeOutSecs', receiverTimeOutSecs...
         );
     % Assert that we received the expected message value
-    assert(messageReceived.msgValue == expectedMessage.value, 'expected and received message values differ');
+    assert(strcmp(messageReceived.msgValue,expectedMessage.value), 'expected and received message values differ');
 end
 
 % Method that triggers the communication by sending a SYNC message.
@@ -60,5 +60,5 @@ function startMasterCommunication(UDPobj, messageToTransmit)
         'timeOutSecs', acknowledgmentTimeOutSecs, ...
         'maxAttemptsNum', 1 ...
     );
-    assert(strcmp(status,'TIMED_OUT_WAITING_FOR_ACKNOWLEDGMENT'), 'Timed out waiting for acknowledgment');
+    assert(~strcmp(status,'TIMED_OUT_WAITING_FOR_ACKNOWLEDGMENT'), 'Timed out waiting for acknowledgment');
 end
