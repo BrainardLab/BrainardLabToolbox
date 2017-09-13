@@ -25,36 +25,47 @@ function demoUDPcommunicator
     end
 
     %% Set up'manta' as the slave (listener) and 'ionean' as the master (emitter)
-    % Configure the communication trigger message 
-    triggerMessage = struct('label', 'GO !', 'value', 'now');
+    % Trigger the communication
+    triggerMessage = struct(...
+        'label', 'GO !', ...
+        'value', 'now' ...
+        );
+    
+    protocolMessageList{1} = struct(...
+        'message', struct('label', 'test1', 'value', 1), ...
+        'direction', 'manta -> ionean', ...
+        'transmitTimeOut', 1, ...
+        'receiveTimeOut', 1 ...
+        );
     
     if (strfind(systemInfo.networkName, 'manta'))
-        startSlaveCommunication(UDPobj, triggerMessage);
+        % Wait for ever to receive the trigger message from the master
+        receive(UDPobj, triggerMessage, Inf);
     else
         fprintf('Is ''%s'' running on the slave computer?. Hit enter if so.\n', mfilename); pause; clc;
-        startMasterCommunication(UDPobj, triggerMessage);
+        % Send trigger and wait for up to 4 seconds to receive acknowledgment
+        transmit(UDPobj, triggerMessage, 4.0);
     end
 
+    
+    fprintf('\nAll done\n');
     UDPobj.shutDown();
 end
 
-
-function startSlaveCommunication(UDPobj, expectedMessage)
-    % Wait for ever to receive the syncMessage
-    receiverTimeOutSecs = Inf;   
+% Method that waits to receive a message
+function receive(UDPobj, expectedMessage, receiverTimeOutSecs)  
     % Start listening
     messageReceived = UDPobj.waitForMessage(expectedMessage.label, ...
         'timeOutSecs', receiverTimeOutSecs...
         );
-    % Assert that we received the expected message value
-    assert(strcmp(messageReceived.msgValue,expectedMessage.value), 'expected and received message values differ');
+    if (~isempty(expectedMessage.value))
+        % Assert that we received the expected message value
+        assert(strcmp(messageReceived.msgValue,expectedMessage.value), 'Expected and received message values differ');
+    end
 end
 
-% Method that triggers the communication by sending a SYNC message.
-% This methods waits to receive acknowledgment with a timeout period of 4 seconds
-function startMasterCommunication(UDPobj, messageToTransmit)
-    % Wait for 4 secs to receive an ack that the syncMessage was received
-    acknowledgmentTimeOutSecs = 4;   
+% Method that transmits a message and waits for an ACK
+function transmit(UDPobj, messageToTransmit, acknowledgmentTimeOutSecs)
     % Send the message
     status = UDPobj.sendMessage(messageToTransmit.label, messageToTransmit.value, ...
         'timeOutSecs', acknowledgmentTimeOutSecs, ...
@@ -62,3 +73,4 @@ function startMasterCommunication(UDPobj, messageToTransmit)
     );
     assert(~strcmp(status,'TIMED_OUT_WAITING_FOR_ACKNOWLEDGMENT'), 'Timed out waiting for acknowledgment');
 end
+
