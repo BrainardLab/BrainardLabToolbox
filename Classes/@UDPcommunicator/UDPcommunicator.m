@@ -34,8 +34,7 @@ classdef UDPcommunicator < handle
 %
 % [STEP 2B.] Send a command message from the mac to the windows
 %  status = UDPobjMac.sendMessage(...
-%     'NUMBER_OF_TRIALS', ...  % REQUIRED field: every message must have a label
-%     'withValue',      12, ...% OPTIONAL field: a message may or may not have a value, here it has a numerical value, 12, default: []
+%     'NUMBER_OF_TRIALS', 12, ...  % REQUIRED field: every message must have a label
 %     'timeOutSecs',    2, ... % OPTIONAL field: expect to receive an acknowdegment from the windows machine within 2 seconds, default: 5 seconds 
 %     'maxAttemptsNum', 3 ...  % OPTIONAL field: if we get no ACK within the timeout period, resend this message up to a total of 3 times, default: 1 times
 %   );
@@ -61,12 +60,12 @@ classdef UDPcommunicator < handle
 % Additional notes:
 % We can send messages whose values are one of the following three types:
 % (a) numerical (i.e., int, double etc), i.e.:
-%      status = UDPobjMac.sendMessage('Modulation Frequency', 'withValue', 0.466);
-%      status = UDPobjMac.sendMessage('X-Offset', 'withValue', -123);
+%      status = UDPobjMac.sendMessage('Modulation Frequency', 0.466);
+%      status = UDPobjMac.sendMessage('X-Offset',  -123);
 % (b) boolean (i.e., true or false), i.e.:
-%      status = UDPobjMac.sendMessage('Invert Yaxis', 'withValue', false);
+%      status = UDPobjMac.sendMessage('Invert Yaxis', false);
 % (c) strings (i.e., character arrays), i.e.:
-%      status = UDPobjMac.sendMessage('Experimenter name', 'withValue', 'Manuel Spitschan');
+%      status = UDPobjMac.sendMessage('Experimenter name', 'Manuel Spitschan');
 %
 % These three different types are all transmitted as character strings together with
 % an additional field that specifies their type, so that the receiver can
