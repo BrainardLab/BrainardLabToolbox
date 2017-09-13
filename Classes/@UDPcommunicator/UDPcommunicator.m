@@ -168,7 +168,7 @@ classdef UDPcommunicator < handle
             % flash any remaining bits
             obj.flashQueue();
             
-            if (~strcmp(obj.verbosity,'min')) && (~strcmp(obj.verbosity,'none'))
+            if strcmp(obj.verbosity,'max')
                 fprintf('%s Initialized.\n', obj.selfSignature);
             end
         end

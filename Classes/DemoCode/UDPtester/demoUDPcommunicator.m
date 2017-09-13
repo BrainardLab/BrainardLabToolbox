@@ -27,7 +27,6 @@ function demoUDPcommunicator
     % Configure the message we are expecting and how long we should wait for it
     syncMessage = 'GO !';
     if (strfind(systemInfo.networkName, 'manta'))
-        fprintf('Ready to receive the sync message from the master computer\n');
         % Wait for ever to receive the syncMessage
         receiverTimeOutSecs = Inf;   
         % Start listening
@@ -35,7 +34,7 @@ function demoUDPcommunicator
             'timeOutSecs', receiverTimeOutSecs...
             );
         % Feedback to user
-        {'Message Received', messageReceived.msgLabel, messageReceived.msgValue, messageReceived.msgValueType, messageReceived.timedOutFlag};
+        messageReceived
     else
         fprintf('Is ''%s'' running on the slave computer?. Hit enter if so.\n', mfilename);
         pause;
