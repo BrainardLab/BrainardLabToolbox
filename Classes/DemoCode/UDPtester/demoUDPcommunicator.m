@@ -9,14 +9,14 @@ function demoUDPcommunicator
         UDPobj = UDPcommunicator( ...
             'localIP',   '128.91.12.90', ...    % REQUIRED: the IP of manta.psych.upenn.edu (local host)
             'remoteIP',  '128.91.12.144', ...   % REQUIRED: the IP of ionean.psych.upenn.edu (remote host)
-            'verbosity', 'min', ...             % OPTIONAL, with default value: 'normal', and possible values: {'min', 'normal', 'max'},
+            'verbosity', 'max', ...             % OPTIONAL, with default value: 'normal', and possible values: {'min', 'normal', 'max'},
             'useNativeUDP', false ...           % OPTIONAL, with default value: false (i.e., using the brainard lab matlabUDP mexfile)
         );
     elseif (strfind(systemInfo.networkName, 'ionean'))
         UDPobj = UDPcommunicator( ...
         'localIP',   '128.91.12.144', ...       % REQUIRED: the IP of ionean.psych.upenn.edu (local host)
         'remoteIP',  '128.91.12.90', ...        % REQUIRED: the IP of manta.psych.upenn.edu (remote host)
-        'verbosity', 'min', ...                 % OPTIONAL, with default value: 'normal', and possible values: {'min', 'normal', 'max'},
+        'verbosity', 'max', ...                 % OPTIONAL, with default value: 'normal', and possible values: {'min', 'normal', 'max'},
         'useNativeUDP', false ...               % OPTIONAL, with default value: false (i.e., using the brainard lab matlabUDP mexfile)
         );
     else
@@ -27,6 +27,7 @@ function demoUDPcommunicator
     % Configure the message we are expecting and how long we should wait for it
     syncMessage = 'GO !';
     if (strfind(systemInfo.networkName, 'manta'))
+        fprintf('Ready to receive the sync message from the master computer\n');
         % Wait for ever to receive the syncMessage
         receiverTimeOutSecs = Inf;   
         % Start listening
@@ -34,9 +35,9 @@ function demoUDPcommunicator
             'timeOutSecs', receiverTimeOutSecs...
             );
         % Feedback to user
-        fprintf('''%s'' received: ''%s''\n', systemInfo.networkName, messageReceived);
+        {'Message Received', messageReceived.msgLabel, messageReceived.msgValue, messageReceived.msgValueType, messageReceived.timeOutFlag};
     else
-        fprintf('Is ''%s'' running on the slave computer ?. Hit enter if so.\n', mfilename);
+        fprintf('Is ''%s'' running on the slave computer?. Hit enter if so.\n', mfilename);
         pause;
         % Wait for 4 secs to receive ack that the syncMessage was received
         acknowledgmentTimeOutSecs = 4;   
@@ -49,5 +50,6 @@ function demoUDPcommunicator
         fprintf('''%s'' sent ''%s'' and received the following acknowledgment: ''%s''\n', systemInfo.networkName, syncMessage, ackReceived);
     end
 
+    UDPobj.shutDown();
 end
 
