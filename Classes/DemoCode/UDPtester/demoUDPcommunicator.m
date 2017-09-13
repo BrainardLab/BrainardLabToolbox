@@ -9,18 +9,18 @@ function demoUDPcommunicator
         UDPobj = UDPcommunicator( ...
             'localIP',   '128.91.12.90', ...    % REQUIRED: the IP of manta.psych.upenn.edu (local host)
             'remoteIP',  '128.91.12.144', ...   % REQUIRED: the IP of ionean.psych.upenn.edu (remote host)
-            'verbosity', 'max', ...             % OPTIONAL, with default value: 'normal', and possible values: {'min', 'normal', 'max'},
+            'verbosity', 'normal', ...             % OPTIONAL, with default value: 'normal', and possible values: {'min', 'normal', 'max'},
             'useNativeUDP', false ...           % OPTIONAL, with default value: false (i.e., using the brainard lab matlabUDP mexfile)
         );
     elseif (strfind(systemInfo.networkName, 'ionean'))
         UDPobj = UDPcommunicator( ...
         'localIP',   '128.91.12.144', ...       % REQUIRED: the IP of ionean.psych.upenn.edu (local host)
         'remoteIP',  '128.91.12.90', ...        % REQUIRED: the IP of manta.psych.upenn.edu (remote host)
-        'verbosity', 'max', ...                 % OPTIONAL, with default value: 'normal', and possible values: {'min', 'normal', 'max'},
+        'verbosity', 'normal', ...                 % OPTIONAL, with default value: 'normal', and possible values: {'min', 'normal', 'max'},
         'useNativeUDP', false ...               % OPTIONAL, with default value: false (i.e., using the brainard lab matlabUDP mexfile)
         );
     else
-        error('No configuration for computer named ''s''.', systemInfo.networkName);
+        error('No configuration for computer named ''%s''.', systemInfo.networkName);
     end
 
     %% We begin by setting up 'manta' as a slave (listener) and 'ionean' as master (emitter)
@@ -35,7 +35,7 @@ function demoUDPcommunicator
             'timeOutSecs', receiverTimeOutSecs...
             );
         % Feedback to user
-        {'Message Received', messageReceived.msgLabel, messageReceived.msgValue, messageReceived.msgValueType, messageReceived.timeOutFlag};
+        {'Message Received', messageReceived.msgLabel, messageReceived.msgValue, messageReceived.msgValueType, messageReceived.timedOutFlag};
     else
         fprintf('Is ''%s'' running on the slave computer?. Hit enter if so.\n', mfilename);
         pause;

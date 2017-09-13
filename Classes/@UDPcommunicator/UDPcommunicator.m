@@ -148,7 +148,7 @@ classdef UDPcommunicator < handle
                 error('%s No ''remoteIP'' was specified', obj.selfSignature);
             end
             
-            if (~strcmp(obj.verbosity,'min')) && (~strcmp(obj.verbosity,'none'))
+            if strcmp(obj.verbosity,'max')
                 fprintf('%s Initializing (local:%s remote:%s)\n', obj.selfSignature, obj.localIP, obj.remoteIP);
             end
 
