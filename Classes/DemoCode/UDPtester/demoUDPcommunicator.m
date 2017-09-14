@@ -4,58 +4,75 @@ function demoUDPcommunicator
     % In this demo we have IPs for manta.psych.upenn.edu and ionean.psych.upenn.edu
     hostNames       = {'manta',                  'ionean'};
     hostIPs         = {'128.91.12.90',           '128.91.12.144'};
-    hostRoles       = {'slave',                  'master'};
+    hostRoles       = {'master',                  'slave'};
     
-    %% Make some communication protocols
-    protocol = designCommunicationProtocolA(hostNames);
-    
+
     %% Instantiate a UDPcommunicator object according to computer name
     systemInfo = GetComputerInfo();
     localHostName = lower(systemInfo.networkName);
     
+    % Generate the parallel communication protocol for the 2 hosts
+    if (strfind(localHostName, 'manta'))
+        protocolToRun = designCommunicationProtocolForManta(hostNames);
+    else
+        protocolToRun = designCommunicationProtocolForIonean(hostNames);
+    end
+    
     %% Run protocol for local host
-    messageList = runProtocol(localHostName, hostNames, hostIPs, hostRoles, protocol(localHostName));
+    messageList = runProtocol(localHostName, hostNames, hostIPs, hostRoles, protocolToRun);
 end
 
-function commProtocols = designCommunicationProtocolA(hostNames)
-    % Define the communication  protocols
-    mantaProtocol = {};
-    ioneanProtocol = {};
-    % Manta sending, Ionean expecting
-    mantaProtocol{numel(mantaProtocol)+1} = makePacket(hostNames,...
+function protocol = designCommunicationProtocolForManta(hostNames)
+    % Define the communication  protocol
+    protocol = {};
+    
+    % Manta sending
+    protocol{numel(protocol)+1} = makePacket(hostNames,...
         'manta -> ionean', struct('label', 'test1', 'value', 1));
-    ioneanProtocol{numel(ioneanProtocol)+1} = makePacket(hostNames,...
+    
+    % Ionean sending
+    protocol{numel(protocol)+1} = makePacket(hostNames,...
+        'manta <- ionean', struct('label', 'test2'));
+    
+    % Manta sending
+    protocol{numel(protocol)+1} = makePacket(hostNames,...
+        'ionean <- manta', struct('label', 'test3', 'value', true));
+    
+    % Ionean sending
+    protocol{numel(protocol)+1} = makePacket(hostNames,...
+        'ionean -> manta', struct('label', 'test4'));
+    
+    % Ionean sending
+    protocol{numel(protocol)+1} = makePacket(hostNames,...
+         'ionean -> manta', struct('label', 'test5'));
+end
+
+
+function protocol = designCommunicationProtocolForIonean(hostNames)
+    % Define the communication  protocol
+    protocol = {};
+    
+    % Manta sending
+    protocol{numel(protocol)+1} = makePacket(hostNames,...
         'manta -> ionean', struct('label', 'test1'));
     
-    % Ionean sending, Manta expecting
-    mantaProtocol{numel(mantaProtocol)+1} = makePacket(hostNames,...
-        'manta <- ionean', struct('label', 'test2'));
-    ioneanProtocol{numel(ioneanProtocol)+1} = makePacket(hostNames,...
+    % Ionean sending
+    protocol{numel(protocol)+1} = makePacket(hostNames,...
         'manta <- ionean', struct('label', 'test2', 'value', -2.34));
     
-    % Manta sending, Ionean expecting
-    mantaProtocol{numel(mantaProtocol)+1} = makePacket(hostNames,...
-        'ionean <- manta', struct('label', 'test3', 'value', true));
-    ioneanProtocol{numel(ioneanProtocol)+1} = makePacket(hostNames,...
+    % Manta sending
+    protocol{numel(protocol)+1} = makePacket(hostNames,...
         'ionean <- manta', struct('label', 'test3'));
     
-    % Ionean sending, Manta expecting
-    mantaProtocol{numel(mantaProtocol)+1} = makePacket(hostNames,...
-        'ionean -> manta', struct('label', 'test4'));
-    ioneanProtocol{numel(ioneanProtocol)+1} = makePacket(hostNames,...
+    % Ionean sending
+    protocol{numel(protocol)+1} = makePacket(hostNames,...
         'ionean -> manta', struct('label', 'test4', 'value', false));
     
-    % Ionean sending, Manta expecting
-    mantaProtocol{numel(mantaProtocol)+1} = makePacket(hostNames,...
-         'ionean -> manta', struct('label', 'test5'));
-    ioneanProtocol{numel(ioneanProtocol)+1} = makePacket(hostNames,...
+    % Ionean sending
+    protocol{numel(protocol)+1} = makePacket(hostNames,...
          'ionean -> manta', struct('label', 'test5', 'value', 'bye now'));
-    
-    % Package protocols for different hosts in a container
-    commProtocols = containers.Map();
-    commProtocols('manta.psych.upenn.edu') = mantaProtocol;
-    commProtocols('ionean.psych.upenn.edu') = ioneanProtocol;
 end
+
 
 function messageList = runProtocol(localHostName, hostNames, hostIPs, hostRoles, commProtocol)
 
@@ -69,12 +86,7 @@ function messageList = runProtocol(localHostName, hostNames, hostIPs, hostRoles,
 
     %% Run the communication protocol
     for commStep = 1:numel(commProtocol)
-        % pause for a random interval to simulate local processing
-        delaySecs = rand()*2;
-        fprintf('Random pausing (%2.1f seconds)\n', delaySecs);
-        pause(delaySecs);
         messageList{commStep} = communicate(UDPobj, localHostName, commStep, commProtocol{commStep}, 'beVerbose', true);
-        displayMessage(messageList{commStep}); 
     end
         
     %% Shutdown the UDPobj
@@ -184,7 +196,7 @@ function packet = makePacket(hostNames, direction, message, varargin)
     );
 end
 
-function messageReceived = communicate(UDPobj, computerName, packetNo, communicationPacket, varargin)
+function messageReceived = communicate(UDPobj, hostName, packetNo, communicationPacket, varargin)
     % Set default return argument
     messageReceived = [];
     
@@ -194,27 +206,27 @@ function messageReceived = communicate(UDPobj, computerName, packetNo, communica
     p.parse(varargin{:});
     beVerbose = p.Results.beVerbose;
     
-    p = strfind(computerName, '.');
-    computerName = computerName(1:p(1)-1);
-    hostEntry = strfind(communicationPacket.direction, computerName);
+    p = strfind(hostName, '.');
+    hostName = hostName(1:p(1)-1);
+    hostEntry = strfind(communicationPacket.direction, hostName);
     rightwardArrowEntry = strfind(communicationPacket.direction, '->');
     
     if (~isempty(rightwardArrowEntry))
         if (hostEntry < rightwardArrowEntry)
             if (beVerbose)
-                fprintf('\n%s is sending the %d-th packet\n', computerName, packetNo);
+                fprintf('\n%s is sending packet %d', hostName, packetNo);
             end
             transmit(UDPobj, communicationPacket.message, communicationPacket.transmitTimeOut, communicationPacket.attemptsNo);
             if (beVerbose)
-                fprintf('\n%s sent the %d-th packet\n', computerName, packetNo);
+                displayMessage(hostName, 'transmitted',  communicationPacket.message, packetNo);
             end
         else
             if (beVerbose)
-                fprintf('\n%s is waiting to receive the %d-th packet\n', computerName, packetNo);
+                fprintf('\n%s is waiting to receive packet %d', hostName, packetNo);
             end
             messageReceived = receive(UDPobj, communicationPacket.message, communicationPacket.receiveTimeOut);
             if (beVerbose)
-                fprintf('\n%s received the %d-th packet\n', computerName, packetNo);
+                displayMessage(hostName, 'received', messageReceived, packetNo);          
             end
         end
     else
@@ -224,27 +236,47 @@ function messageReceived = communicate(UDPobj, computerName, packetNo, communica
         end
         if (hostEntry < leftwardArrowEntry)
             if (beVerbose)
-                fprintf('\n%s is waiting to recieve the %d-th packet\n', computerName, packetNo);
+                fprintf('\n%s is waiting to receive packet %d', hostName, packetNo);
             end
             messageReceived = receive(UDPobj, communicationPacket.message, communicationPacket.receiveTimeOut);
             if (beVerbose)
-                fprintf('\n%s received the %d-th packet\n', computerName, packetNo);
+                displayMessage(hostName, 'received', messageReceived, packetNo);
             end
         else
             if (beVerbose)
-                fprintf('\n%s is sending the %d-th packet\n', computerName, packetNo);
+                fprintf('\n%s is sending packet %d', hostName, packetNo);
             end
             transmit(UDPobj, communicationPacket.message, communicationPacket.transmitTimeOut, communicationPacket.attemptsNo);
             if (beVerbose)
-                fprintf('\n%s sent the %d-th packet\n', computerName, packetNo);
+                displayMessage(hostName, 'transmitted',  communicationPacket.message, packetNo);
             end
         end
     end
 end
 
 
-function displayMessage(message)
-    message
+function displayMessage(hostName, action, message, packetNo)
+    booleanString = {'FALSE', 'TRUE'};
+    if (~isempty(message))
+        if isfield(message, 'msgValueType')
+            switch (message.msgValueType)
+                case  'NUMERIC'
+                    fprintf('\n<strong> [packet no %03d]: ''%s'' %s message with label ''%s'' and Numeric value: %g.</strong>', packetNo, hostName, action, message.msgLabel, message.msgValue);
+                case  'BOOLEAN'
+                    fprintf('\n<strong> [packet no %03d]: ''%s'' %s message with label ''%s'' and Boolean value: %s.</strong>', packetNo, hostName, action, message.msgLabel, booleanString{message.msgValue+1});
+                case 'STRING'
+                    fprintf('\n<strong> [packet no %03d]: ''%s'' %s message with label ''%s'' and String value: ''%s''.</strong>', packetNo, hostName, action, message.msgLabel, message.msgValue);
+            end
+        else
+            if (ischar(message.value))
+                fprintf('\n<strong> [packet no %03d]: ''%s'' %s message with label ''%s'' and String value: ''%s''.</strong>', packetNo, hostName, action, message.label, message.value);
+            elseif (islogical(message.value))
+                fprintf('\n<strong> [packet no %03d]: ''%s'' %s message with label ''%s'' and Boolean value: %s.</strong>', packetNo, hostName, action, message.label, booleanString{message.value});
+            elseif (isnumeric(message.value))
+                fprintf('\n<strong> [packet no %03d]: ''%s'' %s message with label ''%s'' and Numeric value: %g.</strong>', packetNo, hostName, action, message.label, message.value);
+            end
+        end
+    end
 end
 
 
