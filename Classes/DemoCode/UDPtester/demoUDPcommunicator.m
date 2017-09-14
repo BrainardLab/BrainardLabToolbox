@@ -1,5 +1,6 @@
 function demoUDPcommunicator
-    clc;
+
+    clc
     
     %% Define the host names, IPs, and roles
     % In this demo we have IPs for manta.psych.upenn.edu and ionean.psych.upenn.edu
@@ -30,18 +31,18 @@ function demoUDPcommunicator
     
     step = step + 1;
     commProtocol{step} = makePacket(hostNames,...
-        'ionean > manta', struct('label', 'badtest', 'value', 1));
+        'ionean -> manta', struct('label', 'test6', 'value', 1));
 
     step = step + 1;
     commProtocol{step} = makePacket(hostNames,...
-        'ionean -> maanta', struct('label', 'badtest', 'value', 1));
+        'ionean -> manta', struct('label', 'test7', 'value', 1));
     
     %% Instantiate a UDPcommunicator object according to computer name
     systemInfo = GetComputerInfo();
     UDPobj = instantiateUDPcomObject(systemInfo.networkName, hostNames, hostIPs, 'beVerbose', true);
     
     %% Initiate the communication protocol
-    initiateCommunication(systemInfo.networkName, hostRoles,  hostNames, 'beVerbose', true);
+    initiateCommunication(UDPobj, systemInfo.networkName, hostRoles,  hostNames, 'beVerbose', true);
 
     %% Run the communication protocol
     for commStep = 1:numel(commProtocol)
@@ -86,7 +87,7 @@ function UDPobj = instantiateUDPcomObject(localHostName, hostNames, hostIPs, var
     end
 end
 
-function initiateCommunication(localHostName, hostRoles, hostNames, varargin)
+function initiateCommunication(UDPobj, localHostName, hostRoles, hostNames, varargin)
 
     % Parse optinal input parameters.
     p = inputParser;
@@ -120,7 +121,7 @@ function initiateCommunication(localHostName, hostRoles, hostNames, varargin)
     
     
     if (beVerbose)
-        fprintf('Setting ''%s'' as master and ''%s'' as slave\n', masterHostName, slaverHostName);
+        fprintf('Setting ''%s'' as master and ''%s'' as slave\n', masterHostName, slaveHostName);
     end
     
     if (strfind(localHostName, slaveHostName))
