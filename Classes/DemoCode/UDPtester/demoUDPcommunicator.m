@@ -179,7 +179,7 @@ function messageReceived = communicate(UDPobj, computerName, packetNo, communica
             if (beVerbose)
                 fprintf('\n%s is sending the %d-th packet\n', computerName, packetNo);
             end
-            transmit(UDPobj, communicationPacket.message, communicationPacket.transmitTimeOut);
+            transmit(UDPobj, communicationPacket.message, communicationPacket.transmitTimeOut, communicationPacket.attemptsNo);
             if (beVerbose)
                 fprintf('\n%s sent the %d-th packet\n', computerName, packetNo);
             end
@@ -209,7 +209,7 @@ function messageReceived = communicate(UDPobj, computerName, packetNo, communica
             if (beVerbose)
                 fprintf('\n%s is sending the %d-th packet\n', computerName, packetNo);
             end
-            transmit(UDPobj, communicationPacket.message, communicationPacket.transmitTimeOut);
+            transmit(UDPobj, communicationPacket.message, communicationPacket.transmitTimeOut, communicationPacket.attemptsNo);
             if (beVerbose)
                 fprintf('\n%s sent the %d-th packet\n', computerName, packetNo);
             end
@@ -226,11 +226,11 @@ function messageReceived = receive(UDPobj, expectedMessage, receiverTimeOutSecs)
 end
 
 % Method that transmits a message and waits for an ACK
-function transmit(UDPobj, messageToTransmit, acknowledgmentTimeOutSecs)
+function transmit(UDPobj, messageToTransmit, acknowledgmentTimeOutSecs, attemptsNo)
     % Send the message
     status = UDPobj.sendMessage(messageToTransmit.label, messageToTransmit.value, ...
         'timeOutSecs', acknowledgmentTimeOutSecs, ...
-        'maxAttemptsNum', messageToTransmit.attemptsNo ...
+        'maxAttemptsNum', attemptsNo ...
     );
     assert(~strcmp(status,'TIMED_OUT_WAITING_FOR_ACKNOWLEDGMENT'), 'Timed out waiting for acknowledgment');
 end
