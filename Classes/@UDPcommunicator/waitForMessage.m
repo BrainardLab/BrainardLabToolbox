@@ -44,7 +44,7 @@ function response = waitForMessage(obj, msgLabel, varargin)
         if isinf(timeOutSecs)
             fprintf('%s  Waiting for ever to receive a ''%s'' message .... ', signature, expectedMessageLabel);
         else
-            fprintf('%s  Waiting for %2.4f seconds to receive a ''%s'' message ... ', signature, timeOutSecs, expectedMessageLabel);
+            fprintf('%s  Waiting for %2.2f milli-seconds to receive a ''%s'' message ... ', signature, timeOutSecs*1000, expectedMessageLabel);
         end
     end
     
@@ -98,7 +98,7 @@ function response = waitForMessage(obj, msgLabel, varargin)
                 % Send back a TRANSMITTED_MESSAGE_MATCHES_EXPECTED message 
                 obj.sendMessage(obj.TRANSMITTED_MESSAGE_MATCHES_EXPECTED, 'nan', 'doNotreplyToThisMessage', true);
                 if (~strcmp(obj.verbosity,'min'))  && (~strcmp(obj.verbosity,'none'))
-                    fprintf('%s %s Expected message received within %2.4f seconds, acknowledging the sender.', signature, callingFunctionSignature, elapsedTime);
+                    fprintf('%s %s Expected message received within %2.2f milli-seconds, acknowledging the sender.', signature, callingFunctionSignature, elapsedTime*1000);
                 end 
             end
         else
