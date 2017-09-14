@@ -41,10 +41,10 @@ function status = sendMessage(obj, msgLabel, msgValue, varargin)
     end
     
     % ensure timeOutSecs is greater than 0
-    if (timeOutSecs <= 0)
-        timeOutSecs = 0.01;
+    if (timeOutSecs < 0)
+        timeOutSecs = 0/1000.0;
         if (~strcmp(obj.verbosity,'min'))  && (~strcmp(obj.verbosity,'none'))
-            fprintf('%s %s forcing negative or zero timeOutSecs to %2.4f seconds\n', obj.sendMessageSignature, callingFunctionSignature, timeOutSecs);
+            fprintf('%s %s forcing negative or zero timeOutSecs to %2.4f milli-seconds\n', obj.sendMessageSignature, callingFunctionSignature, timeOutSecs*1000);
         end
     end
     
