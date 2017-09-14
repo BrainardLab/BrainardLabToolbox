@@ -10,14 +10,14 @@ function demoUDPcommunicator
     protocolA = makeProtocolA(hostNames);
     
     %% Run the protocol
-    messageList = runProtocol(hostNames, hostIPs, hostRoles, protocolA)
+    messageList = runProtocol(hostNames, hostIPs, hostRoles, protocolA);
     
     disp('Hit enter to run the next protocol');
     pause;
     
     %% Reverse the host roles in protocolA
     hostRoles = {'master', 'slave'};
-    messageList = runProtocol(hostNames, hostIPs, hostRoles, protocolA)
+    messageList = runProtocol(hostNames, hostIPs, hostRoles, protocolA);
     
 end
 
@@ -37,7 +37,9 @@ function messageList = runProtocol(hostNames, hostIPs, hostRoles, commProtocol)
 
     %% Run the communication protocol
     for commStep = 1:numel(commProtocol)
-         messageList{commStep} = communicate(UDPobj, systemInfo.networkName, commStep, commProtocol{commStep}, 'beVerbose', false);
+        % pause for a random interval to simulate local processing
+        pause(rand()*2);
+        messageList{commStep} = communicate(UDPobj, systemInfo.networkName, commStep, commProtocol{commStep}, 'beVerbose', false);
     end
         
     %% Shutdown the UDPobj
