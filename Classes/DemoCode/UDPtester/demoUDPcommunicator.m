@@ -1,6 +1,16 @@
 function demoUDPcommunicator
     clc;
     
+    % Define the communication exchange protocol
+    step = 1;
+    commProtocol{step} = struct(...
+        'message', struct('label', 'test1', 'value', 1), ...
+        'direction', 'manta -> ionean', ...
+        'transmitTimeOut', 1, ...
+        'receiveTimeOut', 1 ...
+    );
+    
+    
     % Get computer info
     systemInfo = GetComputerInfo();
     
@@ -31,13 +41,6 @@ function demoUDPcommunicator
         'value', 'now' ...
         );
     
-    protocolMessageList{1} = struct(...
-        'message', struct('label', 'test1', 'value', 1), ...
-        'direction', 'manta -> ionean', ...
-        'transmitTimeOut', 1, ...
-        'receiveTimeOut', 1 ...
-        );
-    
     if (strfind(systemInfo.networkName, 'manta'))
         % Wait for ever to receive the trigger message from the master
         receive(UDPobj, triggerMessage, Inf);
@@ -47,9 +50,26 @@ function demoUDPcommunicator
         transmit(UDPobj, triggerMessage, 4.0);
     end
 
-    
+    % Run the communication exchange protocol
+    for communicationStep = 1:numel(communicationProtocol)
+         communicate(UDPobj, systemInfo.networkName, communicationStep, communicationProtocol{communicationStep});
+    end
+        
     fprintf('\nAll done\n');
     UDPobj.shutDown();
+end
+
+function communicate(UDPobj, computerName, packetNo, communicationPacket)
+    message = communicationPacket.message;
+    direction = communicationPacket.direction;
+    transmitTimeOut = communicationPacket.transmitTimeOut;
+    receiveTimeOut = communicationPacket.receiveTimeOut;
+    
+    computerName
+    strfind(direction, computerName)
+    strfind(direction, '->')
+    strfind(direction, '<-');
+
 end
 
 % Method that waits to receive a message
