@@ -65,7 +65,9 @@ function messageList = runProtocol(hostNames, hostIPs, hostRoles, commProtocol)
     %% Run the communication protocol
     for commStep = 1:numel(commProtocol)
         % pause for a random interval to simulate local processing
-        pause(rand()*2);
+        delaySecs = rand()*2;
+        fprintf('Random pausing (%2.1f seconds)\n', delaySecs);
+        pause(delaySecs);
         messageList{commStep} = communicate(UDPobj, localHostName, commStep, commProtocol{commStep}, 'beVerbose', true);
     end
         
