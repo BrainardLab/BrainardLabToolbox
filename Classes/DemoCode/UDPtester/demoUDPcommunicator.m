@@ -271,7 +271,7 @@ function displayMessage(hostName, action, message, packetNo)
             if (ischar(message.value))
                 fprintf('\n<strong> [packet no %03d]: ''%s'' %s message with label ''%s'' and String value: ''%s''.</strong>', packetNo, hostName, action, message.label, message.value);
             elseif (islogical(message.value))
-                fprintf('\n<strong> [packet no %03d]: ''%s'' %s message with label ''%s'' and Boolean value: %s.</strong>', packetNo, hostName, action, message.label, booleanString{message.value});
+                fprintf('\n<strong> [packet no %03d]: ''%s'' %s message with label ''%s'' and Boolean value: %s.</strong>', packetNo, hostName, action, message.label, booleanString{message.value+1});
             elseif (isnumeric(message.value))
                 fprintf('\n<strong> [packet no %03d]: ''%s'' %s message with label ''%s'' and Numeric value: %g.</strong>', packetNo, hostName, action, message.label, message.value);
             end
