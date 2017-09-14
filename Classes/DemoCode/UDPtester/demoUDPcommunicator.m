@@ -137,7 +137,7 @@ function receive(UDPobj, expectedMessage, receiverTimeOutSecs)
         );
     if (~isempty(expectedMessage.value))
         % Assert that we received the expected message value
-        assert(strcmp(messageReceived.msgValue,expectedMessage.value), 'Expected and received message values differ');
+        assert(strcmp(messageReceived.msgValue,expectedMessage.value), sprintf('Expected and received message values differ: %s vs %s', messageReceived.msgValue,expectedMessage.value));
     end
 end
 
