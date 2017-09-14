@@ -130,7 +130,9 @@ function initiateCommunication(UDPobj, localHostName, hostRoles, hostNames, vara
     elseif (strfind(localHostName, masterHostName))
         fprintf('Is ''%s'' running on the slave (''%s'') computer?. Hit enter if so.\n', mfilename, slaveHostName); pause; clc;
         % Send trigger and wait for up to 4 seconds to receive acknowledgment
-        transmit(UDPobj, triggerMessage, 4.0);
+        timeoutForAcknowledgment = 4;
+        attemptsNo = 3;
+        transmit(UDPobj, triggerMessage, timeoutForAcknowledgment, attemptsNo);
     else
         error('Local host name (''%s'') does not match the slave (''%s'') or the master (''%s'') host name.', localHostName, slaveHostName, masterHostName);
     end
