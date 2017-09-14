@@ -105,9 +105,11 @@ function communicate(UDPobj, computerName, packetNo, communicationPacket)
         if (hostEntry < rightwardArrowEntry)
             fprintf('\n%s is sending the %d-th packet\n', computerName, packetNo);
             transmit(UDPobj, message, transmitTimeOut);
+            fprintf('\n%s sent the %d-th packet\n', computerName, packetNo);
         else
-            fprintf('\n%s is receiving the %d-th packet\n', computerName, packetNo);
+            fprintf('\n%s is waiting to receive the %d-th packet\n', computerName, packetNo);
             receive(UDPobj, message, receiveTimeOut);
+             fprintf('\n%s received the %d-th packet\n', computerName, packetNo);
         end
     else
         leftwardArrowEntry = strfind(direction, '<-');
@@ -115,11 +117,13 @@ function communicate(UDPobj, computerName, packetNo, communicationPacket)
             error('direction field does not contain correct direction information: ''%s''.\n', direction);
         end
         if (hostEntry < leftwardArrowEntry)
-            fprintf('\n%s is receving the %d-th packet\n', computerName, packetNo);
+            fprintf('\n%s is waiting to recieve the %d-th packet\n', computerName, packetNo);
             receive(UDPobj, message, receiveTimeOut);
+            fprintf('\n%s received the %d-th packet\n', computerName, packetNo);
         else
             fprintf('\n%s is sending the %d-th packet\n', computerName, packetNo);
             transmit(UDPobj, message, transmitTimeOut);
+            fprintf('\n%s sent the %d-th packet\n', computerName, packetNo);
         end
     end
 
