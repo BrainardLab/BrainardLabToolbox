@@ -6,49 +6,22 @@ function demoUDPcommunicator
     hostIPs   = {'128.91.12.90', '128.91.12.144'};
     hostRoles = {'slave',        'master'};
     
-    %% Make a protocol of communication
-    protocolA = makeProtocolA(hostNames);
+    %% Make some communication protocols
+    protocolA = designCommunicationProtocolA(hostNames);
     
-    %% Run the protocol
+    %% Run protocolA
     messageList = runProtocol(hostNames, hostIPs, hostRoles, protocolA);
     
     disp('Hit enter to run the next protocol');
     pause;
     
-    %% Reverse the host roles in protocolA
-    hostRoles = {'master', 'slave'};
-    messageList = runProtocol(hostNames, hostIPs, hostRoles, protocolA);
+    
+    %% Run protocolB
+    messageList = runProtocol(hostNames, hostIPs, hostRoles, protocolB);
     
 end
 
-    
-
-function messageList = runProtocol(hostNames, hostIPs, hostRoles, commProtocol)
-
-    %% Clear the command window
-    clc
-      
-    %% Instantiate a UDPcommunicator object according to computer name
-    systemInfo = GetComputerInfo();
-    UDPobj = instantiateUDPcomObject(systemInfo.networkName, hostNames, hostIPs, 'beVerbose', false);
-    
-    %% Initiate the communication protocol
-    initiateCommunication(UDPobj, systemInfo.networkName, hostRoles,  hostNames);
-
-    %% Run the communication protocol
-    for commStep = 1:numel(commProtocol)
-        % pause for a random interval to simulate local processing
-        pause(rand()*2);
-        messageList{commStep} = communicate(UDPobj, systemInfo.networkName, commStep, commProtocol{commStep}, 'beVerbose', false);
-    end
-        
-    %% Shutdown the UDPobj
-    fprintf('\nAll done\n');
-    UDPobj.shutDown();
-end
-
-
-function commProtocol = makeProtocolA(hostNames)
+function commProtocol = designCommunicationProtocolA(hostNames)
     % Define the communication  protocol
     commProtocol = {};
     commProtocol{numel(commProtocol)+1} = makePacket(hostNames,...
@@ -71,8 +44,34 @@ function commProtocol = makeProtocolA(hostNames)
 
     commProtocol{numel(commProtocol)+1} = makePacket(hostNames,...
         'ionean -> manta', struct('label', 'test7', 'value', 1));
-    
 end
+
+function messageList = runProtocol(hostNames, hostIPs, hostRoles, commProtocol)
+
+    %% Clear the command window
+    clc
+      
+    %% Instantiate a UDPcommunicator object according to computer name
+    systemInfo = GetComputerInfo();
+    localHostName = systemInfo.networkName;
+    
+    UDPobj = instantiateUDPcomObject(localHostName, hostNames, hostIPs, 'beVerbose', false);
+    
+    %% Initiate the communication protocol
+    initiateCommunication(UDPobj, localHostName, hostRoles,  hostNames);
+
+    %% Run the communication protocol
+    for commStep = 1:numel(commProtocol)
+        % pause for a random interval to simulate local processing
+        pause(rand()*2);
+        messageList{commStep} = communicate(UDPobj, localHostName, commStep, commProtocol{commStep}, 'beVerbose', true);
+    end
+        
+    %% Shutdown the UDPobj
+    fprintf('\nAll done\n');
+    UDPobj.shutDown();
+end
+
 
 function UDPobj = instantiateUDPcomObject(localHostName, hostNames, hostIPs, varargin)
 
