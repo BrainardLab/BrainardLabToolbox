@@ -11,21 +11,10 @@ function demoUDPcommunicator
     
     %% Instantiate a UDPcommunicator object according to computer name
     systemInfo = GetComputerInfo();
-    localHostName = lower(systemInfo.networkName)
+    localHostName = lower(systemInfo.networkName);
     
     %% Run protocol for local host
-    keys(protocol)
     messageList = runProtocol(localHostName, hostNames, hostIPs, hostRoles, protocol(localHostName));
-    
-    if (false)
-    disp('Hit enter to run the next protocol');
-    pause;
-    
-    
-    %% Run protocolB
-    messageList = runProtocol(hostNames, hostIPs, hostRoles, protocolB);
-    end
-    
 end
 
 function commProtocols = designCommunicationProtocolA(hostNames)
@@ -85,6 +74,7 @@ function messageList = runProtocol(localHostName, hostNames, hostIPs, hostRoles,
         fprintf('Random pausing (%2.1f seconds)\n', delaySecs);
         pause(delaySecs);
         messageList{commStep} = communicate(UDPobj, localHostName, commStep, commProtocol{commStep}, 'beVerbose', true);
+        displayMessage(messageList{commStep}); 
     end
         
     %% Shutdown the UDPobj
@@ -251,6 +241,12 @@ function messageReceived = communicate(UDPobj, computerName, packetNo, communica
         end
     end
 end
+
+
+function displayMessage(message)
+    message
+end
+
 
 % Method that waits to receive a message
 function messageReceived = receive(UDPobj, expectedMessage, receiverTimeOutSecs)  
