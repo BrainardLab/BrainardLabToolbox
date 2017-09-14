@@ -12,12 +12,14 @@ function demoUDPcommunicator
     %% Run protocolA
     messageList = runProtocol(hostNames, hostIPs, hostRoles, protocolA);
     
+    if (false)
     disp('Hit enter to run the next protocol');
     pause;
     
     
     %% Run protocolB
     messageList = runProtocol(hostNames, hostIPs, hostRoles, protocolB);
+    end
     
 end
 
