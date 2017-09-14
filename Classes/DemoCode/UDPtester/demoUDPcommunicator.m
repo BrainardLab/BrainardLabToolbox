@@ -1,58 +1,76 @@
 function demoUDPcommunicator
 
-    clc
-    
     %% Define the host names, IPs, and roles
     % In this demo we have IPs for manta.psych.upenn.edu and ionean.psych.upenn.edu
     hostNames = {'manta',        'ionean'};
     hostIPs   = {'128.91.12.90', '128.91.12.144'};
     hostRoles = {'slave',        'master'};
     
-    % Define and validate the communication exchange protocol
-    step = 1;
-    commProtocol{step} = makePacket(hostNames,...
-        'manta -> ionean', struct('label', 'test1', 'value', 1));
+    %% Make a protocol of communication
+    protocolA = makeProtocolA(hostNames);
+    
+    %% Run the protocol
+    messageList = runProtocol(hostNames, hostIPs, hostRoles, protocolA)
+    
+    disp('Hit enter to run the next protocol');
+    pause;
+    
+    %% Reverse the host roles in protocolA
+    hostRoles = {'master', 'slave'};
+    messageList = runProtocol(hostNames, hostIPs, hostRoles, protocolA)
+    
+end
 
-    step = step + 1;
-    commProtocol{step} = makePacket(hostNames,...
-        'manta <- ionean', struct('label', 'test2', 'value', -2.34));
     
-    step = step + 1;
-    commProtocol{step} = makePacket(hostNames,...
-        'ionean <- manta', struct('label', 'test3', 'value', true));
-    
-    step = step + 1;
-    commProtocol{step} = makePacket(hostNames,...
-        'ionean -> manta', struct('label', 'test4', 'value', false));
-    
-    step = step + 1;
-    commProtocol{step} = makePacket(hostNames,...
-         'ionean -> manta', struct('label', 'test5', 'value', 'bye now'));
-    
-    step = step + 1;
-    commProtocol{step} = makePacket(hostNames,...
-        'ionean -> manta', struct('label', 'test6', 'value', 1));
 
-    step = step + 1;
-    commProtocol{step} = makePacket(hostNames,...
-        'ionean -> manta', struct('label', 'test7', 'value', 1));
-    
+function messageList = runProtocol(hostNames, hostIPs, hostRoles, commProtocol)
+
+    %% Clear the command window
+    clc
+      
     %% Instantiate a UDPcommunicator object according to computer name
     systemInfo = GetComputerInfo();
-    UDPobj = instantiateUDPcomObject(systemInfo.networkName, hostNames, hostIPs, 'beVerbose', true);
+    UDPobj = instantiateUDPcomObject(systemInfo.networkName, hostNames, hostIPs, 'beVerbose', false);
     
     %% Initiate the communication protocol
-    initiateCommunication(UDPobj, systemInfo.networkName, hostRoles,  hostNames, 'beVerbose', true);
+    initiateCommunication(UDPobj, systemInfo.networkName, hostRoles,  hostNames);
 
     %% Run the communication protocol
     for commStep = 1:numel(commProtocol)
-         communicate(UDPobj, systemInfo.networkName, commStep, commProtocol{commStep}, 'beVerbose', true);
+         messageList{commStep} = communicate(UDPobj, systemInfo.networkName, commStep, commProtocol{commStep}, 'beVerbose', false);
     end
         
+    %% Shutdown the UDPobj
     fprintf('\nAll done\n');
     UDPobj.shutDown();
 end
 
+
+function commProtocol = makeProtocolA(hostNames)
+    % Define the communication  protocol
+    commProtocol = {};
+    commProtocol{numel(commProtocol)+1} = makePacket(hostNames,...
+        'manta -> ionean', struct('label', 'test1', 'value', 1));
+
+    commProtocol{numel(commProtocol)+1} = makePacket(hostNames,...
+        'manta <- ionean', struct('label', 'test2', 'value', -2.34));
+    
+    commProtocol{numel(commProtocol)+1} = makePacket(hostNames,...
+        'ionean <- manta', struct('label', 'test3', 'value', true));
+    
+    commProtocol{numel(commProtocol)+1} = makePacket(hostNames,...
+        'ionean -> manta', struct('label', 'test4', 'value', false));
+    
+    commProtocol{numel(commProtocol)+1} = makePacket(hostNames,...
+         'ionean -> manta', struct('label', 'test5', 'value', 'bye now'));
+    
+    commProtocol{numel(commProtocol)+1} = makePacket(hostNames,...
+        'ionean -> manta', struct('label', 'test6', 'value', 1));
+
+    commProtocol{numel(commProtocol)+1} = makePacket(hostNames,...
+        'ionean -> manta', struct('label', 'test7', 'value', 1));
+    
+end
 
 function UDPobj = instantiateUDPcomObject(localHostName, hostNames, hostIPs, varargin)
 
@@ -65,7 +83,7 @@ function UDPobj = instantiateUDPcomObject(localHostName, hostNames, hostIPs, var
     if (beVerbose)
         verbosity = 'max';
     else
-        verbosity = 'normal';
+        verbosity = 'min';
     end
     
     if (strfind(localHostName, hostNames{1}))
@@ -87,14 +105,9 @@ function UDPobj = instantiateUDPcomObject(localHostName, hostNames, hostIPs, var
     end
 end
 
-function initiateCommunication(UDPobj, localHostName, hostRoles, hostNames, varargin)
+function initiateCommunication(UDPobj, localHostName, hostRoles, hostNames)
 
-    % Parse optinal input parameters.
-    p = inputParser;
-    p.addParameter('beVerbose', false, @islogical);
-    p.parse(varargin{:});
-    beVerbose = p.Results.beVerbose;
-    
+    beVerbose = true;
     triggerMessage = struct(...
         'label', 'GO !', ...
         'value', 'now' ...
@@ -119,9 +132,8 @@ function initiateCommunication(UDPobj, localHostName, hostRoles, hostNames, vara
     assert(ismember(masterHostName, hostNames), sprintf('master host (''%s'') is not a valid host name.\n', masterHostName));
     assert(ismember(slaveHostName, hostNames), sprintf('slave host (''%s'') is not a valid host name.\n', slaveHostName));
     
-    
     if (beVerbose)
-        fprintf('Setting ''%s'' as master and ''%s'' as slave\n', masterHostName, slaveHostName);
+        fprintf('<strong>Setting ''%s'' as MASTER and ''%s'' as SLAVE</strong>\n', masterHostName, slaveHostName);
     end
     
     if (strfind(localHostName, slaveHostName))
