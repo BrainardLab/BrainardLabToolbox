@@ -2,15 +2,20 @@ function demoUDPcommunicator
 
     %% Define the host names, IPs, and roles
     % In this demo we have IPs for manta.psych.upenn.edu and ionean.psych.upenn.edu
-    hostNames = {'manta',        'ionean'};
-    hostIPs   = {'128.91.12.90', '128.91.12.144'};
-    hostRoles = {'slave',        'master'};
+    hostNames       = {'manta',                  'ionean'};
+    hostIPs         = {'128.91.12.90',           '128.91.12.144'};
+    hostRoles       = {'slave',                  'master'};
     
     %% Make some communication protocols
-    protocolA = designCommunicationProtocolA(hostNames);
+    protocol = designCommunicationProtocolA(hostNames);
     
-    %% Run protocolA
-    messageList = runProtocol(hostNames, hostIPs, hostRoles, protocolA);
+    %% Instantiate a UDPcommunicator object according to computer name
+    systemInfo = GetComputerInfo();
+    localHostName = lower(systemInfo.networkName)
+    
+    %% Run protocol for local host
+    keys(protocol)
+    messageList = runProtocol(localHostName, hostNames, hostIPs, hostRoles, protocol(localHostName));
     
     if (false)
     disp('Hit enter to run the next protocol');
@@ -23,39 +28,50 @@ function demoUDPcommunicator
     
 end
 
-function commProtocol = designCommunicationProtocolA(hostNames)
-    % Define the communication  protocol
-    commProtocol = {};
-    commProtocol{numel(commProtocol)+1} = makePacket(hostNames,...
+function commProtocols = designCommunicationProtocolA(hostNames)
+    % Define the communication  protocols
+    mantaProtocol = {};
+    ioneanProtocol = {};
+    % Manta sending, Ionean expecting
+    mantaProtocol{numel(mantaProtocol)+1} = makePacket(hostNames,...
         'manta -> ionean', struct('label', 'test1', 'value', 1));
-
-    commProtocol{numel(commProtocol)+1} = makePacket(hostNames,...
+    ioneanProtocol{numel(ioneanProtocol)+1} = makePacket(hostNames,...
+        'manta -> ionean', struct('label', 'test1'));
+    
+    % Ionean sending, Manta expecting
+    mantaProtocol{numel(mantaProtocol)+1} = makePacket(hostNames,...
+        'manta <- ionean', struct('label', 'test2'));
+    ioneanProtocol{numel(ioneanProtocol)+1} = makePacket(hostNames,...
         'manta <- ionean', struct('label', 'test2', 'value', -2.34));
     
-    commProtocol{numel(commProtocol)+1} = makePacket(hostNames,...
+    % Manta sending, Ionean expecting
+    mantaProtocol{numel(mantaProtocol)+1} = makePacket(hostNames,...
         'ionean <- manta', struct('label', 'test3', 'value', true));
+    ioneanProtocol{numel(ioneanProtocol)+1} = makePacket(hostNames,...
+        'ionean <- manta', struct('label', 'test3'));
     
-    commProtocol{numel(commProtocol)+1} = makePacket(hostNames,...
+    % Ionean sending, Manta expecting
+    mantaProtocol{numel(mantaProtocol)+1} = makePacket(hostNames,...
+        'ionean -> manta', struct('label', 'test4'));
+    ioneanProtocol{numel(ioneanProtocol)+1} = makePacket(hostNames,...
         'ionean -> manta', struct('label', 'test4', 'value', false));
     
-    commProtocol{numel(commProtocol)+1} = makePacket(hostNames,...
+    % Ionean sending, Manta expecting
+    mantaProtocol{numel(mantaProtocol)+1} = makePacket(hostNames,...
+         'ionean -> manta', struct('label', 'test5'));
+    ioneanProtocol{numel(ioneanProtocol)+1} = makePacket(hostNames,...
          'ionean -> manta', struct('label', 'test5', 'value', 'bye now'));
     
-    commProtocol{numel(commProtocol)+1} = makePacket(hostNames,...
-        'ionean -> manta', struct('label', 'test6', 'value', 1));
-
-    commProtocol{numel(commProtocol)+1} = makePacket(hostNames,...
-        'ionean -> manta', struct('label', 'test7', 'value', 1));
+    % Package protocols for different hosts in a container
+    commProtocols = containers.Map();
+    commProtocols('manta.psych.upenn.edu') = mantaProtocol;
+    commProtocols('ionean.psych.upenn.edu') = ioneanProtocol;
 end
 
-function messageList = runProtocol(hostNames, hostIPs, hostRoles, commProtocol)
+function messageList = runProtocol(localHostName, hostNames, hostIPs, hostRoles, commProtocol)
 
     %% Clear the command window
     clc
-      
-    %% Instantiate a UDPcommunicator object according to computer name
-    systemInfo = GetComputerInfo();
-    localHostName = systemInfo.networkName;
     
     UDPobj = instantiateUDPcomObject(localHostName, hostNames, hostIPs, 'beVerbose', false);
     
