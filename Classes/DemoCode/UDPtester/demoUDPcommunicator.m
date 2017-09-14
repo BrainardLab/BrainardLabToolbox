@@ -9,8 +9,39 @@ function demoUDPcommunicator
         'transmitTimeOut', 1, ...
         'receiveTimeOut', 1 ...
     );
+
+    step = step + 1;
+    commProtocol{step} = struct(...
+        'message', struct('label', 'test1', 'value', 1), ...
+        'direction', 'manta <- ionean', ...
+        'transmitTimeOut', 1, ...
+        'receiveTimeOut', 1 ...
+    );
+
+    step = step + 1;
+    commProtocol{step} = struct(...
+        'message', struct('label', 'test1', 'value', 1), ...
+        'direction', 'ionean <- manta', ...
+        'transmitTimeOut', 1, ...
+        'receiveTimeOut', 1 ...
+    );
+
+    step = step + 1;
+    commProtocol{step} = struct(...
+        'message', struct('label', 'test1', 'value', 1), ...
+        'direction', 'ionean -> manta', ...
+        'transmitTimeOut', 1, ...
+        'receiveTimeOut', 1 ...
+    );
     
-    
+    step = step + 1;
+    commProtocol{step} = struct(...
+        'message', struct('label', 'test1', 'value', 1), ...
+        'direction', 'ionean > manta', ...
+        'transmitTimeOut', 1, ...
+        'receiveTimeOut', 1 ...
+    );
+
     % Get computer info
     systemInfo = GetComputerInfo()
     
@@ -52,7 +83,7 @@ function demoUDPcommunicator
 
     % Run the communication exchange protocol
     for commStep = 1:numel(commProtocol)
-         communicate(UDPobj, systemInfo.networkName, commStep, commProtocol{communicationStep});
+         communicate(UDPobj, systemInfo.networkName, commStep, commProtocol{commStep});
     end
         
     fprintf('\nAll done\n');
@@ -65,10 +96,31 @@ function communicate(UDPobj, computerName, packetNo, communicationPacket)
     transmitTimeOut = communicationPacket.transmitTimeOut;
     receiveTimeOut = communicationPacket.receiveTimeOut;
     
-    computerName
-    strfind(direction, computerName)
-    strfind(direction, '->')
-    strfind(direction, '<-');
+    p = strfind(computerName, '.');
+    computerName = computerName(1:p(1)-1);
+    hostEntry = strfind(direction, computerName);
+    rightwardArrowEntry = strfind(direction, '->');
+    if (~isempty(rightwardArrowEntry))
+        if (hostEntry < rightwardArrowEntry)
+            fprintf('%s is sending the %d-th packet\n', hostEntry, packetNo);
+            transmit(UDPobj, message, 10.0);
+        else
+            fprintf('%s is receiving the %d-th packet\n', hostEntry, packetNo);
+            receive(UDPobj, message, 10.0);
+        end
+    else
+        leftwardArrowEntry = strfind(direction, '<-');
+        if (isempty(leftwardArrowEntry))
+            error('direction field does not contain correct direction information: ''%s''.\n', direction);
+        end
+        if (hostEntry < leftwardArrowEntry)
+            fprintf('%s is receing the %d-th packet\n', hostEntry, packetNo);
+            receive(UDPobj, message, 10.0);
+        else
+            fprintf('%s is sending the %d-th packet\n', hostEntry, packetNo);
+            transmit(UDPobj, message, 10.0);
+        end
+    end
 
 end
 
