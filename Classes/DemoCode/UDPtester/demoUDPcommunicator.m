@@ -12,7 +12,7 @@ function demoUDPcommunicator
     
     
     % Get computer info
-    systemInfo = GetComputerInfo();
+    systemInfo = GetComputerInfo()
     
     %% Instantiate a UDPcommunicator object according to computer name
     % In this demo we have IPs for 2 computers: manta.psych.upenn.edu and ionean.psych.upenn.edu
@@ -51,8 +51,8 @@ function demoUDPcommunicator
     end
 
     % Run the communication exchange protocol
-    for communicationStep = 1:numel(communicationProtocol)
-         communicate(UDPobj, systemInfo.networkName, communicationStep, communicationProtocol{communicationStep});
+    for commStep = 1:numel(commProtocol)
+         communicate(UDPobj, systemInfo.networkName, commStep, commProtocol{communicationStep});
     end
         
     fprintf('\nAll done\n');
