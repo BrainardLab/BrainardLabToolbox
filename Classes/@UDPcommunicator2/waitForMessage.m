@@ -32,7 +32,7 @@ function packet = waitForMessage(obj, msgLabel, varargin)
     % Parse the received data stream
     if (packet.timedOutFlag == false)
         % Read the leading packet label
-        packet.messageLabel = matlabUDP('receive');
+        packet.messageLabel = matlabUDP('receive')
         
         % Read number of bytes of ensuing data
         bytesString = matlabUDP('receive');
@@ -46,19 +46,23 @@ function packet = waitForMessage(obj, msgLabel, varargin)
             theData(k) = str2double(matlabUDP('receive'));
         end
         
-        % Read the message label again
-        waitForNewDataArrival();
-        trailingMessageLabel = matlabUDP('receive');
-        if (~strcmp(packet.messageLabel,trailingMessageLabel))
-            error('\nTrailing message label (''%s'') does not match leading message label (''%'').', trailingMessageLabel, packet.messageLabel);
-        end
-        
         % Reconstruct data object
         if (numBytes > 0)
             packet.messageData = getArrayFromByteStream(uint8(theData));
         else
             packet.messageData = [];
         end
+        
+        packet.messageData
+        
+        % Read the message label again
+        waitForNewDataArrival();
+        trailingMessageLabel = matlabUDP('receive')
+        if (~strcmp(packet.messageLabel,trailingMessageLabel))
+            error('\nTrailing message label (''%s'') does not match leading message label (''%'').', trailingMessageLabel, packet.messageLabel);
+        end
+        
+        
     end
   
     % Send acknowledgment if all OK
