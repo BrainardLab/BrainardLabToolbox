@@ -217,7 +217,7 @@ function [messageReceived, errorReport, abortRequestedFromRemoteHost] = communic
         receivedPacket = UDPobj.waitForMessage(communicationPacket.messageLabel, ...
             'timeOutSecs', communicationPacket.receiveTimeOut);
         if (beVerbose)
-            displayMessage(hostName, 'received', receivedMessage, packetNo);          
+            displayMessage(hostName, 'received', receivedPacket.messageLabel, receivedPacket.messageData, packetNo);          
         end   
     end
 end
