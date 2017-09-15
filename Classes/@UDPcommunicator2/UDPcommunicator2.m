@@ -24,8 +24,13 @@ classdef UDPcommunicator2 < handle
     
     properties (Constant)
         % SPECIAL STATUSES
-        TRANSMITTED_MESSAGE_MATCHES_EXPECTED = 'MESSAGE_SENT_MATCHED_EXPECTED_MESSAGE';
+        ACKNOWLEDGMENT = 'EXPECTED_MESSAGE_RECEIVED';
         ABORT_MESSAGE = struct('label', 'ABORT', 'value', 'NOW');
+        
+        % TRANSMISSION STATUS
+        GOOD_TRANSMISSION = 'GOOD_TRANSMISSION';
+        BAD_ACKNOWLDGMENT = 'BAD_ACKNOWLEDGMENT';
+        NO_ACKNOWLDGMENT_WITHIN_TIMEOUT_PERIOD = 'NO_ACKNOWLDGMENT_WITHIN_TIMEOUT_PERIOD';
     end
     
 	% Public methods
@@ -91,26 +96,12 @@ classdef UDPcommunicator2 < handle
         
         % Public API (low-level)
         response = waitForMessage(obj, msgLabel, varargin);
-        status = sendMessage(obj, msgLabel, varargin);
+        transmissionStatus = sendMessage(obj, msgLabel, varargin);
         flashedContents = flashQueue(obj);
-        
-        % Public API (higher level)
-        % Wait for ever to get a message. Return the message value if the
-        % expected and received labels match or fail if the labels do not match, providing the strack trace
-        parameterValue = getMessageValueWithMatchingLabelOrFail(obj, messageLabel);
-        
-        % Send a message and wait for an good acknowledgment of fail,
-        % providing the stack trace. 
-        % messageTuple = {messageLabel} or {messageLabel, messageValue}
-        sendMessageAndReceiveAcknowldegmentOrFail(obj, messageTuple);
         
         % Method that transmits a communication packet and acts for the received acknowledgment
         errorReport = transmitCommunicationPacket(obj, communicationPacket, varargin);
 
-    
-        % Just a utility method for testing message transmission
-        showMessageValueAsStarString(obj, msgCount, direction, msgLabel, msgValueType, msgValue, maxValue, maxStars);
-        
         % Close UDP
         shutDown(obj);
         

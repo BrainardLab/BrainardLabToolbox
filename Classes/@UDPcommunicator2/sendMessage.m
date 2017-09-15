@@ -1,4 +1,4 @@
-function status = sendMessage(obj, msgLabel, msgData, varargin)
+function transmissionStatus = sendMessage(obj, msgLabel, msgData, varargin)
     p = inputParser;
     
     % the msgLabel is required
@@ -46,9 +46,13 @@ function status = sendMessage(obj, msgLabel, msgData, varargin)
     end
     if (timedOutFlag == false)
         acknowledgmentReceived = matlabUDP('receive');
-        fprintf('Acknowledgment received: ''%s''.\n', acknowledgmentReceived);
+        if (strcmp(acknowledgmentReceived, obj.ACKNOWLEDGMENT))
+            transmissionStatus = obj.GOOD_TRANSMISSION;
+        else
+            transmissionStatus = obj.BAD_ACKNOWLDGMENT;
+        end
     else
-        fprintf('Did not receive acknowledgment within timeout period\n');
+        transmissionStatus = obj.NO_ACKNOWLDGMENT_WITHIN_TIMEOUT_PERIOD;
     end
     
 end

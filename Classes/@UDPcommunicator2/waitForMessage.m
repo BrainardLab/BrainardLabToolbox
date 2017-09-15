@@ -21,7 +21,6 @@ function message = waitForMessage(obj, msgLabel, varargin)
     );
 
     % Wait until we get something
-    fprintf('%s: Waiting for something to arrive ...', obj.waitForMessageSignature);
     tic;
     while (~matlabUDP('check')) && (~message.timedOutFlag)
         elapsedTime = toc;
@@ -39,8 +38,6 @@ function message = waitForMessage(obj, msgLabel, varargin)
         bytesString = matlabUDP('receive');
         numBytes = str2double(bytesString);
         
-        % Read the data bytes
-        fprintf('Will read %d char\n', numBytes);
         % Read all bytes
         theData = [];
         for k = 1:numBytes
@@ -51,19 +48,19 @@ function message = waitForMessage(obj, msgLabel, varargin)
         % Read the message label again
         waitForNewDataArrival();
         if (~strcmp(message.label,matlabUDP('receive')))
-            error('Training message label does not match leading message label');
+            error('\nTrailing message label does not match leading message label.');
         end
         
         % Reconstruct data object
         message.data = getArrayFromByteStream(uint8(theData));
     end
   
-    fprintf('%s: received message ''%s'' with the following data\n', message.label)
+    fprintf('%s Received message ''%s'' with the following data\n', message.label)
     message.data
     
     % Send acknowledgment if all OK
     if (strcmp(expectedMessageLabel, message.label))
-        matlabUDP('send', 'EXPECTED_MESSAGE_RECEIVED');
+        matlabUDP('send', obj.ACKNOWLEDGMENT);
     else
         matlabUDP('send', 'WRONG_MESSAGE');
     end
