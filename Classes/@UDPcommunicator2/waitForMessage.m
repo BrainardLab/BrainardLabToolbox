@@ -55,19 +55,13 @@ function packet = waitForMessage(obj, msgLabel, varargin)
         packet.messageData = getArrayFromByteStream(uint8(theData));
     end
   
-    
-    
     % Send acknowledgment if all OK
     if (strcmp(expectedMessageLabel, packet.messageLabel))
         matlabUDP('send', obj.ACKNOWLEDGMENT);
     else
         matlabUDP('send', 'WRONG_MESSAGE');
     end
-    
-    obj.displayMessage(packet.messageLabel, packet.messageData);
 
-    
-    
 %{  
         % check if the message label we received is the same as the one we are expecting, and inform the sender
         if (strcmp(response.msgLabel, expectedMessageLabel))    
