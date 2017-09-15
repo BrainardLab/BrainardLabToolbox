@@ -55,8 +55,7 @@ function message = waitForMessage(obj, msgLabel, varargin)
         message.data = getArrayFromByteStream(uint8(theData));
     end
   
-    fprintf('%s Received message ''%s'' with the following data\n', message.label)
-    message.data
+    
     
     % Send acknowledgment if all OK
     if (strcmp(expectedMessageLabel, message.label))
@@ -64,6 +63,10 @@ function message = waitForMessage(obj, msgLabel, varargin)
     else
         matlabUDP('send', 'WRONG_MESSAGE');
     end
+    
+    obj.displayMessage(message);
+
+    
     
 %{  
         % check if the message label we received is the same as the one we are expecting, and inform the sender

@@ -108,11 +108,7 @@ classdef UDPcommunicator2 < handle
     end % public method
     
     methods (Access = private)
-        % method to transmit a parameter (paramName, paramValue, [timeOutInSeconds])
-        ack = send(obj, paramName, paramValue, timeOutInSeconds);
-        
-        % method to transmit a parameter (paramName, paramValue, [timeOutInSeconds])
-        dStruct = receive(obj, timeOutInSeconds);
+        displayMessage(obj, message);
     end % private methods
 end
 
