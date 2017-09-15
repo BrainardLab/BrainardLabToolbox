@@ -36,7 +36,7 @@ function packet = waitForMessage(obj, msgLabel, varargin)
         
         % Read number of bytes of ensuing data
         bytesString = matlabUDP('receive');
-        numBytes = str2double(bytesString);
+        numBytes = str2double(bytesString)
         
         % Read all bytes
         theData = [];
