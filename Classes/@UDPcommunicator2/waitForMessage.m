@@ -29,8 +29,10 @@ function packet = waitForMessage(obj, msgLabel, varargin)
         end
     end
     
-    % Parse the received data stream
-    if (packet.timedOutFlag == false)
+    if (packet.timedOutFlag)
+        fprintf('Timed out waiting for a message after %2.1f seconds\n', timeOutSecs);
+        return;
+    else
         % Read the leading packet label
         packet.messageLabel = matlabUDP('receive')
         
