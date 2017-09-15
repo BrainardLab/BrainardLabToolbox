@@ -48,8 +48,9 @@ function packet = waitForMessage(obj, msgLabel, varargin)
         
         % Read the message label again
         waitForNewDataArrival();
-        if (~strcmp(packet.messageLabel,matlabUDP('receive')))
-            error('\nTrailing message label does not match leading message label.');
+        trailingMessageLabel = matlabUDP('receive');
+        if (~strcmp(packet.messageLabel,trailingMessageLabel))
+            error('\nTrailing message label (''%s'') does not match leading message label (''%'').', trailingMessageLabel, packet.messageLabel);
         end
         
         % Reconstruct data object
