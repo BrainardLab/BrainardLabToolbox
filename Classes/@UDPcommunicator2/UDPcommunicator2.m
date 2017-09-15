@@ -108,7 +108,7 @@ classdef UDPcommunicator2 < handle
     end % public method
     
     methods (Access = private)
-        displayMessage(obj, message);
+        displayMessage(obj, messageLabel, messageData);
     end % private methods
 end
 
