@@ -19,7 +19,8 @@ function errorReport = transmitCommunicationPacket(obj, communicationPacket, var
     if (~strcmp(status, 'MESSAGE_SENT_MATCHED_EXPECTED_MESSAGE')) && (strcmp(remoteHostActionOnFailure, 'abort'))
         fprintf('\nCommunication failure during transmission: notifying remote host to ABORT!\n');
         obj.sendMessage(obj.ABORT_MESSAGE.label, obj.ABORT_MESSAGE.value, ...
-            'dealWithErrors', false);
+            'dealWithErrors', false, ...
+            'doNotReplyToThisMessage', true);
     end
             
     if (strcmp(localHostActionOnFailure, 'throw error'))
@@ -36,4 +37,6 @@ function errorReport = transmitCommunicationPacket(obj, communicationPacket, var
             errorReport = status;
         end
     end
+    errorReport
+    pause
 end
