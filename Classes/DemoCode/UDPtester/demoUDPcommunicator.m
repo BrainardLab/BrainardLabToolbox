@@ -227,7 +227,7 @@ function [messageReceived, errorReport] = communicate(UDPobj, hostName, packetNo
         if (beVerbose)
             fprintf('\n%s is waiting to receive packet %d', hostName, packetNo);
         end
-        messageReceived = UDPobj.waitForMessage(communicationPacket.message, 'timeOutSecs', communicationPacket.receiveTimeOut);
+        messageReceived = UDPobj.waitForMessage(communicationPacket.message.label, 'timeOutSecs', communicationPacket.receiveTimeOut);
         if (beVerbose)
             displayMessage(hostName, 'received', messageReceived, packetNo);          
         end   
