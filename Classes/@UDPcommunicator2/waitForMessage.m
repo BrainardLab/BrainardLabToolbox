@@ -25,7 +25,7 @@ function response = waitForMessage(obj, msgLabel, varargin)
     timeOutSecs = p.Results.timeOutSecs;
     callingFunctionName = p.Results.callingFunctionName;
     
-    if (strcmp(callingFunctionName, ' '))
+    if (strcmp(callingFunctionName, ' ')) || (~strcmp(obj.verbosity, 'max'))
         callingFunctionSignature = '';
     else
         callingFunctionSignature = sprintf('[called from <strong>%s</strong>]:', callingFunctionName);
@@ -35,15 +35,16 @@ function response = waitForMessage(obj, msgLabel, varargin)
     response = struct(...
         'msgLabel', '', ...
         'msgValue', [], ...
+        'msgValueType', '', ...
         'timedOutFlag', false ...
     );
 
     if (~strcmp(obj.verbosity,'min')) && (~strcmp(obj.verbosity,'none'))
         % give some feedback
         if isinf(timeOutSecs)
-            fprintf('%s Waiting for ever to receive a ''%s'' message .... ', signature, expectedMessageLabel);
+            fprintf('%s  Waiting for ever to receive a ''%s'' message .... ', signature, expectedMessageLabel);
         else
-            fprintf('%s Waiting for %2.2f seconds to receive a ''%s'' message ... ', signature, timeOutSecs, expectedMessageLabel);
+            fprintf('%s  Waiting for %2.2f milli-seconds to receive a ''%s'' message ... ', signature, timeOutSecs*1000, expectedMessageLabel);
         end
     end
     
@@ -85,22 +86,25 @@ function response = waitForMessage(obj, msgLabel, varargin)
             error('Do not know how to handle message value type: ''%s''\n', response.msgValueType); 
         end
         
+        response.msgLabel
+        obj.ABORT_MESSAGE.label
+        
         % check if the message label we received is the same as the one we are expecting, and inform the sender
         if (strcmp(response.msgLabel, expectedMessageLabel))    
             % Do not send back an TRANSMITTED_MESSAGE_MATCHES_EXPECTED message 
             % when we were expecting a TRANSMITTED_MESSAGE_MATCHES_EXPECTED and we received it
             if (strcmp(expectedMessageLabel, obj.TRANSMITTED_MESSAGE_MATCHES_EXPECTED))
-                if (~strcmp(obj.verbosity,'min'))  && (~strcmp(obj.verbosity,'none'))
+                if (strcmp(obj.verbosity,'max'))
                     fprintf('%s %s Received expected message (''%s'')\n', signature, callingFunctionSignature, expectedMessageLabel);
                 end
             else 
-                % Send back an TRANSMITTED_MESSAGE_MATCHES_EXPECTED message 
+                % Send back a TRANSMITTED_MESSAGE_MATCHES_EXPECTED message 
                 obj.sendMessage(obj.TRANSMITTED_MESSAGE_MATCHES_EXPECTED, 'nan', 'doNotreplyToThisMessage', true);
                 if (~strcmp(obj.verbosity,'min'))  && (~strcmp(obj.verbosity,'none'))
-                    fprintf('%s %s Expected message received within %2.2f seconds, acknowledging the sender.', signature, callingFunctionSignature, elapsedTime);
+                    fprintf('%s %s Expected message received within %2.2f milli-seconds, acknowledging the sender.', signature, callingFunctionSignature, elapsedTime*1000);
                 end 
             end
-        else
+        elseif (~strcmp(expectedMessageLabel, obj.TRANSMITTED_MESSAGE_MATCHES_EXPECTED))
             % Send back message that the expected message does not match the received one
             if (~strcmp(obj.verbosity,'min'))  && (~strcmp(obj.verbosity,'none'))
                 fprintf('%s %s: Received: ''%s'' <strong>instead of</strong> ''%s''.\n', signature, callingFunctionSignature, response.msgLabel, expectedMessageLabel);
