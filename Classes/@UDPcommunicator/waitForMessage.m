@@ -101,6 +101,8 @@ function response = waitForMessage(obj, msgLabel, varargin)
                     fprintf('%s %s Expected message received within %2.2f milli-seconds, acknowledging the sender.', signature, callingFunctionSignature, elapsedTime*1000);
                 end 
             end
+        elseif (strcmp(response.msgLabel, obj.ABORT_MESSAGE.label))
+            % do nothing; let the caller deal with abort
         else
             % Send back message that the expected message does not match the received one
             if (~strcmp(obj.verbosity,'min'))  && (~strcmp(obj.verbosity,'none'))
