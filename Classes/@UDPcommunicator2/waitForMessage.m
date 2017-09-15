@@ -53,7 +53,11 @@ function packet = waitForMessage(obj, msgLabel, varargin)
         end
         
         % Reconstruct data object
-        packet.messageData = getArrayFromByteStream(uint8(theData));
+        if (numBytes > 0)
+            packet.messageData = getArrayFromByteStream(uint8(theData));
+        else
+            packet.messageData = [];
+        end
     end
   
     % Send acknowledgment if all OK
