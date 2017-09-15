@@ -235,7 +235,7 @@ function [messageReceived, errorReport, abortRequestedFromRemoteHost] = communic
             fprintf('\n%s is waiting to receive packet %d', hostName, packetNo);
         end
         messageReceived = UDPobj.waitForMessage(communicationPacket.message.label, 'timeOutSecs', communicationPacket.receiveTimeOut)
-        if (strcmp(messageReceived.msgLabel, obj.ABORT_MESSAGE.label)) && (strcmp(messageReceived.msgValue, obj.ABORT_MESSAGE.value))
+        if (strcmp(messageReceived.msgLabel, UDPobj.ABORT_MESSAGE.label)) && (strcmp(messageReceived.msgValue, UDPobj.ABORT_MESSAGE.value))
             abortRequestedFromRemoteHost = true;
         end
         if (beVerbose)
