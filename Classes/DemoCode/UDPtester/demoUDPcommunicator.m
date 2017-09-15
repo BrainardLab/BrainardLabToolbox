@@ -296,6 +296,5 @@ function transmit(UDPobj, messageToTransmit, acknowledgmentTimeOutSecs, attempts
         'timeOutSecs', acknowledgmentTimeOutSecs, ...
         'maxAttemptsNum', attemptsNo ...
     );
-    assert(~strcmp(status,'TIMED_OUT_WAITING_FOR_ACKNOWLEDGMENT'), 'Timed out waiting for acknowledgment');
 end
 

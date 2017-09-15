@@ -129,6 +129,11 @@ function status = sendMessage(obj, msgLabel, msgValue, varargin)
         end
     end % while attemptNo < maxAttemptsNum
     
+    % Make sure the remote host received the expected label
+    assert(strcmp(status,'MESSAGE_SENT_MATCHED_EXPECTED_MESSAGE'), sprintf('Remote host reports a communication failure: %s', status));
+    % Make sure we did not hit the ACK timeOut limit, otherwise throw an error
+    assert(~strcmp(status,'TIMED_OUT_WAITING_FOR_ACKNOWLEDGMENT'), 'Remote host did not send an acknowledgment within the timeout period.');
+    
     function transmitAndUpdateCounter(obj, commandString)
         if (obj.useNativeUDP)
             fwrite(obj.udpClient, commandString);
