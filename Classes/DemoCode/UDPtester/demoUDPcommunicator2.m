@@ -97,7 +97,7 @@ function messageList = runProtocol(UDPobj, localHostName, hostNames, hostRoles, 
     %% Run the communication protocol
     abortRequestedFromRemoteHost = false;
     commStep = 0;
-    while (commStep <= numel(commProtocol)) && (~abortRequestedFromRemoteHost)
+    while (commStep < numel(commProtocol)) && (~abortRequestedFromRemoteHost)
         commStep = commStep + 1;
         [messageList{commStep}, errorReport{commStep}, abortRequestedFromRemoteHost] = communicate(UDPobj, localHostName, commStep, commProtocol{commStep}, 'beVerbose', true);
     end
