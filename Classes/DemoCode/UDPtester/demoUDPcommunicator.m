@@ -206,9 +206,9 @@ function [messageReceived, errorReport] = communicate(UDPobj, hostName, packetNo
     p.addParameter('beVerbose', false, @islogical);
     p.addParameter('withLocalHostActionOnFailure', 'catch error', @(x)ismember(x, {'catch error', 'throw error'}));
     p.addParameter('withRemoteHostActionOnFailure', 'abort', @(x)ismember(x, {'abort', 'nothing'}));
+    p.parse(varargin{:});
     localHostActionOnFailure = p.Results.withLocalHostActionOnFailure;
     remoteHostActionOnFailure = p.Results.withRemoteHostActionOnFailure;
-    p.parse(varargin{:});
     beVerbose = p.Results.beVerbose;
     
     if (isATransmissionPacket(communicationPacket.direction, hostName))
