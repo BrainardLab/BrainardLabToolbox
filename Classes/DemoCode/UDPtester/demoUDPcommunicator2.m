@@ -206,7 +206,7 @@ function [messageReceived, errorReport, abortRequestedFromRemoteHost] = communic
         end
         errorReport = UDPobj.sendMessage(...
             communicationPacket.messageLabel, communicationPacket.messageData, ...
-            'timeOutSecs', 5);
+            'timeOutSecs', communicationPacket.receiveTimeOut);
         if (beVerbose)
             displayMessage(hostName, 'transmitted',  communicationPacket.message, packetNo);
         end    
@@ -214,7 +214,8 @@ function [messageReceived, errorReport, abortRequestedFromRemoteHost] = communic
         if (beVerbose)
             fprintf('\n%s is waiting to receive packet %d', hostName, packetNo);
         end
-        receivedMessage = UDPobj.waitForMessage(communicationPacket.message.label, 'timeOutSecs', communicationPacket.receiveTimeOut);
+        receivedMessage = UDPobj.waitForMessage(communicationPacket.messageLabel, ...
+            'timeOutSecs', communicationPacket.receiveTimeOut);
         if (beVerbose)
             displayMessage(hostName, 'received', receivedMessage, packetNo);          
         end   
