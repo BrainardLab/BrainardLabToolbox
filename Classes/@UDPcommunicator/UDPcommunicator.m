@@ -101,6 +101,7 @@ classdef UDPcommunicator < handle
     properties (Constant)
         % SPECIAL STATUSES
         TRANSMITTED_MESSAGE_MATCHES_EXPECTED = 'MESSAGE_SENT_MATCHED_EXPECTED_MESSAGE';
+        ABORT_MESSAGE = struct('label', 'ABORT', 'value', 'NOW');
     end
     
 	% Public methods

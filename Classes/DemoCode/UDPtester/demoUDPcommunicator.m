@@ -85,11 +85,17 @@ function messageList = runProtocol(localHostName, hostNames, hostIPs, hostRoles,
     initiateCommunication(UDPobj, localHostName, hostRoles,  hostNames);
 
     %% Run the communication protocol
-    for commStep = 1:numel(commProtocol)
-        messageList{commStep} = communicate(UDPobj, localHostName, commStep, commProtocol{commStep}, 'beVerbose', true);
-        pause
+    abortRequestedFromRemoteHost = false;
+    commStep = 0;
+    while (commStep <= numel(commProtocol)) && (~abortRequestedFromRemoteHost)
+        commStep = commStep + 1;
+        [messageList{commStep}, errorReport{commStep}, abortRequestedFromRemoteHost] = communicate(UDPobj, localHostName, commStep, commProtocol{commStep}, 'beVerbose', true);
     end
         
+    if (abortRequestedFromRemoteHost)
+        fprintf('Aborted communication protocol as requested from remote host\n');
+    end
+    
     %% Shutdown the UDPobj
     fprintf('\nAll done\n');
     UDPobj.shutDown();
@@ -196,10 +202,11 @@ function packet = makePacket(hostNames, direction, message, varargin)
     );
 end
 
-function [messageReceived, errorReport] = communicate(UDPobj, hostName, packetNo, communicationPacket, varargin)
+function [messageReceived, errorReport, abortRequestedFromRemoteHost] = communicate(UDPobj, hostName, packetNo, communicationPacket, varargin)
     % Set default state of return arguments
     messageReceived = [];
     errorReport = '';
+    abortRequestedFromRemoteHost = false;
     
     % Parse optinal input parameters.
     p = inputParser;
@@ -227,7 +234,10 @@ function [messageReceived, errorReport] = communicate(UDPobj, hostName, packetNo
         if (beVerbose)
             fprintf('\n%s is waiting to receive packet %d', hostName, packetNo);
         end
-        messageReceived = UDPobj.waitForMessage(communicationPacket.message.label, 'timeOutSecs', communicationPacket.receiveTimeOut);
+        messageReceived = UDPobj.waitForMessage(communicationPacket.message.label, 'timeOutSecs', communicationPacket.receiveTimeOut)
+        if (strcmp(messageReceived.msgLabel, obj.ABORT_MESSAGE.label) && (strcmp(messageReceived.msgValue, obj.ABORT_MESSAGE.value)
+            abortRequestedFromRemoteHost = true;
+        end
         if (beVerbose)
             displayMessage(hostName, 'received', messageReceived, packetNo);          
         end   
