@@ -31,7 +31,7 @@ function message = waitForMessage(obj, msgLabel, varargin)
     end
     
     % Parse the received data stream
-    if (response.timedOutFlag == false)
+    if (message.timedOutFlag == false)
         % Read the leading message label
         message.label = matlabUDP('receive');
         
