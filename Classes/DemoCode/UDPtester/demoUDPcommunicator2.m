@@ -208,7 +208,7 @@ function [messageReceived, errorReport, abortRequestedFromRemoteHost] = communic
             communicationPacket.messageLabel, communicationPacket.messageData, ...
             'timeOutSecs', communicationPacket.receiveTimeOut);
         if (beVerbose)
-            displayMessage(hostName, 'transmitted',  communicationPacket.messageLabel, communicationPacket.messageData, packetNo);
+            UDPobj.displayMessage(hostName, 'transmitted',  communicationPacket.messageLabel, communicationPacket.messageData, packetNo);
         end    
     else
         if (beVerbose)
@@ -217,7 +217,7 @@ function [messageReceived, errorReport, abortRequestedFromRemoteHost] = communic
         receivedPacket = UDPobj.waitForMessage(communicationPacket.messageLabel, ...
             'timeOutSecs', communicationPacket.receiveTimeOut);
         if (beVerbose)
-            displayMessage(hostName, 'received', receivedPacket.messageLabel, receivedPacket.messageData, packetNo);          
+            UDPobj.displayMessage(hostName, 'received', receivedPacket.messageLabel, receivedPacket.messageData, packetNo);          
         end   
     end
 end
