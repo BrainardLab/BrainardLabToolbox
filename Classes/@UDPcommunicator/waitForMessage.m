@@ -86,6 +86,9 @@ function response = waitForMessage(obj, msgLabel, varargin)
             error('Do not know how to handle message value type: ''%s''\n', response.msgValueType); 
         end
         
+        response.msgLabel
+        obj.ABORT_MESSAGE.label
+        
         % check if the message label we received is the same as the one we are expecting, and inform the sender
         if (strcmp(response.msgLabel, expectedMessageLabel))    
             % Do not send back an TRANSMITTED_MESSAGE_MATCHES_EXPECTED message 
@@ -102,6 +105,7 @@ function response = waitForMessage(obj, msgLabel, varargin)
                 end 
             end
         elseif (strcmp(response.msgLabel, obj.ABORT_MESSAGE.label))
+            
             % do nothing; let the caller deal with abort
         else
             % Send back message that the expected message does not match the received one
