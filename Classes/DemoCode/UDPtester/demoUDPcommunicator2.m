@@ -243,27 +243,3 @@ function transmitAction = isATransmissionPacket(direction, hostName)
         end
     end
 end
-
-function displayMessage(hostName, action, message, packetNo)
-    booleanString = {'FALSE', 'TRUE'};
-    if (~isempty(message))
-        if isfield(message, 'msgValueType')
-            switch (message.msgValueType)
-                case  'NUMERIC'
-                    fprintf('\n<strong> [packet no %03d]: ''%s'' %s message with label ''%s'' and Numeric value: %g.</strong>', packetNo, hostName, action, message.msgLabel, message.msgValue);
-                case  'BOOLEAN'
-                    fprintf('\n<strong> [packet no %03d]: ''%s'' %s message with label ''%s'' and Boolean value: %s.</strong>', packetNo, hostName, action, message.msgLabel, booleanString{message.msgValue+1});
-                case 'STRING'
-                    fprintf('\n<strong> [packet no %03d]: ''%s'' %s message with label ''%s'' and String value: ''%s''.</strong>', packetNo, hostName, action, message.msgLabel, message.msgValue);
-            end
-        else
-            if (ischar(message.value))
-                fprintf('\n<strong> [packet no %03d]: ''%s'' %s message with label ''%s'' and String value: ''%s''.</strong>', packetNo, hostName, action, message.label, message.value);
-            elseif (islogical(message.value))
-                fprintf('\n<strong> [packet no %03d]: ''%s'' %s message with label ''%s'' and Boolean value: %s.</strong>', packetNo, hostName, action, message.label, booleanString{message.value+1});
-            elseif (isnumeric(message.value))
-                fprintf('\n<strong> [packet no %03d]: ''%s'' %s message with label ''%s'' and Numeric value: %g.</strong>', packetNo, hostName, action, message.label, message.value);
-            end
-        end
-    end
-end
