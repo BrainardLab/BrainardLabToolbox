@@ -187,6 +187,10 @@ classdef UDPcommunicator < handle
         % messageTuple = {messageLabel} or {messageLabel, messageValue}
         sendMessageAndReceiveAcknowldegmentOrFail(obj, messageTuple);
         
+        % Method that transmits a communication packet and acts for the received acknowledgment
+        errorReport = transmitCommunicationPacket(obj, communicationPacket, varargin);
+
+    
         % Just a utility method for testing message transmission
         showMessageValueAsStarString(obj, msgCount, direction, msgLabel, msgValueType, msgValue, maxValue, maxStars);
         

@@ -16,6 +16,7 @@ function status = sendMessage(obj, msgLabel, msgValue, varargin)
     defaultCallingFunctionName = ' ';
     addOptional(p,'callingFunctionName',defaultCallingFunctionName,@ischar);
     
+    
     % the maxAttemptsNum is optional, with a default value: 1
     defaultMaxAttemptsNum = 1;
     addOptional(p,'maxAttemptsNum',defaultMaxAttemptsNum,@isnumeric);
@@ -23,6 +24,9 @@ function status = sendMessage(obj, msgLabel, msgValue, varargin)
     % the doNotReplyToThisMessage is optional, with a default value false
     defaultDoNotReplyToThisMessage = false;
     addOptional(p,'doNotReplyToThisMessage',defaultDoNotReplyToThisMessage,@islogical);
+    
+    % Whether to deal with errors here or propagate the error message to the caller
+    addOptional(p,'dealWithErrors', true, @islogical);
     
     % parse the input
     parse(p, msgLabel, msgValue, varargin{:});
@@ -33,6 +37,7 @@ function status = sendMessage(obj, msgLabel, msgValue, varargin)
     maxAttemptsNum  = p.Results.maxAttemptsNum;
     doNotReplyToThisMessage = p.Results.doNotReplyToThisMessage;
     callingFunctionName = p.Results.callingFunctionName;
+    dealWithErrors  = p.Results.dealWithErrors;
     
     if (strcmp(callingFunctionName, ' '))
         callingFunctionSignature = '';
@@ -129,10 +134,12 @@ function status = sendMessage(obj, msgLabel, msgValue, varargin)
         end
     end % while attemptNo < maxAttemptsNum
     
-    % Make sure the remote host received the expected label
-    assert(strcmp(status,'MESSAGE_SENT_MATCHED_EXPECTED_MESSAGE'), sprintf('Remote host reports a communication failure: %s', status));
-    % Make sure we did not hit the ACK timeOut limit, otherwise throw an error
-    assert(~strcmp(status,'TIMED_OUT_WAITING_FOR_ACKNOWLEDGMENT'), 'Remote host did not send an acknowledgment within the timeout period.');
+    if (dealWithErrors)
+        % Make sure the remote host received the expected label
+        assert(strcmp(status,'MESSAGE_SENT_MATCHED_EXPECTED_MESSAGE'), sprintf('\nRemote host reports a communication failure: %s', status));
+        % Make sure we did not hit the ACK timeOut limit, otherwise throw an error
+        assert(~strcmp(status,'TIMED_OUT_WAITING_FOR_ACKNOWLEDGMENT'), '\nRemote host did not send an acknowledgment within the timeout period.');
+    end
     
     function transmitAndUpdateCounter(obj, commandString)
         if (obj.useNativeUDP)

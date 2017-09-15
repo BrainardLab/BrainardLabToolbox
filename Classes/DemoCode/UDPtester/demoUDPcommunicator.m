@@ -121,7 +121,7 @@ function UDPobj = instantiateUDPcomObject(localHostName, hostNames, hostIPs, var
         UDPobj = UDPcommunicator( ...
         'localIP',   hostIPs{2}, ...            % REQUIRED: the IP of ionean.psych.upenn.edu (local host)
         'remoteIP',  hostIPs{1}, ...            % REQUIRED: the IP of manta.psych.upenn.edu (remote host)
-        'verbosity', verbosity, ...              % OPTIONAL, with default value: 'normal', and possible values: {'min', 'normal', 'max'},
+        'verbosity', verbosity, ...             % OPTIONAL, with default value: 'normal', and possible values: {'min', 'normal', 'max'},
         'useNativeUDP', false ...               % OPTIONAL, with default value: false (i.e., using the brainard lab matlabUDP mexfile)
         );
     else
@@ -132,10 +132,7 @@ end
 function initiateCommunication(UDPobj, localHostName, hostRoles, hostNames)
 
     beVerbose = true;
-    triggerMessage = struct(...
-        'label', 'GO !', ...
-        'value', 'now' ...
-        );
+    triggerMessage = 'GO!';
     
     if (strcmp(hostRoles{1}, 'master'))
         masterHostName = hostNames{1};
@@ -162,13 +159,15 @@ function initiateCommunication(UDPobj, localHostName, hostRoles, hostNames)
     
     if (strfind(localHostName, slaveHostName))
         % Wait for ever to receive the trigger message from the master
-        receive(UDPobj, triggerMessage, Inf);
+        messageReceived = UDPobj.waitForMessage(triggerMessage, 'timeOutSecs', Inf);
+    
     elseif (strfind(localHostName, masterHostName))
         fprintf('Is ''%s'' running on the slave (''%s'') computer?. Hit enter if so.\n', mfilename, slaveHostName); pause; clc;
         % Send trigger and wait for up to 4 seconds to receive acknowledgment
-        timeoutForAcknowledgment = 4;
-        attemptsNo = 3;
-        transmit(UDPobj, triggerMessage, timeoutForAcknowledgment, attemptsNo);
+        UDPobj.sendMessage(triggerMessage, '', ...
+            'timeOutSecs', 4, ...
+         'maxAttemptsNum', 3 ...
+        );
     else
         error('Local host name (''%s'') does not match the slave (''%s'') or the master (''%s'') host name.', localHostName, slaveHostName, masterHostName);
     end
@@ -197,64 +196,65 @@ function packet = makePacket(hostNames, direction, message, varargin)
     );
 end
 
-function messageReceived = communicate(UDPobj, hostName, packetNo, communicationPacket, varargin)
-    % Set default return argument
+function [messageReceived, errorReport] = communicate(UDPobj, hostName, packetNo, communicationPacket, varargin)
+    % Set default state of return arguments
     messageReceived = [];
+    errorReport = '';
     
     % Parse optinal input parameters.
     p = inputParser;
     p.addParameter('beVerbose', false, @islogical);
+    p.addParameter('withLocalHostActionOnFailure', 'catch error', @(x)ismember(x, {'catch error', 'throw error'}));
+    p.addParameter('withRemoteHostActionOnFailure', 'abort', @(x)ismember(x, {'abort', 'nothing'}));
+    localHostActionOnFailure = p.Results.withLocalHostActionOnFailure;
+    remoteHostActionOnFailure = p.Results.withRemoteHostActionOnFailure;
     p.parse(varargin{:});
     beVerbose = p.Results.beVerbose;
     
-    p = strfind(hostName, '.');
-    hostName = hostName(1:p(1)-1);
-    hostEntry = strfind(communicationPacket.direction, hostName);
-    rightwardArrowEntry = strfind(communicationPacket.direction, '->');
-    
-    if (~isempty(rightwardArrowEntry))
-        if (hostEntry < rightwardArrowEntry)
-            if (beVerbose)
-                fprintf('\n%s is sending packet %d', hostName, packetNo);
-            end
-            transmit(UDPobj, communicationPacket.message, communicationPacket.transmitTimeOut, communicationPacket.attemptsNo);
-            if (beVerbose)
-                displayMessage(hostName, 'transmitted',  communicationPacket.message, packetNo);
-            end
-        else
-            if (beVerbose)
-                fprintf('\n%s is waiting to receive packet %d', hostName, packetNo);
-            end
-            messageReceived = receive(UDPobj, communicationPacket.message, communicationPacket.receiveTimeOut);
-            if (beVerbose)
-                displayMessage(hostName, 'received', messageReceived, packetNo);          
-            end
+    if (isATransmissionPacket(communicationPacket.direction, hostName))
+        if (beVerbose)
+            fprintf('\n%s is sending packet %d', hostName, packetNo);
         end
+        errorReport = UDPobj.transmitAndActOnAcknowledgmentStatus(...
+            communicationPacket, ...
+            'withLocalHostActionOnFailure', localHostActionOnFailure, ...
+            'withRemoteHostActionOnFailure', remoteHostActionOnFailure...
+        );
+        if (beVerbose)
+            displayMessage(hostName, 'transmitted',  communicationPacket.message, packetNo);
+        end    
     else
-        leftwardArrowEntry = strfind(communicationPacket.direction, '<-');
-        if (isempty(leftwardArrowEntry))
-            error('direction field does not contain correct direction information: ''%s''.\n', communicationPacket.direction);
+        if (beVerbose)
+            fprintf('\n%s is waiting to receive packet %d', hostName, packetNo);
         end
-        if (hostEntry < leftwardArrowEntry)
-            if (beVerbose)
-                fprintf('\n%s is waiting to receive packet %d', hostName, packetNo);
-            end
-            messageReceived = receive(UDPobj, communicationPacket.message, communicationPacket.receiveTimeOut);
-            if (beVerbose)
-                displayMessage(hostName, 'received', messageReceived, packetNo);
-            end
-        else
-            if (beVerbose)
-                fprintf('\n%s is sending packet %d', hostName, packetNo);
-            end
-            transmit(UDPobj, communicationPacket.message, communicationPacket.transmitTimeOut, communicationPacket.attemptsNo);
-            if (beVerbose)
-                displayMessage(hostName, 'transmitted',  communicationPacket.message, packetNo);
-            end
-        end
+        messageReceived = UDPobj.waitForMessage(communicationPacket.message, 'timeOutSecs', communicationPacket.receiveTimeOut);
+        if (beVerbose)
+            displayMessage(hostName, 'received', messageReceived, packetNo);          
+        end   
     end
 end
 
+function transmitAction = isATransmissionPacket(direction, hostName)
+
+    transmitAction = false;
+    p = strfind(hostName, '.');
+    hostName = hostName(1:p(1)-1);
+    hostEntry = strfind(direction, hostName);
+    rightwardArrowEntry = strfind(direction, '->');
+    leftwardArrowEntry = strfind(direction, '<-');
+    if (~isempty(rightwardArrowEntry))
+        if (hostEntry < rightwardArrowEntry)
+            transmitAction = true;
+        end
+    else
+        if (isempty(leftwardArrowEntry))
+            error('direction field does not contain correct direction information: ''%s''.\n', direction);
+        end
+        if (hostEntry > leftwardArrowEntry)
+            transmitAction = true;
+        end
+    end
+end
 
 function displayMessage(hostName, action, message, packetNo)
     booleanString = {'FALSE', 'TRUE'};
@@ -279,22 +279,3 @@ function displayMessage(hostName, action, message, packetNo)
         end
     end
 end
-
-
-% Method that waits to receive a message
-function messageReceived = receive(UDPobj, expectedMessage, receiverTimeOutSecs)  
-    % Start listening
-    messageReceived = UDPobj.waitForMessage(expectedMessage.label, ...
-        'timeOutSecs', receiverTimeOutSecs...
-        );
-end
-
-% Method that transmits a message and waits for an ACK
-function transmit(UDPobj, messageToTransmit, acknowledgmentTimeOutSecs, attemptsNo)
-    % Send the message
-    status = UDPobj.sendMessage(messageToTransmit.label, messageToTransmit.value, ...
-        'timeOutSecs', acknowledgmentTimeOutSecs, ...
-        'maxAttemptsNum', attemptsNo ...
-    );
-end
-
