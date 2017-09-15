@@ -23,10 +23,10 @@ function message = waitForMessage(obj, msgLabel, varargin)
     % Wait until we get something
     fprintf('%s: Waiting for something to arrive ...', obj.waitForMessageSignature);
     tic;
-    while (~matlabUDP('check'))
+    while (~matlabUDP('check')) && (~message.timedOutFlag)
         elapsedTime = toc;
         if (elapsedTime > timeOutSecs)
-            response.timedOutFlag = true;
+            message.timedOutFlag = true;
         end
     end
     

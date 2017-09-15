@@ -8,11 +8,11 @@ function status = sendMessage(obj, msgLabel, msgData, varargin)
     addRequired(p, 'msgData');
     
     % the timeOutSecs is optional, with a default value: 5
-    defaultTimeOutSecs = 5;
-    addOptional(p,'timeOutSecs',defaultTimeOutSecs,@isnumeric);
+    addOptional(p,'timeOutSecs', 5, @isnumeric);
+    addOptional(p,'maxAttemptsNum',1, @isnumeric);
     
     % parse the input
-    parse(p, msgLabel, msgValue, varargin{:});
+    parse(p, msgLabel, msgData, varargin{:});
 
     messageLabel = p.Results.msgLabel;
     messageData  = p.Results.msgData;
@@ -39,12 +39,15 @@ function status = sendMessage(obj, msgLabel, msgData, varargin)
     tic;
     while (~matlabUDP('check'))
         elapsedTime = toc;
-        if (elapsedTime > timeOutSecs)
+        if (elapsedTime > acknowledgmentTimeOutSecs)
             response.timedOutFlag = true;
         end
     end
     if (response.timedOutFlag == false)
         acknowledgmentReceived = matlabUDP('receive');
+        fprintf('Acknowledgment received: ''%s''.\n', acknowledgmentReceived);
+    else
+        fprintf('Did not receive acknowledgment within timeout period\n');
     end
     
 end

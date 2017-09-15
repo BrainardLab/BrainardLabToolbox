@@ -36,15 +36,15 @@ function status = sendMessage(obj, msgLabel, msgData, varargin)
     matlabUDP('send', messageLabel);
        
     % Wait for acknowledgment that the message was received OK
-    acknowledgmentReceived = '';
+    timeOutFlag = false;
     tic;
-    while (~matlabUDP('check'))
+    while (~matlabUDP('check')) && (~timedOutFlag)
         elapsedTime = toc;
         if (elapsedTime > acknowledgmentTimeOutSecs)
-            response.timedOutFlag = true;
+            timedOutFlag = true;
         end
     end
-    if (response.timedOutFlag == false)
+    if (timedOutFlag == false)
         acknowledgmentReceived = matlabUDP('receive');
         fprintf('Acknowledgment received: ''%s''.\n', acknowledgmentReceived);
     else
