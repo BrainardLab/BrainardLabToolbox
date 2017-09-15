@@ -67,23 +67,11 @@ function protocol = designCommunicationProtocolForManta(hostNames)
     
     % Manta sending
     protocol{numel(protocol)+1} = makePacket(hostNames,...
-        'manta -> ionean', struct('label', 'test1Alabel', 'value', 1));
+        'manta -> ionean', 'T:1', 'withData', 1);
     
     % Ionean sending
     protocol{numel(protocol)+1} = makePacket(hostNames,...
-        'manta <- ionean', struct('label', 'test2'));
-    
-    % Manta sending
-    protocol{numel(protocol)+1} = makePacket(hostNames,...
-        'ionean <- manta', struct('label', 'test3', 'value', true));
-    
-    % Ionean sending
-    protocol{numel(protocol)+1} = makePacket(hostNames,...
-        'ionean -> manta', struct('label', 'test4'));
-    
-    % Ionean sending
-    protocol{numel(protocol)+1} = makePacket(hostNames,...
-         'ionean -> manta', struct('label', 'test5'));
+        'manta <- ionean', 'R:1');
 end
 
 
@@ -93,23 +81,11 @@ function protocol = designCommunicationProtocolForIonean(hostNames)
     
     % Manta sending
     protocol{numel(protocol)+1} = makePacket(hostNames,...
-        'manta -> ionean', struct('label', 'test1'));
+        'manta -> ionean', 'T:1');
     
     % Ionean sending
     protocol{numel(protocol)+1} = makePacket(hostNames,...
-        'manta <- ionean', struct('label', 'test2', 'value', -2.34));
-    
-    % Manta sending
-    protocol{numel(protocol)+1} = makePacket(hostNames,...
-        'ionean <- manta', struct('label', 'test3'));
-    
-    % Ionean sending
-    protocol{numel(protocol)+1} = makePacket(hostNames,...
-        'ionean -> manta', struct('label', 'test4', 'value', false));
-    
-    % Ionean sending
-    protocol{numel(protocol)+1} = makePacket(hostNames,...
-         'ionean -> manta', struct('label', 'test5', 'value', 'bye now'));
+        'manta <- ionean', 'R:1', 'withData', struct('a', pi, 'b', rand(2,2)));
 end
 
 
@@ -186,11 +162,13 @@ end
 function packet = makePacket(hostNames, direction, message, varargin) 
     % Parse optinal input parameters.
     p = inputParser;
+    p.addParameter('withData', []);
     p.addParameter('timeoutSecsForAckReceipt',  5, @isnumeric);
     p.addParameter('timeoutSecsForReceivingExpectedPacket',  Inf, @isnumeric);
     p.addParameter('attemptsNo', 1, @isnumeric);
     p.parse(varargin{:});
-   
+    data = p.Results.withData;
+    
     % validate direction
     assert((contains(direction, '->')) || (contains(direction, '<-')), sprintf('direction field does not contain correct direction information: ''%s''.\n', direction));
     assert(contains(direction, hostNames{1}), sprintf('direction field does not contain correct host name: ''%s''.\n', direction));
@@ -198,7 +176,8 @@ function packet = makePacket(hostNames, direction, message, varargin)
     
     packet = struct(...
         'direction', direction, ...
-        'message', message, ...
+        'messageLabel', message, ...
+        'messageData', data, ...
         'attemptsNo', p.Results.attemptsNo, ...                               % How many times to re-transmit if we did not get an ACK within the receiveTimeOut
         'transmitTimeOut', p.Results.timeoutSecsForAckReceipt, ...            % Timeout for receiving an ACK in response to a transmitted message
         'receiveTimeOut', p.Results.timeoutSecsForReceivingExpectedPacket ... % Timeout for waiting to receive a regular message
@@ -225,11 +204,9 @@ function [messageReceived, errorReport, abortRequestedFromRemoteHost] = communic
         if (beVerbose)
             fprintf('\n%s is sending packet %d', hostName, packetNo);
         end
-        errorReport = UDPobj.transmitCommunicationPacket(...
-            communicationPacket, ...
-            'withLocalHostActionOnFailure', localHostActionOnFailure, ...
-            'withRemoteHostActionOnFailure', remoteHostActionOnFailure...
-        );
+        errorReport = UDPobj.sendMessage(...
+            communicationPacket.messageLabel, communicationPacket.messageData, ...
+            'timeOutSecs', 5);
         if (beVerbose)
             displayMessage(hostName, 'transmitted',  communicationPacket.message, packetNo);
         end    
@@ -237,12 +214,9 @@ function [messageReceived, errorReport, abortRequestedFromRemoteHost] = communic
         if (beVerbose)
             fprintf('\n%s is waiting to receive packet %d', hostName, packetNo);
         end
-        messageReceived = UDPobj.waitForMessage(communicationPacket.message.label, 'timeOutSecs', communicationPacket.receiveTimeOut)
-        if (strcmp(messageReceived.msgLabel, UDPobj.ABORT_MESSAGE.label)) && (strcmp(messageReceived.msgValue, UDPobj.ABORT_MESSAGE.value))
-            abortRequestedFromRemoteHost = true;
-        end
+        receivedMessage = UDPobj.waitForMessage(communicationPacket.message.label, 'timeOutSecs', communicationPacket.receiveTimeOut);
         if (beVerbose)
-            displayMessage(hostName, 'received', messageReceived, packetNo);          
+            displayMessage(hostName, 'received', receivedMessage, packetNo);          
         end   
     end
 end
