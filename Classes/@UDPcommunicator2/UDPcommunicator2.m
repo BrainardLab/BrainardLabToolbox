@@ -95,8 +95,8 @@ classdef UDPcommunicator2 < handle
         end
         
         % Public API (low-level)
-        response = waitForMessage(obj, msgLabel, varargin);
-        transmissionStatus = sendMessage(obj, msgLabel, varargin);
+        packet = waitForMessage(obj, msgLabel, varargin);
+        transmissionStatus = sendMessage(obj, msgLabel, msgData, varargin);
         flashedContents = flashQueue(obj);
         
         % Method that transmits a communication packet and acts for the received acknowledgment

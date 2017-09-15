@@ -1,4 +1,4 @@
-function message = waitForMessage(obj, msgLabel, varargin)
+function packet = waitForMessage(obj, msgLabel, varargin)
     
     p = inputParser;
     addRequired(p,'msgLabel');
@@ -14,25 +14,25 @@ function message = waitForMessage(obj, msgLabel, varargin)
     end
     
     % initialize response struct
-    message = struct(...
-        'label', '', ...            % a string
-        'data', [], ...             % either empty or a struct
+    packet = struct(...
+        'messageLabel', '', ...            % a string
+        'messageData', [], ...             % either empty or a struct
         'timedOutFlag', false ...   % a flag indicating whether we timeout - is this needed?
     );
 
     % Wait until we get something
     tic;
-    while (~matlabUDP('check')) && (~message.timedOutFlag)
+    while (~matlabUDP('check')) && (~packet.timedOutFlag)
         elapsedTime = toc;
         if (elapsedTime > timeOutSecs)
-            message.timedOutFlag = true;
+            packet.timedOutFlag = true;
         end
     end
     
     % Parse the received data stream
-    if (message.timedOutFlag == false)
-        % Read the leading message label
-        message.label = matlabUDP('receive');
+    if (packet.timedOutFlag == false)
+        % Read the leading packet label
+        packet.messageLabel = matlabUDP('receive');
         
         % Read number of bytes of ensuing data
         bytesString = matlabUDP('receive');
@@ -47,12 +47,12 @@ function message = waitForMessage(obj, msgLabel, varargin)
         
         % Read the message label again
         waitForNewDataArrival();
-        if (~strcmp(message.label,matlabUDP('receive')))
+        if (~strcmp(packet.messageLabel,matlabUDP('receive')))
             error('\nTrailing message label does not match leading message label.');
         end
         
         % Reconstruct data object
-        message.data = getArrayFromByteStream(uint8(theData));
+        packet.messageData = getArrayFromByteStream(uint8(theData));
     end
   
     
@@ -64,7 +64,7 @@ function message = waitForMessage(obj, msgLabel, varargin)
         matlabUDP('send', 'WRONG_MESSAGE');
     end
     
-    obj.displayMessage(message);
+    obj.displayMessage(packet.messageLabel, packet.messageData);
 
     
     
