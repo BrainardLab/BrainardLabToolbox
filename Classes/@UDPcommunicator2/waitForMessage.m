@@ -58,7 +58,7 @@ function packet = waitForMessage(obj, msgLabel, varargin)
     
     
     % Send acknowledgment if all OK
-    if (strcmp(expectedMessageLabel, message.label))
+    if (strcmp(expectedMessageLabel, packet.messageLabel))
         matlabUDP('send', obj.ACKNOWLEDGMENT);
     else
         matlabUDP('send', 'WRONG_MESSAGE');
