@@ -94,9 +94,10 @@ classdef UDPcommunicator2 < handle
             end
         end
         
-        % Public API (low-level)
+        % Public API 
         packet = waitForMessage(obj, msgLabel, varargin);
         transmissionStatus = sendMessage(obj, msgLabel, msgData, varargin);
+        displayMessage(obj, hostname, action,  messageLabel, messageData, packetNo);
         flashedContents = flashQueue(obj);
         
         % Method that transmits a communication packet and acts for the received acknowledgment
@@ -108,7 +109,7 @@ classdef UDPcommunicator2 < handle
     end % public method
     
     methods (Access = private)
-        displayMessage(obj, hostname, action,  messageLabel, messageData, packetNo);
+        
     end % private methods
 end
 
