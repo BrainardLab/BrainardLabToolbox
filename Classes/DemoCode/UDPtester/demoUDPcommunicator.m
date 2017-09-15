@@ -28,7 +28,7 @@ function protocol = designCommunicationProtocolForManta(hostNames)
     
     % Manta sending
     protocol{numel(protocol)+1} = makePacket(hostNames,...
-        'manta -> ionean', struct('label', 'test1', 'value', 1));
+        'manta -> ionean', struct('label', 'test1Alabel', 'value', 1));
     
     % Ionean sending
     protocol{numel(protocol)+1} = makePacket(hostNames,...
@@ -79,7 +79,7 @@ function messageList = runProtocol(localHostName, hostNames, hostIPs, hostRoles,
     %% Clear the command window
     clc
     
-    UDPobj = instantiateUDPcomObject(localHostName, hostNames, hostIPs, 'beVerbose', false);
+    UDPobj = instantiateUDPcomObject(localHostName, hostNames, hostIPs, 'beVerbose', true);
     
     %% Initiate the communication protocol
     initiateCommunication(UDPobj, localHostName, hostRoles,  hostNames);
@@ -87,6 +87,7 @@ function messageList = runProtocol(localHostName, hostNames, hostIPs, hostRoles,
     %% Run the communication protocol
     for commStep = 1:numel(commProtocol)
         messageList{commStep} = communicate(UDPobj, localHostName, commStep, commProtocol{commStep}, 'beVerbose', true);
+        pause
     end
         
     %% Shutdown the UDPobj
