@@ -1,19 +1,19 @@
-function displayMessage(obj, messageLabel, messageData)
+function displayMessage(obj, messageLabel, messageData, packetNo)
 
     if (isempty(messageData))
-        fprintf('\nReceived message ''%s'' with no attached data.\n', messageLabel);
+        fprintf('\nReceived packet %04d with message label ''%s'' and no attached data.\n', packetNo, messageLabel);
     elseif (isstruct(messageData))
-        fprintf('\nReceived message ''%s'' with the following struct data.\n', messageLabel);
+        fprintf('\nReceived packet %04d with message label ''%s'' and the following struct data.\n', packetNo, messageLabel);
         messageData
         fprintf('\n');
     elseif (isnumeric(messageData))
-        fprintf('\nReceived message ''%s'' with the following numeric data.\n', messageLabel, messageData);
+        fprintf('\nReceived packet %04d with message label ''%s'' and the following numeric data.\n', packetNo, messageLabel, messageData);
         fprintf('%g\n',messageData);
     elseif (ischar(messageData))
-        fprintf('\nReceived message ''%s'' with the following char data.\n', messageLabel, messageData);
+        fprintf('\nReceived packet %04d with message label ''%s'' and the following char data.\n', packetNo, messageLabel, messageData);
         fprintf('%s\n',messageData);
     else
-        fprintf('\nReceived message ''%s'' with the data of type %s.\n', messageLabel, class(messageData));
+        fprintf('\nReceived packet %04d with message label ''%s'' and the following data of type %s.\n', packetNo, messageLabel, class(messageData));
         messageData
         fprintf('\n');
     end
