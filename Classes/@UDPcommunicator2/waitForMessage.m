@@ -20,58 +20,65 @@ function packet = waitForMessage(obj, msgLabel, varargin)
         'timedOutFlag', false ...   % a flag indicating whether we timeout - is this needed?
     );
 
-    % Wait until we get something
-    tic;
-    while (~matlabUDP('check')) && (~packet.timedOutFlag)
-        elapsedTime = toc;
-        if (elapsedTime > timeOutSecs)
-            packet.timedOutFlag = true;
-        end
+    % Wait until we receive something or we timeout
+    packet.timedOutFlag = obj.waitForMessageOrTimeout(timeOutSecs);
+    if (packet.timedOutFlag)
+        timeOutAction('while waiting for a message to arrive');
+        return;
     end
     
+    % Read the leading packet label
+    packet.messageLabel = matlabUDP('receive')
+
+    packet.timedOutFlag = obj.waitForMessageOrTimeout(timeOutSecs);
     if (packet.timedOutFlag)
-        fprintf('Timed out waiting for a message after %2.1f seconds\n', timeOutSecs);
+        timeOutAction('while waiting to receive number of bytes');
         return;
-    else
-        % Read the leading packet label
-        packet.messageLabel = matlabUDP('receive')
-        
-        % Read number of bytes of ensuing data
-        bytesString = matlabUDP('receive');
-        bytesString
-        numBytes = str2double(bytesString)
-        
-        % Read all bytes
-        theData = [];
-        for k = 1:numBytes
-            waitForNewDataArrival();
-            theData(k) = str2double(matlabUDP('receive'));
-        end
-        
-        % Reconstruct data object
-        if (numBytes > 0)
-            packet.messageData = getArrayFromByteStream(uint8(theData));
-        else
-            packet.messageData = [];
-        end
-        
-        packet.messageData
-        
-        % Read the message label again
-        waitForNewDataArrival();
-        trailingMessageLabel = matlabUDP('receive')
-        if (~strcmp(packet.messageLabel,trailingMessageLabel))
-            error('\nTrailing message label (''%s'') does not match leading message label (''%'').', trailingMessageLabel, packet.messageLabel);
-        end
-        
-        
     end
+    
+    % Read number of bytes of ensuing data
+    bytesString = matlabUDP('receive');
+    bytesString
+    numBytes = str2double(bytesString);
+    fprintf('Will read %d char\n', numBytes);
+    
+    % Read all bytes
+    theData = [];
+    for k = 1:numBytes
+        packet.timedOutFlag = obj.waitForMessageOrTimeout(timeOutSecs);
+        if (packet.timedOutFlag)
+            timeOutAction(sprintf('while waiting to receive byte %d/%d', k, numBytes));
+            return;
+        end
+        theData(k) = str2double(matlabUDP('receive'));
+    end
+
+    % Read the message label again
+    packet.timedOutFlag = obj.waitForMessageOrTimeout(timeOutSecs);
+    if (packet.timedOutFlag)
+        timeOutAction('while waiting to verify message label');
+        return;
+    end
+    
+    trailingMessageLabel = matlabUDP('receive')
+    if (~strcmp(packet.messageLabel,trailingMessageLabel))
+        error('\nTrailing message label (''%s'') does not match leading message label (''%'').', trailingMessageLabel, packet.messageLabel);
+    end
+
+    % Reconstruct data object
+    if (numBytes > 0)
+        packet.messageData = getArrayFromByteStream(uint8(theData));
+    else
+        packet.messageData = [];
+    end
+
+    packet.messageData
   
     % Send acknowledgment if all OK
     if (strcmp(expectedMessageLabel, packet.messageLabel))
         matlabUDP('send', obj.ACKNOWLEDGMENT);
     else
-        matlabUDP('send', 'WRONG_MESSAGE');
+        matlabUDP('send', obj.INVALID_TRANSMISSION);
     end
 
 %{  
@@ -97,12 +104,11 @@ function packet = waitForMessage(obj, msgLabel, varargin)
             end
             obj.sendMessage(sprintf('Received (''%s'') message does not match expected (''%s'')', response.msgLabel, expectedMessageLabel), 'nan', 'doNotreplyToThisMessage', true);
         end
-%}  
+%}
+end
+
+function timeOutAction(timeoutEvent)
+    fprintf(2, 'Timed out %s. Notify remote host?\n', timeoutEvent');
+end
+
     
-end
-
-
-function waitForNewDataArrival()
-    while (~matlabUDP('check'))
-    end
-end

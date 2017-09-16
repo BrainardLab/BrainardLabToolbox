@@ -28,6 +28,7 @@ classdef UDPcommunicator2 < handle
         ABORT_MESSAGE = struct('label', 'ABORT', 'value', 'NOW');
         
         % TRANSMISSION STATUS
+        INVALID_TRANSMISSION = 'INVALID_TRANSMISSION';
         GOOD_TRANSMISSION = 'GOOD_TRANSMISSION';
         BAD_ACKNOWLDGMENT = 'BAD_ACKNOWLEDGMENT';
         NO_ACKNOWLDGMENT_WITHIN_TIMEOUT_PERIOD = 'NO_ACKNOWLDGMENT_WITHIN_TIMEOUT_PERIOD';
@@ -109,7 +110,7 @@ classdef UDPcommunicator2 < handle
     end % public method
     
     methods (Access = private)
-        
+        timedOutFlag = waitForMessageOrTimeout(obj, timeoutSecs);
     end % private methods
 end
 

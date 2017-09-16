@@ -68,15 +68,15 @@ function protocol = designCommunicationProtocolForManta(hostNames)
     for k = 1:10
     % Manta sending
     protocol{numel(protocol)+1} = makePacket(hostNames,...
-        'manta -> ionean', 'T:1', 'withData', 1);
+        'manta -> ionean', 'T_1', 'withData', 1);
     
     % Ionean sending
     protocol{numel(protocol)+1} = makePacket(hostNames,...
-        'manta <- ionean', 'R:1');
+        'manta <- ionean', 'R_1');
     
     % Manta sending
     protocol{numel(protocol)+1} = makePacket(hostNames,...
-        'ionean <- manta', 'T:2', 'withData', 'tra la la');
+        'ionean <- manta', 'T_2', 'withData', 'tra la la');
     end
     
 end
@@ -89,15 +89,15 @@ function protocol = designCommunicationProtocolForIonean(hostNames)
     for k = 1:10
     % Manta sending
     protocol{numel(protocol)+1} = makePacket(hostNames,...
-        'manta -> ionean', 'T:1');
+        'manta -> ionean', 'T_1');
     
     % Ionean sending
     protocol{numel(protocol)+1} = makePacket(hostNames,...
-        'manta <- ionean', 'R:1', 'withData', struct('a', 12, 'b', rand(2,2)));
+        'manta <- ionean', 'R_1', 'withData', struct('a', 12, 'b', rand(2,2)));
     
     % Manta sending
     protocol{numel(protocol)+1} = makePacket(hostNames,...
-        'ionean <- manta', 'T:2');
+        'ionean <- manta', 'T_2');
     end
 end
 

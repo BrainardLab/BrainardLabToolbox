@@ -28,7 +28,7 @@ function transmissionStatus = sendMessage(obj, msgLabel, msgData, varargin)
      
     % Send number of bytes to read
     fprintf('Sending %d bytes\n', numel(byteStream));
-    matlabUDP('send', sprintf('05d%', numel(byteStream)));
+    matlabUDP('send', sprintf('%d', numel(byteStream)));
         
     % Send each byte separately
     for k = 1:numel(byteStream)
@@ -39,25 +39,19 @@ function transmissionStatus = sendMessage(obj, msgLabel, msgData, varargin)
     matlabUDP('send', messageLabel);
        
     % Wait for acknowledgment that the message was received OK
-    timedOutFlag = false;
-    tic;
-    while (~matlabUDP('check')) && (~timedOutFlag)
-        elapsedTime = toc;
-        if (elapsedTime > acknowledgmentTimeOutSecs)
-            timedOutFlag = true;
-        end
-    end
-    if (timedOutFlag == false)
-        acknowledgmentReceived = matlabUDP('receive');
-        if (strcmp(acknowledgmentReceived, obj.ACKNOWLEDGMENT))
-            transmissionStatus = obj.GOOD_TRANSMISSION;
-        else
-            transmissionStatus = obj.BAD_ACKNOWLDGMENT;
-        end
-    else
+    timedOutFlag = obj.waitForMessageOrTimeout(timeOutSecs);
+    if (timedOutFlag)
+        timeOutAction('while waiting to receive acknowledgment for message sent');
         transmissionStatus = obj.NO_ACKNOWLDGMENT_WITHIN_TIMEOUT_PERIOD;
+        return;
+    else
+        transmissionStatus = matlabUDP('receive');
     end
     
+end
+
+function timeOutAction(timeoutEvent)
+    fprintf(2, 'Timed out %s. Notify remote host?\n', timeoutEvent');
 end
 
 function status = sendMessageOriginal(obj, msgLabel, msgValue, varargin)
