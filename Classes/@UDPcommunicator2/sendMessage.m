@@ -16,7 +16,7 @@ function transmissionStatus = sendMessage(obj, msgLabel, msgData, varargin)
 
     messageLabel = p.Results.msgLabel;
     messageData  = p.Results.msgData;
-    acknowledgmentTimeOutSecs  = p.Results.timeOutSecs;
+    timeOutSecs  = p.Results.timeOutSecs;
     
     fprintf('Sending %s\n', messageLabel);
     % Send the leading message label
