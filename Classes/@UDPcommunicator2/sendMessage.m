@@ -18,14 +18,16 @@ function transmissionStatus = sendMessage(obj, msgLabel, msgData, varargin)
     messageData  = p.Results.msgData;
     acknowledgmentTimeOutSecs  = p.Results.timeOutSecs;
     
-    
+    fprintf('Sending %s\n', messageLabel);
     % Send the leading message label
     matlabUDP('send', messageLabel);
     
     % Serialize data
+    messageData
     byteStream = getByteStreamFromArray(messageData);
      
     % Send number of bytes to read
+    fprintf('Sending %d bytes\n', numel(byteStream));
     matlabUDP('send', sprintf('05d%', numel(byteStream)));
         
     % Send each byte separately
