@@ -170,9 +170,6 @@ function [messageList, commStatusList, ackDelaysList, ...
             if (strcmp(packetSequence{packetNo}.messageLabel, 'ReceptiveFieldData')) & ...
                 (isfield(packetSequence{packetNo}, 'messageData')) & ...
                 (~isempty(packetSequence{packetNo}.messageData))
-            
-                    pause
-                    size(packetSequence{packetNo}.messageData)
                     %% Setup figure for displaying results
                     figure(1); clf;
                     colormap(gray(1024));
