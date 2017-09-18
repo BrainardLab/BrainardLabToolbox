@@ -69,19 +69,28 @@ function protocol = designCommunicationProtocolForManta(hostNames, repeatsNum)
     for k = 1:repeatsNum
         % Manta sending
         protocol{numel(protocol)+1} = makePacket(hostNames,...
-            'manta -> ionean', sprintf('TRANSIT_MSG_LABEL_%d', k), 'withData', 1);
+            'manta -> ionean', sprintf('TRANSIT_MSG_LABEL_%d', k), ...
+            'timeoutSecsForAckReceipt', 1.0, ...                % allow 1 sec to receive ACK (from remote host) that message was received 
+            'withData', 1 ...
+        );
 
-        % Ionean sending
+        % Manta receiving
         protocol{numel(protocol)+1} = makePacket(hostNames,...
-            'manta <- ionean', sprintf('RECEIVE_MSG_LABEL_%d', k));
+            'manta <- ionean', sprintf('RECEIVE_MSG_LABEL_%d', k),...
+            'timeoutSecsForReceivingExpectedPacket', 1.0 ...    % we will wait for 1 secs to receive this message, then throw an error
+        );
 
-        % Manta sending (other direction)
+        % Manta sending (other direction specification)
         protocol{numel(protocol)+1} = makePacket(hostNames,...
-            'ionean <- manta', sprintf('REV_TRANSIT_MSG_LABEL_%d', k), 'withData', 'tra la la');
+            'ionean <- manta', sprintf('REV_TRANSIT_MSG_LABEL_%d', k), ...
+            'timeoutSecsForAckReceipt', 1.0, ...                % allow 1 sec to receive ACK (from remote host) that message was received
+            'withData', 'tra la la');
         
-        % Ionean sending (other direction)
+        % Manta receiving (other direction specification)
         protocol{numel(protocol)+1} = makePacket(hostNames,...
-            'ionean -> manta', sprintf('REV_RECEIVE_MSG_LABEL_%d', k));
+            'ionean -> manta', sprintf('REV_RECEIVE_MSG_LABEL_%d', k), ...
+            'timeoutSecsForReceivingExpectedPacket', 10.0 ...    % longer message, so we will wait for 10 secs to receive this message, then throw an error
+        );
     end
     
 end
@@ -106,22 +115,28 @@ function protocol = designCommunicationProtocolForIonean(hostNames, repeatsNum)
         rfStructTmp.rf = rfStruct.rf .* (1+0.2*randn(size(rfStruct.rf)));
         rfStructTmp.rf = rfStructTmp.rf / max(abs(rfStructTmp.rf(:)));
         
-        % Manta sending
+        % Ionean receiving
         protocol{numel(protocol)+1} = makePacket(hostNames,...
-            'manta -> ionean', sprintf('TRANSIT_MSG_LABEL_%d', k));
+            'manta -> ionean', sprintf('TRANSIT_MSG_LABEL_%d', k), ...
+            'timeoutSecsForReceivingExpectedPacket', 1.0 ...    % we will wait for 1 secs to receive this message, then throw an error
+        );
 
         % Ionean sending
         protocol{numel(protocol)+1} = makePacket(hostNames,...
             'manta <- ionean', sprintf('RECEIVE_MSG_LABEL_%d', k), ...
+            'timeoutSecsForAckReceipt', 1.0, ...                % allow 1 sec to receive ACK (from remote host) that message was received 
             'withData', struct('a', 12, 'b', rand(2,2)));
 
-        % Manta sending (other direction)
+        % Ionean receiving (other direction)
         protocol{numel(protocol)+1} = makePacket(hostNames,...
-            'ionean <- manta', sprintf('REV_TRANSIT_MSG_LABEL_%d', k));
+            'ionean <- manta', sprintf('REV_TRANSIT_MSG_LABEL_%d', k), ...
+             'timeoutSecsForReceivingExpectedPacket', 1.0 ...    % we will wait for 1 secs to receive this message, then throw an error
+        );
         
         % Ionean sending (other direction)
         protocol{numel(protocol)+1} = makePacket(hostNames,...
             'ionean -> manta', sprintf('ReceptiveField_%d', k), ...
+            'timeoutSecsForAckReceipt', 1.0, ...                % allow 1 sec to receive ACK (from remote host) that message was received
             'withData', rfStructTmp);
         
     end
@@ -146,7 +161,8 @@ function messageList = runProtocol(UDPobj, localHostName, hostNames, hostRoles, 
         [messageList{commStep}, errorReport{commStep}, abortRequestedFromRemoteHost] = communicate(UDPobj, localHostName, commStep, commProtocol{commStep}, 'beVerbose', true);
         errorReport{commStep}
         abortRequestedFromRemoteHost
-        if contains(messageList{commStep}, 'ReceptiveField')
+        messageList{commStep}
+        if strfind(messageList{commStep}, 'ReceptiveField')
             subplot(3,5,k);
             imagesc(rfStructTmp.rf)
             set(gca, 'CLim', [-1 1]);
@@ -264,7 +280,7 @@ function [messageReceived, errorReport, abortRequestedFromRemoteHost] = communic
         end    
     else
         if (beVerbose)
-            fprintf('\n%s is waiting to receive packet %d', hostName, packetNo);
+            fprintf('\n%s is waiting to receive packet %d and will timeout after %2.1f seconds', hostName, packetNo, communicationPacket.receiveTimeOut);
         end
         receivedPacket = UDPobj.waitForMessage(communicationPacket.messageLabel, ...
             'timeOutSecs', communicationPacket.receiveTimeOut);
