@@ -14,7 +14,7 @@ if ~isempty(classesPath)
 end
 
 % Now look to see if Classes-Dev is local or on ColorShare.
-classesDevPath = '/Users/Shared/Matlab/Toolboxes/BrainardLabToolbox/Classes';
+classesDevPath = '/Users/colorlab/Documents/MATLAB/toolboxes/BrainardLabToolbox/Classes/';
 if ~exist(classesDevPath, 'dir')
 	classesDevPath = '/Volumes/ColorShare/ToolboxesUse/Classes-Dev';
 	

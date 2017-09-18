@@ -20,9 +20,11 @@ function info = GetBrainardLabStandardToolboxesSVNInfo
 
 % Get a list of all directories in /Users/Shared/Matlab/Toolboxes.  We'll
 % consider each of these directories a possible SVN controlled folder.
-[~, user] = unix('whoami'); 
-if strcmp(user, 'melanopsin')
+sysInfo = GetComputerInfo();
+if strcmp(sysInfo.userShortName, 'melanopsin')
     toolboxDir = '/Users/melanopsin/Documents/MATLAB/toolboxes';
+elseif (strcmp(sysInfo.userShortName, 'colorlab')  && strcmp(sysInfo.localHostName, 'mudpuppy'))
+    toolboxDir = '/Users/colorlab/Documents/MATLAB/toolboxes';
 else
     toolboxDir = '/Users/Shared/Matlab/Toolboxes';
 end

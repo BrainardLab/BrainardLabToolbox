@@ -8,5 +8,5 @@ function make
 cfiles = dir('*.c');
 
 for i = 1:length(cfiles)
-	eval(sprintf('mex %s', cfiles(i).name));
+	eval(sprintf('mex -f clang_maci64.xml %s', cfiles(i).name));
 end
