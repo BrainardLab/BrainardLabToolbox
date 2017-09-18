@@ -24,7 +24,14 @@ function demoUDPcommunicator2
     UDPobj.initiateCommunication(localHostName, hostRoles,  hostNames, triggerMessage, 'beVerbose', beVerbose);
 
     %% Run protocol for local host
-    for k = 1:100
+    maxReps = 100;
+    rep = 0;
+    abortRequestedFromRemoteHost = false;
+    abortDueToCommunicationErrorDetectedInTheLocalHost = false;
+    
+    while (rep < maxReps) && (~abortRequestedFromRemoteHost) & (~abortDueToCommunicationErrorDetectedInTheLocalHost)
+        
+        rep = rep + 1;
         % Generate the parallel communication protocol for the 2 hosts
         if (contains(localHostName, 'manta'))
             protocolToRun = designPacketSequenceForManta(hostNames);
@@ -32,12 +39,15 @@ function demoUDPcommunicator2
             protocolToRun = designPacketSequenceForIonean(hostNames);
         end
     
-        [messageList, commStatusList, ackDelaysList(k,:)] = ...
+        [messageList, commStatusList, ackDelaysList(rep,:), ...
+            abortRequestedFromRemoteHost, abortDueToCommunicationErrorDetectedInTheLocalHost] = ...
             runProtocol(UDPobj, localHostName, protocolToRun, ...
                         'debugPlots', debugPlots, ...
                         'beVerbose', false);
     end
     ackDelaysList
+    abortRequestedFromRemoteHost
+    abortDueToCommunicationErrorDetectedInTheLocalHost
 end
 
 function packetSequence = designPacketSequenceForManta(hostNames)
@@ -125,7 +135,8 @@ function packetSequence = designPacketSequenceForIonean(hostNames)
 end
 
 
-function [messageList, commStatusList, ackDelaysList] = runProtocol(UDPobj, localHostName, packetSequence, varargin)
+function [messageList, commStatusList, ackDelaysList, ...
+    abortRequestedFromRemoteHost, abortDueToCommunicationErrorDetectedInTheLocalHost] = runProtocol(UDPobj, localHostName, packetSequence, varargin)
     
     p = inputParser;
     p.addParameter('beVerbose', false, @islogical);
@@ -211,6 +222,7 @@ function [messageList, commStatusList, ackDelaysList] = runProtocol(UDPobj, loca
     if (abortDueToCommunicationErrorDetectedInTheLocalHost)
         fprintf(2,'Aborted communication loop because of an error detected by the local host [packet no %d].\n', packetNo);
     end
+    
     
     %% Shutdown the UDPobj
     fprintf('\nShutting down UDPobj...\n');
