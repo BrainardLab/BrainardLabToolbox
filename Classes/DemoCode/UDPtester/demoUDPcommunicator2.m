@@ -181,7 +181,7 @@ function [messageList, commStatusList, ackDelaysList, ...
         tic
         [theMessageReceived, theCommunicationStatus] = UDPobj.communicate(...
             localHostName, packetNo, packetSequence{packetNo}, ...
-            'beVerbose', true);
+            'beVerbose', beVerbose);
         ackDelaysList(packetNo) = toc*1000;
         
         if (strcmp(theCommunicationStatus, UDPobj.ACKNOWLEDGMENT))
@@ -225,6 +225,8 @@ function [messageList, commStatusList, ackDelaysList, ...
     
     
     %% Shutdown the UDPobj
-    fprintf('\nShutting down UDPobj...\n');
+    if (beVerbose)
+        fprintf('\nShutting down UDPobj...\n');
+    end
     UDPobj.shutDown();
 end
