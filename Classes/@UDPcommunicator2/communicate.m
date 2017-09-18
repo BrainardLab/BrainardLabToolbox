@@ -7,6 +7,11 @@ function [messageReceived, status] = communicate(obj, hostName, packetNo, commun
     p.addParameter('beVerbose', false, @islogical);
     p.parse(varargin{:});
     beVerbose = p.Results.beVerbose;
+    displayPacket = p.Results.displayPacket;
+    
+    if (displayPacket)
+        communicationPacket
+    end
     
     if (isATransmissionPacket(communicationPacket.direction, hostName))
         if (beVerbose)

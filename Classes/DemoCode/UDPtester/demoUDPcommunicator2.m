@@ -6,6 +6,7 @@ function demoUDPcommunicator2
     % Less printing in command window
     beVerbose = false;
     debugPlots = true;
+    displayPackets = true;
     
     %% Define the host names, IPs, and roles
     % In this demo we have IPs for manta.psych.upenn.edu and ionean.psych.upenn.edu
@@ -43,7 +44,8 @@ function demoUDPcommunicator2
             abortRequestedFromRemoteHost, abortDueToCommunicationErrorDetectedInTheLocalHost] = ...
             runProtocol(UDPobj, localHostName, protocolToRun, ...
                         'debugPlots', debugPlots, ...
-                        'beVerbose', beVerbose);
+                        'beVerbose', beVerbose, ...
+                        'displayPackets', displayPackets);
     end
     ackDelaysList
     if (abortRequestedFromRemoteHost || abortDueToCommunicationErrorDetectedInTheLocalHost)
@@ -137,7 +139,8 @@ end
 
 
 function [messageList, commStatusList, ackDelaysList, ...
-    abortRequestedFromRemoteHost, abortDueToCommunicationErrorDetectedInTheLocalHost] = runProtocol(UDPobj, localHostName, packetSequence, varargin)
+    abortRequestedFromRemoteHost, abortDueToCommunicationErrorDetectedInTheLocalHost] = ...
+    runProtocol(UDPobj, localHostName, packetSequence, varargin)
     
     p = inputParser;
     p.addParameter('beVerbose', false, @islogical);
@@ -145,7 +148,7 @@ function [messageList, commStatusList, ackDelaysList, ...
     p.parse(varargin{:});
     beVerbose = p.Results.beVerbose;
     debugPlots = p.Results.debugPlots;
-    
+    displayPackets = p.Results.displayPackets;
 
     %% Setup control variables
     abortRequestedFromRemoteHost = false;
@@ -166,7 +169,6 @@ function [messageList, commStatusList, ackDelaysList, ...
         
         % Just for debugging
         if (debugPlots)
-            packetSequence{packetNo}
             if (strcmp(packetSequence{packetNo}.messageLabel, 'ReceptiveFieldData')) & ...
                 (isfield(packetSequence{packetNo}, 'messageData')) & ...
                 (~isempty(packetSequence{packetNo}.messageData))
@@ -182,9 +184,12 @@ function [messageList, commStatusList, ackDelaysList, ...
         
         % Communicate and collect roundtrip timing info
         tic
-        [theMessageReceived, theCommunicationStatus] = UDPobj.communicate(...
-            localHostName, packetNo, packetSequence{packetNo}, ...
-            'beVerbose', beVerbose);
+        [theMessageReceived, theCommunicationStatus] = ...
+            UDPobj.communicate(...
+                localHostName, packetNo, packetSequence{packetNo}, ...
+                'beVerbose', beVerbose, ...
+                'displayPackets', displayPackets...
+             );
         ackDelaysList(packetNo) = toc*1000;
         
         if (strcmp(theCommunicationStatus, UDPobj.ACKNOWLEDGMENT))
