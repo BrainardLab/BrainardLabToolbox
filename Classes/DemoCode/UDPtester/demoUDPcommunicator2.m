@@ -5,7 +5,7 @@ function demoUDPcommunicator2
     
     % Less printing in command window
     beVerbose = false;
-    debugPlots = false;
+    debugPlots = true;
     
     %% Define the host names, IPs, and roles
     % In this demo we have IPs for manta.psych.upenn.edu and ionean.psych.upenn.edu
@@ -46,8 +46,9 @@ function demoUDPcommunicator2
                         'beVerbose', false);
     end
     ackDelaysList
-    abortRequestedFromRemoteHost
-    abortDueToCommunicationErrorDetectedInTheLocalHost
+    if (abortRequestedFromRemoteHost || abortDueToCommunicationErrorDetectedInTheLocalHost)
+        fprintf('Loop terminated early due to errors\n');
+    end
 end
 
 function packetSequence = designPacketSequenceForManta(hostNames)
@@ -80,7 +81,7 @@ function packetSequence = designPacketSequenceForManta(hostNames)
     % Manta receiving (other direction specification)
     packetSequence{numel(packetSequence)+1} = UDPcommunicator2.makePacket(hostNames,...
         'ionean -> manta', 'ReceptiveFieldData', ...
-        'timeOutSecs', 10.0, ...                                        % Wait for 10 secs to receive this message
+        'timeOutSecs', 1, ...                                           % Wait for 1 secs to receive this message
         'timeOutAction', UDPcommunicator2.NOTIFY_CALLER, ...            % Do not throw an error, notify caller function instead (choose from UDPcommunicator2.{NOTIFY_CALLER, THROW_ERROR})
         'badTransmissionAction', UDPcommunicator2.NOTIFY_CALLER ...     % Do not throw an error, notify caller function instead (choose from UDPcommunicator2.{NOTIFY_CALLER, THROW_ERROR})
     );
@@ -129,7 +130,7 @@ function packetSequence = designPacketSequenceForIonean(hostNames)
     % Ionean sending (other direction)
     packetSequence{numel(packetSequence)+1} = UDPcommunicator2.makePacket(hostNames,...
         'ionean -> manta', 'ReceptiveFieldData', ...
-        'timeOutSecs', 1.0, ...                                         % Allow 1 sec to receive ACK (from remote host) that message was received
+        'timeOutSecs', 1.0, ...                                        % Allow 1 sec to receive ACK (from remote host) that message was received
         'timeOutAction', UDPcommunicator2.NOTIFY_CALLER, ...           % Do not throw an error, notify caller function instead (choose from UDPcommunicator2.{NOTIFY_CALLER, THROW_ERROR})
         'withData', rfStructTmp);
 end
