@@ -16,10 +16,11 @@ function demoUDPcommunicator2
     UDPobj = instantiateUDPcomObject(localHostName, hostNames, hostIPs, 'beVerbose', true);
     
     % Generate the parallel communication protocol for the 2 hosts
+    repeatsNum = 15;
     if (strfind(localHostName, 'manta'))
-        protocolToRun = designCommunicationProtocolForManta(hostNames);
+        protocolToRun = designCommunicationProtocolForManta(hostNames, repeatsNum);
     else
-        protocolToRun = designCommunicationProtocolForIonean(hostNames);
+        protocolToRun = designCommunicationProtocolForIonean(hostNames, repeatsNum);
     end
     
     %% Run protocol for local host
@@ -61,48 +62,77 @@ function UDPobj = instantiateUDPcomObject(localHostName, hostNames, hostIPs, var
 end
 
 
-function protocol = designCommunicationProtocolForManta(hostNames)
+function protocol = designCommunicationProtocolForManta(hostNames, repeatsNum)
     % Define the communication  protocol
     protocol = {};
-    
-    for k = 1:10
-    % Manta sending
-    protocol{numel(protocol)+1} = makePacket(hostNames,...
-        'manta -> ionean', 'T_1', 'withData', 1);
-    
-    % Ionean sending
-    protocol{numel(protocol)+1} = makePacket(hostNames,...
-        'manta <- ionean', 'R_1');
-    
-    % Manta sending
-    protocol{numel(protocol)+1} = makePacket(hostNames,...
-        'ionean <- manta', 'T_2', 'withData', 'tra la la');
+
+    for k = 1:repeatsNum
+        % Manta sending
+        protocol{numel(protocol)+1} = makePacket(hostNames,...
+            'manta -> ionean', sprintf('TRANSIT_MSG_LABEL_%d', k), 'withData', 1);
+
+        % Ionean sending
+        protocol{numel(protocol)+1} = makePacket(hostNames,...
+            'manta <- ionean', sprintf('RECEIVE_MSG_LABEL_%d', k));
+
+        % Manta sending (other direction)
+        protocol{numel(protocol)+1} = makePacket(hostNames,...
+            'ionean <- manta', sprintf('REV_TRANSIT_MSG_LABEL_%d', k), 'withData', 'tra la la');
+        
+        % Ionean sending (other direction)
+        protocol{numel(protocol)+1} = makePacket(hostNames,...
+            'ionean -> manta', sprintf('REV_RECEIVE_MSG_LABEL_%d', k));
     end
     
 end
 
 
-function protocol = designCommunicationProtocolForIonean(hostNames)
+function protocol = designCommunicationProtocolForIonean(hostNames, repeatsNum)
     % Define the communication  protocol
     protocol = {};
     
-    for k = 1:10
-    % Manta sending
-    protocol{numel(protocol)+1} = makePacket(hostNames,...
-        'manta -> ionean', 'T_1');
+    spatialSupport = linspace(-1,1,17);
+    XY = meshgrid(spatialSupport , spatialSupport);
+    sigmaX = 0.2;
+    sigmaY = 0.33;
+    rfStruct = struct(...
+        'neuronID', 0, ...
+        'rf', exp(-0.5*((XY/sigmaX).^2) + (XY/sigmaY).^2));
     
-    % Ionean sending
-    protocol{numel(protocol)+1} = makePacket(hostNames,...
-        'manta <- ionean', 'R_1', 'withData', struct('a', 12, 'b', rand(2,2)));
     
-    % Manta sending
-    protocol{numel(protocol)+1} = makePacket(hostNames,...
-        'ionean <- manta', 'T_2');
+    for k = 1:repeatsNum
+        
+        rfStructTmp.neuronID = k;
+        rfStructTmp.rf = rfStruct.rf .* (1+0.2*randn(size(rfStruct.rf)));
+        rfStructTmp.rf = rfStructTmp.rf / max(abs(rfStructTmp.rf(:)));
+        
+        % Manta sending
+        protocol{numel(protocol)+1} = makePacket(hostNames,...
+            'manta -> ionean', sprintf('TRANSIT_MSG_LABEL_%d', k));
+
+        % Ionean sending
+        protocol{numel(protocol)+1} = makePacket(hostNames,...
+            'manta <- ionean', sprintf('RECEIVE_MSG_LABEL_%d', k), ...
+            'withData', struct('a', 12, 'b', rand(2,2)));
+
+        % Manta sending (other direction)
+        protocol{numel(protocol)+1} = makePacket(hostNames,...
+            'ionean <- manta', sprintf('REV_TRANSIT_MSG_LABEL_%d', k));
+        
+        % Ionean sending (other direction)
+        protocol{numel(protocol)+1} = makePacket(hostNames,...
+            'ionean -> manta', sprintf('ReceptiveField_%d', k), ...
+            'withData', rfStructTmp);
+        
     end
 end
 
 
 function messageList = runProtocol(UDPobj, localHostName, hostNames, hostRoles, commProtocol)
+    
+    %% Setup figure for displaying results
+    figure(1); clf;
+    colormap(gray(1024));
     
     %% Initiate the communication protocol
     initiateCommunication(UDPobj, localHostName, hostRoles,  hostNames);
@@ -110,9 +140,18 @@ function messageList = runProtocol(UDPobj, localHostName, hostNames, hostRoles, 
     %% Run the communication protocol
     abortRequestedFromRemoteHost = false;
     commStep = 0;
+     
     while (commStep < numel(commProtocol)) && (~abortRequestedFromRemoteHost)
         commStep = commStep + 1;
         [messageList{commStep}, errorReport{commStep}, abortRequestedFromRemoteHost] = communicate(UDPobj, localHostName, commStep, commProtocol{commStep}, 'beVerbose', true);
+        errorReport{commStep}
+        abortRequestedFromRemoteHost
+        if contains(messageList{commStep}, 'ReceptiveField')
+            subplot(3,5,k);
+            imagesc(rfStructTmp.rf)
+            set(gca, 'CLim', [-1 1]);
+            drawnow;
+        end
     end
         
     if (abortRequestedFromRemoteHost)
