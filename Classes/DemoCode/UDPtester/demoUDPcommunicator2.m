@@ -167,10 +167,12 @@ function [messageList, commStatusList, ackDelaysList, ...
         % Just for debugging
         if (debugPlots)
             packetSequence{packetNo}
-            if (strfind(packetSequence{packetNo}.messageLabel, 'ReceptiveFieldData')) & ...
+            if (strcmp(packetSequence{packetNo}.messageLabel, 'ReceptiveFieldData')) & ...
                 (isfield(packetSequence{packetNo}, 'messageData')) & ...
                 (~isempty(packetSequence{packetNo}.messageData))
             
+                    pause
+                    size(packetSequence{packetNo}.messageData)
                     %% Setup figure for displaying results
                     figure(1); clf;
                     colormap(gray(1024));
@@ -207,7 +209,7 @@ function [messageList, commStatusList, ackDelaysList, ...
         if (debugPlots)
             if (~isempty(theMessageReceived))
                  % Just for debugging
-                if (strfind(theMessageReceived.label, 'ReceptiveFieldData'))
+                if (strcmp(theMessageReceived.label, 'ReceptiveFieldData'))
                     figure(1); clf;
                     colormap(gray(1024));
                     imagesc(theMessageReceived.data.rf)
