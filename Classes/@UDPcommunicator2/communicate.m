@@ -5,6 +5,7 @@ function [messageReceived, status] = communicate(obj, hostName, packetNo, commun
     % Parse optinal input parameters.
     p = inputParser;
     p.addParameter('beVerbose', false, @islogical);
+    p.addParameter('displayPackets', false, @islogical);
     p.parse(varargin{:});
     beVerbose = p.Results.beVerbose;
     displayPacket = p.Results.displayPacket;

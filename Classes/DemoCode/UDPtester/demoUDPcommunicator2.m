@@ -145,6 +145,8 @@ function [messageList, commStatusList, ackDelaysList, ...
     p = inputParser;
     p.addParameter('beVerbose', false, @islogical);
     p.addParameter('debugPlots', false, @islogical);
+    p.addParameter('displayPackets', false, @islogical);
+    
     p.parse(varargin{:});
     beVerbose = p.Results.beVerbose;
     debugPlots = p.Results.debugPlots;
