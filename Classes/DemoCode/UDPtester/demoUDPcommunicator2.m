@@ -129,7 +129,7 @@ function [messageList, commStatusList, ackDelaysList] = runProtocol(UDPobj, loca
     
     p = inputParser;
     p.addParameter('beVerbose', false, @islogical);
-    p.addParameter('beVerbose', false, @islogical);
+    p.addParameter('debugPlots', false, @islogical);
     p.parse(varargin{:});
     beVerbose = p.Results.beVerbose;
     debugPlots = p.Results.debugPlots;
