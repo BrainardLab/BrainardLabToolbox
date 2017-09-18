@@ -158,8 +158,8 @@ function messageList = runProtocol(UDPobj, localHostName, hostNames, hostRoles, 
      
     while (commStep < numel(commProtocol)) && (~abortRequestedFromRemoteHost)
         commStep = commStep + 1;
-        [messageList{commStep}, errorReport{commStep}, abortRequestedFromRemoteHost] = communicate(UDPobj, localHostName, commStep, commProtocol{commStep}, 'beVerbose', true);
-        errorReport{commStep}
+        [messageList{commStep}, communicationStatus{commStep}, abortRequestedFromRemoteHost] = communicate(UDPobj, localHostName, commStep, commProtocol{commStep}, 'beVerbose', true);
+        communicationStatus{commStep}
         abortRequestedFromRemoteHost
         messageList{commStep}
         if strfind(messageList{commStep}, 'ReceptiveField')
@@ -212,15 +212,17 @@ function initiateCommunication(UDPobj, localHostName, hostRoles, hostNames)
     
     if (strfind(localHostName, slaveHostName))
         % Wait for ever to receive the trigger message from the master
-        messageReceived = UDPobj.waitForMessage(triggerMessage, 'timeOutSecs', Inf);
+        packetReceived = UDPobj.waitForMessage(triggerMessage, ...
+            'timeOutSecs', Inf, ...
+            'badTransmissionAction', UDPobj.THROW_ERROR);
     
     elseif (strfind(localHostName, masterHostName))
         fprintf('Is ''%s'' running on the slave (''%s'') computer?. Hit enter if so.\n', mfilename, slaveHostName); pause; clc;
         % Send trigger and wait for up to 4 seconds to receive acknowledgment
         transmissionStatus = UDPobj.sendMessage(triggerMessage, '', ...
-            'timeOutSecs', 4, ...
-         'maxAttemptsNum', 3 ...
-        )
+            'timeOutSecs',  4, ...
+            'timeOutAction', UDPobj.THROW_ERROR ...
+        );
     else
         error('Local host name (''%s'') does not match the slave (''%s'') or the master (''%s'') host name.', localHostName, slaveHostName, masterHostName);
     end
@@ -252,7 +254,7 @@ function packet = makePacket(hostNames, direction, message, varargin)
     );
 end
 
-function [messageReceived, errorReport, abortRequestedFromRemoteHost] = communicate(UDPobj, hostName, packetNo, communicationPacket, varargin)
+function [messageReceived, status, abortRequestedFromRemoteHost] = communicate(UDPobj, hostName, packetNo, communicationPacket, varargin)
     % Set default state of return arguments
     messageReceived = [];
     errorReport = '';
@@ -272,12 +274,12 @@ function [messageReceived, errorReport, abortRequestedFromRemoteHost] = communic
         if (beVerbose)
             fprintf('\n%s is sending packet %d', hostName, packetNo);
         end
-        errorReport = UDPobj.sendMessage(...
+        status = UDPobj.sendMessage(...
             communicationPacket.messageLabel, communicationPacket.messageData, ...
             'timeOutSecs', communicationPacket.receiveTimeOut);
         if (beVerbose)
-            UDPobj.displayMessage(hostName, 'transmitted',  communicationPacket.messageLabel, communicationPacket.messageData, packetNo);
-        end    
+            UDPobj.displayMessage(hostName, sprintf('transmitted with status ''%s'' ', transmissionStatus),  communicationPacket.messageLabel, communicationPacket.messageData, packetNo);
+        end
     else
         if (beVerbose)
             fprintf('\n%s is waiting to receive packet %d and will timeout after %2.1f seconds', hostName, packetNo, communicationPacket.receiveTimeOut);
@@ -286,7 +288,16 @@ function [messageReceived, errorReport, abortRequestedFromRemoteHost] = communic
             'timeOutSecs', communicationPacket.receiveTimeOut);
         if (beVerbose)
             UDPobj.displayMessage(hostName, 'received', receivedPacket.messageLabel, receivedPacket.messageData, packetNo);          
-        end   
+        end  
+        
+        % Update status of operation
+        status = obj.GOOD_TRANSMISSION;
+        if (receivedPacket.timedOutFlag)
+            status = obj.NO_ACKNOWLDGMENT_WITHIN_TIMEOUT_PERIOD;
+        end
+        if (receivedPacket.badTransmissionFlag)
+            status = obj.INVALID_TRANSMISSION;
+        end
     end
 end
 

@@ -32,6 +32,10 @@ classdef UDPcommunicator2 < handle
         GOOD_TRANSMISSION = 'GOOD_TRANSMISSION';
         BAD_ACKNOWLDGMENT = 'BAD_ACKNOWLEDGMENT';
         NO_ACKNOWLDGMENT_WITHIN_TIMEOUT_PERIOD = 'NO_ACKNOWLDGMENT_WITHIN_TIMEOUT_PERIOD';
+        
+        % TIMEOUT/BAD_TRANSMISSION ACTIONS
+        NOTIFY_CALLER = 'NOTIFY_CALLER';
+        THROW_ERROR = 'THROW_ERROR';
     end
     
 	% Public methods
@@ -111,6 +115,7 @@ classdef UDPcommunicator2 < handle
     
     methods (Access = private)
         timedOutFlag = waitForMessageOrTimeout(obj, timeoutSecs);
+        executeTimeOut(obj, timeOutMessage, timeOutAction);
     end % private methods
 end
 
