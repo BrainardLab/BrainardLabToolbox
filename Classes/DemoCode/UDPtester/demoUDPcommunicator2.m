@@ -3,6 +3,9 @@ function demoUDPcommunicator2
     %% Clear the command window
     clc
     
+    % Less printing in command window
+    beVerbose = false;
+    
     %% Define the host names, IPs, and roles
     % In this demo we have IPs for manta.psych.upenn.edu and ionean.psych.upenn.edu
     hostNames       = {'manta',            'ionean'};
@@ -13,7 +16,7 @@ function demoUDPcommunicator2
     localHostName = UDPcommunicator2.getLocalHostName();
     
     %% Instantiate our UDPcommunicator object
-    UDPobj = UDPcommunicator2.instantiateObject(localHostName, hostNames, hostIPs, 'beVerbose', false);
+    UDPobj = UDPcommunicator2.instantiateObject(localHostName, hostNames, hostIPs, 'beVerbose', beVerbose);
     
     %% Establish the communication
     triggerMessage = 'Go!';
