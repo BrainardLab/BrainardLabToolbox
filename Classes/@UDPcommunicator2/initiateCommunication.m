@@ -37,7 +37,7 @@ function initiateCommunication(obj, localHostName, hostRoles, hostNames, trigger
         );
     
     elseif (strfind(localHostName, masterHostName))
-        fprintf('Is ''%s'' running on the slave (''%s'') computer?. Hit enter if so.\n', mfilename, slaveHostName); pause; clc;
+        fprintf('Is the slave (''%s'') computer ready to go?. Hit enter if so.\n', slaveHostName); pause; clc;
         % Send trigger and wait for up to 4 seconds to receive acknowledgment
         transmissionStatus = obj.sendMessage(triggerMessage, '', ...
             'timeOutSecs',  4, ...

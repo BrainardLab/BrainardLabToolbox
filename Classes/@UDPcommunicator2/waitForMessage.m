@@ -24,7 +24,8 @@ function packet = waitForMessage(obj, msgLabel, varargin)
         'messageLabel', '', ...                 % a string
         'messageData', [], ...                  % either empty or a struct
         'timedOutFlag', false, ...              % a flag indicating whether we timeout - is this needed?
-        'badTransmissionFlag', false ...        % a flag indicating whether we encountered bad transmiddion data
+        'badTransmissionFlag', false, ...       % a flag indicating whether we encountered bad transmiddion data
+        'mismatchedMessageLabel', '' ...        % mistmatched label
     );
 
     % Wait until we receive something or we timeout
@@ -88,7 +89,8 @@ function packet = waitForMessage(obj, msgLabel, varargin)
     if (strcmp(expectedMessageLabel, packet.messageLabel))
         matlabUDP('send', obj.ACKNOWLEDGMENT);
     else
-        matlabUDP('send', obj.INVALID_TRANSMISSION);
+        packet.mismatchedMessageLabel = expectedMessageLabel;
+        matlabUDP('send', obj.UNEXPECTED_MESSAGE_LABEL_RECEIVED);
     end
 end
 

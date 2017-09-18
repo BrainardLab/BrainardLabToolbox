@@ -55,7 +55,7 @@ function packetSequence = designPacketSequenceForManta(hostNames)
 
     % Manta receiving (other direction specification)
     packetSequence{numel(packetSequence)+1} = UDPcommunicator2.makePacket(hostNames,...
-        'ionean -> manta', sprintf('REV_RECEIVE_MSG_LABEL_%d', 2), ...
+        'ionean -> manta', 'ReceptiveFieldData', ...
         'timeOutSecs', 10.0, ...                                        % Wait for 10 secs to receive this message
         'timeOutAction', UDPcommunicator2.NOTIFY_CALLER, ...            % Do not throw an error, notify caller function instead (choose from UDPcommunicator2.{NOTIFY_CALLER, THROW_ERROR})
         'badTransmissionAction', UDPcommunicator2.NOTIFY_CALLER ...     % Do not throw an error, notify caller function instead (choose from UDPcommunicator2.{NOTIFY_CALLER, THROW_ERROR})
@@ -104,7 +104,7 @@ function packetSequence = designPacketSequenceForIonean(hostNames)
 
     % Ionean sending (other direction)
     packetSequence{numel(packetSequence)+1} = UDPcommunicator2.makePacket(hostNames,...
-        'ionean -> manta', sprintf('ReceptiveField_%d', 2), ...
+        'ionean -> manta', 'ReceptiveFieldData', ...
         'timeOutSecs', 1.0, ...                                         % Allow 1 sec to receive ACK (from remote host) that message was received
         'timeOutAction', UDPcommunicator2.NOTIFY_CALLER, ...           % Do not throw an error, notify caller function instead (choose from UDPcommunicator2.{NOTIFY_CALLER, THROW_ERROR})
         'withData', rfStructTmp);
@@ -144,7 +144,6 @@ function messageList = runProtocol(UDPobj, localHostName, hostNames, hostRoles, 
             % ALL_GOOD, do not print anything
         elseif (strcmp(theCommunicationStatus, UDPobj.GOOD_TRANSMISSION))
             % ALL_GOOD, print what we received
-            theMessageReceived
         elseif (strcmp(theCommunicationStatus, UDPobj.ABORT_MESSAGE.label))
             abortRequestedFromRemoteHost = true;
         else
