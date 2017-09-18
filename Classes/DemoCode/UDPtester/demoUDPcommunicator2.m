@@ -29,7 +29,7 @@ function demoUDPcommunicator2
     abortRequestedFromRemoteHost = false;
     abortDueToCommunicationErrorDetectedInTheLocalHost = false;
     
-    while (rep < maxReps) && (~abortRequestedFromRemoteHost) & (~abortDueToCommunicationErrorDetectedInTheLocalHost)
+    while (rep < maxReps) && (~abortRequestedFromRemoteHost) && (~abortDueToCommunicationErrorDetectedInTheLocalHost)
         
         rep = rep + 1;
         % Generate the parallel communication protocol for the 2 hosts
