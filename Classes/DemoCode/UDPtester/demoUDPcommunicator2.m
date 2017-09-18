@@ -5,6 +5,7 @@ function demoUDPcommunicator2
     
     % Less printing in command window
     beVerbose = false;
+    debugPlots = false;
     
     %% Define the host names, IPs, and roles
     % In this demo we have IPs for manta.psych.upenn.edu and ionean.psych.upenn.edu
@@ -23,7 +24,7 @@ function demoUDPcommunicator2
     UDPobj.initiateCommunication(localHostName, hostRoles,  hostNames, triggerMessage, 'beVerbose', beVerbose);
 
     %% Run protocol for local host
-    for k = 1:10
+    for k = 1:100
         % Generate the parallel communication protocol for the 2 hosts
         if (contains(localHostName, 'manta'))
             protocolToRun = designPacketSequenceForManta(hostNames);
@@ -31,8 +32,12 @@ function demoUDPcommunicator2
             protocolToRun = designPacketSequenceForIonean(hostNames);
         end
     
-        messageList = runProtocol(UDPobj, localHostName, protocolToRun, 'beVerbose', false);
+        [messageList, commStatusList, ackDelaysList(k,:)] = ...
+            runProtocol(UDPobj, localHostName, protocolToRun, ...
+                        'debugPlots', debugPlots, ...
+                        'beVerbose', false);
     end
+    ackDelaysList
 end
 
 function packetSequence = designPacketSequenceForManta(hostNames)
@@ -120,12 +125,14 @@ function packetSequence = designPacketSequenceForIonean(hostNames)
 end
 
 
-function messageList = runProtocol(UDPobj, localHostName, packetSequence, varargin)
+function [messageList, commStatusList, ackDelaysList] = runProtocol(UDPobj, localHostName, packetSequence, varargin)
     
     p = inputParser;
     p.addParameter('beVerbose', false, @islogical);
+    p.addParameter('beVerbose', false, @islogical);
     p.parse(varargin{:});
     beVerbose = p.Results.beVerbose;
+    debugPlots = p.Results.debugPlots;
     
     %% Setup figure for displaying results
     figure(1); clf;
@@ -139,6 +146,7 @@ function messageList = runProtocol(UDPobj, localHostName, packetSequence, vararg
     packetNo = 0;
     messageList    = {};
     commStatusList = {};
+    ackDelaysList = [];
     
     %% Start communicating
     while (packetNo < numel(packetSequence)) && ...
@@ -148,18 +156,22 @@ function messageList = runProtocol(UDPobj, localHostName, packetSequence, vararg
         packetNo = packetNo + 1;
         
         % Just for debugging
-        if (strfind(packetSequence{packetNo}.messageLabel, 'ReceptiveFieldData')) & ...
-            (isfield(packetSequence{packetNo}, 'messageData')) & ...
-            (~isempty(packetSequence{packetNo}.messageData))
-            imagesc(packetSequence{packetNo}.messageData.rf);
-            title('Transmitted data');
-            set(gca, 'CLim', [-1 1]);
-            drawnow;
+        if (debugPlots)
+            if (strfind(packetSequence{packetNo}.messageLabel, 'ReceptiveFieldData')) & ...
+                (isfield(packetSequence{packetNo}, 'messageData')) & ...
+                (~isempty(packetSequence{packetNo}.messageData))
+                    imagesc(packetSequence{packetNo}.messageData.rf);
+                    title('Transmitted data');
+                    set(gca, 'CLim', [-1 1]);
+                    drawnow;
+            end
         end
         
+        tic
         [theMessageReceived, theCommunicationStatus] = UDPobj.communicate(...
             localHostName, packetNo, packetSequence{packetNo}, ...
             'beVerbose', true);
+        ackDelaysList(packetNo) = toc*1000;
         
         if (strcmp(theCommunicationStatus, UDPobj.ACKNOWLEDGMENT))
             % ALL_GOOD, do not print anything
@@ -176,14 +188,16 @@ function messageList = runProtocol(UDPobj, localHostName, packetSequence, vararg
             abortDueToCommunicationErrorDetectedInTheLocalHost = true;
         end
         
-        
-        if (~isempty(theMessageReceived))
-             % Just for debugging
-            if (strfind(theMessageReceived.label, 'ReceptiveFieldData'))
-                imagesc(theMessageReceived.data.rf)
-                title('Received data');
-                set(gca, 'CLim', [-1 1]);
-                drawnow;
+         % Just for debugging
+        if (debugPlots)
+            if (~isempty(theMessageReceived))
+                 % Just for debugging
+                if (strfind(theMessageReceived.label, 'ReceptiveFieldData'))
+                    imagesc(theMessageReceived.data.rf)
+                    title('Received data');
+                    set(gca, 'CLim', [-1 1]);
+                    drawnow;
+                end
             end
         end
         
