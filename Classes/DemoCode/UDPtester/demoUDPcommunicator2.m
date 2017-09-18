@@ -10,7 +10,7 @@ function demoUDPcommunicator2
     hostRoles       = {'master',           'slave'};
     
     %% Get computer name
-    localHostName = UDPcommunicator2.getLocalHostName()
+    localHostName = UDPcommunicator2.getLocalHostName();
     
     % Generate the parallel communication protocol for the 2 hosts
     if (contains(localHostName, 'manta'))
@@ -23,7 +23,9 @@ function demoUDPcommunicator2
     UDPobj = UDPcommunicator2.instantiateObject(localHostName, hostNames, hostIPs, 'beVerbose', false);
     
     %% Run protocol for local host
-    messageList = runProtocol(UDPobj, localHostName, hostNames, hostRoles, protocolToRun);
+    for k = 1:10
+        messageList = runProtocol(UDPobj, localHostName, hostNames, hostRoles, protocolToRun, 'beVerbose', false);
+    end
 end
 
 function packetSequence = designPacketSequenceForManta(hostNames)
@@ -111,7 +113,12 @@ function packetSequence = designPacketSequenceForIonean(hostNames)
 end
 
 
-function messageList = runProtocol(UDPobj, localHostName, hostNames, hostRoles, packetSequence)
+function messageList = runProtocol(UDPobj, localHostName, hostNames, hostRoles, packetSequence, varargin)
+    
+    p = inputParser;
+    p.addParameter('beVerbose', false, @islogical);
+    p.parse(varargin{:});
+    beVerbose = p.Results.beVerbose;
     
     %% Setup figure for displaying results
     figure(1); clf;
@@ -119,7 +126,7 @@ function messageList = runProtocol(UDPobj, localHostName, hostNames, hostRoles, 
     
     %% Establish the communication
     triggerMessage = 'Go!';
-    UDPobj.initiateCommunication(localHostName, hostRoles,  hostNames, triggerMessage, 'beVerbose', true);
+    UDPobj.initiateCommunication(localHostName, hostRoles,  hostNames, triggerMessage, 'beVerbose', beVerbose);
 
     %% Setup control variables
     abortRequestedFromRemoteHost = false;
@@ -142,7 +149,8 @@ function messageList = runProtocol(UDPobj, localHostName, hostNames, hostRoles, 
         if (strfind(packetSequence{packetNo}.messageLabel, 'ReceptiveFieldData')) & ...
             (isfield(packetSequence{packetNo}, 'messageData')) & ...
             (~isempty(packetSequence{packetNo}.messageData))
-            imagesc(packetSequence{packetNo}.messageData.rf)
+            imagesc(packetSequence{packetNo}.messageData.rf);
+            title('Transmitted data');
             set(gca, 'CLim', [-1 1]);
             drawnow;
         end
@@ -158,7 +166,7 @@ function messageList = runProtocol(UDPobj, localHostName, hostNames, hostRoles, 
         elseif (strcmp(theCommunicationStatus, UDPobj.ABORT_MESSAGE.label))
             abortRequestedFromRemoteHost = true;
         else
-            % If we reached here, there was a communication error (timeout
+            % If we reach here, there was a communication error (timeout
             % or bad data), which was not handled earlier.
             fprintf(2, 'Communication status: ''%s''\n', theCommunicationStatus);
             
@@ -171,6 +179,7 @@ function messageList = runProtocol(UDPobj, localHostName, hostNames, hostRoles, 
              % Just for debugging
             if (strfind(theMessageReceived.label, 'ReceptiveFieldData'))
                 imagesc(theMessageReceived.data.rf)
+                title('Received data');
                 set(gca, 'CLim', [-1 1]);
                 drawnow;
             end
