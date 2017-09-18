@@ -49,8 +49,10 @@ function [messageReceived, status] = communicate(obj, hostName, packetNo, commun
         if (~isempty(receivedPacket.mismatchedMessageLabel))
             obj.displayMessage(hostName, sprintf('received incorrect message while expecting ''%s''', receivedPacket.mismatchedMessageLabel), receivedPacket.messageLabel, receivedPacket.messageData, packetNo);
         end
-        if (strcmp(status, obj.GOOD_TRANSMISSION)) && (beVerbose)
-            obj.displayMessage(hostName, 'successfully received', receivedPacket.messageLabel, receivedPacket.messageData, packetNo);          
+        if (strcmp(status, obj.GOOD_TRANSMISSION))
+            if (beVerbose)
+                obj.displayMessage(hostName, 'successfully received', receivedPacket.messageLabel, receivedPacket.messageData, packetNo);          
+            end
             messageReceived = struct();
             messageReceived.label = receivedPacket.messageLabel;
             messageReceived.data  = receivedPacket.messageData;

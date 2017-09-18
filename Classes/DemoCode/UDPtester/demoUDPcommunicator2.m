@@ -205,12 +205,10 @@ function [messageList, commStatusList, ackDelaysList, ...
          % Just for debugging
         if (debugPlots)
             if (~isempty(theMessageReceived))
-                fprintf('in here\n');
                  % Just for debugging
                 if (strfind(theMessageReceived.label, 'ReceptiveFieldData'))
                     figure(1); clf;
                     colormap(gray(1024));
-                    fprintf('and here\n');
                     imagesc(theMessageReceived.data.rf)
                     title('Received data');
                     set(gca, 'CLim', [-1 1]);
