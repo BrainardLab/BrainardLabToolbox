@@ -8,9 +8,9 @@ function [messageReceived, status] = communicate(obj, hostName, packetNo, commun
     p.addParameter('displayPackets', false, @islogical);
     p.parse(varargin{:});
     beVerbose = p.Results.beVerbose;
-    displayPacket = p.Results.displayPacket;
+    displayPackets = p.Results.displayPackets;
     
-    if (displayPacket)
+    if (displayPackets)
         communicationPacket
     end
     
