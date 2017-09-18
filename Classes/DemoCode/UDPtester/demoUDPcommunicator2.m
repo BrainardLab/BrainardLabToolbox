@@ -156,8 +156,8 @@ function messageList = runProtocol(UDPobj, localHostName, hostNames, hostRoles, 
         end
         
         theMessageReceived
-        if strfind(theMessageReceived, 'ReceptiveFieldData')
-            imagesc(rfStructTmp.rf)
+        if strfind(theMessageReceived.label, 'ReceptiveFieldData')
+            imagesc(theMessageReceived.data.rf)
             set(gca, 'CLim', [-1 1]);
             drawnow;
         end

@@ -51,6 +51,9 @@ function [messageReceived, status] = communicate(obj, hostName, packetNo, commun
         end
         if (strcmp(status, obj.GOOD_TRANSMISSION)) && (beVerbose)
             obj.displayMessage(hostName, 'successfully received', receivedPacket.messageLabel, receivedPacket.messageData, packetNo);          
+            messageReceived = struct();
+            messageReceived.label = receivedPacket.messageLabel;
+            messageReceived.data  = receivedPacket.messageData;
         end
     end
 end
