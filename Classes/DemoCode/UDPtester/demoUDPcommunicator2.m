@@ -10,7 +10,7 @@ function demoUDPcommunicator2
     hostRoles       = {'master',           'slave'};
     
     %% Get computer name
-    localHostName = UDPcommunicator2.getLocalHostName();
+    localHostName = UDPcommunicator2.getLocalHostName()
     
     % Generate the parallel communication protocol for the 2 hosts
     if (contains(localHostName, 'manta'))
@@ -133,9 +133,20 @@ function messageList = runProtocol(UDPobj, localHostName, hostNames, hostRoles, 
     
     %% Start communicating
     while (packetNo < numel(packetSequence)) && ...
-        (~abortRequestedFromRemoteHost) && (~abortDueToCommunicationErrorDetectedInTheLocalHost)
+          (~abortRequestedFromRemoteHost) && ...
+          (~abortDueToCommunicationErrorDetectedInTheLocalHost)
     
         packetNo = packetNo + 1;
+        
+        % Just for debugging
+        if (strfind(packetSequence{packetNo}.messageLabel, 'ReceptiveFieldData')) & ...
+            (isfield(packetSequence{packetNo}, 'messageData')) & ...
+            (~isempty(packetSequence{packetNo}.messageData))
+            imagesc(packetSequence{packetNo}.messageData.rf)
+            set(gca, 'CLim', [-1 1]);
+            drawnow;
+        end
+        
         [theMessageReceived, theCommunicationStatus] = UDPobj.communicate(...
             localHostName, packetNo, packetSequence{packetNo}, ...
             'beVerbose', true);
@@ -155,8 +166,9 @@ function messageList = runProtocol(UDPobj, localHostName, hostNames, hostRoles, 
             abortDueToCommunicationErrorDetectedInTheLocalHost = true;
         end
         
-        theMessageReceived
-        if (~isempty(theMessageReceived) )
+        
+        if (~isempty(theMessageReceived))
+             % Just for debugging
             if (strfind(theMessageReceived.label, 'ReceptiveFieldData'))
                 imagesc(theMessageReceived.data.rf)
                 set(gca, 'CLim', [-1 1]);
