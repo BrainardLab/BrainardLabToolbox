@@ -12,19 +12,23 @@ function demoUDPcommunicator2
     %% Get computer name
     localHostName = UDPcommunicator2.getLocalHostName();
     
-    % Generate the parallel communication protocol for the 2 hosts
-    if (contains(localHostName, 'manta'))
-        protocolToRun = designPacketSequenceForManta(hostNames);
-    else
-        protocolToRun = designPacketSequenceForIonean(hostNames);
-    end
-    
     %% Instantiate our UDPcommunicator object
     UDPobj = UDPcommunicator2.instantiateObject(localHostName, hostNames, hostIPs, 'beVerbose', false);
     
+    %% Establish the communication
+    triggerMessage = 'Go!';
+    UDPobj.initiateCommunication(localHostName, hostRoles,  hostNames, triggerMessage, 'beVerbose', beVerbose);
+
     %% Run protocol for local host
     for k = 1:10
-        messageList = runProtocol(UDPobj, localHostName, hostNames, hostRoles, protocolToRun, 'beVerbose', false);
+        % Generate the parallel communication protocol for the 2 hosts
+        if (contains(localHostName, 'manta'))
+            protocolToRun = designPacketSequenceForManta(hostNames);
+        else
+            protocolToRun = designPacketSequenceForIonean(hostNames);
+        end
+    
+        messageList = runProtocol(UDPobj, localHostName, protocolToRun, 'beVerbose', false);
     end
 end
 
@@ -113,7 +117,7 @@ function packetSequence = designPacketSequenceForIonean(hostNames)
 end
 
 
-function messageList = runProtocol(UDPobj, localHostName, hostNames, hostRoles, packetSequence, varargin)
+function messageList = runProtocol(UDPobj, localHostName, packetSequence, varargin)
     
     p = inputParser;
     p.addParameter('beVerbose', false, @islogical);
@@ -124,14 +128,9 @@ function messageList = runProtocol(UDPobj, localHostName, hostNames, hostRoles, 
     figure(1); clf;
     colormap(gray(1024));
     
-    %% Establish the communication
-    triggerMessage = 'Go!';
-    UDPobj.initiateCommunication(localHostName, hostRoles,  hostNames, triggerMessage, 'beVerbose', beVerbose);
-
     %% Setup control variables
     abortRequestedFromRemoteHost = false;
     abortDueToCommunicationErrorDetectedInTheLocalHost = false;
-    
     
     %% Initialize counter and messages list
     packetNo = 0;
