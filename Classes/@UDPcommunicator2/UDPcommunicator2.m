@@ -28,9 +28,8 @@ classdef UDPcommunicator2 < handle
         ABORT_MESSAGE = struct('label', 'ABORT', 'value', 'NOW');
         
         % TRANSMISSION STATUS
-        INVALID_TRANSMISSION = 'INVALID_TRANSMISSION';
+        BAD_TRANSMISSION = 'BAD_TRANSMISSION';
         GOOD_TRANSMISSION = 'GOOD_TRANSMISSION';
-        BAD_ACKNOWLDGMENT = 'BAD_ACKNOWLEDGMENT';
         NO_ACKNOWLDGMENT_WITHIN_TIMEOUT_PERIOD = 'NO_ACKNOWLDGMENT_WITHIN_TIMEOUT_PERIOD';
         
         % TIMEOUT/BAD_TRANSMISSION ACTIONS
@@ -99,20 +98,34 @@ classdef UDPcommunicator2 < handle
             end
         end
         
-        % Public API 
+        % Public API (low-level)
         packet = waitForMessage(obj, msgLabel, varargin);
         transmissionStatus = sendMessage(obj, msgLabel, msgData, varargin);
         displayMessage(obj, hostname, action,  messageLabel, messageData, packetNo);
         flashedContents = flashQueue(obj);
         
-        % Method that transmits a communication packet and acts for the received acknowledgment
-        errorReport = transmitCommunicationPacket(obj, communicationPacket, varargin);
+        %Public API (higher-level)
+         
+        % Method that established communication between local and remote host
+        initiateCommunication(obj, localHostName, hostRoles, hostNames, triggerMessage, varargin);
+        
+        % Method that sends/received a communicaiton packet
+        [messageReceived, status, abortRequestedFromRemoteHost] = communicate(obj, hostName, packetNo, communicationPacket, varargin)
 
         % Close UDP
         shutDown(obj);
-        
     end % public method
     
+    % Convenience methods
+    methods (Static)
+        UDPobj = instantiateObject(localHostName, hostNames, hostIPs, varargin);
+        
+        % Method that constructs a communication packet
+        packet = makePacket(obj, hostNames, direction, message, varargin)
+        
+        localHostName = getLocalHostName();
+    end
+         
     methods (Access = private)
         timedOutFlag = waitForMessageOrTimeout(obj, timeoutSecs);
         executeTimeOut(obj, timeOutMessage, timeOutAction);

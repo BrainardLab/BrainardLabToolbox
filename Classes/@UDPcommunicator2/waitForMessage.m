@@ -5,7 +5,6 @@ function packet = waitForMessage(obj, msgLabel, varargin)
     p.addOptional('timeOutSecs', Inf,@isnumeric);
     p.addOptional('timeOutAction', obj.NOTIFY_CALLER, @(x)((ischar(x)) && ismember(x, {obj.NOTIFY_CALLER, obj.THROW_ERROR}))); 
     p.addOptional('badTransmissionAction', obj.NOTIFY_CALLER, @(x)((ischar(x)) && ismember(x, {obj.NOTIFY_CALLER, obj.THROW_ERROR}))); 
-    
     parse(p,msgLabel,varargin{:});
     timeOutSecs = p.Results.timeOutSecs;
     expectedMessageLabel = p.Results.msgLabel;
@@ -69,7 +68,9 @@ function packet = waitForMessage(obj, msgLabel, varargin)
     trailingMessageLabel = matlabUDP('receive');
     if (~strcmp(packet.messageLabel,trailingMessageLabel))
         if (strcmp(badTransmissionAction, obj.THROW_ERROR))
-            error('Trailing message label (''%s'') does not match leading message label (''%'').', trailingMessageLabel, packet.messageLabel)
+            % ask remote host to abort
+            obj.sendMessage(obj.ABORT_MESSAGE.label, obj.ABORT_MESSAGE.value);
+            error('Trailing message label (''%s'') does not match leading message label (''%'').\nAsked remote host to abort.', trailingMessageLabel, packet.messageLabel)
         else
             packet.badTransmissionFlag = true;
             return;

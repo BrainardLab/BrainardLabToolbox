@@ -5,100 +5,67 @@ function demoUDPcommunicator2
     
     %% Define the host names, IPs, and roles
     % In this demo we have IPs for manta.psych.upenn.edu and ionean.psych.upenn.edu
-    hostNames       = {'manta',                  'ionean'};
-    hostIPs         = {'128.91.12.90',           '128.91.12.144'};
-    hostRoles       = {'master',                  'slave'};
+    hostNames       = {'manta',            'ionean'};
+    hostIPs         = {'128.91.12.90',     '128.91.12.144'};
+    hostRoles       = {'master',           'slave'};
     
-
-    %% Instantiate a UDPcommunicator object according to computer name
-    systemInfo = GetComputerInfo();
-    localHostName = lower(systemInfo.networkName);
-    UDPobj = instantiateUDPcomObject(localHostName, hostNames, hostIPs, 'beVerbose', true);
+    %% Get computer name
+    localHostName = UDPcommunicator2.getLocalHostName();
     
     % Generate the parallel communication protocol for the 2 hosts
-    repeatsNum = 15;
-    if (strfind(localHostName, 'manta'))
-        protocolToRun = designCommunicationProtocolForManta(hostNames, repeatsNum);
+    if (contains(localHostName, 'manta'))
+        protocolToRun = designPacketSequenceForManta(hostNames);
     else
-        protocolToRun = designCommunicationProtocolForIonean(hostNames, repeatsNum);
+        protocolToRun = designPacketSequenceForIonean(hostNames);
     end
+    
+    %% Instantiate our UDPcommunicator object
+    UDPobj = UDPcommunicator2.instantiateObject(localHostName, hostNames, hostIPs, 'beVerbose', false);
     
     %% Run protocol for local host
     messageList = runProtocol(UDPobj, localHostName, hostNames, hostRoles, protocolToRun);
 end
 
+function packetSequence = designPacketSequenceForManta(hostNames)
+    % Define the communication  packetSequence
+    packetSequence = {};
 
-function UDPobj = instantiateUDPcomObject(localHostName, hostNames, hostIPs, varargin)
+    % Manta sending
+    packetSequence{numel(packetSequence)+1} = UDPcommunicator2.makePacket(hostNames,...
+        'manta -> ionean', sprintf('TRANSIT_MSG_LABEL_%d', 1), ...
+        'timeOutSecs', 1.0, ...                                         % Allow 1 sec to receive ACK (from remote host) that message was received 
+        'timeOutAction', UDPcommunicator2.NOTIFY_CALLER, ...            % Do not throw an error, notify caller function instead (choose from UDPcommunicator2.{NOTIFY_CALLER, THROW_ERROR})
+        'withData', 1 ...
+    );
 
-    % Parse optinal input parameters.
-    p = inputParser;
-    p.addParameter('beVerbose', false, @islogical);
-    p.parse(varargin{:});
-    beVerbose = p.Results.beVerbose;
-    
-    if (beVerbose)
-        verbosity = 'max';
-    else
-        verbosity = 'min';
-    end
-    
-    if (strfind(localHostName, hostNames{1}))
-        UDPobj = UDPcommunicator2( ...
-            'localIP',   hostIPs{1}, ...        % REQUIRED: the IP of manta.psych.upenn.edu (local host)
-            'remoteIP',  hostIPs{2}, ...        % REQUIRED: the IP of ionean.psych.upenn.edu (remote host)
-            'verbosity', verbosity, ...          % OPTIONAL, with default value: 'normal', and possible values: {'min', 'normal', 'max'},
-            'useNativeUDP', false ...           % OPTIONAL, with default value: false (i.e., using the brainard lab matlabUDP mexfile)
-        );
-    elseif (strfind(localHostName, hostNames{2}))
-        UDPobj = UDPcommunicator2( ...
-        'localIP',   hostIPs{2}, ...            % REQUIRED: the IP of ionean.psych.upenn.edu (local host)
-        'remoteIP',  hostIPs{1}, ...            % REQUIRED: the IP of manta.psych.upenn.edu (remote host)
-        'verbosity', verbosity, ...             % OPTIONAL, with default value: 'normal', and possible values: {'min', 'normal', 'max'},
-        'useNativeUDP', false ...               % OPTIONAL, with default value: false (i.e., using the brainard lab matlabUDP mexfile)
-        );
-    else
-        error('No configuration for computer named ''%s''.', systemInfo.networkName);
-    end
+    % Manta receiving
+    packetSequence{numel(packetSequence)+1} = UDPcommunicator2.makePacket(hostNames,...
+        'manta <- ionean', sprintf('RECEIVE_MSG_LABEL_%d', 1),...
+        'timeOutSecs', 1.0, ...                                         % Allow for 1 secs to receive this message
+        'timeOutAction', UDPcommunicator2.NOTIFY_CALLER, ...            % Do not throw an error, notify caller function instead (choose from UDPcommunicator2.{NOTIFY_CALLER, THROW_ERROR})
+        'badTransmissionAction', UDPcommunicator2.NOTIFY_CALLER ...     % Do not throw an error, notify caller function instead (choose from UDPcommunicator2.{NOTIFY_CALLER, THROW_ERROR})
+    );
+
+    % Manta sending (other direction specification)
+    packetSequence{numel(packetSequence)+1} = UDPcommunicator2.makePacket(hostNames,...
+        'ionean <- manta', sprintf('REV_TRANSIT_MSG_LABEL_%d', 2), ...
+        'timeOutSecs', 1.0, ...                                         % Allow 1 sec to receive ACK (from remote host) that message was received
+        'timeOutAction', UDPcommunicator2.NOTIFY_CALLER, ...            % Do not throw an error, notify caller function instead (choose from UDPcommunicator2.{NOTIFY_CALLER, THROW_ERROR})
+        'withData', 'tra la la');
+
+    % Manta receiving (other direction specification)
+    packetSequence{numel(packetSequence)+1} = UDPcommunicator2.makePacket(hostNames,...
+        'ionean -> manta', sprintf('REV_RECEIVE_MSG_LABEL_%d', 2), ...
+        'timeOutSecs', 10.0, ...                                        % Wait for 10 secs to receive this message
+        'timeOutAction', UDPcommunicator2.NOTIFY_CALLER, ...            % Do not throw an error, notify caller function instead (choose from UDPcommunicator2.{NOTIFY_CALLER, THROW_ERROR})
+        'badTransmissionAction', UDPcommunicator2.NOTIFY_CALLER ...     % Do not throw an error, notify caller function instead (choose from UDPcommunicator2.{NOTIFY_CALLER, THROW_ERROR})
+    );
 end
 
 
-function protocol = designCommunicationProtocolForManta(hostNames, repeatsNum)
-    % Define the communication  protocol
-    protocol = {};
-
-    for k = 1:repeatsNum
-        % Manta sending
-        protocol{numel(protocol)+1} = makePacket(hostNames,...
-            'manta -> ionean', sprintf('TRANSIT_MSG_LABEL_%d', k), ...
-            'timeoutSecsForAckReceipt', 1.0, ...                % allow 1 sec to receive ACK (from remote host) that message was received 
-            'withData', 1 ...
-        );
-
-        % Manta receiving
-        protocol{numel(protocol)+1} = makePacket(hostNames,...
-            'manta <- ionean', sprintf('RECEIVE_MSG_LABEL_%d', k),...
-            'timeoutSecsForReceivingExpectedPacket', 1.0 ...    % we will wait for 1 secs to receive this message, then throw an error
-        );
-
-        % Manta sending (other direction specification)
-        protocol{numel(protocol)+1} = makePacket(hostNames,...
-            'ionean <- manta', sprintf('REV_TRANSIT_MSG_LABEL_%d', k), ...
-            'timeoutSecsForAckReceipt', 1.0, ...                % allow 1 sec to receive ACK (from remote host) that message was received
-            'withData', 'tra la la');
-        
-        % Manta receiving (other direction specification)
-        protocol{numel(protocol)+1} = makePacket(hostNames,...
-            'ionean -> manta', sprintf('REV_RECEIVE_MSG_LABEL_%d', k), ...
-            'timeoutSecsForReceivingExpectedPacket', 10.0 ...    % longer message, so we will wait for 10 secs to receive this message, then throw an error
-        );
-    end
-    
-end
-
-
-function protocol = designCommunicationProtocolForIonean(hostNames, repeatsNum)
-    % Define the communication  protocol
-    protocol = {};
+function packetSequence = designPacketSequenceForIonean(hostNames)
+    % Define the communication  packetSequence
+    packetSequence = {};
     
     spatialSupport = linspace(-1,1,17);
     XY = meshgrid(spatialSupport , spatialSupport);
@@ -108,217 +75,105 @@ function protocol = designCommunicationProtocolForIonean(hostNames, repeatsNum)
         'neuronID', 0, ...
         'rf', exp(-0.5*((XY/sigmaX).^2) + (XY/sigmaY).^2));
     
-    
-    for k = 1:repeatsNum
-        
-        rfStructTmp.neuronID = k;
-        rfStructTmp.rf = rfStruct.rf .* (1+0.2*randn(size(rfStruct.rf)));
-        rfStructTmp.rf = rfStructTmp.rf / max(abs(rfStructTmp.rf(:)));
-        
-        % Ionean receiving
-        protocol{numel(protocol)+1} = makePacket(hostNames,...
-            'manta -> ionean', sprintf('TRANSIT_MSG_LABEL_%d', k), ...
-            'timeoutSecsForReceivingExpectedPacket', 1.0 ...    % we will wait for 1 secs to receive this message, then throw an error
-        );
+    rfStructTmp.neuronID = 1;
+    rfStructTmp.rf = rfStruct.rf .* (1+0.2*randn(size(rfStruct.rf)));
+    rfStructTmp.rf = rfStructTmp.rf / max(abs(rfStructTmp.rf(:)));
 
-        % Ionean sending
-        protocol{numel(protocol)+1} = makePacket(hostNames,...
-            'manta <- ionean', sprintf('RECEIVE_MSG_LABEL_%d', k), ...
-            'timeoutSecsForAckReceipt', 1.0, ...                % allow 1 sec to receive ACK (from remote host) that message was received 
-            'withData', struct('a', 12, 'b', rand(2,2)));
+    % Ionean receiving
+    packetSequence{numel(packetSequence)+1} = UDPcommunicator2.makePacket(hostNames,...
+        'manta -> ionean', sprintf('TRANSIT_MSG_LABEL_%d', 1), ...
+        'timeOutSecs', 1.0, ...                                         % Wait for 1 secs to receive this message
+        'timeOutAction', UDPcommunicator2.NOTIFY_CALLER, ...            % Do not throw an error, notify caller function instead (choose from UDPcommunicator2.{NOTIFY_CALLER, THROW_ERROR})
+        'badTransmissionAction', UDPcommunicator2.NOTIFY_CALLER ...     % Do not throw an error, notify caller function instead (choose from UDPcommunicator2.{NOTIFY_CALLER, THROW_ERROR})
+    );
 
-        % Ionean receiving (other direction)
-        protocol{numel(protocol)+1} = makePacket(hostNames,...
-            'ionean <- manta', sprintf('REV_TRANSIT_MSG_LABEL_%d', k), ...
-             'timeoutSecsForReceivingExpectedPacket', 1.0 ...    % we will wait for 1 secs to receive this message, then throw an error
-        );
-        
-        % Ionean sending (other direction)
-        protocol{numel(protocol)+1} = makePacket(hostNames,...
-            'ionean -> manta', sprintf('ReceptiveField_%d', k), ...
-            'timeoutSecsForAckReceipt', 1.0, ...                % allow 1 sec to receive ACK (from remote host) that message was received
-            'withData', rfStructTmp);
-        
-    end
+    % Ionean sending
+    packetSequence{numel(packetSequence)+1} = UDPcommunicator2.makePacket(hostNames,...
+        'manta <- ionean', sprintf('RECEIVE_MSG_LABEL_%d', 1), ...
+        'timeOutSecs', 1.0, ...                                         % Allow 1 sec to receive ACK (from remote host) that message was received 
+        'timeOutAction', UDPcommunicator2.NOTIFY_CALLER, ...            % Do not throw an error, notify caller function instead (choose from UDPcommunicator2.{NOTIFY_CALLER, THROW_ERROR})
+        'withData', struct('a', 12, 'b', rand(2,2)));
+
+    % Ionean receiving (other direction)
+    packetSequence{numel(packetSequence)+1} = UDPcommunicator2.makePacket(hostNames,...
+        'ionean <- manta', sprintf('REV_TRANSIT_MSG_LABEL_%d', 2), ...
+         'timeOutSecs', 1.0, ...                                        % Wait for 1 secs to receive this message
+         'timeOutAction', UDPcommunicator2.NOTIFY_CALLER, ...           % Do not throw an error, notify caller function instead (choose from UDPcommunicator2.{NOTIFY_CALLER, THROW_ERROR})
+         'badTransmissionAction', UDPcommunicator2.NOTIFY_CALLER ...    % Do not throw an error, notify caller function instead (choose from UDPcommunicator2.{NOTIFY_CALLER, THROW_ERROR})
+    );
+
+    % Ionean sending (other direction)
+    packetSequence{numel(packetSequence)+1} = UDPcommunicator2.makePacket(hostNames,...
+        'ionean -> manta', sprintf('ReceptiveField_%d', 2), ...
+        'timeOutSecs', 1.0, ...                                         % Allow 1 sec to receive ACK (from remote host) that message was received
+        'timeOutAction', UDPcommunicator2.NOTIFY_CALLER, ...           % Do not throw an error, notify caller function instead (choose from UDPcommunicator2.{NOTIFY_CALLER, THROW_ERROR})
+        'withData', rfStructTmp);
 end
 
 
-function messageList = runProtocol(UDPobj, localHostName, hostNames, hostRoles, commProtocol)
+function messageList = runProtocol(UDPobj, localHostName, hostNames, hostRoles, packetSequence)
     
     %% Setup figure for displaying results
     figure(1); clf;
     colormap(gray(1024));
     
-    %% Initiate the communication protocol
-    initiateCommunication(UDPobj, localHostName, hostRoles,  hostNames);
+    %% Establish the communication
+    triggerMessage = 'Go!';
+    UDPobj.initiateCommunication(localHostName, hostRoles,  hostNames, triggerMessage, 'beVerbose', true);
 
-    %% Run the communication protocol
+    %% Setup control variables
     abortRequestedFromRemoteHost = false;
-    commStep = 0;
-     
-    while (commStep < numel(commProtocol)) && (~abortRequestedFromRemoteHost)
-        commStep = commStep + 1;
-        [messageList{commStep}, communicationStatus{commStep}, abortRequestedFromRemoteHost] = communicate(UDPobj, localHostName, commStep, commProtocol{commStep}, 'beVerbose', true);
-        communicationStatus{commStep}
-        abortRequestedFromRemoteHost
-        messageList{commStep}
-        if strfind(messageList{commStep}, 'ReceptiveField')
-            subplot(3,5,k);
+    abortDueToCommunicationErrorDetectedInTheLocalHost = false;
+    
+    
+    %% Initialize counter and messages list
+    packetNo = 0;
+    messageList    = {};
+    commStatusList = {};
+    
+    %% Start communicating
+    while (packetNo < numel(packetSequence)) && ...
+        (~abortRequestedFromRemoteHost) && (~abortDueToCommunicationErrorDetectedInTheLocalHost)
+    
+        packetNo = packetNo + 1;
+        [theMessageReceived, theCommunicationStatus] = UDPobj.communicate(...
+            localHostName, packetNo, packetSequence{packetNo}, ...
+            'beVerbose', true);
+        
+        if (strcmp(theCommunicationStatus, UDPobj.ACKNOWLEDGMENT))
+            % ALL_GOOD, do not print anything
+        elseif (strcmp(theCommunicationStatus, UDPobj.GOOD_TRANSMISSION))
+            % ALL_GOOD, print what we received
+            theMessageReceived
+        elseif (strcmp(theCommunicationStatus, UDPobj.ABORT_MESSAGE.label))
+            abortRequestedFromRemoteHost = true;
+        else
+            % If we reached here, there was a communication error (timeout
+            % or bad data), which was not handled earlier.
+            fprintf(2, 'Communication status: ''%s''\n', theCommunicationStatus);
+            
+            % Decice how to handle it. here just exit the loop
+            abortDueToCommunicationErrorDetectedInTheLocalHost = true;
+        end
+        
+        if strfind(theMessageReceived, 'ReceptiveField')
             imagesc(rfStructTmp.rf)
             set(gca, 'CLim', [-1 1]);
             drawnow;
         end
-    end
         
+        messageList{packetNo} = theMessageReceived;
+        commStatusList{packetNo} = theCommunicationStatus;
+    end % while
+    
     if (abortRequestedFromRemoteHost)
-        fprintf('Aborted communication protocol as requested from remote host\n');
+        fprintf(2,'Aborted communication loop because of an error detected by the remote host [packet no %d].\n', packetNo);
+    end
+    if (abortDueToCommunicationErrorDetectedInTheLocalHost)
+        fprintf(2,'Aborted communication loop because of an error detected by the local host [packet no %d].\n', packetNo);
     end
     
     %% Shutdown the UDPobj
-    fprintf('\nAll done\n');
+    fprintf('\nShutting down UDPobj...\n');
     UDPobj.shutDown();
-end
-
-
-
-
-function initiateCommunication(UDPobj, localHostName, hostRoles, hostNames)
-
-    beVerbose = true;
-    triggerMessage = 'GO!';
-    
-    if (strcmp(hostRoles{1}, 'master'))
-        masterHostName = hostNames{1};
-    elseif (strcmp(hostRoles{2}, 'master'))
-        masterHostName = hostNames{2};
-    else
-        error('There is no master role in hostRoles');
-    end
-    
-    if (strcmp(hostRoles{1}, 'slave'))
-        slaveHostName = hostNames{1};
-    elseif (strcmp(hostRoles{2}, 'slave'))
-        slaveHostName = hostNames{2};
-    else
-        error('There is no slave role in hostRoles');
-    end
-    
-    assert(ismember(masterHostName, hostNames), sprintf('master host (''%s'') is not a valid host name.\n', masterHostName));
-    assert(ismember(slaveHostName, hostNames), sprintf('slave host (''%s'') is not a valid host name.\n', slaveHostName));
-    
-    if (beVerbose)
-        fprintf('<strong>Setting ''%s'' as MASTER and ''%s'' as SLAVE</strong>\n', masterHostName, slaveHostName);
-    end
-    
-    if (strfind(localHostName, slaveHostName))
-        % Wait for ever to receive the trigger message from the master
-        packetReceived = UDPobj.waitForMessage(triggerMessage, ...
-            'timeOutSecs', Inf, ...
-            'badTransmissionAction', UDPobj.THROW_ERROR);
-    
-    elseif (strfind(localHostName, masterHostName))
-        fprintf('Is ''%s'' running on the slave (''%s'') computer?. Hit enter if so.\n', mfilename, slaveHostName); pause; clc;
-        % Send trigger and wait for up to 4 seconds to receive acknowledgment
-        transmissionStatus = UDPobj.sendMessage(triggerMessage, '', ...
-            'timeOutSecs',  4, ...
-            'timeOutAction', UDPobj.THROW_ERROR ...
-        );
-    else
-        error('Local host name (''%s'') does not match the slave (''%s'') or the master (''%s'') host name.', localHostName, slaveHostName, masterHostName);
-    end
-end
-
-
-function packet = makePacket(hostNames, direction, message, varargin) 
-    % Parse optinal input parameters.
-    p = inputParser;
-    p.addParameter('withData', []);
-    p.addParameter('timeoutSecsForAckReceipt',  5, @isnumeric);
-    p.addParameter('timeoutSecsForReceivingExpectedPacket',  Inf, @isnumeric);
-    p.addParameter('attemptsNo', 1, @isnumeric);
-    p.parse(varargin{:});
-    data = p.Results.withData;
-    
-    % validate direction
-    assert((contains(direction, '->')) || (contains(direction, '<-')), sprintf('direction field does not contain correct direction information: ''%s''.\n', direction));
-    assert(contains(direction, hostNames{1}), sprintf('direction field does not contain correct host name: ''%s''.\n', direction));
-    assert(contains(direction, hostNames{2}), sprintf('direction field does not contain correct host name: ''%s''.\n', direction));
-    
-    packet = struct(...
-        'direction', direction, ...
-        'messageLabel', message, ...
-        'messageData', data, ...
-        'attemptsNo', p.Results.attemptsNo, ...                               % How many times to re-transmit if we did not get an ACK within the receiveTimeOut
-        'transmitTimeOut', p.Results.timeoutSecsForAckReceipt, ...            % Timeout for receiving an ACK in response to a transmitted message
-        'receiveTimeOut', p.Results.timeoutSecsForReceivingExpectedPacket ... % Timeout for waiting to receive a regular message
-    );
-end
-
-function [messageReceived, status, abortRequestedFromRemoteHost] = communicate(UDPobj, hostName, packetNo, communicationPacket, varargin)
-    % Set default state of return arguments
-    messageReceived = [];
-    errorReport = '';
-    abortRequestedFromRemoteHost = false;
-    
-    % Parse optinal input parameters.
-    p = inputParser;
-    p.addParameter('beVerbose', false, @islogical);
-    p.addParameter('withLocalHostActionOnFailure', 'catch error', @(x)ismember(x, {'catch error', 'throw error'}));
-    p.addParameter('withRemoteHostActionOnFailure', 'abort', @(x)ismember(x, {'abort', 'nothing'}));
-    p.parse(varargin{:});
-    localHostActionOnFailure = p.Results.withLocalHostActionOnFailure;
-    remoteHostActionOnFailure = p.Results.withRemoteHostActionOnFailure;
-    beVerbose = p.Results.beVerbose;
-    
-    if (isATransmissionPacket(communicationPacket.direction, hostName))
-        if (beVerbose)
-            fprintf('\n%s is sending packet %d', hostName, packetNo);
-        end
-        status = UDPobj.sendMessage(...
-            communicationPacket.messageLabel, communicationPacket.messageData, ...
-            'timeOutSecs', communicationPacket.receiveTimeOut);
-        if (beVerbose)
-            UDPobj.displayMessage(hostName, sprintf('transmitted with status ''%s'' ', transmissionStatus),  communicationPacket.messageLabel, communicationPacket.messageData, packetNo);
-        end
-    else
-        if (beVerbose)
-            fprintf('\n%s is waiting to receive packet %d and will timeout after %2.1f seconds', hostName, packetNo, communicationPacket.receiveTimeOut);
-        end
-        receivedPacket = UDPobj.waitForMessage(communicationPacket.messageLabel, ...
-            'timeOutSecs', communicationPacket.receiveTimeOut);
-        if (beVerbose)
-            UDPobj.displayMessage(hostName, 'received', receivedPacket.messageLabel, receivedPacket.messageData, packetNo);          
-        end  
-        
-        % Update status of operation
-        status = obj.GOOD_TRANSMISSION;
-        if (receivedPacket.timedOutFlag)
-            status = obj.NO_ACKNOWLDGMENT_WITHIN_TIMEOUT_PERIOD;
-        end
-        if (receivedPacket.badTransmissionFlag)
-            status = obj.INVALID_TRANSMISSION;
-        end
-    end
-end
-
-function transmitAction = isATransmissionPacket(direction, hostName)
-
-    transmitAction = false;
-    p = strfind(hostName, '.');
-    hostName = hostName(1:p(1)-1);
-    hostEntry = strfind(direction, hostName);
-    rightwardArrowEntry = strfind(direction, '->');
-    leftwardArrowEntry = strfind(direction, '<-');
-    if (~isempty(rightwardArrowEntry))
-        if (hostEntry < rightwardArrowEntry)
-            transmitAction = true;
-        end
-    else
-        if (isempty(leftwardArrowEntry))
-            error('direction field does not contain correct direction information: ''%s''.\n', direction);
-        end
-        if (hostEntry > leftwardArrowEntry)
-            transmitAction = true;
-        end
-    end
 end

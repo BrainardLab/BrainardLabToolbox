@@ -1,7 +1,7 @@
 function executeTimeOut(obj, timeOutMessage, timeOutAction)
-    if sprintf(timeOutAction, obj.THROW_ERROR)
-        error('Timed out %s.\n', timeOutMessage);
+    if strcmp(timeOutAction, obj.THROW_ERROR)
+        error('\nTimed out: %s. Check remote host.\n', timeOutMessage);
     else
-        fprintf(2, 'Timed out %s. Caller must handle what happens next.\n', timeOutMessage);
+        fprintf(2, '\nTimed out %s.\n', timeOutMessage);
     end
 end
