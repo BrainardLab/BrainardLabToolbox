@@ -43,7 +43,7 @@ function demoUDPcommunicator2
             abortRequestedFromRemoteHost, abortDueToCommunicationErrorDetectedInTheLocalHost] = ...
             runProtocol(UDPobj, localHostName, protocolToRun, ...
                         'debugPlots', debugPlots, ...
-                        'beVerbose', false);
+                        'beVerbose', beVerbose);
     end
     ackDelaysList
     if (abortRequestedFromRemoteHost || abortDueToCommunicationErrorDetectedInTheLocalHost)
@@ -146,10 +146,7 @@ function [messageList, commStatusList, ackDelaysList, ...
     beVerbose = p.Results.beVerbose;
     debugPlots = p.Results.debugPlots;
     
-    %% Setup figure for displaying results
-    figure(1); clf;
-    colormap(gray(1024));
-    
+
     %% Setup control variables
     abortRequestedFromRemoteHost = false;
     abortDueToCommunicationErrorDetectedInTheLocalHost = false;
@@ -172,6 +169,10 @@ function [messageList, commStatusList, ackDelaysList, ...
             if (strfind(packetSequence{packetNo}.messageLabel, 'ReceptiveFieldData')) & ...
                 (isfield(packetSequence{packetNo}, 'messageData')) & ...
                 (~isempty(packetSequence{packetNo}.messageData))
+            
+                    %% Setup figure for displaying results
+                    figure(1); clf;
+                    colormap(gray(1024));
                     imagesc(packetSequence{packetNo}.messageData.rf);
                     title('Transmitted data');
                     set(gca, 'CLim', [-1 1]);
@@ -179,6 +180,7 @@ function [messageList, commStatusList, ackDelaysList, ...
             end
         end
         
+        % Communicate and collect roundtrip timing info
         tic
         [theMessageReceived, theCommunicationStatus] = UDPobj.communicate(...
             localHostName, packetNo, packetSequence{packetNo}, ...
@@ -203,8 +205,12 @@ function [messageList, commStatusList, ackDelaysList, ...
          % Just for debugging
         if (debugPlots)
             if (~isempty(theMessageReceived))
+                fprintf('in here\n');
                  % Just for debugging
                 if (strfind(theMessageReceived.label, 'ReceptiveFieldData'))
+                    figure(1); clf;
+                    colormap(gray(1024));
+                    fprintf('and here\n');
                     imagesc(theMessageReceived.data.rf)
                     title('Received data');
                     set(gca, 'CLim', [-1 1]);
