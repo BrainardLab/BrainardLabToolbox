@@ -24,8 +24,8 @@ function [messageReceived, status] = communicate(obj, hostName, packetNo, commun
             'timeOutSecs', communicationPacket.timeOutSecs, ...
             'timeOutAction', communicationPacket.timeOutAction ...
         );
-        if (beVerbose)
-            obj.displayMessage(hostName, sprintf('received status ''%s'' from remote host for', status), communicationPacket.messageLabel, communicationPacket.messageData, packetNo);
+        if (beVerbose) || (strcmp(status,obj.NO_ACKNOWLDGMENT_WITHIN_TIMEOUT_PERIOD))
+            obj.displayMessage(hostName, sprintf('received status ''%s'' from remote host', status), communicationPacket.messageLabel, communicationPacket.messageData, packetNo);
         end
     else
         if (beVerbose)
@@ -48,16 +48,18 @@ function [messageReceived, status] = communicate(obj, hostName, packetNo, commun
         status = obj.GOOD_TRANSMISSION;
         if (receivedPacket.timedOutFlag)
             status = obj.NO_ACKNOWLDGMENT_WITHIN_TIMEOUT_PERIOD;
+            obj.displayMessage(hostName, sprintf('received message operation timed out'), receivedPacket.messageLabel, receivedPacket.messageData, packetNo);
         end
         if (receivedPacket.badTransmissionFlag)
             status = obj.BAD_TRANSMISSION;
+            obj.displayMessage(hostName, sprintf('received message contains bad data'), receivedPacket.messageLabel, receivedPacket.messageData, packetNo);
         end
         if (~isempty(receivedPacket.mismatchedMessageLabel))
-            obj.displayMessage(hostName, sprintf('received incorrect message while expecting ''%s''', receivedPacket.mismatchedMessageLabel), receivedPacket.messageLabel, receivedPacket.messageData, packetNo);
+            obj.displayMessage(hostName, sprintf('received message with wrong label (expected: ''%s'')', receivedPacket.mismatchedMessageLabel), receivedPacket.messageLabel, receivedPacket.messageData, packetNo);
         end
         if (strcmp(status, obj.GOOD_TRANSMISSION))
             if (beVerbose)
-                obj.displayMessage(hostName, 'successfully received', receivedPacket.messageLabel, receivedPacket.messageData, packetNo);          
+                obj.displayMessage(hostName, 'received expected message', receivedPacket.messageLabel, receivedPacket.messageData, packetNo);          
             end
             messageReceived = struct();
             messageReceived.label = receivedPacket.messageLabel;
