@@ -153,7 +153,7 @@ function [messageList, commStatusList, roundTripDelayMilliSecsList, ...
                 %% Setup figure for displaying results
                 hFig = figure(2); clf;
                 set(hFig, 'Position', [600 1000 400 400]);
-                imshow(packetSequence{packetNo}.messageData.theMatrix);
+                imshow(theMessageReceived.data.theMatrix);
                 title('Received data');
                 drawnow;
                 end
