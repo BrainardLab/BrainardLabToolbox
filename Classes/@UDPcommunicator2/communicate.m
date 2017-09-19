@@ -58,6 +58,7 @@ function [messageReceived, status] = communicate(obj, hostName, packetNo, commun
             obj.displayMessage(hostName, sprintf('received message contains bad data'), receivedPacket.messageLabel, receivedPacket.messageData, packetNo, 'alert', true);
         end
         if (~isempty(receivedPacket.mismatchedMessageLabel))
+            status = obj.UNEXPECTED_MESSAGE_LABEL_RECEIVED;
             obj.displayMessage(hostName, sprintf('received message with wrong label (expected: ''%s'')', receivedPacket.mismatchedMessageLabel), receivedPacket.messageLabel, receivedPacket.messageData, packetNo, 'alert', true);
         end
         if (strcmp(status, obj.GOOD_TRANSMISSION))
