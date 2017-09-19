@@ -34,7 +34,7 @@ function packetSequence = designPacketSequenceForIonean(hostNames)
         'manta <- ionean', 'IONEAN_SENDING_A_MATRIX', ...
         'timeOutSecs', 10.0, ...                                         % Allow 10 sec to receive ACK (from remote host) that message was received 
         'timeOutAction', UDPcommunicator2.NOTIFY_CALLER, ...             % Do not throw an error, notify caller function instead (choose from UDPcommunicator2.{NOTIFY_CALLER, THROW_ERROR})
-        'withData', rand(23,50,3));
+        'withData', struct('theMatrix', rand(23,50,3)));
     
     % Ionean receiving (other direction)
     packetSequence{numel(packetSequence)+1} = UDPcommunicator2.makePacket(hostNames,...
