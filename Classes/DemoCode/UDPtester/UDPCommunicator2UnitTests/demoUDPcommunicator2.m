@@ -25,7 +25,7 @@ function demoUDPcommunicator2
     UDPobj.initiateCommunication(localHostName, hostRoles,  hostNames, triggerMessage, 'beVerbose', beVerbose);
 
     %% Run protocol for local host
-    maxReps = 100;
+    maxReps = 10;
     rep = 0;
     abortRequestedFromRemoteHost = false;
     abortDueToCommunicationErrorDetectedInTheLocalHost = false;
@@ -102,7 +102,7 @@ function [messageList, commStatusList, roundTripDelayMilliSecsList, ...
             if (strcmp(packetSequence{packetNo}.messageLabel,'IONEAN_SENDING_A_MATRIX'))
                 %% Setup figure for displaying results
                 hFig = figure(2); clf;
-                set(hFig, 'Position', [600 100 200 200]);
+                set(hFig, 'Position', [600 1000 400 400]);
                 imshow(packetSequence{packetNo}.messageData);
                 title('Transmitted data');
                 drawnow;
@@ -150,9 +150,9 @@ function [messageList, commStatusList, roundTripDelayMilliSecsList, ...
                 if (strcmp(packetSequence{packetNo}.messageLabel,'IONEAN_SENDING_A_MATRIX'))
                 %% Setup figure for displaying results
                 hFig = figure(2); clf;
-                set(hFig, 'Position', [600 100 200 200]);
+                set(hFig, 'Position', [600 1000 400 400]);
                 imshow(packetSequence{packetNo}.messageData);
-                title('Transmitted data');
+                title('Received data');
                 drawnow;
                 end
             
