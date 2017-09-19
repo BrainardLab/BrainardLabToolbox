@@ -99,6 +99,18 @@ function [messageList, commStatusList, roundTripDelayMilliSecsList, ...
                     drawnow;
             end
             
+            if (strcmp(packetSequence{packetNo}.messageLabel, 'MANTA_SENDING_A_MATRIX')) & ...
+                (isfield(packetSequence{packetNo}, 'messageData')) & ...
+                (~isempty(packetSequence{packetNo}.messageData))
+                    %% Setup figure for displaying results
+                    hfig = figure(2); clf;
+                    set(hFig, 'Position', [1570 918 560 420]);
+                    colormap(gray(1024));
+                    imagesc(packetSequence{packetNo}.messageData.theMatrix);
+                    title('Transmitted data');
+                    set(gca, 'CLim', [-1 1]);
+                    drawnow;
+            end
         end
         
         % Communicate and collect roundtrip timing info
@@ -139,6 +151,14 @@ function [messageList, commStatusList, roundTripDelayMilliSecsList, ...
                     drawnow;
                 end
                 
+                if (strcmp(theMessageReceived.label,'MANTA_SENDING_A_MATRIX'))
+                    hfig = figure(2); clf;
+                    set(hFig, 'Position', [1570 918 560 420]);
+                    colormap(gray(1024));
+                    imagesc(theMessageReceived.data.theMatrix);
+                    title('Received data');
+                    drawnow;
+                end
             
             end
         end
