@@ -107,7 +107,6 @@ function [messageList, commStatusList, roundTripDelayMilliSecsList, ...
                 (~isempty(packetSequence{packetNo}.messageData))
                     %% Setup figure for displaying results
                     subplot(1,2,1)
-                    set(hFig, 'Position', [1570 918 560 420]);
                     colormap(gray(1024));
                     imagesc(packetSequence{packetNo}.messageData.theMatrix);
                     title('Data transmitted from Manta');
@@ -156,7 +155,6 @@ function [messageList, commStatusList, roundTripDelayMilliSecsList, ...
                 
                 if (strcmp(theMessageReceived.label,'MANTA_SENDING_A_MATRIX'))
                     subplot(1,2,2)
-                    set(hFig, 'Position', [1570 918 560 420]);
                     colormap(gray(1024));
                     imagesc(theMessageReceived.data.theMatrix);
                     title('Received from Manta');
