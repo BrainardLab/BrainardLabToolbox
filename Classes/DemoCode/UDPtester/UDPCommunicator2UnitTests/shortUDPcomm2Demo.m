@@ -9,6 +9,10 @@ function shortUDPcomm2Demo
     %% Get computer name
     localHostName = UDPcommunicator2.getLocalHostName();
     
+    %% Control what is printed on the command window
+    beVerbose = false;
+    displayPackets = false;
+    
     %% Instantiate our UDPcommunicator object
     UDPobj = UDPcommunicator2.instantiateObject(localHostName, hostNames, hostIPs, 'beVerbose', beVerbose);
     
