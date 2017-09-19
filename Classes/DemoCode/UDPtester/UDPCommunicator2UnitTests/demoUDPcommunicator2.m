@@ -78,6 +78,8 @@ function [messageList, commStatusList, roundTripDelayMilliSecsList, ...
     commStatusList = {};
     roundTripDelayMilliSecsList = [];
     
+    figure(1); clf;
+    
     %% Start communicating
     while (packetNo < numel(packetSequence)) && ...
           (~abortRequestedFromRemoteHost) && ...
@@ -87,14 +89,15 @@ function [messageList, commStatusList, roundTripDelayMilliSecsList, ...
         
         % Just for debugging
         if (debugPlots)
+            
             if (strcmp(packetSequence{packetNo}.messageLabel, 'IONEAN_SENDING_RF_DATA')) & ...
                 (isfield(packetSequence{packetNo}, 'messageData')) & ...
                 (~isempty(packetSequence{packetNo}.messageData))
                     %% Setup figure for displaying results
-                    figure(1); clf;
+                    subplot(1,2,1)
                     colormap(gray(1024));
                     imagesc(packetSequence{packetNo}.messageData.rf);
-                    title('Transmitted data');
+                    title('Data transmitted from Ionean');
                     set(gca, 'CLim', [-1 1]);
                     drawnow;
             end
@@ -103,11 +106,11 @@ function [messageList, commStatusList, roundTripDelayMilliSecsList, ...
                 (isfield(packetSequence{packetNo}, 'messageData')) & ...
                 (~isempty(packetSequence{packetNo}.messageData))
                     %% Setup figure for displaying results
-                    hfig = figure(2); clf;
+                    subplot(1,2,1)
                     set(hFig, 'Position', [1570 918 560 420]);
                     colormap(gray(1024));
                     imagesc(packetSequence{packetNo}.messageData.theMatrix);
-                    title('Transmitted data');
+                    title('Data transmitted from Manta');
                     set(gca, 'CLim', [-1 1]);
                     drawnow;
             end
@@ -138,25 +141,25 @@ function [messageList, commStatusList, roundTripDelayMilliSecsList, ...
             abortDueToCommunicationErrorDetectedInTheLocalHost = true;
         end
         
-         % Just for debugging
+         % Just for debugging - Received data
         if (debugPlots)
             if (~isempty(theMessageReceived))
                  % Just for debugging
                 if (strcmp(theMessageReceived.label, 'IONEAN_SENDING_RF_DATA'))
-                    figure(1); clf;
+                    subplot(1,2,2)
                     colormap(gray(1024));
                     imagesc(theMessageReceived.data.rf)
-                    title('Received data');
+                    title('Received from Ionean');
                     set(gca, 'CLim', [-1 1]);
                     drawnow;
                 end
                 
                 if (strcmp(theMessageReceived.label,'MANTA_SENDING_A_MATRIX'))
-                    hfig = figure(2); clf;
+                    subplot(1,2,2)
                     set(hFig, 'Position', [1570 918 560 420]);
                     colormap(gray(1024));
                     imagesc(theMessageReceived.data.theMatrix);
-                    title('Received data');
+                    title('Received from Manta');
                     drawnow;
                 end
             

@@ -32,7 +32,7 @@ function packetSequence = designPacketSequenceForIonean(hostNames)
     % Manta sending, Ionean receiving 
     packetSequence{numel(packetSequence)+1} = UDPcommunicator2.makePacket(hostNames,...
         'manta -> ionean', 'MANTA_SENDING_A_MATRIX', ...
-        'timeOutSecs', 10.0, ...                                         % Allow 10 sec to receive ACK (from remote host) that message was received 
+        'timeOutSecs', 30.0, ...                                         % Allow 10 sec to receive ACK (from remote host) that message was received 
         'timeOutAction', UDPcommunicator2.NOTIFY_CALLER ...             % Do not throw an error, notify caller function instead (choose from UDPcommunicator2.{NOTIFY_CALLER, THROW_ERROR})
         );
     
