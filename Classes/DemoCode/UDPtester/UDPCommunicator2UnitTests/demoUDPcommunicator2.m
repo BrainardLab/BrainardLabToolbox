@@ -30,6 +30,8 @@ function demoUDPcommunicator2
     abortRequestedFromRemoteHost = false;
     abortDueToCommunicationErrorDetectedInTheLocalHost = false;
     
+    figure(1); clf;
+    
     while (rep < maxReps) && (~abortRequestedFromRemoteHost) && (~abortDueToCommunicationErrorDetectedInTheLocalHost)
         
         rep = rep + 1;
@@ -78,7 +80,7 @@ function [messageList, commStatusList, roundTripDelayMilliSecsList, ...
     commStatusList = {};
     roundTripDelayMilliSecsList = [];
     
-    figure(1); clf;
+    
     
     %% Start communicating
     while (packetNo < numel(packetSequence)) && ...
@@ -106,7 +108,7 @@ function [messageList, commStatusList, roundTripDelayMilliSecsList, ...
                 (isfield(packetSequence{packetNo}, 'messageData')) & ...
                 (~isempty(packetSequence{packetNo}.messageData))
                     %% Setup figure for displaying results
-                    subplot(1,2,1)
+                    subplot(1,2,2)
                     colormap(gray(1024));
                     imagesc(packetSequence{packetNo}.messageData.theMatrix);
                     title('Data transmitted from Manta');
@@ -145,7 +147,7 @@ function [messageList, commStatusList, roundTripDelayMilliSecsList, ...
             if (~isempty(theMessageReceived))
                  % Just for debugging
                 if (strcmp(theMessageReceived.label, 'IONEAN_SENDING_RF_DATA'))
-                    subplot(1,2,2)
+                    subplot(1,2,1)
                     colormap(gray(1024));
                     imagesc(theMessageReceived.data.rf)
                     title('Received from Ionean');
