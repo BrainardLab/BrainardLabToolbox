@@ -40,4 +40,15 @@ function packetSequence = designPacketSequenceForManta(hostNames)
         'timeOutAction', UDPcommunicator2.NOTIFY_CALLER, ...            % Do not throw an error, notify caller function instead (choose from UDPcommunicator2.{NOTIFY_CALLER, THROW_ERROR})
         'badTransmissionAction', UDPcommunicator2.NOTIFY_CALLER ...     % Do not throw an error, notify caller function instead (choose from UDPcommunicator2.{NOTIFY_CALLER, THROW_ERROR})
     );
+
+    % Ionean sending, Manta receiving
+    packetSequence{numel(packetSequence)+1} = UDPcommunicator2.makePacket(hostNames,...
+        'ionean -> manta', 'IONEAN_SENDING_RF_DATA_DIRECTLY', ...
+        'timeOutSecs', 1, ...                                           % Wait for 1 secs to receive this message
+        'timeOutAction', UDPcommunicator2.NOTIFY_CALLER, ...            % Do not throw an error, notify caller function instead (choose from UDPcommunicator2.{NOTIFY_CALLER, THROW_ERROR})
+        'badTransmissionAction', UDPcommunicator2.NOTIFY_CALLER ...     % Do not throw an error, notify caller function instead (choose from UDPcommunicator2.{NOTIFY_CALLER, THROW_ERROR})
+    );
+
+
+
 end
