@@ -150,12 +150,12 @@ function [messageList, commStatusList, roundTripDelayMilliSecsList, ...
                 end
                 
                 if (strcmp(theMessageReceived.label,'IONEAN_SENDING_A_MATRIX'))
-                %% Setup figure for displaying results
-                hFig = figure(2); clf;
-                set(hFig, 'Position', [600 1000 400 400]);
-                imshow(theMessageReceived.data.theMatrix);
-                title('Received data');
-                drawnow;
+                    %% Setup figure for displaying results
+                    hFig = figure(2); clf;
+                    set(hFig, 'Position', [600 1000 400 400]);
+                    imshow(theMessageReceived.data.theMatrix);
+                    title('Received data');
+                    drawnow;
                 end
             
             end
