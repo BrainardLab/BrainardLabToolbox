@@ -99,16 +99,6 @@ function [messageList, commStatusList, roundTripDelayMilliSecsList, ...
                     drawnow;
             end
             
-            if (strcmp(packetSequence{packetNo}.messageLabel,'IONEAN_SENDING_A_MATRIX')) & ...
-                (isfield(packetSequence{packetNo}, 'messageData')) & ...
-                (~isempty(packetSequence{packetNo}.messageData))
-                %% Setup figure for displaying results
-                hFig = figure(2); clf;
-                set(hFig, 'Position', [600 1000 400 400]);
-                imshow(packetSequence{packetNo}.messageData.theMatrix);
-                title('Transmitted data');
-                drawnow;
-            end
         end
         
         % Communicate and collect roundtrip timing info
@@ -149,14 +139,6 @@ function [messageList, commStatusList, roundTripDelayMilliSecsList, ...
                     drawnow;
                 end
                 
-                if (strcmp(theMessageReceived.label,'IONEAN_SENDING_A_MATRIX'))
-                    %% Setup figure for displaying results
-                    hFig = figure(2); clf;
-                    set(hFig, 'Position', [600 1000 400 400]);
-                    imshow(theMessageReceived.data.theMatrix);
-                    title('Received data');
-                    drawnow;
-                end
             
             end
         end
