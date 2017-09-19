@@ -47,7 +47,7 @@ function [messageReceived, status] = communicate(obj, hostName, packetNo, commun
             return;
         end
         
-        % Update status of operation
+        % Compute status of operation
         status = obj.GOOD_TRANSMISSION;
         if (receivedPacket.timedOutFlag)
             status = obj.NO_ACKNOWLDGMENT_WITHIN_TIMEOUT_PERIOD;
@@ -61,6 +61,7 @@ function [messageReceived, status] = communicate(obj, hostName, packetNo, commun
             status = obj.UNEXPECTED_MESSAGE_LABEL_RECEIVED;
             obj.displayMessage(hostName, sprintf('received message with wrong label (expected: ''%s'')', receivedPacket.mismatchedMessageLabel), receivedPacket.messageLabel, receivedPacket.messageData, packetNo, 'alert', true);
         end
+        
         if (strcmp(status, obj.GOOD_TRANSMISSION))
             if (beVerbose)
                 obj.displayMessage(hostName, 'received expected message', receivedPacket.messageLabel, receivedPacket.messageData, packetNo);          

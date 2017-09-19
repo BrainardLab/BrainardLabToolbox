@@ -87,8 +87,6 @@ function [messageList, commStatusList, roundTripDelayMilliSecsList, ...
         
         % Just for debugging
         if (debugPlots)
-            packetSequence{packetNo}.messageLabel
-            packetSequence{packetNo}.messageData
             if (strcmp(packetSequence{packetNo}.messageLabel, 'IONEAN_SENDING_RF_DATA')) & ...
                 (isfield(packetSequence{packetNo}, 'messageData')) & ...
                 (~isempty(packetSequence{packetNo}.messageData))
@@ -111,9 +109,6 @@ function [messageList, commStatusList, roundTripDelayMilliSecsList, ...
                 'displayPackets', displayPackets...
              );
         roundTripDelayMilliSecsList(packetNo) = toc*1000;
-        
-        fprintf('the communication status for packet #%d\n', packetNo)
-        theCommunicationStatus
         
         if (strcmp(theCommunicationStatus, UDPobj.ACKNOWLEDGMENT))
             % ALL_GOOD, do not print anything
