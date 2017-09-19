@@ -1,4 +1,4 @@
-function [messageReceived, status] = communicate(obj, hostName, packetNo, communicationPacket, varargin)
+function [messageReceived, status, roundTipDelayMilliSecs] = communicate(obj, hostName, packetNo, communicationPacket, varargin)
     % Set default state of return arguments
     messageReceived = [];
     
@@ -13,6 +13,8 @@ function [messageReceived, status] = communicate(obj, hostName, packetNo, commun
     if (displayPackets)
         communicationPacket
     end
+    
+    tic
     
     if (isATransmissionPacket(communicationPacket.direction, hostName))
         if (beVerbose)
@@ -71,6 +73,8 @@ function [messageReceived, status] = communicate(obj, hostName, packetNo, commun
             messageReceived.data  = receivedPacket.messageData;
         end
     end
+    
+    roundTipDelayMilliSecs = toc * 1000;
 end
 
 function transmitAction = isATransmissionPacket(direction, hostName)

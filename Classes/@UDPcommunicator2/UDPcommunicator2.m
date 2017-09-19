@@ -111,7 +111,8 @@ classdef UDPcommunicator2 < handle
         initiateCommunication(obj, localHostName, hostRoles, hostNames, triggerMessage, varargin);
         
         % Method that sends/received a communicaiton packet
-        [messageReceived, status, abortRequestedFromRemoteHost] = communicate(obj, hostName, packetNo, communicationPacket, varargin)
+        [messageReceived, status, abortRequestedFromRemoteHost, roundTipDelayMilliSecs] = ...
+            communicate(obj, hostName, packetNo, communicationPacket, varargin);
 
         % Close UDP
         shutDown(obj);

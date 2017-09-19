@@ -10,9 +10,9 @@ function demoUDPcommunicator2
     
     %% Define the host names, IPs, and roles
     % In this demo we have IPs for manta.psych.upenn.edu and ionean.psych.upenn.edu
-    hostNames       = {'manta',            'ionean'};
-    hostIPs         = {'128.91.12.90',     '128.91.12.144'};
-    hostRoles       = {'master',           'slave'};
+    hostNames       = {'manta',         'ionean'};
+    hostIPs         = {'128.91.12.90',  '128.91.12.144'};
+    hostRoles       = {'master',        'slave'};
     
     %% Get computer name
     localHostName = UDPcommunicator2.getLocalHostName();
@@ -28,8 +28,7 @@ function demoUDPcommunicator2
     maxReps = 10;
     rep = 0;
     abortRequestedFromRemoteHost = false;
-    abortDueToCommunicationErrorDetectedInTheLocalHost = false;
-    
+    abortDueToCommunicationErrorDetectedInTheLocalHost = false; 
     figure(1); clf;
     
     while (rep < maxReps) && (~abortRequestedFromRemoteHost) && (~abortDueToCommunicationErrorDetectedInTheLocalHost)
@@ -80,54 +79,25 @@ function [messageList, commStatusList, roundTripDelayMilliSecsList, ...
     commStatusList = {};
     roundTripDelayMilliSecsList = [];
     
-    
-    
     %% Start communicating
     while (packetNo < numel(packetSequence)) && ...
           (~abortRequestedFromRemoteHost) && ...
           (~abortDueToCommunicationErrorDetectedInTheLocalHost)
     
+        % Update packet no
         packetNo = packetNo + 1;
         
-        % Just for debugging
-        if (debugPlots)
-            
-            if (strcmp(packetSequence{packetNo}.messageLabel, 'IONEAN_SENDING_RF_DATA_VIA_STRUCT')) & ...
-                (isfield(packetSequence{packetNo}, 'messageData')) & ...
-                (~isempty(packetSequence{packetNo}.messageData))
-                    %% Setup figure for displaying results
-                    subplot(1,2,1)
-                    colormap(gray(1024));
-                    imagesc(packetSequence{packetNo}.messageData.rf);
-                    title('Data transmitted from Ionean');
-                    set(gca, 'CLim', [-1 1]);
-                    axis 'image'
-                    drawnow;
-            end
-            
-            if (strcmp(packetSequence{packetNo}.messageLabel, 'MANTA_SENDING_A_MATRIX')) & ...
-                (isfield(packetSequence{packetNo}, 'messageData')) & ...
-                (~isempty(packetSequence{packetNo}.messageData))
-                    %% Setup figure for displaying results
-                    subplot(1,2,2)
-                    colormap(gray(1024));
-                    imagesc(packetSequence{packetNo}.messageData.theMatrix);
-                    title('Data transmitted from Manta');
-                    set(gca, 'CLim', [-1 1]);
-                    axis 'image'
-                    drawnow;
-            end
-        end
+        % Just for debugging. Render transmitted data
+        if (debugPlots); renderTransmittedDataPlot(); end
         
         % Communicate and collect roundtrip timing info
-        tic
-        [theMessageReceived, theCommunicationStatus] = ...
+        [theMessageReceived, theCommunicationStatus, roundTipDelayMilliSecs] = ...
             UDPobj.communicate(...
                 localHostName, packetNo, packetSequence{packetNo}, ...
                 'beVerbose', beVerbose, ...
                 'displayPackets', displayPackets...
              );
-        roundTripDelayMilliSecsList(packetNo) = toc*1000;
+        roundTripDelayMilliSecsList(packetNo) = roundTipDelayMilliSecs;
         
         if (strcmp(theCommunicationStatus, UDPobj.ACKNOWLEDGMENT))
             % ALL_GOOD, do not print anything
@@ -144,31 +114,8 @@ function [messageList, commStatusList, roundTripDelayMilliSecsList, ...
             abortDueToCommunicationErrorDetectedInTheLocalHost = true;
         end
         
-         % Just for debugging - Received data
-        if (debugPlots)
-            if (~isempty(theMessageReceived))
-                 % Just for debugging
-                if (strcmp(theMessageReceived.label, 'IONEAN_SENDING_RF_DATA_VIA_STRUCT'))
-                    subplot(1,2,1)
-                    colormap(gray(1024));
-                    imagesc(theMessageReceived.data.rf)
-                    title('Received from Ionean');
-                    set(gca, 'CLim', [-1 1]);
-                    axis 'image'
-                    drawnow;
-                end
-                
-                if (strcmp(theMessageReceived.label,'MANTA_SENDING_A_MATRIX'))
-                    subplot(1,2,2)
-                    colormap(gray(1024));
-                    imagesc(theMessageReceived.data.theMatrix);
-                    title('Received from Manta');
-                    axis 'image'
-                    drawnow;
-                end
-            
-            end
-        end
+         % Just for debugging - Render received data
+        if (debugPlots); renderReceivingDataPlot(); end
         
         messageList{packetNo} = theMessageReceived;
         commStatusList{packetNo} = theCommunicationStatus;
@@ -186,4 +133,58 @@ function [messageList, commStatusList, roundTripDelayMilliSecsList, ...
         fprintf('\nShutting down UDPobj...\n');
     end
     UDPobj.shutDown();
+    
+    
+    % Helper functions (rendering)
+    function renderTransmittedDataPlot()
+        if (strcmp(packetSequence{packetNo}.messageLabel, 'IONEAN_SENDING_RF_DATA_VIA_STRUCT')) & ...
+            (isfield(packetSequence{packetNo}, 'messageData')) & ...
+            (~isempty(packetSequence{packetNo}.messageData))
+                %% Setup figure for displaying results
+                subplot(1,2,1)
+                colormap(gray(1024));
+                imagesc(packetSequence{packetNo}.messageData.rf);
+                title('Data transmitted from Ionean');
+                set(gca, 'CLim', [-1 1]);
+                axis 'image'
+                drawnow;
+        end
+
+        if (strcmp(packetSequence{packetNo}.messageLabel, 'MANTA_SENDING_A_MATRIX')) & ...
+            (isfield(packetSequence{packetNo}, 'messageData')) & ...
+            (~isempty(packetSequence{packetNo}.messageData))
+                %% Setup figure for displaying results
+                subplot(1,2,2)
+                colormap(gray(1024));
+                imagesc(packetSequence{packetNo}.messageData.theMatrix);
+                title('Data transmitted from Manta');
+                set(gca, 'CLim', [-1 1]);
+                axis 'image'
+                drawnow;
+        end
+    end
+
+    function renderReceivingDataPlot()
+        if (~isempty(theMessageReceived))
+            % Just for debugging
+            if (strcmp(theMessageReceived.label, 'IONEAN_SENDING_RF_DATA_VIA_STRUCT'))
+                subplot(1,2,1)
+                colormap(gray(1024));
+                imagesc(theMessageReceived.data.rf)
+                title('Received from Ionean');
+                set(gca, 'CLim', [-1 1]);
+                axis 'image'
+                drawnow;
+            end
+            
+            if (strcmp(theMessageReceived.label,'MANTA_SENDING_A_MATRIX'))
+                subplot(1,2,2)
+                colormap(gray(1024));
+                imagesc(theMessageReceived.data.theMatrix);
+                title('Received from Manta');
+                axis 'image'
+                drawnow;
+            end
+        end
+    end       
 end
