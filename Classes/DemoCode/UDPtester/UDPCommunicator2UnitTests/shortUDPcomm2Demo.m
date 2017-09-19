@@ -11,7 +11,7 @@ function shortUDPcomm2Demo
     
     %% Control what is printed on the command window
     beVerbose = false;
-    displayPackets = false;
+    displayPackets = true;
     
     %% Instantiate our UDPcommunicator object
     UDPobj = UDPcommunicator2.instantiateObject(localHostName, hostNames, hostIPs, 'beVerbose', beVerbose);
@@ -34,6 +34,7 @@ function shortUDPcomm2Demo
                 'beVerbose', beVerbose, ...
                 'displayPackets', displayPackets...
              );
+         theMessageReceived
     end % packetNo
 end
 
