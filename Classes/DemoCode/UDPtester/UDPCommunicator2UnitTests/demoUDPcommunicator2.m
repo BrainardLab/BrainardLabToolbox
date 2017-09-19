@@ -92,7 +92,7 @@ function [messageList, commStatusList, roundTripDelayMilliSecsList, ...
         % Just for debugging
         if (debugPlots)
             
-            if (strcmp(packetSequence{packetNo}.messageLabel, 'IONEAN_SENDING_RF_DATA')) & ...
+            if (strcmp(packetSequence{packetNo}.messageLabel, 'IONEAN_SENDING_RF_DATA_VIA_STRUCT')) & ...
                 (isfield(packetSequence{packetNo}, 'messageData')) & ...
                 (~isempty(packetSequence{packetNo}.messageData))
                     %% Setup figure for displaying results
@@ -148,7 +148,7 @@ function [messageList, commStatusList, roundTripDelayMilliSecsList, ...
         if (debugPlots)
             if (~isempty(theMessageReceived))
                  % Just for debugging
-                if (strcmp(theMessageReceived.label, 'IONEAN_SENDING_RF_DATA'))
+                if (strcmp(theMessageReceived.label, 'IONEAN_SENDING_RF_DATA_VIA_STRUCT'))
                     subplot(1,2,1)
                     colormap(gray(1024));
                     imagesc(theMessageReceived.data.rf)
