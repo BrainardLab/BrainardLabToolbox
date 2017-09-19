@@ -209,6 +209,9 @@ function [messageList, commStatusList, roundTripDelayMilliSecsList, ...
              );
         roundTripDelayMilliSecsList(packetNo) = toc*1000;
         
+        fprintf('the communication status for packet #%d\n', packetNo)
+        theCommunicationStatus
+        
         if (strcmp(theCommunicationStatus, UDPobj.ACKNOWLEDGMENT))
             % ALL_GOOD, do not print anything
         elseif (strcmp(theCommunicationStatus, UDPobj.GOOD_TRANSMISSION))
