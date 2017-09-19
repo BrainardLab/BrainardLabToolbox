@@ -24,7 +24,10 @@ function [messageReceived, status] = communicate(obj, hostName, packetNo, commun
             'timeOutSecs', communicationPacket.timeOutSecs, ...
             'timeOutAction', communicationPacket.timeOutAction ...
         );
-        if (beVerbose) || (strcmp(status,obj.NO_ACKNOWLDGMENT_WITHIN_TIMEOUT_PERIOD))
+    
+        if (strcmp(status,obj.NO_ACKNOWLDGMENT_WITHIN_TIMEOUT_PERIOD))
+            obj.displayMessage(hostName, sprintf('received status ''%s'' from remote host', status), communicationPacket.messageLabel, communicationPacket.messageData, packetNo, 'alert', true);
+        elseif beVerbose
             obj.displayMessage(hostName, sprintf('received status ''%s'' from remote host', status), communicationPacket.messageLabel, communicationPacket.messageData, packetNo);
         end
     else
@@ -48,14 +51,14 @@ function [messageReceived, status] = communicate(obj, hostName, packetNo, commun
         status = obj.GOOD_TRANSMISSION;
         if (receivedPacket.timedOutFlag)
             status = obj.NO_ACKNOWLDGMENT_WITHIN_TIMEOUT_PERIOD;
-            obj.displayMessage(hostName, sprintf('received message operation timed out'), receivedPacket.messageLabel, receivedPacket.messageData, packetNo);
+            obj.displayMessage(hostName, sprintf('received message operation timed out'), receivedPacket.messageLabel, receivedPacket.messageData, packetNo, 'alert', true);
         end
         if (receivedPacket.badTransmissionFlag)
             status = obj.BAD_TRANSMISSION;
-            obj.displayMessage(hostName, sprintf('received message contains bad data'), receivedPacket.messageLabel, receivedPacket.messageData, packetNo);
+            obj.displayMessage(hostName, sprintf('received message contains bad data'), receivedPacket.messageLabel, receivedPacket.messageData, packetNo, 'alert', true);
         end
         if (~isempty(receivedPacket.mismatchedMessageLabel))
-            obj.displayMessage(hostName, sprintf('received message with wrong label (expected: ''%s'')', receivedPacket.mismatchedMessageLabel), receivedPacket.messageLabel, receivedPacket.messageData, packetNo);
+            obj.displayMessage(hostName, sprintf('received message with wrong label (expected: ''%s'')', receivedPacket.mismatchedMessageLabel), receivedPacket.messageLabel, receivedPacket.messageData, packetNo, 'alert', true);
         end
         if (strcmp(status, obj.GOOD_TRANSMISSION))
             if (beVerbose)

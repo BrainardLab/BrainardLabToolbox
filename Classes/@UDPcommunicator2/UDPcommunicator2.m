@@ -102,7 +102,7 @@ classdef UDPcommunicator2 < handle
         % Public API (low-level)
         packet = waitForMessage(obj, msgLabel, varargin);
         transmissionStatus = sendMessage(obj, msgLabel, msgData, varargin);
-        displayMessage(obj, hostname, action,  messageLabel, messageData, packetNo);
+        displayMessage(obj, hostname, action,  messageLabel, messageData, packetNo, varargin);
         flashedContents = flashQueue(obj);
         
         %Public API (higher-level)
