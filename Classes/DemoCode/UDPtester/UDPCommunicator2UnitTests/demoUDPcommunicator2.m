@@ -101,6 +101,7 @@ function [messageList, commStatusList, roundTripDelayMilliSecsList, ...
                     imagesc(packetSequence{packetNo}.messageData.rf);
                     title('Data transmitted from Ionean');
                     set(gca, 'CLim', [-1 1]);
+                    axis 'image'
                     drawnow;
             end
             
@@ -113,6 +114,7 @@ function [messageList, commStatusList, roundTripDelayMilliSecsList, ...
                     imagesc(packetSequence{packetNo}.messageData.theMatrix);
                     title('Data transmitted from Manta');
                     set(gca, 'CLim', [-1 1]);
+                    axis 'image'
                     drawnow;
             end
         end
@@ -152,6 +154,7 @@ function [messageList, commStatusList, roundTripDelayMilliSecsList, ...
                     imagesc(theMessageReceived.data.rf)
                     title('Received from Ionean');
                     set(gca, 'CLim', [-1 1]);
+                    axis 'image'
                     drawnow;
                 end
                 
@@ -160,6 +163,7 @@ function [messageList, commStatusList, roundTripDelayMilliSecsList, ...
                     colormap(gray(1024));
                     imagesc(theMessageReceived.data.theMatrix);
                     title('Received from Manta');
+                    axis 'image'
                     drawnow;
                 end
             
