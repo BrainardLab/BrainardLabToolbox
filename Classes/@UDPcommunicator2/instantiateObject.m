@@ -26,6 +26,6 @@ function UDPobj = instantiateObject(localHostName, hostNames, hostIPs, varargin)
         'useNativeUDP', false ...               % OPTIONAL, with default value: false (i.e., using the brainard lab matlabUDP mexfile)
         );
     else
-        error('No configuration for computer named ''%s''.', systemInfo.networkName);
+        error('No configuration for computer named ''%s''.', localHostName);
     end
 end
