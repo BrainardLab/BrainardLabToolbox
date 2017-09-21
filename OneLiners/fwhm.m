@@ -1,15 +1,20 @@
 function width = fwhm(x,y,verbose)
-
-% function width = fwhm(x,y,verbose)
+% function width = fwhm(x,y,[verbose])
 %
 % Full-Width at Half-Maximum (FWHM) of the waveform y(x)
 % and its polarity.
-% The FWHM result in 'width' will be in units of 'x'
 %
+% The FWHM result in returned variable width will be in units of x.
 %
 % Rev 1.2, April 2006 (Patrick Egan)
 %
-% 1/20/14  dhb, ms  Wrap in try/catch and return NaN on error.  Easier than figuring out why it crashes.
+% 01/20/14  dhb, ms  Wrap in try/catch and return NaN on error.  Easier than figuring out why it crashes.
+% 09/21/17  dhb      Put in a default for verbose.
+
+% Put in default for verbose.  
+if (nargin < 3)
+    verbose = false;
+end
 
 try
     y = y / max(y);
