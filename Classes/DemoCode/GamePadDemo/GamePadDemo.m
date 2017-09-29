@@ -16,8 +16,8 @@ function GamePadDemo
     
     keepGoing = true;
     while (keepGoing)
-        % Read the gamePage
-        [action, time] = gamePad.read();
+        % Read the gamePad
+        [action, time, timeString, state] = gamePad.read();
         
         switch (action)
             case gamePad.noChange       % do nothing
@@ -74,8 +74,7 @@ function GamePadDemo
                     fprintf('[%s]: Right Joystick delta-X: %d\n', time, gamePad.rightJoyStickDeltaX);
                 elseif (gamePad.rightJoyStickDeltaY ~= 0)
                     fprintf('[%s]: Right Joystick delta-Y: %d\n', time, gamePad.rightJoyStickDeltaY);
-                end
-                
+                end    
         end
     end  % while keepGoing
     

@@ -63,7 +63,7 @@ classdef GamePad < handle
             obj.devHandle = vrjoystick(1);
         end
         
-        function [action, time, timeString] = read(obj)
+        function [action, time, timeString, state] = read(obj)
             % Read from the device
             [axes, buttons, povs] = read(obj.devHandle);
             
@@ -125,11 +125,80 @@ classdef GamePad < handle
             obj.rightJoyStickDeltaX = axes(3);
             obj.rightJoyStickDeltaY = axes(4);
             
+            state = obj.getState(action);
         end
         
         function shutDown(obj)
            close(obj.devHandle);
         end
+        
+        
+        function stateVector = getState(obj, action)
+            
+            stateVector = containers.Map();
+            switch (action)
+            
+            case obj.noChange       % do nothing
+                
+            case obj.buttonChange   % see which button was pressed
+                % Control buttons
+                if (obj.buttonBack)
+                    stateVector('back') = 1;
+                    
+                elseif (obj.buttonStart)
+                    stateVector('start') = 1;
+                    
+                % Colored buttons (on the right)
+                elseif (obj.buttonX)
+                    stateVector('X') = 1;
+                    
+                elseif (obj.buttonY)
+                    stateVector('Y') = 1;
+                    
+                elseif (obj.buttonA)
+                    stateVector('A') = 1;
+                    
+                elseif (obj.buttonB)
+                    stateVector('B') = 1;    
+                
+                % Trigger buttons
+                elseif (obj.buttonLeftUpperTrigger)
+                    stateVector('leftUpperTrigger') = 1; 
+                elseif (obj.buttonRightUpperTrigger)
+                    stateVector('rightUpperTrigger') = 1; 
+                elseif (obj.buttonLeftLowerTrigger)
+                     stateVector('leftLowerTrigger') = 1; 
+                elseif (obj.buttonRightLowerTrigger)
+                    stateVector('rightLowerTrigger') = 1;
+                end
+                
+            case obj.directionalButtonChange  % see which direction was selected
+                switch (obj.directionChoice)
+                    case obj.directionEast
+                        stateVector('east') = 1;
+                    case obj.directionWest
+                        stateVector('west') = 1;
+                    case obj.directionNorth
+                        stateVector('north') = 1;
+                    case obj.directionSouth
+                        stateVector('south') = 1;
+                    case obj.directionNone
+                        stateVector('nodirection') = 1;
+                end  % switch (obj.directionChoice)
+                
+            case obj.joystickChange % see which analog joystick was changed
+                if (obj.leftJoyStickDeltaX ~= 0)
+                    stateVector('leftDeltaX') = obj.leftJoyStickDeltaX;
+                elseif (obj.leftJoyStickDeltaY ~= 0)
+                    stateVector('leftDeltaY') = obj.leftJoyStickDeltaY;
+                elseif (obj.rightJoyStickDeltaX ~= 0)
+                    stateVector('rightDeltaX') = obj.rightJoyStickDeltaX;
+                elseif (obj.rightJoyStickDeltaY ~= 0)
+                    stateVector('rightDeltaY') = obj.rightJoyStickDeltaY;
+                end    
+            end % switch action
+        end
+        
     end
     
 end
