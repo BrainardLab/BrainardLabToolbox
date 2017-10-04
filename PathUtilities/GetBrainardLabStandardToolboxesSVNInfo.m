@@ -17,6 +17,7 @@ function info = GetBrainardLabStandardToolboxesSVNInfo
 % 8/16/10  dhb  Add Psychtoolbox to the list
 % 8/16/10  dhb  Also return Matlab version info
 % 12/18/12 dhb  Fix bug that skipped iset.
+% 10/4/17  npc  Look for toolboxes in new directory
 
 % Get a list of all directories in /Users/Shared/Matlab/Toolboxes.  We'll
 % consider each of these directories a possible SVN controlled folder.
@@ -26,7 +27,7 @@ if strcmp(sysInfo.userShortName, 'melanopsin')
 elseif (strcmp(sysInfo.userShortName, 'colorlab')  && strcmp(sysInfo.localHostName, 'mudpuppy'))
     toolboxDir = '/Users/colorlab/Documents/MATLAB/toolboxes';
 else
-    toolboxDir = '/Users/Shared/Matlab/Toolboxes';
+    toolboxDir = sprintf('/Users/%s/Documents/MATLAB/toolboxes',sysInfo.userShortName);
 end
 toolboxList = GetSubdirectories(toolboxDir);
 numToolboxes = length(toolboxList);
