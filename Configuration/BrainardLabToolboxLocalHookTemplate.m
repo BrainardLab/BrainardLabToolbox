@@ -3,7 +3,8 @@
 % Template for setting preferences and other configuration things, for the
 % BrainardLabToolbox.
 
-% 6/14/17  dhb, ar  Wrote it.
+% 06/14/17  dhb, ar  Wrote it.
+% 10/15/17 dhb       Only try to stick PTB java stuff on path if we can find the PTB.
 
 %% Define project
 projectName = 'BrainardLabToolbox';
@@ -21,7 +22,7 @@ if (ispref('ColorMaterialModel'))
 end
 
 %% Specify project location
-toolboxBaseDir = tbLocateToolbox('BrainardLabToolbox');
+ptbBaseDir = tbLocateToolbox('BrainardLabToolbox');
 
 % Figure out where baseDir for other kinds of data files is.
 sysInfo = GetComputerInfo();
@@ -44,8 +45,8 @@ end
 %
 % These preferences have to do with the ColorMaterialModel section of the
 % BrainardLabToolbox
-setpref(projectName,'cmmCodeDir',fullfile(toolboxBaseDir,'ColorMaterialModel'));
-setpref(projectName,'cmmDemoDataDir', fullfile(toolboxBaseDir,'ColorMaterialModel','DemoData'));
+setpref(projectName,'cmmCodeDir',fullfile(ptbBaseDir,'ColorMaterialModel'));
+setpref(projectName,'cmmDemoDataDir', fullfile(ptbBaseDir,'ColorMaterialModel','DemoData'));
 
 %% RadiometerChecks preferences
 %
@@ -53,8 +54,14 @@ setpref(projectName,'cmmDemoDataDir', fullfile(toolboxBaseDir,'ColorMaterialMode
 % BrainardLabToolbox
 setpref(projectName,'RadiometerChecksDir',fullfile(baseDir,'MELA_admin','RadiometerChecks'));
 
-% Add PTB PsychJava to the path
-JavaAddToPath(sprintf('/Users/%s/Documents/Matlab/Toolboxes/Psychtoolbox-3/Psychtoolbox/PsychJava',sysInfo.userShortName), 'Psychtoolbox/PsychJava');
+% Add PTB PsychJava to the path, if we can find the Psychtoolbox.
+%% Find the toolbox location, the TbTb way.
+ptbBaseDir = tbLocateToolbox('Psychtoolbox-3');
+if (~isempty(ptbBaseDir))
+    thePath = fullfile(ptbBaseDir,'Psychtoolbox','PsychJava');
+    theMsg = 'Psychtoolbox/PsychJava';
+    JavaAddToPath(thePath,theMsg);
+end
 
 
 

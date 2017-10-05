@@ -9,9 +9,11 @@ function JavaAddToPath(thePath,theMsg)
 % where thePath does not exist, etc.  And, doesn't add if
 % it is already there.
 %
-% Our primary use for this is in our startup.m file.
-%
+% Our primary use for this is in ToolboxToolbox local hook
+% files, although it could also be used in a startup.m file.
+
 % 6/20/13  dhb  Factorized out of startup.m
+% 10/05/17 dhb  Supress warning if we try to add something twice.
 
 % Check args
 if (nargin < 2)
@@ -37,6 +39,7 @@ if (exist('javaaddpath','file'))
     
     %% Need to add
     if (needToAdd)
+        wState = warning('off','MATLAB:Java:DuplicateClass');
         if (~exist(thePath))
             if (~isempty(theMsg))
                 fprintf('Cannot add %s to the java path because it is not present on your computer\n',theMsg);
@@ -47,6 +50,7 @@ if (exist('javaaddpath','file'))
             end
             javaaddpath(thePath);
         end
+        warning(wState);                  
     end
 else
     if (~isempty(theMsg))
