@@ -12,7 +12,7 @@ function demoUDPcommunicator2
     % In this demo we have IPs for manta.psych.upenn.edu and ionean.psych.upenn.edu
     hostNames       = {'manta',         'ionean'};
     hostIPs         = {'128.91.12.90',  '128.91.12.144'};
-    hostRoles       = {'master',        'slave'};
+    hostRoles       = {'base',          'satellite'};
     
     %% Get computer name
     localHostName = UDPcommunicator2.getLocalHostName();

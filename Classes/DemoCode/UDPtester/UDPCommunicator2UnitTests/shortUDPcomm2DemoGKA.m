@@ -1,10 +1,10 @@
-function shortUDPcomm2Demo
+function shortUDPcomm2DemoGKA
 
     %% Define the host names, IPs, and roles
     % In this demo we have IPs for gka06.psych.upenn.edu and Monkfish.psych.upenn.edu
     hostNames       = {'gka06',         'monkfish'};
-    hostIPs         = {'128.91.12.160',  '128.91.12.161'};
-    hostRoles       = {'master',        'slave'};
+    hostIPs         = {'128.91.12.160', '128.91.12.161'};
+    hostRoles       = {'base',          'satellite'};
     
     %% Get computer name
     localHostName = UDPcommunicator2.getLocalHostName();
