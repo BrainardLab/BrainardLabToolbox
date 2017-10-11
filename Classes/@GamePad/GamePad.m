@@ -159,6 +159,10 @@ classdef GamePad < handle
             obj.lastKeyCharCode = '';
         end
         
+        function time = getTime(obj)
+            time = GetSecs;
+        end
+        
         function key = getKeyEvent(obj)
             % Do not report buttons pressed too often
             
