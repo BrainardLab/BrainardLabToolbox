@@ -6,11 +6,14 @@ function GamePadDemo2
     keepGoing = true;
     fprintf('\n\nStart pressing different game pad buttons. Enter ''q'' to quit.\n\n');
     
+    time0 = gamePad.getTime();
+    
     while (keepGoing)
         % Read the gamePad
         gamePadKey = gamePad.getKeyEvent();
         if (~isempty(gamePadKey))
             gamePadKey
+            fprintf('Uset pressed a button at %g\n', gamePadKey.when-time0)
         end
         
         % Read the keyboard
@@ -23,7 +26,7 @@ function GamePadDemo2
         
     end % while keepGoing
     
-    % Close the gamePage object
+    % Close the gamePad object
     gamePad.shutDown();
 end
 

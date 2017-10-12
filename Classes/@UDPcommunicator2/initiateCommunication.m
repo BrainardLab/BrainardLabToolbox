@@ -5,45 +5,47 @@ function initiateCommunication(obj, localHostName, hostRoles, hostNames, trigger
     parse(p,varargin{:});
     beVerbose = p.Results.beVerbose;
     
-    if (strcmp(hostRoles{1}, 'master'))
-        masterHostName = hostNames{1};
-    elseif (strcmp(hostRoles{2}, 'master'))
-        masterHostName = hostNames{2};
+    localHostName = lower(localHostName);
+    
+    if (strcmp(lower(hostRoles{1}), 'base'))
+        baseHostName = lower(hostNames{1});
+    elseif (strcmp(lower(hostRoles{2}), 'base'))
+        baseHostName = lower(hostNames{2});
     else
-        error('There is no master role in hostRoles');
+        error('There is no base role in hostRoles');
     end
     
-    if (strcmp(hostRoles{1}, 'slave'))
-        slaveHostName = hostNames{1};
-    elseif (strcmp(hostRoles{2}, 'slave'))
-        slaveHostName = hostNames{2};
+    if (strcmp(lower(hostRoles{1}), 'satellite'))
+        satelliteHostName = lower(hostNames{1});
+    elseif (strcmp(lower(hostRoles{2}), 'satellite'))
+        satelliteHostName = lower(hostNames{2});
     else
-        error('There is no slave role in hostRoles');
+        error('There is no satellite role in hostRoles');
     end
     
-    assert(ismember(masterHostName, hostNames), sprintf('master host (''%s'') is not a valid host name.\n', masterHostName));
-    assert(ismember(slaveHostName, hostNames), sprintf('slave host (''%s'') is not a valid host name.\n', slaveHostName));
+    assert(ismember(baseHostName, hostNames), sprintf('base host (''%s'') is not a valid host name.\n', baseHostName));
+    assert(ismember(satelliteHostName, hostNames), sprintf('satellite host (''%s'') is not a valid host name.\n', satelliteHostName));
     
     if (beVerbose)
-        fprintf('<strong>Setting ''%s'' as MASTER and ''%s'' as SLAVE</strong>\n', masterHostName, slaveHostName);
+        fprintf('<strong>Setting ''%s'' as MASTER and ''%s'' as SLAVE</strong>\n', baseHostName, satelliteHostName);
     end
     
-    if (strfind(localHostName, slaveHostName))
-        % Wait for ever to receive the trigger message from the master
+    if (strfind(localHostName, satelliteHostName))
+        % Wait for ever to receive the trigger message from the base
         packetReceived = obj.waitForMessage(triggerMessage, ...
             'timeOutSecs', Inf, ...
             'timeOutAction', obj.THROW_ERROR, ...
             'badTransmissionAction', obj.THROW_ERROR ...
         );
     
-    elseif (strfind(localHostName, masterHostName))
-        fprintf('Is the slave (''%s'') computer ready to go?. Hit enter if so.\n', slaveHostName); pause; clc;
+    elseif (strfind(localHostName, baseHostName))
+        fprintf('Is the satellite (''%s'') computer ready to go?. Hit enter if so.\n', satelliteHostName); pause; clc;
         % Send trigger and wait for up to 4 seconds to receive acknowledgment
         transmissionStatus = obj.sendMessage(triggerMessage, '', ...
             'timeOutSecs',  4, ...
             'timeOutAction', obj.THROW_ERROR ...
         );
     else
-        error('Local host name (''%s'') does not match the slave (''%s'') or the master (''%s'') host name.', localHostName, slaveHostName, masterHostName);
+        error('Local host name (''%s'') does not match the satellite (''%s'') or the base (''%s'') host name.', localHostName, satelliteHostName, baseHostName);
     end
 end
