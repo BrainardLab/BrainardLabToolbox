@@ -47,7 +47,7 @@ function packetSequence = designShortPacketSequenceForMonkfish(hostNames)
         'gka06 -> monkfish', 'gka06_SENDING_SINGLE_INTEGER', ...
         'timeOutSecs', 1.0, ...                                         % Wait for 1 secs to receive this message
         'timeOutAction', UDPcommunicator2.NOTIFY_CALLER, ...            % Do not throw an error, notify caller function instead (choose from UDPcommunicator2.{NOTIFY_CALLER, THROW_ERROR})
-        'badTransmissionAction', UDPcommunicator2.NOTIFY_CALLER ...     % Do not throw an error, notify caller function instead (choose from UDPcommunicator2.{NOTIFY_CALLER, THROW_ERROR})
+        'badTransmissionAction', UDPcommunicator2.THROW_ERROR ...     % Do not throw an error, notify caller function instead (choose from UDPcommunicator2.{NOTIFY_CALLER, THROW_ERROR})
     );
 
     % gka06 sending, Monkfish receiving 
