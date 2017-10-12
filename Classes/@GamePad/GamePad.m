@@ -21,8 +21,8 @@ classdef GamePad < handle
         % State of left knob (5 states: none, east, west, north, south) 
         directionChoice;
         directionNone  = -1;
-        directionEast  = 270;
-        directionWest  = 90;
+        directionEast  = 90;
+        directionWest  = 270;
         directionNorth = 0;
         directionSouth = 180;
         
