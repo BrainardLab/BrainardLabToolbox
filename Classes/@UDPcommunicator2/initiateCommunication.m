@@ -27,7 +27,7 @@ function initiateCommunication(obj, localHostName, hostRoles, hostNames, trigger
     assert(ismember(satelliteHostName, hostNames), sprintf('satellite host (''%s'') is not a valid host name.\n', satelliteHostName));
     
     if (beVerbose)
-        fprintf('<strong>Setting ''%s'' as MASTER and ''%s'' as SLAVE</strong>\n', baseHostName, satelliteHostName);
+        fprintf('<strong>Setting ''%s'' as BASE and ''%s'' as SATELLITE</strong>\n', baseHostName, satelliteHostName);
     end
     
     if (strfind(localHostName, satelliteHostName))
