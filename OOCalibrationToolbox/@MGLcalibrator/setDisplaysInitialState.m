@@ -1,5 +1,7 @@
 function setDisplaysInitialState(obj, userPrompt)
 
+    mglClose();
+    
     % Make a local copy of obj.cal so we do not keep calling it and regenerating it
     calStruct = obj.cal;
     
@@ -42,8 +44,6 @@ function setDisplaysInitialState(obj, userPrompt)
             bgSettings     = calStruct.describe.blankSettings';
             targetSettings = [1 1 1]';
             obj.loadClut(bgSettings, targetSettings, calStruct.describe.useBitsPP);
-            
-            mglFlush;
         end
 	
         % Make sure the cursor is displayed.
@@ -56,25 +56,13 @@ function setDisplaysInitialState(obj, userPrompt)
     mglScreenCoordinates;
     
     % Update LUT
-    bgSettings     = [0 0 0]';
-    targetSettings = [0 0 0]';
+    bgSettings     = calStruct.describe.bgColor;
+    targetSettings = [1 1 1];
     obj.loadClut(bgSettings, targetSettings, calStruct.describe.useBitsPP);
     
-    % Make sure the cursor is displayed.
-    mglDisplayCursor;
+    disp('Position radiometer and hit enter when ready');
+    pause
 
-    % Draw the measurement box
-    mglFillRect(obj.calibrationRect.x0, obj.calibrationRect.y0, obj.calibrationRect.size, obj.calibrationRect.RGB);
-    mglFlush;
-    
-    % Update LUT
-    bgSettings     = calStruct.describe.bgColor';
-    targetSettings = [1 1 1]';
-    obj.loadClut(bgSettings, targetSettings, calStruct.describe.useBitsPP);
-    
-    fprintf('Hit enter to continue\n');
-    pause;
-    
     % Wait for user
     if (userPrompt) 
         fprintf('Pausing for %d seconds ...', calStruct.describe.leaveRoomTime);
@@ -84,9 +72,4 @@ function setDisplaysInitialState(obj, userPrompt)
         fprintf(' done\n\n\n');
     end
 
-    % Update LUT
-    bgSettings     = calStruct.describe.bgColor';
-    targetSettings = [1 1 1]';
-    obj.loadClut(bgSettings, targetSettings, calStruct.describe.useBitsPP);
-    
 end

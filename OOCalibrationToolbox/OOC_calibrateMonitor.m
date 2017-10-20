@@ -6,9 +6,10 @@
 %                  a single function.
 % 8/30/2016  JAR   Added calibration configuration for the InVivo Sensa Vue
 %                  Flat panel monitor located at the Stellar Chance 3T Magnet.
+% 10/18/2017 npc   Reset Radiometer before crashing
+%
 
 function OOC_calibrateMonitor
-    
     
     % Select a calibration configuration name
     AvailableCalibrationConfigs = {  ...
@@ -18,6 +19,7 @@ function OOC_calibrateMonitor
         'Left_SONY_PVM2541A'
         'Right_SONY_PVM2541A'
         'InVivoSensaVue_FlatPanel'
+        'AppleThunderboltDisplay'
     };
     
     defaultCalibrationConfig = AvailableCalibrationConfigs{1};
@@ -49,6 +51,9 @@ function OOC_calibrateMonitor
 
         case 'SamsungOLEDpanel'
             configFunctionHandle = @generateConfigurationForSamsungOLED;
+            
+        case 'AppleThunderboltDisplay'
+            configFunctionHandle = @generateConfigurationForAppleThunderboltDisplay;
             
         case 'Left_SONY_PVM2541A'
             configFunctionHandle = @generateConfigurationForSONY_PVM2541A;
@@ -257,6 +262,46 @@ function [displaySettings, calibratorOptions] = generateConfigurationForViewSoni
     );
 end
 
+% configuration function for AppleThunderboltDisplay
+function [displaySettings, calibratorOptions] = generateConfigurationForAppleThunderboltDisplay()
+    % Specify where to send the 'Calibration Done' notification email
+    emailAddressForNotification = 'cottaris@sas.upenn.edu';
+    
+    % Specify the @Calibrator's initialization params. 
+    % Users should tailor these according to their hardware specs. 
+    % These can be set once only, at the time the @Calibrator object is instantiated.
+    displaySettings = { ...
+        'screenToCalibrate',        2, ...                          % which display to calibrate. main screen = 1, second display = 2
+        'desiredScreenSizePixel',   [2560 1440], ...                % pixels along the width and height of the display to be calibrated
+        'desiredRefreshRate',       [], ...                         % refresh rate in Hz
+        'displayPrimariesNum',      3, ...                          % for regular displays this is always 3 (RGB) 
+        'displayDeviceType',        'monitor', ...                  % this should always be set to 'monitor' for now
+        'displayDeviceName',        'AppleThunderboltDisplay', ...         % a name for the display been calibrated
+        'calibrationFile',          'AppleThunderboltDisplay', ...         % name of calibration file to be generated
+        'comment',                  'Nicolas office 2nd display' ...       % some comment, could be anything
+        };
+    
+    % Specify the @Calibrator's optional params using a CalibratorOptions object
+    % To see what options are available type: doc CalibratorOptions
+    % Users should tailor these according to their experimental needs.
+    calibratorOptions = CalibratorOptions( ...
+        'verbosity',                        2, ...
+        'whoIsDoingTheCalibration',         input('Enter your name: ','s'), ...
+        'emailAddressForDoneNotification',  GetWithDefault('Enter email address for done notification',  emailAddressForNotification), ...
+        'blankOtherScreen',                 0, ...                          % whether to blank other displays attached to the host computer (1=yes, 0 = no), ...
+        'whichBlankScreen',                 1, ...                          % screen number of the display to be blanked  (main screen = 1, second display = 2)
+        'blankSettings',                    [0.0 0.0 0.0], ...              % color of the whichBlankScreen 
+        'bgColor',                          [0.3962 0.5 0.4039], ...     % color of the background  
+        'fgColor',                          [0.3962 0.5 0.4039], ...     % color of the foreground
+        'meterDistance',                    0.5, ...                        % distance between radiometer and screen in meters
+        'leaveRoomTime',                    1, ...                          % seconds allowed to leave room
+        'nAverage',                         2, ...                          % number of repeated measurements for averaging
+        'nMeas',                            21, ...                         % samples along gamma curve
+        'boxSize',                          150, ...                        % size of calibration stimulus in pixels
+        'boxOffsetX',                       0, ...                          % x-offset from center of screen (neg: leftwards, pos:rightwards)         
+        'boxOffsetY',                       0 ...                           % y-offset from center of screen (neg: upwards, pos: downwards)                      
+    );
+end
 
 % configuration function for SamsungOLED
 function [displaySettings, calibratorOptions] = generateConfigurationForSamsungOLED()
@@ -358,7 +403,7 @@ function calibratorOBJ = generateCalibratorObject(displaySettings, radiometerOBJ
     calibratorInitParams{numel(calibratorInitParams)+1} = execScriptFileName;
         
     % Select and instantiate the calibrator object
-    calibratorOBJ = selectAndInstantiateCalibrator(calibratorInitParams);
+    calibratorOBJ = selectAndInstantiateCalibrator(calibratorInitParams, radiometerOBJ);
 end
 
 
@@ -416,7 +461,7 @@ end
 % Function to select and instantiate a particular calibrator type
 % Currently either MGL-based or PTB-3 based.
 % Users should not modify this function unless they know what they are doing.
-function calibratorOBJ = selectAndInstantiateCalibrator(calibratorInitParams)
+function calibratorOBJ = selectAndInstantiateCalibrator(calibratorInitParams, radiometerOBJ)
     % List of available @Calibrator objects
     calibratorTypes = {'MGL-based', 'PsychImaging-based (8-bit)'};
     calibratorsNum  = numel(calibratorTypes);
@@ -446,6 +491,8 @@ function calibratorOBJ = selectAndInstantiateCalibrator(calibratorInitParams)
         end
         
     catch err
+        % Shutdown the radiometer
+        radiometerOBJ.shutDown();
         % Shutdown DBLab_Radiometer object  
         if (~isempty(calibratorOBJ))
             % Shutdown calibratorOBJ

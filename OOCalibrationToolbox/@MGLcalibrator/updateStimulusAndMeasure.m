@@ -2,7 +2,6 @@
 % calling the corresponding method of the attached @Radiometer object.
 function [measurement, S] = updateStimulusAndMeasure(obj, bgSettings, targetSettings, useBitsPP)
 %
-
     if (obj.options.verbosity > 1)
         fprintf('        Background settings: %2.3f %2.3f %2.3f\n', bgSettings(1), bgSettings(2), bgSettings(3));
         fprintf('        Target settings    : %2.3f %2.3f %2.3f\n\n', targetSettings(1), targetSettings(2), targetSettings(3));
