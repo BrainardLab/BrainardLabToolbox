@@ -290,7 +290,7 @@ function [displaySettings, calibratorOptions] = generateConfigurationForAppleThu
         'emailAddressForDoneNotification',  GetWithDefault('Enter email address for done notification',  emailAddressForNotification), ...
         'blankOtherScreen',                 0, ...                          % whether to blank other displays attached to the host computer (1=yes, 0 = no), ...
         'whichBlankScreen',                 1, ...                          % screen number of the display to be blanked  (main screen = 1, second display = 2)
-        'blankSettings',                    [0.0 0.0 0.0], ...              % color of the whichBlankScreen 
+        'blankSettings',                    [0.3 0.0 0.0], ...              % color of the whichBlankScreen 
         'bgColor',                          [0.3962 0.5 0.4039], ...     % color of the background  
         'fgColor',                          [0.3962 0.5 0.4039], ...     % color of the foreground
         'meterDistance',                    0.5, ...                        % distance between radiometer and screen in meters

@@ -31,21 +31,7 @@ function setDisplaysInitialState(obj, userPrompt)
         mglSwitchDisplay(calStruct.describe.whichBlankScreen);
         mglOpen(calStruct.describe.whichBlankScreen);
         mglScreenCoordinates;
-        
-        bgSettings     = calStruct.describe.blankSettings';
-        targetSettings = bgSettings;
-        obj.loadClut(bgSettings, targetSettings, calStruct.describe.useBitsPP);
-        
-        % If foreground settings for the blanked display have been set,
-        % then draw a box of the test size into the frame buffer and
-        % set it to the specified settings.
-        if (~isempty(calStruct.describe.blankSettings))
-            % Update LUT
-            bgSettings     = calStruct.describe.blankSettings';
-            targetSettings = [1 1 1]';
-            obj.loadClut(bgSettings, targetSettings, calStruct.describe.useBitsPP);
-        end
-	
+        obj.loadClut(calStruct.describe.blankSettings, calStruct.describe.blankSettings, calStruct.describe.useBitsPP);
         % Make sure the cursor is displayed.
         mglDisplayCursor;
     end  % blackOtherScreen
@@ -55,7 +41,7 @@ function setDisplaysInitialState(obj, userPrompt)
     mglOpen(calStruct.describe.whichScreen);
     mglScreenCoordinates;
     
-    % Update LUT
+    % Show calibrating square
     bgSettings     = calStruct.describe.bgColor;
     targetSettings = [1 1 1];
     obj.loadClut(bgSettings, targetSettings, calStruct.describe.useBitsPP);
