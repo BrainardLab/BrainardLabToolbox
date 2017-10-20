@@ -13,15 +13,15 @@ function UDPobj = instantiateObject(localHostName, hostNames, hostIPs, varargin)
     
     if (strfind(localHostName, lower(hostNames{1})))
         UDPobj = UDPcommunicator2( ...
-            'localIP',   hostIPs{1}, ...        % REQUIRED: the IP of manta.psych.upenn.edu (local host)
-            'remoteIP',  hostIPs{2}, ...        % REQUIRED: the IP of ionean.psych.upenn.edu (remote host)
+            'localIP',   hostIPs{1}, ...        % REQUIRED: the local host IP
+            'remoteIP',  hostIPs{2}, ...        % REQUIRED: the remote host IP
             'verbosity', verbosity, ...         % OPTIONAL, with default value: 'normal', and possible values: {'min', 'normal', 'max'},
             'useNativeUDP', false ...           % OPTIONAL, with default value: false (i.e., using the brainard lab matlabUDP mexfile)
         );
     elseif (strfind(localHostName, lower(hostNames{2})))
         UDPobj = UDPcommunicator2( ...
-        'localIP',   hostIPs{2}, ...            % REQUIRED: the IP of ionean.psych.upenn.edu (local host)
-        'remoteIP',  hostIPs{1}, ...            % REQUIRED: the IP of manta.psych.upenn.edu (remote host)
+        'localIP',   hostIPs{2}, ...            % REQUIRED: the local host IP
+        'remoteIP',  hostIPs{1}, ...            % REQUIRED: the remote host IP
         'verbosity', verbosity, ...             % OPTIONAL, with default value: 'normal', and possible values: {'min', 'normal', 'max'},
         'useNativeUDP', false ...               % OPTIONAL, with default value: false (i.e., using the brainard lab matlabUDP mexfile)
         );
