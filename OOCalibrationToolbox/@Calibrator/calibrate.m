@@ -38,7 +38,7 @@ function obj = calibrate(obj)
         obj.rawData.basicLinearityMeasurements1 = zeros(settingsNumToBeMeasured, obj.measurementChannelsNum);
         
         % set background settings
-        backgroundSettings = calStruct.describe.bgColor';
+        backgroundSettings = calStruct.describe.bgColor;
         
         % Measure the SPD for all the settings in the calStruct.basicLinearitySetup
         for settingsIndex = 1:settingsNumToBeMeasured
