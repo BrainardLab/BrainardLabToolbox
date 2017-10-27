@@ -16,10 +16,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     size_t dims[2];
     int i;
     unsigned short *outPtr;
-
+    int satteliteID;
+    
     // If no arguments given, print usage string
-    if(nrhs < 1) {
-        mexPrintf("matlabUDP usage:\n socketIsOpen = matlabUDP('open', (string)localIP, (string)remoteIP, (int)port);%% should return small int\n matlabUDP('send', (string)message);\n messageIsAvailable = matlabUDP('check');\n message = matlabUDP('receive');\n socketIsOpen = matlabUDP('close');%% should return -1\n");
+    if(nrhs < 2) {
+        mexPrintf("matlabNUDP usage:\n socketIsOpen = matlabNUDP('open',  (int)satteliteID, (string)localIP, (string)remoteIP, (int)port);%% should return small int\n matlabNUDP('send', (int)satteliteID, (string)message);\n messageIsAvailable = matlabNUDP('check', (int)satteliteID);\n message = matlabNUDP('receive', (int)satteliteID);\n socketIsOpen = matlabNUDP('close', (int)satteliteID);%% should return -1\n");
         return;
     }
     
@@ -28,10 +29,14 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         buf_len =  mxGetN(prhs[0]) + 1;
         command = mxCalloc(buf_len, sizeof(char));
         if(mxGetString(prhs[0], command, buf_len))
-            mexWarnMsgTxt("matlabUDP: Not enough heap space. String (command) is truncated.");
+            mexWarnMsgTxt("matlabNUDP: Not enough heap space. String (command) is truncated.");
     } else {
-        mexErrMsgTxt("matlabUDP: First argument should be a string (command).");
+        mexErrMsgTxt("matlabNUDP: First argument should be a string (command).");
     }
+    
+    // Second argument if the satteliteID
+    satteliteID = (int)(mxGetScalar(prhs[1]));
+    mexPrintf("Operating on satteliteID: %d\n", satteliteID);
     
     // case on command string...
     if(!strncmp(command, "open", 3)) {
@@ -39,37 +44,37 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         mxFree(command);
         
         // register exit routine to free socket
-        if(mexAtExit(mat_UDP_close) != 0 ) {
-            mat_UDP_close();
-            mexErrMsgTxt("matlabUDP: failed to register exit routine, mat_UDP_close.");
+        if(mexAtExit(mat_UDP_close_all_ports) != 0 ) {
+            mat_UDP_close_all_ports();
+            mexErrMsgTxt("matlabNUDP: failed to register exit routine, mat_UDP_close.");
         }
         
         // only open a fresh socket if
         //  PORT arg is a number, and
         //  IP addr args are short strings e.g. "111.222.333.444"
-        if(nrhs==4 && mxIsNumeric(prhs[3])
-        && mxIsChar(prhs[2]) && mxGetN(prhs[2])<=15
-        && mxIsChar(prhs[1]) && mxGetN(prhs[1])<=15){
+        if(nrhs==5 && mxIsNumeric(prhs[4])
+        && mxIsChar(prhs[3]) && mxGetN(prhs[3])<=15
+        && mxIsChar(prhs[2]) && mxGetN(prhs[2])<=15){
 
             // close old socket?
-            if(mat_UDP_sockfd>=0)
-                mat_UDP_close();
+            if(mat_UDP_sockfd[satteliteID]>=0)
+                mat_UDP_close(satteliteID);
             
             //format args for socket opener function
-            mxGetString(prhs[1],local,16);
-            mxGetString(prhs[2],remote,16);
+            mxGetString(prhs[2],local,16);
+            mxGetString(prhs[3],remote,16);
 
             //openerup
-            mexPrintf("matlabUDP opening socket\n");
-            mat_UDP_open(local, remote, (int)mxGetScalar(prhs[3]));
+            mexPrintf("matlabNUDP opening socket for satteliteID: %d\n", satteliteID);
+            mat_UDP_open(local, remote, (int)mxGetScalar(prhs[4]), satteliteID);
             
         }
         
         // always return socket index
 
         // build me a return value worthy of MATLAB
-        if(!(plhs[0] = mxCreateDoubleScalar((double)mat_UDP_sockfd)))
-            mexErrMsgTxt("matlabUDP: mxCreateNumericArray failed.");
+        if(!(plhs[0] = mxCreateDoubleScalar((double)mat_UDP_sockfd[satteliteID])))
+            mexErrMsgTxt("matlabNUDP: mxCreateNumericArray failed.");
         
         
     } else if(!strncmp(command, "receive", 3)) {
@@ -81,7 +86,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         
         if(nlhs<=1){
             
-            if(mat_UDP_sockfd<0){
+            if(mat_UDP_sockfd[satteliteID]<0){
 
                 // socket closed so zero bytes are read
                 i = 0;
@@ -89,20 +94,20 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             } else {
                 
                 // read new bytes from socket
-                mat_UDP_read(mat_UDP_messBuff, MAX_NUM_BYTES);//sets mat_UDP_numBytes
-                i = mat_UDP_numBytes;
+                mat_UDP_read(mat_UDP_messBuff[satteliteID], MAX_NUM_BYTES, satteliteID);//sets mat_UDP_numBytes[satteliteID]
+                i = mat_UDP_numBytes[satteliteID];
 
             }
 
             // always provide at least an empty return value
             dims[1] = i;
             if(!(plhs[0] = mxCreateCharArray((size_t) 2, dims)))
-                mexErrMsgTxt("matlabUDP: mxCreateCharArray failed.");
+                mexErrMsgTxt("matlabNUDP: mxCreateCharArray failed.");
             
             // fill in report with any new bytes
             outPtr = (unsigned short *) mxGetData(plhs[0]);
             for(i--; i>=0; i--){
-                *(outPtr + i) = mat_UDP_messBuff[i];
+                *(outPtr + i) = mat_UDP_messBuff[satteliteID][i];
             }
 
         }
@@ -113,24 +118,24 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         // done with command
         mxFree(command);
         
-        if(mat_UDP_sockfd<0){
+        if(mat_UDP_sockfd[satteliteID]<0){
             
             // warn that no message was not sent
-            mexWarnMsgTxt("matlabUDP: Message not sent.  No socket is open.");
+            mexWarnMsgTxt("matlabNUDP: Message not sent.  No socket is open.");
             
         } else {
             
             // only send message if message arg is a 1-by-N char array
-            if(nrhs==2 && mxIsChar(prhs[1]) && mxGetM(prhs[1])==1 && mxGetN(prhs[1])>0){
+            if(nrhs==3 && mxIsChar(prhs[2]) && mxGetM(prhs[2])==1 && mxGetN(prhs[2])>0){
                 
                 // format ye string and send forth
-                mxGetString(prhs[1],mat_UDP_messBuff,mxGetN(prhs[1])+1);
-                mat_UDP_send(mat_UDP_messBuff, mxGetN(prhs[1]));
+                mxGetString(prhs[2],mat_UDP_messBuff[satteliteID],mxGetN(prhs[2])+1);
+                mat_UDP_send(mat_UDP_messBuff[satteliteID], mxGetN(prhs[2]), satteliteID);
                 
             }else{
                 
                 // warn that no message was not sent
-                mexWarnMsgTxt("matlabUDP: Message not sent.  Must be 1-by-N char array.");
+                mexWarnMsgTxt("matlabNUDP: Message not sent.  Must be 1-by-N char array.");
                 
             }
         }
@@ -143,8 +148,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         
         // always provide a return value
         // if socket is closed, && will short-circuit and skip the actual socket check
-        if(!(plhs[0] = mxCreateDoubleScalar( (double) (mat_UDP_sockfd>=0) && mat_UDP_check() )))
-            mexErrMsgTxt("matlabUDP: mxCreateNumericArray failed.");
+        if(!(plhs[0] = mxCreateDoubleScalar( (double) (mat_UDP_sockfd[satteliteID]>=0) && mat_UDP_check(satteliteID) )))
+            mexErrMsgTxt("matlabNUDP: mxCreateNumericArray failed.");
         
         
     } else if(!strncmp(command, "close", 3)) {
@@ -153,13 +158,13 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         mxFree(command);
 
         // only try to close if socket is open
-        if(mat_UDP_sockfd >= 0)
-            mat_UDP_close();
+        if(mat_UDP_sockfd[satteliteID] >= 0)
+            mat_UDP_close(satteliteID);
         
         // always return socket index
         if(nlhs==1){
-            if(!(plhs[0] = mxCreateDoubleScalar((double)mat_UDP_sockfd)))
-                mexErrMsgTxt("matlabUDP: mxCreateNumericArray failed.");
+            if(!(plhs[0] = mxCreateDoubleScalar((double)mat_UDP_sockfd[satteliteID])))
+                mexErrMsgTxt("matlabNUDP: mxCreateNumericArray failed.");
         }
         
         
@@ -168,16 +173,16 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         // done with command
         mxFree(command);
         
-        mexWarnMsgTxt("matlabUDP: Unknown command option");
+        mexWarnMsgTxt("matlabNUDP: Unknown command option");
     }
 }
 
 //initialize UDP socket
-void mat_UDP_open (char localIP[], char remoteIP[], int port){    
-    mat_UDP_REMOTE_addr.sin_family = AF_INET;	// host byte order
-    mat_UDP_REMOTE_addr.sin_port = htons(port);	// short, network byte order
-    mat_UDP_REMOTE_addr.sin_addr.s_addr = inet_addr(remoteIP);
-    memset(&(mat_UDP_REMOTE_addr.sin_zero), '\0', 8);// zero the rest of the struct
+void mat_UDP_open (char localIP[], char remoteIP[], int port, int satteliteID){    
+    mat_UDP_REMOTE_addr[satteliteID].sin_family = AF_INET;	// host byte order
+    mat_UDP_REMOTE_addr[satteliteID].sin_port = htons(port);	// short, network byte order
+    mat_UDP_REMOTE_addr[satteliteID].sin_addr.s_addr = inet_addr(remoteIP);
+    memset(&(mat_UDP_REMOTE_addr[satteliteID].sin_zero), '\0', 8);// zero the rest of the struct
     
     mat_UDP_LOCAL_addr.sin_family = AF_INET;         // host byte order
     mat_UDP_LOCAL_addr.sin_port = htons(port);     // short, network byte order
@@ -188,20 +193,20 @@ void mat_UDP_open (char localIP[], char remoteIP[], int port){
     //mexPrintf("remoteIP = <%s>\n",inet_ntoa(mat_UDP_REMOTE_addr.sin_addr));
     //mexPrintf("ports = <%i>,<%i>\n",mat_UDP_LOCAL_addr.sin_port,mat_UDP_REMOTE_addr.sin_port  );
     
-    if ((mat_UDP_sockfd=socket(AF_INET, SOCK_DGRAM, 0)) == -1) {
+    if ((mat_UDP_sockfd[satteliteID]=socket(AF_INET, SOCK_DGRAM, 0)) == -1) {
         mexErrMsgTxt("Couldn't create UDP socket.");
     }
     
     //mexPrintf("sockFD = %i\n",mat_UDP_sockfd);
     
-    if (bind(mat_UDP_sockfd, (struct sockaddr *)&mat_UDP_LOCAL_addr, mat_UDP_addr_len) == -1){
+    if (bind(mat_UDP_sockfd[satteliteID], (struct sockaddr *)&mat_UDP_LOCAL_addr, mat_UDP_addr_len) == -1){
         mexErrMsgTxt("Couldn't bind socket.  Maybe invalid local address.");
     }
 }
 
 
 //send a string to MATLAB
-void mat_UDP_send (char mBuff[], int mLen){
+void mat_UDP_send (char mBuff[], int mLen, int satteliteID){
     
     //     const char drPhil[] = {"you're a loser"};
     //     int callyourwifeabitch = 11;
@@ -210,35 +215,47 @@ void mat_UDP_send (char mBuff[], int mLen){
     //     youreabigfatgooneybird=sendto(mat_UDP_sockfd, drPhil, callyourwifeabitch, MSG_DONTWAIT,(struct sockaddr *)&mat_UDP_REMOTE_addr, mat_UDP_addr_len);
     //     mexPrintf("loser=<%s>, loserLen=%i, retVal=%i\n",drPhil,callyourwifeabitch,youreabigfatgooneybird);
     
-    if ((mLen=sendto(mat_UDP_sockfd, mBuff, mLen, MSG_DONTWAIT,
-    (struct sockaddr *)&mat_UDP_REMOTE_addr, mat_UDP_addr_len)) == -1)
+    if ((mLen=sendto(mat_UDP_sockfd[satteliteID], mBuff, mLen, MSG_DONTWAIT,
+    (struct sockaddr *)&mat_UDP_REMOTE_addr[satteliteID], mat_UDP_addr_len)) == -1)
         mexWarnMsgTxt("Couldn't send string.  Are computers connected??");
 }
 
 
 //is a return message available?
-int mat_UDP_check (void){
+int mat_UDP_check (int satteliteID){
     static struct timeval timout;
     static fd_set readfds;
     FD_ZERO(&readfds);
-    FD_SET(mat_UDP_sockfd,&readfds);
-    select(mat_UDP_sockfd+1,&readfds,NULL,NULL,&timout);
-    return(FD_ISSET(mat_UDP_sockfd,&readfds));
+    FD_SET(mat_UDP_sockfd[satteliteID],&readfds);
+    select(mat_UDP_sockfd[satteliteID]+1,&readfds,NULL,NULL,&timout);
+    return(FD_ISSET(mat_UDP_sockfd[satteliteID],&readfds));
 }
 
 
 //read any available message
-void mat_UDP_read (char mBuff[], int messUpToLen){
-    if ((mat_UDP_numBytes=recvfrom(mat_UDP_sockfd,mBuff, messUpToLen, MSG_DONTWAIT,
-    (struct sockaddr *)&mat_UDP_REMOTE_addr, &mat_UDP_addr_len)) <0 )
-        mat_UDP_numBytes=0;
+void mat_UDP_read (char mBuff[], int messUpToLen, int satteliteID){
+    if ((mat_UDP_numBytes[satteliteID]=recvfrom(mat_UDP_sockfd[satteliteID],mBuff, messUpToLen, MSG_DONTWAIT,
+    (struct sockaddr *)&(mat_UDP_REMOTE_addr[satteliteID]), &mat_UDP_addr_len)) <0 )
+        mat_UDP_numBytes[satteliteID]=0;
 }
 
 //cleanup UDP socket
-void mat_UDP_close (void){
-    if(mat_UDP_sockfd>=0){
-        mexPrintf("matlabUDP closing socket\n");
-        close(mat_UDP_sockfd);
-        mat_UDP_sockfd=-1;
+void mat_UDP_close (int satteliteID){
+    if(mat_UDP_sockfd[satteliteID]>=0){
+        mexPrintf("matlabNUDP closing socket to sattelite %d\n", satteliteID);
+        close(mat_UDP_sockfd[satteliteID]);
+        mat_UDP_sockfd[satteliteID]=-1;
     }
 }
+
+//cleanup UDP socket
+void mat_UDP_close_all_ports (void){
+    for (int satteliteID = 0; satteliteID < SATTELITES_NUM; satteliteID++) {
+    if(mat_UDP_sockfd[satteliteID]>=0){
+        mexPrintf("matlabNUDP closing socket to sattelite %d\n", satteliteID);
+        close(mat_UDP_sockfd[satteliteID]);
+        mat_UDP_sockfd[satteliteID]=-1;
+    }
+    }
+}
+
