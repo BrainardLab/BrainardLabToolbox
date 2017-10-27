@@ -1,17 +1,18 @@
 function matlabNUDP_Sattelite
 
     
-    sattelite.portID = 2007;
+    
     sattelite.ID = 0;
     
+    sattelite.portID = 2007;
     sattelite.IP = '128.91.12.144'; % ionean
     localName = 'Ionean';
+    %test(sattelite, localName);   
+    
+    sattelite.portID = 2008;
+    sattelite.IP = '128.91.12.155'; % leviathan
+    localName = 'Leviathan';
     test(sattelite, localName);   
-    
-    
-%    sattelite.IP = '128.91.12.155'; % leviathan
-%    localName = 'Leviathan';
-%    test(sattelite, localName);   
  
     
 end
