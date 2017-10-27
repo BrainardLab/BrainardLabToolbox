@@ -13,7 +13,7 @@ function GamePadDemo2
         gamePadKey = gamePad.getKeyEvent();
         if (~isempty(gamePadKey))
             gamePadKey
-            fprintf('Uset pressed a button at %g\n', gamePadKey.when-time0)
+            fprintf('User pressed a button at %g\n', gamePadKey.when-time0)
         end
         
         % Read the keyboard
