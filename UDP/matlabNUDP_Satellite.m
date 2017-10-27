@@ -26,12 +26,12 @@ function test(sattelite, localName)
     matlabNUDP('open', sattelite.IP, baseIP, sattelite.portID);
 
     fprintf('Waiting to receive a message ...\n');
-    while (matlabNUDP('check',  satellite.ID) ==0)
+    while (matlabNUDP('check',  sattelite.ID) ==0)
     end
     
-    receivedMessage = matlabNUDP('receive',  satellite.ID)
+    receivedMessage = matlabNUDP('receive',  sattelite.ID)
     fprintf('Message received. Sending ACK\n');
-    matlabNUDP('send', satellite.ID, sprintf('''%s'' sends ACK for: %s', localName, receivedMessage));
-    matlabNUDP('close', satellite.ID);
+    matlabNUDP('send', sattelite.ID, sprintf('''%s'' sends ACK for: %s', localName, receivedMessage));
+    matlabNUDP('close', sattelite.ID);
 end
 
