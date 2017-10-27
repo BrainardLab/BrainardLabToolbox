@@ -29,25 +29,27 @@
 
 #define MAX_NUM_BYTES 2000
 
+#define SATTELITES_NUM 5
 
 //Globals for UDP socket
-static int                      mat_UDP_sockfd=-1,      //descriptor of UDP socket
-                				mat_UDP_addr_len        =sizeof(struct sockaddr),
-                                mat_UDP_numBytes;       //length of return message
+static int                      mat_UDP_sockfd[SATTELITES_NUM]= {-1},        //descriptor of UDP socket
+                				mat_UDP_addr_len = sizeof(struct sockaddr),
+                                mat_UDP_numBytes[SATTELITES_NUM];            //length of return message
                                 
-static char mat_UDP_messBuff[MAX_NUM_BYTES];            //used by send and receive
+static char mat_UDP_messBuff[SATTELITES_NUM][MAX_NUM_BYTES];            //used by send and receive
 
-static struct sockaddr_in       mat_UDP_LOCAL_addr,     //holds LOCAL IP address 
-                                mat_UDP_REMOTE_addr;	//holds REMOTE IP address
+static struct sockaddr_in       mat_UDP_LOCAL_addr;                     //holds LOCAL IP address 
+static struct sockaddr_in       mat_UDP_REMOTE_addr[SATTELITES_NUM];     //holds REMOTE IP address(es)
 
 
 //functions for exchanging strings with remote machines
-void	mat_UDP_open	(char*, char*, int);            //initialize UDP socket
-void	mat_UDP_send	(char*, int);                   //send a string to MATLAB
-int     mat_UDP_check	(void);                         //is a return message available?
-void	mat_UDP_read	(char*, int);                   //read any available message
-void	mat_UDP_close	(void);                         //cleanup UDP socket
-
+void	mat_UDP_open	(char*, char*, int, int);            //initialize UDP socket
+void	mat_UDP_send	(char*, int, int);                   //send a string to MATLAB
+int     mat_UDP_check	(int);                         //is a return message available?
+void	mat_UDP_read	(char*, int, int);                   //read any available message
+void	mat_UDP_close	(int);                         //cleanup UDP socket
+void	mat_UDP_close_all_ports (void);
+        
 void mexFunction(
     int           nlhs,           /* number of expected outputs */
     mxArray       *plhs[],        /* array of pointers to output arguments */
