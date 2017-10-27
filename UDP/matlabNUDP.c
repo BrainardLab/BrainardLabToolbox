@@ -34,7 +34,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         mexErrMsgTxt("matlabNUDP: First argument should be a string (command).");
     }
     
-    // Second argument if the satteliteID
+    // Second argument is the satteliteID
     satteliteID = (int)(mxGetScalar(prhs[1]));
     //mexPrintf("Operating on satteliteID: %d\n", satteliteID);
     
