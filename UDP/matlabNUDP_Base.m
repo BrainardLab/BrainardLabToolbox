@@ -1,4 +1,4 @@
-function matlabNUDPtest
+function matlabNUDP_Base
 
     baseIP = '128.91.12.90'; % manta
     
