@@ -22,23 +22,23 @@ function matlabNUDP_Base
     disp('Hit enter to send a message\n');
     pause
     message = 'Hello from manta to Ionean';
-    matlabNUDP('send', satellite1.ID, message);
+    matlabNUDP('send', sattelite1.ID, message);
     
     message = 'Hello from manta to Leviathan';
-    matlabNUDP('send', satellite2.ID, message);
+    matlabNUDP('send', sattelite2.ID, message);
     
     disp('Hit enter to read a message\n');
     pause
-    while (matlabNUDP('check', satellite1.ID) == 0)
+    while (matlabNUDP('check', sattelite1.ID) == 0)
     end
-    receivedMessageFromIonean = matlabNUDP('receive', satellite1.ID)
+    receivedMessageFromIonean = matlabNUDP('receive', sattelite1.ID)
     
     pause
-    while (matlabNUDP('check', satellite2.ID) == 0)
+    while (matlabNUDP('check', sattelite2.ID) == 0)
     end
-    receivedMessageFromLeviathan = matlabNUDP('receive', satellite2.ID)
+    receivedMessageFromLeviathan = matlabNUDP('receive', sattelite2.ID)
     
-    matlabNUDP('close', satellite1.ID);
-    matlabNUDP('close', satellite2.ID);
+    matlabNUDP('close', sattelite1.ID);
+    matlabNUDP('close', sattelite2.ID);
 end
 

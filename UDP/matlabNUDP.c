@@ -36,7 +36,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     
     // Second argument if the satteliteID
     satteliteID = (int)(mxGetScalar(prhs[1]));
-    mexPrintf("Operating on satteliteID: %d\n", satteliteID);
+    //mexPrintf("Operating on satteliteID: %d\n", satteliteID);
     
     // case on command string...
     if(!strncmp(command, "open", 3)) {
