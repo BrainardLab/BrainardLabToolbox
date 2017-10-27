@@ -23,7 +23,7 @@ function test(sattelite, localName)
 
     
     matlabNUDP('close', sattelite.ID);
-    matlabNUDP('open', sattelite.IP, baseIP, sattelite.portID);
+    matlabNUDP('open', sattelite.ID, sattelite.IP, baseIP, sattelite.portID);
 
     fprintf('Waiting to receive a message ...\n');
     while (matlabNUDP('check',  sattelite.ID) ==0)

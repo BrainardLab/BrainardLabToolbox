@@ -13,11 +13,17 @@ function matlabNUDP_Base
     
     % Close sattelites
     matlabNUDP('close', sattelite1.ID);
-    matlabNUDP('close', sattelite1.ID);
+    matlabNUDP('close', sattelite2.ID);
+    
+    fprintf('Closed ports\n');
+    
     
     % Open connections to 2 sattelites
-    matlabNUDP('open', baseIP, sattelite1.ID, sattelite1.IP, sattelite1.portID);
-    matlabNUDP('open', baseIP, sattelite2.ID, sattelite2.IP, sattelite2.portID);
+    matlabNUDP('open', sattelite1.ID, baseIP, sattelite1.IP, sattelite1.portID);
+    fprintf('Opened %s\n', sattelite1.IP);
+    
+    matlabNUDP('open', sattelite2.ID, baseIP, sattelite2.IP, sattelite2.portID);
+    fprintf('Opened %s\n', sattelite2.IP);
     
     disp('Hit enter to send a message\n');
     pause
