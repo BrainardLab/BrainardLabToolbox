@@ -16,7 +16,8 @@ function shortBaseMultiSatteliteDemo
     
     %% Establish the communication
     triggerMessage = 'Go!';
-    UDPobj.initiateCommunication(hostRoles,  hostNames, triggerMessage, 'beVerbose', beVerbose);
+    allSattelitesAreAGOMessage = 'All Sattelites Are A GO!';
+    UDPobj.initiateCommunication(hostRoles,  hostNames, triggerMessage, allSattelitesAreAGOMessage, 'beVerbose', beVerbose);
 
     %% Make the packetSequence for the local host
     if (contains(UDPobj.localHostName, 'manta'))

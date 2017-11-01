@@ -1,4 +1,4 @@
-function initiateCommunication(obj, hostRoles, hostNames, triggerMessage, varargin)
+function initiateCommunication(obj, hostRoles, hostNames, triggerMessage, allSattelitesAreAGOMessage, varargin)
 
     p = inputParser;
     p.addOptional('beVerbose', true, @islogical);
@@ -59,16 +59,37 @@ function initiateCommunication(obj, hostRoles, hostNames, triggerMessage, vararg
                 'timeOutSecs',  4, ...
                 'timeOutAction', obj.THROW_ERROR ...
                 );
-        end
+        end % for k
+        
+        for k = 1:numel(iSatteliteNames)
+            satteliteName = iSatteliteNames{k};
+            fprintf('Sendint the * all sattelites are a go * message ''%s''\n', satteliteName);
+            % Set the current udpHandle
+            obj.udpHandle = obj.satteliteInfo(satteliteName).satteliteChannelID; 
+            % Send trigger and wait for up to 4 seconds to receive acknowledgment
+            transmissionStatus = obj.sendMessage(allSattelitesAreAGOMessage, '', ...
+                'timeOutSecs',  4, ...
+                'timeOutAction', obj.THROW_ERROR ...
+                );
+        end % for k
+        
     else
         % Set the current udpHandle
         obj.udpHandle = obj.satteliteInfo(obj.localHostName).satteliteChannelID; 
         % Wait for ever to receive the trigger message from the base
-            packetReceived = obj.waitForMessage(triggerMessage, ...
+        packetReceived = obj.waitForMessage(triggerMessage, ...
                 'timeOutSecs', Inf, ...
                 'timeOutAction', obj.THROW_ERROR, ...
                 'badTransmissionAction', obj.THROW_ERROR ...
-                );            
+                );      
+            
+        fprintf('Received the trigger message, will wait 5 seconds for the BASE to transmit that all sattelites are a GO !\n');
+        % Wait for 5 seconds to receive the allSattelitesAreAGOMessage message from the base
+        packetReceived = obj.waitForMessage(allSattelitesAreAGOMessage, ...
+                'timeOutSecs', 5, ...
+                'timeOutAction', obj.THROW_ERROR, ...
+                'badTransmissionAction', obj.THROW_ERROR ...
+                ); 
     end
 end
 
