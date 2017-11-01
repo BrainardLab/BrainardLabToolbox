@@ -12,7 +12,7 @@ function initiateCommunication(obj, hostRoles, hostNames, triggerMessage, vararg
     iAmTheBase  = localHostRoleIs(localHostName, hostNames, hostRoles, 'base');
     iAmASattelite = localHostRoleIs(localHostName, hostNames, hostRoles, 'sattelite');
     if ((~iAmTheBase) && (~iAmASattelite))
-        error('Localhost (''%s'') does not have neither a ''base'' not a ''sattelite'' role.', localhost);
+        error('Localhost (''%s'') does not have a ''base'' or a ''sattelite'' role.', localHostName);
     end
    
     if (beVerbose)

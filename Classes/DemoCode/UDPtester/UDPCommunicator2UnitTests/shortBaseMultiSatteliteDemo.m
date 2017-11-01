@@ -3,7 +3,7 @@ function shortBaseMultiSatteliteDemo
     %% Define the host names, IPs, roles, and communication port numbers
     hostNames       = {'manta',         'ionean',         'leviathan'};
     hostIPs         = {'128.91.12.90',  '128.91.12.144',  '128.91.12.155'};
-    hostRoles       = {'base',          'satellite',      'sattelite'};
+    hostRoles       = {'base',          'sattelite',      'sattelite'};
     commPorts       = {nan,              2007,             2008};
         
    
