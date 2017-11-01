@@ -1,4 +1,4 @@
-function [UDPobj, satteliteChannelIDs] = instantiateObject(hostNames, hostIPs, hostRoles, commPorts, beVerbose)
+function UDPobj = instantiateObject(hostNames, hostIPs, hostRoles, commPorts, beVerbose)
     % Parse optinal input parameters.
     p = inputParser;
     p.addRequired('hostNames', @iscell);
