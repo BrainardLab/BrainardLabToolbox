@@ -15,7 +15,7 @@ function shortBaseMultiSatteliteDemo
     hostNames       = {baseHostName,    sattelite1HostName};
     hostIPs         = {'128.91.12.90',  '128.91.12.144'};
     hostRoles       = {'base',          'sattelite'};
-    commPorts       = {nan,              2007};
+    commPorts       = {nan,              2010};
     
     %% Control what is printed on the command window
     beVerbose = true;
@@ -23,7 +23,6 @@ function shortBaseMultiSatteliteDemo
     
     %% Instantiate our UDPcommunicator object
     UDPobj = UDPBaseSatteliteCommunicator.instantiateObject(hostNames, hostIPs, hostRoles, commPorts, beVerbose);
-    keys(UDPobj.satteliteInfo)
     
     %% Make the packetSequences
     if (contains(UDPobj.localHostName, baseHostName))
