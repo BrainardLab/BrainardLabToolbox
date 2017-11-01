@@ -3,19 +3,19 @@ function shortBaseMultiSatteliteDemo
     %% Define a 2-sattelite scheme
     baseHostName = 'manta';
     sattelite1HostName = 'ionean';
-    sattelite2HostName = 'leviathan';
+    sattelite2HostName = 'gka06';
     
     
     hostNames       = {baseHostName,    sattelite1HostName,  sattelite2HostName};
-    hostIPs         = {'128.91.12.90',  '128.91.12.144',     '128.91.12.155'};
+    hostIPs         = {'128.91.12.90',  '128.91.12.144',     '128.91.12.160'};
     hostRoles       = {'base',          'sattelite',         'sattelite'};
     commPorts       = {nan,              2007,               2008};
         
     %% Define a 1-sattelite scheme
-    hostNames       = {baseHostName,    sattelite1HostName};
-    hostIPs         = {'128.91.12.90',  '128.91.12.144'};
-    hostRoles       = {'base',          'sattelite'};
-    commPorts       = {nan,              2010};
+%     hostNames       = {baseHostName,    sattelite1HostName};
+%     hostIPs         = {'128.91.12.90',  '128.91.12.144'};
+%     hostRoles       = {'base',          'sattelite'};
+%     commPorts       = {nan,              2010};
     
     %% Control what is printed on the command window
     beVerbose = true;
