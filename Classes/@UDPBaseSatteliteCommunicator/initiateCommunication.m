@@ -9,22 +9,44 @@ function initiateCommunication(obj, hostRoles, hostNames, triggerMessage, vararg
     localHostName = obj.localHostName;
     
     % What role do we have?
-    iAmTheBase  = localHostRoleIs(localHostName, hostNames, hostRoles, 'base');
-    iAmASattelite = localHostRoleIs(localHostName, hostNames, hostRoles, 'sattelite');
-    if ((~iAmTheBase) && (~iAmASattelite))
+    obj.localHostIsBase  = localHostRoleIs(localHostName, hostNames, hostRoles, 'base');
+    obj.localHostIsSattelite = localHostRoleIs(localHostName, hostNames, hostRoles, 'sattelite');
+    if ((~obj.localHostIsBase) && (~obj.localHostIsSattelite))
         error('Localhost (''%s'') does not have a ''base'' or a ''sattelite'' role.', localHostName);
     end
    
     if (beVerbose)
-        if (iAmTheBase)
+        if (obj.localHostIsBase)
             fprintf('<strong>Setting ''%s'' as the BASE with sattelite channel IDs: </strong>\n', localHostName);
         else
             fprintf('<strong>Setting ''%s'' as a SATTELITE  with sattelite channel IDs: </strong>\n', localHostName);
         end
     end
     
+    % initialize UDP communication(s)
+    if (obj.localHostIsBase)
+        iSatteliteNames = keys(obj.satteliteInfo);
+    else
+        iSatteliteNames{1} = obj.localHostName;
+    end
+    for k = 1:numel(iSatteliteNames)  
+        % Set updHandle
+        satteliteName = iSatteliteNames{k};
+        obj.udpHandle = obj.satteliteInfo(satteliteName).satteliteChannelID;
+
+        if strcmp(obj.verbosity,'max')
+            fprintf('%s Opening connection to/from ''%s'' via udpChannel:%d, (local:%s remote:%s)\n', obj.selfSignature, satteliteName, obj.udpHandle, obj.localIP,  obj.satteliteInfo(satteliteName).remoteIP);
+        end
+
+        matlabNUDP('close', obj.udpHandle);
+        matlabNUDP('open', obj.udpHandle, obj.localIP, obj.satteliteInfo(satteliteName).remoteIP, obj.satteliteInfo(satteliteName).portNo);
+
+        % flash any remaining bits
+        obj.flashQueue();
+    end
+
     
-    if (iAmTheBase)
+    if (obj.localHostIsBase)
         fprintf('Are the satellite(s) ready to go?. Hit enter if so.\n'); pause; clc; 
         iSatteliteNames = keys(obj.satteliteInfo);
         for k = 1:numel(iSatteliteNames)
@@ -48,7 +70,6 @@ function initiateCommunication(obj, hostRoles, hostNames, triggerMessage, vararg
                 'badTransmissionAction', obj.THROW_ERROR ...
                 );            
     end
-
 end
 
 function iHaveThatRole  = localHostRoleIs(localHostName, hostNames, hostRoles, theRole)

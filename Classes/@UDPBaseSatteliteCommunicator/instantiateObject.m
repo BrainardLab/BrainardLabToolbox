@@ -32,7 +32,7 @@ function [UDPobj, satteliteChannelIDs] = instantiateObject(hostNames, hostIPs, h
         
     UDPobj = UDPBaseSatteliteCommunicator( ...
             localIP, ...                       % REQUIRED: the local host IP
-            satteliteInfo, ...
+            satteliteInfo, ...                 % REQUIRED: the sattelite info
             'verbosity', verbosity ...         % OPTIONAL, with default value: 'normal', and possible values: {'min', 'normal', 'max'},
     );
 end

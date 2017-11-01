@@ -8,6 +8,8 @@ classdef UDPBaseSatteliteCommunicator < handle
         localHostName
         localIP 
         satteliteInfo
+        localHostIsBase       % boolean indicating whether the local host is thebase
+        localHostIsSattelite  % boolean indicating whether the local host is a sattelite
         verbosity             % choose from {'min', 'normal', 'max'}
         sentMessagesCount     % number of messages sent
         receivedMessagesCount % number of messages received
@@ -63,33 +65,9 @@ classdef UDPBaseSatteliteCommunicator < handle
             
             obj.localIP  = p.Results.localIP;
             obj.satteliteInfo = p.Results.satteliteInfo;
-            
-            %obj.remoteIPs = p.Results.remoteIPs;
-            %obj.satteliteChannelIDs = p.Results.satteliteChannelIDs;
-            %obj.commPorts  = p.Results.commPorts;
-            
-            
             obj.verbosity = p.Results.verbosity;
             obj.localHostName = obj.getLocalHostName();
 
-            % initialize UDP communication(s)
-            iSatteliteNames = keys(obj.satteliteInfo);
-            for k = 1:numel(iSatteliteNames)  
-                % Set updHandle
-                satteliteName = iSatteliteNames{k};
-                obj.udpHandle = obj.satteliteInfo(satteliteName).satteliteChannelID;
-
-                if strcmp(obj.verbosity,'max')
-                    fprintf('%s Opening connection to/from ''%s'' via udpChannel:%d, (local:%s remote:%s)\n', obj.selfSignature, satteliteName, obj.udpHandle, obj.localIP,  obj.satteliteInfo(satteliteName).remoteIP);
-                end
-            
-                matlabNUDP('close', obj.udpHandle);
-                matlabNUDP('open', obj.udpHandle, obj.localIP, obj.satteliteInfo(satteliteName).remoteIP, obj.satteliteInfo(satteliteName).portNo);
-
-                % flash any remaining bits
-                obj.flashQueue();
-            end
-            
             if strcmp(obj.verbosity,'max')
                 fprintf('%s Initialized.\n', obj.selfSignature);
             end
