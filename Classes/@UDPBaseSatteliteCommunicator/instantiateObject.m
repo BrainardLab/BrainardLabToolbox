@@ -20,12 +20,11 @@ function UDPobj = instantiateObject(hostNames, hostIPs, hostRoles, commPorts, be
     
     % Establish satteliteChannelIDs
     satteliteInfo = containers.Map();
-    satteliteIndices = find(strcmp(lower(hostRoles), 'sattelite'))
+    satteliteIndices = find(strcmp(lower(hostRoles), 'sattelite'));
     for k = 1:numel(satteliteIndices)
         d.satteliteChannelID = k-1;
         d.portNo = commPorts{satteliteIndices(k)};
         d.remoteIP = hostIPs{satteliteIndices(k)};
-        d
         satteliteName = lower(hostNames{satteliteIndices(k)});
         satteliteInfo(satteliteName) = d;
     end
