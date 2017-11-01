@@ -2,20 +2,20 @@ function shortBaseMultiSatteliteDemo
 
     %% Define a 2-sattelite scheme
     baseHostName = 'manta';
-    sattelite1HostName = 'leviathan';
-    sattelite2HostName = 'ionean';
+    sattelite1HostName = 'ionean';
+    sattelite2HostName = 'leviathan';
+    
     
     hostNames       = {baseHostName,    sattelite1HostName,  sattelite2HostName};
     hostIPs         = {'128.91.12.90',  '128.91.12.144',     '128.91.12.155'};
     hostRoles       = {'base',          'sattelite',         'sattelite'};
-    
     commPorts       = {nan,              2007,               2008};
         
     %% Define a 1-sattelite scheme
-     hostNames       = {baseHostName,    sattelite2HostName};
-     hostIPs         = {'128.91.12.90',  '128.91.12.144'};
-     hostRoles       = {'base',          'sattelite'};
-     commPorts       = {nan,              2008};
+    hostNames       = {baseHostName,    sattelite1HostName};
+    hostIPs         = {'128.91.12.90',  '128.91.12.144'};
+    hostRoles       = {'base',          'sattelite'};
+    commPorts       = {nan,              2007};
     
     %% Control what is printed on the command window
     beVerbose = true;
@@ -23,6 +23,7 @@ function shortBaseMultiSatteliteDemo
     
     %% Instantiate our UDPcommunicator object
     UDPobj = UDPBaseSatteliteCommunicator.instantiateObject(hostNames, hostIPs, hostRoles, commPorts, beVerbose);
+    keys(UDPobj.satteliteInfo)
     
     %% Make the packetSequences
     if (contains(UDPobj.localHostName, baseHostName))
@@ -30,7 +31,7 @@ function shortBaseMultiSatteliteDemo
             packetSequence = designPacketSequenceForBaseWithTwoSatellites(baseHostName, sattelite1HostName, sattelite2HostName, ...
                 UDPobj.satteliteInfo(sattelite1HostName).satteliteChannelID, UDPobj.satteliteInfo(sattelite2HostName).satteliteChannelID);
         elseif (numel(hostNames) == 2)
-            packetSequence = designPacketSequenceForBaseWithOneSatellite(baseHostName, UDPobj.satteliteInfo(sattelite1HostName).satteliteChannelID);
+            packetSequence = designPacketSequenceForBaseWithOneSatellite(baseHostName, sattelite1HostName, UDPobj.satteliteInfo(sattelite1HostName).satteliteChannelID);
         end
         
     elseif (contains(UDPobj.localHostName, sattelite2HostName))
@@ -171,7 +172,7 @@ function packetSequence = designPacketSequenceForBaseWithTwoSatellites(baseHostN
     % Sattelite1 sending, Base receiving
     packetSequence{numel(packetSequence)+1} = UDPBaseSatteliteCommunicator.makePacket(...
         sattelite1ChannelID, ...
-        sprintf('%s <- %s', baseHostName, sattelite1HostName), sprintf('SATTELITE-1(%s)_SENDING_SMALL_STRUCT',sattelite1HostName),...
+        sprintf('%s <- %s', baseHostName, sattelite1HostName), sprintf('SATTELITE-1(%s)___SENDING_SMALL_STRUCT',sattelite1HostName),...
         'timeOutSecs', 4.0, ...                                                 % Allow for 1 secs to receive this message
         'timeOutAction', UDPBaseSatteliteCommunicator.NOTIFY_CALLER, ...        % Do not throw an error, notify caller function instead (choose from UDPBaseSatteliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
         'badTransmissionAction', UDPBaseSatteliteCommunicator.NOTIFY_CALLER ... % Do not throw an error, notify caller function instead (choose from UDPBaseSatteliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
@@ -180,7 +181,7 @@ function packetSequence = designPacketSequenceForBaseWithTwoSatellites(baseHostN
     % Sattelite2 sending, Manta receiving
     packetSequence{numel(packetSequence)+1} = UDPBaseSatteliteCommunicator.makePacket(...
         sattelite2ChannelID, ...
-        sprintf('%s <- %s', baseHostName, sattelite2HostName), sprintf('SATTELITE-2(%s)_SENDING_SMALL_STRUCT',sattelite2HostName),...
+        sprintf('%s <- %s', baseHostName, sattelite2HostName), sprintf('SATTELITE-2(%s)___SENDING_SMALL_STRUCT',sattelite2HostName),...
         'timeOutSecs', 4.0, ...                                                 % Allow for 1 secs to receive this message
         'timeOutAction', UDPBaseSatteliteCommunicator.NOTIFY_CALLER, ...        % Do not throw an error, notify caller function instead (choose from UDPBaseSatteliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
         'badTransmissionAction', UDPBaseSatteliteCommunicator.NOTIFY_CALLER ... % Do not throw an error, notify caller function instead (choose from UDPBaseSatteliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
@@ -197,7 +198,7 @@ function packetSequence = designPacketSequenceForBaseWithOneSatellite(baseHostNa
     % Bse sending (int: +1), Ionean receiving
     packetSequence{numel(packetSequence)+1} = UDPBaseSatteliteCommunicator.makePacket(...
         satteliteChannelID, ...
-        sprintf('%s -> %s', baseHostName, satteliteHostName), sprintf('BASE(%s)_SENDING_SINGLE_INTEGER',baseHostName), ...
+        sprintf('%s -> %s', baseHostName, satteliteHostName), sprintf('BASE(%s)___SENDING_SINGLE_INTEGER',baseHostName), ...
         'timeOutSecs', 4.0, ...                                             % Allow 1 sec to receive ACK (from remote host) that message was received 
         'timeOutAction', UDPBaseSatteliteCommunicator.NOTIFY_CALLER, ...    % Do not throw an error, notify caller function instead (choose from UDPBaseSatteliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
         'withData', 1 ...
@@ -206,7 +207,7 @@ function packetSequence = designPacketSequenceForBaseWithOneSatellite(baseHostNa
     % Base sending (char: tra la la #1), Ionean receiving 
     packetSequence{numel(packetSequence)+1} = UDPBaseSatteliteCommunicator.makePacket(...
         satteliteChannelID, ...
-        sprintf('%s -> %s', baseHostName, satteliteHostName), sprintf('BASE(%s)_SENDING_A_CHAR_STING',baseHostName), ...
+        sprintf('%s -> %s', baseHostName, satteliteHostName), sprintf('BASE(%s)___SENDING_A_CHAR_STING',baseHostName), ...
         'timeOutSecs', 4.0, ...                                                 % Allow 1 sec to receive ACK (from remote host) that message was received
         'timeOutAction', UDPBaseSatteliteCommunicator.NOTIFY_CALLER, ...        % Do not throw an error, notify caller function instead (choose from UDPBaseSatteliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
         'withData', 'tra la la #1');
@@ -214,7 +215,7 @@ function packetSequence = designPacketSequenceForBaseWithOneSatellite(baseHostNa
     % Ionean sending, Manta receiving
     packetSequence{numel(packetSequence)+1} = UDPBaseSatteliteCommunicator.makePacket(...
         satteliteChannelID, ...
-        sprintf('%s <- %s', baseHostName, satteliteHostName), sprintf('SATTELITE(%s)_SENDING_SMALL_STRUCT',satteliteHostName),...
+        sprintf('%s <- %s', baseHostName, satteliteHostName), sprintf('SATTELITE(%s)___SENDING_SMALL_STRUCT',satteliteHostName),...
         'timeOutSecs', 4.0, ...                                                 % Allow for 1 secs to receive this message
         'timeOutAction', UDPBaseSatteliteCommunicator.NOTIFY_CALLER, ...        % Do not throw an error, notify caller function instead (choose from UDPBaseSatteliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
         'badTransmissionAction', UDPBaseSatteliteCommunicator.NOTIFY_CALLER ... % Do not throw an error, notify caller function instead (choose from UDPBaseSatteliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
