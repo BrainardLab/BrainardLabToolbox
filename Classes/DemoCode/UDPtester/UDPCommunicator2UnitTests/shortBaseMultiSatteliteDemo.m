@@ -35,7 +35,10 @@ function shortBaseMultiSatteliteDemo
         elseif (numel(hostNames) == 2)
             packetSequence = designPacketSequenceForBaseWithOneSatellite(baseHostName, sattelite1HostName, UDPobj.satteliteInfo(sattelite1HostName).satteliteChannelID);
         end
-        
+      
+    elseif (contains(UDPobj.localHostName, sattelite3HostName))
+        packetSequence = designPacketSequenceForSattelite3(baseHostName, sattelite3HostName, UDPobj.satteliteInfo(sattelite3HostName).satteliteChannelID);
+    
     elseif (contains(UDPobj.localHostName, sattelite2HostName))
         packetSequence = designPacketSequenceForSattelite2(baseHostName, sattelite2HostName, UDPobj.satteliteInfo(sattelite2HostName).satteliteChannelID);
         
