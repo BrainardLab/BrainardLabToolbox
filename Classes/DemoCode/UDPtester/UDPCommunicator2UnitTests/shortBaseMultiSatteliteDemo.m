@@ -4,10 +4,10 @@ function shortBaseMultiSatteliteDemo
     baseHostName = 'manta';
     sattelite1HostName = 'ionean';
     sattelite2HostName = 'gka06';
-    sattelite3HostName = 'seaanemone';
+    sattelite3HostName = 'monkfish';
     
     hostNames       = {baseHostName,    sattelite1HostName,  sattelite2HostName,  sattelite3HostName};
-    hostIPs         = {'128.91.12.90',  '128.91.12.144',     '128.91.12.160',     '128.91.12.133'};
+    hostIPs         = {'128.91.12.90',  '128.91.12.144',     '128.91.12.160',     '128.91.12.161'};
     hostRoles       = {'base',          'sattelite',         'sattelite',         'sattelite'};
     commPorts       = {nan,              2007,               2008,                2009};
         
