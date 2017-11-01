@@ -33,9 +33,9 @@ function [messageReceived, status, roundTipDelayMilliSecs] = communicate(obj, pa
         );
     
         if (strcmp(status,obj.NO_ACKNOWLDGMENT_WITHIN_TIMEOUT_PERIOD))
-            obj.displayMessage(obj.localHostName, sprintf('received status ''%s'' from remote host', status), communicationPacket.messageLabel, communicationPacket.messageData, packetNo, 'alert', true);
+            obj.displayMessage(printf('received status ''%s'' from remote host', status), communicationPacket.messageLabel, communicationPacket.messageData, packetNo, 'alert', true);
         elseif beVerbose
-            obj.displayMessage(obj.localHostName, sprintf('received status ''%s'' from remote host', status), communicationPacket.messageLabel, communicationPacket.messageData, packetNo);
+            obj.displayMessage(sprintf('received status ''%s'' from remote host', status), communicationPacket.messageLabel, communicationPacket.messageData, packetNo);
         end
     else
         if (beVerbose)
