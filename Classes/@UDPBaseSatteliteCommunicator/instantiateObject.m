@@ -1,12 +1,11 @@
-function UDPobj = instantiateObject(hostNames, hostIPs, hostRoles, commPorts, beVerbose)
+function UDPobj = instantiateObject(hostNames, hostIPs, hostRoles,  beVerbose)
     % Parse optinal input parameters.
     p = inputParser;
     p.addRequired('hostNames', @iscell);
     p.addRequired('hostIPs', @iscell);
     p.addRequired('hostRoles', @iscell);
-    p.addRequired('commPorts', @iscell);
     p.addRequired('beVerbose',  @islogical);
-    p.parse(hostNames, hostIPs, hostRoles, commPorts, beVerbose);
+    p.parse(hostNames, hostIPs, hostRoles,  beVerbose);
     
     if (beVerbose)
         verbosity = 'max';
@@ -14,6 +13,9 @@ function UDPobj = instantiateObject(hostNames, hostIPs, hostRoles, commPorts, be
         verbosity = 'min';
     end
     
+    % Comm ports for the different connections
+    commPorts = {nan, 2007, 2008, 2009, 2010, 2011};
+        
     % Establish the localIP
     localHostName = UDPBaseSatteliteCommunicator.getLocalHostName();
     localIP = hostIPs{find(strcmp(lower(hostNames), localHostName))};
