@@ -15,7 +15,7 @@ function transmissionStatus = sendMessage(obj, msgLabel, msgData, varargin)
     udpHandle    = obj.udpHandle;
     
     % Send the leading message label
-    fprintf('Sending message label: %s\n', messageLabel);
+    fprintf('Sending message label: %s via udpHandle: %d\n', messageLabel, udpHandle);
     matlabNUDP('send', udpHandle, messageLabel);
     
     % Serialize data
@@ -28,7 +28,7 @@ function transmissionStatus = sendMessage(obj, msgLabel, msgData, varargin)
         
     % Send each byte separately
     for k = 1:numel(byteStream)
-       fprintf('Sedning byte %d of %d\n', k, numel(byteStream);
+       fprintf('Sedning byte %d of %d\n', k, numel(byteStream));
        matlabNUDP('send', udpHandle, sprintf('%03d', byteStream(k)));
     end
     

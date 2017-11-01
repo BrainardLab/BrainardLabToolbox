@@ -15,7 +15,7 @@ function [messageReceived, status, roundTipDelayMilliSecs] = communicate(obj, pa
     end
     
     % Set the current updHandle
-    obj.udpHandle = communicationPacket.udpChannel-1;
+    obj.udpHandle = communicationPacket.udpChannel;
 
     tic
     
@@ -24,6 +24,9 @@ function [messageReceived, status, roundTipDelayMilliSecs] = communicate(obj, pa
             fprintf('\n<strong>%s</strong> is sending packet %d via UDP channel %d and will expect ACK within %2.1f seconds with action: ''%s''.', ...
                 obj.localHostName, packetNo, communicationPacket.udpChannel, communicationPacket.timeOutSecs, communicationPacket.timeOutAction);
         end
+        communicationPacket.messageLabel
+        communicationPacket.messageData
+        
         status = obj.sendMessage(communicationPacket.messageLabel, communicationPacket.messageData, ...
             'timeOutSecs', communicationPacket.timeOutSecs, ...
             'timeOutAction', communicationPacket.timeOutAction ...
