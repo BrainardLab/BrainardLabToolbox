@@ -7,10 +7,10 @@ function shortBaseMultiSatteliteDemo
     commPorts       = {nan,              2007,             2008};
         
     %% Define a 1-sattelite scheme
-    hostNames       = {'manta',         'ionean'};
-    hostIPs         = {'128.91.12.90',  '128.91.12.144'};
-    hostRoles       = {'base',          'sattelite'};
-    commPorts       = {nan,              2007};
+%     hostNames       = {'manta',         'ionean'};
+%     hostIPs         = {'128.91.12.90',  '128.91.12.144'};
+%     hostRoles       = {'base',          'sattelite'};
+%     commPorts       = {nan,              2007};
     
     %% Control what is printed on the command window
     beVerbose = true;
