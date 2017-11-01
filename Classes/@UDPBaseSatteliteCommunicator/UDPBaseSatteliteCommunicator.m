@@ -97,7 +97,7 @@ classdef UDPBaseSatteliteCommunicator < handle
         UDPobj = instantiateObject(hostNames, hostIPs, hostRoles, commPorts, beVerbose);
         
         % Method that constructs a communication packet
-        packet = makePacket(hostNames, direction, message, varargin)
+        packet = makePacket(satteliteChannel, direction, message, varargin)
         
         localHostName = getLocalHostName();
     end

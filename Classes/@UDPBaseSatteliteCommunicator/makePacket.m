@@ -1,4 +1,4 @@
-function packet = makePacket(satteliteChannel, hostNames, direction, message, varargin) 
+function packet = makePacket(satteliteChannel, direction, message, varargin) 
     % Parse optinal input parameters.
     p = inputParser;
     p.addParameter('withData', []);
