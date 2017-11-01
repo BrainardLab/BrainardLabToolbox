@@ -18,17 +18,15 @@ function initiateCommunication(obj, hostRoles, hostNames, triggerMessage, vararg
     if (beVerbose)
         if (iAmTheBase)
             fprintf('<strong>Setting ''%s'' as the BASE with sattelite channel IDs: </strong>\n', localHostName);
-            obj.satteliteChannelIDs
         else
             fprintf('<strong>Setting ''%s'' as a SATTELITE  with sattelite channel IDs: </strong>\n', localHostName);
-            obj.satteliteChannelIDs
         end
     end
     
     
     if (iAmTheBase)
         fprintf('Are the satellite(s) ready to go?. Hit enter if so.\n'); pause; clc; 
-        iSatteliteNames = keys(obj.satteliteChannelIDs);
+        iSatteliteNames = keys(obj.satteliteInfo);
         for k = 1:numel(iSatteliteNames)
             satteliteName = iSatteliteNames{k};
             fprintf('Initiating communication with sattelite ''%s''\n', satteliteName);
