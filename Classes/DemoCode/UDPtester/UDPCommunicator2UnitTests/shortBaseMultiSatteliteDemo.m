@@ -88,7 +88,7 @@ function packetSequence = designPacketSequenceForSattelite1(baseHostName, sattel
         sprintf('%s <- %s', baseHostName, satteliteHostName), sprintf('SATTELITE(%s)___SENDING_SMALL_STRUCT', satteliteHostName),...
         'timeOutSecs', 4.0, ...                                                     % Allow 1 sec to receive ACK (from remote host) that message was received 
         'timeOutAction', UDPBaseSatteliteCommunicator.NOTIFY_CALLER, ...            % Do not throw an error, notify caller function instead (choose from UDPBaseSatteliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
-        'withData', struct('a', 12, 'b', rand(10,10)));
+        'withData', struct('a', 12, 'b', rand(3,3)));
 end
 
 %
@@ -122,7 +122,7 @@ function packetSequence = designPacketSequenceForSattelite2(baseHostName, sattel
         sprintf('%s <- %s', baseHostName, satteliteHostName), sprintf('SATTELITE(%s)___SENDING_SMALL_STRUCT', satteliteHostName),...
         'timeOutSecs', 4.0, ...                                             % Allow 1 sec to receive ACK (from remote host) that message was received 
         'timeOutAction', UDPBaseSatteliteCommunicator.NOTIFY_CALLER, ...    % Do not throw an error, notify caller function instead (choose from UDPBaseSatteliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
-        'withData', struct('a', 12, 'b', rand(20,20)));
+        'withData', struct('a', 12, 'b', rand(4,4)));
 end
 
 %
@@ -156,7 +156,7 @@ function packetSequence = designPacketSequenceForSattelite3(baseHostName, sattel
         sprintf('%s <- %s', baseHostName, satteliteHostName), sprintf('SATTELITE(%s)___SENDING_SMALL_STRUCT', satteliteHostName),...
         'timeOutSecs', 4.0, ...                                             % Allow 1 sec to receive ACK (from remote host) that message was received 
         'timeOutAction', UDPBaseSatteliteCommunicator.NOTIFY_CALLER, ...    % Do not throw an error, notify caller function instead (choose from UDPBaseSatteliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
-        'withData', struct('a', 12, 'b', rand(30,30)));
+        'withData', struct('a', 12, 'b', rand(5,5)));
 end
 
 
