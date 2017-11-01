@@ -74,14 +74,13 @@ classdef UDPBaseSatteliteCommunicator < handle
 
             % initialize UDP communication(s)
             iSatteliteNames = keys(obj.satteliteInfo);
-            for k = 1:numel(iSatteliteNames)
-                
+            for k = 1:numel(iSatteliteNames)  
                 % Set updHandle
                 satteliteName = iSatteliteNames{k};
                 obj.udpHandle = obj.satteliteInfo(satteliteName).satteliteChannelID;
-                
+
                 if strcmp(obj.verbosity,'max')
-                    fprintf('%s Opening connection to/from ''%s'', (local:%s remote:%s)\n', obj.selfSignature,  iSatteliteNames{k}, obj.localIP,  obj.satteliteInfo(satteliteName).remoteIP);
+                    fprintf('%s Opening connection to/from ''%s'' via udpChannel:%d, (local:%s remote:%s)\n', obj.selfSignature, satteliteName, obj.udpHandle, obj.localIP,  obj.satteliteInfo(satteliteName).remoteIP);
                 end
             
                 matlabNUDP('close', obj.udpHandle);

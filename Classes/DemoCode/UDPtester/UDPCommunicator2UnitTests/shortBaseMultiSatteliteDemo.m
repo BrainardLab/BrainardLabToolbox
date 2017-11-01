@@ -8,7 +8,7 @@ function shortBaseMultiSatteliteDemo
         
    
     %% Control what is printed on the command window
-    beVerbose = false;
+    beVerbose = true;
     displayPackets = true;
     
     %% Instantiate our UDPcommunicator object

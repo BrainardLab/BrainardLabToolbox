@@ -23,8 +23,8 @@ function [UDPobj, satteliteChannelIDs] = instantiateObject(hostNames, hostIPs, h
     satteliteIndices = find(strcmp(lower(hostRoles), 'sattelite'))
     for k = 1:numel(satteliteIndices)
         d.satteliteChannelID = k-1;
-        d.portNo = commPorts(satteliteIndices(k));
-        d.remoteIP = hostIPs(satteliteIndices(k));
+        d.portNo = commPorts{satteliteIndices(k)};
+        d.remoteIP = hostIPs{satteliteIndices(k)};
         d
         satteliteName = lower(hostNames{satteliteIndices(k)});
         satteliteInfo(satteliteName) = d;
