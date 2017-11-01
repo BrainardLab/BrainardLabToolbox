@@ -31,8 +31,8 @@ function shortBaseMultiSatteliteDemo
             sattelite3HostName};
         satteliteChannelIDs = {...
             UDPobj.satteliteInfo(sattelite1HostName).satteliteChannelID, ...
-            UDPobj.satteliteInfo(sattelite2HostName).satteliteChannelID
-            UDPobj.satteliteInfo(sattelite3HostName).satteliteChannelID
+            UDPobj.satteliteInfo(sattelite2HostName).satteliteChannelID, ...
+            UDPobj.satteliteInfo(sattelite3HostName).satteliteChannelID, ...
             };
         packetSequence = designPacketSequenceForBase(baseHostName, ...
                 satteliteNames,...
@@ -299,7 +299,7 @@ function packetSequence = designPacketSequenceForBase(baseHostName, satteliteHos
     
     % Sattelite1 sending to base
     satteliteName = satteliteHostNames{1};
-    satteliteChannelID = satteliteChannelID{1};
+    satteliteChannelID = satteliteChannelIDs{1};
     direction = sprintf('%s <- %s', baseHostName, satteliteName);
     messageLabel = sprintf('SATTELITE(%s)___SENDING_SMALL_STRUCT',satteliteName);
     packetSequence{numel(packetSequence)+1} = UDPBaseSatteliteCommunicator.makePacket(...
@@ -327,7 +327,7 @@ function packetSequence = designPacketSequenceForBase(baseHostName, satteliteHos
 
      % Sattelite3 sending to base
     satteliteName = satteliteHostNames{3};
-    satteliteChannelID = sattelite3ChannelID;
+    satteliteChannelID = satteliteChannelIDs{3};
     direction = sprintf('%s <- %s', baseHostName, satteliteName);
     messageLabel = sprintf('SATTELITE(%s)___SENDING_SMALL_STRUCT',satteliteName);
     packetSequence{numel(packetSequence)+1} = UDPBaseSatteliteCommunicator.makePacket(...
