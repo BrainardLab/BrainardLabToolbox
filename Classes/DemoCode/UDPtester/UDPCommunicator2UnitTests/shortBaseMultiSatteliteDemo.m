@@ -443,8 +443,8 @@ function packetSequence = designPacketSequenceForBase(baseHostName, satteliteHos
         % Extract radial-coeff
         radial_coeff = packet.messageData;
         
-        x(k) = radial_coeff*cos_coeff);
-        y(k) = radial_coeff*sin_coeff);
+        x(k) = radial_coeff*cos_coeff;
+        y(k) = radial_coeff*sin_coeff;
         plot(x,y, '*-');
         drawnow;
     end
