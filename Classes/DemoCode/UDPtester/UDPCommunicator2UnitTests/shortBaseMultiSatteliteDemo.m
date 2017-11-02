@@ -151,6 +151,19 @@ function packetSequence = designPacketSequenceForSattelite1(baseHostName, sattel
 
     % Sattelite sending to Base 100 cosine coefficients
     for k = 1:100
+        
+        % Sattelite waits to receive trigger message from Base to send next cos-coefficient
+        direction = sprintf('%s -> %s', baseHostName, satteliteHostName); 
+        expectedMessageLabel = sprintf('BASE(%s)_TO_SATTELITE(%s)___SEND_ME_NEXT_COS_COEFF', baseHostName, satteliteHostName);
+        packetSequence{numel(packetSequence)+1} = UDPBaseSatteliteCommunicator.makePacket(...
+            satteliteChannelID,...
+            direction, ...
+            expectedMessageLabel, ...
+            'timeOutSecs', timeOutSecs, ...                                            % Wait for this many secs to receive this message
+            'timeOutAction', UDPBaseSatteliteCommunicator.NOTIFY_CALLER, ...           % Do not throw an error, notify caller function instead (choose from UDPBaseSatteliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
+            'badTransmissionAction', UDPBaseSatteliteCommunicator.NOTIFY_CALLER ...    % Do not throw an error, notify caller function instead (choose from UDPBaseSatteliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
+        );
+
         direction = sprintf('%s <- %s', baseHostName, satteliteHostName);
         messageLabel = sprintf('SATTELITE(%s)___SENDING_COS_COEFF', satteliteHostName);
         messageData = cos(2*pi*k/100);
@@ -210,6 +223,19 @@ function packetSequence = designPacketSequenceForSattelite2(baseHostName, sattel
 
     % Sattelite sending to Base 100 sine coefficients
     for k = 1:100
+        
+        % Sattelite waits to receiv trigger message from Base to send next sin-coefficient
+        direction = sprintf('%s -> %s', baseHostName, satteliteHostName);
+        expectedMessageLabel = sprintf('BASE(%s)_TO_SATTELITE(%s)___SEND_ME_NEXT_SIN_COEFF', baseHostName, satteliteHostName);
+        packetSequence{numel(packetSequence)+1} = UDPBaseSatteliteCommunicator.makePacket(...
+        satteliteChannelID, ...
+        direction, ...
+        expectedMessageLabel, ...
+        'timeOutSecs', timeOutSecs, ...                                                    % Wait for this many secs to receive this message
+        'timeOutAction', UDPBaseSatteliteCommunicator.NOTIFY_CALLER, ...           % Do not throw an error, notify caller function instead (choose from UDPBaseSatteliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
+        'badTransmissionAction', UDPBaseSatteliteCommunicator.NOTIFY_CALLER ...    % Do not throw an error, notify caller function instead (choose from UDPBaseSatteliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
+        );
+
         direction = sprintf('%s <- %s', baseHostName, satteliteHostName);
         messageLabel = sprintf('SATTELITE(%s)___SENDING_SIN_COEFF', satteliteHostName);
         messageData = sin(2*pi*k/100);
@@ -269,6 +295,19 @@ function packetSequence = designPacketSequenceForSattelite3(baseHostName, sattel
 
     % Sattelite sending to Base 100 radial coefficients
     for k = -49:50
+        
+        % Sattelite waits to receive message from Base to send next radial coeff
+        direction =  sprintf('%s -> %s', baseHostName, satteliteHostName);
+        expectedMessageLabel = sprintf('BASE(%s)_TO_SATTELITE(%s)___SEND_ME_NEXT_RADIAL_COEFF', baseHostName, satteliteHostName);
+        packetSequence{numel(packetSequence)+1} = UDPBaseSatteliteCommunicator.makePacket(...
+            satteliteChannelID, ...
+            direction, ...
+            expectedMessageLabel,...
+            'timeOutSecs', timeOutSecs, ...                                            % Wait for timeOutSecs to receive this message
+            'timeOutAction', UDPBaseSatteliteCommunicator.NOTIFY_CALLER, ...           % Do not throw an error, notify caller function instead (choose from UDPBaseSatteliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
+            'badTransmissionAction', UDPBaseSatteliteCommunicator.NOTIFY_CALLER ...    % Do not throw an error, notify caller function instead (choose from UDPBaseSatteliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
+        );
+
         direction = sprintf('%s <- %s', baseHostName, satteliteHostName);
         messageLabel = sprintf('SATTELITE(%s)___SENDING_RADIAL_COEFF', satteliteHostName);
         messageData = k;
@@ -420,6 +459,20 @@ function packetSequence = designPacketSequenceForBase(baseHostName, satteliteHos
     );
 
     for k = 1:100
+        
+        % Tell sattelite-1 to send next cos-coefficient
+        satteliteHostName = satteliteHostNames{1};
+        direction = sprintf('%s -> %s', baseHostName, satteliteHostName); 
+        messageLabel = sprintf('BASE(%s)_TO_SATTELITE(%s)___SEND_ME_NEXT_COS_COEFF', baseHostName, satteliteHostName);
+        packetSequence{numel(packetSequence)+1} = UDPBaseSatteliteCommunicator.makePacket(...
+            satteliteChannelID,...
+            direction, ...
+            messageLabel, 'withData', 'right now, please',...
+            'timeOutSecs', timeOutSecs, ...                                            % Wait for this many secs to receive this message
+            'timeOutAction', UDPBaseSatteliteCommunicator.NOTIFY_CALLER, ...           % Do not throw an error, notify caller function instead (choose from UDPBaseSatteliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
+            'badTransmissionAction', UDPBaseSatteliteCommunicator.NOTIFY_CALLER ...    % Do not throw an error, notify caller function instead (choose from UDPBaseSatteliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
+        );
+    
         % Read cos-coeff from sattelite-1
         satteliteHostName = satteliteHostNames{1};
         direction = sprintf('%s <- %s', baseHostName, satteliteHostName);
@@ -430,6 +483,20 @@ function packetSequence = designPacketSequenceForBase(baseHostName, satteliteHos
             messageLabel, ...
             'timeOutSecs', timeOutSecs, ...                                            % Allow this many secs to receive ACK (from remote host) that message was received 
             'timeOutAction', UDPBaseSatteliteCommunicator.NOTIFY_CALLER ...            % Do not throw an error, notify caller function instead (choose from UDPBaseSatteliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
+        );
+    
+    
+        % Tell sattelite-2 to send next sin-coefficient
+        satteliteHostName = satteliteHostNames{2};
+        direction = sprintf('%s -> %s', baseHostName, satteliteHostName); 
+        messageLabel = sprintf('BASE(%s)_TO_SATTELITE(%s)___SEND_ME_NEXT_SIN_COEFF', baseHostName, satteliteHostName);
+        packetSequence{numel(packetSequence)+1} = UDPBaseSatteliteCommunicator.makePacket(...
+            satteliteChannelID,...
+            direction, ...
+            messageLabel, 'withData', 'right now, please',...
+            'timeOutSecs', timeOutSecs, ...                                            % Wait for this many secs to receive this message
+            'timeOutAction', UDPBaseSatteliteCommunicator.NOTIFY_CALLER, ...           % Do not throw an error, notify caller function instead (choose from UDPBaseSatteliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
+            'badTransmissionAction', UDPBaseSatteliteCommunicator.NOTIFY_CALLER ...    % Do not throw an error, notify caller function instead (choose from UDPBaseSatteliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
         );
     
         % Read sin-coeff from sattelite-2
@@ -444,6 +511,20 @@ function packetSequence = designPacketSequenceForBase(baseHostName, satteliteHos
             'timeOutAction', UDPBaseSatteliteCommunicator.NOTIFY_CALLER ...            % Do not throw an error, notify caller function instead (choose from UDPBaseSatteliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
         );
 
+    
+        % Tell sattelite-3 to send next sin-coefficient
+        satteliteHostName = satteliteHostNames{3};
+        direction = sprintf('%s -> %s', baseHostName, satteliteHostName); 
+        messageLabel = sprintf('BASE(%s)_TO_SATTELITE(%s)___SEND_ME_NEXT_RADIAL_COEFF', baseHostName, satteliteHostName);
+        packetSequence{numel(packetSequence)+1} = UDPBaseSatteliteCommunicator.makePacket(...
+            satteliteChannelID,...
+            direction, ...
+            messageLabel, 'withData', 'right now, please',...
+            'timeOutSecs', timeOutSecs, ...                                            % Wait for this many secs to receive this message
+            'timeOutAction', UDPBaseSatteliteCommunicator.NOTIFY_CALLER, ...           % Do not throw an error, notify caller function instead (choose from UDPBaseSatteliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
+            'badTransmissionAction', UDPBaseSatteliteCommunicator.NOTIFY_CALLER ...    % Do not throw an error, notify caller function instead (choose from UDPBaseSatteliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
+        );
+    
         % Read radial coeff from sattelite-3
         satteliteHostName = satteliteHostNames{3};
         direction = sprintf('%s <- %s', baseHostName, satteliteHostName);
