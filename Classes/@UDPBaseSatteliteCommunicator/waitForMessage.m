@@ -13,6 +13,8 @@ function packet = waitForMessage(obj, msgLabel, varargin)
     badTransmissionAction = p.Results.badTransmissionAction;
     udpHandle = obj.udpHandle;
     
+    fprintf('Acquiring message via udp channel: %d\n', udpHandle);
+    
     if isempty(expectedMessageLabel)
         expectedMessageLabel = '';
     end
