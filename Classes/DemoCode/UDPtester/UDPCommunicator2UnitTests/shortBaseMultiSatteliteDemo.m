@@ -73,7 +73,12 @@ function shortBaseMultiSatteliteDemo
     radial_coeff = [];
     cos_coeff = [];
     sin_coeff = [];
-    figure(1); clf;
+    hFig = figure(1); clf;
+    
+    videoOBJ = VideoWriter('UDPdata.mp4', 'MPEG-4'); % H264 format
+    videoOBJ.FrameRate = 5; 
+    videoOBJ.Quality = 100;
+    videoOBJ.open();
     
     for packetNo = 1:numel(packetSequence)
         [theMessageReceived, theCommunicationStatus, roundTipDelayMilliSecs] = ...
@@ -97,13 +102,23 @@ function shortBaseMultiSatteliteDemo
 
                  dataPoints = min([numel(sin_coeff) numel(cos_coeff) numel(radial_coeff)]);
                  if (dataPoints > 0)
-                     plot(radial_coeff(1:dataPoints).*cos_coeff(1:dataPoints), radial_coeff(1:dataPoints).*sin_coeff(1:dataPoints), '*-');
+                     x = radial_coeff(1:dataPoints).*cos_coeff(1:dataPoints);
+                     y = radial_coeff(1:dataPoints).*sin_coeff(1:dataPoints);
+                     maxRange = max([max(abs(x(:))) max(abs(y(:)))]);
+                     plot(x,y, '-', 'LineWidth', 5.0, 'Color', [0.7 0.7 0.4]); hold on; plot(x,y, '*-', 'LineWidth', 1.5);
+                     set(gca, 'XLim', maxRange * [-1 1], 'YLim', maxRange * [-1 1]);
+                     axis 'square';
+                     grid 'on'
+                     grid on
                      drawnow;
+                    videoOBJ.writeVideo(getframe(hFig));
                  end
              end % ~isempty
          end % if we are base
          
     end % packetNo
+    videoOBJ.close();
+    
 end
 
 %
@@ -294,7 +309,7 @@ function packetSequence = designPacketSequenceForSattelite3(baseHostName, sattel
     );
 
     % Sattelite sending to Base 100 radial coefficients
-    for k = -49:50
+    for k = 1:100
         
         % Sattelite waits to receive message from Base to send next radial coeff
         direction =  sprintf('%s -> %s', baseHostName, satteliteHostName);
@@ -310,7 +325,7 @@ function packetSequence = designPacketSequenceForSattelite3(baseHostName, sattel
 
         direction = sprintf('%s <- %s', baseHostName, satteliteHostName);
         messageLabel = sprintf('SATTELITE(%s)___SENDING_RADIAL_COEFF', satteliteHostName);
-        messageData = k;
+        messageData = 1-(k/100)*0.4;
         packetSequence{numel(packetSequence)+1} = UDPBaseSatteliteCommunicator.makePacket(...
             satteliteChannelID, ...
             direction, ...
@@ -459,9 +474,9 @@ function packetSequence = designPacketSequenceForBase(baseHostName, satteliteHos
     );
 
     for k = 1:100
-        
         % Tell sattelite-1 to send next cos-coefficient
         satteliteHostName = satteliteHostNames{1};
+        satteliteChannelID = satteliteChannelIDs{1};
         direction = sprintf('%s -> %s', baseHostName, satteliteHostName); 
         messageLabel = sprintf('BASE(%s)_TO_SATTELITE(%s)___SEND_ME_NEXT_COS_COEFF', baseHostName, satteliteHostName);
         packetSequence{numel(packetSequence)+1} = UDPBaseSatteliteCommunicator.makePacket(...
@@ -475,6 +490,7 @@ function packetSequence = designPacketSequenceForBase(baseHostName, satteliteHos
     
         % Read cos-coeff from sattelite-1
         satteliteHostName = satteliteHostNames{1};
+        satteliteChannelID = satteliteChannelIDs{1};
         direction = sprintf('%s <- %s', baseHostName, satteliteHostName);
         messageLabel = sprintf('SATTELITE(%s)___SENDING_COS_COEFF', satteliteHostName);
         packetSequence{numel(packetSequence)+1} = UDPBaseSatteliteCommunicator.makePacket(...
@@ -488,6 +504,7 @@ function packetSequence = designPacketSequenceForBase(baseHostName, satteliteHos
     
         % Tell sattelite-2 to send next sin-coefficient
         satteliteHostName = satteliteHostNames{2};
+        satteliteChannelID = satteliteChannelIDs{2};
         direction = sprintf('%s -> %s', baseHostName, satteliteHostName); 
         messageLabel = sprintf('BASE(%s)_TO_SATTELITE(%s)___SEND_ME_NEXT_SIN_COEFF', baseHostName, satteliteHostName);
         packetSequence{numel(packetSequence)+1} = UDPBaseSatteliteCommunicator.makePacket(...
@@ -501,6 +518,7 @@ function packetSequence = designPacketSequenceForBase(baseHostName, satteliteHos
     
         % Read sin-coeff from sattelite-2
         satteliteHostName = satteliteHostNames{2};
+        satteliteChannelID = satteliteChannelIDs{2};
         direction = sprintf('%s <- %s', baseHostName, satteliteHostName);
         messageLabel = sprintf('SATTELITE(%s)___SENDING_SIN_COEFF', satteliteHostName);
         packetSequence{numel(packetSequence)+1} = UDPBaseSatteliteCommunicator.makePacket(...
@@ -514,6 +532,7 @@ function packetSequence = designPacketSequenceForBase(baseHostName, satteliteHos
     
         % Tell sattelite-3 to send next sin-coefficient
         satteliteHostName = satteliteHostNames{3};
+        satteliteChannelID = satteliteChannelIDs{3};
         direction = sprintf('%s -> %s', baseHostName, satteliteHostName); 
         messageLabel = sprintf('BASE(%s)_TO_SATTELITE(%s)___SEND_ME_NEXT_RADIAL_COEFF', baseHostName, satteliteHostName);
         packetSequence{numel(packetSequence)+1} = UDPBaseSatteliteCommunicator.makePacket(...
@@ -527,6 +546,7 @@ function packetSequence = designPacketSequenceForBase(baseHostName, satteliteHos
     
         % Read radial coeff from sattelite-3
         satteliteHostName = satteliteHostNames{3};
+        satteliteChannelID = satteliteChannelIDs{3};
         direction = sprintf('%s <- %s', baseHostName, satteliteHostName);
         messageLabel = sprintf('SATTELITE(%s)___SENDING_RADIAL_COEFF', satteliteHostName);
         messageData = k;
