@@ -1,5 +1,10 @@
 function shortBaseMultiSatteliteDemo
 
+    %% Start fresh
+    fprintf('\nClearing stuff\n');
+    clear all;
+    fprintf('\n\n');
+    
     %% Define a 2-sattelite scheme
     baseHostName = 'manta';
     sattelite1HostName = 'ionean';
