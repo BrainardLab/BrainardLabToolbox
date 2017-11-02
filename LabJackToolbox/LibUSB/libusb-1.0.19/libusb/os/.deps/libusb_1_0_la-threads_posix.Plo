@@ -1,6 +1,6 @@
 os/libusb_1_0_la-threads_posix.lo: os/threads_posix.c \
   /usr/include/mach/mach.h /usr/include/mach/std_types.h \
-  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../lib/clang/6.0/include/stdint.h \
+  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../lib/clang/8.1.0/include/stdint.h \
   /usr/include/stdint.h /usr/include/sys/_types/_int8_t.h \
   /usr/include/sys/_types/_int16_t.h /usr/include/sys/_types/_int32_t.h \
   /usr/include/sys/_types/_int64_t.h /usr/include/_types/_uint8_t.h \
@@ -19,11 +19,12 @@ os/libusb_1_0_la-threads_posix.lo: os/threads_posix.c \
   /usr/include/mach/machine/vm_types.h /usr/include/mach/i386/vm_types.h \
   /usr/include/mach/i386/vm_param.h \
   /usr/include/sys/_types/_mach_port_t.h /usr/include/mach/vm_types.h \
-  /usr/include/mach/mach_types.h /usr/include/mach/host_info.h \
-  /usr/include/mach/message.h /usr/include/sys/appleapiopts.h \
-  /usr/include/mach/vm_statistics.h /usr/include/mach/machine.h \
-  /usr/include/mach/time_value.h /usr/include/mach/host_notify.h \
-  /usr/include/mach/host_special_ports.h \
+  /usr/include/sys/_types/_uuid_t.h /usr/include/mach/mach_types.h \
+  /usr/include/mach/host_info.h /usr/include/mach/message.h \
+  /usr/include/sys/appleapiopts.h /usr/include/Availability.h \
+  /usr/include/AvailabilityInternal.h /usr/include/mach/vm_statistics.h \
+  /usr/include/mach/machine.h /usr/include/mach/time_value.h \
+  /usr/include/mach/host_notify.h /usr/include/mach/host_special_ports.h \
   /usr/include/mach/memory_object_types.h /usr/include/mach/vm_prot.h \
   /usr/include/mach/vm_sync.h /usr/include/mach/exception_types.h \
   /usr/include/mach/machine/exception.h \
@@ -37,8 +38,7 @@ os/libusb_1_0_la-threads_posix.lo: os/threads_posix.c \
   /usr/include/mach/processor_info.h \
   /usr/include/mach/machine/processor_info.h \
   /usr/include/mach/i386/processor_info.h /usr/include/mach/task_info.h \
-  /usr/include/mach/policy.h /usr/include/Availability.h \
-  /usr/include/AvailabilityInternal.h /usr/include/mach/task_policy.h \
+  /usr/include/mach/policy.h /usr/include/mach/task_policy.h \
   /usr/include/mach/task_special_ports.h /usr/include/mach/thread_info.h \
   /usr/include/mach/thread_policy.h \
   /usr/include/mach/thread_special_ports.h \
@@ -46,6 +46,9 @@ os/libusb_1_0_la-threads_posix.lo: os/threads_posix.c \
   /usr/include/mach/vm_inherit.h /usr/include/mach/vm_purgable.h \
   /usr/include/mach/vm_behavior.h /usr/include/mach/vm_region.h \
   /usr/include/mach/machine/vm_param.h /usr/include/mach/kmod.h \
+  /usr/include/mach/dyld_kernel.h /usr/include/sys/_types/_fsid_t.h \
+  /usr/include/sys/_types/_u_int32_t.h \
+  /usr/include/sys/_types/_fsobj_id_t.h \
   /usr/include/mach/mach_interface.h /usr/include/mach/clock_priv.h \
   /usr/include/string.h /usr/include/_types.h \
   /usr/include/sys/_types/_size_t.h /usr/include/sys/_types/_null.h \
@@ -71,7 +74,7 @@ os/libusb_1_0_la-threads_posix.lo: os/threads_posix.c \
   /usr/include/mach/task.h /usr/include/mach/thread_act.h \
   /usr/include/mach/vm_map.h /usr/include/mach/mach_port.h \
   /usr/include/mach/mach_init.h /usr/include/mach/vm_page_size.h \
-  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../lib/clang/6.0/include/stdarg.h \
+  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../lib/clang/8.1.0/include/stdarg.h \
   /usr/include/mach/mach_traps.h /usr/include/machine/endian.h \
   /usr/include/i386/endian.h /usr/include/sys/_endian.h \
   /usr/include/mach/mach_host.h /usr/include/mach/thread_switch.h \
@@ -97,7 +100,7 @@ os/libusb_1_0_la-threads_posix.lo: os/threads_posix.c \
 
 /usr/include/mach/std_types.h:
 
-/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../lib/clang/6.0/include/stdint.h:
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../lib/clang/8.1.0/include/stdint.h:
 
 /usr/include/stdint.h:
 
@@ -163,6 +166,8 @@ os/libusb_1_0_la-threads_posix.lo: os/threads_posix.c \
 
 /usr/include/mach/vm_types.h:
 
+/usr/include/sys/_types/_uuid_t.h:
+
 /usr/include/mach/mach_types.h:
 
 /usr/include/mach/host_info.h:
@@ -170,6 +175,10 @@ os/libusb_1_0_la-threads_posix.lo: os/threads_posix.c \
 /usr/include/mach/message.h:
 
 /usr/include/sys/appleapiopts.h:
+
+/usr/include/Availability.h:
+
+/usr/include/AvailabilityInternal.h:
 
 /usr/include/mach/vm_statistics.h:
 
@@ -221,10 +230,6 @@ os/libusb_1_0_la-threads_posix.lo: os/threads_posix.c \
 
 /usr/include/mach/policy.h:
 
-/usr/include/Availability.h:
-
-/usr/include/AvailabilityInternal.h:
-
 /usr/include/mach/task_policy.h:
 
 /usr/include/mach/task_special_ports.h:
@@ -250,6 +255,14 @@ os/libusb_1_0_la-threads_posix.lo: os/threads_posix.c \
 /usr/include/mach/machine/vm_param.h:
 
 /usr/include/mach/kmod.h:
+
+/usr/include/mach/dyld_kernel.h:
+
+/usr/include/sys/_types/_fsid_t.h:
+
+/usr/include/sys/_types/_u_int32_t.h:
+
+/usr/include/sys/_types/_fsobj_id_t.h:
 
 /usr/include/mach/mach_interface.h:
 
@@ -333,7 +346,7 @@ os/libusb_1_0_la-threads_posix.lo: os/threads_posix.c \
 
 /usr/include/mach/vm_page_size.h:
 
-/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../lib/clang/6.0/include/stdarg.h:
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../lib/clang/8.1.0/include/stdarg.h:
 
 /usr/include/mach/mach_traps.h:
 
