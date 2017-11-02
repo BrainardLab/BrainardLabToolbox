@@ -82,21 +82,26 @@ function shortBaseMultiSatteliteDemo
                 'displayPackets', displayPackets...
              );
          
-         if (contains(theMessageReceived.label, 'SIN_COEFF'))
-             sin_coeff = cat(1,sin_coeff, theMessageReceived.data);
-         end
-         if (contains(theMessageReceived.label, 'COS_COEFF'))
-             cos_coeff = cat(1,cos_coeff, theMessageReceived.data);
-         end
-         if (contains(theMessageReceived.label, 'RADIAL_COEFF'))
-             radial_coeff = cat(1,radial_coeff, theMessageReceived.data);
-         end
-         
-         dataPoints = min([numel(sin_coeff) numel(cos_coeff) numel(radial_coeff)]);
-         if (dataPoints > 0)
-             plot(radial_coeff(1:dataPoints).*cos_coeff(1:dataPoints), radial_coeff(1:dataPoints).*sin_coeff(1:dataPoints), '*-');
-             drawnow;
-         end
+         % If we are the base, plot what we receive from our sattelites
+         if (UDPobj.localHostIsBase)
+             if (~isempty(theMessageReceived))
+                 if (contains(theMessageReceived.label, 'SIN_COEFF'))
+                     sin_coeff = cat(1,sin_coeff, theMessageReceived.data);
+                 end
+                 if (contains(theMessageReceived.label, 'COS_COEFF'))
+                     cos_coeff = cat(1,cos_coeff, theMessageReceived.data);
+                 end
+                 if (contains(theMessageReceived.label, 'RADIAL_COEFF'))
+                     radial_coeff = cat(1,radial_coeff, theMessageReceived.data);
+                 end
+
+                 dataPoints = min([numel(sin_coeff) numel(cos_coeff) numel(radial_coeff)]);
+                 if (dataPoints > 0)
+                     plot(radial_coeff(1:dataPoints).*cos_coeff(1:dataPoints), radial_coeff(1:dataPoints).*sin_coeff(1:dataPoints), '*-');
+                     drawnow;
+                 end
+             end % ~isempty
+         end % if we are base
          
     end % packetNo
 end
