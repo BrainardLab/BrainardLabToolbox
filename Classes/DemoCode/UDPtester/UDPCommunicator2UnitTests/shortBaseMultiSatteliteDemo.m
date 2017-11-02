@@ -90,60 +90,79 @@ function shortBaseMultiSatteliteDemo
                 radial_coeff = [];
                 cos_coeff = [];
                 sin_coeff = [];
-                dataP = 0;
                 sat1 = [];
                 sat2 = [];
                 sat3 = [];
                 hFig = figure(1); clf;
-                set(hFig, 'Position', [1000 918 560 420], 'Color', [1 1 1])
+                set(hFig, 'Position', [1000 918 1000 420], 'Color', [1 1 1])
              end
              
              if (~isempty(theMessageReceived))
                  if (contains(theMessageReceived.label, 'SIN_COEFF'))
-                     sin_coeff = cat(1,sin_coeff, theMessageReceived.data);
-                     dataP = dataP + 1;
-                     sat1 = cat(1,sat1, sin_coeff );
-                     sat2 = cat(1,sat2, 0);
-                     sat3 = cat(1,sat3, 0);
+                     sin_coeff = cat(2,sin_coeff, theMessageReceived.data);
+                     sat1(numel(sat1)+1) = theMessageReceived.data;
+                     sat2(numel(sat2)+1) = 0;
+                     sat3(numel(sat3)+1) = 0;
                  end
+                 
                  if (contains(theMessageReceived.label, 'COS_COEFF'))
-                     cos_coeff = cat(1,cos_coeff, theMessageReceived.data);
-                     dataP = dataP + 1;
-                     sat2 = cat(1,sat2, cos_coeff);
-                     sat1 = cat(1,sat1, 0);
-                     sat3 = cat(1,sat3, 0);
+                     cos_coeff = cat(12,cos_coeff, theMessageReceived.data);
+                     sat2(numel(sat2)+1) = theMessageReceived.data;
+                     sat1(numel(sat1)+1) = 0;
+                     sat3(numel(sat3)+1) = 0;
                  end
+                 
                  if (contains(theMessageReceived.label, 'RADIAL_COEFF'))
-                     radial_coeff = cat(1,radial_coeff, theMessageReceived.data);
-                     dataP = dataP + 1;
-                     sat3 = cat(1,sat3, radial_coeff);
-                     sat1 = cat(1,sat1, 0);
-                     sat2 = cat(1,sat2, 0);
+                     radial_coeff = cat(2,radial_coeff, theMessageReceived.data);
+                     sat3(numel(sat3)+1) = theMessageReceived.data;
+                     sat1(numel(sat1)+1) = 0;
+                     sat2(numel(sat2)+1) = 0;
                  end
 
                  dataPoints = min([numel(sin_coeff) numel(cos_coeff) numel(radial_coeff)]);
                  if (dataPoints > 0)
                      x = radial_coeff(1:dataPoints).*cos_coeff(1:dataPoints);
                      y = radial_coeff(1:dataPoints).*sin_coeff(1:dataPoints);
+                     size(x)
+                     size(y)
+                     size(radial_coeff(1:dataPoints))
+                     size(cos_coeff(1:dataPoints))
+                     size(sin_coeff(1:dataPoints))
                      maxRange = max([max(abs(x(:))) max(abs(y(:)))]);
-                     subplot(1,2,1);
+                     subplot(3,5,[1 2 6 7]);
                      plot(x,y, '-', 'LineWidth', 5.0, 'Color', [0.7 0.7 0.4]); hold on; plot(x,y, '*-', 'LineWidth', 1.5); hold off;
                      set(gca, 'XLim', maxRange * [-1 1], 'YLim', maxRange * [-1 1]);
                      axis 'square';
                      grid 'on'
                      grid on
-                     subplot(1,2,2);
-                     stem(1:numel(sat1), sat1, 'ro'); hold on
-                     stem(1:numel(sat2), sat2, 'mo');
-                     stem(1:numel(sat3), sat3, 'bo'); hold off
-                     set(gca, 'XLim', [1 300], 'YLim', [-1 1]);
-                     legend('sat-1', 'sat-2', 'sat-3');
-                     drawnow;
-                    videoOBJ.writeVideo(getframe(hFig));
                  end
+                 
+                 subplot(3,5, 3:5);
+                 if (~isempty(sat1))
+                    stem(sat1, 'filled'); 
+                    legend('sat-1');
+                 end
+                 set(gca, 'XLim', [1 300], 'YLim', [-1 1]);
+
+                 subplot(3,5, 8:10);
+                 
+                 if (~isempty(sat2))
+                    stem(sat2, 'filled');
+                    legend('sat-2');
+                 end
+                 
+                 set(gca, 'XLim', [1 300], 'YLim', [-1 1]);
+
+                 subplot(3,5, 13:15);
+                 if (~isempty(sat3))
+                    stem(sat3, 'filled');
+                    legend('sat-3');
+                 end
+                 set(gca, 'XLim', [1 300], 'YLim', [0 1]);
+                 drawnow;
+                 videoOBJ.writeVideo(getframe(hFig));
              end % ~isempty
          end % if we are base
-         
     end % packetNo
     
     if (UDPobj.localHostIsBase)
