@@ -69,6 +69,13 @@ function shortBaseMultiSatteliteDemo
     allSattelitesAreAGOMessage = 'All Sattelites Are A GO!';
     UDPobj.initiateCommunication(hostRoles,  hostNames, triggerMessage, allSattelitesAreAGOMessage, 'beVerbose', beVerbose);
     
+    if (UDPobj.localHostIsBase)
+        videoOBJ = VideoWriter('UDPdata.mp4', 'MPEG-4'); % H264 format
+    	videoOBJ.FrameRate = 30; 
+        videoOBJ.Quality = 100;
+        videoOBJ.open();
+    end
+    
     %% Execute communication protocol
     for packetNo = 1:numel(packetSequence)
         [theMessageReceived, theCommunicationStatus, roundTipDelayMilliSecs] = ...
@@ -85,11 +92,7 @@ function shortBaseMultiSatteliteDemo
                 cos_coeff = [];
                 sin_coeff = [];
                 hFig = figure(1); clf;
-    
-                videoOBJ = VideoWriter('UDPdata.mp4', 'MPEG-4'); % H264 format
-                videoOBJ.FrameRate = 5; 
-                videoOBJ.Quality = 100;
-                videoOBJ.open();
+                set(hFig, 'Position', [1000 918 560 420], 'Color', [1 1 1])
              end
              
              if (~isempty(theMessageReceived))
