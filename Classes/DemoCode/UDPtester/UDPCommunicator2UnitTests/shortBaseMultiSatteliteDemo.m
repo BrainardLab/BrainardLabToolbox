@@ -70,6 +70,7 @@ function shortBaseMultiSatteliteDemo
     UDPobj.initiateCommunication(hostRoles,  hostNames, triggerMessage, allSattelitesAreAGOMessage, 'beVerbose', beVerbose);
     
     %% Execute communication protocol
+    for k = 1:10
     for packetNo = 1:numel(packetSequence)
         [theMessageReceived, theCommunicationStatus, roundTipDelayMilliSecs] = ...
             UDPobj.communicate(packetNo, packetSequence{packetNo}, ...
@@ -77,6 +78,7 @@ function shortBaseMultiSatteliteDemo
                 'displayPackets', displayPackets...
              );
     end % packetNo
+    end
 end
 
 %
