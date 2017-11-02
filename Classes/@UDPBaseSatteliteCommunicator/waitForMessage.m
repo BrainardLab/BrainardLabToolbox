@@ -69,6 +69,7 @@ function packet = waitForMessage(obj, msgLabel, varargin)
     
     trailingMessageLabel = matlabNUDP('receive', udpHandle);
     if (~strcmp(packet.messageLabel,trailingMessageLabel))
+        fprintf('Trailing message label mismatch: expected ''%s'', received: ''%s''.\n', packet.messageLabel,trailingMessageLabel);
         if (strcmp(badTransmissionAction, obj.THROW_ERROR))
             % ask remote host to abort
             obj.sendMessage(obj.ABORT_MESSAGE.label, obj.ABORT_MESSAGE.value);

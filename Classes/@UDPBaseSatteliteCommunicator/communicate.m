@@ -82,8 +82,6 @@ end
 
 function transmitAction = isATransmissionPacket(direction, hostName)
     transmitAction = false;
-    %p = strfind(hostName, '.');
-    %hostName = hostName(1:p(1)-1);
     hostEntry = strfind(direction, hostName);
     rightwardArrowEntry = strfind(direction, '->');
     leftwardArrowEntry = strfind(direction, '<-');
