@@ -20,7 +20,7 @@ function shortBaseMultiSatteliteDemo
     
     
     %% Use 10 second time out for all comms
-    timeOutSecs = 10;
+    timeOutSecs = 30;
     
     %% Make the packetSequences for the base
     if (contains(UDPobj.localHostName, baseHostName))
