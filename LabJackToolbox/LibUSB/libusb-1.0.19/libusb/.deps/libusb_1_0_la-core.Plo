@@ -3,7 +3,7 @@ libusb_1_0_la-core.lo: core.c ../config.h /usr/include/errno.h \
   /usr/include/sys/_symbol_aliasing.h \
   /usr/include/sys/_posix_availability.h \
   /usr/include/sys/_types/_errno_t.h \
-  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../lib/clang/6.0/include/stdarg.h \
+  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../lib/clang/8.1.0/include/stdarg.h \
   /usr/include/stdio.h /usr/include/Availability.h \
   /usr/include/AvailabilityInternal.h /usr/include/_types.h \
   /usr/include/sys/_types.h /usr/include/machine/_types.h \
@@ -23,7 +23,7 @@ libusb_1_0_la-core.lo: core.c ../config.h /usr/include/errno.h \
   /usr/include/sys/_types/_ucontext.h \
   /usr/include/sys/_types/_sigset_t.h /usr/include/sys/_types/_uid_t.h \
   /usr/include/sys/resource.h \
-  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../lib/clang/6.0/include/stdint.h \
+  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../lib/clang/8.1.0/include/stdint.h \
   /usr/include/stdint.h /usr/include/sys/_types/_int8_t.h \
   /usr/include/sys/_types/_int16_t.h /usr/include/sys/_types/_int32_t.h \
   /usr/include/sys/_types/_int64_t.h /usr/include/_types/_uint8_t.h \
@@ -36,7 +36,10 @@ libusb_1_0_la-core.lo: core.c ../config.h /usr/include/errno.h \
   /usr/include/libkern/i386/_OSByteOrder.h /usr/include/alloca.h \
   /usr/include/sys/_types/_ct_rune_t.h /usr/include/sys/_types/_rune_t.h \
   /usr/include/sys/_types/_wchar_t.h /usr/include/machine/types.h \
-  /usr/include/i386/types.h /usr/include/sys/_types/_dev_t.h \
+  /usr/include/i386/types.h /usr/include/sys/_types/_u_int8_t.h \
+  /usr/include/sys/_types/_u_int16_t.h \
+  /usr/include/sys/_types/_u_int32_t.h \
+  /usr/include/sys/_types/_u_int64_t.h /usr/include/sys/_types/_dev_t.h \
   /usr/include/sys/_types/_mode_t.h /usr/include/string.h \
   /usr/include/sys/_types/_rsize_t.h /usr/include/strings.h \
   /usr/include/secure/_string.h /usr/include/sys/types.h \
@@ -65,12 +68,13 @@ libusb_1_0_la-core.lo: core.c ../config.h /usr/include/errno.h \
   /usr/include/sys/_pthread/_pthread_key_t.h \
   /usr/include/sys/_types/_fsblkcnt_t.h \
   /usr/include/sys/_types/_fsfilcnt_t.h /usr/include/sys/time.h \
-  /usr/include/sys/_types/_timespec.h /usr/include/time.h \
+  /usr/include/sys/_types/_timespec.h \
+  /usr/include/sys/_types/_timeval64.h /usr/include/time.h \
   /usr/include/sys/_select.h /usr/include/syslog.h \
   /usr/include/sys/syslog.h libusbi.h \
-  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../lib/clang/6.0/include/stddef.h \
+  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../lib/clang/8.1.0/include/stddef.h \
   /usr/include/poll.h /usr/include/sys/poll.h libusb.h \
-  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../lib/clang/6.0/include/limits.h \
+  /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../lib/clang/8.1.0/include/limits.h \
   /usr/include/limits.h /usr/include/machine/limits.h \
   /usr/include/i386/limits.h /usr/include/i386/_limits.h \
   /usr/include/sys/syslimits.h version.h version_nano.h \
@@ -97,7 +101,7 @@ libusb_1_0_la-core.lo: core.c ../config.h /usr/include/errno.h \
 
 /usr/include/sys/_types/_errno_t.h:
 
-/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../lib/clang/6.0/include/stdarg.h:
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../lib/clang/8.1.0/include/stdarg.h:
 
 /usr/include/stdio.h:
 
@@ -165,7 +169,7 @@ libusb_1_0_la-core.lo: core.c ../config.h /usr/include/errno.h \
 
 /usr/include/sys/resource.h:
 
-/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../lib/clang/6.0/include/stdint.h:
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../lib/clang/8.1.0/include/stdint.h:
 
 /usr/include/stdint.h:
 
@@ -216,6 +220,14 @@ libusb_1_0_la-core.lo: core.c ../config.h /usr/include/errno.h \
 /usr/include/machine/types.h:
 
 /usr/include/i386/types.h:
+
+/usr/include/sys/_types/_u_int8_t.h:
+
+/usr/include/sys/_types/_u_int16_t.h:
+
+/usr/include/sys/_types/_u_int32_t.h:
+
+/usr/include/sys/_types/_u_int64_t.h:
 
 /usr/include/sys/_types/_dev_t.h:
 
@@ -297,6 +309,8 @@ libusb_1_0_la-core.lo: core.c ../config.h /usr/include/errno.h \
 
 /usr/include/sys/_types/_timespec.h:
 
+/usr/include/sys/_types/_timeval64.h:
+
 /usr/include/time.h:
 
 /usr/include/sys/_select.h:
@@ -307,7 +321,7 @@ libusb_1_0_la-core.lo: core.c ../config.h /usr/include/errno.h \
 
 libusbi.h:
 
-/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../lib/clang/6.0/include/stddef.h:
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../lib/clang/8.1.0/include/stddef.h:
 
 /usr/include/poll.h:
 
@@ -315,7 +329,7 @@ libusbi.h:
 
 libusb.h:
 
-/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../lib/clang/6.0/include/limits.h:
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../lib/clang/8.1.0/include/limits.h:
 
 /usr/include/limits.h:
 
