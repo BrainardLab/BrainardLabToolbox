@@ -18,6 +18,10 @@ function shortBaseMultiSatteliteDemo
     %% Instantiate the UDPBaseSatteliteCommunicator object
     UDPobj = UDPBaseSatteliteCommunicator.instantiateObject(hostNames, hostIPs, hostRoles, beVerbose);
     
+    
+    %% Use 10 second time out for all comms
+    timeOutSecs = 10;
+    
     %% Make the packetSequences for the base
     if (contains(UDPobj.localHostName, baseHostName))
         satteliteNames = {...
@@ -31,24 +35,28 @@ function shortBaseMultiSatteliteDemo
             };
         packetSequence = designPacketSequenceForBase(baseHostName, ...
                 satteliteNames,...
-                satteliteChannelIDs);    
+                satteliteChannelIDs, ...
+                timeOutSecs);    
     end
     
     %% Make the packetSequences for the sattelite(s)
     if (contains(UDPobj.localHostName, sattelite3HostName))
         packetSequence = designPacketSequenceForSattelite3(baseHostName, ...
             sattelite3HostName, ...
-            UDPobj.satteliteInfo(sattelite3HostName).satteliteChannelID);
+            UDPobj.satteliteInfo(sattelite3HostName).satteliteChannelID, ...
+            timeOutSecs);
     
     elseif (contains(UDPobj.localHostName, sattelite2HostName))
         packetSequence = designPacketSequenceForSattelite2(baseHostName, ...
             sattelite2HostName, ...
-            UDPobj.satteliteInfo(sattelite2HostName).satteliteChannelID);
+            UDPobj.satteliteInfo(sattelite2HostName).satteliteChannelID, ...
+            timeOutSecs);
         
     elseif (contains(UDPobj.localHostName, sattelite1HostName))
         packetSequence = designPacketSequenceForSattelite1(baseHostName, ...
             sattelite1HostName, ...
-            UDPobj.satteliteInfo(sattelite1HostName).satteliteChannelID);
+            UDPobj.satteliteInfo(sattelite1HostName).satteliteChannelID, ...
+            timeOutSecs);
     end
     
     %% Establish the base / multi-sattelite communication
@@ -69,7 +77,7 @@ end
 %
 % DESIGN PACKET SEQUENCE FOR SATTELITE-1
 %
-function packetSequence = designPacketSequenceForSattelite1(baseHostName, satteliteHostName, satteliteChannelID)
+function packetSequence = designPacketSequenceForSattelite1(baseHostName, satteliteHostName, satteliteChannelID, timeOutSecs)
     % Define the communication  packetSequence
     packetSequence = {};
     
@@ -80,7 +88,7 @@ function packetSequence = designPacketSequenceForSattelite1(baseHostName, sattel
         satteliteChannelID, ...
         direction, ...
         expectedMessageLabel, ...
-        'timeOutSecs', 4.0, ...                                                     % Wait for 1 secs to receive this message
+        'timeOutSecs', timeOutSecs, ...                                             % Wait for this many secs to receive this message
         'timeOutAction', UDPBaseSatteliteCommunicator.NOTIFY_CALLER, ...            % Do not throw an error, notify caller function instead (choose from UDPBaseSatteliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
         'badTransmissionAction', UDPBaseSatteliteCommunicator.NOTIFY_CALLER ...     % Do not throw an error, notify caller function instead (choose from UDPBaseSatteliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
     );
@@ -92,7 +100,7 @@ function packetSequence = designPacketSequenceForSattelite1(baseHostName, sattel
         satteliteChannelID,...
         direction, ...
         expectedMessageLabel, ...
-        'timeOutSecs', 4.0, ...                                                    % Wait for 1 secs to receive this message
+        'timeOutSecs', timeOutSecs, ...                                            % Wait for this many secs to receive this message
         'timeOutAction', UDPBaseSatteliteCommunicator.NOTIFY_CALLER, ...           % Do not throw an error, notify caller function instead (choose from UDPBaseSatteliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
         'badTransmissionAction', UDPBaseSatteliteCommunicator.NOTIFY_CALLER ...    % Do not throw an error, notify caller function instead (choose from UDPBaseSatteliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
     );
@@ -105,7 +113,7 @@ function packetSequence = designPacketSequenceForSattelite1(baseHostName, sattel
         satteliteChannelID, ...
         direction, ...
         messageLabel, 'withData', messageData, ...
-        'timeOutSecs', 20.0, ...                                                     % Allow 1 sec to receive ACK (from remote host) that message was received 
+        'timeOutSecs', timeOutSecs, ...                                            % Allow this many secs to receive ACK (from remote host) that message was received 
         'timeOutAction', UDPBaseSatteliteCommunicator.NOTIFY_CALLER ...            % Do not throw an error, notify caller function instead (choose from UDPBaseSatteliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
     );
 end
@@ -113,7 +121,7 @@ end
 %
 % DESIGN PACKET SEQUENCE FOR SATTELITE-2
 %
-function packetSequence = designPacketSequenceForSattelite2(baseHostName, satteliteHostName, satteliteChannelID)
+function packetSequence = designPacketSequenceForSattelite2(baseHostName, satteliteHostName, satteliteChannelID, timeOutSecs)
     % Define the communication  packetSequence
     packetSequence = {};
     
@@ -124,7 +132,7 @@ function packetSequence = designPacketSequenceForSattelite2(baseHostName, sattel
         satteliteChannelID, ...
         direction, ...
         expectedMessageLabel, ...
-        'timeOutSecs', 4.0, ...                                                     % Wait for 1 secs to receive this message
+        'timeOutSecs', timeOutSecs, ...                                             % Wait for this many secs to receive this message
         'timeOutAction', UDPBaseSatteliteCommunicator.NOTIFY_CALLER, ...            % Do not throw an error, notify caller function instead (choose from UDPBaseSatteliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
         'badTransmissionAction', UDPBaseSatteliteCommunicator.NOTIFY_CALLER ...     % Do not throw an error, notify caller function instead (choose from UDPBaseSatteliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
     );
@@ -136,7 +144,7 @@ function packetSequence = designPacketSequenceForSattelite2(baseHostName, sattel
         satteliteChannelID, ...
         direction, ...
         expectedMessageLabel, ...
-        'timeOutSecs', 4.0, ...                                                    % Wait for 1 secs to receive this message
+        'timeOutSecs', timeOutSecs, ...                                                    % Wait for this many secs to receive this message
         'timeOutAction', UDPBaseSatteliteCommunicator.NOTIFY_CALLER, ...           % Do not throw an error, notify caller function instead (choose from UDPBaseSatteliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
         'badTransmissionAction', UDPBaseSatteliteCommunicator.NOTIFY_CALLER ...    % Do not throw an error, notify caller function instead (choose from UDPBaseSatteliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
     );
@@ -149,7 +157,7 @@ function packetSequence = designPacketSequenceForSattelite2(baseHostName, sattel
         satteliteChannelID, ...
         direction,...
         messageLabel, 'withData', messageData, ...
-        'timeOutSecs', 20.0, ...                                             % Allow 1 sec to receive ACK (from remote host) that message was received 
+        'timeOutSecs', timeOutSecs, ...                                    % Allow this many secs to receive ACK (from remote host) that message was received 
         'timeOutAction', UDPBaseSatteliteCommunicator.NOTIFY_CALLER ...    % Do not throw an error, notify caller function instead (choose from UDPBaseSatteliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
    );
 end
@@ -157,7 +165,7 @@ end
 %
 % DESIGN PACKET SEQUENCE FOR SATTELITE-3
 %
-function packetSequence = designPacketSequenceForSattelite3(baseHostName, satteliteHostName, satteliteChannelID)
+function packetSequence = designPacketSequenceForSattelite3(baseHostName, satteliteHostName, satteliteChannelID, timeOutSecs)
     % Define the communication  packetSequence
     packetSequence = {};
     
@@ -168,7 +176,7 @@ function packetSequence = designPacketSequenceForSattelite3(baseHostName, sattel
         satteliteChannelID, ...
         direction,...
         expectedMessageLabel, ...
-        'timeOutSecs', 4.0, ...                                                     % Wait for 1 secs to receive this message
+        'timeOutSecs', timeOutSecs, ...                                             % Wait for timeOutSecsto receive this message
         'timeOutAction', UDPBaseSatteliteCommunicator.NOTIFY_CALLER, ...            % Do not throw an error, notify caller function instead (choose from UDPBaseSatteliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
         'badTransmissionAction', UDPBaseSatteliteCommunicator.NOTIFY_CALLER ...     % Do not throw an error, notify caller function instead (choose from UDPBaseSatteliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
     );
@@ -180,7 +188,7 @@ function packetSequence = designPacketSequenceForSattelite3(baseHostName, sattel
         satteliteChannelID, ...
         direction, ...
         expectedMessageLabel,...
-        'timeOutSecs', 4.0, ...                                                    % Wait for 1 secs to receive this message
+        'timeOutSecs', timeOutSecs, ...                                            % Wait for timeOutSecs to receive this message
         'timeOutAction', UDPBaseSatteliteCommunicator.NOTIFY_CALLER, ...           % Do not throw an error, notify caller function instead (choose from UDPBaseSatteliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
         'badTransmissionAction', UDPBaseSatteliteCommunicator.NOTIFY_CALLER ...    % Do not throw an error, notify caller function instead (choose from UDPBaseSatteliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
     );
@@ -193,7 +201,7 @@ function packetSequence = designPacketSequenceForSattelite3(baseHostName, sattel
         satteliteChannelID, ...
         direction, ...
         messageLabel, 'withData', messageData, ...
-        'timeOutSecs', 20.0, ...                                             % Allow 1 sec to receive ACK (from remote host) that message was received 
+        'timeOutSecs', timeOutSecs, ...                                    % Allow timeOutSecs  to receive ACK (from remote host) that message was received 
         'timeOutAction', UDPBaseSatteliteCommunicator.NOTIFY_CALLER ...    % Do not throw an error, notify caller function instead (choose from UDPBaseSatteliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
     );
 end
@@ -202,7 +210,7 @@ end
 %
 % DESIGN PACKET SEQUENCE FOR BASE
 %
-function packetSequence = designPacketSequenceForBase(baseHostName, satteliteHostNames, satteliteChannelIDs)
+function packetSequence = designPacketSequenceForBase(baseHostName, satteliteHostNames, satteliteChannelIDs, timeOutSecs)
     % Define the communication  packetSequence
     packetSequence = {};
 
@@ -216,7 +224,7 @@ function packetSequence = designPacketSequenceForBase(baseHostName, satteliteHos
         satteliteChannelID,...
         direction, ...
         messageLabel, 'withData', messageData, ...
-        'timeOutSecs', 4.0, ...                                            % Allow 1 sec to receive ACK (from remote host) that message was received 
+        'timeOutSecs', timeOutSecs, ...                                    % Allow timeOutSecsto receive ACK (from remote host) that message was received 
         'timeOutAction', UDPBaseSatteliteCommunicator.NOTIFY_CALLER ...    % Do not throw an error, notify caller function instead (choose from UDPBaseSatteliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
     );
 
@@ -230,7 +238,7 @@ function packetSequence = designPacketSequenceForBase(baseHostName, satteliteHos
         satteliteChannelID,...
         direction, ...
         messageLabel, 'withData', messageData, ...
-        'timeOutSecs', 4.0, ...                                             % Allow 1 sec to receive ACK (from remote host) that message was received 
+        'timeOutSecs', timeOutSecs, ...                                     % Allow timeOutSecs to receive ACK (from remote host) that message was received 
         'timeOutAction', UDPBaseSatteliteCommunicator.NOTIFY_CALLER, ...    % Do not throw an error, notify caller function instead (choose from UDPBaseSatteliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
         'withData', 2 ...
     );
@@ -245,7 +253,7 @@ function packetSequence = designPacketSequenceForBase(baseHostName, satteliteHos
         satteliteChannelID,...
         direction, ...
         messageLabel, 'withData', messageData, ...
-        'timeOutSecs', 4.0, ...                                             % Allow 1 sec to receive ACK (from remote host) that message was received 
+        'timeOutSecs', timeOutSecs, ...                                     % Allow timeOutSecs to receive ACK (from remote host) that message was received 
         'timeOutAction', UDPBaseSatteliteCommunicator.NOTIFY_CALLER, ...    % Do not throw an error, notify caller function instead (choose from UDPBaseSatteliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
         'withData', 3 ...
     );
@@ -260,7 +268,7 @@ function packetSequence = designPacketSequenceForBase(baseHostName, satteliteHos
         satteliteChannelID, ...
         direction,...
         messageLabel,  'withData', messageData, ...
-        'timeOutSecs', 4.0, ...                                                 % Allow 1 sec to receive ACK (from remote host) that message was received
+        'timeOutSecs', timeOutSecs, ...                                        % Allow timeOutSecs to receive ACK (from remote host) that message was received
         'timeOutAction', UDPBaseSatteliteCommunicator.NOTIFY_CALLER ...        % Do not throw an error, notify caller function instead (choose from UDPBaseSatteliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
     );
     
@@ -274,7 +282,7 @@ function packetSequence = designPacketSequenceForBase(baseHostName, satteliteHos
         satteliteChannelID, ...
         direction,...
         messageLabel,  'withData', messageData, ...
-        'timeOutSecs', 4.0, ...                                                 % Allow 1 sec to receive ACK (from remote host) that message was received
+        'timeOutSecs', timeOutSecs, ...                                        % Allow timeOutSecs to receive ACK (from remote host) that message was received
         'timeOutAction', UDPBaseSatteliteCommunicator.NOTIFY_CALLER ...        % Do not throw an error, notify caller function instead (choose from UDPBaseSatteliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
     );
     
@@ -288,7 +296,7 @@ function packetSequence = designPacketSequenceForBase(baseHostName, satteliteHos
         satteliteChannelID, ...
         direction,...
         messageLabel,  'withData', messageData, ...
-        'timeOutSecs', 4.0, ...                                                 % Allow 1 sec to receive ACK (from remote host) that message was received
+        'timeOutSecs', timeOutSecs, ...                                        % Allow timeOutSecsto receive ACK (from remote host) that message was received
         'timeOutAction', UDPBaseSatteliteCommunicator.NOTIFY_CALLER ...        % Do not throw an error, notify caller function instead (choose from UDPBaseSatteliteCommunicator.{NOTIFY_CALLER, THROW_ERROR}));
     );
     
@@ -301,7 +309,7 @@ function packetSequence = designPacketSequenceForBase(baseHostName, satteliteHos
         satteliteChannelID, ...
         direction,...
         messageLabel, ...
-        'timeOutSecs', 20.0, ...                                                 % Allow for 1 secs to receive this message
+        'timeOutSecs', timeOutSecs, ...                                         % Allow timeOutSecs to receive this message
         'timeOutAction', UDPBaseSatteliteCommunicator.NOTIFY_CALLER, ...        % Do not throw an error, notify caller function instead (choose from UDPBaseSatteliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
         'badTransmissionAction', UDPBaseSatteliteCommunicator.NOTIFY_CALLER ... % Do not throw an error, notify caller function instead (choose from UDPBaseSatteliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
     );
@@ -315,7 +323,7 @@ function packetSequence = designPacketSequenceForBase(baseHostName, satteliteHos
         satteliteChannelID, ...
         direction,...
         messageLabel, ...
-        'timeOutSecs', 20.0, ...                                                 % Allow for 1 secs to receive this message
+        'timeOutSecs', timeOutSecs, ...                                         % Allow timeOutSecs to receive this message
         'timeOutAction', UDPBaseSatteliteCommunicator.NOTIFY_CALLER, ...        % Do not throw an error, notify caller function instead (choose from UDPBaseSatteliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
         'badTransmissionAction', UDPBaseSatteliteCommunicator.NOTIFY_CALLER ... % Do not throw an error, notify caller function instead (choose from UDPBaseSatteliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
     );
@@ -329,7 +337,7 @@ function packetSequence = designPacketSequenceForBase(baseHostName, satteliteHos
         satteliteChannelID, ...
         direction, ...
         messageLabel, ...
-        'timeOutSecs', 20.0, ...                                                 % Allow for 1 secs to receive this message
+        'timeOutSecs', timeOutSecs, ...                                         % Allow timeOutSecs to receive this message
         'timeOutAction', UDPBaseSatteliteCommunicator.NOTIFY_CALLER, ...        % Do not throw an error, notify caller function instead (choose from UDPBaseSatteliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
         'badTransmissionAction', UDPBaseSatteliteCommunicator.NOTIFY_CALLER ... % Do not throw an error, notify caller function instead (choose from UDPBaseSatteliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
     );
