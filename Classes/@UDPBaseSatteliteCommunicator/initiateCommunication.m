@@ -29,6 +29,11 @@ function initiateCommunication(obj, hostRoles, hostNames, triggerMessage, allSat
     else
         iSatteliteNames{1} = obj.localHostName;
     end
+    
+    for udpHandle = obj.MIN_UDP_HANDLE:obj.MAX_UDP_HANDLE
+        matlabNUDP('close', udpHandle);
+    end
+    
     for k = 1:numel(iSatteliteNames)  
         % Set updHandle
         satteliteName = iSatteliteNames{k};
