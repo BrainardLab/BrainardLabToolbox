@@ -86,11 +86,14 @@ function shortBaseMultiSatteliteDemo
          
          % If we are the base, plot what we receive from our sattelites
          if (UDPobj.localHostIsBase)
-             
              if (packetNo == 1)
                 radial_coeff = [];
                 cos_coeff = [];
                 sin_coeff = [];
+                dataP = 0;
+                sat1 = [];
+                sat2 = [];
+                sat3 = [];
                 hFig = figure(1); clf;
                 set(hFig, 'Position', [1000 918 560 420], 'Color', [1 1 1])
              end
@@ -98,12 +101,24 @@ function shortBaseMultiSatteliteDemo
              if (~isempty(theMessageReceived))
                  if (contains(theMessageReceived.label, 'SIN_COEFF'))
                      sin_coeff = cat(1,sin_coeff, theMessageReceived.data);
+                     dataP = dataP + 1;
+                     sat1 = cat(1,sat1, sin_coeff );
+                     sat2 = cat(1,sat2, 0);
+                     sat3 = cat(1,sat3, 0);
                  end
                  if (contains(theMessageReceived.label, 'COS_COEFF'))
                      cos_coeff = cat(1,cos_coeff, theMessageReceived.data);
+                     dataP = dataP + 1;
+                     sat2 = cat(1,sat2, cos_coeff);
+                     sat1 = cat(1,sat1, 0);
+                     sat3 = cat(1,sat3, 0);
                  end
                  if (contains(theMessageReceived.label, 'RADIAL_COEFF'))
                      radial_coeff = cat(1,radial_coeff, theMessageReceived.data);
+                     dataP = dataP + 1;
+                     sat3 = cat(1,sat3, radial_coeff);
+                     sat1 = cat(1,sat1, 0);
+                     sat2 = cat(1,sat2, 0);
                  end
 
                  dataPoints = min([numel(sin_coeff) numel(cos_coeff) numel(radial_coeff)]);
@@ -111,11 +126,18 @@ function shortBaseMultiSatteliteDemo
                      x = radial_coeff(1:dataPoints).*cos_coeff(1:dataPoints);
                      y = radial_coeff(1:dataPoints).*sin_coeff(1:dataPoints);
                      maxRange = max([max(abs(x(:))) max(abs(y(:)))]);
-                     plot(x,y, '-', 'LineWidth', 5.0, 'Color', [0.7 0.7 0.4]); hold on; plot(x,y, '*-', 'LineWidth', 1.5);
+                     subplot(1,2,1);
+                     plot(x,y, '-', 'LineWidth', 5.0, 'Color', [0.7 0.7 0.4]); hold on; plot(x,y, '*-', 'LineWidth', 1.5); hold off;
                      set(gca, 'XLim', maxRange * [-1 1], 'YLim', maxRange * [-1 1]);
                      axis 'square';
                      grid 'on'
                      grid on
+                     subplot(1,2,2);
+                     stem(1:numel(sat1), sat1, 'ro'); hold on
+                     stem(1:numel(sat2), sat2, 'mo');
+                     stem(1:numel(sat3), sat3, 'bo'); hold off
+                     set(gca, 'XLim', [1 300], 'YLim', [-1 1]);
+                     legend('sat-1', 'sat-2', 'sat-3');
                      drawnow;
                     videoOBJ.writeVideo(getframe(hFig));
                  end
@@ -123,8 +145,10 @@ function shortBaseMultiSatteliteDemo
          end % if we are base
          
     end % packetNo
-    videoOBJ.close();
     
+    if (UDPobj.localHostIsBase)
+        videoOBJ.close();
+    end
 end
 
 %
