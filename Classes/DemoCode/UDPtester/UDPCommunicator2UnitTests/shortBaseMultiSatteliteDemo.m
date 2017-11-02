@@ -70,16 +70,6 @@ function shortBaseMultiSatteliteDemo
     UDPobj.initiateCommunication(hostRoles,  hostNames, triggerMessage, allSattelitesAreAGOMessage, 'beVerbose', beVerbose);
     
     %% Execute communication protocol
-    radial_coeff = [];
-    cos_coeff = [];
-    sin_coeff = [];
-    hFig = figure(1); clf;
-    
-    videoOBJ = VideoWriter('UDPdata.mp4', 'MPEG-4'); % H264 format
-    videoOBJ.FrameRate = 5; 
-    videoOBJ.Quality = 100;
-    videoOBJ.open();
-    
     for packetNo = 1:numel(packetSequence)
         [theMessageReceived, theCommunicationStatus, roundTipDelayMilliSecs] = ...
             UDPobj.communicate(packetNo, packetSequence{packetNo}, ...
@@ -89,6 +79,19 @@ function shortBaseMultiSatteliteDemo
          
          % If we are the base, plot what we receive from our sattelites
          if (UDPobj.localHostIsBase)
+             
+             if (packetNo == 1)
+                radial_coeff = [];
+                cos_coeff = [];
+                sin_coeff = [];
+                hFig = figure(1); clf;
+    
+                videoOBJ = VideoWriter('UDPdata.mp4', 'MPEG-4'); % H264 format
+                videoOBJ.FrameRate = 5; 
+                videoOBJ.Quality = 100;
+                videoOBJ.open();
+             end
+             
              if (~isempty(theMessageReceived))
                  if (contains(theMessageReceived.label, 'SIN_COEFF'))
                      sin_coeff = cat(1,sin_coeff, theMessageReceived.data);
