@@ -5,13 +5,12 @@ function shortBaseMultiSatteliteDemo
     clear all;
     fprintf('\n\n');
     
-    %% Define a 2-sattelite scheme
+    %% Define a 1 base/3-sattelite scheme
     baseHostName = 'manta';
     sattelite1HostName = 'ionean';
     sattelite2HostName = 'gka06';
     sattelite3HostName = 'monkfish';
-    
-    %% Define a 3-sattelite scheme
+
     hostNames = {baseHostName,    sattelite1HostName,  sattelite2HostName,  sattelite3HostName};
     hostIPs   = {'128.91.12.90',  '128.91.12.144',     '128.91.12.160',     '128.91.12.161'};
     hostRoles = {'base',          'sattelite',         'sattelite',         'sattelite'};
