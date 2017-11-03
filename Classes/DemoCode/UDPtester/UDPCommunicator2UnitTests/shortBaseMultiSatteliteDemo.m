@@ -18,7 +18,7 @@ function shortBaseMultiSatteliteDemo
     
     %% Control what is printed on the command window
     beVerbose = false;
-    displayPackets = true;
+    displayPackets = false;
     
     %% Use 10 second time out for all comms
     timeOutSecs = 30;
