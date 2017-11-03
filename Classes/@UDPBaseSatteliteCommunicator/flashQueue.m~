@@ -1,7 +1,0 @@
-function flashedContents = flashQueue(obj, udpHandle)
-        while (matlabNUDP('check',) == 1)
-            flashedContents = matlabUDP('receive');
-        end
-    end
-end
-
