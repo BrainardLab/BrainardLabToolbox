@@ -2,7 +2,10 @@ function timedOutFlag = waitForMessageOrTimeout(obj, timeOutSecs)
     tic;
     fprintf('\n');
     timedOutFlag = false;
-    while (~lazyCheck(obj)) && (~timedOutFlag)
+    noInputs = true;
+    nDots = 0;
+    while (noInputs) && (~timedOutFlag)
+        [noInputs, nDots] = lazyCheck(obj, nDots);
         elapsedTime = toc;
         if (elapsedTime > timeOutSecs)
             timedOutFlag = true;
@@ -12,9 +15,15 @@ function timedOutFlag = waitForMessageOrTimeout(obj, timeOutSecs)
     fprintf('\n');
 end
 
-function status = lazyCheck(obj)
+function [status, nDots] = lazyCheck(obj, nDots)
     status = matlabNUDP('check', obj.udpHandle);
     % Add a pause so we are not overheating the machine
     pause(0.01);
-    fprintf('.'); 
+    nDots = nDots+1;
+    if (nDots > 60)
+        fprintf('\n.')
+    else        
+        fprintf('.');
+    end
+    
 end
