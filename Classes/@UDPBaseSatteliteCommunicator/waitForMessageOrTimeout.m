@@ -22,6 +22,7 @@ function [status, nDots] = lazyCheck(obj, nDots)
     nDots = nDots+1;
     if (nDots > 60)
         fprintf('\n.')
+        nDots = 0;
     else        
         fprintf('.');
     end
