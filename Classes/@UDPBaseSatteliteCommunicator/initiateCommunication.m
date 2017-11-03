@@ -34,20 +34,38 @@ function initiateCommunication(obj, hostRoles, hostNames, triggerMessage, allSat
         matlabNUDP('close', udpHandle);
     end
     
-    for k = 1:numel(iSatteliteNames)  
-        % Set updHandle
-        satteliteName = iSatteliteNames{k};
-        obj.udpHandle = obj.satteliteInfo(satteliteName).satteliteChannelID;
+    if (obj.localHostIsBase)
+        % We are the base
+        for k = 1:numel(iSatteliteNames)  
+            % Set updHandle for communication with this sattelite
+            satteliteName = iSatteliteNames{k};
+            obj.udpHandle = obj.satteliteInfo(satteliteName).satteliteChannelID;
 
+            if strcmp(obj.verbosity,'max')
+                fprintf('%s Opening connection to/from ''%s'' via udpChannel:%d and port:%d, (local:%s remote:%s)\n', obj.selfSignature, satteliteName, obj.udpHandle, obj.satteliteInfo(satteliteName).portNo, obj.localIP,  obj.satteliteInfo(satteliteName).satteliteIP);
+            end
+
+            matlabNUDP('close', obj.udpHandle);
+            matlabNUDP('open', obj.udpHandle, obj.localIP, obj.satteliteInfo(satteliteName).satteliteIP, obj.satteliteInfo(satteliteName).portNo);
+
+            % flash any remaining bits
+            obj.flashQueue();
+        end
+    else 
+        % We are a sattelite
+        % Set updHandle for communicating with base
+        satteliteName = iSatteliteNames{1};
+        obj.udpHandle = obj.satteliteInfo(satteliteName).satteliteChannelID;
+            
         if strcmp(obj.verbosity,'max')
-            fprintf('%s Opening connection to/from ''%s'' via udpChannel:%d and port:%d, (local:%s remote:%s)\n', obj.selfSignature, satteliteName, obj.udpHandle, obj.satteliteInfo(satteliteName).portNo, obj.localIP,  obj.satteliteInfo(satteliteName).remoteIP);
+            fprintf('%s Opening connection to/from ''%s'' via udpChannel:%d and port:%d, (local:%s remote:%s)\n', obj.selfSignature, satteliteName, obj.udpHandle, obj.satteliteInfo(satteliteName).portNo, obj.localIP,  obj.baseInfo.baseIP);
         end
 
         matlabNUDP('close', obj.udpHandle);
-        matlabNUDP('open', obj.udpHandle, obj.localIP, obj.satteliteInfo(satteliteName).remoteIP, obj.satteliteInfo(satteliteName).portNo);
+        matlabNUDP('open', obj.udpHandle, obj.localIP, obj.baseInfo.baseIP, obj.satteliteInfo(satteliteName).portNo);
 
         % flash any remaining bits
-        obj.flashQueue();
+        obj.flashQueue();   
     end
 
     

@@ -7,6 +7,7 @@ classdef UDPBaseSatteliteCommunicator < handle
 	properties (SetAccess = protected)
         localHostName
         localIP 
+        baseInfo
         satteliteInfo
         localHostIsBase       % boolean indicating whether the local host is thebase
         localHostIsSattelite  % boolean indicating whether the local host is a sattelite
@@ -61,9 +62,10 @@ classdef UDPBaseSatteliteCommunicator < handle
             p.addRequired('localIP',  @ischar);
             p.addRequired('satteliteInfo');
             p.addParameter('verbosity', defaultVerbosity, @ischar);
-            p.parse(localIP, satteliteInfo, varargin{:});
+            p.parse(localIP, baseInfo, satteliteInfo, varargin{:});
             
             obj.localIP  = p.Results.localIP;
+            obj.baseInfo = p.Results.baseInfo;
             obj.satteliteInfo = p.Results.satteliteInfo;
             obj.verbosity = p.Results.verbosity;
             obj.localHostName = obj.getLocalHostName();
@@ -84,6 +86,9 @@ classdef UDPBaseSatteliteCommunicator < handle
         % Method that established communication between local and remote host
         initiateCommunication(obj, hostRoles, hostNames, triggerMessage, varargin);
         
+        % Method that constructs a communication packet
+        packet = makePacket(obj, satteliteChannel, direction, message, varargin);
+        
         % Method that sends/received a communicaiton packet
         [messageReceived, status, abortRequestedFromRemoteHost, roundTipDelayMilliSecs] = ...
             communicate(obj, packetNo, communicationPacket, varargin);
@@ -95,9 +100,6 @@ classdef UDPBaseSatteliteCommunicator < handle
     % Convenience methods
     methods (Static)
         UDPobj = instantiateObject(hostNames, hostIPs, hostRoles, beVerbose);
-        
-        % Method that constructs a communication packet
-        packet = makePacket(satteliteChannel, direction, message, varargin)
         
         localHostName = getLocalHostName();
     end

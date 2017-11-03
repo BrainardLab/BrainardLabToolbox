@@ -20,19 +20,25 @@ function UDPobj = instantiateObject(hostNames, hostIPs, hostRoles,  beVerbose)
     localHostName = UDPBaseSatteliteCommunicator.getLocalHostName();
     localIP = hostIPs{find(strcmp(lower(hostNames), localHostName))};
     
-    % Establish satteliteChannelIDs
+    % Assemble baseInfo
+    baseIndex = find(strcmp(lower(hostRoles), 'base'));
+    baseInfo.baseHostName = lower(hostNames{baseIndex(1)});
+    baseInfo.baseIP = hostIPs{baseIndex(1)};
+    
+    % Assemble satteliteInfo
     satteliteInfo = containers.Map();
     satteliteIndices = find(strcmp(lower(hostRoles), 'sattelite'));
     for k = 1:numel(satteliteIndices)
         d.satteliteChannelID = k-1;
         d.portNo = commPorts{satteliteIndices(k)};
-        d.remoteIP = hostIPs{satteliteIndices(k)};
+        d.satteliteIP = hostIPs{satteliteIndices(k)};
         satteliteName = lower(hostNames{satteliteIndices(k)});
         satteliteInfo(satteliteName) = d;
     end
         
     UDPobj = UDPBaseSatteliteCommunicator( ...
             localIP, ...                       % REQUIRED: the local host IP
+            baseInfo, ...                      % REQUIRED: the base info
             satteliteInfo, ...                 % REQUIRED: the sattelite info
             'verbosity', verbosity ...         % OPTIONAL, with default value: 'normal', and possible values: {'min', 'normal', 'max'},
     );
