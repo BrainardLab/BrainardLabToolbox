@@ -103,11 +103,11 @@ function shortBaseMultiSatteliteDemo
             videoOBJ.Quality = 100;
             videoOBJ.open();
             return;
-        end
-        
-        if (strcmp(mode, 'close'))
+        elseif (strcmp(mode, 'close'))
             videoOBJ.close();
             return;
+        elseif (~strcmp(mode, 'add'))
+            error('Unknown mode in visualizeDemoData(): ''%s'' \n', demo);
         end
         
         if (packetNo == 1)
