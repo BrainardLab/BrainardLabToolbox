@@ -16,7 +16,7 @@ end
 function [status, nDots] = lazyCheck(obj, nDots)
     status = ~(matlabNUDP('check', obj.udpHandle));
     % Add a pause so we are not overheating the machine
-    pause(0.01);
+    %pause(0.01);
     if (1==2)
         dotsNumThresholdForPrinting = 10;
         if (nDots > 600)
