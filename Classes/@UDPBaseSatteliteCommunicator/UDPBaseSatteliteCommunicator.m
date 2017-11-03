@@ -47,7 +47,7 @@ classdef UDPBaseSatteliteCommunicator < handle
 	% Public methods
     methods
         % Constructor
-        function obj = UDPBaseSatteliteCommunicator(localIP, satteliteInfo, varargin)
+        function obj = UDPBaseSatteliteCommunicator(localIP, baseInfo, satteliteInfo, varargin)
            
             % Reset counters
             obj.sentMessagesCount = 0;       % number of messages sent
@@ -60,6 +60,7 @@ classdef UDPBaseSatteliteCommunicator < handle
             % Parse input parameters.
             p = inputParser;
             p.addRequired('localIP',  @ischar);
+            p.addRequired('baseInfo');
             p.addRequired('satteliteInfo');
             p.addParameter('verbosity', defaultVerbosity, @ischar);
             p.parse(localIP, baseInfo, satteliteInfo, varargin{:});
