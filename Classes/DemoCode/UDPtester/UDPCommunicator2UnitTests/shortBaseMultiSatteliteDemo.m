@@ -24,7 +24,7 @@ function shortBaseMultiSatteliteDemo
     timeOutSecs = 30;
     
     %% Generate 50 data points for the spiral signal
-    coeffPoints = 50;
+    coeffPoints = 100;
     
     %% Record a video of the demo?
     recordVideo = true;
@@ -96,7 +96,14 @@ function shortBaseMultiSatteliteDemo
     %% Nested function for visualizing the demo
     function visualizeDemoData(mode)
         persistent videoOBJ
-        
+        persistent radial_coeff;
+        persistent cos_coeff;
+        persistent sin_coeff;
+        persistent sat1;
+        persistent sat2;
+        persistent sat3;
+        persistent hFig; 
+            
         if (strcmp(mode, 'open'))
             videoOBJ = VideoWriter('UDPdata.mp4', 'MPEG-4'); % H264 format
             videoOBJ.FrameRate = 30; 
@@ -142,7 +149,7 @@ function shortBaseMultiSatteliteDemo
                 sat1(numel(sat1)+1) = 0;
                 sat2(numel(sat2)+1) = 0;
             end
-            
+
             dataPoints = min([numel(sin_coeff) numel(cos_coeff) numel(radial_coeff)]);
             if (dataPoints > 0)
                 x = radial_coeff(1:dataPoints).*cos_coeff(1:dataPoints);
@@ -150,7 +157,7 @@ function shortBaseMultiSatteliteDemo
                 maxRange = max([max(abs(x(:))) max(abs(y(:)))]);
                 subplot(3,5,[1 2 6 7 11 12]);
                 plot(x,y, '-', 'LineWidth', 5.0, 'Color', [0.7 0.7 0.4]); hold on; plot(x,y, '*-', 'LineWidth', 1.5); hold off;
-                set(gca, 'XLim', maxRange * [-1 1], 'YLim', maxRange * [-1 1]);
+                set(gca, 'XLim', maxRange * [-1 1], 'YLim', maxRange * [-1 1], 'FontSize', 12);
                 axis 'square';
                 grid 'on'
                 grid on
@@ -159,25 +166,27 @@ function shortBaseMultiSatteliteDemo
             subplot(3,5, 3:5);
             if (~isempty(sat1))
                 stem(sat1, 'filled');
-                legend('sat-1');
+                hL = legend('sat-1');
+                set(hL, 'FontSize', 16);
             end
-            set(gca, 'XLim', [1 300], 'YLim', [-1 1]);
+            set(gca, 'XLim', [1 300], 'YLim', [-1 1], 'FontSize', 12);
             
             subplot(3,5, 8:10);
-            
             if (~isempty(sat2))
                 stem(sat2, 'filled');
-                legend('sat-2');
+                hL = legend('sat-2');
+                set(hL, 'FontSize', 16);
             end
             
-            set(gca, 'XLim', [1 300], 'YLim', [-1 1]);
+            set(gca, 'XLim', [1 300], 'YLim', [-1 1], 'FontSize', 12);
             
             subplot(3,5, 13:15);
             if (~isempty(sat3))
                 stem(sat3, 'filled');
-                legend('sat-3');
+                hL = legend('sat-3');
+                set(hL, 'FontSize', 16);
             end
-            set(gca, 'XLim', [1 300], 'YLim', [0 1]);
+            set(gca, 'XLim', [1 300], 'YLim', [0 1], 'FontSize', 12);
             drawnow;
             videoOBJ.writeVideo(getframe(hFig));
         end % if (~isempty(theMessageReceived))
@@ -320,7 +329,7 @@ function packetSequence = designPacketSequenceForSattelite2(UDPobj, satteliteHos
 
         direction = sprintf('%s <- %s', baseHostName, satteliteHostName);
         messageLabel = sprintf('SATTELITE(%s)___SENDING_SIN_COEFF', satteliteHostName);
-        messageData = sin(2*pi*2*k/coeffPoints);
+        messageData = sin(2*pi*1.3*k/coeffPoints);
         packetSequence{numel(packetSequence)+1} = UDPobj.makePacket(...
             satteliteHostName, ...
             direction, ...

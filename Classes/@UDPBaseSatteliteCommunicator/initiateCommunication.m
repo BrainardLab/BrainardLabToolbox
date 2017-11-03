@@ -44,7 +44,8 @@ function initiateCommunication(obj, hostRoles, hostNames, triggerMessage, allSat
             if strcmp(obj.verbosity,'max')
                 fprintf('%s Opening connection to/from ''%s'' via udpChannel:%d and port:%d, (local:%s remote:%s)\n', obj.selfSignature, satteliteName, obj.udpHandle, obj.satteliteInfo(satteliteName).portNo, obj.localIP,  obj.satteliteInfo(satteliteName).satteliteIP);
             end
-
+            
+            % Close udp channel, then re-open it
             matlabNUDP('close', obj.udpHandle);
             matlabNUDP('open', obj.udpHandle, obj.localIP, obj.satteliteInfo(satteliteName).satteliteIP, obj.satteliteInfo(satteliteName).portNo);
 
