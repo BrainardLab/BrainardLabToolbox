@@ -13,5 +13,6 @@ end
 function status = lazyCheck(obj)
     status = matlabNUDP('check', obj.udpHandle);
     % Add a pause so we are not overheating the machine
-    pause(0.05);
+    pause(0.01);
+    fprintf('[%s] Waiting for input %s\n',datestr(now)); 
 end
