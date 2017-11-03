@@ -16,7 +16,7 @@ function timedOutFlag = waitForMessageOrTimeout(obj, timeOutSecs)
 end
 
 function [status, nDots] = lazyCheck(obj, nDots)
-    status = matlabNUDP('check', obj.udpHandle);
+    status = ~(matlabNUDP('check', obj.udpHandle));
     % Add a pause so we are not overheating the machine
     pause(0.01);
     nDots = nDots+1;
