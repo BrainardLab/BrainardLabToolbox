@@ -99,21 +99,21 @@ function shortBaseMultiSatteliteDemo
              
              if (~isempty(theMessageReceived))
                  if (contains(theMessageReceived.label, 'SIN_COEFF'))
-                     sin_coeff = cat(2,sin_coeff, theMessageReceived.data);
+                     sin_coeff = cat(1,sin_coeff, theMessageReceived.data);
                      sat1(numel(sat1)+1) = theMessageReceived.data;
                      sat2(numel(sat2)+1) = 0;
                      sat3(numel(sat3)+1) = 0;
                  end
                  
                  if (contains(theMessageReceived.label, 'COS_COEFF'))
-                     cos_coeff = cat(12,cos_coeff, theMessageReceived.data);
+                     cos_coeff = cat(1,cos_coeff, theMessageReceived.data);
                      sat2(numel(sat2)+1) = theMessageReceived.data;
                      sat1(numel(sat1)+1) = 0;
                      sat3(numel(sat3)+1) = 0;
                  end
                  
                  if (contains(theMessageReceived.label, 'RADIAL_COEFF'))
-                     radial_coeff = cat(2,radial_coeff, theMessageReceived.data);
+                     radial_coeff = cat(1,radial_coeff, theMessageReceived.data);
                      sat3(numel(sat3)+1) = theMessageReceived.data;
                      sat1(numel(sat1)+1) = 0;
                      sat2(numel(sat2)+1) = 0;
@@ -123,13 +123,8 @@ function shortBaseMultiSatteliteDemo
                  if (dataPoints > 0)
                      x = radial_coeff(1:dataPoints).*cos_coeff(1:dataPoints);
                      y = radial_coeff(1:dataPoints).*sin_coeff(1:dataPoints);
-                     size(x)
-                     size(y)
-                     size(radial_coeff(1:dataPoints))
-                     size(cos_coeff(1:dataPoints))
-                     size(sin_coeff(1:dataPoints))
                      maxRange = max([max(abs(x(:))) max(abs(y(:)))]);
-                     subplot(3,5,[1 2 6 7]);
+                     subplot(3,5,[1 2 6 7 11 12]);
                      plot(x,y, '-', 'LineWidth', 5.0, 'Color', [0.7 0.7 0.4]); hold on; plot(x,y, '*-', 'LineWidth', 1.5); hold off;
                      set(gca, 'XLim', maxRange * [-1 1], 'YLim', maxRange * [-1 1]);
                      axis 'square';
@@ -348,7 +343,7 @@ function packetSequence = designPacketSequenceForSattelite3(baseHostName, sattel
     % Sattelite sending to Base
     direction = sprintf('%s <- %s', baseHostName, satteliteHostName);
     messageLabel = sprintf('SATTELITE(%s)___SENDING_SMALL_STRUCT', satteliteHostName);
-    messageData = struct('a', 12, 'b', rand(5,5));
+    messageData = struct('a', 12, 'b', 1:100);
     packetSequence{numel(packetSequence)+1} = UDPBaseSatteliteCommunicator.makePacket(...
         satteliteChannelID, ...
         direction, ...
