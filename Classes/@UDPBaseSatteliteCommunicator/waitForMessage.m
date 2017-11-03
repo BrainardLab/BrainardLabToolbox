@@ -54,9 +54,10 @@ function packet = waitForMessage(obj, msgLabel, varargin)
     numBytes = str2double(bytesString);
     
     % Read all bytes
+    pauseSecs = 0;
     theData = [];
     for k = 1:numBytes
-        packet.timedOutFlag = obj.waitForMessageOrTimeout(timeOutSecs);
+        packet.timedOutFlag = obj.waitForMessageOrTimeout(timeOutSecs, pauseSecs);
         if (packet.timedOutFlag)
             obj.executeTimeOut(sprintf('while waiting to receive byte %d/%d of message ''%s''', k, numBytes, expectedMessageLabel), timeOutAction);
             return;
@@ -65,7 +66,7 @@ function packet = waitForMessage(obj, msgLabel, varargin)
     end
 
     % Read the message label again
-    packet.timedOutFlag = obj.waitForMessageOrTimeout(timeOutSecs);
+    packet.timedOutFlag = obj.waitForMessageOrTimeout(timeOutSecs, pauseSecs);
     if (packet.timedOutFlag)
         obj.executeTimeOut(sprintf('while waiting to verify the label of message ''%s''', expectedMessageLabel), timeOutAction);
         return;
