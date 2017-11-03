@@ -1,6 +1,5 @@
 function timedOutFlag = waitForMessageOrTimeout(obj, timeOutSecs)
     tic;
-    fprintf('\n');
     timedOutFlag = false;
     noInputs = true;
     nDots = -1;
@@ -12,7 +11,6 @@ function timedOutFlag = waitForMessageOrTimeout(obj, timeOutSecs)
             fprintf('>>>Here timeout: %f secs\n', timeOutSecs);
         end
     end
-    fprintf('\n');
 end
 
 function [status, nDots] = lazyCheck(obj, nDots)
