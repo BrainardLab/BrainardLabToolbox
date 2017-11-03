@@ -4,7 +4,7 @@ function timedOutFlag = waitForMessageOrTimeout(obj, timeOutSecs, pauseTimeSecs)
     noInputs = true;
     nDots = -1;
     while (noInputs) && (~timedOutFlag)
-        [noInputs, nDots] = lazyCheck(obj, pauseTimeSecs);
+        [noInputs, nDots] = lazyCheck(obj, nDots, pauseTimeSecs);
         elapsedTime = toc;
         if (elapsedTime > timeOutSecs)
             timedOutFlag = true;
