@@ -1,4 +1,4 @@
-function packet = makePacket(obj, satteliteName, direction, message, varargin) 
+function packet = makePacket(obj, satelliteName, direction, message, varargin) 
     % Parse optinal input parameters.
     p = inputParser;
     p.addParameter('withData', []);
@@ -12,12 +12,12 @@ function packet = makePacket(obj, satteliteName, direction, message, varargin)
     % validate direction
     assert((contains(direction, '->')) || (contains(direction, '<-')), sprintf('direction field does not contain correct direction information: ''%s''.\n', direction));
     
-    % validate sattelite name
-    satteliteNames = keys(obj.satteliteInfo);
-    assert(ismember(satteliteName, satteliteNames), sprintf('passed sattelite name: ''%s'', is not valid\n', satteliteName));
+    % validate satellite name
+    satelliteNames = keys(obj.satelliteInfo);
+    assert(ismember(satelliteName, satelliteNames), sprintf('passed satellite name: ''%s'', is not valid\n', satelliteName));
     
     packet = struct(...
-        'udpChannel', obj.satteliteInfo(satteliteName).satteliteChannelID, ...
+        'udpChannel', obj.satelliteInfo(satelliteName).satelliteChannelID, ...
         'direction', direction, ...
         'messageLabel', message, ...
         'messageData', data, ...

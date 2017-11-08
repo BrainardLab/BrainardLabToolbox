@@ -1,5 +1,5 @@
-classdef UDPBaseSatteliteCommunicator < handle
-% Class for BASE <-> Multi-Sattelite UDP-based communication.
+classdef UDPBaseSatelliteCommunicator < handle
+% Class for BASE <-> Multi-Satellite UDP-based communication.
 % 10/20/2017   NPC   Wrote it
 %
 
@@ -8,9 +8,9 @@ classdef UDPBaseSatteliteCommunicator < handle
         localHostName
         localIP 
         baseInfo
-        satteliteInfo
+        satelliteInfo
         localHostIsBase       % boolean indicating whether the local host is thebase
-        localHostIsSattelite  % boolean indicating whether the local host is a sattelite
+        localHostIsSatellite  % boolean indicating whether the local host is a satellite
         verbosity             % choose from {'min', 'normal', 'max'}
         sentMessagesCount     % number of messages sent
         receivedMessagesCount % number of messages received
@@ -19,9 +19,9 @@ classdef UDPBaseSatteliteCommunicator < handle
 
     properties (Access = private)
         udpHandle             % always set by obj.communicate
-        waitForMessageSignature = sprintf('\n<strong>%s:</strong>', sprintf('%35s','UDPBaseSatteliteCommunicator.waitForMessage'));
-        sendMessageSignature    = sprintf('\n<strong>%s:</strong>', sprintf('%35s','UDPBaseSatteliteCommunicator.sendMessage'));
-        selfSignature           = sprintf('\n<strong>%s:</strong>', sprintf('%35s','UDPBaseSatteliteCommunicator'));
+        waitForMessageSignature = sprintf('\n<strong>%s:</strong>', sprintf('%35s','UDPBaseSatelliteCommunicator.waitForMessage'));
+        sendMessageSignature    = sprintf('\n<strong>%s:</strong>', sprintf('%35s','UDPBaseSatelliteCommunicator.sendMessage'));
+        selfSignature           = sprintf('\n<strong>%s:</strong>', sprintf('%35s','UDPBaseSatelliteCommunicator'));
     end
     
     properties (Constant)
@@ -47,7 +47,7 @@ classdef UDPBaseSatteliteCommunicator < handle
 	% Public methods
     methods
         % Constructor
-        function obj = UDPBaseSatteliteCommunicator(localIP, baseInfo, satteliteInfo, varargin)
+        function obj = UDPBaseSatelliteCommunicator(localIP, baseInfo, satelliteInfo, varargin)
            
             % Reset counters
             obj.sentMessagesCount = 0;       % number of messages sent
@@ -61,13 +61,13 @@ classdef UDPBaseSatteliteCommunicator < handle
             p = inputParser;
             p.addRequired('localIP',  @ischar);
             p.addRequired('baseInfo');
-            p.addRequired('satteliteInfo');
+            p.addRequired('satelliteInfo');
             p.addParameter('verbosity', defaultVerbosity, @ischar);
-            p.parse(localIP, baseInfo, satteliteInfo, varargin{:});
+            p.parse(localIP, baseInfo, satelliteInfo, varargin{:});
             
             obj.localIP  = p.Results.localIP;
             obj.baseInfo = p.Results.baseInfo;
-            obj.satteliteInfo = p.Results.satteliteInfo;
+            obj.satelliteInfo = p.Results.satelliteInfo;
             obj.verbosity = p.Results.verbosity;
             obj.localHostName = obj.getLocalHostName();
 
@@ -88,7 +88,7 @@ classdef UDPBaseSatteliteCommunicator < handle
         initiateCommunication(obj, hostRoles, hostNames, triggerMessage, varargin);
         
         % Method that constructs a communication packet
-        packet = makePacket(obj, satteliteChannel, direction, message, varargin);
+        packet = makePacket(obj, satelliteChannel, direction, message, varargin);
         
         % Method that sends/received a communicaiton packet
         [messageReceived, status, abortRequestedFromRemoteHost, roundTipDelayMilliSecs] = ...

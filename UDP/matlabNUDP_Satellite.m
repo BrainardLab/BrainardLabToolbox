@@ -1,38 +1,35 @@
-function matlabNUDP_Sattelite
-
+function matlabNUDP_Satellite 
+    satellite.ID = 0;
     
-    
-    sattelite.ID = 0;
-    
-    sattelite.portID = 2007;
-    sattelite.IP = '128.91.12.144'; % ionean
+    satellite.portID = 2007;
+    satellite.IP = '128.91.12.144'; % ionean
     localName = 'Ionean';
-    %test(sattelite, localName);   
+    %test(satellite, localName);   
     
-    sattelite.portID = 2008;
-    sattelite.IP = '128.91.12.155'; % leviathan
+    satellite.portID = 2008;
+    satellite.IP = '128.91.12.155'; % leviathan
     localName = 'Leviathan';
-    test(sattelite, localName);   
+    test(satellite, localName);   
  
     
 end
 
-function test(sattelite, localName)
+function test(satellite, localName)
     fprintf('\n')
     
     baseIP = '128.91.12.90'; % manta
 
     
-    matlabNUDP('close', sattelite.ID);
-    matlabNUDP('open', sattelite.ID, sattelite.IP, baseIP, sattelite.portID);
+    matlabNUDP('close', satellite.ID);
+    matlabNUDP('open', satellite.ID, satellite.IP, baseIP, satellite.portID);
 
     fprintf('Waiting to receive a message ...\n');
-    while (matlabNUDP('check',  sattelite.ID) ==0)
+    while (matlabNUDP('check',  satellite.ID) ==0)
     end
     
-    receivedMessage = matlabNUDP('receive',  sattelite.ID)
+    receivedMessage = matlabNUDP('receive',  satellite.ID)
     fprintf('Message received. Sending ACK\n');
-    matlabNUDP('send', sattelite.ID, sprintf('''%s'' sends ACK for: %s', localName, receivedMessage));
-    matlabNUDP('close', sattelite.ID);
+    matlabNUDP('send', satellite.ID, sprintf('''%s'' sends ACK for: %s', localName, receivedMessage));
+    matlabNUDP('close', satellite.ID);
 end
 
