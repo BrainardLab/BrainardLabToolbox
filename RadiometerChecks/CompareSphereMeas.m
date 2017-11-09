@@ -4,9 +4,11 @@ function CompareSphereMeas
 % Compare the three measurements of the sphere for a given date
 
 % 09/09/17  dhb  Update to use prefs for where data live and go.
-% 11/009/17 npc  Fixed some path issues. Also added PTB-3 to the path.  
+% 11/09/17  npc  Fixed some path issues. Also added PTB-3 to the path.  
 %                This is not included in the BrainardLabToolbox config for
 %                some reason unknown to me (nicolas)
+% 11/09/17 npc   Added ability to normalize with respect to either PR670-1
+%                or PR670-2. The user is asked which one.
 %
 % Run this after doing: tbUse('BrainardLabToolbox');
 
@@ -32,8 +34,10 @@ if (~exist(radiometerChecksDir,'dir'))
     error(['Directory ' radiometerChecksDir ' does not exist.  Something is not set up correctly.']);
 end
 
-%% Load new PR-650
+%% Save current dir
 curDir = pwd;
+
+%% Load new PR-650
 cd(fullfile(radiometerChecksDir,'xNewMeter'));
 if (exist(['NewUCSB_Sphere_' dateStr '.mat'],'file'))
     fprintf('Loading NewUCSB PR-650 data\n');
@@ -116,35 +120,58 @@ cd(curDir);
 [~, commonWlsIdx1] = intersect(wls, wlsLabSphere);
 [~, commonWlsIdx2] = intersect(wlsLabSphere, wls);
 
+
+% Ask which PR670 to normalize against
+normPR670Default = '1';
+normPR670 = str2num(GetWithDefault('PR670 to normalize against (1 or 2)',normPR670Default))
+
+if (normPR670 == 1)
+    spectrumNormPR670 = spectrumPr670_1_Meter;
+    prefixNormPR670 = 'PR-670 #1';
+    spectrumOtherPR670 = spectrumPr670_2_Meter;
+    prefixOtherPR670 = 'PR-670 #2';
+else
+    spectrumNormPR670 = spectrumPr670_2_Meter;
+    prefixNormPR670 = 'PR-670 #2';
+    spectrumOtherPR670 = spectrumPr670_1_Meter;
+    prefixOtherPR670 = 'PR-670 #1';
+end
+
 %% Figure, normalized to PR_670_1
 figure; clf; hold on
 legendStr = {};
 legendLength = 0;
 fprintf('\n');
-if (~isempty(spectrumPr670_1_Meter))
-    plot(wls,spectrumPr670_1_Meter,'Color', [255 0 0]/255,'LineWidth',2);
+if (~isempty(spectrumNormPR670))
+    plot(wls,spectrumNormPR670,'Color', [255 0 0]/255,'LineWidth',2);
     legendLength = legendLength + 1;
-    legendStr{legendLength} = 'PR-670 #1';
+    legendStr{legendLength} = sprintf('%s (normalizer)', prefixNormPR670);
 else
-    error('Must have PR_670_1 measurements, these are assumed for normalizing');
+    error('Must have %s measurements, these are assumed for normalizing', prefixNormPR670);
 end
-if (~isempty(spectrumPr670_2_Meter))
-    plot(wls,(spectrumPr670_2_Meter\spectrumPr670_1_Meter)*spectrumPr670_2_Meter,'Color', [0 255 0]/255,'LineWidth',2);
+
+if (~isempty(spectrumOtherPR670))
+    spectrumFactor = spectrumOtherPR670\spectrumNormPR670;
+    plot(wls,spectrumFactor*spectrumOtherPR670,'Color', [0 255 0]/255,'LineWidth',2);
     legendLength = legendLength + 1;
-    legendStr{legendLength} = 'PR-670 #2';
-    fprintf('PR-670 #2 to PR-670 #1 factor: %0.2f\n',(spectrumPr670_2_Meter\spectrumPr670_1_Meter));
+    legendStr{legendLength} = prefixOtherPR670;
+    fprintf('%s to %s factor: %0.2f\n',prefixOtherPR670, prefixNormPR670, spectrumFactor);
 end
+
 if (~isempty(spectrumNewMeter))
-    plot(wls,(spectrumNewMeter\spectrumPr670_1_Meter)*spectrumNewMeter,'Color',[0 0 255]/255,'LineWidth',2);
+    spectrumFactor = spectrumNewMeter\spectrumNormPR670;
+    plot(wls,spectrumFactor*spectrumNewMeter,'Color',[0 0 255]/255,'LineWidth',2);
     legendLength = legendLength + 1;
     legendStr{legendLength} = 'NewUCSB PR-650';
-    fprintf('NewUCSB meter PR-650 to PR-670 #1 factor: %0.2f\n',(spectrumNewMeter\spectrumPr670_1_Meter));
+    fprintf('NewUCSB meter PR-650 to %s factor: %0.2f\n', prefixNormPR670, spectrumFactor);
 end
+
 if (~isempty(spectrumPennMeter))
-    plot(wls,(spectrumPennMeter\spectrumPr670_1_Meter)*spectrumPennMeter,'Color', [255 128 128]/255,'LineWidth',2);
+    spectrumFactor = spectrumPennMeter\spectrumNormPR670;
+    plot(wls,spectrumFactor*spectrumPennMeter,'Color', [255 128 128]/255,'LineWidth',2);
     legendLength = legendLength + 1;
     legendStr{legendLength} = 'Penn PR-650';
-    fprintf('Penn meter PR-650 to PR-670 #1 factor: %0.2f\n',(spectrumPennMeter\spectrumPr670_1_Meter));
+    fprintf('Penn meter PR-650 to %s factor: %0.2f\n', prefixNormPR670, spectrumFactor);
 end
 xlabel('Wavelength (nm)','FontSize',18);
 ylabel('Power re PR-670 #1','FontSize',18);
@@ -157,16 +184,18 @@ FigureSave(fullfile(radiometerChecksDir,'xComparison',['PRComparison_Relative_' 
 figure; clf; hold on
 legendStr = {};
 legendLength = 0;
-if (~isempty(spectrumPr670_1_Meter))
-    plot(wls,spectrumPr670_1_Meter,'Color', [255 0 0]/255,'LineWidth',2);
+if (~isempty(spectrumNormPR670))
+    plot(wls,spectrumNormPR670,'Color', [255 0 0]/255,'LineWidth',2);
     legendLength = legendLength + 1;
-    legendStr{legendLength} = 'PR-670 #1';
+    legendStr{legendLength} = sprintf('%s (normalizer)', prefixNormPR670);
 end
-if (~isempty(spectrumPr670_2_Meter))
-    plot(wls,spectrumPr670_2_Meter,'Color', [0 255 0]/255,'LineWidth',2);
+
+if (~isempty(spectrumOtherPR670))
+    plot(wls,spectrumOtherPR670,'Color', [0 255 0]/255,'LineWidth',2);
     legendLength = legendLength + 1;
-    legendStr{legendLength} = 'PR-670 #2';
+    legendStr{legendLength} = prefixOtherPR670;
 end
+
 if (~isempty(spectrumNewMeter))
     plot(wls,spectrumNewMeter,'Color',[0 0 255]/255,'LineWidth',2);
     legendLength = legendLength + 1;
@@ -188,10 +217,10 @@ FigureSave(fullfile(radiometerChecksDir,'xComparison',['PRComparison_Absolute_' 
 fprintf('\n');
 load T_xyz1931;
 T_xyz1931 = SplineCmf(S_xyz1931,683*T_xyz1931,wls);
-measureXYZ = T_xyz1931*spectrumPr670_1_Meter;
+measureXYZ = T_xyz1931*spectrumNormPR670;
 measureCDM2(i) = measureXYZ(2);
-fprintf(1,'Measured luminance (PR-670 #1), %g cd/m2\n',measureCDM2(i));
-fprintf(1,'Measured chromaticity (PR-670 #1), x: %.4f, y: %.4f\n',measureXYZ(1)/sum(measureXYZ), measureXYZ(2)/sum(measureXYZ));
+fprintf(1,'Measured luminance (%s), %g cd/m2\n',prefixNormPR670, measureCDM2(i));
+fprintf(1,'Measured chromaticity (%s), x: %.4f, y: %.4f\n', prefixNormPR670, measureXYZ(1)/sum(measureXYZ), measureXYZ(2)/sum(measureXYZ));
 
 %% Fit a black body radiator to the mean relative spectrum
 % meanSpectrum = mean([(spectrumNewMeter\spectrumPr670Meter)*spectrumNewMeter (spectrumPennMeter\spectrumPr670Meter)*spectrumPennMeter spectrumPr670Meter],2);
