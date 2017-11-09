@@ -4,11 +4,19 @@ function CompareSphereMeas
 % Compare the three measurements of the sphere for a given date
 
 % 09/09/17  dhb  Update to use prefs for where data live and go.
+% 11/009/17 npc  Fixed some path issues. Also added PTB-3 to the path.  
+%                This is not included in the BrainardLabToolbox config for
+%                some reason unknown to me (nicolas)
+%
+% Run this after doing: tbUse('BrainardLabToolbox');
 
 % Clear and close
 close all;
 
 %% Measurement date to analyze
+% Put the PTB-3 in the path
+addpath(genpath(fullfile(getpref('BrainardLabToolbox', 'ptbBaseDir'), 'Psychtoolbox')));
+
 dateStrDefault = '11-Nov-2015';
 dateStr = GetWithDefault('Enter date string to compare for',dateStrDefault);
 
@@ -42,7 +50,7 @@ else
     wlsNewMeter = [];
     spectrumNewMeter = [];
 end
-cd(curDir);
+
 
 %% Load the Penn PR-650
 cd(fullfile(radiometerChecksDir,'xPennMeter'));
@@ -64,7 +72,7 @@ end
 cd(curDir);
 
 %% Load the Penn PR-670 #1
-cd xPR-670_1
+cd(fullfile(radiometerChecksDir, 'xPR-670_1'));
 if (exist(['PR-670_1_Sphere_' dateStr '.mat'],'file')) 
     fprintf('Loading PR-670_1 data\n');
     pr670_1_MeterData = load(['PR-670_1_Sphere_' dateStr]);
@@ -83,7 +91,7 @@ end
 cd(curDir);
 
 %% Load the Penn PR-670 #2
-cd xPR-670_2
+cd(fullfile(radiometerChecksDir, 'xPR-670_2'));
 if (exist(['PR-670_2_Sphere_' dateStr '.mat'],'file')) 
     fprintf('Loading PR-670_2 data\n');
     pr670_2_MeterData = load(['PR-670_2_Sphere_' dateStr]);

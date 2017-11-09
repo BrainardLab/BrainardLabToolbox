@@ -5,6 +5,7 @@
 
 % 06/14/17  dhb, ar  Wrote it.
 % 10/15/17 dhb       Only try to stick PTB java stuff on path if we can find the PTB.
+% 10/9/17  npc       Added ptbBaseDir field and case for Nicolas' iMac
 
 %% Define project
 projectName = 'BrainardLabToolbox';
@@ -31,6 +32,10 @@ switch (sysInfo.localHostName)
         % DHB's desktop
         baseDir = fullfile(filesep,'Volumes','Users1','Dropbox (Aguirre-Brainard Lab)');
  
+    case {'Manta', 'Manta-2'}
+        % Nicolas's iMac
+        baseDir = fullfile(filesep,'Volumes','DropBoxDisk/Dropbox','Dropbox (Aguirre-Brainard Lab)');
+        
     otherwise
         % Some unspecified machine, try user specific customization
         switch(sysInfo.userShortName)
@@ -62,6 +67,9 @@ if (~isempty(ptbBaseDir))
     theMsg = 'Psychtoolbox/PsychJava';
     JavaAddToPath(thePath,theMsg);
 end
+
+% RadiometerChenks need access to GetWithDefault, which is a PTB function
+setpref(projectName, 'ptbBaseDir', ptbBaseDir);
 
 
 
