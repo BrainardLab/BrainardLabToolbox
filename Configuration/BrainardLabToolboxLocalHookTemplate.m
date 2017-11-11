@@ -3,9 +3,10 @@
 % Template for setting preferences and other configuration things, for the
 % BrainardLabToolbox.
 
-% 06/14/17  dhb, ar  Wrote it.
-% 10/15/17 dhb       Only try to stick PTB java stuff on path if we can find the PTB.
-% 10/9/17  npc       Added ptbBaseDir field and case for Nicolas' iMac
+% 06/14/17  dhb, ar   Wrote it.
+% 10/15/17  dhb       Only try to stick PTB java stuff on path if we can find the PTB.
+% 10/9/17   npc       Added ptbBaseDir field and case for Nicolas' iMac
+% 11/11/17  dhb       Add 'CalDataFolder' preference.
 
 %% Define project
 toolboxName = 'BrainardLabToolbox';
@@ -75,6 +76,9 @@ setpref(toolboxName, 'ptbBaseDir', ptbBaseDir);
 % 
 % If there is a PsychCalLocalData folder that tbLocate can find, 
 % we point at that. Otherwise this is set to empty.
+%
+% Specific projects can override this to have the calibration files
+% written to a project specific location.
 psychCalLocalData = tbLocateToolbox('PsychCalLocalData');
 setpref(toolboxName,'CalDataFolder',psychCalLocalData);
 
