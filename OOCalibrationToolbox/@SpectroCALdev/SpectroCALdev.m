@@ -36,7 +36,7 @@ classdef SpectroCALdev < Radiometer
             
             parser = inputParser;
             parser.addParamValue('verbosity',   1);
-            parser.addParamValue('devicePortString',  []);
+            parser.addParamValue('devicePortString',  '/dev/tty.usbserial-AL1G0I9F');
             
             % Execute the parser
             parser.parse(varargin{:});
@@ -126,7 +126,7 @@ classdef SpectroCALdev < Radiometer
                 tmp = ls(obj.portHandle);
                 fprintf('Device found at <strong>%s</strong>\n', strtrim(tmp));
             catch e
-                fprintf(sprintf('No device found at <strong>%s</strong>, port does not exist\n', usbPort));
+                fprintf(sprintf('No device found at <strong>%s</strong>, port does not exist\n', obj.portHandle));
                 fprintf('Potential devices in /dev/tty:\n');
                 tmp = dir('/dev/tty*usb*');
                 for ii = 1:length(tmp)
