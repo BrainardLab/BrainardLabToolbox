@@ -3,16 +3,17 @@
 % Template for setting preferences and other configuration things, for the
 % BrainardLabToolbox.
 
-% 06/14/17  dhb, ar  Wrote it.
-% 10/15/17 dhb       Only try to stick PTB java stuff on path if we can find the PTB.
-% 10/9/17  npc       Added ptbBaseDir field and case for Nicolas' iMac
+% 06/14/17  dhb, ar   Wrote it.
+% 10/15/17  dhb       Only try to stick PTB java stuff on path if we can find the PTB.
+% 10/9/17   npc       Added ptbBaseDir field and case for Nicolas' iMac
+% 11/11/17  dhb       Add 'CalDataFolder' preference.
 
 %% Define project
-projectName = 'BrainardLabToolbox';
+toolboxName = 'BrainardLabToolbox';
 
 %% Clear out old preferences
-if (ispref(projectName))
-    rmpref(projectName);
+if (ispref(toolboxName))
+    rmpref(toolboxName);
 end
 
 %% Clear out prefs named 'ColorMaterialModel', if they exist
@@ -50,14 +51,14 @@ end
 %
 % These preferences have to do with the ColorMaterialModel section of the
 % BrainardLabToolbox
-setpref(projectName,'cmmCodeDir',fullfile(ptbBaseDir,'ColorMaterialModel'));
-setpref(projectName,'cmmDemoDataDir', fullfile(ptbBaseDir,'ColorMaterialModel','DemoData'));
+setpref(toolboxName,'cmmCodeDir',fullfile(ptbBaseDir,'ColorMaterialModel'));
+setpref(toolboxName,'cmmDemoDataDir', fullfile(ptbBaseDir,'ColorMaterialModel','DemoData'));
 
 %% RadiometerChecks preferences
 %
 % These preferences have to do with the RadiometerChecks section of the
 % BrainardLabToolbox
-setpref(projectName,'RadiometerChecksDir',fullfile(baseDir,'MELA_admin','RadiometerChecks'));
+setpref(toolboxName,'RadiometerChecksDir',fullfile(baseDir,'MELA_admin','RadiometerChecks'));
 
 % Add PTB PsychJava to the path, if we can find the Psychtoolbox.
 %% Find the toolbox location, the TbTb way.
@@ -68,8 +69,18 @@ if (~isempty(ptbBaseDir))
     JavaAddToPath(thePath,theMsg);
 end
 
-% RadiometerChenks need access to GetWithDefault, which is a PTB function
-setpref(projectName, 'ptbBaseDir', ptbBaseDir);
+% RadiometerChecks need access to GetWithDefault, which is a PTB function
+setpref(toolboxName, 'ptbBaseDir', ptbBaseDir);
+
+%% Calibration prefs
+% 
+% If there is a PsychCalLocalData folder that tbLocate can find, 
+% we point at that. Otherwise this is set to empty.
+%
+% Specific projects can override this to have the calibration files
+% written to a project specific location.
+psychCalLocalData = tbLocateToolbox('PsychCalLocalData');
+setpref(toolboxName,'CalDataFolder',psychCalLocalData);
 
 
 

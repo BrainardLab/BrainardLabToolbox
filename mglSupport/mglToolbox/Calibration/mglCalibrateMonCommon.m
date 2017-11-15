@@ -3,6 +3,12 @@
 % This handles everything past the display specific prompting.  Can be called
 % by multiple top level interfaces.
 %
+% Calibration data is written into folder specified by
+% getpref('BrainardLabToolbox','CalDataFolder').  This is set by default in
+% the BrainardLabToolbox local hook to be PsychCalLocalData, but can be
+% reset by a specific project to define a project specific location.  This
+% latter practice is what we recommend going forward (from 11/11/17).
+%
 % 2/12/10  dhb  Pulled out of mglCalibrateMonSpd
 %          dhb  Don't pass blankOtherScreen, now part of cal.describe structure.
 % 2/13/10  dhb  Same with cal.usebitspp
@@ -12,7 +18,8 @@
 %                   8;" in order to work with 64-bit MATLAB
 % 7/03/14  npc  Modifications for accessing calibration data using a @CalStruct object.
 %               This was required only at the very end, where plotting data are directly accessed.
-%
+% 11/11/17 dhb  Use BrainardLabToolbox preference to determine where to
+%               save the calibration file.
 
 % Get dacsize
 if (cal.usebitspp)
@@ -94,11 +101,14 @@ end
 %% Calibrate ambient
 cal = mglCalibrateAmbDrvr(cal, 0, whichMeterType);
 
-% Save the structure
+% Save the calibration structure
 fprintf(1, '\nSaving to %s.mat\n', newFileName);
-SaveCalFile(cal, newFileName);
-
-
+calFolder = getpref('BrainardLabToolbox','CalDataFolder');
+if (isempty(calFolder))
+    SaveCalFile(cal, newFileName);
+else
+    SaveCalFile(cal, newFileName);
+end
 
 % Specify @CalStruct object that will handle all access to the calibration data.
 [calStructOBJ, inputArgIsACalStructOBJ] = ObjectToHandleCalOrCalStruct(cal);

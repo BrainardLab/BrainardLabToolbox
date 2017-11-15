@@ -183,7 +183,7 @@ switch calibrationType
         
         % EyeTracker
     case 'EyeTracker'
-        fprintf('Warning! The monitor for eyetracker has changed. This is caling for calibration for the old one!')
+        fprintf('Warning! The monitor for eyetracker has changed. This is calling for calibration for the old one!')
         whichScreen = 2;
         cal.describe.whichScreen = whichScreen;
         cal.describe.blankOtherScreen = 0;
@@ -384,7 +384,7 @@ switch calibrationType
         
         
         % Lightness classification, CRT/Bits++ rig
-         % New LCD for eyetracking
+        % New LCD for eyetracking
         case 'BoldDisplay'
         whichScreen = 2;
         cal.describe.whichScreen = whichScreen;
