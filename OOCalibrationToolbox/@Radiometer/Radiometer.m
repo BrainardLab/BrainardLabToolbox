@@ -74,11 +74,16 @@ classdef Radiometer < handle
         portDeviceNames = { lower('keyserial1'), lower('usbmodem'), lower('usbserial'), lower('cu.USA') };
     
         % Enumerate cu* devices - they correspond to serial ports:
-        portDeviceFiles = dir('/dev/cu*');
-        
+        portDeviceFilesCU = dir('/dev/cu*');
+
+        % Enumerate tty.usb* devices - they correspond to serial ports:
+        portDeviceFilesTTY_USB = dir('/dev/tty.usb*');
+
+        % Concatenate all portDevicefiles
+        portDeviceFiles = [portDeviceFilesCU(:); portDeviceFilesTTY_USB(:)]
+
         % Private Verbosity
         privateVerbosity;
-        
     end % private properties
     
     % Abstract, public methods. Each subclass *must* implenent its own
