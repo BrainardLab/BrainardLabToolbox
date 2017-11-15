@@ -86,7 +86,8 @@ classdef SpectroCALdev < Radiometer
         function result = measure(obj)
             % initialize to empty result
             result = obj.measureSpd();
-            obj.measurement = result.spd;
+            obj.measurement.spectralAxis = result.wls;
+            obj.measurement.energy = result.spd;
         end
         
         function obj = shutDown(obj)
@@ -99,9 +100,9 @@ classdef SpectroCALdev < Radiometer
         end
         
         function result = measureSpd(obj)
-            wls = obj.nativeS(1):obj.nativeS(2):(obj.nativeS(1)+obj.nativeS(2)*obj.nativeS(3)-1);
+            result.wls = obj.nativeS(1):obj.nativeS(2):(obj.nativeS(1)+obj.nativeS(2)*obj.nativeS(3)-1);
             [result.ciexy, result.cieuv, result.luminance, result.wls, result.spd] = SpectroCALMakeSPDMeasurement(obj.portHandle, ...
-                wls(1), wls(end), obj.nativeS(2));
+                result.wls(1), result.wls(end), obj.nativeS(2));
         end
             
     end % Implementations of required -- Public -- Abstract methods defined in the Radiometer interface
