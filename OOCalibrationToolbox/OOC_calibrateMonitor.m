@@ -20,6 +20,7 @@ function OOC_calibrateMonitor
         'Right_SONY_PVM2541A'
         'InVivoSensaVue_FlatPanel'
         'AppleThunderboltDisplay'
+        'HTCVive'
     };
     
     defaultCalibrationConfig = AvailableCalibrationConfigs{1};
@@ -410,7 +411,7 @@ end
 function radiometerOBJ = generateRadiometerObject()
 
     % List of available @Radiometer objects
-    radiometerTypes = {'PR650dev', 'PR670dev'};
+    radiometerTypes = {'PR650dev', 'PR670dev', 'CRSSpectroCAL'};
     radiometersNum  = numel(radiometerTypes);
     
     % Ask the user to select a calibrator type
@@ -453,6 +454,8 @@ function radiometerOBJ = generateRadiometerObject()
             'apertureSize',     desiredApertureSize, ...
             'exposureTime',     desiredExposureTime ...
         );
+    elseif (strcmp(selectedRadiometerType, 'SpectroCAL'))
+        
     
     end
     
