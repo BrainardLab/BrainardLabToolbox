@@ -79,9 +79,9 @@ classdef Radiometer < handle
         % Enumerate tty.usb* devices - they correspond to serial ports:
         portDeviceFilesTTY_USB = dir('/dev/tty.usb*');
 
-        % Concatenate all portDevicefiles
-        portDeviceFiles = [portDeviceFilesCU(:); portDeviceFilesTTY_USB(:)]
-
+        % Concatenation of above portDeviceFiles
+        portDeviceFiles;
+        
         % Private Verbosity
         privateVerbosity;
     end % private properties
@@ -111,7 +111,9 @@ classdef Radiometer < handle
     methods
         % Constructor
         function obj = Radiometer(verbosity, devPortString)
-            
+            % Concatenate all portDevicefiles
+            obj.portDeviceFiles = [obj.portDeviceFilesCU(:); obj.portDeviceFilesTTY_USB(:)];
+        
             obj.verbosity = verbosity;
             if ~isempty(devPortString)
                 obj.portString = devPortString;
@@ -122,7 +124,6 @@ classdef Radiometer < handle
             if (obj.verbosity > 9)
                 fprintf('In Radiometer.constructor() method\n');
             end
-
         end
         
         % Setter method for property verbosity
