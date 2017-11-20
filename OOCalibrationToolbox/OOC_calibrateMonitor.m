@@ -66,6 +66,9 @@ function OOC_calibrateMonitor
             
         case 'InVivoSensaVue_FlatPanel'
             configFunctionHandle = @generateConfigurationForInVivoSensaVue_FlatPanel;   
+
+        case 'HTCVive'
+            configFunctionHandle = @generateConfigurationForHTCVive;   
             
         otherwise
             configFunctionHandle = @generateConfigurationForViewSonicProbe;
@@ -387,6 +390,47 @@ function [displaySettings, calibratorOptions] = generateConfigurationForInVivoSe
     );
 end
 
+% configuration function for HTCVive
+function [displaySettings, calibratorOptions] = generateConfigurationForHTCVive()
+    % Specify where to send the 'Calibration Done' notification email
+    emailAddressForNotification = 'manuel.spitschan@psy.ox.ac.uk';
+    
+    % Specify the @Calibrator's initialization params. 
+    % Users should tailor these according to their hardware specs. 
+    % These can be set once only, at the time the @Calibrator object is instantiated.
+    displaySettings = { ...
+        'screenToCalibrate',        2, ...                          % which display to calibrate. main screen = 1, second display = 2
+        'desiredScreenSizePixel',   [1680 1050], ...                % pixels along the width and height of the display to be calibrated
+        'desiredRefreshRate',       [], ...                         % refresh rate in Hz
+        'displayPrimariesNum',      3, ...                          % for regular displays this is always 3 (RGB) 
+        'displayDeviceType',        'monitor', ...                  % this should always be set to 'monitor' for now
+        'displayDeviceName',        'HTCVive', ...  % a name for the display been calibrated
+        'calibrationFile',          'HTCVive', ...  % name of calibration file to be generated
+        'comment',                  'First calibration' ...         % some comment, could be anything
+        };
+    
+    % Specify the @Calibrator's optional params using a CalibratorOptions object
+    % To see what options are available type: doc CalibratorOptions
+    % Users should tailor these according to their experimental needs.
+    calibratorOptions = CalibratorOptions( ...
+        'verbosity',                        1, ...
+        'whoIsDoingTheCalibration',         input('Enter your name: ','s'), ...
+        'emailAddressForDoneNotification',  GetWithDefault('Enter email address for done notification',  emailAddressForNotification), ...
+        'blankOtherScreen',                 0, ...                          % whether to blank other displays attached to the host computer (1=yes, 0 = no), ...
+        'whichBlankScreen',                 1, ...                          % screen number of the display to be blanked  (main screen = 1, second display = 2)
+        'blankSettings',                    [0.1 0.1 0.1], ...           % color of the whichBlankScreen 
+        'bgColor',                          [0.5 0.5 0.5], ...     % color of the background  
+        'fgColor',                          [0.5 0.5 0.5], ...     % color of the foreground
+        'meterDistance',                    0.5, ...                        % distance between radiometer and screen in meters
+        'leaveRoomTime',                    1, ...                          % seconds allowed to leave room
+        'nAverage',                         1, ...                          % number of repeated measurements for averaging
+        'nMeas',                            15, ...                         % samples along gamma curve
+        'boxSize',                          150, ...                        % size of calibration stimulus in pixels
+        'boxOffsetX',                       0, ...                          % x-offset from center of screen (neg: leftwards, pos:rightwards)         
+        'boxOffsetY',                       0 ...                           % y-offset from center of screen (neg: upwards, pos: downwards)                      
+    );
+end
+
 
 % Function to generate the calibrator object.
 % Users should not modify this function unless they know what they are doing.
@@ -411,7 +455,7 @@ end
 function radiometerOBJ = generateRadiometerObject()
 
     % List of available @Radiometer objects
-    radiometerTypes = {'PR650dev', 'PR670dev', 'CRSSpectroCAL'};
+    radiometerTypes = {'PR650dev', 'PR670dev', 'SpectroCALdev'};
     radiometersNum  = numel(radiometerTypes);
     
     % Ask the user to select a calibrator type
@@ -454,9 +498,8 @@ function radiometerOBJ = generateRadiometerObject()
             'apertureSize',     desiredApertureSize, ...
             'exposureTime',     desiredExposureTime ...
         );
-    elseif (strcmp(selectedRadiometerType, 'SpectroCAL'))
-        
-    
+    elseif (strcmp(selectedRadiometerType, 'SpectroCALdev'))
+        radiometerOBJ = SpectroCALdev();
     end
     
 end
