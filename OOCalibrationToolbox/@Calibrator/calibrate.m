@@ -26,7 +26,6 @@ function obj = calibrate(obj)
 
     % Initialize states of the screen to be measured and the other screen
     obj.setDisplaysInitialState(userPrompt);
-   
 
     % Begin by some basic linearity measurements (first pass). 
     % These may be compared to what happens when we predict the same values from the calibration itself.
