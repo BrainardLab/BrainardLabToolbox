@@ -45,16 +45,23 @@ function setDisplaysInitialState(obj, userPrompt)
         Screen('Flip', obj.slaveWindowPtr);    
     end  % blackOtherScreen
     
-    % white square for user to focus the spectr-radiometer
+    % white square for user to focus the spectro-radiometer
     targetSettings = [1 1 1];
     obj.updateBackgroundAndTarget(calStruct.describe.bgColor, targetSettings, calStruct.describe.useBitsPP)    
  
+    % When doing calibration with the SpectroCAL, turn the laser on
+    if strcmp(class(obj.radiometerObj), 'SpectroCALdev')
+       obj.radiometerObj.switchLaserState(1); 
+    end
     
     % Wait for user
     if (userPrompt)
         fprintf('\nHit enter when ready ...');
         FlushEvents;
         GetChar;
+        if strcmp(class(obj.radiometerObj), 'SpectroCALdev')
+            obj.radiometerObj.switchLaserState(0);
+        end
         fprintf('\n\n-------------------------------------------\n');
         fprintf('\nPausing for %d seconds ...', calStruct.describe.leaveRoomTime);
         WaitSecs(calStruct.describe.leaveRoomTime);
