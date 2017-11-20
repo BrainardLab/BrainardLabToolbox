@@ -14,7 +14,7 @@ classdef SpectroCALdev < Radiometer
     % --- PRIVATE PROPERTIES ----------------------------------------------
     properties (Access = private)
         % Handle to communication port
-        portHandle = '/dev/tty.usbserial-AL1G0I9F';
+        portHandle = [];
         
         % device files that are known to be for other devices than the SpectroCAL
         invalidPortStrings = { 'cu.usbserial-KU000000', 'unspecified' };
@@ -101,7 +101,7 @@ classdef SpectroCALdev < Radiometer
         
         function result = measureSpd(obj)
             result.wls = obj.nativeS(1):obj.nativeS(2):(obj.nativeS(1)+obj.nativeS(2)*obj.nativeS(3)-1);
-            [result.ciexy, result.cieuv, result.luminance, result.wls, result.spd] = SpectroCALMakeSPDMeasurement(obj.portHandle, ...
+            [result.ciexy, result.cieuv, result.luminance, result.wls, result.spd] = SpectroCALMakeSPDMeasurement(obj.portString, ...
                 result.wls(1), result.wls(end), obj.nativeS(2));
         end
             
@@ -113,9 +113,9 @@ classdef SpectroCALdev < Radiometer
         function obj = switchLaserState(obj, laserState)
             % Check whether to turn laser on or off
             if laserState == 0
-                SpectroCALLaserOff(obj.portHandle);
+                SpectroCALLaserOff(obj.portString);
             elseif laserState == 1
-                SpectroCALLaserOn(obj.portHandle);
+                SpectroCALLaserOn(obj.portString);
             end
         end
     end
@@ -124,10 +124,10 @@ classdef SpectroCALdev < Radiometer
         % Method to initialize communication with the device
         function obj = establishCommunication(obj)
             try
-                tmp = ls(obj.portHandle);
+                tmp = ls(obj.portString);
                 fprintf('Device found at <strong>%s</strong>\n', strtrim(tmp));
             catch e
-                fprintf(sprintf('No device found at <strong>%s</strong>, port does not exist\n', obj.portHandle));
+                fprintf(sprintf('No device found at <strong>%s</strong>, port does not exist\n', obj.portString));
                 fprintf('Potential devices in /dev/tty:\n');
                 tmp = dir('/dev/tty*usb*');
                 for ii = 1:length(tmp)
