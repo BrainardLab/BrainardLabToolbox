@@ -103,6 +103,7 @@ classdef SpectroCALdev < Radiometer
             result.wls = obj.nativeS(1):obj.nativeS(2):(obj.nativeS(1)+obj.nativeS(2)*obj.nativeS(3)-1);
             [result.ciexy, result.cieuv, result.luminance, result.wls, result.spd] = SpectroCALMakeSPDMeasurement(obj.portString, ...
                 result.wls(1), result.wls(end), obj.nativeS(2));
+            result.spd = result.spd';
         end
             
     end % Implementations of required -- Public -- Abstract methods defined in the Radiometer interface
