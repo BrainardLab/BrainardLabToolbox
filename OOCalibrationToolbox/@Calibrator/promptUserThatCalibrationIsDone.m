@@ -18,7 +18,11 @@ function promptUserThatCalibrationIsDone(obj,beepWhenDone)
         Snd('Play',sin(0:10000));
         pause(0.3);
         Snd('Play',sin(0:10000));
-        sendmail(obj.cal.describe.doneNotificationEmail, 'Calibration Complete', 'All done!');
+        try
+            sendmail(obj.cal.describe.doneNotificationEmail, 'Calibration Complete', 'All done!');
+        catch e
+            fprintf('\nCouldn''t send completion email, proceeding anyway.\n');
+        end
     end
     
 end
