@@ -113,13 +113,13 @@ classdef SpectroCALdev < Radiometer
         function obj = switchLaserState(obj, laserState)
             % Check whether to turn laser on or off
             if laserState == 0
-                SpectroCALLaserOff(obj.portString);
+                obj.sendCommand('*CONTR:LASER 0');CP,1);
             elseif laserState == 1
-                SpectroCALLaserOn(obj.portString);
+                obj.sendCommand('*CONTR:LASER 1');
             end
         end
         
-        function obj = parseErrorCode(obj, errorCode)
+        function errMesg = parseErrorCode(obj, errorCode)
             % The following list of error codes is from the JETI
             % Spectroradiometer Firmware handbook, document rev 2.70
             
@@ -274,6 +274,24 @@ classdef SpectroCALdev < Radiometer
                 end
                 error('Exiting...');
             end
+        end
+        
+        function obj = sendCommand(obj, commandToBeSent)
+            if ~isstring(commandToBeSent)
+               error('Input to sendCommand not a string');
+            end
+            VCP = serial(obj.portString, 'BaudRate', 921600,...
+                'DataBits', 8, ...
+                'StopBits', 1, ...
+                'FlowControl', 'none', ...
+                'Parity', 'none', 'Terminator', 'CR',...
+                'Timeout', 5, ...
+                'InputBufferSize', 16000);
+            fopen(VCP);
+            fprintf(VCP, [commandToBeSent, char(13)]);
+            errorMsg = fread(VCP, 1);
+            obj.parseErrorCode(errorMsg);
+            fclose(VCP);
         end
         
         % Method to obtain device-speficic properties of PR-650
