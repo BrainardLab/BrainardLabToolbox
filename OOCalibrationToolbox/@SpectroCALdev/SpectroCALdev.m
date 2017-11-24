@@ -105,11 +105,10 @@ classdef SpectroCALdev < Radiometer
                 result.wls(1), result.wls(end), obj.nativeS(2));
             result.spd = result.spd';
         end
-            
+        
     end % Implementations of required -- Public -- Abstract methods defined in the Radiometer interface
     
     methods
-        
         % Method to turn on and off the laser
         function obj = switchLaserState(obj, laserState)
             % Check whether to turn laser on or off
@@ -119,6 +118,145 @@ classdef SpectroCALdev < Radiometer
                 SpectroCALLaserOn(obj.portString);
             end
         end
+        
+        function obj = parseErrorCode(obj, errorCode)
+            % The following list of error codes is from the JETI
+            % Spectroradiometer Firmware handbook, document rev 2.70
+            
+            switch errorCode
+                case 0
+                    errMesg = "no error";
+                case 4
+                    errMesg = "command error";
+                case 7
+                    errMesg = "error password";
+                case 8
+                    errMesg = "digit error";
+                case 10
+                    errMesg = "error argument 1";
+                case 11
+                    errMesg = "error argument 2";
+                case 12
+                    errMesg = "error argument 3";
+                case 13
+                    errMesg = "error argument 4";
+                case 20
+                    errMesg = "error parameter argument";
+                case 21
+                    errMesg = "error config argument";
+                case 22
+                    errMesg = "error control argument";
+                case 23
+                    errMesg = "error read argument";
+                case 24
+                    errMesg = "error fetch argument";
+                case 25
+                    errMesg = "error measuring argument";
+                case 26
+                    errMesg = "error calculation argument";
+                case 27
+                    errMesg = "error calibration argument";
+                case 101
+                    errMesg = "error parameter checksum";
+                case 102
+                    errMesg = "error userfile checksum";
+                case 103
+                    errMesg = "error userfile2 checksum";
+                case 104
+                    errMesg = "error userfile2 argument";
+                case 120
+                    errMesg = "error overexposure";
+                case 121
+                    errMesg = "error underexposure";
+                case 123
+                    errMesg = "error adaption integration time";
+                case 130
+                    errMesg = "error shutter not exist";
+                case 131
+                    errMesg = "error no dark measurement";
+                case 132
+                    errMesg = "error no reference measurement";
+                case 133
+                    errMesg = "error no transmission measurement";
+                case 134
+                    errMesg = "error no radiometric calculation";
+                case 135
+                    errMesg = "error no cct calculation";
+                case 136
+                    errMesg = "error no cri calculation";
+                case 137
+                    errMesg = "error no dark compensation";
+                case 138
+                    errMesg = "error no light measurement";
+                case 139
+                    errMesg = "error no peak calculation";
+                case 140
+                    errMesg = "error calibration data";
+                case 141
+                    errMesg = "error exceed calibration wavelength";
+                case 147
+                    errMesg = "error scan break";
+                case 160
+                    errMesg = "error timeout cycle optical trigger";
+                case 161
+                    errMesg = "error divider cycle time";
+                case 170
+                    errMesg = "error write parameter to flash";
+                case 171
+                    errMesg = "error read parameter from flash";
+                case 172
+                    errMesg = "error erase flash";
+                case 180
+                    errMesg = "error no calib file";
+                case 181
+                    errMesg = "error calib file header";
+                case 182
+                    errMesg = "error write calib file";
+                case 183
+                    errMesg = "error calib file values";
+                case 184
+                    errMesg = "error calib file number";
+                case 186
+                    errMesg = "error clear calib file";
+                case 187
+                    errMesg = "error clear calib file argument";
+                case 190
+                    errMesg = "error no lamp file";
+                case 191
+                    errMesg = "error lamp file header";
+                case 192
+                    errMesg = "error write lamp file";
+                case 193
+                    errMesg = "error lamp file values";
+                case 194
+                    errMesg = "error lamp file number";
+                case 196
+                    errMesg = "error clear lamp file";
+                case 197
+                    errMesg = "error clear lamp file argument";
+                case 200
+                    errMesg = "error ram check";
+                case 220
+                    errMesg = "error data output";
+                case 225
+                    errMesg = "error insufcient ram";
+                case 230
+                    errMesg = "error first memory allocation";
+                case 231
+                    errMesg = "error second memory allocation";
+                case 232
+                    errMesg = "error third memory allocation";
+                case 251
+                    errMesg = "error wavelength range for radiometric calculation";
+                case 280
+                    errMesg = "error jump boot by battery power";
+                case 500
+                    errMesg = "error trigger configuration 1";
+                case 501
+                    errMesg = "error trigger configuration 2";
+            end
+        end
+        
     end
     
     methods (Access = private)
