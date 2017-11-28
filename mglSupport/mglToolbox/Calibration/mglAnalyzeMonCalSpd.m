@@ -43,6 +43,7 @@
 %               (a) less overhead (@CalStruct objects are passed by reference, not by value), and
 %               (b) better control over how the calibration data are accessed.
 % 7/17/14  npc  Replaced all instances of savefig() with FigureSave().
+% 11/28/17 dhb  Save plots in folder pointed to by getpref('BrainardLabToolbox','CalDataFolder');
 
 % Initialize
 clear; close all;
@@ -62,15 +63,13 @@ clear 'cal'
 % Print out some information from the calibration.
 DescribeMonCal(calStructOBJ);
 
-
+% Get color matching functions
 S = calStructOBJ.get('S');                          
 load T_xyz1931
 T_xyz = SplineCmf(S_xyz1931,683*T_xyz1931,S);
 
 % Set color space
 SetSensorColorSpace(calStructOBJ,T_xyz,S);
-
-
 
 % Spectral calibration?
 T_device = calStructOBJ.get('T_device');
@@ -100,19 +99,22 @@ end
 %% Save basic figures?
 SAVEBASICFIGS = GetWithDefault('Save basic figures in cal plot directory (0 -> no, 1 -> yes)?',0);
 if (SAVEBASICFIGS)
-    calFolder = CalDataFolder([],calFilename);
+    calFolder = CalDataFolder([],calFilename,getpref('BrainardLabToolbox','CalDataFolder'));
     calPlotFolder = fullfile(calFolder,'Plots');
     if (~exist(calPlotFolder,'dir'))
-        unix(['mkdir ' calPlotFolder]);
+        %unix(['mkdir ' calPlotFolder]);
+        mkdir(calPlotFolder);
     end
     calFilePlotFolder = fullfile(calPlotFolder,calFilename);
     if (~exist(calFilePlotFolder,'dir'))
-        unix(['mkdir ' calFilePlotFolder]);
+        %unix(['mkdir ' calFilePlotFolder]);
+        mkdir(calFilePlotFolder);
     end
     calDate = calStructOBJ.get('date');
     thePlotFolder = fullfile(calFilePlotFolder,calDate(1:11));
     if (~exist(thePlotFolder,'dir'))
-        unix(['mkdir ' thePlotFolder]);
+        %unix(['mkdir ' thePlotFolder]);
+        mkdir(thePlotFolder);
     end
 end
 
