@@ -43,6 +43,11 @@ function packet = waitForMessage(obj, msgLabel, varargin)
     packet.messageLabel = matlabNUDP('receive', udpHandle);
     if (~strcmp(expectedMessageLabel,'')) && (~strcmp(packet.messageLabel, expectedMessageLabel))
         fprintf(2,'\nLeading message mismatch:\nExpected: ''%s''\nReceived: ''%s''\n', expectedMessageLabel,packet.messageLabel);
+        fprintf(2,'\nHere are the next 20 entries received\n');
+        for kkk = 1:20
+        datum = matlabNUDP('receive', udpHandle);
+        fprintf('SERIAL[%3d/%3d]: %s\n', kkk, 20, datum);
+        end
     end
     
     packet.timedOutFlag = obj.waitForMessageOrTimeout(timeOutSecs, pauseTimeSecs);
