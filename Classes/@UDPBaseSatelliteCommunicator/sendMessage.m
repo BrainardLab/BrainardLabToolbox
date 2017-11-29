@@ -14,7 +14,7 @@ function transmissionStatus = sendMessage(obj, msgLabel, msgData, varargin)
     maxAttemptsNum = p.Results.maxAttemptsNum;
     udpHandle    = obj.udpHandle;
     
-    paus(0.2);
+    pause(0.2);
     
     % Send the leading message label twice
     fprintf('\n-----> Seding messageLabel: %s\n', messageLabel);
