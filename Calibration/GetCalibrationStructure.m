@@ -9,13 +9,17 @@ function [cal,calFileName] = GetCalibrationStructure(prompt,defaultName,defaultW
 % Pass empty matrix to defaultWhichCal get it to prompt you for which calibration.  Pass
 % -1 to get most recent calibration.
 %
+% Uses getpref('BrainardLabToolbox','CalDataFolder') as the location to
+% look in for calibration files.
+%
 % 4/3/10   dhb  Wrote it.
 % 6/10/10  dhb  Add -1 option for defaultWhichCal.
-% 10/05/10 dhb  Optional return of filename
+% 10/05/10 dhb  Optional return of filename.
+% 11/28/17 dhb  Use preference to get calibration data folder.
 
 % Get calibration file and choose date
 calFileName = GetWithDefault(prompt,defaultName);
-[cal,cals] = LoadCalFile(calFileName);
+[cal,cals] = LoadCalFile(calFileName,[],getpref('BrainardLabToolbox','CalDataFolder'));
 if (isempty(cal))
     error('Can''t find calibration file: %s',calFileName);
 else
