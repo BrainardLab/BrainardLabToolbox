@@ -15,9 +15,11 @@ function transmissionStatus = sendMessage(obj, msgLabel, msgData, varargin)
     udpHandle    = obj.udpHandle;
     
     % Send the leading message label twice
-    matlabNUDP('send', udpHandle, messageLabel);
-    matlabNUDP('send', udpHandle, messageLabel);
     fprintf('\n-----> Seding messageLabel: %s\n', messageLabel);
+    matlabNUDP('send', udpHandle, messageLabel);
+    fprintf('\n-----> Seding messageLabel (2nd time): %s\n', messageLabel);
+    matlabNUDP('send', udpHandle, messageLabel);
+    
     
     % Serialize data
     byteStream = getByteStreamFromArray(messageData);
