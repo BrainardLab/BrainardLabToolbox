@@ -40,6 +40,7 @@ function packet = waitForMessage(obj, msgLabel, varargin)
     end
     
     % Read the leading packet label
+    packet.timedOutFlag = obj.waitForMessageOrTimeout(timeOutSecs, pauseTimeSecs);
     packet.messageLabel = matlabNUDP('receive', udpHandle);
     
     % We may have a second transmission of the message label
@@ -53,7 +54,9 @@ function packet = waitForMessage(obj, msgLabel, varargin)
         else
             error('Synchronization error in waitForMessage: ''%s'' vs. ''%s''.\n', packet.messageLabel, bytesNumOrMessageLabel);
         end
-    else
+    end
+    
+    if (receivedMessageLabelDuringBothAttempts == false)
         fprintf(2,'MessageLabel during first transmission was lost !!\n');
         fprintf(2,'Possible data transmission problem\n');
         
