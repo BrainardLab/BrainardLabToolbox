@@ -57,16 +57,20 @@ function packet = waitForMessage(obj, msgLabel, varargin)
     
     % Read all bytes
     pauseSecs = 0;
-    theData = [];
+    theData = zeros(1,numBytes);
+    fprintf('\n-------------------IN------------------\n');
     for k = 1:numBytes
         packet.timedOutFlag = obj.waitForMessageOrTimeout(timeOutSecs, pauseSecs);
         if (packet.timedOutFlag)
             obj.executeTimeOut(sprintf('while waiting to receive byte %d/%d of message ''%s''', k, numBytes, expectedMessageLabel), timeOutAction);
             return;
         end
-        theData(k) = str2double(matlabNUDP('receive', udpHandle));
+        datum = matlabNUDP('receive', udpHandle);
+        fprintf('SERIAL[%3d/%3d]: %s\n', k, numBytes, datum);
+        theData(k) = str2double(datum);
     end
-
+    fprintf('\n----------------------------------------\n');
+    
     % Read the message label again
     packet.timedOutFlag = obj.waitForMessageOrTimeout(timeOutSecs, pauseSecs);
     if (packet.timedOutFlag)

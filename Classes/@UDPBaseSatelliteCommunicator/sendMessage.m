@@ -25,9 +25,12 @@ function transmissionStatus = sendMessage(obj, msgLabel, msgData, varargin)
     matlabNUDP('send', udpHandle, sprintf('%d', numel(byteStream)));
         
     % Send each byte separately
+    fprintf('\n-------------------OUT------------------\n');
     for k = 1:numel(byteStream)
+       fprintf('SERIAL[%3d/%3d]: %s\n', k, numel(byteStream), sprintf('%03d', byteStream(k)));
        matlabNUDP('send', udpHandle, sprintf('%03d', byteStream(k)));
     end
+    fprintf('\n----------------------------------------\n');
     
     % Send the trailing message label
     matlabNUDP('send', udpHandle, messageLabel);
