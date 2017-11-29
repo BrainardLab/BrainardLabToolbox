@@ -41,24 +41,37 @@ function packet = waitForMessage(obj, msgLabel, varargin)
     
     % Read the leading packet label
     packet.messageLabel = matlabNUDP('receive', udpHandle);
-    if (~strcmp(expectedMessageLabel,'')) && (~strcmp(packet.messageLabel, expectedMessageLabel))
-        fprintf(2,'\nLeading message mismatch:\nExpected: ''%s''\nReceived: ''%s''\n', expectedMessageLabel,packet.messageLabel);
-        fprintf(2,'\nHere are the next 20 entries received\n');
-        for kkk = 1:20
-        datum = matlabNUDP('receive', udpHandle);
-        fprintf('SERIAL[%3d/%3d]: %s\n', kkk, 20, datum);
-        end
-    end
     
+    % We may have a second transmission of the message label
     packet.timedOutFlag = obj.waitForMessageOrTimeout(timeOutSecs, pauseTimeSecs);
-    if (packet.timedOutFlag)
-        obj.executeTimeOut(sprintf('while waiting to receive number of bytes for message ''%s''', expectedMessageLabel), timeOutAction);
-        return;
+    bytesNumOrMessageLabel = matlabNUDP('receive', udpHandle);
+    
+    receivedMessageLabelDuringBothAttempts = false;
+    if (strcmp(bytesNumOrMessageLabel, expectedMessageLabel))
+        if (strcmp(packet.messageLabel, expectedMessageLabel))
+            receivedMessageLabelDuringBothAttempts = true;
+        else
+            error('Synchronization error in waitForMessage: ''%s'' vs. ''%s''.\n', packet.messageLabel, bytesNumOrMessageLabel);
+        end
+    else
+        fprintf(2,'MessageLabel during first transmission was lost !!\n');
+        fprintf(2,'Possible data transmission problem\n');
+        
+        numBytes = str2double(bytesNumOrMessageLabel);
+        fprintf(2,'Is transmitted number of bytes equal to %d ?\n', numBytes);
     end
     
-    % Read number of bytes of ensuing data
-    bytesString = matlabNUDP('receive', udpHandle);
-    numBytes = str2double(bytesString);
+    if (receivedMessageLabelDuringBothAttempts)
+        packet.timedOutFlag = obj.waitForMessageOrTimeout(timeOutSecs, pauseTimeSecs);
+        if (packet.timedOutFlag)
+            obj.executeTimeOut(sprintf('while waiting to receive number of bytes for message ''%s''', expectedMessageLabel), timeOutAction);
+            return;
+        end
+
+        % Read number of bytes of ensuing data
+        bytesString = matlabNUDP('receive', udpHandle);
+        numBytes = str2double(bytesString);
+    end
     
     % Read all bytes
     pauseSecs = 0;
@@ -85,7 +98,7 @@ function packet = waitForMessage(obj, msgLabel, varargin)
     
     trailingMessageLabel = matlabNUDP('receive', udpHandle);
     if (~strcmp(packet.messageLabel,trailingMessageLabel))
-        fprintf('Trailing message label mismatch: expected ''%s'', received: ''%s''.\n', packet.messageLabel,trailingMessageLabel);
+        fprintf('Trailing message label mismatch: expected ''%s'', received: ''%s''.\n', expectedMessageLabel, trailingMessageLabel);
         if (strcmp(badTransmissionAction, obj.THROW_ERROR))
             % ask remote host to abort
             obj.sendMessage(obj.ABORT_MESSAGE.label, obj.ABORT_MESSAGE.value);
