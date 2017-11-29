@@ -15,7 +15,7 @@ function transmissionStatus = sendMessage(obj, msgLabel, msgData, varargin)
     udpHandle    = obj.udpHandle;
     
     % Wait a little bit
-    pause(0.02);
+    pause(0.1);
     
     % Send the leading message label
     matlabNUDP('send', udpHandle, messageLabel);
