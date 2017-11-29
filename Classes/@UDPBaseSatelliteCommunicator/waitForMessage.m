@@ -42,7 +42,7 @@ function packet = waitForMessage(obj, msgLabel, varargin)
     % Read the leading packet label
     packet.messageLabel = matlabNUDP('receive', udpHandle);
     if (~strcmp(packet.messageLabel, expectedMessageLabel))
-        error('Leading message label (''%s'') does not match expected message label (''%'')', packet.messageLabel, expectedMessageLabel)
+        error('Leading message label (''%s'') does not match expected message label (''%s'')', packet.messageLabel, expectedMessageLabel)
     end
     
     % We may have a second transmission of the message label
