@@ -41,6 +41,9 @@ function packet = waitForMessage(obj, msgLabel, varargin)
     
     % Read the leading packet label
     packet.messageLabel = matlabNUDP('receive', udpHandle);
+    if (~strcmp(packet.messageLabel, expectedMessageLabel))
+        error('Leading message label (''%s'') does not match expected message label (''%'')', packet.messageLabel, expectedMessageLabel)
+    end
     
     % We may have a second transmission of the message label
     packet.timedOutFlag = obj.waitForMessageOrTimeout(timeOutSecs, pauseTimeSecs);
@@ -54,14 +57,14 @@ function packet = waitForMessage(obj, msgLabel, varargin)
     if (strcmp(bytesNumOrMessageLabel, expectedMessageLabel))
         if (strcmp(packet.messageLabel, expectedMessageLabel))
             receivedMessageLabelDuringBothAttempts = true;
-            fprintf('Received message label twice. Yeah\n');
+            fprintf('\nReceived message label twice. Yeah\n');
         else
-            error('Synchronization error in waitForMessage: ''%s'' vs. ''%s''.\n', packet.messageLabel, bytesNumOrMessageLabel);
+            error('\nSynchronization error in waitForMessage: ''%s'' vs. ''%s''.\n', packet.messageLabel, bytesNumOrMessageLabel);
         end
     end
     
     if (receivedMessageLabelDuringBothAttempts == false)
-        fprintf(2,'MessageLabel during first transmission was lost !!\n');
+        fprintf(2,'\nMessageLabel during first transmission was lost !!\n');
         fprintf(2,'Possible data transmission problem\n');
         
         numBytes = str2double(bytesNumOrMessageLabel);
@@ -107,7 +110,7 @@ function packet = waitForMessage(obj, msgLabel, varargin)
         if (strcmp(badTransmissionAction, obj.THROW_ERROR))
             % ask remote host to abort
             obj.sendMessage(obj.ABORT_MESSAGE.label, obj.ABORT_MESSAGE.value);
-            error('Trailing message label (''%s'') does not match leading message label (''%'').\nAsked remote host to abort.', trailingMessageLabel, packet.messageLabel)
+            error('Trailing message label (''%s'') does not match leading message label (''%'').\nAsked remote host to abort.', trailingMessageLabel, packet.messageLabel);
         else
             packet.badTransmissionFlag = true;
             return;
