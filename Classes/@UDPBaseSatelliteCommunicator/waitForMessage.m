@@ -41,6 +41,10 @@ function packet = waitForMessage(obj, msgLabel, varargin)
     
     % Read the leading packet label
     packet.messageLabel = matlabNUDP('receive', udpHandle);
+    if (~strcmp(expectedMessageLabel,'')) && (~strcmp(packet.messageLabel, expectedMessageLabel))
+        error('\nLeading message label (''%s'') does not match expected message label (''%s'')\n', packet.messageLabel, expectedMessageLabel);
+    end
+    
     fprintf('------> Received messageLabel: %s\n', packet.messageLabel);
     
     packet.timedOutFlag = obj.waitForMessageOrTimeout(timeOutSecs, pauseTimeSecs);
