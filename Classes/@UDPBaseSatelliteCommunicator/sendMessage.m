@@ -14,6 +14,9 @@ function transmissionStatus = sendMessage(obj, msgLabel, msgData, varargin)
     maxAttemptsNum = p.Results.maxAttemptsNum;
     udpHandle    = obj.udpHandle;
     
+    % Wait a little bit
+    pause(0.02);
+    
     % Send the leading message label
     matlabNUDP('send', udpHandle, messageLabel);
     fprintf('-----> Seding messageLabel: %s\n', messageLabel);
@@ -37,7 +40,7 @@ function transmissionStatus = sendMessage(obj, msgLabel, msgData, varargin)
        
     % Wait for acknowledgment that the message was received OK
     pauseTimeSecs = 0;
-    timedOutFlag = obj.waitForMessageOrTimeout(timeOutSecs, pauseTimeSecs );
+    timedOutFlag = obj.waitForMessageOrTimeout(timeOutSecs, pauseTimeSecs);
     if (timedOutFlag)
         executeTimeOut(obj, 'while waiting to receive acknowledgment for message sent', timeOutAction);
         transmissionStatus = obj.NO_ACKNOWLDGMENT_WITHIN_TIMEOUT_PERIOD;
