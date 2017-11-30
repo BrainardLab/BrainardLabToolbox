@@ -57,7 +57,7 @@ function packet = waitForMessage(obj, msgLabel, varargin)
     if (strcmp(bytesNumOrMessageLabel, expectedMessageLabel))
         if (strcmp(packet.messageLabel, expectedMessageLabel))
             receivedMessageLabelDuringBothAttempts = true;
-            fprintf('\nReceived message label twice. Yeah\n');
+            %fprintf('\nReceived message label twice. Yeah\n');
         else
             error('\nSynchronization error in waitForMessage: ''%s'' vs. ''%s''.\n', packet.messageLabel, bytesNumOrMessageLabel);
         end
@@ -84,7 +84,7 @@ function packet = waitForMessage(obj, msgLabel, varargin)
     % Read all bytes
     pauseSecs = 0;
     theData = zeros(1,numBytes);
-    fprintf('\n-------------------IN------------------\n');
+    %fprintf('\n-------------------IN------------------\n');
     for k = 1:numBytes
         packet.timedOutFlag = obj.waitForMessageOrTimeout(timeOutSecs, pauseSecs);
         if (packet.timedOutFlag)
@@ -92,10 +92,10 @@ function packet = waitForMessage(obj, msgLabel, varargin)
             return;
         end
         datum = matlabNUDP('receive', udpHandle);
-        fprintf('SERIAL[%3d/%3d]: %s\n', k, numBytes, datum);
+        %fprintf('SERIAL[%3d/%3d]: %s\n', k, numBytes, datum);
         theData(k) = str2double(datum);
     end
-    fprintf('\n----------------------------------------\n');
+    %fprintf('\n----------------------------------------\n');
     
     % Read the message label again
     packet.timedOutFlag = obj.waitForMessageOrTimeout(timeOutSecs, pauseSecs);
