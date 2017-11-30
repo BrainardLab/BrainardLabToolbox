@@ -14,12 +14,8 @@ function transmissionStatus = sendMessage(obj, msgLabel, msgData, varargin)
     maxAttemptsNum = p.Results.maxAttemptsNum;
     udpHandle    = obj.udpHandle;
     
-    % Send the leading message label twice
-    %fprintf('\n-----> Seding messageLabel: %s\n', messageLabel);
+    % Send the leading message label
     matlabNUDP('send', udpHandle, messageLabel);
-    %fprintf('\n-----> Seding messageLabel (2nd time): %s\n', messageLabel);
-    matlabNUDP('send', udpHandle, messageLabel);
-    
     
     % Serialize data
     byteStream = getByteStreamFromArray(messageData);
@@ -28,12 +24,9 @@ function transmissionStatus = sendMessage(obj, msgLabel, msgData, varargin)
     matlabNUDP('send', udpHandle, sprintf('%d', numel(byteStream)));
         
     % Send each byte separately
-    %fprintf('\n-------------------OUT------------------\n');
     for k = 1:numel(byteStream)
-       %fprintf('SERIAL[%3d/%3d]: %s\n', k, numel(byteStream), sprintf('%03d', byteStream(k)));
        matlabNUDP('send', udpHandle, sprintf('%03d', byteStream(k)));
     end
-    %fprintf('\n----------------------------------------\n');
     
     % Send the trailing message label
     matlabNUDP('send', udpHandle, messageLabel);

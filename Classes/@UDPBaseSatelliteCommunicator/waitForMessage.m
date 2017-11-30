@@ -45,41 +45,14 @@ function packet = waitForMessage(obj, msgLabel, varargin)
         error('Leading message label (''%s'') does not match expected message label (''%s'')', packet.messageLabel, expectedMessageLabel)
     end
     
-    % We may have a second transmission of the message label
+    % Read the number of bytes
     packet.timedOutFlag = obj.waitForMessageOrTimeout(timeOutSecs, pauseTimeSecs);
     if (packet.timedOutFlag)
-        obj.executeTimeOut(sprintf('while waiting for message ''%s'' to arrive (2nd time)', expectedMessageLabel), timeOutAction);
+        obj.executeTimeOut(sprintf('while waiting to receive number of bytes for message ''%s''', expectedMessageLabel), timeOutAction);
         return;
     end
-    bytesNumOrMessageLabel = matlabNUDP('receive', udpHandle);
-    
-    receivedMessageLabelDuringBothAttempts = false;
-    if (strcmp(bytesNumOrMessageLabel, expectedMessageLabel))
-        if (strcmp(packet.messageLabel, expectedMessageLabel))
-            receivedMessageLabelDuringBothAttempts = true;
-            %fprintf('\nReceived message label twice. Yeah\n');
-        else
-            error('\nSynchronization error in waitForMessage: ''%s'' vs. ''%s''.\n', packet.messageLabel, bytesNumOrMessageLabel);
-        end
-    end
-    
-    if (receivedMessageLabelDuringBothAttempts == false)
-        fprintf(2,'\nMessageLabel during first transmission was lost !!\n');
-        fprintf(2,'Possible data transmission problem\n');
-        
-        numBytes = str2double(bytesNumOrMessageLabel);
-        fprintf(2,'Is transmitted number of bytes equal to %d ?\n', numBytes);
-    else
-        packet.timedOutFlag = obj.waitForMessageOrTimeout(timeOutSecs, pauseTimeSecs);
-        if (packet.timedOutFlag)
-            obj.executeTimeOut(sprintf('while waiting to receive number of bytes for message ''%s''', expectedMessageLabel), timeOutAction);
-            return;
-        end
-
-        % Read number of bytes of ensuing data
-        bytesString = matlabNUDP('receive', udpHandle);
-        numBytes = str2double(bytesString);
-    end
+    bytesString = matlabNUDP('receive', udpHandle);
+    numBytes = str2double(bytesString);
     
     % Read all bytes
     pauseSecs = 0;
