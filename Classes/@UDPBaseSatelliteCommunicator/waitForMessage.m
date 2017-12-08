@@ -47,6 +47,12 @@ function packet = waitForMessage(obj, msgLabel, varargin)
     
     % Read the leading packet label
     packet.messageLabel = matlabNUDP('receive', udpHandle);
+    
+    % test
+    if (strfind(communicationPacket.messageLabel, 'SENDING_SMALL_STRUCT'))
+       packet.messageLabel = 'SENDING_SMALL_S';
+    end
+        
     if (~strcmp(packet.messageLabel, expectedMessageLabel))
         messageToPrint = sprintf('Leading message label (''%s'') does not match expected message label (''%s'')', packet.messageLabel, expectedMessageLabel);
         packet = informSender_ReceivedMessageLabelNotMatchingExpected(packet, expectedMessageLabel, messageToPrint);
