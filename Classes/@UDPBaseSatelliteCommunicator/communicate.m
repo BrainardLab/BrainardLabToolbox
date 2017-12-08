@@ -47,7 +47,7 @@ function [messageReceived, status, roundTipDelayMilliSecs] = communicate(obj, pa
                 case { obj.UNEXPECTED_MESSAGE_LABEL_RECEIVED, obj.BAD_TRANSMISSION}
                     obj.displayMessage(sprintf('received status ''%s'' from remote host', status), communicationPacket.messageLabel, communicationPacket.messageData, packetNo, 'alert', true);
                     attemptNo = attemptNo + 1;
-                    fprintf(2, '\nAttempting to send the same message (trial #%d)\n', attemptNo);
+                    fprintf('<strong>\nAttempting to send the same message (trial #%d)\n</strong>', attemptNo);
                     status = obj.sendMessage(communicationPacket.messageLabel, communicationPacket.messageData, ...
                             'timeOutSecs', communicationPacket.timeOutSecs, ...
                             'timeOutAction', communicationPacket.timeOutAction ...
@@ -56,7 +56,7 @@ function [messageReceived, status, roundTipDelayMilliSecs] = communicate(obj, pa
         end % while
         
         if (noACK)
-            error('Communicate() bailing out: failed to received ACK after %d attempts of transmission\n', maxAttemptsNum);
+            error('Communicate() bailing out: failed to receive ACK after %d attempts of transmission\n', maxAttemptsNum);
         end
     else
         if (beVerbose)
@@ -86,7 +86,7 @@ function [messageReceived, status, roundTipDelayMilliSecs] = communicate(obj, pa
                 status = obj.BAD_TRANSMISSION;
                 obj.displayMessage(sprintf('received message contains bad data'), receivedPacket.messageLabel, receivedPacket.messageData, packetNo, 'alert', true);
                 attemptNo = attemptNo + 1;
-                fprintf(2, '\nWaiting to receive a resubmission (trial #%d)\n', attemptNo);
+                fprintf('<strong>\nWaiting to receive a resubmission (trial #%d)\n</strong>', attemptNo);
                 receivedPacket = obj.waitForMessage(communicationPacket.messageLabel, ...
                     'timeOutSecs', communicationPacket.timeOutSecs, ...
                     'timeOutAction', communicationPacket.timeOutAction, ...
@@ -96,7 +96,7 @@ function [messageReceived, status, roundTipDelayMilliSecs] = communicate(obj, pa
                 status = obj.UNEXPECTED_MESSAGE_LABEL_RECEIVED;
                 obj.displayMessage(sprintf('received message with wrong label (expected: ''%s'')', receivedPacket.mismatchedMessageLabel), receivedPacket.messageLabel, receivedPacket.messageData, packetNo, 'alert', true);
                 attemptNo = attemptNo + 1;
-                fprintf(2, '\nWaiting to receive a resubmission (trial #%d)\n', attemptNo);
+                fprintf('<strong>\nWaiting to receive a resubmission (trial #%d)\n</strong>', attemptNo);
                 receivedPacket = obj.waitForMessage(communicationPacket.messageLabel, ...
                     'timeOutSecs', communicationPacket.timeOutSecs, ...
                     'timeOutAction', communicationPacket.timeOutAction, ...
@@ -113,7 +113,7 @@ function [messageReceived, status, roundTipDelayMilliSecs] = communicate(obj, pa
             messageReceived.label = receivedPacket.messageLabel;
             messageReceived.data  = receivedPacket.messageData;
         else
-            error('Communicate() bailing out: failed to received a valid message after %d attempts.\n', maxAttemptsNum);
+            error('Communicate() bailing out: failed to receive a valid message after %d attempts.\n', maxAttemptsNum);
         end
     end
     
