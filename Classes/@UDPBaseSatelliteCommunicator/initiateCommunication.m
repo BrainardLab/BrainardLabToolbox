@@ -75,7 +75,7 @@ function initiateCommunication(obj, hostRoles, hostNames, triggerMessage, allSat
         iSatelliteNames = keys(obj.satelliteInfo);
         for k = 1:numel(iSatelliteNames)
             satelliteName = iSatelliteNames{k};
-            fprintf('Initiating communication with satellite ''%s''\n', satelliteName);
+            fprintf('Initiating communication with satellite ''%s''.\n', satelliteName);
             % Set the current udpHandle
             obj.udpHandle = obj.satelliteInfo(satelliteName).satelliteChannelID; 
             % Send trigger and wait for up to 4 seconds to receive acknowledgment
@@ -87,7 +87,7 @@ function initiateCommunication(obj, hostRoles, hostNames, triggerMessage, allSat
         
         for k = 1:numel(iSatelliteNames)
             satelliteName = iSatelliteNames{k};
-            fprintf('Sendint the * all satellites are a go * message ''%s''\n', satelliteName);
+            fprintf('Sending the * all satellites are a go * message to ''%s''.\n', satelliteName);
             % Set the current udpHandle
             obj.udpHandle = obj.satelliteInfo(satelliteName).satelliteChannelID; 
             % Send trigger and wait for up to 4 seconds to receive acknowledgment
