@@ -80,7 +80,7 @@ classdef UDPBaseSatelliteCommunicator < handle
         packet = waitForMessage(obj, msgLabel, varargin);
         transmissionStatus = sendMessage(obj, msgLabel, msgData, varargin);
         displayMessage(obj, action,  messageLabel, messageData, packetNo, varargin);
-        flashedContents = flashQueue(obj);
+        flushedContents = flushQueue(obj);
         
         % Public API (higher-level)
          
