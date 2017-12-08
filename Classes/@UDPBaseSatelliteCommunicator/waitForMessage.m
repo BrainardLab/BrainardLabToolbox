@@ -13,6 +13,12 @@ function packet = waitForMessage(obj, msgLabel, varargin)
     expectedMessageLabel = p.Results.msgLabel;
     timeOutAction = p.Results.timeOutAction;
     badTransmissionAction = p.Results.badTransmissionAction;
+    
+    % Always set it to notify caller
+    badTransmissionAction = obj.NOTIFY_CALLER
+    timeOutAction = obj.THROW_ERROR
+    
+    
     udpHandle = obj.udpHandle;
         
     if isempty(expectedMessageLabel)
@@ -42,7 +48,9 @@ function packet = waitForMessage(obj, msgLabel, varargin)
     % Read the leading packet label
     packet.messageLabel = matlabNUDP('receive', udpHandle);
     if (~strcmp(packet.messageLabel, expectedMessageLabel))
-        error('Leading message label (''%s'') does not match expected message label (''%s'')', packet.messageLabel, expectedMessageLabel)
+        messageToPrint = sprintf('Leading message label (''%s'') does not match expected message label (''%s'')', packet.messageLabel, expectedMessageLabel);
+        packet = informSender_ReceivedMessageLabelNotMatchingExpected(packet, expectedMessageLabel, messageToPrint);
+        return;
     end
     
     % Read the number of bytes
@@ -76,15 +84,10 @@ function packet = waitForMessage(obj, msgLabel, varargin)
     
     trailingMessageLabel = matlabNUDP('receive', udpHandle);
     if (~strcmp(packet.messageLabel,trailingMessageLabel))
-        fprintf('Trailing message label mismatch: expected ''%s'', received: ''%s''.\n', expectedMessageLabel, trailingMessageLabel);
-        if (strcmp(badTransmissionAction, obj.THROW_ERROR))
-            % ask remote host to abort
-            obj.sendMessage(obj.ABORT_MESSAGE.label, obj.ABORT_MESSAGE.value);
-            error('Trailing message label (''%s'') does not match leading message label (''%'').\nAsked remote host to abort.', trailingMessageLabel, packet.messageLabel);
-        else
-            packet.badTransmissionFlag = true;
-            return;
-        end
+       % Now we definitely have a bad transmission so set this flag
+       messageToPrint = sprintf('Trailing message label mismatch: expected ''%s'', received: ''%s''.\n', expectedMessageLabel, trailingMessageLabel);
+       packet = informSender_BadTransmission(packet, expectedMessageLabel, messageToPrint);
+       return;
     end
 
     % Reconstruct data object
@@ -94,13 +97,19 @@ function packet = waitForMessage(obj, msgLabel, varargin)
         packet.messageData = [];
     end
   
-    % Send acknowledgment if all OK
-    if (strcmp(expectedMessageLabel, packet.messageLabel))
-        matlabNUDP('send', udpHandle, obj.ACKNOWLEDGMENT);
-    else
-        packet.mismatchedMessageLabel = expectedMessageLabel;
-        matlabNUDP('send', udpHandle, obj.UNEXPECTED_MESSAGE_LABEL_RECEIVED);
-    end
+    % Send acknowledgment if we reached this point
+    matlabNUDP('send', udpHandle, obj.ACKNOWLEDGMENT);
 end
 
-    
+function packet = informSender_ReceivedMessageLabelNotMatchingExpected(packet, expectedMessageLabel, messageToPrint)
+    fprintf(2,'\n%s\n', messageToPrint);
+    packet.mismatchedMessageLabel = expectedMessageLabel;
+    matlabNUDP('send', udpHandle, obj.UNEXPECTED_MESSAGE_LABEL_RECEIVED);
+end
+
+function packet = informSender_BadTransmission(packet, expectedMessageLabel, messageToPrint)
+    fprintf(2,'\n%s\n', messageToPrint);
+    packet.mismatchedMessageLabel = expectedMessageLabel;
+    packet.badTransmissionFlag = true;
+    matlabNUDP('send', udpHandle, obj.BAD_TRANSMISSION);
+end

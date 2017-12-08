@@ -6,9 +6,11 @@ function [messageReceived, status, roundTipDelayMilliSecs] = communicate(obj, pa
     p = inputParser;
     p.addParameter('beVerbose', false, @islogical);
     p.addParameter('displayPackets', false, @islogical);
+    p.addParameter('maxAttemptsNum',1, @isnumeric);
     p.parse(varargin{:});
     beVerbose = p.Results.beVerbose;
     displayPackets = p.Results.displayPackets;
+    maxAttemptsNum = p.Results.maxAttemptsNum;
     
     if (displayPackets)
         communicationPacket
@@ -25,47 +27,83 @@ function [messageReceived, status, roundTipDelayMilliSecs] = communicate(obj, pa
                 obj.localHostName, packetNo, communicationPacket.udpChannel, communicationPacket.timeOutSecs, communicationPacket.timeOutAction);
         end
         
+        attemptNo = 0;
         status = obj.sendMessage(communicationPacket.messageLabel, communicationPacket.messageData, ...
             'timeOutSecs', communicationPacket.timeOutSecs, ...
             'timeOutAction', communicationPacket.timeOutAction ...
         );
-    
-        if (strcmp(status,obj.NO_ACKNOWLDGMENT_WITHIN_TIMEOUT_PERIOD))
-            obj.displayMessage(sprintf('received status ''%s'' from remote host', status), communicationPacket.messageLabel, communicationPacket.messageData, packetNo, 'alert', true);
-        elseif beVerbose
-            obj.displayMessage(sprintf('received status ''%s'' from remote host', status), communicationPacket.messageLabel, communicationPacket.messageData, packetNo);
+        
+        noACK = true;
+        while (attemptNo <= maxAttemptsNum) && (noACK)
+            switch status
+                case obj.ACKNOWLEDGMENT 
+                    if beVerbose
+                        obj.displayMessage(sprintf('received status ''%s'' from remote host', status), communicationPacket.messageLabel, communicationPacket.messageData, packetNo);
+                    end
+                    noACK = false;
+                case obj.NO_ACKNOWLDGMENT_WITHIN_TIMEOUT_PERIOD
+                    obj.displayMessage(sprintf('received status ''%s'' from remote host', status), communicationPacket.messageLabel, communicationPacket.messageData, packetNo, 'alert', true);
+                    error('Communicate() bailing out: Time out waiting for acknowledgment.\n');
+                case { obj.UNEXPECTED_MESSAGE_LABEL_RECEIVED, obj.BAD_TRANSMISSION}
+                    obj.displayMessage(sprintf('received status ''%s'' from remote host', status), communicationPacket.messageLabel, communicationPacket.messageData, packetNo, 'alert', true);
+                    attemptNo = attemptNo + 1;
+                    fprintf(2, '\nATTEMPT No. %d\n', attemptNo);
+                    status = obj.sendMessage(communicationPacket.messageLabel, communicationPacket.messageData, ...
+                            'timeOutSecs', communicationPacket.timeOutSecs, ...
+                            'timeOutAction', communicationPacket.timeOutAction ...
+                    );
+            end % switch
+        end % while
+        
+        if (noACK)
+            error('Communicate() bailing out: failed to received ACK after %d attempts of transmission\n', maxAttemptsNum);
         end
     else
         if (beVerbose)
             fprintf('\n<strong>%s</strong> is waiting to receive packet %d via UDP channel %d and will timeout after %2.1f seconds with action: ''%s'' and bad transmission action: ''%s''.', ...
                 obj.localHostName, packetNo, communicationPacket.udpChannel, communicationPacket.timeOutSecs, communicationPacket.timeOutAction, communicationPacket.badTransmissionAction);
         end
+        
+        attemptNo = 0;
+        
         receivedPacket = obj.waitForMessage(communicationPacket.messageLabel, ...
             'timeOutSecs', communicationPacket.timeOutSecs, ...
             'timeOutAction', communicationPacket.timeOutAction, ...
             'badTransmissionAction', communicationPacket.badTransmissionAction ...
         );
 
-        % Check if the received message was an ABORT message
-        if strcmp(receivedPacket.messageLabel, obj.ABORT_MESSAGE.label)
-            status = obj.ABORT_MESSAGE.label;
-            return;
-        end
-        
         % Compute status of operation
-        status = obj.GOOD_TRANSMISSION;
-        if (receivedPacket.timedOutFlag)
-            status = obj.NO_ACKNOWLDGMENT_WITHIN_TIMEOUT_PERIOD;
-            obj.displayMessage(sprintf('received message operation timed out'), receivedPacket.messageLabel, receivedPacket.messageData, packetNo, 'alert', true);
-        end
-        if (receivedPacket.badTransmissionFlag)
-            status = obj.BAD_TRANSMISSION;
-            obj.displayMessage(sprintf('received message contains bad data'), receivedPacket.messageLabel, receivedPacket.messageData, packetNo, 'alert', true);
-        end
-        if (~isempty(receivedPacket.mismatchedMessageLabel))
-            status = obj.UNEXPECTED_MESSAGE_LABEL_RECEIVED;
-            obj.displayMessage(sprintf('received message with wrong label (expected: ''%s'')', receivedPacket.mismatchedMessageLabel), receivedPacket.messageLabel, receivedPacket.messageData, packetNo, 'alert', true);
-        end
+        status = 'to be determined';
+        while (attemptNo <= maxAttemptsNum) && ~(strcmp(status, obj.GOOD_TRANSMISSION))   
+            status = obj.GOOD_TRANSMISSION;
+            if (receivedPacket.timedOutFlag)
+                status = obj.NO_ACKNOWLDGMENT_WITHIN_TIMEOUT_PERIOD;
+                obj.displayMessage(sprintf('received message operation timed out'), receivedPacket.messageLabel, receivedPacket.messageData, packetNo, 'alert', true);
+                error('Communicate() bailing out: Time out waiting for a message to be received.\n');
+            end
+            if (receivedPacket.badTransmissionFlag)
+                status = obj.BAD_TRANSMISSION;
+                obj.displayMessage(sprintf('received message contains bad data'), receivedPacket.messageLabel, receivedPacket.messageData, packetNo, 'alert', true);
+                attemptNo = attemptNo + 1;
+                fprintf(2, '\nATTEMPT No. %d\n', attemptNo);
+                receivedPacket = obj.waitForMessage(communicationPacket.messageLabel, ...
+                    'timeOutSecs', communicationPacket.timeOutSecs, ...
+                    'timeOutAction', communicationPacket.timeOutAction, ...
+                    'badTransmissionAction', communicationPacket.badTransmissionAction ...
+                );
+            end
+            if (~isempty(receivedPacket.mismatchedMessageLabel))
+                status = obj.UNEXPECTED_MESSAGE_LABEL_RECEIVED;
+                obj.displayMessage(sprintf('received message with wrong label (expected: ''%s'')', receivedPacket.mismatchedMessageLabel), receivedPacket.messageLabel, receivedPacket.messageData, packetNo, 'alert', true);
+                attemptNo = attemptNo + 1;
+                fprintf(2, '\nATTEMPT No. %d\n', attemptNo);
+                receivedPacket = obj.waitForMessage(communicationPacket.messageLabel, ...
+                    'timeOutSecs', communicationPacket.timeOutSecs, ...
+                    'timeOutAction', communicationPacket.timeOutAction, ...
+                    'badTransmissionAction', communicationPacket.badTransmissionAction ...
+                );
+            end
+        end % while
         
         if (strcmp(status, obj.GOOD_TRANSMISSION))
             if (beVerbose)
@@ -74,6 +112,8 @@ function [messageReceived, status, roundTipDelayMilliSecs] = communicate(obj, pa
             messageReceived = struct();
             messageReceived.label = receivedPacket.messageLabel;
             messageReceived.data  = receivedPacket.messageData;
+        else
+            error('Communicate() bailing out: failed to received a valid message after %d attempts.\n', maxAttemptsNum);
         end
     end
     
