@@ -6,10 +6,8 @@ function packet = waitForMessage(obj, msgLabel, varargin)
     p.addOptional('pauseTimeSecs', 0, @isnumeric);
     p.addOptional('timeOutAction', obj.NOTIFY_CALLER, @(x)((ischar(x)) && ismember(x, {obj.NOTIFY_CALLER, obj.THROW_ERROR}))); 
     p.addOptional('badTransmissionAction', obj.NOTIFY_CALLER, @(x)((ischar(x)) && ismember(x, {obj.NOTIFY_CALLER, obj.THROW_ERROR}))); 
-    p.addOptional('testFail', false, @islogical);
     parse(p,msgLabel,varargin{:});
     
-    testFail = p.Results.testFail;
     pauseTimeSecs = p.Results.pauseTimeSecs;
     timeOutSecs = p.Results.timeOutSecs;
     expectedMessageLabel = p.Results.msgLabel;
@@ -85,11 +83,6 @@ function packet = waitForMessage(obj, msgLabel, varargin)
     end
     
     trailingMessageLabel = matlabNUDP('receive', udpHandle);
-     % test
-    if (strfind(trailingMessageLabel, 'SENDING_SMALL_STRUCT')) & (testFail)
-       trailingMessageLabel = 'SENDING_SMALL_S';
-    end
-    
     if (~strcmp(packet.messageLabel,trailingMessageLabel))
        % Now we definitely have a bad transmission so set this flag
        messageToPrint = sprintf('Trailing message label mismatch: expected ''%s'', received: ''%s''.\n', expectedMessageLabel, trailingMessageLabel);
