@@ -1,5 +1,5 @@
 function qpQuestPlusColorMaterialModelDemo
-%qpQuestPlusCircularCatDemo  Demonstrate/test QUEST+ at work on the color material model.
+% Demonstrate/test QUEST+ at work on the color material model.
 %
 % Description:
 %    This script shows QUEST+ employed to estimate the parameters of the linear
@@ -50,7 +50,7 @@ simulatedPsiParams = [2 0.7 0.8];
 simulatedObserverFun = @(x) qpSimulatedObserver(x,qpPFFun,simulatedPsiParams);
 
 %% Run multiple simulations
-nSimulations = 100;
+nSimulations = 1;
 nTrialsPerQuest = 30;
 questOrderIn = [0 0 1 2 3 3 3 3];
 histFigure = figure; clf;
@@ -87,6 +87,10 @@ for ss = 1:nSimulations
             if (theQuest > 0)
                 questData{theQuest} = qpUpdate(questData{theQuest},stim,outcome);
             end
+            
+            % This data structure tracks all of the trials run in the
+            % experiment.  We never query it to decide what to do, but we
+            % will use it to fit the data at the end.
             questDataAllTrials = qpUpdate(questDataAllTrials,stim,outcome);
         end
     end
@@ -110,7 +114,6 @@ for ss = 1:nSimulations
     fprintf('\n');
     
     % Make a histogram of the fit parameters
-    
     figure(histFigure); clf;
     subplot(1,3,1); hold on;
     hist(psiParamsFit(:,1));

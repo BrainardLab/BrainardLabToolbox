@@ -1,5 +1,5 @@
 function predictedProportions = qpPFColorMaterialModel(stimParams,psiParams,F)
-%qpPFColorMaterialModel  Psychometric function for the color material model, for use with mQUESTPlus
+% Psychometric function for the color material model, for use with mQUESTPlus
 %
 % Usage:
 %     predictedProportions = qpPFColorMaterialModel(stimParams,psiParams)
