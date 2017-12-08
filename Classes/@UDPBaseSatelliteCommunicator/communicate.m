@@ -33,6 +33,8 @@ function [messageReceived, status, roundTipDelayMilliSecs] = communicate(obj, pa
             'timeOutAction', communicationPacket.timeOutAction ...
         );
         
+
+        
         noACK = true;
         while (attemptNo <= maxAttemptsNum) && (noACK)
             switch status
@@ -71,7 +73,7 @@ function [messageReceived, status, roundTipDelayMilliSecs] = communicate(obj, pa
             'timeOutAction', communicationPacket.timeOutAction, ...
             'badTransmissionAction', communicationPacket.badTransmissionAction ...
         );
-
+        
         % Compute status of operation
         status = 'to be determined';
         while (attemptNo <= maxAttemptsNum) && ~(strcmp(status, obj.GOOD_TRANSMISSION))   

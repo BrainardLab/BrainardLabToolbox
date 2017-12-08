@@ -49,13 +49,13 @@ function packet = waitForMessage(obj, msgLabel, varargin)
     packet.messageLabel = matlabNUDP('receive', udpHandle);
     
     % test
-    if (strfind(communicationPacket.messageLabel, 'SENDING_SMALL_STRUCT'))
+    if (strfind(packet.messageLabel, 'SENDING_SMALL_STRUCT'))
        packet.messageLabel = 'SENDING_SMALL_S';
     end
         
     if (~strcmp(packet.messageLabel, expectedMessageLabel))
         messageToPrint = sprintf('Leading message label (''%s'') does not match expected message label (''%s'')', packet.messageLabel, expectedMessageLabel);
-        packet = informSender_ReceivedMessageLabelNotMatchingExpected(packet, expectedMessageLabel, messageToPrint);
+        packet = informSender_ReceivedMessageLabelNotMatchingExpected(udpHandle, packet, expectedMessageLabel, messageToPrint);
         return;
     end
     
@@ -92,7 +92,7 @@ function packet = waitForMessage(obj, msgLabel, varargin)
     if (~strcmp(packet.messageLabel,trailingMessageLabel))
        % Now we definitely have a bad transmission so set this flag
        messageToPrint = sprintf('Trailing message label mismatch: expected ''%s'', received: ''%s''.\n', expectedMessageLabel, trailingMessageLabel);
-       packet = informSender_BadTransmission(packet, expectedMessageLabel, messageToPrint);
+       packet = informSender_BadTransmission(udpHandle, packet, expectedMessageLabel, messageToPrint);
        return;
     end
 
@@ -107,13 +107,13 @@ function packet = waitForMessage(obj, msgLabel, varargin)
     matlabNUDP('send', udpHandle, obj.ACKNOWLEDGMENT);
 end
 
-function packet = informSender_ReceivedMessageLabelNotMatchingExpected(packet, expectedMessageLabel, messageToPrint)
+function packet = informSender_ReceivedMessageLabelNotMatchingExpected(udpHandle, packet, expectedMessageLabel, messageToPrint)
     fprintf(2,'\n%s\n', messageToPrint);
     packet.mismatchedMessageLabel = expectedMessageLabel;
     matlabNUDP('send', udpHandle, obj.UNEXPECTED_MESSAGE_LABEL_RECEIVED);
 end
 
-function packet = informSender_BadTransmission(packet, expectedMessageLabel, messageToPrint)
+function packet = informSender_BadTransmission(udpHandle, packet, expectedMessageLabel, messageToPrint)
     fprintf(2,'\n%s\n', messageToPrint);
     packet.mismatchedMessageLabel = expectedMessageLabel;
     packet.badTransmissionFlag = true;
