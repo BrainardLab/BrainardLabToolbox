@@ -107,7 +107,7 @@ function packet = waitForMessage(obj, msgLabel, varargin)
     matlabNUDP('send', udpHandle, obj.ACKNOWLEDGMENT);
 end
 
-function packet = informSender_ReceivedMessageLabelNotMatchingExpected(udpHandle, packet, expectedMessageLabel, errorMessageToSend)
+function packet = informSender_ReceivedMessageLabelNotMatchingExpected(udpHandle, packet, expectedMessageLabel, messageToPrint, errorMessageToSend)
     fprintf(2,'\n%s\n', messageToPrint);
     packet.mismatchedMessageLabel = expectedMessageLabel;
     matlabNUDP('send', udpHandle, errorMessageToSend);
