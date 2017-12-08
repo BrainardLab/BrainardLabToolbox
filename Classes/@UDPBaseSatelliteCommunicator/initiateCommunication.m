@@ -49,8 +49,8 @@ function initiateCommunication(obj, hostRoles, hostNames, triggerMessage, allSat
             matlabNUDP('close', obj.udpHandle);
             matlabNUDP('open', obj.udpHandle, obj.localIP, obj.satelliteInfo(satelliteName).satelliteIP, obj.satelliteInfo(satelliteName).portNo);
 
-            % flash any remaining bits
-            obj.flashQueue();
+            % flush any remaining bits
+            obj.flushQueue();
         end
     else 
         % We are a satellite
@@ -65,8 +65,8 @@ function initiateCommunication(obj, hostRoles, hostNames, triggerMessage, allSat
         matlabNUDP('close', obj.udpHandle);
         matlabNUDP('open', obj.udpHandle, obj.localIP, obj.baseInfo.baseIP, obj.satelliteInfo(satelliteName).portNo);
 
-        % flash any remaining bits
-        obj.flashQueue();   
+        % flush any remaining bits
+        obj.flushQueue();   
     end
 
     

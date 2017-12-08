@@ -33,6 +33,8 @@ function [messageReceived, status, roundTipDelayMilliSecs] = communicate(obj, pa
             'timeOutAction', communicationPacket.timeOutAction ...
         );
         
+
+        
         noACK = true;
         while (attemptNo <= maxAttemptsNum) && (noACK)
             switch status
@@ -72,6 +74,7 @@ function [messageReceived, status, roundTipDelayMilliSecs] = communicate(obj, pa
             'badTransmissionAction', communicationPacket.badTransmissionAction ...
         );
 
+        
         % Compute status of operation
         status = 'to be determined';
         while (attemptNo <= maxAttemptsNum) && ~(strcmp(status, obj.GOOD_TRANSMISSION))   
@@ -91,8 +94,7 @@ function [messageReceived, status, roundTipDelayMilliSecs] = communicate(obj, pa
                     'timeOutAction', communicationPacket.timeOutAction, ...
                     'badTransmissionAction', communicationPacket.badTransmissionAction ...
                 );
-            end
-            if (~isempty(receivedPacket.mismatchedMessageLabel))
+            elseif (~isempty(receivedPacket.mismatchedMessageLabel))
                 status = obj.UNEXPECTED_MESSAGE_LABEL_RECEIVED;
                 obj.displayMessage(sprintf('received message with wrong label (expected: ''%s'')', receivedPacket.mismatchedMessageLabel), receivedPacket.messageLabel, receivedPacket.messageData, packetNo, 'alert', true);
                 attemptNo = attemptNo + 1;
