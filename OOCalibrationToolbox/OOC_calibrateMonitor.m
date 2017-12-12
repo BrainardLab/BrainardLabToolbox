@@ -7,13 +7,14 @@
 % 8/30/2016  JAR   Added calibration configuration for the InVivo Sensa Vue
 %                  Flat panel monitor located at the Stellar Chance 3T Magnet.
 % 10/18/2017 npc   Reset Radiometer before crashing
-%
+% 12/12/2017 ana   Added eye tracker LCD case
 
 function OOC_calibrateMonitor
     
     % Select a calibration configuration name
     AvailableCalibrationConfigs = {  ...
-        'ViewSonicProbe' 
+        'EyeTrackerLCD' 
+        'ViewSonicProbe'
         'BOLDscreen'
         'SamsungOLEDpanel'
         'Left_SONY_PVM2541A'
@@ -44,6 +45,9 @@ function OOC_calibrateMonitor
     runtimeParams = [];
     switch calibrationConfig
         
+        case 'EyeTrackerLCD' 
+            configFunctionHandle = @generateConfigurationForEyeTrackerLCD;
+            
         case 'ViewSonicProbe'
             configFunctionHandle = @generateConfigurationForViewSonicProbe;
             
@@ -128,6 +132,48 @@ function OOC_calibrateMonitor
 
         rethrow(err)
     end % end try/catch
+end
+
+
+% configuration function for Eye Tracker LCD
+function [displaySettings, calibratorOptions] = generateConfigurationForEyeTrackerLCD()
+    % Specify where to send the 'Calibration Done' notification email
+    emailAddressForNotification = 'radonjic@upenn.edu';
+    
+    % Specify the @Calibrator's initialization params. 
+    % Users should tailor these according to their hardware specs. 
+    % These can be set once only, at the time the @Calibrator object is instantiated.
+    displaySettings = { ...
+        'screenToCalibrate',        2, ...                          % which display to calibrate. main screen = 1, second display = 2
+        'desiredScreenSizePixel',   [1920 1200], ...                % pixels along the width and height of the display to be calibrated
+        'desiredRefreshRate',       60, ...                        % refresh rate in Hz
+        'displayPrimariesNum',      3, ...                          % for regular displays this is always 3 (RGB) 
+        'displayDeviceType',        'monitor', ...                  % this should always be set to 'monitor' for now
+        'displayDeviceName',        'EyeTrackerLCD', ...               % a name for the display been calibrated
+        'calibrationFile',          'EyeTrackerLCD', ...               % name of calibration file to be generated
+        'comment',                  'Anas display' ...                % some comment, could be anything
+        };
+    
+    % Specify the @Calibrator's optional params using a CalibratorOptions object
+    % To see what options are available type: doc CalibratorOptions
+    % Users should tailor these according to their experimental needs.
+    calibratorOptions = CalibratorOptions( ...
+        'verbosity',                        2, ...
+        'whoIsDoingTheCalibration',         input('Enter your name: ','s'), ...
+        'emailAddressForDoneNotification',  GetWithDefault('Enter email address for done notification',  emailAddressForNotification), ...
+        'blankOtherScreen',                 0, ...                          % whether to blank other displays attached to the host computer (1=yes, 0 = no), ...
+        'whichBlankScreen',                 1, ...                          % screen number of the display to be blanked  (main screen = 1, second display = 2)
+        'blankSettings',                    [0.25 0.25 0.25], ...           % color of the whichBlankScreen 
+        'bgColor',                          [0.3962 0.3787 0.4039], ...     % color of the background  
+        'fgColor',                          [0.3962 0.3787 0.4039], ...     % color of the foreground
+        'meterDistance',                    0.5, ...                        % distance between radiometer and screen in meters
+        'leaveRoomTime',                    1, ...                          % seconds allowed to leave room
+        'nAverage',                         1, ...                          % number of repeated measurements for averaging
+        'nMeas',                            15, ...                         % samples along gamma curve
+        'boxSize',                          150, ...                        % size of calibration stimulus in pixels
+        'boxOffsetX',                       0, ...                          % x-offset from center of screen (neg: leftwards, pos:rightwards)         
+        'boxOffsetY',                       0 ...                           % y-offset from center of screen (neg: upwards, pos: downwards)                      
+    );
 end
 
 
