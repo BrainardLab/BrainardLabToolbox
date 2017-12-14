@@ -13,7 +13,7 @@ function OOC_calibrateMonitor
     
     % Select a calibration configuration name
     AvailableCalibrationConfigs = {  ...
-        'EyeTrackerLCD' 
+        'ColorMaterialCalibration' 
         'ViewSonicProbe'
         'BOLDscreen'
         'SamsungOLEDpanel'
@@ -45,8 +45,8 @@ function OOC_calibrateMonitor
     runtimeParams = [];
     switch calibrationConfig
         
-        case 'EyeTrackerLCD' 
-            configFunctionHandle = @generateConfigurationForEyeTrackerLCD;
+        case 'ColorMaterialCalibration' 
+            configFunctionHandle = @generateConfigurationForColorMaterialCalibration;
             
         case 'ViewSonicProbe'
             configFunctionHandle = @generateConfigurationForViewSonicProbe;
@@ -135,8 +135,9 @@ function OOC_calibrateMonitor
 end
 
 
-% configuration function for Eye Tracker LCD
-function [displaySettings, calibratorOptions] = generateConfigurationForEyeTrackerLCD()
+% configuration function for ColorMaterialCalibration (previously: Eye
+% Tracker LCD)
+function [displaySettings, calibratorOptions] = generateConfigurationForColorMaterialCalibration()
     % Specify where to send the 'Calibration Done' notification email
     emailAddressForNotification = 'radonjic@upenn.edu';
     
@@ -145,13 +146,13 @@ function [displaySettings, calibratorOptions] = generateConfigurationForEyeTrack
     % These can be set once only, at the time the @Calibrator object is instantiated.
     displaySettings = { ...
         'screenToCalibrate',        2, ...                          % which display to calibrate. main screen = 1, second display = 2
-        'desiredScreenSizePixel',   [1920 1200], ...                % pixels along the width and height of the display to be calibrated
+        'desiredScreenSizePixel',   [1920 1080], ...                % pixels along the width and height of the display to be calibrated
         'desiredRefreshRate',       60, ...                        % refresh rate in Hz
         'displayPrimariesNum',      3, ...                          % for regular displays this is always 3 (RGB) 
         'displayDeviceType',        'monitor', ...                  % this should always be set to 'monitor' for now
-        'displayDeviceName',        'EyeTrackerLCD', ...               % a name for the display been calibrated
-        'calibrationFile',          'EyeTrackerLCD', ...               % name of calibration file to be generated
-        'comment',                  'Anas display' ...                % some comment, could be anything
+        'displayDeviceName',        'ColorMaterialCalibration', ...               % a name for the display been calibrated
+        'calibrationFile',          'ColorMaterialCalibration', ...               % name of calibration file to be generated
+        'comment',                  'Color Material Display' ...                % some comment, could be anything
         };
     
     % Specify the @Calibrator's optional params using a CalibratorOptions object
@@ -163,13 +164,13 @@ function [displaySettings, calibratorOptions] = generateConfigurationForEyeTrack
         'emailAddressForDoneNotification',  GetWithDefault('Enter email address for done notification',  emailAddressForNotification), ...
         'blankOtherScreen',                 0, ...                          % whether to blank other displays attached to the host computer (1=yes, 0 = no), ...
         'whichBlankScreen',                 1, ...                          % screen number of the display to be blanked  (main screen = 1, second display = 2)
-        'blankSettings',                    [0.25 0.25 0.25], ...           % color of the whichBlankScreen 
-        'bgColor',                          [0.3962 0.3787 0.4039], ...     % color of the background  
-        'fgColor',                          [0.3962 0.3787 0.4039], ...     % color of the foreground
-        'meterDistance',                    0.5, ...                        % distance between radiometer and screen in meters
-        'leaveRoomTime',                    1, ...                          % seconds allowed to leave room
-        'nAverage',                         1, ...                          % number of repeated measurements for averaging
-        'nMeas',                            15, ...                         % samples along gamma curve
+        'blankSettings',                    [0 0 0], ...           % color of the whichBlankScreen 
+        'bgColor',                          [0.7451, 0.7451, 0.7451], ...     % color of the background  
+        'fgColor',                          [0 ; 0 ; 0], ...     % color of the foreground
+        'meterDistance',                    1, ...                        % distance between radiometer and screen in meters
+        'leaveRoomTime',                    10, ...                          % seconds allowed to leave room
+        'nAverage',                         2, ...                          % number of repeated measurements for averaging
+        'nMeas',                            25, ...                         % samples along gamma curve
         'boxSize',                          150, ...                        % size of calibration stimulus in pixels
         'boxOffsetX',                       0, ...                          % x-offset from center of screen (neg: leftwards, pos:rightwards)         
         'boxOffsetY',                       0 ...                           % y-offset from center of screen (neg: upwards, pos: downwards)                      
