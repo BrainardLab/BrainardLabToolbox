@@ -102,8 +102,6 @@ function packet = waitForMessage(obj, msgLabel, varargin)
 end
 
 function packet = informSender_ReceivedMessageLabelNotMatchingExpected(obj, udpHandle, packet, expectedMessageLabel, messageToPrint)
-    % Wait to make sure the sender has sent all the data, then flush it
-    pause(obj.flushDelay);
     fprintf('\n<strong>%s</strong>\n', messageToPrint);
     flushedContents = obj.flushQueue();
     fprintf('<strong>Flushed data:%s\n</strong>', flushedContents);
@@ -112,8 +110,6 @@ function packet = informSender_ReceivedMessageLabelNotMatchingExpected(obj, udpH
 end
 
 function packet = informSender_BadTransmission(obj, udpHandle, packet, expectedMessageLabel, messageToPrint)
-    % Wait to make sure the sender has sent all the data, then flush it
-    pause(obj.flushDelay);
     fprintf('\n<strong>%s</strong>\n', messageToPrint);
     flushedContents = obj.flushQueue();
     fprintf('<strong>Flushed data:%s\n</strong>', flushedContents);
