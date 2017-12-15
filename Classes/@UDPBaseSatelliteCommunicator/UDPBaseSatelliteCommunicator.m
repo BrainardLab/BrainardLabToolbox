@@ -15,6 +15,7 @@ classdef UDPBaseSatelliteCommunicator < handle
         sentMessagesCount     % number of messages sent
         receivedMessagesCount % number of messages received
         timeOutsCount         % number of timeouts
+        flushDelay            % seconds to wait before flushing the UDP queue
     end
 
     properties (Access = private)
@@ -70,7 +71,8 @@ classdef UDPBaseSatelliteCommunicator < handle
             obj.satelliteInfo = p.Results.satelliteInfo;
             obj.verbosity = p.Results.verbosity;
             obj.localHostName = obj.getLocalHostName();
-
+            obj.flushDelay = 0.5;
+            
             if strcmp(obj.verbosity,'max')
                 fprintf('%s Initialized.\n', obj.selfSignature);
             end
