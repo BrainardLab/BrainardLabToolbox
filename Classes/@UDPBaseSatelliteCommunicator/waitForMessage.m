@@ -102,8 +102,8 @@ function packet = waitForMessage(obj, msgLabel, varargin)
 end
 
 function packet = informSender_ReceivedMessageLabelNotMatchingExpected(obj, udpHandle, packet, expectedMessageLabel, messageToPrint)
-    % Wait for 1 second to make sure the sender has sent all the data, then flush it
-    pause(1.0);
+    % Wait for 1/2 second to make sure the sender has sent all the data, then flush it
+    pause(0.5);
     fprintf('\n<strong>%s</strong>\n', messageToPrint);
     flushedContents = obj.flushQueue();
     fprintf('<strong>Flushed data:%s\n</strong>', flushedContents);
