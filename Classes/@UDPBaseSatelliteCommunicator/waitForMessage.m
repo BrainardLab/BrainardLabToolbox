@@ -112,7 +112,7 @@ end
 function packet = informSender_ReceivedMessageLabelNotMatchingExpected(obj, udpHandle, packet, expectedMessageLabel, messageToPrint)
     fprintf('\n<strong>%s</strong>\n', messageToPrint);
     flushedContents = obj.flushQueue();
-    fprintf('<strong>Flushed data:%s\n</strong>', flushedContents);
+    %fprintf('<strong>Flushed data:%s\n</strong>', flushedContents);
     packet.mismatchedMessageLabel = expectedMessageLabel;
     matlabNUDP('send', udpHandle, obj.UNEXPECTED_MESSAGE_LABEL_RECEIVED);
 end
@@ -120,7 +120,7 @@ end
 function packet = informSender_BadTransmission(obj, udpHandle, packet, expectedMessageLabel, messageToPrint)
     fprintf('\n<strong>%s</strong>\n', messageToPrint);
     flushedContents = obj.flushQueue();
-    fprintf('<strong>Flushed data:%s\n</strong>', flushedContents);
+    %fprintf('<strong>Flushed data:%s\n</strong>', flushedContents);
     packet.mismatchedMessageLabel = expectedMessageLabel;
     packet.badTransmissionFlag = true;
     matlabNUDP('send', udpHandle, obj.BAD_TRANSMISSION);
