@@ -41,7 +41,7 @@ colorCoordinateSlope = psiParams(1);
 colorCoordinateQuad = psiParams(2);
 materialCoordinateSlope = psiParams(3);
 materialCoordinateQuad = psiParams(4);
-weight = psiParams(3);
+weight = psiParams(5);
 
 %% Extract and map stim parameters
 colorMatchColorCoords = colorCoordinateSlope*stimParams(:,1)+colorCoordinateQuad*(stimParams(:,1).^2);
