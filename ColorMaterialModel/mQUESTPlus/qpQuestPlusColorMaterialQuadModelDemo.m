@@ -1,11 +1,11 @@
-function qpQuestPlusColorMaterialModelDemo
-% Demonstrate/test QUEST+ at work on the color material model.
+function qpQuestPlusColorMaterialQuadModelDemo
+% Demonstrate/test QUEST+ at work on the color material model, quadratic
 %
 % Description:
-%    This script shows QUEST+ employed to estimate the parameters of the linear
-%    version of the color material model.
+%    This script shows QUEST+ employed to estimate the parameters of the
+%    quadratic version of the color material model.
 
-% 07/08/17  dhb  Created.
+% 12/19/17  dhb, ar  Created.
 
 %% Close out stray figures
 close all;
@@ -17,36 +17,43 @@ cd(fileparts(mfilename('fullpath')));
 theLookupTable = load('../colorMaterialInterpolateFunLineareuclidean');
 
 %% Define psychometric function in terms of lookup table
-qpPFFun = @(stimParams,psiParams) qpPFColorMaterialModel(stimParams,psiParams,theLookupTable.colorMaterialInterpolatorFunction);
+qpPFFun = @(stimParams,psiParams) qpPFColorMaterialQuadModel(stimParams,psiParams,theLookupTable.colorMaterialInterpolatorFunction);
 
 %% Initialize three QUEST+ structures
 %
 % Each one has a different upper end of stimulus regime
 % The last of these should be the most inclusive, and
 % include stimuli that could come from any of them.
-stimUpperEnds = [1 2 3];
-nQuests = length(stimUpperEnds);
-for qq = 1:nQuests
-    fprintf('Initializing quest structure %d\n',qq)
-    qTemp = qpParams( ...
-        'qpPF',qpPFFun, ...
-        'stimParamsDomainList',{-stimUpperEnds(qq):stimUpperEnds(qq), -stimUpperEnds(qq):stimUpperEnds(qq), -stimUpperEnds(qq):stimUpperEnds(qq), -stimUpperEnds(qq):stimUpperEnds(qq)}, ...
-        'psiParamsDomainList',{[0.25 0.5 1 2 4] [0.25 0.5 1 2 4] [0.05:0.15:0.95]} ...
-        );
-    questData{qq} = qpInitialize(qTemp);
+DO_INITIALIZE = false;
+if (DO_INITIALIZE)
+    stimUpperEnds = [1 2 3];
+    nQuests = length(stimUpperEnds);
+    for qq = 1:nQuests
+        fprintf('Initializing quest structure %d\n',qq)
+        qTemp = qpParams( ...
+            'qpPF',qpPFFun, ...
+            'stimParamsDomainList',{-stimUpperEnds(qq):stimUpperEnds(qq), -stimUpperEnds(qq):stimUpperEnds(qq), -stimUpperEnds(qq):stimUpperEnds(qq), -stimUpperEnds(qq):stimUpperEnds(qq)}, ...
+            'psiParamsDomainList',{[1/6 0.5 1 2 6] [-1 0 1] [1/6 0.5 1 2 6] [-1 0 1] [0.05:0.15:0.95]} ...
+            );
+        questData{qq} = qpInitialize(qTemp);
+    end
+    
+    %% Define a questStructure that has all the stimuli
+    %
+    % We use this as a simple way to account for every
+    % stimulus in the analysis at the end.
+    questDataAllTrials = questData{end};
+    
+    %% Save out initialized quests
+    save(fullfile(tempdir,'initalizedQuests'),'questData','questDataAllTrials');
+    
+    % Load in saved initialized thingy's
+else
+    load(fullfile(tempdir,'initalizedQuests'),'questData','questDataAllTrials');
 end
 
-%% Define a questStructure that has all the stimuli
-%
-% We use this as a simple way to account for every
-% stimulus in the analysis at the end.
-questDataAllTrials = questData{end};
-
-%% Save out initialized quests
-save(fullfile(tempdir,'initalizedQuests'),'questData','questDataAllTrials');
-
 %% Set up simulated observer function
-simulatedPsiParams = [2 0.7 0.8];
+simulatedPsiParams = [2 0.2 0.7 -0.3 0.8];
 simulatedObserverFun = @(x) qpSimulatedObserver(x,qpPFFun,simulatedPsiParams);
 
 %% Run multiple simulations
@@ -84,6 +91,7 @@ for ss = 1:nSimulations
             outcome = simulatedObserverFun(stim);
             
             % Update quest data structure, if not a randomly inserted trial
+            tic
             if (theQuest > 0)
                 questData{theQuest} = qpUpdate(questData{theQuest},stim,outcome);
             end
@@ -92,6 +100,7 @@ for ss = 1:nSimulations
             % experiment.  We never query it to decide what to do, but we
             % will use it to fit the data at the end.
             questDataAllTrials = qpUpdate(questDataAllTrials,stim,outcome);
+            toc
         end
     end
     
@@ -99,18 +108,18 @@ for ss = 1:nSimulations
     % on the gridded parameter domain.
     psiParamsIndex = qpListMaxArg(questDataAllTrials.posterior);
     psiParamsQuest(ss,:) = questDataAllTrials.psiParamsDomain(psiParamsIndex,:);
-    fprintf('Simulated parameters: %0.1f, %0.1f, %0.2f\n', ...
-        simulatedPsiParams(1),simulatedPsiParams(2),simulatedPsiParams(3));
-    fprintf('Max posterior QUEST+ parameters: %0.1f, %0.1f, %0.2f\n', ...
-        psiParamsQuest(ss,1),psiParamsQuest(ss,2),psiParamsQuest(ss,3));
+    fprintf('Simulated parameters: %0.1f, %0.1f, %0.1f, %0.1f, %0.2f\n', ...
+        simulatedPsiParams(1),simulatedPsiParams(2),simulatedPsiParams(3),simulatedPsiParams(4),simulatedPsiParams(5));
+    fprintf('Max posterior QUEST+ parameters: %0.1f, %0.1f, %0.2f, %0.1f, %0.2f\n', ...
+        psiParamsQuest(ss,1),psiParamsQuest(ss,2),psiParamsQuest(ss,3),psiParamsQuest(ss,4),psiParamsQuest(ss,5));
     
     % Maximum likelihood fit.  Use psiParams from QUEST+ as the starting
     % parameter for the search, and impose as parameter bounds the range
     % provided to QUEST+.
     psiParamsFit(ss,:) = qpFit(questDataAllTrials.trialData,questDataAllTrials.qpPF,psiParamsQuest(ss,:),questDataAllTrials.nOutcomes,...
-        'lowerBounds', [-5 -5 0],'upperBounds',[5 5 1]);
-    fprintf('Maximum likelihood fit parameters: %0.1f, %0.1f, %0.2f\n', ...
-        psiParamsFit(ss,1),psiParamsFit(ss,2),psiParamsFit(ss,3));
+        'lowerBounds', [-5 -1 -5 -1 0],'upperBounds',[5 1 5 1 1]);
+    fprintf('Maximum likelihood fit parameters: %0.1f, %0.1f, %0.2f, %0.1f, %0.2f\n', ...
+        psiParamsFit(ss,1),psiParamsFit(ss,2),psiParamsFit(ss,3),psiParamsFit(ss,4),psiParamsFit(ss,5));
     fprintf('\n');
     
     % Make a histogram of the fit parameters
@@ -130,8 +139,8 @@ for ss = 1:nSimulations
     ylabel('Count');
     
     subplot(1,3,3); hold on;
-    hist(psiParamsFit(:,3));
-    plot(simulatedPsiParams(3),2,'r*','MarkerSize',12);
+    hist(psiParamsFit(:,5));
+    plot(simulatedPsiParams(5),2,'r*','MarkerSize',12);
     xlim([0 1]);
     xlabel('Weight');
     ylabel('Count');
@@ -198,7 +207,7 @@ figure; clf; hold on;
 index1 = find(questDataAllTrials.psiParamsDomain(:,1) == psiParamsQuest(end,1));
 posterior1 = questDataAllTrials.posterior(index1);
 plotX = questDataAllTrials.psiParamsDomainList{2};
-plotY = questDataAllTrials.psiParamsDomainList{3};
+plotY = questDataAllTrials.psiParamsDomainList{5};
 plotZ = reshape(posterior1,length(plotY),length(plotX));
 surf(plotX',plotY',plotZ);
 shading interp
@@ -213,7 +222,7 @@ figure; clf; hold on;
 index1 = find(questDataAllTrials.psiParamsDomain(:,2) == psiParamsQuest(end,2));
 posterior1 = questDataAllTrials.posterior(index1);
 plotX = questDataAllTrials.psiParamsDomainList{1};
-plotY = questDataAllTrials.psiParamsDomainList{3};
+plotY = questDataAllTrials.psiParamsDomainList{5};
 plotZ = reshape(posterior1,length(plotY),length(plotX));
 surf(plotX',plotY',plotZ);
 shading interp
