@@ -6,6 +6,7 @@ function packet = waitForMessage(obj, msgLabel, varargin)
     p.addOptional('pauseTimeSecs', 0, @isnumeric);
     p.addOptional('timeOutAction', obj.NOTIFY_CALLER, @(x)((ischar(x)) && ismember(x, {obj.NOTIFY_CALLER, obj.THROW_ERROR}))); 
     p.addOptional('badTransmissionAction', obj.NOTIFY_CALLER, @(x)((ischar(x)) && ismember(x, {obj.NOTIFY_CALLER, obj.THROW_ERROR}))); 
+    p.addOptional('testFail', false, @islogical);
     parse(p,msgLabel,varargin{:});
     
     pauseTimeSecs = p.Results.pauseTimeSecs;
@@ -13,6 +14,8 @@ function packet = waitForMessage(obj, msgLabel, varargin)
     expectedMessageLabel = p.Results.msgLabel;
     timeOutAction = p.Results.timeOutAction;
     badTransmissionAction = p.Results.badTransmissionAction;
+    testFail = p.Results.testFail;
+
     
     % Force this behavior always
     badTransmissionAction = obj.NOTIFY_CALLER;
@@ -83,6 +86,11 @@ function packet = waitForMessage(obj, msgLabel, varargin)
     end
     
     trailingMessageLabel = matlabNUDP('receive', udpHandle);
+    % test
+    if (strfind(trailingMessageLabel, 'SENDING_SMALL_STRUCT') & testFail)
+       trailingMessageLabel = 'SENDING_SMALL_S';
+    end
+    
     if (~strcmp(packet.messageLabel,trailingMessageLabel))
        % Now we definitely have a bad transmission so set this flag
        messageToPrint = sprintf('Trailing message label mismatch: expected ''%s'', received: ''%s''.\n', expectedMessageLabel, trailingMessageLabel);
@@ -104,7 +112,7 @@ end
 function packet = informSender_ReceivedMessageLabelNotMatchingExpected(obj, udpHandle, packet, expectedMessageLabel, messageToPrint)
     fprintf('\n<strong>%s</strong>\n', messageToPrint);
     flushedContents = obj.flushQueue();
-    fprintf('<strong>Flushed data:%s\n</strong>', flushedContents);
+    %fprintf('<strong>Flushed data:%s\n</strong>', flushedContents);
     packet.mismatchedMessageLabel = expectedMessageLabel;
     matlabNUDP('send', udpHandle, obj.UNEXPECTED_MESSAGE_LABEL_RECEIVED);
 end
@@ -112,7 +120,7 @@ end
 function packet = informSender_BadTransmission(obj, udpHandle, packet, expectedMessageLabel, messageToPrint)
     fprintf('\n<strong>%s</strong>\n', messageToPrint);
     flushedContents = obj.flushQueue();
-    fprintf('<strong>Flushed data:%s\n</strong>', flushedContents);
+    %fprintf('<strong>Flushed data:%s\n</strong>', flushedContents);
     packet.mismatchedMessageLabel = expectedMessageLabel;
     packet.badTransmissionFlag = true;
     matlabNUDP('send', udpHandle, obj.BAD_TRANSMISSION);
