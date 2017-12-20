@@ -71,7 +71,7 @@ classdef UDPBaseSatelliteCommunicator < handle
             obj.satelliteInfo = p.Results.satelliteInfo;
             obj.verbosity = p.Results.verbosity;
             obj.localHostName = obj.getLocalHostName();
-            obj.flushDelay = 0.5;
+            obj.flushDelay = 0.1;
             
             if strcmp(obj.verbosity,'max')
                 fprintf('%s Initialized.\n', obj.selfSignature);
