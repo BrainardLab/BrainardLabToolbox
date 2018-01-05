@@ -2,7 +2,7 @@ function transmissionStatus = sendMessage(obj, msgLabel, msgData, varargin)
     p = inputParser;
     p.addRequired('msgLabel',@ischar);
     p.addRequired('msgData');
-    p.addOptional('timeOutSecs', 5, @isnumeric); 
+    p.addOptional('timeOutSecs', 5, @isnumeric);
     parse(p,  msgLabel, msgData, varargin{:});
 
     messageLabel = p.Results.msgLabel;
@@ -29,11 +29,8 @@ function transmissionStatus = sendMessage(obj, msgLabel, msgData, varargin)
 
     % Wait for acknowledgment that the message was received OK
     pauseTimeSecs = 0;
-    timedOutFlag = obj.waitForMessageOrTimeout(timeOutSecs, pauseTimeSecs);
-    if (timedOutFlag)
-        executeTimeOut(obj, 'while waiting to receive acknowledgment for message sent');
-        transmissionStatus = obj.NO_ACKNOWLDGMENT_WITHIN_TIMEOUT_PERIOD;
-    else
-        transmissionStatus = matlabNUDP('receive', udpHandle);
-    end
+    transmissionStatus = obj.NO_ACKNOWLDGMENT_WITHIN_TIMEOUT_PERIOD;
+    timeOutMessage = sprintf('while waiting to receive acknowledgment for messageLabel: ''%s''', messageLabel);
+    timedOutFlag = obj.waitForMessageOrTimeout(timeOutSecs, pauseTimeSecs, timeOutMessage);
+    transmissionStatus = matlabNUDP('receive', udpHandle);
 end

@@ -1,4 +1,4 @@
-function timedOutFlag = waitForMessageOrTimeout(obj, timeOutSecs, pauseTimeSecs)
+function timedOutFlag = waitForMessageOrTimeout(obj, timeOutSecs, pauseTimeSecs, timeOutMessage)
     tic;
     timedOutFlag = false;
     noInputs = true;
@@ -8,9 +8,16 @@ function timedOutFlag = waitForMessageOrTimeout(obj, timeOutSecs, pauseTimeSecs)
         elapsedTime = toc;
         if (elapsedTime > timeOutSecs)
             timedOutFlag = true;
-            fprintf('>>>Here timeout: %f secs\n', timeOutSecs);
+            executeTimeOut(timeOutMessage);
         end
     end
+end
+
+function executeTimeOut( timeOutMessage)
+    fprintf(2,'\n\n-----------------------------------------------------------------------------\n');
+    fprintf(2,'<strong>Timed out: %s</strong>.', timeOutMessage);
+    fprintf(2,'\n-----------------------------------------------------------------------------\n\n');
+    error('Communication failure');
 end
 
 function [status, nDots] = lazyCheck(obj, nDots, pauseTimeSecs)
@@ -22,7 +29,7 @@ function [status, nDots] = lazyCheck(obj, nDots, pauseTimeSecs)
         if (nDots > 600)
             fprintf('\n.')
             nDots = 0;
-        else    
+        else
             if (mod(nDots,dotsNumThresholdForPrinting)==0)
                 fprintf('.');
             end
