@@ -71,7 +71,6 @@ function [messageReceived, status, roundTipDelayMilliSecs] = communicate(obj, pa
             'timeOutSecs', communicationPacket.timeOutSecs ...
         );
 
-
         % Compute status of operation
         status = 'to be determined';
         while (attemptNo < maxAttemptsNum) && ~(strcmp(status, obj.GOOD_TRANSMISSION))
@@ -81,23 +80,20 @@ function [messageReceived, status, roundTipDelayMilliSecs] = communicate(obj, pa
                 obj.displayMessage(sprintf('received message operation timed out'), receivedPacket.messageLabel, receivedPacket.messageData, packetNo, 'alert', true);
                 error('Communicate() bailing out: Time out waiting for a message to be received.\n');
             end
+
             if (receivedPacket.badTransmissionFlag)
                 status = obj.BAD_TRANSMISSION;
                 obj.displayMessage(sprintf('received message contains bad data'), receivedPacket.messageLabel, receivedPacket.messageData, packetNo, 'alert', true);
-                attemptNo = attemptNo + 1;
-                fprintf('\n<strong>Waiting to receive a resubmission (attempt #%d)</strong>\n', attemptNo);
-                receivedPacket = obj.waitForMessage(communicationPacket.messageLabel, ...
-                    'timeOutSecs', communicationPacket.timeOutSecs ...
-                );
             elseif (~isempty(receivedPacket.mismatchedMessageLabel))
                 status = obj.UNEXPECTED_MESSAGE_LABEL_RECEIVED;
                 obj.displayMessage(sprintf('received message with wrong label (expected: ''%s'')', receivedPacket.mismatchedMessageLabel), receivedPacket.messageLabel, receivedPacket.messageData, packetNo, 'alert', true);
-                attemptNo = attemptNo + 1;
-                fprintf('\n<strong>Waiting to receive a resubmission (attempt #%d)</strong>\n', attemptNo);
-                receivedPacket = obj.waitForMessage(communicationPacket.messageLabel, ...
-                    'timeOutSecs', communicationPacket.timeOutSecs ...
-                );
             end
+
+            attemptNo = attemptNo + 1;
+            fprintf('\n<strong>Waiting to receive a resubmission (attempt #%d)</strong>\n', attemptNo);
+            receivedPacket = obj.waitForMessage(communicationPacket.messageLabel, ...
+                'timeOutSecs', communicationPacket.timeOutSecs ...
+            );
         end % while
 
         if (strcmp(status, obj.GOOD_TRANSMISSION))
