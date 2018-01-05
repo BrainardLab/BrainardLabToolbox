@@ -4,7 +4,7 @@ function shortBaseOneSatelliteDemo
     fprintf('\nClearing stuff\n');
     clear all;
     fprintf('\n\n');
-    
+
     %% Define a 1 base/3-satellite scheme
     baseHostName = 'manta';
     satellite1HostName = 'ionean';
@@ -13,35 +13,35 @@ function shortBaseOneSatelliteDemo
     hostNames = {baseHostName,    satellite1HostName };
     hostIPs   = {'128.91.12.90',  '128.91.12.144' };
     hostRoles = {'base',          'satellite' };
-    
+
     %% Control what is printed on the command window
     beVerbose = false;
     displayPackets = false;
-    
+
     %% Use 10 second time out for all comms
     timeOutSecs = 30;
-    
+
     %% Generate 50 data points for the spiral signal
     coeffPoints = 100;
-    
+
     %% Record a video of the demo?
     recordVideo = true;
-    
+
     %% Instantiate the UDPBaseSatelliteCommunicator object to handle all communications
     UDPobj = UDPBaseSatelliteCommunicator.instantiateObject(hostNames, hostIPs, hostRoles, beVerbose);
-    
+
     %% Who the heck are we?
     iAmTheBase = contains(UDPobj.localHostName, baseHostName);
     iAmSatellite1 = contains(UDPobj.localHostName, satellite1HostName);
 
-    
+
      %% Make packetSequences for the base
     if (iAmTheBase)
         packetSequence = designPacketSequenceForBase(UDPobj, ...
             {satellite1HostName},...
-            timeOutSecs, coeffPoints);    
+            timeOutSecs, coeffPoints);
     end
-    
+
     %% Make packetSequences for satellite(s)
     if (iAmSatellite1)
         packetSequence = designPacketSequenceForSatellite1(UDPobj, ...
@@ -49,17 +49,17 @@ function shortBaseOneSatelliteDemo
             timeOutSecs, coeffPoints);
     end
 
-    
+
     %% Initiate the base / multi-satellite communication
     triggerMessage = 'Go!';                                     % Tell each satellite to start listening
     allSatellitesAreAGOMessage = 'All Satellites Are A GO!';    % Tell each satellite that all its peers are ready-to-go
     UDPobj.initiateCommunication(hostRoles,  hostNames, triggerMessage, allSatellitesAreAGOMessage, 'beVerbose', beVerbose);
-    
+
     %% Init demo
     if (recordVideo && iAmTheBase)
         visualizeDemoData('open');
     end
-    
+
     %% Execute communication protocol
     for packetNo = 1:numel(packetSequence)
         % Transmit packet
@@ -75,13 +75,13 @@ function shortBaseOneSatelliteDemo
              visualizeDemoData('add');
          end
     end % packetNo
-    
+
     %% Finalize demo
     if (recordVideo && iAmTheBase)
         visualizeDemoData('close');
     end
-    
-    
+
+
     %% Nested function for visualizing the demo
     function visualizeDemoData(mode)
         persistent videoOBJ
@@ -91,11 +91,11 @@ function shortBaseOneSatelliteDemo
         persistent sat1;
         persistent sat2;
         persistent sat3;
-        persistent hFig; 
-            
+        persistent hFig;
+
         if (strcmp(mode, 'open'))
             videoOBJ = VideoWriter('UDPdata.mp4', 'MPEG-4'); % H264 format
-            videoOBJ.FrameRate = 30; 
+            videoOBJ.FrameRate = 30;
             videoOBJ.Quality = 100;
             videoOBJ.open();
             return;
@@ -105,7 +105,7 @@ function shortBaseOneSatelliteDemo
         elseif (~strcmp(mode, 'add'))
             error('Unknown mode in visualizeDemoData(): ''%s'' \n', demo);
         end
-        
+
         if (packetNo == 1)
             radial_coeff = [];
             cos_coeff = [];
@@ -116,7 +116,7 @@ function shortBaseOneSatelliteDemo
             hFig = figure(1); clf;
             set(hFig, 'Position', [1000 918 1000 420], 'Color', [1 1 1])
         end
-        
+
         if (~isempty(theMessageReceived))
             if (contains(theMessageReceived.label, 'SIN_COEFF'))
                 sin_coeff = cat(1,sin_coeff, theMessageReceived.data);
@@ -124,14 +124,14 @@ function shortBaseOneSatelliteDemo
                 sat2(numel(sat2)+1) = 0;
                 sat3(numel(sat3)+1) = 0;
             end
-            
+
             if (contains(theMessageReceived.label, 'COS_COEFF'))
                 cos_coeff = cat(1,cos_coeff, theMessageReceived.data);
                 sat2(numel(sat2)+1) = theMessageReceived.data;
                 sat1(numel(sat1)+1) = 0;
                 sat3(numel(sat3)+1) = 0;
             end
-            
+
             if (contains(theMessageReceived.label, 'RADIAL_COEFF'))
                 radial_coeff = cat(1,radial_coeff, theMessageReceived.data);
                 sat3(numel(sat3)+1) = theMessageReceived.data;
@@ -151,7 +151,7 @@ function shortBaseOneSatelliteDemo
                 grid 'on'
                 grid on
             end
-            
+
             subplot(3,5, 3:5);
             if (~isempty(sat1))
                 stem(sat1, 'filled');
@@ -159,16 +159,16 @@ function shortBaseOneSatelliteDemo
                 set(hL, 'FontSize', 16);
             end
             set(gca, 'XLim', [1 300], 'YLim', [-1 1], 'FontSize', 12);
-            
+
             subplot(3,5, 8:10);
             if (~isempty(sat2))
                 stem(sat2, 'filled');
                 hL = legend('sat-2');
                 set(hL, 'FontSize', 16);
             end
-            
+
             set(gca, 'XLim', [1 300], 'YLim', [-1 1], 'FontSize', 12);
-            
+
             subplot(3,5, 13:15);
             if (~isempty(sat3))
                 stem(sat3, 'filled');
@@ -188,10 +188,10 @@ end
 function packetSequence = designPacketSequenceForSatellite1(UDPobj, satelliteHostName, timeOutSecs, coeffPoints)
     % Define the communication  packetSequence
     packetSequence = {};
-    
+
     % Get base host name
     baseHostName = UDPobj.baseInfo.baseHostName;
-    
+
     % Satellite receiving from Base
     direction = sprintf('%s -> %s', baseHostName, satelliteHostName);
     expectedMessageLabel = sprintf('BASE(%s)_TO_SATTELITE(%s)___SENDING_SINGLE_INTEGER', baseHostName, satelliteHostName);
@@ -199,21 +199,17 @@ function packetSequence = designPacketSequenceForSatellite1(UDPobj, satelliteHos
         satelliteHostName, ...
         direction, ...
         expectedMessageLabel, ...
-        'timeOutSecs', timeOutSecs, ...                                             % Wait for this many secs to receive this message
-        'timeOutAction', UDPBaseSatelliteCommunicator.NOTIFY_CALLER, ...            % Do not throw an error, notify caller function instead (choose from UDPBaseSatelliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
-        'badTransmissionAction', UDPBaseSatelliteCommunicator.NOTIFY_CALLER ...     % Do not throw an error, notify caller function instead (choose from UDPBaseSatelliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
+        'timeOutSecs', timeOutSecs ...                                             % Wait for this many secs to receive this message
     );
 
     % Satellite receiving from Base
-    direction = sprintf('%s -> %s', baseHostName, satelliteHostName); 
+    direction = sprintf('%s -> %s', baseHostName, satelliteHostName);
     expectedMessageLabel = sprintf('BASE(%s)_TO_SATTELITE(%s)___SENDING_CHAR_STRING', baseHostName, satelliteHostName);
     packetSequence{numel(packetSequence)+1} = UDPobj.makePacket(...
         satelliteHostName,...
         direction, ...
         expectedMessageLabel, ...
-        'timeOutSecs', timeOutSecs, ...                                            % Wait for this many secs to receive this message
-        'timeOutAction', UDPBaseSatelliteCommunicator.NOTIFY_CALLER, ...           % Do not throw an error, notify caller function instead (choose from UDPBaseSatelliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
-        'badTransmissionAction', UDPBaseSatelliteCommunicator.NOTIFY_CALLER ...    % Do not throw an error, notify caller function instead (choose from UDPBaseSatelliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
+        'timeOutSecs', timeOutSecs ...                                            % Wait for this many secs to receive this message
     );
 
     % Satellite sending to Base
@@ -224,22 +220,19 @@ function packetSequence = designPacketSequenceForSatellite1(UDPobj, satelliteHos
         satelliteHostName, ...
         direction, ...
         messageLabel, 'withData', messageData, ...
-        'timeOutSecs', timeOutSecs, ...                                            % Allow this many secs to receive ACK (from remote host) that message was received 
-        'timeOutAction', UDPBaseSatelliteCommunicator.NOTIFY_CALLER ...            % Do not throw an error, notify caller function instead (choose from UDPBaseSatelliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
+        'timeOutSecs', timeOutSecs ...                                            % Allow this many secs to receive ACK (from remote host) that message was received
     );
 
-    % Satellite providing cosine coefficients whenever Base asks for one. 
+    % Satellite providing cosine coefficients whenever Base asks for one.
     for k = 1:coeffPoints
         % Satellite waits to receive trigger message from Base to send next cos-coefficient
-        direction = sprintf('%s -> %s', baseHostName, satelliteHostName); 
+        direction = sprintf('%s -> %s', baseHostName, satelliteHostName);
         expectedMessageLabel = sprintf('BASE(%s)_TO_SATTELITE(%s)___SEND_ME_NEXT_COS_COEFF', baseHostName, satelliteHostName);
         packetSequence{numel(packetSequence)+1} = UDPobj.makePacket(...
             satelliteHostName,...
             direction, ...
             expectedMessageLabel, ...
-            'timeOutSecs', timeOutSecs, ...                                            % Wait for this many secs to receive this message
-            'timeOutAction', UDPBaseSatelliteCommunicator.NOTIFY_CALLER, ...           % Do not throw an error, notify caller function instead (choose from UDPBaseSatelliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
-            'badTransmissionAction', UDPBaseSatelliteCommunicator.NOTIFY_CALLER ...    % Do not throw an error, notify caller function instead (choose from UDPBaseSatelliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
+            'timeOutSecs', timeOutSecs ...                                            % Wait for this many secs to receive this message
         );
 
         direction = sprintf('%s <- %s', baseHostName, satelliteHostName);
@@ -249,11 +242,10 @@ function packetSequence = designPacketSequenceForSatellite1(UDPobj, satelliteHos
             satelliteHostName, ...
             direction, ...
             messageLabel, 'withData', messageData, ...
-            'timeOutSecs', timeOutSecs, ...                                            % Allow this many secs to receive ACK (from remote host) that message was received 
-            'timeOutAction', UDPBaseSatelliteCommunicator.NOTIFY_CALLER ...            % Do not throw an error, notify caller function instead (choose from UDPBaseSatelliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
+            'timeOutSecs', timeOutSecs ...                                            % Allow this many secs to receive ACK (from remote host) that message was received
         );
     end
-    
+
 end
 
 %
@@ -265,7 +257,7 @@ function packetSequence = designPacketSequenceForBase(UDPobj, satelliteHostNames
 
     % Get base host name
     baseHostName = UDPobj.baseInfo.baseHostName;
-    
+
     % Base sending to Satellite-1 the number pi
     satelliteName = satelliteHostNames{1};
     direction = sprintf('%s -> %s', baseHostName, satelliteName);
@@ -275,8 +267,7 @@ function packetSequence = designPacketSequenceForBase(UDPobj, satelliteHostNames
         satelliteName,...
         direction, ...
         messageLabel, 'withData', messageData, ...
-        'timeOutSecs', timeOutSecs, ...                                    % Allow timeOutSecsto receive ACK (from remote host) that message was received 
-        'timeOutAction', UDPBaseSatelliteCommunicator.NOTIFY_CALLER ...    % Do not throw an error, notify caller function instead (choose from UDPBaseSatelliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
+        'timeOutSecs', timeOutSecs ...                                    % Allow timeOutSecsto receive ACK (from remote host) that message was received
     );
 
     % Base sending to Satellite-1 the string "tra la la #1"
@@ -288,12 +279,11 @@ function packetSequence = designPacketSequenceForBase(UDPobj, satelliteHostNames
         satelliteName, ...
         direction,...
         messageLabel,  'withData', messageData, ...
-        'timeOutSecs', timeOutSecs, ...                                        % Allow timeOutSecs to receive ACK (from remote host) that message was received
-        'timeOutAction', UDPBaseSatelliteCommunicator.NOTIFY_CALLER ...        % Do not throw an error, notify caller function instead (choose from UDPBaseSatelliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
+        'timeOutSecs', timeOutSecs ...                                        % Allow timeOutSecs to receive ACK (from remote host) that message was received
     );
- 
-  
-    
+
+
+
     % Satellite1 sending struct to base
     satelliteName = satelliteHostNames{1};
     direction = sprintf('%s <- %s', baseHostName, satelliteName);
@@ -302,26 +292,22 @@ function packetSequence = designPacketSequenceForBase(UDPobj, satelliteHostNames
         satelliteName, ...
         direction,...
         messageLabel, ...
-        'timeOutSecs', timeOutSecs, ...                                         % Allow timeOutSecs to receive this message
-        'timeOutAction', UDPBaseSatelliteCommunicator.NOTIFY_CALLER, ...        % Do not throw an error, notify caller function instead (choose from UDPBaseSatelliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
-        'badTransmissionAction', UDPBaseSatelliteCommunicator.NOTIFY_CALLER ... % Do not throw an error, notify caller function instead (choose from UDPBaseSatelliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
+        'timeOutSecs', timeOutSecs ...                                         % Allow timeOutSecs to receive this message
     );
 
 
     for k = 1:coeffPoints
         % Tell satellite-1 to send next the cos-coefficient
         satelliteName = satelliteHostNames{1};
-        direction = sprintf('%s -> %s', baseHostName, satelliteName); 
+        direction = sprintf('%s -> %s', baseHostName, satelliteName);
         messageLabel = sprintf('BASE(%s)_TO_SATTELITE(%s)___SEND_ME_NEXT_COS_COEFF', baseHostName, satelliteName);
         packetSequence{numel(packetSequence)+1} = UDPobj.makePacket(...
             satelliteName,...
             direction, ...
             messageLabel, 'withData', 'right now, please',...
-            'timeOutSecs', timeOutSecs, ...                                            % Wait for this many secs to receive this message
-            'timeOutAction', UDPBaseSatelliteCommunicator.NOTIFY_CALLER, ...           % Do not throw an error, notify caller function instead (choose from UDPBaseSatelliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
-            'badTransmissionAction', UDPBaseSatelliteCommunicator.NOTIFY_CALLER ...    % Do not throw an error, notify caller function instead (choose from UDPBaseSatelliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
+            'timeOutSecs', timeOutSecs ...                                            % Wait for this many secs to receive this message
         );
-    
+
         % Read the next cos-coeff from satellite-1
         direction = sprintf('%s <- %s', baseHostName, satelliteName);
         messageLabel = sprintf('SATTELITE(%s)___SENDING_COS_COEFF', satelliteName);
@@ -329,9 +315,8 @@ function packetSequence = designPacketSequenceForBase(UDPobj, satelliteHostNames
             satelliteName, ...
             direction, ...
             messageLabel, ...
-            'timeOutSecs', timeOutSecs, ...                                            % Allow this many secs to receive ACK (from remote host) that message was received 
-            'timeOutAction', UDPBaseSatelliteCommunicator.NOTIFY_CALLER ...            % Do not throw an error, notify caller function instead (choose from UDPBaseSatelliteCommunicator.{NOTIFY_CALLER, THROW_ERROR})
+            'timeOutSecs', timeOutSecs ...                                            % Allow this many secs to receive ACK (from remote host) that message was received
         );
-    
+
     end
 end
