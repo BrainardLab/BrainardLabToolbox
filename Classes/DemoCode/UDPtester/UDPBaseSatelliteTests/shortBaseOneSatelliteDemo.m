@@ -8,10 +8,11 @@ function shortBaseOneSatelliteDemo
     %% Define a 1 base/3-satellite scheme
     baseHostName = 'manta';
     satellite1HostName = 'ionean';
-
+    satellite1HostName = 'ithaka';
+    
 
     hostNames = {baseHostName,    satellite1HostName };
-    hostIPs   = {'128.91.12.90',  '128.91.12.144' };
+    hostIPs   = {'128.91.12.90',  '192.168.2.2'};  % '128.91.12.144' };
     hostRoles = {'base',          'satellite' };
 
     %% Control what is printed on the command window
