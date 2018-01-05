@@ -35,6 +35,7 @@ function predictedProportions = qpPFColorMaterialQuadModel(stimParams,psiParams,
 %     None
 
 % 07/08/17  dhb  Started on this.
+% 01/05/18  dhb  Add check for return value out of range [0,1], throw error.
 
 %% Extract model parameter
 colorCoordinateSlope = psiParams(1);
@@ -53,6 +54,7 @@ nStim = length(colorMatchColorCoords);
 %% Look up probability of each response for each stimulus
 predictedProportions = zeros(nStim,2);
 for ii = 1:nStim
+    % Look up probability
     p1 = ColorMaterialModelGetProbabilityFromLookupTable(F,colorMatchColorCoords(ii),materialMatchColorCoords(ii), ...
         colorMatchMaterialCoords(ii),materialMatchMaterialCoords(ii), weight);
     
@@ -62,6 +64,8 @@ for ii = 1:nStim
     elseif (p1 > 1)
         error('Table returns probability greater than 1');
     end
+    
+    % Return in desired format
     predictedProportions(ii,:) = [p1 1-p1];
 end
 
