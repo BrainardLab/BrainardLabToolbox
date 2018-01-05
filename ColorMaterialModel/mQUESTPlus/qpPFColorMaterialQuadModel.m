@@ -55,6 +55,13 @@ predictedProportions = zeros(nStim,2);
 for ii = 1:nStim
     p1 = ColorMaterialModelGetProbabilityFromLookupTable(F,colorMatchColorCoords(ii),materialMatchColorCoords(ii), ...
         colorMatchMaterialCoords(ii),materialMatchMaterialCoords(ii), weight);
+    
+    % Check on bounds
+    if (p1 < 0)
+        error('Table returns probability less than 0');
+    elseif (p1 > 1)
+        error('Table returns probability greater than 1');
+    end
     predictedProportions(ii,:) = [p1 1-p1];
 end
 
