@@ -8,7 +8,7 @@ function shortBaseOneSatelliteDemo
     %% Define a 1 base/3-satellite scheme
     baseHostName = 'manta';
     satellite1HostName = 'ionean';
-    satellite1HostName = 'ithaka';
+    satellite1HostName = 'ithaca';
     
 
     hostNames = {baseHostName,    satellite1HostName };
