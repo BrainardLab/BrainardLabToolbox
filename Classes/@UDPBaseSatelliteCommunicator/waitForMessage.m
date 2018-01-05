@@ -32,7 +32,6 @@ function packet = waitForMessage(obj, msgLabel, varargin)
     packet.timedOutFlag = obj.waitForMessageOrTimeout(timeOutSecs, pauseTimeSecs);
     if (packet.timedOutFlag)
         obj.executeTimeOut(sprintf('while waiting for message ''%s'' to arrive', expectedMessageLabel));
-        return;
     end
 
     % Read the leading packet label
@@ -48,7 +47,6 @@ function packet = waitForMessage(obj, msgLabel, varargin)
     packet.timedOutFlag = obj.waitForMessageOrTimeout(timeOutSecs, pauseTimeSecs);
     if (packet.timedOutFlag)
         obj.executeTimeOut(sprintf('while waiting to receive number of bytes for message ''%s''', expectedMessageLabel));
-        return;
     end
     bytesString = matlabNUDP('receive', udpHandle);
     numBytes = str2double(bytesString);
@@ -60,7 +58,6 @@ function packet = waitForMessage(obj, msgLabel, varargin)
         packet.timedOutFlag = obj.waitForMessageOrTimeout(timeOutSecs, pauseSecs);
         if (packet.timedOutFlag)
             obj.executeTimeOut(sprintf('while waiting to receive byte %d/%d of message ''%s''', k, numBytes, expectedMessageLabel));
-            return;
         end
         datum = matlabNUDP('receive', udpHandle);
         theData(k) = str2double(datum);
@@ -70,7 +67,6 @@ function packet = waitForMessage(obj, msgLabel, varargin)
     packet.timedOutFlag = obj.waitForMessageOrTimeout(timeOutSecs, pauseSecs);
     if (packet.timedOutFlag)
         obj.executeTimeOut(sprintf('while waiting to verify the label of message ''%s''', expectedMessageLabel));
-        return;
     end
 
     trailingMessageLabel = matlabNUDP('receive', udpHandle);
