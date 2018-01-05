@@ -1,4 +1,3 @@
-function qpQuestPlusColorMaterialQuadModelDemo
 % Demonstrate/test QUEST+ at work on the color material model, quadratic
 %
 % Description:
@@ -24,7 +23,7 @@ qpPFFun = @(stimParams,psiParams) qpPFColorMaterialQuadModel(stimParams,psiParam
 % Each one has a different upper end of stimulus regime
 % The last of these should be the most inclusive, and
 % include stimuli that could come from any of them.
-DO_INITIALIZE = false;
+DO_INITIALIZE = true;
 if (DO_INITIALIZE)
     stimUpperEnds = [1 2 3];
     nQuests = length(stimUpperEnds);
@@ -33,7 +32,7 @@ if (DO_INITIALIZE)
         qTemp = qpParams( ...
             'qpPF',qpPFFun, ...
             'stimParamsDomainList',{-stimUpperEnds(qq):stimUpperEnds(qq), -stimUpperEnds(qq):stimUpperEnds(qq), -stimUpperEnds(qq):stimUpperEnds(qq), -stimUpperEnds(qq):stimUpperEnds(qq)}, ...
-            'psiParamsDomainList',{[1/6 0.5 1 2 6] [-1 0 1] [1/6 0.5 1 2 6] [-1 0 1] [0.05:0.15:0.95]} ...
+            'psiParamsDomainList',{[1/4 0.5 1 2 4] [-0.5 0 0.5] [1/4 0.5 1 2 4] [-0.5 0 0.5] [0.05:0.15:0.95]} ...
             );
         questData{qq} = qpInitialize(qTemp);
     end
@@ -47,7 +46,7 @@ if (DO_INITIALIZE)
     %% Save out initialized quests
     save(fullfile(tempdir,'initalizedQuests'),'questData','questDataAllTrials');
     
-    % Load in saved initialized thingy's
+% Load in saved initialized thingy's
 else
     load(fullfile(tempdir,'initalizedQuests'),'questData','questDataAllTrials');
 end
