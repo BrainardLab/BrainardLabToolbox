@@ -11,12 +11,14 @@
 clear; close all;
 
 % Set directories and load the subject data
-analysisDir = '/Users/radonjic/Documents/MATLAB/toolboxes/BrainardLabToolbox/ColorMaterialModel/';
+codeDir = '/Users/radonjic/Documents/MATLAB/toolboxes/BrainardLabToolbox/ColorMaterialModel/';
+simulatedDataDir = '/Users/radonjic/Documents/MATLAB/projects/ColorMaterial/SimulatedData/'; 
+
 MAINDEMO = true; 
 if MAINDEMO
-    dataDir = ([analysisDir, 'DemoData/']);
+    dataDir = demoDataDir; 
 else
-    dataDir = '/Users/radonjic/Documents/MATLAB/projects/ColorMaterial/SimulatedData/';
+    dataDir = simulatedDataDir;
 end
 
 % Set parameters for the simulated data set we're cross-validating.
@@ -102,4 +104,4 @@ end
 % Save in the right folder.
 cd(dataDir)
 save([subjectName '-' num2str(nRepetitions) 'BootstrapResults.mat'],  'dataSet');
-cd(analysisDir)
+cd(codeDir)

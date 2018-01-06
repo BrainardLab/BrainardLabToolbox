@@ -12,12 +12,12 @@ switch whichExperiment
     case 'E1P2'
         subjectList = { 'mdc'};
         conditionCode = {'NC', 'CY', 'CB'};
-        figAndDataDir = ['/Users/ana/Dropbox (Aguirre-Brainard Lab)/CNST_analysis/ColorMaterial/Experiment1'];
+        figAndDataDir = [analysisDir '/Experiment1'];
         
     case 'Pilot'
         subjectList = {'zhr', 'vtr', 'scd', 'mcv', 'flj'};
         conditionCode = {'NC'};
-        figAndDataDir = ['/Users/ana/Dropbox (Aguirre-Brainard Lab)/CNST_analysis/ColorMaterial/Pilot'];
+        figAndDataDir = [analysisDir, '/Pilot'];
         dataDir = '/Users/Shared/Matlab/Experiments/ColorMaterial/data/';
 end
 whichError = 'logLik';
@@ -66,7 +66,6 @@ for s = 1:length(subjectList)
                     ylabel('logLik')
                     xlabel('FixedWeigth')
                     line([meanVariedWeight, meanVariedWeight], [-100 0], 'color', 'b')
-           
             end
             
             

@@ -8,7 +8,7 @@
 
 % Initialize
 clear; close all;
-figDir = '/Users/radonjic/Dropbox (Aguirre-Brainard Lab)/CNST_analysis/ColorMaterial/DemoData';
+figDir = [analysisDir '/GridMovies']; 
 cd(figDir)
 
 % movie parametes. 

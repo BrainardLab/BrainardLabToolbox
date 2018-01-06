@@ -114,4 +114,4 @@ for whichSet = 1:length(dataSet)
 end
 % Save current fit
 cd(dataDir)
-save([params.subjectName 'Fit.mat'], 'dataSet', 'params', 'pairInfo')
+save([params.subjectName 'Fit.mat'], 'dataSet', 'params', 'pairInfo', 'indexMatrix')

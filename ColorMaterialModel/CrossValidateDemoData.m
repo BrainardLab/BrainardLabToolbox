@@ -14,7 +14,6 @@
 clear; close all;
 
 % Set directories and load the subject data
-analysisDir = '/Users/Shared/Matlab/Toolboxes/BrainardLabToolbox/ColorMaterialModel';
 demoDir = [analysisDir '/DemoData/']; 
 
 % Set parameters for the simulated data set we're cross-validating. 
