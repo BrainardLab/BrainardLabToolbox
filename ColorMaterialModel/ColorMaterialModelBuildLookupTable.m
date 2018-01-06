@@ -3,7 +3,9 @@
 % Build a 5-dimensional table to allow lookup of probabilities that color match is chosen, for various positions and
 % dimension weight.
 
-% 05/16/2017 ar Reviewed,added comments and gridParams structure. 
+% 05/16/17   ar   Reviewed,added comments and gridParams structure. 
+% 01/05/18   dhb  Use nearest neighbor extrapolation, to avoid out of range
+%                 values.
 
 %% Initialize; 
 clear; close all; 
@@ -53,14 +55,13 @@ for i = 1:length(gridParams.colorMatchColorCoords)
 end
 toc 
 
-% Build interpolator
+% Build and save interpolators
 colorMaterialInterpolatorFunction = griddedInterpolant(gridParams.colorMatchColorCoordGrid,gridParams.materialMatchColorCoordGrid,...
-    gridParams.colorMatchMaterialCoordGrid,gridParams.materialMatchMaterialCoordsGrid, gridParams.weightGrid, CMLookUp,'linear');
+    gridParams.colorMatchMaterialCoordGrid,gridParams.materialMatchMaterialCoordsGrid, gridParams.weightGrid, CMLookUp,'linear','nearest');
 save(['colorMaterialInterpolateFunLinear' gridParams.whichDistance],'colorMaterialInterpolatorFunction','CMLookUp','gridParams');
 clear colorMaterialInterpolatorFunction
+
 colorMaterialInterpolatorFunction = griddedInterpolant(gridParams.colorMatchColorCoordGrid,...
     gridParams.materialMatchColorCoordGrid,gridParams.colorMatchMaterialCoordGrid,...
-    gridParams.materialMatchMaterialCoordsGrid, gridParams.weightGrid, CMLookUp,'cubic');
-
-% Save all parameters. 
+    gridParams.materialMatchMaterialCoordsGrid, gridParams.weightGrid, CMLookUp,'cubic','nearest'); 
 save(['colorMaterialInterpolateFunCubic' gridParams.whichDistance],'colorMaterialInterpolatorFunction','CMLookUp','gridParams'); 

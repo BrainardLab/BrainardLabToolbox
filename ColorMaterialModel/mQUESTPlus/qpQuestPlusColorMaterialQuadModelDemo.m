@@ -1,4 +1,3 @@
-function qpQuestPlusColorMaterialQuadModelDemo
 % Demonstrate/test QUEST+ at work on the color material model, quadratic
 %
 % Description:
@@ -6,9 +5,10 @@ function qpQuestPlusColorMaterialQuadModelDemo
 %    quadratic version of the color material model.
 
 % 12/19/17  dhb, ar  Created.
+% 01/05/18  dhb      Futz with bounds on parameters so it doesn't bomb.
 
 %% Close out stray figures
-close all;
+clear; close all;
 
 %% Change to our pwd
 cd(fileparts(mfilename('fullpath')));
@@ -24,7 +24,9 @@ qpPFFun = @(stimParams,psiParams) qpPFColorMaterialQuadModel(stimParams,psiParam
 % Each one has a different upper end of stimulus regime
 % The last of these should be the most inclusive, and
 % include stimuli that could come from any of them.
-DO_INITIALIZE = false;
+upperLin = 4;
+upperQuad = 0.5;
+DO_INITIALIZE = true;
 if (DO_INITIALIZE)
     stimUpperEnds = [1 2 3];
     nQuests = length(stimUpperEnds);
@@ -33,7 +35,7 @@ if (DO_INITIALIZE)
         qTemp = qpParams( ...
             'qpPF',qpPFFun, ...
             'stimParamsDomainList',{-stimUpperEnds(qq):stimUpperEnds(qq), -stimUpperEnds(qq):stimUpperEnds(qq), -stimUpperEnds(qq):stimUpperEnds(qq), -stimUpperEnds(qq):stimUpperEnds(qq)}, ...
-            'psiParamsDomainList',{[1/6 0.5 1 2 6] [-1 0 1] [1/6 0.5 1 2 6] [-1 0 1] [0.05:0.15:0.95]} ...
+            'psiParamsDomainList',{[1/upperLin 1/(upperLin/2) 1 upperLin/2 upperLin] [-upperQuad 0 upperQuad] [1/upperLin 1/(upperLin/2) 1 upperLin/2 upperLin] [-upperQuad 0 upperQuad] [0.05:0.15:0.95]} ...
             );
         questData{qq} = qpInitialize(qTemp);
     end
@@ -47,7 +49,7 @@ if (DO_INITIALIZE)
     %% Save out initialized quests
     save(fullfile(tempdir,'initalizedQuests'),'questData','questDataAllTrials');
     
-    % Load in saved initialized thingy's
+% Load in saved initialized thingy's
 else
     load(fullfile(tempdir,'initalizedQuests'),'questData','questDataAllTrials');
 end
@@ -91,7 +93,7 @@ for ss = 1:nSimulations
             outcome = simulatedObserverFun(stim);
             
             % Update quest data structure, if not a randomly inserted trial
-            tic
+            %tic
             if (theQuest > 0)
                 questData{theQuest} = qpUpdate(questData{theQuest},stim,outcome);
             end
@@ -100,7 +102,7 @@ for ss = 1:nSimulations
             % experiment.  We never query it to decide what to do, but we
             % will use it to fit the data at the end.
             questDataAllTrials = qpUpdate(questDataAllTrials,stim,outcome);
-            toc
+            %toc
         end
     end
     
@@ -117,7 +119,7 @@ for ss = 1:nSimulations
     % parameter for the search, and impose as parameter bounds the range
     % provided to QUEST+.
     psiParamsFit(ss,:) = qpFit(questDataAllTrials.trialData,questDataAllTrials.qpPF,psiParamsQuest(ss,:),questDataAllTrials.nOutcomes,...
-        'lowerBounds', [-5 -1 -5 -1 0],'upperBounds',[5 1 5 1 1]);
+        'lowerBounds', [1/upperLin -upperQuad 1/upperLin -upperQuad 0],'upperBounds',[upperLin upperQuad upperLin upperQuad 1]);
     fprintf('Maximum likelihood fit parameters: %0.1f, %0.1f, %0.2f, %0.1f, %0.2f\n', ...
         psiParamsFit(ss,1),psiParamsFit(ss,2),psiParamsFit(ss,3),psiParamsFit(ss,4),psiParamsFit(ss,5));
     fprintf('\n');
@@ -204,9 +206,11 @@ title({'Color Material Model',''});
 %
 % Posterior versus material slope and weight
 figure; clf; hold on;
-index1 = find(questDataAllTrials.psiParamsDomain(:,1) == psiParamsQuest(end,1));
+index1 = find(questDataAllTrials.psiParamsDomain(:,1) == psiParamsQuest(end,1) & ...
+    questDataAllTrials.psiParamsDomain(:,2) == psiParamsQuest(end,2) & ...
+    questDataAllTrials.psiParamsDomain(:,4) == psiParamsQuest(end,4));
 posterior1 = questDataAllTrials.posterior(index1);
-plotX = questDataAllTrials.psiParamsDomainList{2};
+plotX = questDataAllTrials.psiParamsDomainList{3};
 plotY = questDataAllTrials.psiParamsDomainList{5};
 plotZ = reshape(posterior1,length(plotY),length(plotX));
 surf(plotX',plotY',plotZ);
@@ -219,7 +223,9 @@ set(gca,'View',[20 80]);
 
 % Posterior versus color slope and weight
 figure; clf; hold on;
-index1 = find(questDataAllTrials.psiParamsDomain(:,2) == psiParamsQuest(end,2));
+index1 = find(questDataAllTrials.psiParamsDomain(:,3) == psiParamsQuest(end,3) & ...
+    questDataAllTrials.psiParamsDomain(:,2) == psiParamsQuest(end,2) & ...
+    questDataAllTrials.psiParamsDomain(:,4) == psiParamsQuest(end,4));
 posterior1 = questDataAllTrials.posterior(index1);
 plotX = questDataAllTrials.psiParamsDomainList{1};
 plotY = questDataAllTrials.psiParamsDomainList{5};
@@ -234,10 +240,12 @@ set(gca,'View',[20 80]);
 
 % Posterior versus color slope and material slope
 figure; clf; hold on;
-index1 = find(questDataAllTrials.psiParamsDomain(:,3) == psiParamsQuest(end,3));
+index1 = find(questDataAllTrials.psiParamsDomain(:,5) == psiParamsQuest(end,5) & ...
+    questDataAllTrials.psiParamsDomain(:,2) == psiParamsQuest(end,2) & ...
+    questDataAllTrials.psiParamsDomain(:,4) == psiParamsQuest(end,4));
 posterior1 = questDataAllTrials.posterior(index1);
 plotX = questDataAllTrials.psiParamsDomainList{1};
-plotY = questDataAllTrials.psiParamsDomainList{2};
+plotY = questDataAllTrials.psiParamsDomainList{3};
 plotZ = reshape(posterior1,length(plotY),length(plotX));
 surf(plotX',plotY',plotZ);
 shading interp
