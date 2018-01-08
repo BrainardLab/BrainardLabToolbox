@@ -89,6 +89,10 @@ function [messageReceived, status, roundTipDelayMilliSecs] = communicate(obj, pa
                 obj.displayMessage(sprintf('received message with wrong label (expected: ''%s'')', receivedPacket.mismatchedMessageLabel), receivedPacket.messageLabel, receivedPacket.messageData, packetNo, 'alert', true);
             end
 
+            if (strcmp(status, obj.GOOD_TRANSMISSION))
+                continue;
+            end
+            
             attemptNo = attemptNo + 1;
             fprintf('\n<strong>Waiting to receive a resubmission (attempt #%d)</strong>\n', attemptNo);
             receivedPacket = obj.waitForMessage(communicationPacket.messageLabel, ...
