@@ -30,7 +30,7 @@ function transmissionStatus = sendMessage(obj, msgLabel, msgData, varargin)
             wordsNum = 1+floor(wordsNum);
         end
         wordIndex = 0;
-        allWords = zeros(wordsNum, 3*obj.WORD_LENGTH, 'char');
+        allWords = char(ones(wordsNum, 3*obj.WORD_LENGTH, 'uint8'));
         for k = 1:numel(byteStream)
             if (mod(k-1, obj.WORD_LENGTH) == 0)
                 wordIndex = wordIndex + 1;
