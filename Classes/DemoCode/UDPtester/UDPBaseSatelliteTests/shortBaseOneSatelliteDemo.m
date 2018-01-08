@@ -28,7 +28,7 @@ function shortBaseOneSatelliteDemo
     recordVideo = true;
 
     %% Instantiate the UDPBaseSatelliteCommunicator object to handle all communications
-    UDPobj = UDPBaseSatelliteCommunicator.instantiateObject(hostNames, hostIPs, hostRoles, beVerbose);
+    UDPobj = UDPBaseSatelliteCommunicator.instantiateObject(hostNames, hostIPs, hostRoles, beVerbose, 'transmissionMode', 'WORDS');
 
     %% Who the heck are we?
     iAmTheBase = contains(UDPobj.localHostName, baseHostName);
@@ -53,7 +53,7 @@ function shortBaseOneSatelliteDemo
     %% Initiate the base / multi-satellite communication
     triggerMessage = 'Go!';                                     % Tell each satellite to start listening
     allSatellitesAreAGOMessage = 'All Satellites Are A GO!';    % Tell each satellite that all its peers are ready-to-go
-    UDPobj.initiateCommunication(hostRoles,  hostNames, triggerMessage, allSatellitesAreAGOMessage, 'beVerbose', beVerbose, 'transmissionMode', 'WORDS');
+    UDPobj.initiateCommunication(hostRoles,  hostNames, triggerMessage, allSatellitesAreAGOMessage, 'beVerbose', beVerbose);
 
     %% Init demo
     if (recordVideo && iAmTheBase)
