@@ -72,7 +72,7 @@ function packet = waitForMessage(obj, msgLabel, varargin)
         % Concatenate all words into a single byte stream
         theData = zeros(1,numBytes);
         for k = 1:numBytes
-            if (mod(k-1, obj.WORD_LENGTH == 0))
+            if (mod(k-1, obj.WORD_LENGTH) == 0)
                 wordIndex = wordIndex + 1;
                 charIndex = 0;
             end
