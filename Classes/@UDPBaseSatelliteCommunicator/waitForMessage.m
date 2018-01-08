@@ -62,7 +62,7 @@ function packet = waitForMessage(obj, msgLabel, varargin)
         timeOutMessage = sprintf('while waiting to receive number of words for message ''%s''', expectedMessageLabel);
         packet.timedOutFlag = obj.waitForMessageOrTimeout(timeOutSecs, pauseSecs, timeOutMessage);
         wordsNum = matlabNUDP('receive', udpHandle);
-        allWords = zeros(wordsNum, 3*obj.WORD_LENGTH);
+        allWords = zeros(wordsNum, 3*obj.WORD_LENGTH, 'char');
         % Send each word
         for wordIndex = 1:wordsNum
             timeOutMessage = sprintf('while waiting to receive word %d/%d of message ''%s''', wordIndex, wordsNum, expectedMessageLabel);
