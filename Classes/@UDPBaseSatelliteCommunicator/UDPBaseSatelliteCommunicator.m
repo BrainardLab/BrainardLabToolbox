@@ -41,7 +41,7 @@ classdef UDPBaseSatelliteCommunicator < handle
         MIN_UDP_HANDLE = 0;
         MAX_UDP_HANDLE = 4;
         
-        WORD_LENGTH = 80;
+        WORD_LENGTH = 512;
     end
 
 	% Public methods
