@@ -105,7 +105,7 @@ classdef UDPBaseSatelliteCommunicator < handle
 
     % Convenience methods
     methods (Static)
-        UDPobj = instantiateObject(hostNames, hostIPs, hostRoles, beVerbose);
+        UDPobj = instantiateObject(hostNames, hostIPs, hostRoles, beVerbose, varargin);
         localHostName = getLocalHostName();
     end
 
