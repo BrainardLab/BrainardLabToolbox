@@ -45,14 +45,40 @@ function packet = waitForMessage(obj, msgLabel, varargin)
     bytesString = matlabNUDP('receive', udpHandle);
     numBytes = str2double(bytesString);
 
-    % Read all bytes
-    pauseSecs = 0;
-    theData = zeros(1,numBytes);
-    for k = 1:numBytes
-        timeOutMessage = sprintf('while waiting to receive byte %d/%d of message ''%s''', k, numBytes, expectedMessageLabel);
+    if (strcmp((obj.transmissionMode), 'SINGLE_BYTES'))
+        % Read all bytes
+        pauseSecs = 0;
+        theData = zeros(1,numBytes);
+        for k = 1:numBytes
+            timeOutMessage = sprintf('while waiting to receive byte %d/%d of message ''%s''', k, numBytes, expectedMessageLabel);
+            packet.timedOutFlag = obj.waitForMessageOrTimeout(timeOutSecs, pauseSecs, timeOutMessage);
+            datum = matlabNUDP('receive', udpHandle);
+            theData(k) = str2double(datum);
+        end
+    else
+        % Read all words
+        pauseSecs = 0;
+        % Read number of words
+        timeOutMessage = sprintf('while waiting to receive number of words for message ''%s''', expectedMessageLabel);
         packet.timedOutFlag = obj.waitForMessageOrTimeout(timeOutSecs, pauseSecs, timeOutMessage);
-        datum = matlabNUDP('receive', udpHandle);
-        theData(k) = str2double(datum);
+        wordsNum = matlabNUDP('receive', udpHandle);
+        allWords = zeros(wordsNum, 3*obj.WORD_LENGTH);
+        % Send each word
+        for wordIndex = 1:wordsNum
+            timeOutMessage = sprintf('while waiting to receive word %d/%d of message ''%s''', wordIndex, wordsNum, expectedMessageLabel);
+            packet.timedOutFlag = obj.waitForMessageOrTimeout(timeOutSecs, pauseSecs, timeOutMessage);
+            allWords(wordIndex,:) = matlabNUDP('receive', udpHandle);
+        end
+        % Concatenate all words into a single byte stream
+        theData = zeros(1,numBytes);
+        for k = 1:numBytes
+            if (mod(k-1, obj.WORD_LENGTH == 0))
+                wordIndex = wordIndex + 1;
+                charIndex = 0;
+            end
+            theData(k) = allWords(wordIndex,charIndex*3+(1:3));
+            charIndex = charIndex + 1;
+        end
     end
 
     % Read the message label again

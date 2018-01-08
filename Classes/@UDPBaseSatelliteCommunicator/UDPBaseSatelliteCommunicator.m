@@ -16,6 +16,7 @@ classdef UDPBaseSatelliteCommunicator < handle
         receivedMessagesCount % number of messages received
         timeOutsCount         % number of timeouts
         flushDelay            % seconds to wait before flushing the UDP queue
+        transmissionMode      % either 'SINGLE_BYTES', or 'WORDS'
     end
 
     properties (Access = private)
@@ -39,6 +40,8 @@ classdef UDPBaseSatelliteCommunicator < handle
         % RANGE OF HANDLES ALLOWED IN matlabNUDP mexfile (CURRENTLY UP TO 5, SO: 0..4)
         MIN_UDP_HANDLE = 0;
         MAX_UDP_HANDLE = 4;
+        
+        WORD_LENGTH = 80;
     end
 
 	% Public methods
@@ -53,22 +56,26 @@ classdef UDPBaseSatelliteCommunicator < handle
 
             % Set default values for optional config params
             defaultVerbosity = 'min';
-
+            defaultTransmissionMode = 'SINGLE_BYTES';
+            
             % Parse input parameters.
             p = inputParser;
             p.addRequired('localIP',  @ischar);
             p.addRequired('baseInfo');
             p.addRequired('satelliteInfo');
             p.addParameter('verbosity', defaultVerbosity, @ischar);
+            p.addParameter('transmissionMode', defaultTransmissionMode, @(x)((ischar(x))&&(ismember(x,  {'SINGLE_BYTES','WORDS'}))));
             p.parse(localIP, baseInfo, satelliteInfo, varargin{:});
 
             obj.localIP  = p.Results.localIP;
             obj.baseInfo = p.Results.baseInfo;
             obj.satelliteInfo = p.Results.satelliteInfo;
             obj.verbosity = p.Results.verbosity;
+            obj.transmissionMode = p.Results.transmissionMode;
             obj.localHostName = obj.getLocalHostName();
             obj.flushDelay = 0.1;
-
+            
+            
             if strcmp(obj.verbosity,'max')
                 fprintf('%s Initialized.\n', obj.selfSignature);
             end

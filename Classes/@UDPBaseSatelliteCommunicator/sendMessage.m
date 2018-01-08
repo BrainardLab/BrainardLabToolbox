@@ -18,12 +18,35 @@ function transmissionStatus = sendMessage(obj, msgLabel, msgData, varargin)
 
     % Send number of bytes to read
     matlabNUDP('send', udpHandle, sprintf('%d', numel(byteStream)));
-
-    % Send each byte separately
-    for k = 1:numel(byteStream)
-       matlabNUDP('send', udpHandle, sprintf('%03d', byteStream(k)));
+    
+    if (strcmp((obj.transmissionMode), 'SINGLE_BYTES'))
+        % Send each byte separately
+        for k = 1:numel(byteStream)
+           matlabNUDP('send', udpHandle, sprintf('%03d', byteStream(k)));
+        end
+    else
+        wordsNum = numel(byteStream)/obj.WORD_LENGTH;
+        if (wordsNum > floor(wordsNum))
+            wordsNum = 1+floor(wordsNum);
+        end
+        wordIndex = 0;
+        allWords = zeros(wordsNum, 3*obj.WORD_LENGTH);
+        for k = 1:numel(byteStream)
+            if (mod(k-1, obj.WORD_LENGTH == 0))
+                wordIndex = wordIndex + 1;
+                charIndex = 0;
+            end
+            allWords(wordIndex,charIndex*3+(1:3)) = sprintf('%03d', byteStream(k));
+            charIndex = charIndex + 1;
+        end
+        % Send number of words
+        matlabNUDP('send', udpHandle, sprintf('%d', wordsNum));
+        % Send each word
+        for wordIndex = 1:wordsNum
+             matlabNUDP('send', udpHandle, squeeze(allWords(wordIndex,:)));
+        end
     end
-
+    
     % Send the trailing message label
     matlabNUDP('send', udpHandle, messageLabel);
 
