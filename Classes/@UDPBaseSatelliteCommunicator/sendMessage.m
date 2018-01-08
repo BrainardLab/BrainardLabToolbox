@@ -52,6 +52,7 @@ function transmissionStatus = sendMessage(obj, msgLabel, msgData, varargin)
             else
                 datum = squeeze(allWords(wordIndex,:));
             end
+            fprintf('message length: %d\n', numel(datum));
             matlabNUDP('send', udpHandle, datum);
         end
     end
