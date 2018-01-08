@@ -67,7 +67,8 @@ function packet = waitForMessage(obj, msgLabel, varargin)
         for wordIndex = 1:wordsNum
             timeOutMessage = sprintf('while waiting to receive word %d/%d of message ''%s''', wordIndex, wordsNum, expectedMessageLabel);
             packet.timedOutFlag = obj.waitForMessageOrTimeout(timeOutSecs, pauseSecs, timeOutMessage);
-            allWords(wordIndex,:) = matlabNUDP('receive', udpHandle);
+            datum = matlabNUDP('receive', udpHandle);
+            allWords(wordIndex,1:numel(datum)) = datum;
         end
         % Concatenate all words into a single byte stream
         theData = zeros(1,numBytes);
