@@ -28,7 +28,7 @@ function shortBaseOneSatelliteDemo
     recordVideo = true;
 
     %% Instantiate the UDPBaseSatelliteCommunicator object to handle all communications
-    UDPobj = UDPBaseSatelliteCommunicator.instantiateObject(hostNames, hostIPs, hostRoles, beVerbose);
+    UDPobj = UDPBaseSatelliteCommunicator.instantiateObject(hostNames, hostIPs, hostRoles, beVerbose, 'transmissionMode', 'WORDS');
 
     %% Who the heck are we?
     iAmTheBase = contains(UDPobj.localHostName, baseHostName);
