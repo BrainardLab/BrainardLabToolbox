@@ -1,11 +1,12 @@
-function UDPobj = instantiateObject(hostNames, hostIPs, hostRoles,  beVerbose)
+function UDPobj = instantiateObject(hostNames, hostIPs, hostRoles, beVerbose, varargin)
     % Parse optinal input parameters.
     p = inputParser;
     p.addRequired('hostNames', @iscell);
     p.addRequired('hostIPs', @iscell);
     p.addRequired('hostRoles', @iscell);
     p.addRequired('beVerbose',  @islogical);
-    p.parse(hostNames, hostIPs, hostRoles,  beVerbose);
+    p.addParameter('transmissionMode', 'SINGLE_BYTES', @ischar);    
+    p.parse(hostNames, hostIPs, hostRoles,  beVerbose, varargin{:});
     
     if (beVerbose)
         verbosity = 'max';
@@ -37,9 +38,10 @@ function UDPobj = instantiateObject(hostNames, hostIPs, hostRoles,  beVerbose)
     end
         
     UDPobj = UDPBaseSatelliteCommunicator( ...
-            localIP, ...                       % REQUIRED: the local host IP
-            baseInfo, ...                      % REQUIRED: the base info
-            satelliteInfo, ...                 % REQUIRED: the satellite info
-            'verbosity', verbosity ...         % OPTIONAL, with default value: 'normal', and possible values: {'min', 'normal', 'max'},
+            localIP, ...                                % REQUIRED: the local host IP
+            baseInfo, ...                               % REQUIRED: the base info
+            satelliteInfo, ...                          % REQUIRED: the satellite info
+            'verbosity', verbosity, ...                  % REQUIRED, with default value: 'normal', and possible values: {'min', 'normal', 'max'},
+            'transmissionMode', p.Results.transmissionMode ...   % OPTIONAL: choose between 'SINGLE_BYTES' (default) and 'WORDS'
     );
 end
