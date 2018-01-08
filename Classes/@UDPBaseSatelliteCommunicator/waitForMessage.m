@@ -78,7 +78,8 @@ function packet = waitForMessage(obj, msgLabel, varargin)
                 charIndex = 0;
             end
             [wordIndex wordsNum charIndex*3+1 size(allWords,1) size(allWords ,2)]
-            theData(k) = allWords(wordIndex,charIndex*3+(1:3));
+            datum = str2double(allWords(wordIndex,charIndex*3+(1:3)))
+            theData(k) = datum
             charIndex = charIndex + 1;
         end
     end
