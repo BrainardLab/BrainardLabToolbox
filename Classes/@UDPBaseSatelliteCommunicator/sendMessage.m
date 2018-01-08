@@ -44,7 +44,6 @@ function transmissionStatus = sendMessage(obj, msgLabel, msgData, varargin)
         % Send each word
         for wordIndex = 1:wordsNum
             datum = squeeze(allWords(wordIndex,:));
-            size(datum)
             matlabNUDP('send', udpHandle, datum);
         end
     end
