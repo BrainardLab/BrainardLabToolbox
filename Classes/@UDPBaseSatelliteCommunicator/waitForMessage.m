@@ -95,7 +95,12 @@ function packet = waitForMessage(obj, msgLabel, varargin)
 
     % Reconstruct data object
     if (numBytes > 0)
-        packet.messageData = getArrayFromByteStream(uint8(theData));
+        try
+            packet.messageData = getArrayFromByteStream(uint8(theData));
+        catch err
+            fprintf(2,'Could not decode a matlab data type from the transmitted byte stream for message with label: ''%s''.', expectedMessageLabel);
+            rethrow(err);
+        end
     else
         packet.messageData = [];
     end
