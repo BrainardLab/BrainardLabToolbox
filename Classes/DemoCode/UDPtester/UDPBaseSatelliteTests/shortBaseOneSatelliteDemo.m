@@ -53,7 +53,7 @@ function shortBaseOneSatelliteDemo
     %% Initiate the base / multi-satellite communication
     triggerMessage = 'Go!';                                     % Tell each satellite to start listening
     allSatellitesAreAGOMessage = 'All Satellites Are A GO!';    % Tell each satellite that all its peers are ready-to-go
-    UDPobj.initiateCommunication(hostRoles,  hostNames, triggerMessage, allSatellitesAreAGOMessage, 'beVerbose', beVerbose);
+    UDPobj.initiateCommunication(hostRoles,  hostNames, triggerMessage, allSatellitesAreAGOMessage, 'beVerbose', beVerbose, 'transmissionMode', 'WORDS');
 
     %% Init demo
     if (recordVideo && iAmTheBase)

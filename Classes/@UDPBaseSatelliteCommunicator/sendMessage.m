@@ -31,19 +31,27 @@ function transmissionStatus = sendMessage(obj, msgLabel, msgData, varargin)
         end
         wordIndex = 0;
         allWords = char(ones(wordsNum, 3*obj.WORD_LENGTH, 'uint8'));
+        lastWordLength = 0;
         for k = 1:numel(byteStream)
             if (mod(k-1, obj.WORD_LENGTH) == 0)
                 wordIndex = wordIndex + 1;
                 charIndex = 0;
             end
             allWords(wordIndex,charIndex*3+(1:3)) = sprintf('%03d', byteStream(k));
+            if (k == numel(byteStream))
+                lastWordLength = charIndex*3+3;
+            end
             charIndex = charIndex + 1;
         end
         % Send number of words
         matlabNUDP('send', udpHandle, sprintf('%d', wordsNum));
         % Send each word
         for wordIndex = 1:wordsNum
-            datum = squeeze(allWords(wordIndex,:));
+            if (wordIndex == wordsNum)
+                datum = squeeze(allWords(wordIndex,1:lastWordLength));
+            else
+                datum = squeeze(allWords(wordIndex,:));
+            end
             matlabNUDP('send', udpHandle, datum);
         end
     end
