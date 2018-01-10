@@ -7,11 +7,11 @@ function shortBaseOneSatelliteDemo
 
     %% Define a 1 base/3-satellite scheme
     baseHostName = 'manta';
-    satellite1HostName = 'ithaca';
+    satellite1HostName = 'ionean';
     
 
     hostNames = {baseHostName,    satellite1HostName };
-    hostIPs   = {'128.91.12.90',  '169.254.103.92' };
+    hostIPs   = {'128.91.12.90',  '128.91.12.144' };
     hostRoles = {'base',          'satellite' };
 
     %% Control what is printed on the command window
@@ -28,7 +28,7 @@ function shortBaseOneSatelliteDemo
     recordVideo = true;
 
     %% Instantiate the UDPBaseSatelliteCommunicator object to handle all communications
-    UDPobj = UDPBaseSatelliteCommunicator.instantiateObject(hostNames, hostIPs, hostRoles, beVerbose, 'transmissionMode', 'WORDS');
+    UDPobj = UDPBaseSatelliteCommunicator.instantiateObject(hostNames, hostIPs, hostRoles, beVerbose, 'transmissionMode', 'SINGLE_BYTES');
 
     %% Who the heck are we?
     iAmTheBase = contains(UDPobj.localHostName, baseHostName);
