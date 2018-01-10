@@ -14,7 +14,7 @@ function transmissionStatus = sendMessage(obj, msgLabel, msgData, varargin)
     byteStream = getByteStreamFromArray(messageData);
 
     if (strcmp((obj.transmissionMode), 'WORDS'))
-        [allWords, wordsNum, lastWordLength] = wordStreamFromByteStream(byStream, obj.WORD_LENGTH);
+        [allWords, wordsNum, lastWordLength] = wordStreamFromByteStream(byteStream, obj.WORD_LENGTH);
     end
     
     % Send the leading message label
