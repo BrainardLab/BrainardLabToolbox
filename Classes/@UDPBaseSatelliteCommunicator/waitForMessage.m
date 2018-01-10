@@ -46,7 +46,7 @@ function packet = waitForMessage(obj, msgLabel, varargin)
     numBytes = str2double(bytesString);
 
     if (strcmp((obj.transmissionMode), 'SINGLE_BYTES'))
-        % Read all bytes
+        % Read  bytes
         pauseSecs = 0;
         theData = zeros(1,numBytes);
         for k = 1:numBytes
@@ -56,30 +56,19 @@ function packet = waitForMessage(obj, msgLabel, varargin)
             theData(k) = str2double(datum);
         end
     else
-        % Read all words
+        % Read words
         pauseSecs = 0;
         % Read number of words
         timeOutMessage = sprintf('while waiting to receive number of words for message ''%s''', expectedMessageLabel);
         packet.timedOutFlag = obj.waitForMessageOrTimeout(timeOutSecs, pauseSecs, timeOutMessage);
         wordsNum = str2double(matlabNUDP('receive', udpHandle));
         allWords = char(ones(wordsNum, 3*obj.WORD_LENGTH, 'uint8'));
-        % Send each word
+        % Read each word
         for wordIndex = 1:wordsNum
             timeOutMessage = sprintf('while waiting to receive word %d/%d of message ''%s''', wordIndex, wordsNum, expectedMessageLabel);
             packet.timedOutFlag = obj.waitForMessageOrTimeout(timeOutSecs, pauseSecs, timeOutMessage);
             datum = matlabNUDP('receive', udpHandle);
             allWords(wordIndex,1:numel(datum)) = datum;
-        end
-        % Concatenate all words into a single byte stream
-        theData = zeros(1,numBytes);
-        wordIndex = 0;
-        for k = 1:numBytes
-            if (mod(k-1, obj.WORD_LENGTH) == 0)
-                wordIndex = wordIndex + 1;
-                charIndex = 0;
-            end
-            theData(k) = str2double(allWords(wordIndex,charIndex*3+(1:3)));
-            charIndex = charIndex + 1;
         end
     end
 
@@ -95,6 +84,20 @@ function packet = waitForMessage(obj, msgLabel, varargin)
        return;
     end
 
+    % Concatenate all words into a single byte stream
+    if (strcmp((obj.transmissionMode), 'WORDS'))
+        theData = zeros(1,numBytes);
+        wordIndex = 0;
+        for k = 1:numBytes
+            if (mod(k-1, obj.WORD_LENGTH) == 0)
+                wordIndex = wordIndex + 1;
+                charIndex = 0;
+            end
+            theData(k) = str2double(allWords(wordIndex,charIndex*3+(1:3)));
+            charIndex = charIndex + 1;
+        end
+    end
+    
     % Reconstruct data object
     if (numBytes > 0)
         try
