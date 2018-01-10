@@ -3,40 +3,73 @@ function transmissionStatus = sendMessage(obj, msgLabel, msgData, varargin)
     p.addRequired('msgLabel',@ischar);
     p.addRequired('msgData');
     p.addOptional('timeOutSecs', 5, @isnumeric);
-    p.addOptional('timeOutAction', obj.NOTIFY_CALLER, @(x)((ischar(x)) && ismember(x, {obj.NOTIFY_CALLER, obj.THROW_ERROR}))); 
     parse(p,  msgLabel, msgData, varargin{:});
 
     messageLabel = p.Results.msgLabel;
     messageData  = p.Results.msgData;
     timeOutSecs  = p.Results.timeOutSecs;
-    timeOutAction = p.Results.timeOutAction;
     udpHandle    = obj.udpHandle;
+
+    % Serialize data
+    byteStream = getByteStreamFromArray(messageData);
+
+    if (strcmp((obj.transmissionMode), 'WORDS'))
+        [allWords, wordsNum, lastWordLength] = wordStreamFromByteStream(byteStream, obj.WORD_LENGTH);
+    end
     
     % Send the leading message label
     matlabNUDP('send', udpHandle, messageLabel);
     
-    % Serialize data
-    byteStream = getByteStreamFromArray(messageData);
-     
     % Send number of bytes to read
     matlabNUDP('send', udpHandle, sprintf('%d', numel(byteStream)));
-        
-    % Send each byte separately
-    for k = 1:numel(byteStream)
-       matlabNUDP('send', udpHandle, sprintf('%03d', byteStream(k)));
+    
+    if (strcmp((obj.transmissionMode), 'SINGLE_BYTES'))
+        % Send each byte separately
+        for k = 1:numel(byteStream)
+           matlabNUDP('send', udpHandle, sprintf('%03d', byteStream(k)));
+        end
+    else
+        % Send number of words
+        matlabNUDP('send', udpHandle, sprintf('%d', wordsNum));
+        % Send each word
+        for wordIndex = 1:wordsNum
+            if (wordIndex == wordsNum)
+                datum = squeeze(allWords(wordIndex,1:lastWordLength));
+            else
+                datum = squeeze(allWords(wordIndex,:));
+            end
+            matlabNUDP('send', udpHandle, datum);
+        end
     end
     
     % Send the trailing message label
     matlabNUDP('send', udpHandle, messageLabel);
-       
+
     % Wait for acknowledgment that the message was received OK
     pauseTimeSecs = 0;
-    timedOutFlag = obj.waitForMessageOrTimeout(timeOutSecs, pauseTimeSecs);
-    if (timedOutFlag)
-        executeTimeOut(obj, 'while waiting to receive acknowledgment for message sent', timeOutAction);
-        transmissionStatus = obj.NO_ACKNOWLDGMENT_WITHIN_TIMEOUT_PERIOD;
-    else
-        transmissionStatus = matlabNUDP('receive', udpHandle);
-    end
+    timeOutMessage = sprintf('while waiting to receive acknowledgment for messageLabel: ''%s''', messageLabel);
+    obj.waitForMessageOrTimeout(timeOutSecs, pauseTimeSecs, timeOutMessage);
+    transmissionStatus = matlabNUDP('receive', udpHandle);
 end
 
+
+function [allWords, wordsNum, lastWordLength] = wordStreamFromByteStream(byteStream, wordLength)
+    wordsNum = numel(byteStream)/wordLength;
+    if (wordsNum > floor(wordsNum))
+        wordsNum = 1+floor(wordsNum);
+    end
+    wordIndex = 0;
+    allWords = char(ones(wordsNum, 3*wordLength, 'uint8'));
+    lastWordLength = 0;
+    for k = 1:numel(byteStream)
+        if (mod(k-1, wordLength) == 0)
+            wordIndex = wordIndex + 1;
+            charIndex = 0;
+        end
+        allWords(wordIndex,charIndex*3+(1:3)) = sprintf('%03d', byteStream(k));
+        if (k == numel(byteStream))
+            lastWordLength = charIndex*3+3;
+        end
+        charIndex = charIndex + 1;
+    end
+end

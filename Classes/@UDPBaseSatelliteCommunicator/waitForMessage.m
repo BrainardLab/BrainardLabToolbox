@@ -1,36 +1,24 @@
 function packet = waitForMessage(obj, msgLabel, varargin)
-    
+
     p = inputParser;
     p.addRequired('msgLabel');
     p.addOptional('timeOutSecs', Inf,@isnumeric);
     p.addOptional('pauseTimeSecs', 0, @isnumeric);
-    p.addOptional('timeOutAction', obj.NOTIFY_CALLER, @(x)((ischar(x)) && ismember(x, {obj.NOTIFY_CALLER, obj.THROW_ERROR}))); 
-    p.addOptional('badTransmissionAction', obj.NOTIFY_CALLER, @(x)((ischar(x)) && ismember(x, {obj.NOTIFY_CALLER, obj.THROW_ERROR}))); 
-    p.addOptional('testFail', false, @islogical);
     parse(p,msgLabel,varargin{:});
-    
+
     pauseTimeSecs = p.Results.pauseTimeSecs;
     timeOutSecs = p.Results.timeOutSecs;
     expectedMessageLabel = p.Results.msgLabel;
-    timeOutAction = p.Results.timeOutAction;
-    badTransmissionAction = p.Results.badTransmissionAction;
-    testFail = p.Results.testFail;
-
-    
-    % Force this behavior always
-    badTransmissionAction = obj.NOTIFY_CALLER;
-    timeOutAction = obj.THROW_ERROR;
-    
     udpHandle = obj.udpHandle;
-        
+
     if isempty(expectedMessageLabel)
         expectedMessageLabel = '';
     end
-    
+
     if (~ischar(expectedMessageLabel))
         error('%s The expected message label must be a string, or an empty array, i.e.: []\n',obj.waitForMessageSignature);
     end
-    
+
     % initialize response struct
     packet = struct(...
         'messageLabel', '', ...                 % a string
@@ -40,57 +28,55 @@ function packet = waitForMessage(obj, msgLabel, varargin)
         'mismatchedMessageLabel', '' ...        % mistmatched label
     );
 
-    % Wait until we receive something or we timeout
-    packet.timedOutFlag = obj.waitForMessageOrTimeout(timeOutSecs, pauseTimeSecs);
-    if (packet.timedOutFlag)
-        obj.executeTimeOut(sprintf('while waiting for message ''%s'' to arrive', expectedMessageLabel), timeOutAction);
-        return;
-    end
-    
     % Read the leading packet label
+    timeOutMessage = sprintf('while waiting for message ''%s'' to arrive', expectedMessageLabel);
+    packet.timedOutFlag = obj.waitForMessageOrTimeout(timeOutSecs, pauseTimeSecs, timeOutMessage);
     packet.messageLabel = matlabNUDP('receive', udpHandle);
-        
+
     if (~strcmp(packet.messageLabel, expectedMessageLabel))
         messageToPrint = sprintf('Leading message label (''%s'') does not match expected message label (''%s'')', packet.messageLabel, expectedMessageLabel);
         packet = informSender_ReceivedMessageLabelNotMatchingExpected(obj, udpHandle, packet, expectedMessageLabel, messageToPrint);
         return;
     end
-    
+
     % Read the number of bytes
-    packet.timedOutFlag = obj.waitForMessageOrTimeout(timeOutSecs, pauseTimeSecs);
-    if (packet.timedOutFlag)
-        obj.executeTimeOut(sprintf('while waiting to receive number of bytes for message ''%s''', expectedMessageLabel), timeOutAction);
-        return;
-    end
+    timeOutMessage = sprintf('while waiting to receive number of bytes for message ''%s''', expectedMessageLabel);
+    packet.timedOutFlag = obj.waitForMessageOrTimeout(timeOutSecs, pauseTimeSecs, timeOutMessage);
     bytesString = matlabNUDP('receive', udpHandle);
     numBytes = str2double(bytesString);
-    
-    % Read all bytes
-    pauseSecs = 0;
-    theData = zeros(1,numBytes);
-    for k = 1:numBytes
-        packet.timedOutFlag = obj.waitForMessageOrTimeout(timeOutSecs, pauseSecs);
-        if (packet.timedOutFlag)
-            obj.executeTimeOut(sprintf('while waiting to receive byte %d/%d of message ''%s''', k, numBytes, expectedMessageLabel), timeOutAction);
-            return;
+
+    if (strcmp((obj.transmissionMode), 'SINGLE_BYTES'))
+        % Read  bytes
+        pauseSecs = 0;
+        theData = zeros(1,numBytes);
+        for k = 1:numBytes
+            timeOutMessage = sprintf('while waiting to receive byte %d/%d of message ''%s''', k, numBytes, expectedMessageLabel);
+            packet.timedOutFlag = obj.waitForMessageOrTimeout(timeOutSecs, pauseSecs, timeOutMessage);
+            datum = matlabNUDP('receive', udpHandle);
+            theData(k) = str2double(datum);
         end
-        datum = matlabNUDP('receive', udpHandle);
-        theData(k) = str2double(datum);
+    else
+        % Read words
+        pauseSecs = 0;
+        % Read number of words
+        timeOutMessage = sprintf('while waiting to receive number of words for message ''%s''', expectedMessageLabel);
+        packet.timedOutFlag = obj.waitForMessageOrTimeout(timeOutSecs, pauseSecs, timeOutMessage);
+        wordsNum = str2double(matlabNUDP('receive', udpHandle));
+        allWords = char(ones(wordsNum, 3*obj.WORD_LENGTH, 'uint8'));
+        % Read each word
+        for wordIndex = 1:wordsNum
+            timeOutMessage = sprintf('while waiting to receive word %d/%d of message ''%s''', wordIndex, wordsNum, expectedMessageLabel);
+            packet.timedOutFlag = obj.waitForMessageOrTimeout(timeOutSecs, pauseSecs, timeOutMessage);
+            datum = matlabNUDP('receive', udpHandle);
+            allWords(wordIndex,1:numel(datum)) = datum;
+        end
     end
-    
+
     % Read the message label again
-    packet.timedOutFlag = obj.waitForMessageOrTimeout(timeOutSecs, pauseSecs);
-    if (packet.timedOutFlag)
-        obj.executeTimeOut(sprintf('while waiting to verify the label of message ''%s''', expectedMessageLabel), timeOutAction);
-        return;
-    end
-    
+    timeOutMessage = sprintf('while waiting to verify the label of message ''%s''', expectedMessageLabel);
+    packet.timedOutFlag = obj.waitForMessageOrTimeout(timeOutSecs, pauseSecs, timeOutMessage);
     trailingMessageLabel = matlabNUDP('receive', udpHandle);
-    % test
-    if (strfind(trailingMessageLabel, 'SENDING_SMALL_STRUCT') & testFail)
-       trailingMessageLabel = 'SENDING_SMALL_S';
-    end
-    
+
     if (~strcmp(packet.messageLabel,trailingMessageLabel))
        % Now we definitely have a bad transmission so set this flag
        messageToPrint = sprintf('Trailing message label mismatch: expected ''%s'', received: ''%s''.\n', expectedMessageLabel, trailingMessageLabel);
@@ -98,13 +84,32 @@ function packet = waitForMessage(obj, msgLabel, varargin)
        return;
     end
 
+    % Concatenate all words into a single byte stream
+    if (strcmp((obj.transmissionMode), 'WORDS'))
+        theData = zeros(1,numBytes);
+        wordIndex = 0;
+        for k = 1:numBytes
+            if (mod(k-1, obj.WORD_LENGTH) == 0)
+                wordIndex = wordIndex + 1;
+                charIndex = 0;
+            end
+            theData(k) = str2double(allWords(wordIndex,charIndex*3+(1:3)));
+            charIndex = charIndex + 1;
+        end
+    end
+    
     % Reconstruct data object
     if (numBytes > 0)
-        packet.messageData = getArrayFromByteStream(uint8(theData));
+        try
+            packet.messageData = getArrayFromByteStream(uint8(theData));
+        catch err
+            fprintf(2,'Could not decode a matlab data type from the transmitted byte stream for message with label: ''%s''.', expectedMessageLabel);
+            rethrow(err);
+        end
     else
         packet.messageData = [];
     end
-  
+
     % Send acknowledgment if we reached this point
     matlabNUDP('send', udpHandle, obj.ACKNOWLEDGMENT);
 end
