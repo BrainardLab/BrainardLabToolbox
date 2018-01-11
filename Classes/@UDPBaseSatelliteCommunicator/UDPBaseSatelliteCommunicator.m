@@ -111,6 +111,7 @@ classdef UDPBaseSatelliteCommunicator < handle
     methods (Static)
         UDPobj = instantiateObject(hostNames, hostIPs, hostRoles, beVerbose, varargin);
         localHostName = getLocalHostName();
+        transmitAction = isATransmissionPacket(direction, hostName);
     end
 
     methods (Access = private)

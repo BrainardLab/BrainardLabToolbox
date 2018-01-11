@@ -53,7 +53,7 @@ function transmissionStatus = sendMessage(obj, msgLabel, msgData, varargin)
     pauseTimeSecs = 0;
     timeOutMessage = sprintf('while waiting to receive acknowledgment for messageLabel: ''%s''', messageLabel);
     obj.waitForMessageOrTimeout(timeOutSecs, pauseTimeSecs, timeOutMessage);
-    transmissionStatus = matlabNUDP('receive', udpHandle)
+    transmissionStatus = matlabNUDP('receive', udpHandle);
 end
 
 

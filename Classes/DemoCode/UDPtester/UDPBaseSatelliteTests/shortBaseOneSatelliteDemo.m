@@ -19,7 +19,7 @@ function shortBaseOneSatelliteDemo
     displayPackets = false;
 
     %% Use 10 second time out for all comms
-    timeOutSecs = 0.1;
+    timeOutSecs = 0.02;
     maxAttemptsNum = 3;
     
     %% Generate 50 data points for the spiral signal
@@ -60,24 +60,33 @@ function shortBaseOneSatelliteDemo
         visualizeDemoData('open');
     end
 
+    roundTipDelayMilliSecsTransmit = [];
+    roundTipDelayMilliSecsReceive = [];
     %% Execute communication protocol
     for packetNo = 1:numel(packetSequence)
         % Transmit packet
-        [theMessageReceived, theCommunicationStatus, roundTipDelayMilliSecs(packetNo)] = ...
+        
+        [theMessageReceived, theCommunicationStatus, roundTipDelayMilliSecs] = ...
             UDPobj.communicate(packetNo, packetSequence{packetNo}, ...
                 'maxAttemptsNum', maxAttemptsNum, ...
                 'beVerbose', beVerbose, ...
                 'displayPackets', displayPackets...
              );
 
+        if (UDPBaseSatelliteCommunicator.isATransmissionPacket(packetSequence{packetNo}.direction, obj.localHostName))
+            roundTipDelayMilliSecsTransmit(numel(roundTipDelayMilliSecsTransmit)+1) = roundTipDelayMilliSecs;
+        else
+            roundTipDelayMilliSecsReceive(numel(roundTipDelayMilliSecsReceive)+1) = roundTipDelayMilliSecs;
+        end
+        
          % Update demo
          if (recordVideo && iAmTheBase)
              visualizeDemoData('add');
          end
     end % packetNo
 
-    roundTipDelayMilliSecs
-    mean(roundTipDelayMilliSecs)
+    fprintf('MEAN and STD roundtrip for transmitting packages: %2.1f %2.1f msec\n', mean(roundTipDelayMilliSecsTransmit), std(roundTipDelayMilliSecsTransmit));
+    fprintf('MEAN and STD roundtrip for receiving packages: %2.1f %2.1f msec\n', mean(roundTipDelayMilliSecsReceive), std(roundTipDelayMilliSecsReceive));
     
     %% Finalize demo
     if (recordVideo && iAmTheBase)

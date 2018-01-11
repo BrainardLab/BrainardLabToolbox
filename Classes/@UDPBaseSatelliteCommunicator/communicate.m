@@ -34,7 +34,7 @@ function [messageReceived, status, roundTripDelayMilliSecs] = communicate(obj, p
 
     tic
 
-    if (isATransmissionPacket(communicationPacket.direction, obj.localHostName))
+    if (UDPBaseSatelliteCommunicator.isATransmissionPacket(communicationPacket.direction, obj.localHostName))
         % We are transmitting a packet
         if (beVerbose)
             fprintf('\n<strong>%s</strong> is sending packet %d via UDP channel %d and will expect ACK within %2.1f seconds.', ...
@@ -80,8 +80,8 @@ function [messageReceived, status, roundTripDelayMilliSecs] = communicate(obj, p
                 fprintf('\n<strong>Succesfully transmitted message on attempt %d.</strong>\n', attemptNo);
             end
         end
-        roundTripDelayMilliSecsForMessageTransmit = toc * 1000
-        roundTripDelayMilliSecs = roundTripDelayMilliSecsForMessageTransmit;
+        roundTripDelayMilliSecs = toc * 1000;
+        
     else
         % We are receiving a packet
         if (beVerbose)
@@ -134,8 +134,7 @@ function [messageReceived, status, roundTripDelayMilliSecs] = communicate(obj, p
             messageReceived = struct();
             messageReceived.label = receivedPacket.messageLabel;
             messageReceived.data  = receivedPacket.messageData;
-            roundTripDelayMilliSecsForMessageReceive = toc * 1000
-            roundTripDelayMilliSecs = roundTripDelayMilliSecsForMessageReceive;
+            roundTripDelayMilliSecs = toc * 1000;
         else
             error('Communicate() bailed out: failure to receive a valid message after %d attempts.\n', maxAttemptsNum);
         end
@@ -144,21 +143,3 @@ function [messageReceived, status, roundTripDelayMilliSecs] = communicate(obj, p
     
 end
 
-function transmitAction = isATransmissionPacket(direction, hostName)
-    transmitAction = false;
-    hostEntry = strfind(direction, hostName);
-    rightwardArrowEntry = strfind(direction, '->');
-    leftwardArrowEntry = strfind(direction, '<-');
-    if (~isempty(rightwardArrowEntry))
-        if (hostEntry < rightwardArrowEntry)
-            transmitAction = true;
-        end
-    else
-        if (isempty(leftwardArrowEntry))
-            error('direction field does not contain correct direction information: ''%s''.\n', direction);
-        end
-        if (hostEntry > leftwardArrowEntry)
-            transmitAction = true;
-        end
-    end
-end
