@@ -54,7 +54,11 @@ function [messageReceived, status, roundTipDelayMilliSecs] = communicate(obj, pa
                     noACK = false;
                 case obj.NO_ACKNOWLDGMENT_WITHIN_TIMEOUT_PERIOD
                     obj.displayMessage(sprintf('received status ''%s'' from remote host', status), communicationPacket.messageLabel, communicationPacket.messageData, packetNo, 'alert', true);
-                    error('Communicate() bailing out: Time out waiting for acknowledgment.\n');
+                    attemptNo = attemptNo + 1;
+                    fprintf('\n<strong>Attempting to send the same message (attempt #%d)</strong>\n', attemptNo);
+                    status = obj.sendMessage(communicationPacket.messageLabel, communicationPacket.messageData, ...
+                            'timeOutSecs', communicationPacket.timeOutSecs ...
+                    );
                 case { obj.UNEXPECTED_MESSAGE_LABEL_RECEIVED, obj.BAD_TRANSMISSION}
                     obj.displayMessage(sprintf('received status ''%s'' from remote host', status), communicationPacket.messageLabel, communicationPacket.messageData, packetNo, 'alert', true);
                     attemptNo = attemptNo + 1;
@@ -87,11 +91,11 @@ function [messageReceived, status, roundTipDelayMilliSecs] = communicate(obj, pa
         % Compute status of operation
         status = 'to be determined';
         while (attemptNo < maxAttemptsNum) && ~(strcmp(status, obj.GOOD_TRANSMISSION))
+            
             status = obj.GOOD_TRANSMISSION;
             if (receivedPacket.timedOutFlag)
                 status = obj.NO_ACKNOWLDGMENT_WITHIN_TIMEOUT_PERIOD;
                 obj.displayMessage(sprintf('received message operation timed out'), receivedPacket.messageLabel, receivedPacket.messageData, packetNo, 'alert', true);
-                error('Communicate() bailing out: Time out waiting for a message to be received.\n');
             end
 
             if (receivedPacket.badTransmissionFlag)

@@ -1,5 +1,5 @@
 % Method that waits for a message to be received for a timeOutSecs period.
-% If a message is not received, we throw an exception.
+% If a message is not received, we print the associated timeOutMessage.
 function timedOutFlag = waitForMessageOrTimeout(obj, timeOutSecs, pauseTimeSecs, timeOutMessage)
     tic;
     timedOutFlag = false;
@@ -10,16 +10,15 @@ function timedOutFlag = waitForMessageOrTimeout(obj, timeOutSecs, pauseTimeSecs,
         elapsedTime = toc;
         if (elapsedTime > timeOutSecs)
             timedOutFlag = true;
-            executeTimeOut(timeOutMessage);
+            printTimeOutMessage(timeOutMessage);
         end
     end
 end
 
-function executeTimeOut( timeOutMessage)
+function printTimeOutMessage( timeOutMessage)
     fprintf(2,'\n\n-----------------------------------------------------------------------------\n');
     fprintf(2,'<strong>Timed out: %s</strong>.', timeOutMessage);
     fprintf(2,'\n-----------------------------------------------------------------------------\n\n');
-    error('Communication failure');
 end
 
 function [status, nDots] = lazyCheck(obj, nDots, pauseTimeSecs)
