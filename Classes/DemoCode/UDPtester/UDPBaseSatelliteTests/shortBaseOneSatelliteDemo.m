@@ -73,7 +73,7 @@ function shortBaseOneSatelliteDemo
                 'displayPackets', displayPackets...
              );
 
-        if (UDPBaseSatelliteCommunicator.isATransmissionPacket(packetSequence{packetNo}.direction, obj.localHostName))
+        if (UDPobj.isATransmissionPacket(packetSequence{packetNo}.direction, UDPobj.localHostName))
             roundTipDelayMilliSecsTransmit(numel(roundTipDelayMilliSecsTransmit)+1) = roundTipDelayMilliSecs;
         else
             roundTipDelayMilliSecsReceive(numel(roundTipDelayMilliSecsReceive)+1) = roundTipDelayMilliSecs;

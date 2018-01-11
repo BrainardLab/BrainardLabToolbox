@@ -34,7 +34,7 @@ function [messageReceived, status, roundTripDelayMilliSecs] = communicate(obj, p
 
     tic
 
-    if (UDPBaseSatelliteCommunicator.isATransmissionPacket(communicationPacket.direction, obj.localHostName))
+    if (obj.isATransmissionPacket(communicationPacket.direction, obj.localHostName))
         % We are transmitting a packet
         if (beVerbose)
             fprintf('\n<strong>%s</strong> is sending packet %d via UDP channel %d and will expect ACK within %2.1f seconds.', ...
