@@ -19,7 +19,7 @@ function shortBaseOneSatelliteDemo
     displayPackets = false;
 
     %% Use 10 second time out for all comms
-    timeOutSecs = 30;
+    timeOutSecs = 1;
 
     %% Generate 50 data points for the spiral signal
     coeffPoints = 100;
