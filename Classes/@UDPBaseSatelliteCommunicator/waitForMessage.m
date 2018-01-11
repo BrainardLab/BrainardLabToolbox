@@ -114,8 +114,10 @@ function packet = waitForMessage(obj, msgLabel, varargin)
         try
             packet.messageData = getArrayFromByteStream(uint8(theData));
         catch err
-            fprintf(2,'Could not decode a matlab data type from the transmitted byte stream for message with label: ''%s''.', expectedMessageLabel);
-            rethrow(err);
+            % Inform sender
+            messageToPrint = sprintf('Could not decode a matlab data type from the transmitted byte stream (error: %s) for message with label: ''%s''.\n', err.message,expectedMessageLabel);
+            packet = informSender_BadTransmission(obj, udpHandle, packet, expectedMessageLabel, messageToPrint);
+            return;
         end
     else
         packet.messageData = [];
