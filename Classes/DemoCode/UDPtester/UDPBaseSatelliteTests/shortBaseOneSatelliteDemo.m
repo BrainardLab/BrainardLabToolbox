@@ -15,12 +15,12 @@ function shortBaseOneSatelliteDemo
     hostRoles = {'base',          'satellite' };
 
     %% Control what is printed on the command window
-    beVerbose = true;
+    beVerbose = false;
     displayPackets = false;
 
     %% Use 10 second time out for all comms
-    timeOutSecs = 0.2;
-    maxAttemptsNum = 10;
+    timeOutSecs = 0.1;
+    maxAttemptsNum = 3;
     
     %% Generate 50 data points for the spiral signal
     coeffPoints = 100;
@@ -63,7 +63,7 @@ function shortBaseOneSatelliteDemo
     %% Execute communication protocol
     for packetNo = 1:numel(packetSequence)
         % Transmit packet
-        [theMessageReceived, theCommunicationStatus, roundTipDelayMilliSecs] = ...
+        [theMessageReceived, theCommunicationStatus, roundTipDelayMilliSecs(packetNo)] = ...
             UDPobj.communicate(packetNo, packetSequence{packetNo}, ...
                 'maxAttemptsNum', maxAttemptsNum, ...
                 'beVerbose', beVerbose, ...
@@ -76,6 +76,9 @@ function shortBaseOneSatelliteDemo
          end
     end % packetNo
 
+    roundTipDelayMilliSecs
+    mean(roundTipDelayMilliSecs)
+    
     %% Finalize demo
     if (recordVideo && iAmTheBase)
         visualizeDemoData('close');
