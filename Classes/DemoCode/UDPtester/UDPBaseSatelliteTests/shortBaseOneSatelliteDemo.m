@@ -15,7 +15,7 @@ function shortBaseOneSatelliteDemo
     hostRoles = {'base',          'satellite' };
 
     %% Control what is printed on the command window
-    beVerbose = false;
+    beVerbose = true;
     displayPackets = false;
 
     %% Use 10 second time out for all comms

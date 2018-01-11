@@ -79,6 +79,7 @@ function [messageReceived, status, roundTripDelayMilliSecs] = communicate(obj, p
             end
         end
         roundTripDelayMilliSecsForMessageTransmit = toc * 1000
+        roundTripDelayMilliSecs = roundTripDelayMilliSecsForMessageTransmit;
     else
         % We are receiving a packet
         if (beVerbose)
@@ -123,7 +124,8 @@ function [messageReceived, status, roundTripDelayMilliSecs] = communicate(obj, p
         if (strcmp(status, obj.GOOD_TRANSMISSION))
             if (attemptNo>1)
                 fprintf('\n<strong>Succesfully received message on attempt %d.</strong>\n', attemptNo);
-                roundTripDelayMilliSecsForMessageReceive = toc * 1000;
+                roundTripDelayMilliSecsForMessageReceive = toc * 1000
+                roundTripDelayMilliSecs = roundTripDelayMilliSecsForMessageReceive
             end
             if (beVerbose)
                 obj.displayMessage('received expected message', receivedPacket.messageLabel, receivedPacket.messageData, packetNo);
