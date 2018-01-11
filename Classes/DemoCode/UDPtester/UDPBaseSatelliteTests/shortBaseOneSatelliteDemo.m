@@ -19,7 +19,7 @@ function shortBaseOneSatelliteDemo
     displayPackets = false;
 
     %% Use 10 second time out for all comms
-    timeOutSecs = 0.4;
+    timeOutSecs = 0.2;
     maxAttemptsNum = 10;
     
     %% Generate 50 data points for the spiral signal
@@ -34,7 +34,6 @@ function shortBaseOneSatelliteDemo
     %% Who the heck are we?
     iAmTheBase = contains(UDPobj.localHostName, baseHostName);
     iAmSatellite1 = contains(UDPobj.localHostName, satellite1HostName);
-
 
      %% Make packetSequences for the base
     if (iAmTheBase)

@@ -9,7 +9,7 @@
 % period, the waitMessage() method informs the sender and we keep waiting
 % to obtain a new message up to the maxAttemptsNum.
 
-function [messageReceived, status, roundTipDelayMilliSecs] = communicate(obj, packetNo, communicationPacket, varargin)
+function [messageReceived, status, roundTripDelayMilliSecs] = communicate(obj, packetNo, communicationPacket, varargin)
     % Parse optinal input parameters.
     p = inputParser;
     p.addParameter('beVerbose', false, @islogical);
@@ -55,17 +55,19 @@ function [messageReceived, status, roundTipDelayMilliSecs] = communicate(obj, pa
                 case obj.NO_ACKNOWLDGMENT_WITHIN_TIMEOUT_PERIOD
                     obj.displayMessage(sprintf('received status ''%s'' from remote host', status), communicationPacket.messageLabel, communicationPacket.messageData, packetNo, 'alert', true);
                     attemptNo = attemptNo + 1;
-                    fprintf('\n<strong>Attempting to send the same message (attempt #%d)</strong>\n', attemptNo);
+                    fprintf('\n<strong>Attempting to send message ''%s'' again (attempt #%d)</strong>\n', communicationPacket.messageLabel, attemptNo);
                     status = obj.sendMessage(communicationPacket.messageLabel, communicationPacket.messageData, ...
                             'timeOutSecs', communicationPacket.timeOutSecs ...
                     );
                 case { obj.UNEXPECTED_MESSAGE_LABEL_RECEIVED, obj.BAD_TRANSMISSION}
                     obj.displayMessage(sprintf('received status ''%s'' from remote host', status), communicationPacket.messageLabel, communicationPacket.messageData, packetNo, 'alert', true);
                     attemptNo = attemptNo + 1;
-                    fprintf('\n<strong>Attempting to send the same message (attempt #%d)</strong>\n', attemptNo);
+                    fprintf('\n<strong>Attempting to send the  message ''%s'' again (attempt #%d)</strong>\n', communicationPacket.messageLabel, attemptNo);
                     status = obj.sendMessage(communicationPacket.messageLabel, communicationPacket.messageData, ...
                             'timeOutSecs', communicationPacket.timeOutSecs ...
                     );
+                otherwise
+                    error('Unknown status: ''%s''.', status);
             end % switch
         end % while
 
@@ -111,7 +113,7 @@ function [messageReceived, status, roundTipDelayMilliSecs] = communicate(obj, pa
             end
             
             attemptNo = attemptNo + 1;
-            fprintf('\n<strong>Waiting to receive a resubmission (attempt #%d)</strong>\n', attemptNo);
+            fprintf('\n<strong>Waiting to receive a resubmission for message label: ''%s'' (attempt #%d)</strong>\n', communicationPacket.messageLabel, attemptNo);
             receivedPacket = obj.waitForMessage(communicationPacket.messageLabel, ...
                 'timeOutSecs', communicationPacket.timeOutSecs ...
             );
@@ -132,7 +134,7 @@ function [messageReceived, status, roundTipDelayMilliSecs] = communicate(obj, pa
         end
     end
 
-    roundTipDelayMilliSecs = toc * 1000
+    roundTripDelayMilliSecs = toc * 1000
 end
 
 function transmitAction = isATransmissionPacket(direction, hostName)
