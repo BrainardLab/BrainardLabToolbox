@@ -1,5 +1,9 @@
 classdef UDPBaseSatelliteCommunicator < handle
 % Class for BASE <-> Multi-Satellite UDP-based communication.
+% For usage, see shortBaseMultiSatelliteDemo and shortBaseOneSatelliteDemo
+% located in:
+% BrainardLabToolbox/Classes/DemoCode/UDPtester/UDPBaseSatelliteTests
+%
 % 10/20/2017   NPC   Wrote it
 %
 
@@ -74,7 +78,6 @@ classdef UDPBaseSatelliteCommunicator < handle
             obj.transmissionMode = p.Results.transmissionMode;
             obj.localHostName = obj.getLocalHostName();
             obj.flushDelay = 0.1;
-            
             
             if strcmp(obj.verbosity,'max')
                 fprintf('%s Initialized.\n', obj.selfSignature);

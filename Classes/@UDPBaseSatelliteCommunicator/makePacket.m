@@ -1,3 +1,7 @@
+% Method to compose a transmission packet based on the desired direction
+% (base-to-sattelite or sattelite-to-base) with a given message label,
+% message data, and a timeout delay. The attemptsNo param is currently not
+% used - the attempts number is controlled by communicate() method.
 function packet = makePacket(obj, satelliteName, direction, message, varargin)
     % Parse optinal input parameters.
     p = inputParser;
@@ -19,7 +23,7 @@ function packet = makePacket(obj, satelliteName, direction, message, varargin)
         'direction', direction, ...
         'messageLabel', message, ...
         'messageData', data, ...
-        'attemptsNo', p.Results.attemptsNo, ...                         % How many times to re-transmit if we did not get an ACK within the receiveTimeOut
-        'timeOutSecs', p.Results.timeOutSecs ...                       % Timeout for receiving an ACK in response to transmission or for waiting for a message to be received
+        'attemptsNo', p.Results.attemptsNo, ... 
+        'timeOutSecs', p.Results.timeOutSecs ... 
     );
 end
