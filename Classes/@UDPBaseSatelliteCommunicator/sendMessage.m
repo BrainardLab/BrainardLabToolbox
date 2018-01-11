@@ -52,8 +52,12 @@ function transmissionStatus = sendMessage(obj, msgLabel, msgData, varargin)
     % Wait for acknowledgment that the message was received OK
     pauseTimeSecs = 0;
     timeOutMessage = sprintf('while waiting to receive acknowledgment for messageLabel: ''%s''', messageLabel);
-    obj.waitForMessageOrTimeout(timeOutSecs, pauseTimeSecs, timeOutMessage);
-    transmissionStatus = matlabNUDP('receive', udpHandle);
+    timedOutFlag = obj.waitForMessageOrTimeout(timeOutSecs, pauseTimeSecs, timeOutMessage);
+    if (~timedOutFlag)
+        transmissionStatus = matlabNUDP('receive', udpHandle);
+    else 
+        transmissionStatus = obj.NO_ACKNOWLDGMENT_WITHIN_TIMEOUT_PERIOD;
+    end
 end
 
 
