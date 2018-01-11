@@ -13,18 +13,16 @@ function transmissionStatus = sendMessage(obj, msgLabel, msgData, varargin)
     messageData  = p.Results.msgData;
     timeOutSecs  = p.Results.timeOutSecs;
     udpHandle    = obj.udpHandle;
-
-    % Send the leading message label
-    matlabNUDP('send', udpHandle, messageLabel);
     
-    tic
     % Serialize data
     byteStream = getByteStreamFromArray(messageData);
 
     if (strcmp((obj.transmissionMode), 'WORDS'))
         [allWords, wordsNum, lastWordLength] = wordStreamFromByteStream(byteStream, obj.WORD_LENGTH);
     end
-    toc
+    
+    % Send the leading message label
+    matlabNUDP('send', udpHandle, messageLabel);
     
     % Send number of bytes to read
     matlabNUDP('send', udpHandle, sprintf('%d', numel(byteStream)));

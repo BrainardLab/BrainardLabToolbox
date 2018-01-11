@@ -94,8 +94,8 @@ function [messageReceived, status, roundTipDelayMilliSecs] = communicate(obj, pa
             
             status = obj.GOOD_TRANSMISSION;
             if (receivedPacket.timedOutFlag)
-                status = obj.NO_ACKNOWLDGMENT_WITHIN_TIMEOUT_PERIOD;
-                obj.displayMessage(sprintf('received message operation timed out'), receivedPacket.messageLabel, receivedPacket.messageData, packetNo, 'alert', true);
+                status = obj.MESSAGE_FAILED_TO_ARRIVE_WITHIN_TIMEOUT_PERIOD;
+                obj.displayMessage(sprintf('received no message within the timeout period'), communicationPacket.messageLabel, [], packetNo, 'alert', true);
             end
 
             if (receivedPacket.badTransmissionFlag)
