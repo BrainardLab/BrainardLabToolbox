@@ -20,7 +20,7 @@ function shortBaseMultiSatelliteDemo
     displayPackets = false;
     
     %% Use 10 second time out for all comms
-    timeOutSecs = 0.5;
+    timeOutSecs = 1;
     
     %% Generate 50 data points for the spiral signal
     coeffPoints = 100;
@@ -40,7 +40,7 @@ function shortBaseMultiSatelliteDemo
      %% Make packetSequences for the base
     if (iAmTheBase)
         packetSequence = designPacketSequenceForBase(UDPobj, ...
-            {satellite1HostName, satellite2HostName, satellite3HostName},...
+            {satellite1HostName, satellite2HostName},...
             timeOutSecs, coeffPoints);    
     end
     
