@@ -19,8 +19,9 @@ function shortBaseOneSatelliteDemo
     displayPackets = false;
 
     %% Use 10 second time out for all comms
-    timeOutSecs = 1;
-
+    timeOutSecs = 0.4;
+    maxAttemptsNum = 10;
+    
     %% Generate 50 data points for the spiral signal
     coeffPoints = 100;
 
@@ -65,7 +66,7 @@ function shortBaseOneSatelliteDemo
         % Transmit packet
         [theMessageReceived, theCommunicationStatus, roundTipDelayMilliSecs] = ...
             UDPobj.communicate(packetNo, packetSequence{packetNo}, ...
-                'maxAttemptsNum', 3, ...
+                'maxAttemptsNum', maxAttemptsNum, ...
                 'beVerbose', beVerbose, ...
                 'displayPackets', displayPackets...
              );
