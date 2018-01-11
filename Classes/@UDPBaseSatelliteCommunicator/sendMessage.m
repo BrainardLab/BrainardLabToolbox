@@ -1,3 +1,7 @@
+% Method that sends a message either as single bytes or as words. At the end of the transmission
+% we wait up to timeOutSecs to receive an acknowledgment. If we do not, the
+% waitForMessageOrTimeout() method throws an exception.
+
 function transmissionStatus = sendMessage(obj, msgLabel, msgData, varargin)
     p = inputParser;
     p.addRequired('msgLabel',@ischar);

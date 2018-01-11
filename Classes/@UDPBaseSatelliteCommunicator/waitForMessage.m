@@ -1,3 +1,7 @@
+% Method that waits for an expected message until the timeOut runs out.
+% If the message label does not match the expected message label, of if there is
+% something wrong with the transmitted data, we inform the sender and we return.
+% If all is OK, we send an acknowldegment to the sender.
 function packet = waitForMessage(obj, msgLabel, varargin)
 
     p = inputParser;

@@ -1,7 +1,15 @@
-function [messageReceived, status, roundTipDelayMilliSecs] = communicate(obj, packetNo, communicationPacket, varargin)
-    % Set default state of return arguments
-    messageReceived = [];
+% Method to perform a single communication action as determined by the
+% communicationPacket. If the packet defines a read message, the received
+% message is returned, otherwise we return an empty array. The status of the 
+% operation and the round trip delay are also returned.
+% If we are transmitting, we are expecting an acknowledgment. If this is
+% not received, or if we get a bad transmission flag, we transmit again up
+% to the maxAttemptsNum passed (default is 1 attempt). If we are
+% receiveing, and we do not receive the expected packet within the timeOut
+% period, the waitMessage() method informs the sender and we keep waiting
+% to obtain a new message up to the maxAttemptsNum.
 
+function [messageReceived, status, roundTipDelayMilliSecs] = communicate(obj, packetNo, communicationPacket, varargin)
     % Parse optinal input parameters.
     p = inputParser;
     p.addParameter('beVerbose', false, @islogical);
@@ -19,9 +27,13 @@ function [messageReceived, status, roundTipDelayMilliSecs] = communicate(obj, pa
     % Set the current updHandle
     obj.udpHandle = communicationPacket.udpChannel;
 
+    % Set default state of return arguments
+    messageReceived = [];
+
     tic
 
     if (isATransmissionPacket(communicationPacket.direction, obj.localHostName))
+        % We are transmitting a packet
         if (beVerbose)
             fprintf('\n<strong>%s</strong> is sending packet %d via UDP channel %d and will expect ACK within %2.1f seconds.', ...
                 obj.localHostName, packetNo, communicationPacket.udpChannel, communicationPacket.timeOutSecs);
@@ -61,6 +73,7 @@ function [messageReceived, status, roundTipDelayMilliSecs] = communicate(obj, pa
             end
         end
     else
+        % We are receiving a packet
         if (beVerbose)
             fprintf('\n<strong>%s</strong> is waiting to receive packet %d via UDP channel %d and will timeout after %2.1f seconds.', ...
                 obj.localHostName, packetNo, communicationPacket.udpChannel, communicationPacket.timeOutSecs);

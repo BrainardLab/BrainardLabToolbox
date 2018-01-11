@@ -1,3 +1,7 @@
+% Method for setting up a UDPobject between 
+% the local host computer and its sattelite (if local computer is base) 
+% or between the local host computer and its base (if local computer is sattelite)
+
 function UDPobj = instantiateObject(hostNames, hostIPs, hostRoles, beVerbose, varargin)
     % Parse optinal input parameters.
     p = inputParser;
@@ -19,7 +23,7 @@ function UDPobj = instantiateObject(hostNames, hostIPs, hostRoles, beVerbose, va
         
     % Establish the localIP
     localHostName = UDPBaseSatelliteCommunicator.getLocalHostName();
-    index = find(strcmp(lower(hostNames), localHostName));
+    index = find(strcmpi(hostNames, localHostName));
     if (isempty(index))
         for k = 1:numel(hostNames)
             fprintf(2,'\nlocal host name: ''%s'' not found in hostname: ''%s''', localHostName, hostNames{k});
@@ -28,14 +32,14 @@ function UDPobj = instantiateObject(hostNames, hostIPs, hostRoles, beVerbose, va
     end
     localIP = hostIPs{index};
     
-    % Assemble baseInfo
-    baseIndex = find(strcmp(lower(hostRoles), 'base'));
+    % Collect baseInfo
+    baseIndex = find(strcmpi(hostRoles, 'base'));
     baseInfo.baseHostName = lower(hostNames{baseIndex(1)});
     baseInfo.baseIP = hostIPs{baseIndex(1)};
     
-    % Assemble satelliteInfo
+    % Collect satelliteInfo
     satelliteInfo = containers.Map();
-    satelliteIndices = find(strcmp(lower(hostRoles), 'satellite'));
+    satelliteIndices = find(strcmpi(hostRoles, 'satellite'));
     for k = 1:numel(satelliteIndices)
         d.satelliteChannelID = k-1;
         d.portNo = commPorts{satelliteIndices(k)};
@@ -44,11 +48,12 @@ function UDPobj = instantiateObject(hostNames, hostIPs, hostRoles, beVerbose, va
         satelliteInfo(satelliteName) = d;
     end
         
+    % Instantiate a UDPBaseSatelliteCommunicator using the collected information
     UDPobj = UDPBaseSatelliteCommunicator( ...
-            localIP, ...                                % REQUIRED: the local host IP
-            baseInfo, ...                               % REQUIRED: the base info
-            satelliteInfo, ...                          % REQUIRED: the satellite info
-            'verbosity', verbosity, ...                  % REQUIRED, with default value: 'normal', and possible values: {'min', 'normal', 'max'},
-            'transmissionMode', p.Results.transmissionMode ...   % OPTIONAL: choose between 'SINGLE_BYTES' (default) and 'WORDS'
+        localIP, ...                                        % REQUIRED: the local host IP
+        baseInfo, ...                                       % REQUIRED: the base info
+        satelliteInfo, ...                                  % REQUIRED: the satellite info
+        'verbosity', verbosity, ...                         % REQUIRED, with default value: 'normal', and possible values: {'min', 'normal', 'max'},
+        'transmissionMode', p.Results.transmissionMode ...  % OPTIONAL: choose between 'SINGLE_BYTES' (default) and 'WORDS'
     );
 end

@@ -1,3 +1,6 @@
+% Method to open UDP communication channels between base and sattelites.
+% Once UDP channels are open, we instruct the base to send the triggerMessage to all
+% the sattelites, and we wait for all sattelites to respond with an allSatellitesAreAGOMessage
 function initiateCommunication(obj, hostRoles, hostNames, triggerMessage, allSatellitesAreAGOMessage, varargin)
 
     p = inputParser;
@@ -79,9 +82,7 @@ function initiateCommunication(obj, hostRoles, hostNames, triggerMessage, allSat
             % Set the current udpHandle
             obj.udpHandle = obj.satelliteInfo(satelliteName).satelliteChannelID; 
             % Send trigger and wait for up to 4 seconds to receive acknowledgment
-            transmissionStatus = obj.sendMessage(triggerMessage, '', ...
-                'timeOutSecs',  5 ...
-                );
+            obj.sendMessage(triggerMessage, '', 'timeOutSecs',  5);
         end % for k
         
         for k = 1:numel(iSatelliteNames)
@@ -90,25 +91,21 @@ function initiateCommunication(obj, hostRoles, hostNames, triggerMessage, allSat
             % Set the current udpHandle
             obj.udpHandle = obj.satelliteInfo(satelliteName).satelliteChannelID; 
             % Send trigger and wait for up to 4 seconds to receive acknowledgment
-            transmissionStatus = obj.sendMessage(allSatellitesAreAGOMessage, '', ...
-                'timeOutSecs',  5 ...
-                );
+            obj.sendMessage(allSatellitesAreAGOMessage, '', 'timeOutSecs',  5);
         end % for k
         
     else
         % Set the current udpHandle
         obj.udpHandle = obj.satelliteInfo(obj.localHostName).satelliteChannelID; 
         % Wait for ever to receive the trigger message from the base
-        packetReceived = obj.waitForMessage(triggerMessage, ...
+        obj.waitForMessage(triggerMessage, ...
                 'timeOutSecs', Inf, ...
                 'pauseTimeSecs', 0.05 ...
-                );      
+        );      
             
         fprintf('Received the trigger message, will wait 5 seconds for the BASE to transmit that all satellites are a GO !\n');
         % Wait for 5 seconds to receive the allSatellitesAreAGOMessage message from the base
-        packetReceived = obj.waitForMessage(allSatellitesAreAGOMessage, ...
-                'timeOutSecs', 5 ...
-                ); 
+        obj.waitForMessage(allSatellitesAreAGOMessage, 'timeOutSecs', 5); 
     end
 end
 
