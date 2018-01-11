@@ -20,6 +20,8 @@ function [messageReceived, status, roundTripDelayMilliSecs] = communicate(obj, p
     displayPackets = p.Results.displayPackets;
     maxAttemptsNum = p.Results.maxAttemptsNum;
 
+    maxSecondsToWaitForReceivingAnExpectedMessage = 10;
+    
     if (displayPackets)
         communicationPacket
     end
@@ -89,7 +91,7 @@ function [messageReceived, status, roundTripDelayMilliSecs] = communicate(obj, p
 
         attemptNo = 1;
         receivedPacket = obj.waitForMessage(communicationPacket.messageLabel, ...
-            'timeOutSecs', communicationPacket.timeOutSecs ...
+            'timeOutSecs', maxSecondsToWaitForReceivingAnExpectedMessage ...
         );
 
         % Compute status of operation
@@ -98,8 +100,9 @@ function [messageReceived, status, roundTripDelayMilliSecs] = communicate(obj, p
             
             status = obj.GOOD_TRANSMISSION;
             if (receivedPacket.timedOutFlag)
-                status = obj.MESSAGE_FAILED_TO_ARRIVE_WITHIN_TIMEOUT_PERIOD;
-                obj.displayMessage(sprintf('received no message within the timeout period'), communicationPacket.messageLabel, [], packetNo, 'alert', true);
+                status = obj.MESSAGE_FAILED_TO_ARRIVE_WITHIN_MAX_WAIT_PERIOD;
+                obj.displayMessage(sprintf('received no message within the max wait period'), communicationPacket.messageLabel, [], packetNo, 'alert', true);
+                error('received no message within the max wait period')
             end
 
             if (receivedPacket.badTransmissionFlag)
@@ -117,7 +120,7 @@ function [messageReceived, status, roundTripDelayMilliSecs] = communicate(obj, p
             attemptNo = attemptNo + 1;
             fprintf('\n<strong>Waiting to receive a resubmission for message label: ''%s'' (attempt #%d)</strong>\n', communicationPacket.messageLabel, attemptNo);
             receivedPacket = obj.waitForMessage(communicationPacket.messageLabel, ...
-                'timeOutSecs', communicationPacket.timeOutSecs ...
+                'timeOutSecs', maxSecondsToWaitForReceivingAnExpectedMessage ...
             );
         end % while
 
