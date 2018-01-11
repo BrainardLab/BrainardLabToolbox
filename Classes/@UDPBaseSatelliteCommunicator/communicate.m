@@ -132,7 +132,7 @@ function [messageReceived, status, roundTipDelayMilliSecs] = communicate(obj, pa
         end
     end
 
-    roundTipDelayMilliSecs = toc * 1000;
+    roundTipDelayMilliSecs = toc * 1000
 end
 
 function transmitAction = isATransmissionPacket(direction, hostName)

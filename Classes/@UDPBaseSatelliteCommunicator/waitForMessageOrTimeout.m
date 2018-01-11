@@ -1,7 +1,7 @@
 % Method that waits for a message to be received for a timeOutSecs period.
 % If a message is not received, we print the associated timeOutMessage.
 function timedOutFlag = waitForMessageOrTimeout(obj, timeOutSecs, pauseTimeSecs, timeOutMessage)
-    tic;
+    tic
     timedOutFlag = false;
     noInputs = true;
     nDots = -1;
