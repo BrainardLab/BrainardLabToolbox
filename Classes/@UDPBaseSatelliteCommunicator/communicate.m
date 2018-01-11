@@ -123,9 +123,7 @@ function [messageReceived, status, roundTripDelayMilliSecs] = communicate(obj, p
 
         if (strcmp(status, obj.GOOD_TRANSMISSION))
             if (attemptNo>1)
-                fprintf('\n<strong>Succesfully received message on attempt %d.</strong>\n', attemptNo);
-                roundTripDelayMilliSecsForMessageReceive = toc * 1000
-                roundTripDelayMilliSecs = roundTripDelayMilliSecsForMessageReceive
+                fprintf('\n<strong>Succesfully received message on attempt %d.</strong>\n', attemptNo); 
             end
             if (beVerbose)
                 obj.displayMessage('received expected message', receivedPacket.messageLabel, receivedPacket.messageData, packetNo);
@@ -133,6 +131,8 @@ function [messageReceived, status, roundTripDelayMilliSecs] = communicate(obj, p
             messageReceived = struct();
             messageReceived.label = receivedPacket.messageLabel;
             messageReceived.data  = receivedPacket.messageData;
+            roundTripDelayMilliSecsForMessageReceive = toc * 1000
+            roundTripDelayMilliSecs = roundTripDelayMilliSecsForMessageReceive
         else
             error('Communicate() bailed out: failure to receive a valid message after %d attempts.\n', maxAttemptsNum);
         end
