@@ -6,21 +6,21 @@ function shortBaseMultiSatelliteDemo
     fprintf('\n\n');
     
     %% Define a 1 base/3-satellite scheme
-    baseHostName = 'manta';
-    satellite1HostName = 'ionean';
-    satellite2HostName = 'gka06';
-    satellite3HostName = 'monkfish';
+    baseHostName = 'gka06';
+    satellite1HostName = 'monkfish';
+    satellite2HostName = 'gka33';
+   
 
-    hostNames = {baseHostName,    satellite1HostName,  satellite2HostName,  satellite3HostName};
-    hostIPs   = {'128.91.12.90',  '128.91.12.144',     '128.91.12.160',     '128.91.12.161'};
-    hostRoles = {'base',          'satellite',         'satellite',         'satellite'};
+    hostNames = {baseHostName,    satellite1HostName,  satellite2HostName};
+    hostIPs   = {'128.91.59.227',  '128.91.59.157',     '128.91.59.228'};
+    hostRoles = {'base',          'satellite',         'satellite'};
     
     %% Control what is printed on the command window
     beVerbose = false;
     displayPackets = false;
     
     %% Use 10 second time out for all comms
-    timeOutSecs = 30;
+    timeOutSecs = 0.5;
     
     %% Generate 50 data points for the spiral signal
     coeffPoints = 100;
