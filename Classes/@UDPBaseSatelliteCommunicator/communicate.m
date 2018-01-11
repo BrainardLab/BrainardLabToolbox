@@ -132,7 +132,7 @@ function [messageReceived, status, roundTripDelayMilliSecs] = communicate(obj, p
             messageReceived.label = receivedPacket.messageLabel;
             messageReceived.data  = receivedPacket.messageData;
             roundTripDelayMilliSecsForMessageReceive = toc * 1000
-            roundTripDelayMilliSecs = roundTripDelayMilliSecsForMessageReceive
+            roundTripDelayMilliSecs = roundTripDelayMilliSecsForMessageReceive;
         else
             error('Communicate() bailed out: failure to receive a valid message after %d attempts.\n', maxAttemptsNum);
         end
