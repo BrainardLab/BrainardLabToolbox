@@ -158,7 +158,7 @@ function shortBaseOneSatelliteDemo
                 hL = legend('sat-1');
                 set(hL, 'FontSize', 16);
             end
-            set(gca, 'XLim', [1 300], 'YLim', [-1 1], 'FontSize', 12);
+            set(gca, 'XLim', [1 150], 'YLim', [-1 1], 'FontSize', 12);
 
             subplot(3,5, 8:10);
             if (~isempty(sat2))
@@ -167,7 +167,7 @@ function shortBaseOneSatelliteDemo
                 set(hL, 'FontSize', 16);
             end
 
-            set(gca, 'XLim', [1 300], 'YLim', [-1 1], 'FontSize', 12);
+            set(gca, 'XLim', [1 150], 'YLim', [-1 1], 'FontSize', 12);
 
             subplot(3,5, 13:15);
             if (~isempty(sat3))
@@ -175,7 +175,7 @@ function shortBaseOneSatelliteDemo
                 hL = legend('sat-3');
                 set(hL, 'FontSize', 16);
             end
-            set(gca, 'XLim', [1 300], 'YLim', [0 1], 'FontSize', 12);
+            set(gca, 'XLim', [1 150], 'YLim', [0 1], 'FontSize', 12);
             drawnow;
             videoOBJ.writeVideo(getframe(hFig));
         end % if (~isempty(theMessageReceived))
