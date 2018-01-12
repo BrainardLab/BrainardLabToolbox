@@ -22,8 +22,8 @@ function shortBaseOneSatelliteDemo
     timeOutSecs = 50/1000;
     maxAttemptsNum = 3;
     
-    %% Generate 50 data points for the spiral signal
-    coeffPoints = 900;
+    %% Generate 500 data points for the spiral signal
+    coeffPoints = 500;
 
     %% Record a video of the demo?
     recordVideo = false;
@@ -266,12 +266,8 @@ function packetSequence = designPacketSequenceForSatellite1(UDPobj, satelliteHos
     for k = 1:coeffPoints
         % Satellite waits to receive trigger message from Base to send next cos-coefficient
         direction = sprintf('%s -> %s', baseHostName, satelliteHostName);
-        
-        if (mod(k,2) == 0)
-            expectedMessageLabel = sprintf('BASE(%s)_TO_SATTELITE(%s)___SEND_ME_NEXT_COS_COEFF', baseHostName, satelliteHostName);
-        else
-            expectedMessageLabel = sprintf('BASE(%s)_TO_SATTELITE(%s)___SEND_ME_NEXT_SIN_COEFF', baseHostName, satelliteHostName);
-        end
+        expectedMessageLabel = sprintf('BASE(%s)_TO_SATTELITE(%s)___SEND_ME_NEXT_COS_COEFF', baseHostName, satelliteHostName);
+ 
         packetSequence{numel(packetSequence)+1} = UDPobj.makePacket(...
             satelliteHostName,...
             direction, ...
@@ -280,13 +276,9 @@ function packetSequence = designPacketSequenceForSatellite1(UDPobj, satelliteHos
         );
 
         direction = sprintf('%s <- %s', baseHostName, satelliteHostName);
-        if (mod(k,2) == 0)
-            messageLabel = sprintf('SATTELITE(%s)___SENDING_COS_COEFF', satelliteHostName);
-            messageData = cos(2*pi*k/coeffPoints);
-        else
-            messageLabel = sprintf('SATTELITE(%s)___SENDING_SIN_COEFF', satelliteHostName);
-            messageData = -1;
-        end
+        messageLabel = sprintf('SATTELITE(%s)___SENDING_COS_COEFF', satelliteHostName);
+        messageData = cos(2*pi*k/coeffPoints);
+
         packetSequence{numel(packetSequence)+1} = UDPobj.makePacket(...
             satelliteHostName, ...
             direction, ...
@@ -349,11 +341,7 @@ function packetSequence = designPacketSequenceForBase(UDPobj, satelliteHostNames
         % Tell satellite-1 to send next the cos-coefficient
         satelliteName = satelliteHostNames{1};
         direction = sprintf('%s -> %s', baseHostName, satelliteName);
-        if (mod(k,2) == 0)
-            messageLabel = sprintf('BASE(%s)_TO_SATTELITE(%s)___SEND_ME_NEXT_COS_COEFF', baseHostName, satelliteName);
-        else
-            messageLabel = sprintf('BASE(%s)_TO_SATTELITE(%s)___SEND_ME_NEXT_SIN_COEFF', baseHostName, satelliteName);
-        end
+        messageLabel = sprintf('BASE(%s)_TO_SATTELITE(%s)___SEND_ME_NEXT_COS_COEFF', baseHostName, satelliteName);
         
         packetSequence{numel(packetSequence)+1} = UDPobj.makePacket(...
             satelliteName,...
@@ -364,11 +352,8 @@ function packetSequence = designPacketSequenceForBase(UDPobj, satelliteHostNames
 
         % Read the next cos-coeff from satellite-1
         direction = sprintf('%s <- %s', baseHostName, satelliteName);
-        if (mod(k,2) == 0)
-            messageLabel = sprintf('SATTELITE(%s)___SENDING_COS_COEFF', satelliteName);
-        else
-            messageLabel = sprintf('SATTELITE(%s)___SENDING_SIN_COEFF', satelliteName);
-        end
+        messageLabel = sprintf('SATTELITE(%s)___SENDING_COS_COEFF', satelliteName);
+        
         packetSequence{numel(packetSequence)+1} = UDPobj.makePacket(...
             satelliteName, ...
             direction, ...
