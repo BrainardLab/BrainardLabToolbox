@@ -23,7 +23,7 @@ function shortBaseOneSatelliteDemo
     maxAttemptsNum = 3;
     
     %% Generate 500 data points for the spiral signal
-    coeffPoints = 500;
+    coeffPoints = 100;
 
     %% Record a video of the demo?
     recordVideo = false;
@@ -73,7 +73,7 @@ function shortBaseOneSatelliteDemo
                 'beVerbose', beVerbose, ...
                 'displayPackets', displayPackets...
              );
-
+        
         if (UDPobj.isATransmissionPacket(packetSequence{packetNo}.direction, UDPobj.localHostName))
             roundTipDelayMilliSecsTransmit(numel(roundTipDelayMilliSecsTransmit)+1) = roundTipDelayMilliSecs;
         else
@@ -105,10 +105,10 @@ function shortBaseOneSatelliteDemo
         persistent sat2;
         persistent sat3;
         persistent hFig;
-        persistent p1
-        persistent p2
-        persistent p3
-        persistent p4
+        persistent p1;
+        persistent p2;
+        persistent p3;
+        persistent p4;
         
         if (strcmp(mode, 'open')) 
             if (recordVideo)
@@ -135,11 +135,17 @@ function shortBaseOneSatelliteDemo
             sat1 = [];
             sat2 = [];
             sat3 = [];
+            p1 = [];
+            p2 = [];
+            p3 = [];
+            p4 = [];
             hFig = figure(1); clf;
             set(hFig, 'Position', [1000 918 1000 420], 'Color', [1 1 1])
         end
 
+        
         if (~isempty(theMessageReceived))
+            
             if (contains(theMessageReceived.label, 'SIN_COEFF'))
                 sin_coeff = cat(1,sin_coeff, theMessageReceived.data);
                 sat1(numel(sat1)+1) = theMessageReceived.data;
@@ -166,7 +172,7 @@ function shortBaseOneSatelliteDemo
                 x = radial_coeff(1:dataPoints).*cos_coeff(1:dataPoints);
                 y = radial_coeff(1:dataPoints).*sin_coeff(1:dataPoints);
                 subplot(3,5,[1 2 6 7 11 12]);
-                if (packetNo == 1)
+                if (isempty(p1))
                     p1 = plot(x,y, '-', 'LineWidth', 5.0, 'Color', [0.7 0.7 0.4]); hold on; plot(x,y, '*-', 'LineWidth', 1.5); 
                     set(gca, 'XLim', [-5 5], 'YLim', [-5 5], 'FontSize', 12);
                     axis 'square';
@@ -178,37 +184,37 @@ function shortBaseOneSatelliteDemo
 
             subplot(3,5, 3:5);
             if (~isempty(sat1))
-                if (packetNo == 1)
-                    p2 = stem(sat1, 'filled');
+                if (isempty(p2))
+                    p2 = plot(1:2, [0 0], 'ks-');
                     hL = legend('sat-1');
                     set(hL, 'FontSize', 16);
-                    set(gca, 'XLim', [1 150], 'YLim', [-1 1], 'FontSize', 12);
+                    set(gca, 'XLim', [1 coeffPoints], 'YLim', [-1 1], 'FontSize', 12);
                 else
-                    set(p2, 'YData', sat1);
+                    set(p2, 'XData', 1:numel(sat1), 'YData', sat1);
                 end
             end
             
             subplot(3,5, 8:10);
             if (~isempty(sat2))
-                if (packetNo == 1)
-                    p3 = stem(sat2, 'filled');
+                if (isempty(p3))
+                    p3 = plot(1:2, [0 0], 'ks-');
                     hL = legend('sat-2');
                     set(hL, 'FontSize', 16);
-                    set(gca, 'XLim', [1 150], 'YLim', [-1 1], 'FontSize', 12);
+                    set(gca, 'XLim', [1 coeffPoints], 'YLim', [-1 1], 'FontSize', 12);
                 else
-                    set(p3, 'YData', sat2);
+                    set(p3, 'XData', 1:numel(sat2), 'YData', sat2);
                 end
             end
 
             subplot(3,5, 13:15);
             if (~isempty(sat3))
-                if (packetNo == 1)
-                    p4 = stem(sat3, 'filled');
+                if (isempty(p4))
+                    p4 = plot(1:2, [0 0], 'ks-');
                     hL = legend('sat-3');
                     set(hL, 'FontSize', 16);
-                    set(gca, 'XLim', [1 150], 'YLim', [0 1], 'FontSize', 12);
+                    set(gca, 'XLim', [1 coeffPoints], 'YLim', [-1 1], 'FontSize', 12);
                 else
-                    set(p4, 'YData', sat3);
+                    set(p4, 'XData', 1:numel(sat3), 'YData', sat3);
                 end
             end
             
