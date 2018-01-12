@@ -155,26 +155,26 @@ function shortBaseTwoSatellitesDemo
             if (contains(theMessageReceived.label, 'SIN_COEFF'))
                 sin_coeff = cat(1,sin_coeff, theMessageReceived.data);
                 sat1(numel(sat1)+1) = theMessageReceived.data;
-                sat2(numel(sat2)+1) = 0;
-                sat3(numel(sat3)+1) = 0;
+                sat2(numel(sat2)+1) = nan;
+                sat3(numel(sat3)+1) = nan;
             end
 
             if (contains(theMessageReceived.label, 'COS_COEFF'))
                 cos_coeff = cat(1,cos_coeff, theMessageReceived.data);
                 sat2(numel(sat2)+1) = theMessageReceived.data;
-                sat1(numel(sat1)+1) = 0;
-                sat3(numel(sat3)+1) = 0;
+                sat1(numel(sat1)+1) = nan;
+                sat3(numel(sat3)+1) = nan;
             end
 
             if (contains(theMessageReceived.label, 'RADIAL_COEFF'))
                 radial_coeff = cat(1,radial_coeff, theMessageReceived.data);
                 sat3(numel(sat3)+1) = theMessageReceived.data;
-                sat1(numel(sat1)+1) = 0;
-                sat2(numel(sat2)+1) = 0;
+                sat1(numel(sat1)+1) = nan;
+                sat2(numel(sat2)+1) = nan;
             end
 
             % Always 1, since there is no sat-3 to provide this
-            radial_coeff = ones(1,min([numel(sin_coeff) numel(cos_coeff)]));
+            radial_coeff = 4*ones(min([numel(sin_coeff) numel(cos_coeff)]),1);
             
             dataPoints = min([numel(sin_coeff) numel(cos_coeff) numel(radial_coeff)]);
             if (dataPoints > 2)
@@ -182,7 +182,7 @@ function shortBaseTwoSatellitesDemo
                 y = radial_coeff(1:dataPoints).*sin_coeff(1:dataPoints);
                 subplot(3,5,[1 2 6 7 11 12]);
                 if (isempty(p1))
-                    p1 = plot(x,y, '-', 'LineWidth', 5.0, 'Color', [0.7 0.7 0.4]); hold on; plot(x,y, '*-', 'LineWidth', 1.5); 
+                    p1 = plot(x,y, 'ro-', 'LineWidth', 5.0, 'Color', [0.7 0.7 0.4]);
                     set(gca, 'XLim', [-5 5], 'YLim', [-5 5], 'FontSize', 12);
                     axis 'square';
                     grid on
@@ -197,7 +197,7 @@ function shortBaseTwoSatellitesDemo
                     p2 = stem([0 0], 'filled');
                     hL = legend('sat-1');
                     set(hL, 'FontSize', 16);
-                    set(gca, 'XLim', [1 coeffPoints], 'YLim', [-1 1], 'FontSize', 12);
+                    set(gca, 'XLim', [1 coeffPoints*2], 'YLim', [-1 1], 'FontSize', 12);
                 else
                     set(p2, 'XData', 1:numel(sat1), 'YData', sat1);
                 end
@@ -209,7 +209,7 @@ function shortBaseTwoSatellitesDemo
                     p3 = stem([0 0], 'filled');
                     hL = legend('sat-2');
                     set(hL, 'FontSize', 16);
-                    set(gca, 'XLim', [1 coeffPoints], 'YLim', [-1 1], 'FontSize', 12);
+                    set(gca, 'XLim', [1 coeffPoints*2], 'YLim', [-1 1], 'FontSize', 12);
                 else
                     set(p3, 'XData', 1:numel(sat2), 'YData', sat2);
                 end
@@ -221,7 +221,7 @@ function shortBaseTwoSatellitesDemo
                     p4 = stem([0 0], 'filled');
                     hL = legend('sat-3');
                     set(hL, 'FontSize', 16);
-                    set(gca, 'XLim', [1 coeffPoints], 'YLim', [-1 1], 'FontSize', 12);
+                    set(gca, 'XLim', [1 coeffPoints*2], 'YLim', [-1 1], 'FontSize', 12);
                 else
                     set(p4, 'XData', 1:numel(sat3), 'YData', sat3);
                 end
