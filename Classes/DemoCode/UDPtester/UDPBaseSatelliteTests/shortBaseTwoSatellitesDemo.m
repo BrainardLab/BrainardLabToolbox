@@ -19,7 +19,7 @@ function shortBaseTwoSatellitesDemo
     displayPackets = false;
 
     %% Use 10 second time out for all comms
-    timeOutSecs = 7/1000;
+    timeOutSecs = 10/1000;
     maxAttemptsNum = 3;
     
     %% Generate 500 data points for the spiral signal
