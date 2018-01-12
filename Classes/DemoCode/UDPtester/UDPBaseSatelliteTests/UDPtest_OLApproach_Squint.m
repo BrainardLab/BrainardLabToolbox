@@ -2,7 +2,7 @@
 % satellites using the @UDPBaseSatelliteCommunicator class. This is tailored
 % to the OLApproach_Squint rig.
 %
-% The Base is asking the 2 sattelites to provide two component signals and then
+% The Base is asking the 2 satellites to provide two component signals and then
 % reconstructs a signal from these components. This communication is
 % running in an endless loop. At the end of each loop, the mean roundtrip delay
 % is printed.
