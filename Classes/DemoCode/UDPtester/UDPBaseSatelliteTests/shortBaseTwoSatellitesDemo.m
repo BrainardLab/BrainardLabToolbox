@@ -19,12 +19,12 @@ function shortBaseTwoSatellitesDemo
     displayPackets = false;
 
     %% Use 10 second time out for all comms
-    timeOutSecs = 10/1000;
+    timeOutSecs = 7/1000;
     maxAttemptsNum = 3;
     
     %% Generate 500 data points for the spiral signal
     coeffPoints = 50;
-    repeatsNum = 5;
+    
     %% Record a video of the demo?
     recordVideo = false;
     visualizeComm = true;
@@ -69,7 +69,8 @@ function shortBaseTwoSatellitesDemo
 
     roundTipDelayMilliSecsTransmit = [];
     roundTipDelayMilliSecsReceive = [];
-    r = 0
+    
+    r = 0;
     while (1)
     r = r + 1;
     %% Execute communication protocol
@@ -157,7 +158,7 @@ function shortBaseTwoSatellitesDemo
             set(hFig, 'Position', [1000 918 1000 420], 'Color', [1 1 1])
             % Always 1, since there is no sat-3 to provide this
             t = 1:(coeffPoints*4+10);
-            radial_coeff = 4+0.5*cos(t'/coeffPoints*50);
+            radial_coeff = 4+0.5*cos(t'/coeffPoints*30);
         end
 
         
@@ -190,7 +191,7 @@ function shortBaseTwoSatellitesDemo
                 y = radial_coeff(1:dataPoints).*sin_coeff(1:dataPoints);
                 subplot(3,5,[1 2 6 7 11 12]);
                 if (isempty(p1))
-                    p1 = plot(x,y, 'r-', 'LineWidth', 2.0);
+                    p1 = plot(x,y, 'ro-', 'LineWidth', 2.0);
                     set(gca, 'XLim', [-5 5], 'YLim', [-5 5], 'FontSize', 12);
                     axis 'square';
                     grid on
