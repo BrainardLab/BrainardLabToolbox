@@ -19,7 +19,7 @@ function shortBaseTwoSatellitesDemo
     displayPackets = false;
 
     %% Use 10 second time out for all comms
-    timeOutSecs = 20/1000;
+    timeOutSecs = 10/1000;
     maxAttemptsNum = 3;
     
     %% Generate 500 data points for the spiral signal
@@ -194,6 +194,7 @@ function shortBaseTwoSatellitesDemo
                     set(gca, 'XLim', [-5 5], 'YLim', [-5 5], 'FontSize', 12);
                     axis 'square';
                     grid on
+                    title('Base');
                 else
                     set(p1, 'XData', x, 'YData', y);
                 end
