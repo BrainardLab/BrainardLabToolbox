@@ -23,7 +23,7 @@ function shortBaseTwoSatellitesDemo
     maxAttemptsNum = 3;
     
     %% Generate 500 data points for the spiral signal
-    coeffPoints = 100;
+    coeffPoints = 50;
     repeatsNum = 5;
     %% Record a video of the demo?
     recordVideo = false;
@@ -69,7 +69,9 @@ function shortBaseTwoSatellitesDemo
 
     roundTipDelayMilliSecsTransmit = [];
     roundTipDelayMilliSecsReceive = [];
-    for r = 1:repeatsNum
+    r = 0
+    while (1)
+    r = r + 1;
     %% Execute communication protocol
     for packetNo = 1:numel(packetSequence)
         % Transmit packet
@@ -92,10 +94,14 @@ function shortBaseTwoSatellitesDemo
              visualizeDemoData('add', recordVideo, {satellite1HostName, satellite2HostName});
          end
     end % packetNo
-    end
     
+    fprintf('Repetition %d\n', r);
     fprintf('MEAN and STD roundtrip for transmitting packages: %2.1f %2.1f msec\n', mean(roundTipDelayMilliSecsTransmit), std(roundTipDelayMilliSecsTransmit));
     fprintf('MEAN and STD roundtrip for receiving packages: %2.1f %2.1f msec\n', mean(roundTipDelayMilliSecsReceive), std(roundTipDelayMilliSecsReceive));
+    
+    end
+    
+    
     
     %% Finalize demo
     if (iAmTheBase && visualizeComm)
