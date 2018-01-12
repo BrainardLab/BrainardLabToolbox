@@ -25,7 +25,6 @@ function shortBaseTwoSatellitesDemo
     %% Generate 500 data points for the spiral signal
     coeffPoints = 100;
     repeatsNum = 5;
-    
     %% Record a video of the demo?
     recordVideo = false;
     visualizeComm = true;
@@ -42,19 +41,19 @@ function shortBaseTwoSatellitesDemo
     if (iAmTheBase)
         packetSequence = designPacketSequenceForBase(UDPobj, ...
             {satellite1HostName, satellite2HostName},...
-            timeOutSecs, coeffPoints, repeatsNum);
+            timeOutSecs, coeffPoints);
     end
 
     %% Make packetSequences for satellite(s)
     if (iAmSatellite1)
         packetSequence = designPacketSequenceForSatellite1(UDPobj, ...
             satellite1HostName, ...
-            timeOutSecs, coeffPoints, repeatsNum);
+            timeOutSecs, coeffPoints);
     end
     if (iAmSatellite2)
         packetSequence = designPacketSequenceForSatellite2(UDPobj, ...
             satellite2HostName, ...
-            timeOutSecs, coeffPoints, repeatsNum);
+            timeOutSecs, coeffPoints);
     end
     
 
@@ -70,6 +69,7 @@ function shortBaseTwoSatellitesDemo
 
     roundTipDelayMilliSecsTransmit = [];
     roundTipDelayMilliSecsReceive = [];
+    for r = 1:repeatsNum
     %% Execute communication protocol
     for packetNo = 1:numel(packetSequence)
         % Transmit packet
@@ -92,7 +92,8 @@ function shortBaseTwoSatellitesDemo
              visualizeDemoData('add', recordVideo, {satellite1HostName, satellite2HostName});
          end
     end % packetNo
-
+    end
+    
     fprintf('MEAN and STD roundtrip for transmitting packages: %2.1f %2.1f msec\n', mean(roundTipDelayMilliSecsTransmit), std(roundTipDelayMilliSecsTransmit));
     fprintf('MEAN and STD roundtrip for receiving packages: %2.1f %2.1f msec\n', mean(roundTipDelayMilliSecsReceive), std(roundTipDelayMilliSecsReceive));
     
@@ -240,7 +241,7 @@ end
 %
 % METHOD TO DESIGN PACKET SEQUENCE FOR SATTELITE-1
 %
-function packetSequence = designPacketSequenceForSatellite1(UDPobj, satelliteHostName, timeOutSecs, coeffPoints, repeatsNum)
+function packetSequence = designPacketSequenceForSatellite1(UDPobj, satelliteHostName, timeOutSecs, coeffPoints)
     % Define the communication  packetSequence
     packetSequence = {};
 
@@ -278,7 +279,6 @@ function packetSequence = designPacketSequenceForSatellite1(UDPobj, satelliteHos
         'timeOutSecs', timeOutSecs ...                                            % Allow this many secs to receive ACK (from remote host) that message was received
     );
 
-    for r = 1: repeatsNum
     % Satellite providing cosine coefficients whenever Base asks for one.
     for k = 1:coeffPoints
         % Satellite waits to receive trigger message from Base to send next cos-coefficient
@@ -303,13 +303,12 @@ function packetSequence = designPacketSequenceForSatellite1(UDPobj, satelliteHos
             'timeOutSecs', timeOutSecs ...                                            % Allow this many secs to receive ACK (from remote host) that message was received
         );
     end
-    end
 end
 
 %
 % METHOD TO DESIGN PACKET SEQUENCE FOR SATTELITE-1
 %
-function packetSequence = designPacketSequenceForSatellite2(UDPobj, satelliteHostName, timeOutSecs, coeffPoints, repeatsNum)
+function packetSequence = designPacketSequenceForSatellite2(UDPobj, satelliteHostName, timeOutSecs, coeffPoints)
     % Define the communication  packetSequence
     packetSequence = {};
 
@@ -317,7 +316,6 @@ function packetSequence = designPacketSequenceForSatellite2(UDPobj, satelliteHos
     baseHostName = UDPobj.baseInfo.baseHostName;
 
     % Satellite providing cosine coefficients whenever Base asks for one.
-    for r = 1:repeatsNum
     for k = 1:coeffPoints
         % Satellite waits to receive trigger message from Base to send next cos-coefficient
         direction = sprintf('%s -> %s', baseHostName, satelliteHostName);
@@ -341,14 +339,13 @@ function packetSequence = designPacketSequenceForSatellite2(UDPobj, satelliteHos
             'timeOutSecs', timeOutSecs ...                                            % Allow this many secs to receive ACK (from remote host) that message was received
         );
     end
-    end
 end
 
 
 %
 % METHOD TO DESIGN PACKET SEQUENCE FOR BASE
 %
-function packetSequence = designPacketSequenceForBase(UDPobj, satelliteHostNames, timeOutSecs, coeffPoints, repeatsNum)
+function packetSequence = designPacketSequenceForBase(UDPobj, satelliteHostNames, timeOutSecs, coeffPoints)
     % Define the communication  packetSequence
     packetSequence = {};
 
@@ -392,7 +389,7 @@ function packetSequence = designPacketSequenceForBase(UDPobj, satelliteHostNames
         'timeOutSecs', timeOutSecs ...                                         % Allow timeOutSecs to receive this message
     );
 
-    for r = 1:repeatsNum
+
     for k = 1:coeffPoints
         % Tell satellite-1 to send next the cos-coefficient
         satelliteName = satelliteHostNames{1};
@@ -440,6 +437,6 @@ function packetSequence = designPacketSequenceForBase(UDPobj, satelliteHostNames
             messageLabel, ...
             'timeOutSecs', timeOutSecs ...                                            % Allow this many secs to receive ACK (from remote host) that message was received
         );
-    end
+    
     end
 end
