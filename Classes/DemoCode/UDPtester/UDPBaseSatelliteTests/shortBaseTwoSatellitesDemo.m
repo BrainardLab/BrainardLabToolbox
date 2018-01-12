@@ -8,7 +8,7 @@ function shortBaseTwoSatellitesDemo
     %% Define a 1 base/3-satellite scheme
     baseHostName = 'manta';
     satellite1HostName = 'ionean';
-    satellite2HostName = 'ithaca';
+    satellite2HostName = 'leviathan';
 
     hostNames = {baseHostName,    satellite1HostName, satellite2HostName };
     hostIPs   = {'128.91.12.90',  '128.91.12.144',   '128.91.12.155'};
@@ -40,7 +40,7 @@ function shortBaseTwoSatellitesDemo
      %% Make packetSequences for the base
     if (iAmTheBase)
         packetSequence = designPacketSequenceForBase(UDPobj, ...
-            {satellite1HostName},...
+            {satellite1HostName, satellite2HostName},...
             timeOutSecs, coeffPoints);
     end
 
@@ -177,7 +177,7 @@ function shortBaseTwoSatellitesDemo
             radial_coeff = ones(1,min([numel(sin_coeff) numel(cos_coeff)]));
             
             dataPoints = min([numel(sin_coeff) numel(cos_coeff) numel(radial_coeff)]);
-            if (dataPoints > 0)
+            if (dataPoints > 2)
                 x = radial_coeff(1:dataPoints).*cos_coeff(1:dataPoints);
                 y = radial_coeff(1:dataPoints).*sin_coeff(1:dataPoints);
                 subplot(3,5,[1 2 6 7 11 12]);
