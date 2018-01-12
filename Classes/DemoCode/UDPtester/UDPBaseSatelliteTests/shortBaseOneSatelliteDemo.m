@@ -19,15 +19,16 @@ function shortBaseOneSatelliteDemo
     displayPackets = false;
 
     %% Use 10 second time out for all comms
-    timeOutSecs = 5/1000;
+    timeOutSecs = 50/1000;
     maxAttemptsNum = 3;
     
     %% Generate 50 data points for the spiral signal
-    coeffPoints = 100;
+    coeffPoints = 900;
 
     %% Record a video of the demo?
-    recordVideo = true;
-
+    recordVideo = false;
+    visualizeComm = true;
+    
     %% Instantiate the UDPBaseSatelliteCommunicator object to handle all communications
     UDPobj = UDPBaseSatelliteCommunicator.instantiateObject(hostNames, hostIPs, hostRoles, beVerbose, 'transmissionMode', 'SINGLE_BYTES');
 
@@ -56,8 +57,8 @@ function shortBaseOneSatelliteDemo
     UDPobj.initiateCommunication(hostRoles,  hostNames, triggerMessage, allSatellitesAreAGOMessage, 'beVerbose', beVerbose);
 
     %% Init demo
-    if (recordVideo && iAmTheBase)
-        visualizeDemoData('open');
+    if (iAmTheBase && visualizeComm)
+        visualizeDemoData('open', recordVideo);
     end
 
     roundTipDelayMilliSecsTransmit = [];
@@ -80,8 +81,8 @@ function shortBaseOneSatelliteDemo
         end
         
          % Update demo
-         if (recordVideo && iAmTheBase)
-             visualizeDemoData('add');
+         if (iAmTheBase && visualizeComm)
+             visualizeDemoData('add', recordVideo);
          end
     end % packetNo
 
@@ -89,13 +90,13 @@ function shortBaseOneSatelliteDemo
     fprintf('MEAN and STD roundtrip for receiving packages: %2.1f %2.1f msec\n', mean(roundTipDelayMilliSecsReceive), std(roundTipDelayMilliSecsReceive));
     
     %% Finalize demo
-    if (recordVideo && iAmTheBase)
-        visualizeDemoData('close');
+    if (iAmTheBase && visualizeComm)
+        visualizeDemoData('close', recordVideo);
     end
 
 
     %% Nested function for visualizing the demo
-    function visualizeDemoData(mode)
+    function visualizeDemoData(mode, recordVideo)
         persistent videoOBJ
         persistent radial_coeff;
         persistent cos_coeff;
@@ -104,18 +105,27 @@ function shortBaseOneSatelliteDemo
         persistent sat2;
         persistent sat3;
         persistent hFig;
-
-        if (strcmp(mode, 'open'))
-            videoOBJ = VideoWriter('UDPdata.mp4', 'MPEG-4'); % H264 format
-            videoOBJ.FrameRate = 30;
-            videoOBJ.Quality = 100;
-            videoOBJ.open();
+        persistent p1
+        persistent p2
+        persistent p3
+        persistent p4
+        
+        if (strcmp(mode, 'open')) 
+            if (recordVideo)
+                videoOBJ = VideoWriter('UDPdata.mp4', 'MPEG-4'); % H264 format
+                videoOBJ.FrameRate = 30;
+                videoOBJ.Quality = 100;
+                videoOBJ.open();
+            end
             return;
-        elseif (strcmp(mode, 'close'))
-            videoOBJ.close();
+            
+        elseif (strcmp(mode, 'close')) 
+            if (recordVideo)
+                videoOBJ.close();
+            end
             return;
         elseif (~strcmp(mode, 'add'))
-            error('Unknown mode in visualizeDemoData(): ''%s'' \n', demo);
+            error('Unknown mode in visualizeDemoData(): ''%s'' \n', mode);
         end
 
         if (packetNo == 1)
@@ -155,41 +165,58 @@ function shortBaseOneSatelliteDemo
             if (dataPoints > 0)
                 x = radial_coeff(1:dataPoints).*cos_coeff(1:dataPoints);
                 y = radial_coeff(1:dataPoints).*sin_coeff(1:dataPoints);
-                maxRange = max([max(abs(x(:))) max(abs(y(:)))]);
                 subplot(3,5,[1 2 6 7 11 12]);
-                plot(x,y, '-', 'LineWidth', 5.0, 'Color', [0.7 0.7 0.4]); hold on; plot(x,y, '*-', 'LineWidth', 1.5); hold off;
-                set(gca, 'XLim', maxRange * [-1 1], 'YLim', maxRange * [-1 1], 'FontSize', 12);
-                axis 'square';
-                grid 'on'
-                grid on
+                if (packetNo == 1)
+                    p1 = plot(x,y, '-', 'LineWidth', 5.0, 'Color', [0.7 0.7 0.4]); hold on; plot(x,y, '*-', 'LineWidth', 1.5); 
+                    set(gca, 'XLim', [-5 5], 'YLim', [-5 5], 'FontSize', 12);
+                    axis 'square';
+                    grid on
+                else
+                    set(p1, 'XData', x, 'YData', y);
+                end
             end
 
             subplot(3,5, 3:5);
             if (~isempty(sat1))
-                stem(sat1, 'filled');
-                hL = legend('sat-1');
-                set(hL, 'FontSize', 16);
+                if (packetNo == 1)
+                    p2 = stem(sat1, 'filled');
+                    hL = legend('sat-1');
+                    set(hL, 'FontSize', 16);
+                    set(gca, 'XLim', [1 150], 'YLim', [-1 1], 'FontSize', 12);
+                else
+                    set(p2, 'YData', sat1);
+                end
             end
-            set(gca, 'XLim', [1 150], 'YLim', [-1 1], 'FontSize', 12);
-
+            
             subplot(3,5, 8:10);
             if (~isempty(sat2))
-                stem(sat2, 'filled');
-                hL = legend('sat-2');
-                set(hL, 'FontSize', 16);
+                if (packetNo == 1)
+                    p3 = stem(sat2, 'filled');
+                    hL = legend('sat-2');
+                    set(hL, 'FontSize', 16);
+                    set(gca, 'XLim', [1 150], 'YLim', [-1 1], 'FontSize', 12);
+                else
+                    set(p3, 'YData', sat2);
+                end
             end
-
-            set(gca, 'XLim', [1 150], 'YLim', [-1 1], 'FontSize', 12);
 
             subplot(3,5, 13:15);
             if (~isempty(sat3))
-                stem(sat3, 'filled');
-                hL = legend('sat-3');
-                set(hL, 'FontSize', 16);
+                if (packetNo == 1)
+                    p4 = stem(sat3, 'filled');
+                    hL = legend('sat-3');
+                    set(hL, 'FontSize', 16);
+                    set(gca, 'XLim', [1 150], 'YLim', [0 1], 'FontSize', 12);
+                else
+                    set(p4, 'YData', sat3);
+                end
             end
-            set(gca, 'XLim', [1 150], 'YLim', [0 1], 'FontSize', 12);
+            
             drawnow;
-            videoOBJ.writeVideo(getframe(hFig));
+            
+            if (recordVideo)
+                videoOBJ.writeVideo(getframe(hFig));
+            end
         end % if (~isempty(theMessageReceived))
     end % visualizeDemoData
 end
