@@ -1,4 +1,4 @@
-function shortBaseOneSatelliteDemo
+function shortBaseTwoSatellitesDemo
 
     %% Start fresh
     fprintf('\nClearing stuff\n');
@@ -8,11 +8,11 @@ function shortBaseOneSatelliteDemo
     %% Define a 1 base/3-satellite scheme
     baseHostName = 'manta';
     satellite1HostName = 'ionean';
-    
+    satellite2HostName = 'ithaca';
 
-    hostNames = {baseHostName,    satellite1HostName };
-    hostIPs   = {'128.91.12.90',  '128.91.12.144' };
-    hostRoles = {'base',          'satellite' };
+    hostNames = {baseHostName,    satellite1HostName, satellite2HostName };
+    hostIPs   = {'128.91.12.90',  '128.91.12.144',   '128.91.12.155'};
+    hostRoles = {'base',          'satellite',       'satellite'};
 
     %% Control what is printed on the command window
     beVerbose = false;
@@ -35,7 +35,8 @@ function shortBaseOneSatelliteDemo
     %% Who the heck are we?
     iAmTheBase = contains(UDPobj.localHostName, baseHostName);
     iAmSatellite1 = contains(UDPobj.localHostName, satellite1HostName);
-
+    iAmSatellite2 = contains(UDPobj.localHostName, satellite2HostName);
+    
      %% Make packetSequences for the base
     if (iAmTheBase)
         packetSequence = designPacketSequenceForBase(UDPobj, ...
@@ -49,7 +50,12 @@ function shortBaseOneSatelliteDemo
             satellite1HostName, ...
             timeOutSecs, coeffPoints);
     end
-
+    if (iAmSatellite2)
+        packetSequence = designPacketSequenceForSatellite2(UDPobj, ...
+            satellite2HostName, ...
+            timeOutSecs, coeffPoints);
+    end
+    
 
     %% Initiate the base / multi-satellite communication
     triggerMessage = 'Go!';                                     % Tell each satellite to start listening
@@ -167,6 +173,9 @@ function shortBaseOneSatelliteDemo
                 sat2(numel(sat2)+1) = 0;
             end
 
+            % Always 1, since there is no sat-3 to provide this
+            radial_coeff = ones(1,min([numel(sin_coeff) numel(cos_coeff)]));
+            
             dataPoints = min([numel(sin_coeff) numel(cos_coeff) numel(radial_coeff)]);
             if (dataPoints > 0)
                 x = radial_coeff(1:dataPoints).*cos_coeff(1:dataPoints);
@@ -292,8 +301,44 @@ function packetSequence = designPacketSequenceForSatellite1(UDPobj, satelliteHos
             'timeOutSecs', timeOutSecs ...                                            % Allow this many secs to receive ACK (from remote host) that message was received
         );
     end
-
 end
+
+%
+% METHOD TO DESIGN PACKET SEQUENCE FOR SATTELITE-1
+%
+function packetSequence = designPacketSequenceForSatellite2(UDPobj, satelliteHostName, timeOutSecs, coeffPoints)
+    % Define the communication  packetSequence
+    packetSequence = {};
+
+    % Get base host name
+    baseHostName = UDPobj.baseInfo.baseHostName;
+
+    % Satellite providing cosine coefficients whenever Base asks for one.
+    for k = 1:coeffPoints
+        % Satellite waits to receive trigger message from Base to send next cos-coefficient
+        direction = sprintf('%s -> %s', baseHostName, satelliteHostName);
+        expectedMessageLabel = sprintf('BASE(%s)_TO_SATTELITE(%s)___SEND_ME_NEXT_SIN_COEFF', baseHostName, satelliteHostName);
+ 
+        packetSequence{numel(packetSequence)+1} = UDPobj.makePacket(...
+            satelliteHostName,...
+            direction, ...
+            expectedMessageLabel, ...
+            'timeOutSecs', timeOutSecs ...                                            % Wait for this many secs to receive this message
+        );
+
+        direction = sprintf('%s <- %s', baseHostName, satelliteHostName);
+        messageLabel = sprintf('SATTELITE(%s)___SENDING_SIN_COEFF', satelliteHostName);
+        messageData = sin(2*pi*k/coeffPoints);
+
+        packetSequence{numel(packetSequence)+1} = UDPobj.makePacket(...
+            satelliteHostName, ...
+            direction, ...
+            messageLabel, 'withData', messageData, ...
+            'timeOutSecs', timeOutSecs ...                                            % Allow this many secs to receive ACK (from remote host) that message was received
+        );
+    end
+end
+
 
 %
 % METHOD TO DESIGN PACKET SEQUENCE FOR BASE
@@ -367,5 +412,29 @@ function packetSequence = designPacketSequenceForBase(UDPobj, satelliteHostNames
             'timeOutSecs', timeOutSecs ...                                            % Allow this many secs to receive ACK (from remote host) that message was received
         );
 
+    
+        % Tell satellite-2 to send next the sin-coefficient
+        satelliteName = satelliteHostNames{2};
+        direction = sprintf('%s -> %s', baseHostName, satelliteName);
+        messageLabel = sprintf('BASE(%s)_TO_SATTELITE(%s)___SEND_ME_NEXT_SIN_COEFF', baseHostName, satelliteName);
+        
+        packetSequence{numel(packetSequence)+1} = UDPobj.makePacket(...
+            satelliteName,...
+            direction, ...
+            messageLabel, 'withData', 'right now, please',...
+            'timeOutSecs', timeOutSecs ...                                            % Wait for this many secs to receive this message
+        );
+
+        % Read the next cos-coeff from satellite-1
+        direction = sprintf('%s <- %s', baseHostName, satelliteName);
+        messageLabel = sprintf('SATTELITE(%s)___SENDING_SIN_COEFF', satelliteName);
+        
+        packetSequence{numel(packetSequence)+1} = UDPobj.makePacket(...
+            satelliteName, ...
+            direction, ...
+            messageLabel, ...
+            'timeOutSecs', timeOutSecs ...                                            % Allow this many secs to receive ACK (from remote host) that message was received
+        );
+    
     end
 end
