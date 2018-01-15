@@ -20,6 +20,7 @@ function [messageReceived, status, roundTripDelayMilliSecs] = communicate(obj, p
     displayPackets = p.Results.displayPackets;
     maxAttemptsNum = p.Results.maxAttemptsNum;
 
+    % Comment from NPC. This should really be a property of the object !!!
     maxSecondsToWaitForReceivingAnExpectedMessage = 10;
     
     if (displayPackets)
