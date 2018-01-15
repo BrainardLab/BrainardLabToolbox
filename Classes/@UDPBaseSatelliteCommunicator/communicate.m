@@ -101,8 +101,7 @@ function [messageReceived, status, roundTripDelayMilliSecs] = communicate(obj, p
             status = obj.GOOD_TRANSMISSION;
             if (receivedPacket.timedOutFlag)
                 status = obj.MESSAGE_FAILED_TO_ARRIVE_WITHIN_MAX_WAIT_PERIOD;
-                obj.displayMessage(sprintf('received no message within the max wait period'), communicationPacket.messageLabel, [], packetNo, 'alert', true);
-                error('received no message within the max wait period')
+                obj.displayMessage(sprintf('received no message within the max wait period (attempt no. %d)', attemptNo), communicationPacket.messageLabel, [], packetNo, 'alert', true);
             end
 
             if (receivedPacket.badTransmissionFlag)
