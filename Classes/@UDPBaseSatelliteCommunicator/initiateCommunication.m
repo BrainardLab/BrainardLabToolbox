@@ -110,16 +110,23 @@ function initiateCommunication(obj, hostRoles, hostNames, triggerMessage, allSat
         );      
             
         if (receivedPacket.badTransmissionFlag)
-            status = obj.BAD_TRANSMISSION;
             error('received message contains bad data');
         elseif (~isempty(receivedPacket.mismatchedMessageLabel))
-            status = obj.UNEXPECTED_MESSAGE_LABEL_RECEIVED;
             error('received message with wrong label (expected: ''%s'')', receivedPacket.mismatchedMessageLabel);
         end
         
         fprintf('Received the trigger message, will wait 5 seconds for the BASE to transmit that all satellites are a GO !\n');
         % Wait for 5 seconds to receive the allSatellitesAreAGOMessage message from the base
-        obj.waitForMessage(allSatellitesAreAGOMessage, 'timeOutSecs', 5); 
+        receivedPacket = obj.waitForMessage(allSatellitesAreAGOMessage, 'timeOutSecs', 5); 
+        if (receivedPacket.timedOutFlag)
+            error('Timed out after 5 seconds while waiting to receive the ''%s'' message.', allSatellitesAreAGOMessage);
+        end
+        if (receivedPacket.badTransmissionFlag)
+            error('Bad data  during the ''%s'' message.', allSatellitesAreAGOMessage);
+        end
+        if (~isempty(receivedPacket.mismatchedMessageLabel))
+            error('Expected: ''%s'', Received: ''%s''.', allSatellitesAreAGOMessage, receivedPacket.mismatchedMessageLabel);
+        end
     end
 end
 
