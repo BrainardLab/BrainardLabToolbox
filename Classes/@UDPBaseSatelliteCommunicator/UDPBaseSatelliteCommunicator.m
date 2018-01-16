@@ -79,7 +79,7 @@ classdef UDPBaseSatelliteCommunicator < handle
             obj.verbosity = p.Results.verbosity;
             obj.transmissionMode = p.Results.transmissionMode;
             obj.localHostName = obj.getLocalHostName();
-            obj.flushDelay = 0.0;
+            obj.flushDelay = 0.3;
             obj.maxSecondsToWaitForReceivingAnExpectedMessage = 10;
             
             if strcmp(obj.verbosity,'max')

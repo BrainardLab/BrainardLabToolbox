@@ -55,6 +55,8 @@ function [messageReceived, status, roundTripDelayMilliSecs, attemptNo] = communi
                 case obj.NO_ACKNOWLDGMENT_WITHIN_TIMEOUT_PERIOD
                     obj.displayMessage(sprintf('received status ''%s'' from remote host', status), communicationPacket.messageLabel, communicationPacket.messageData, packetNo, 'alert', true);
                     attemptNo = attemptNo + 1;
+                    % Pause for 0.5 seconds before resending
+                    pause(0.5)
                     fprintf('\n<strong>Attempting to send message ''%s'' again (attempt #%d)</strong>\n', communicationPacket.messageLabel, attemptNo);
                     status = obj.sendMessage(communicationPacket.messageLabel, communicationPacket.messageData, ...
                             'timeOutSecs', communicationPacket.timeOutSecs ...
@@ -62,6 +64,8 @@ function [messageReceived, status, roundTripDelayMilliSecs, attemptNo] = communi
                 case { obj.UNEXPECTED_MESSAGE_LABEL_RECEIVED, obj.BAD_TRANSMISSION}
                     obj.displayMessage(sprintf('received status ''%s'' from remote host', status), communicationPacket.messageLabel, communicationPacket.messageData, packetNo, 'alert', true);
                     attemptNo = attemptNo + 1;
+                    % Pause for 0.5 seconds before resending
+                    pause(0.5)
                     fprintf('\n<strong>Attempting to send the  message ''%s'' again (attempt #%d)</strong>\n', communicationPacket.messageLabel, attemptNo);
                     status = obj.sendMessage(communicationPacket.messageLabel, communicationPacket.messageData, ...
                             'timeOutSecs', communicationPacket.timeOutSecs ...
