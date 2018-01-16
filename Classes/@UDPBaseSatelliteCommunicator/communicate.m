@@ -53,7 +53,7 @@ function [messageReceived, status, roundTripDelayMilliSecs, attemptNo] = communi
                     end
                     noACK = false;
                 case obj.NO_ACKNOWLDGMENT_WITHIN_TIMEOUT_PERIOD
-                    obj.displayMessage(sprintf('received status ''%s'' from remote host', status), communicationPacket.messageLabel, communicationPacket.messageData, packetNo, 'alert', true);
+                    obj.displayMessage(sprintf('received status ''%s'' from remote host (packet no: %d)', status, packetNo), communicationPacket.messageLabel, communicationPacket.messageData, packetNo, 'alert', true);
                     attemptNo = attemptNo + 1;
                     % Pause for 0.5 seconds before resending
                     pause(0.5)
@@ -62,7 +62,7 @@ function [messageReceived, status, roundTripDelayMilliSecs, attemptNo] = communi
                             'timeOutSecs', communicationPacket.timeOutSecs ...
                     );
                 case { obj.UNEXPECTED_MESSAGE_LABEL_RECEIVED, obj.BAD_TRANSMISSION}
-                    obj.displayMessage(sprintf('received status ''%s'' from remote host', status), communicationPacket.messageLabel, communicationPacket.messageData, packetNo, 'alert', true);
+                    obj.displayMessage(sprintf('received status ''%s'' from remote host (packet no: %d)', status, packetNo), communicationPacket.messageLabel, communicationPacket.messageData, packetNo, 'alert', true);
                     attemptNo = attemptNo + 1;
                     % Pause for 0.5 seconds before resending
                     pause(0.5)
@@ -71,7 +71,7 @@ function [messageReceived, status, roundTripDelayMilliSecs, attemptNo] = communi
                             'timeOutSecs', communicationPacket.timeOutSecs ...
                     );
                 otherwise
-                    obj.displayMessage(sprintf('received unexpected status ''%s'' from remote host', status), communicationPacket.messageLabel, communicationPacket.messageData, packetNo, 'alert', true);
+                    obj.displayMessage(sprintf('received unexpected status ''%s'' from remote host (packet no: %d)', status, packetNo), communicationPacket.messageLabel, communicationPacket.messageData, packetNo, 'alert', true);
                     attemptNo = attemptNo + 1;
                     % Pause for 0.5 seconds
                     pause(0.5)
@@ -118,10 +118,10 @@ function [messageReceived, status, roundTripDelayMilliSecs, attemptNo] = communi
 
             if (receivedPacket.badTransmissionFlag)
                 status = obj.BAD_TRANSMISSION;
-                obj.displayMessage(sprintf('received message contains bad data'), receivedPacket.messageLabel, receivedPacket.messageData, packetNo, 'alert', true);
+                obj.displayMessage(sprintf('received message contains bad data (packet no:%d)', packetNo), receivedPacket.messageLabel, receivedPacket.messageData, packetNo, 'alert', true);
             elseif (~isempty(receivedPacket.mismatchedMessageLabel))
                 status = obj.UNEXPECTED_MESSAGE_LABEL_RECEIVED;
-                obj.displayMessage(sprintf('received message with wrong label (expected: ''%s'')', receivedPacket.mismatchedMessageLabel), receivedPacket.messageLabel, receivedPacket.messageData, packetNo, 'alert', true);
+                obj.displayMessage(sprintf('received message with wrong label (expected: ''%s'', packet no: %d)', receivedPacket.mismatchedMessageLabel, packetNo), receivedPacket.messageLabel, receivedPacket.messageData, packetNo, 'alert', true);
             end
 
             if (strcmp(status, obj.GOOD_TRANSMISSION))
@@ -129,7 +129,7 @@ function [messageReceived, status, roundTripDelayMilliSecs, attemptNo] = communi
             end
             
             attemptNo = attemptNo + 1;
-            fprintf('\n<strong>Waiting to receive a resubmission for message label: ''%s'' (attempt #%d)</strong>\n', communicationPacket.messageLabel, attemptNo);
+            fprintf('\n<strong>Waiting to receive a resubmission for message label: ''%s'' (attempt #%d, packet no: %d)</strong>\n', communicationPacket.messageLabel, attemptNo, packetNo);
             receivedPacket = obj.waitForMessage(communicationPacket.messageLabel, ...
                 'timeOutSecs', obj.maxSecondsToWaitForReceivingAnExpectedMessage ...
             );
