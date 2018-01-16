@@ -49,14 +49,21 @@ function transmissionStatus = sendMessage(obj, msgLabel, msgData, varargin)
     % Send the trailing message label
     matlabNUDP('send', udpHandle, messageLabel);
 
+    
     % Wait for acknowledgment that the message was received OK
+    timedOutFlag = true;
+    attemptNo = 0;
     pauseTimeSecs = 0;
-    timeOutMessage = sprintf('while waiting to receive acknowledgment for messageLabel: ''%s''', messageLabel);
-    timedOutFlag = obj.waitForMessageOrTimeout(timeOutSecs, pauseTimeSecs, timeOutMessage);
-    if (~timedOutFlag)
-        transmissionStatus = matlabNUDP('receive', udpHandle);
-    else 
-        transmissionStatus = obj.NO_ACKNOWLDGMENT_WITHIN_TIMEOUT_PERIOD;
+    maxAttemptsToReadACK = 10;
+    while (timedOutFlag) && (attemptNo < maxAttemptsToReadACK)
+        attemptNo = attemptNo + 1;
+        timeOutMessage = sprintf('while waiting to receive acknowledgment for messageLabel: ''%s'' (attempt no: %d/%d)', messageLabel, attemptNo, maxAttemptsToReadACK);
+        timedOutFlag = obj.waitForMessageOrTimeout(timeOutSecs, pauseTimeSecs, timeOutMessage);
+        if (~timedOutFlag)
+            transmissionStatus = matlabNUDP('receive', udpHandle);
+        else 
+            transmissionStatus = obj.NO_ACKNOWLDGMENT_WITHIN_TIMEOUT_PERIOD;
+        end
     end
 end
 

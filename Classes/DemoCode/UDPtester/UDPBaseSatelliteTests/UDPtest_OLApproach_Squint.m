@@ -35,7 +35,7 @@ function UDPtest_OLApproach_Squint
         hostRoles = {'base',          'satellite',       'satellite'};
         
         % Set the timeOutSecs param
-        timeOutSecs = 10/1000;
+        timeOutSecs = 7/1000;
     else
         % Define communication scheme
         baseHostName = 'gka06';
