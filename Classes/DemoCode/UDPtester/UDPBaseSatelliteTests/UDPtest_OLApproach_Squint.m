@@ -35,7 +35,7 @@ function UDPtest_OLApproach_Squint
         hostRoles = {'base',          'satellite',       'satellite'};
         
         % Set the timeOutSecs param
-        timeOutSecs = 20/1000;
+        timeOutSecs = 10/1000;
     else
         % Define communication scheme
         baseHostName = 'gka06';
@@ -104,13 +104,15 @@ function UDPtest_OLApproach_Squint
     % Init repetition number
     r = 0;
     
+    % Init the attempts package counter
+    attemptsCounter = zeros(1,maxAttemptsNum);
+    
     % Enter the testing loop
     while r < totalReps
         r = r + 1;
         roundTipDelayMilliSecsTransmit = [];
         roundTipDelayMilliSecsReceive = [];
-        attemptsList = zeros(1,maxAttemptsNum);
-        
+
         %% Execute communication protocol
         for packetNo = 1:numel(packetSequence)
             % Communicate packet
@@ -122,7 +124,7 @@ function UDPtest_OLApproach_Squint
                  );
 
             % Update stats
-            attemptsList(attemptsForThisPacket) = attemptsList(attemptsForThisPacket) + 1;
+            attemptsCounter(attemptsForThisPacket) = attemptsCounter(attemptsForThisPacket) + 1;
             
             if (UDPobj.isATransmissionPacket(packetSequence{packetNo}.direction, UDPobj.localHostName))
                 roundTipDelayMilliSecsTransmit(numel(roundTipDelayMilliSecsTransmit)+1) = roundTipDelayMilliSecs;
@@ -138,7 +140,7 @@ function UDPtest_OLApproach_Squint
 
         fprintf('\nRepetition %d\n', r);
         for k = 1:maxAttemptsNum
-            fprintf('Packages required %d attempt(s): %d\n', k, attemptsList(k));
+            fprintf('Packages required %d attempt(s): %d\n', k, attemptsCounter(k));
         end
         fprintf('MEAN and STD roundtrip for transmitting packages: %2.3f %2.3f msec\n', mean(roundTipDelayMilliSecsTransmit), std(roundTipDelayMilliSecsTransmit));
         fprintf('MEAN and STD roundtrip for receiving packages: %2.3f %2.3f msec\n\n', mean(roundTipDelayMilliSecsReceive), std(roundTipDelayMilliSecsReceive));
