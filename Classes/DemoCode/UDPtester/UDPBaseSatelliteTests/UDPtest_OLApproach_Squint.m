@@ -24,6 +24,8 @@ function UDPtest_OLApproach_Squint
     end
     
     location = 'nicolas_office';
+    %location = 'OLroom';
+    
     if strcmp(location,'nicolas_office')
         % Define communication scheme
         baseHostName = 'manta';
@@ -35,8 +37,8 @@ function UDPtest_OLApproach_Squint
         hostRoles = {'base',          'satellite',       'satellite'};
         
         % Set the timeOutSecs param
-        timeOutSecs = 7/1000;
-    else
+        timeOutSecs = 15/1000;
+    elseif strcmp(location,'OLroom')
         % Define communication scheme
         baseHostName = 'gka06';
         satellite1HostName = 'monkfish';
