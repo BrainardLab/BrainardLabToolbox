@@ -55,7 +55,7 @@ function transmissionStatus = sendMessage(obj, msgLabel, msgData, varargin)
     timedOutFlag = true;
     attemptsNo = 0;
     pauseTimeSecs = 0;
-    while (timedOutFlag) && (attemptNo < maxAttemptsNum)
+    while (timedOutFlag) && (attemptsNo < maxAttemptsNum)
         attemptsNo = attemptsNo + 1;
         timeOutMessage = sprintf('while waiting to receive acknowledgment for messageLabel: ''%s'' (attempt no: %d/%d)', messageLabel, attemptsNo, maxAttemptsToReadACK);
         timedOutFlag = obj.waitForMessageOrTimeout(timeOutSecs, pauseTimeSecs, timeOutMessage);
