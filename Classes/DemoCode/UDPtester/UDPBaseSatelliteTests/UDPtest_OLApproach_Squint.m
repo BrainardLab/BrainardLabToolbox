@@ -23,8 +23,8 @@ function UDPtest_OLApproach_Squint
         totalReps = Inf;
     end
     
-    location = 'nicolas_office';
-    %location = 'OLroom';
+    %location = 'nicolas_office';
+    location = 'OLroom';
     
     if strcmp(location,'nicolas_office')
         % Define communication scheme
