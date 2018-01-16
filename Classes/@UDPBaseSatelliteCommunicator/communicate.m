@@ -35,7 +35,7 @@ function [messageReceived, status, roundTripDelayMilliSecs, attemptNo] = communi
     if (obj.isATransmissionPacket(communicationPacket.direction, obj.localHostName))
         % We are transmitting a packet
         if (beVerbose)
-            fprintf('\n<strong>%s</strong> is sending packet %d via UDP channel %d and will expect ACK within %2.1f seconds.', ...
+            fprintf('\n<strong>%s</strong> is sending packet %d via UDP channel %d and will expect ACK within %2.4f seconds.', ...
                 obj.localHostName, packetNo, communicationPacket.udpChannel, communicationPacket.timeOutSecs);
         end
 
@@ -57,6 +57,8 @@ function [messageReceived, status, roundTripDelayMilliSecs, attemptNo] = communi
                     attemptNo = attemptNo + 1;
                     % Pause for 0.5 seconds before resending
                     pause(0.5)
+                    % Flush the queue
+                    obj.flushQueue();
                     fprintf('\n<strong>Attempting to send message ''%s'' again (attempt #%d)</strong>\n', communicationPacket.messageLabel, attemptNo);
                     status = obj.sendMessage(communicationPacket.messageLabel, communicationPacket.messageData, ...
                             'timeOutSecs', communicationPacket.timeOutSecs ...
@@ -66,6 +68,8 @@ function [messageReceived, status, roundTripDelayMilliSecs, attemptNo] = communi
                     attemptNo = attemptNo + 1;
                     % Pause for 0.5 seconds before resending
                     pause(0.5)
+                    % Flush the queue
+                    obj.flushQueue();
                     fprintf('\n<strong>Attempting to send the  message ''%s'' again (attempt #%d)</strong>\n', communicationPacket.messageLabel, attemptNo);
                     status = obj.sendMessage(communicationPacket.messageLabel, communicationPacket.messageData, ...
                             'timeOutSecs', communicationPacket.timeOutSecs ...
@@ -97,7 +101,7 @@ function [messageReceived, status, roundTripDelayMilliSecs, attemptNo] = communi
     else
         % We are receiving a packet
         if (beVerbose)
-            fprintf('\n<strong>%s</strong> is waiting to receive packet %d via UDP channel %d and will timeout after %2.1f seconds.', ...
+            fprintf('\n<strong>%s</strong> is waiting to receive packet %d via UDP channel %d and will timeout after %2.4f seconds.', ...
                 obj.localHostName, packetNo, communicationPacket.udpChannel, communicationPacket.timeOutSecs);
         end
 
