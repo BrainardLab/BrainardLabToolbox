@@ -51,7 +51,7 @@ function UDPtest_OLApproach_Squint
     end
     
     %% Control what is printed on the command window
-    beVerbose = false;
+    beVerbose = true;
     displayPackets = false;
     fprintf('\n\n');
     
