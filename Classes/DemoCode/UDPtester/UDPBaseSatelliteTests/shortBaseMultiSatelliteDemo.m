@@ -1,13 +1,11 @@
 function shortBaseMultiSatelliteDemo
     
-    %% Set the timeOutSecs param
-    timeOutSecs = 20/1000;
-    
     %% Allow up to 3 resubmissions before the program crashes
     maxAttemptsNum = 3;
 
     location = 'nicolas_office';
     if strcmp(location,'nicolas_office')
+        % Define communication scheme
         baseHostName = 'manta';
         satellite1HostName = 'ionean';
         satellite2HostName = 'leviathan';
@@ -15,8 +13,11 @@ function shortBaseMultiSatelliteDemo
         hostNames = {baseHostName,    satellite1HostName, satellite2HostName };
         hostIPs   = {'128.91.12.90',  '128.91.12.144',   '128.91.12.155'};
         hostRoles = {'base',          'satellite',       'satellite'};
+        
+        % Set the timeOutSecs param
+        timeOutSecs = 20/1000;
     else
-        %% Define the communication scheme
+        % Define communication scheme
         baseHostName = 'gka06';
         satellite1HostName = 'monkfish';
         satellite2HostName = 'gka33';
@@ -24,6 +25,9 @@ function shortBaseMultiSatelliteDemo
         hostNames = {baseHostName,     satellite1HostName, satellite2HostName };
         hostIPs   = {'128.91.59.227',  '128.91.59.157',   '128.91.59.228'};
         hostRoles = {'base',           'satellite',       'satellite'};
+        
+        % Set the timeOutSecs param
+        timeOutSecs = 40/1000;
     end
     
     %% Control what is printed on the command window

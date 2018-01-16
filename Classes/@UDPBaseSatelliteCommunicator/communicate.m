@@ -9,7 +9,7 @@
 % period, the waitMessage() method informs the sender and we keep waiting
 % to obtain a new message up to the maxAttemptsNum.
 
-function [messageReceived, status, roundTripDelayMilliSecs] = communicate(obj, packetNo, communicationPacket, varargin)
+function [messageReceived, status, roundTripDelayMilliSecs, attemptNo] = communicate(obj, packetNo, communicationPacket, varargin)
     % Parse optinal input parameters.
     p = inputParser;
     p.addParameter('beVerbose', false, @islogical);
@@ -136,7 +136,5 @@ function [messageReceived, status, roundTripDelayMilliSecs] = communicate(obj, p
             error('Communicate() bailed out: failure to receive a valid message after %d attempts.\n', maxAttemptsNum);
         end
     end
-
-    
 end
 

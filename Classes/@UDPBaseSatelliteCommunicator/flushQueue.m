@@ -2,7 +2,7 @@
 % transmission.
 function flushedContents = flushQueue(obj)
     % Wait to make sure the sender has sent all the data, then flush it
-    pause(obj.flushDelay);
+    %pause(obj.flushDelay);
     flushedContents = '';
     while (matlabNUDP('check', obj.udpHandle) == 1)
         flushedContents = matlabNUDP('receive', obj.udpHandle);

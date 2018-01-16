@@ -15,21 +15,41 @@
 
 function UDPtest_OLApproach_Squint
     
-    %% Set the timeOutSecs param
-    timeOutSecs = 10/1000;
-    
-    %% Allow up to 3 resubmissions before the program crashes
+    %% Allow up to 3 resubmissions in case of bad/timed-out transmissions
     maxAttemptsNum = 3;
 
-    %% Define the communication scheme
-    baseHostName = 'gka06';
-    satellite1HostName = 'monkfish';
-    satellite2HostName = 'gka33';
+    totalReps = input('Run an infinite loop (0) or a predefined number of reps (e.g. 800) : ');
+    if (totalReps == 0)
+        totalReps = Inf;
+    end
+    
+    location = 'nicolas_office';
+    if strcmp(location,'nicolas_office')
+        % Define communication scheme
+        baseHostName = 'manta';
+        satellite1HostName = 'ionean';
+        satellite2HostName = 'leviathan';
+        
+        hostNames = {baseHostName,    satellite1HostName, satellite2HostName };
+        hostIPs   = {'128.91.12.90',  '128.91.12.144',   '128.91.12.155'};
+        hostRoles = {'base',          'satellite',       'satellite'};
+        
+        % Set the timeOutSecs param
+        timeOutSecs = 20/1000;
+    else
+        % Define communication scheme
+        baseHostName = 'gka06';
+        satellite1HostName = 'monkfish';
+        satellite2HostName = 'gka33';
 
-    hostNames = {baseHostName,     satellite1HostName, satellite2HostName };
-    hostIPs   = {'128.91.59.227',  '128.91.59.157',   '128.91.59.228'};
-    hostRoles = {'base',           'satellite',       'satellite'};
-
+        hostNames = {baseHostName,     satellite1HostName, satellite2HostName };
+        hostIPs   = {'128.91.59.227',  '128.91.59.157',   '128.91.59.228'};
+        hostRoles = {'base',           'satellite',       'satellite'};
+        
+        % Set the timeOutSecs param
+        timeOutSecs = 40/1000;
+    end
+    
     %% Control what is printed on the command window
     beVerbose = false;
     displayPackets = false;
@@ -41,7 +61,7 @@ function UDPtest_OLApproach_Squint
     %% Record a video of the demo?
     recordVideo = false;
     %% Visualize the communication. You can set this to false if you want to test faster
-    visualizeComm = true;
+    visualizeComm = false;
     
     %% Instantiate the UDPBaseSatelliteCommunicator object to handle all communications
     UDPobj = UDPBaseSatelliteCommunicator.instantiateObject(hostNames, hostIPs, hostRoles, beVerbose, 'transmissionMode', 'SINGLE_BYTES');
@@ -84,41 +104,45 @@ function UDPtest_OLApproach_Squint
     % Init repetition number
     r = 0;
     
-    % Infinite loop
-    while (1)
-       
-    r = r + 1;
-    roundTipDelayMilliSecsTransmit = [];
-    roundTipDelayMilliSecsReceive = [];
-    
-    %% Execute communication protocol
-    for packetNo = 1:numel(packetSequence)
-        % Transmit packet
+    % Enter the testing loop
+    while r < totalReps
+        r = r + 1;
+        roundTipDelayMilliSecsTransmit = [];
+        roundTipDelayMilliSecsReceive = [];
+        attemptsList = zeros(1,maxAttemptsNum);
         
-        [theMessageReceived, theCommunicationStatus, roundTipDelayMilliSecs] = ...
-            UDPobj.communicate(packetNo, packetSequence{packetNo}, ...
-                'maxAttemptsNum', maxAttemptsNum, ...
-                'beVerbose', beVerbose, ...
-                'displayPackets', displayPackets...
-             );
-        
-        if (UDPobj.isATransmissionPacket(packetSequence{packetNo}.direction, UDPobj.localHostName))
-            roundTipDelayMilliSecsTransmit(numel(roundTipDelayMilliSecsTransmit)+1) = roundTipDelayMilliSecs;
-        else
-            roundTipDelayMilliSecsReceive(numel(roundTipDelayMilliSecsReceive)+1) = roundTipDelayMilliSecs;
+        %% Execute communication protocol
+        for packetNo = 1:numel(packetSequence)
+            % Communicate packet
+            [theMessageReceived, theCommunicationStatus, roundTipDelayMilliSecs, attemptsForThisPacket] = ...
+                UDPobj.communicate(packetNo, packetSequence{packetNo}, ...
+                    'maxAttemptsNum', maxAttemptsNum, ...
+                    'beVerbose', beVerbose, ...
+                    'displayPackets', displayPackets...
+                 );
+
+            % Update stats
+            attemptsList(attemptsForThisPacket) = attemptsList(attemptsForThisPacket) + 1;
+            
+            if (UDPobj.isATransmissionPacket(packetSequence{packetNo}.direction, UDPobj.localHostName))
+                roundTipDelayMilliSecsTransmit(numel(roundTipDelayMilliSecsTransmit)+1) = roundTipDelayMilliSecs;
+            else
+                roundTipDelayMilliSecsReceive(numel(roundTipDelayMilliSecsReceive)+1) = roundTipDelayMilliSecs;
+            end
+
+            % Update demo
+            if (iAmTheBase && visualizeComm)
+                 visualizeDemoData('add', recordVideo, {satellite1HostName, satellite2HostName});
+            end
+        end % packetNo
+
+        fprintf('\nRepetition %d\n', r);
+        for k = 1:maxAttemptsNum
+            fprintf('Packages required %d attempt(s): %d\n', k, attemptsList(k));
         end
-        
-         % Update demo
-         if (iAmTheBase && visualizeComm)
-             visualizeDemoData('add', recordVideo, {satellite1HostName, satellite2HostName});
-         end
-    end % packetNo
-    
-    fprintf('Repetition %d\n', r);
-    fprintf('MEAN and STD roundtrip for transmitting packages: %2.1f %2.1f msec\n', mean(roundTipDelayMilliSecsTransmit), std(roundTipDelayMilliSecsTransmit));
-    fprintf('MEAN and STD roundtrip for receiving packages: %2.1f %2.1f msec\n', mean(roundTipDelayMilliSecsReceive), std(roundTipDelayMilliSecsReceive));
-    
-    end  % while (1)
+        fprintf('MEAN and STD roundtrip for transmitting packages: %2.3f %2.3f msec\n', mean(roundTipDelayMilliSecsTransmit), std(roundTipDelayMilliSecsTransmit));
+        fprintf('MEAN and STD roundtrip for receiving packages: %2.3f %2.3f msec\n\n', mean(roundTipDelayMilliSecsReceive), std(roundTipDelayMilliSecsReceive));
+    end  % while (r < totalReps)
     
     %% Close video file
     if (iAmTheBase && visualizeComm)
