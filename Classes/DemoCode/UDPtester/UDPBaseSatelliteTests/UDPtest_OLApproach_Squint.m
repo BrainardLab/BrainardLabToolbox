@@ -142,7 +142,7 @@ function UDPtest_OLApproach_Squint
 
         fprintf('\nRepetition %d\n', r);
         for k = 1:maxAttemptsNum
-            fprintf('Packages required %d attempt(s): %d\n', k, attemptsCounter(k));
+            fprintf('Numer of packages that required %d attempt(s): %d\n', k, attemptsCounter(k));
         end
         fprintf('MEAN and STD roundtrip for transmitting packages: %2.3f %2.3f msec\n', mean(roundTipDelayMilliSecsTransmit), std(roundTipDelayMilliSecsTransmit));
         fprintf('MEAN and STD roundtrip for receiving packages: %2.3f %2.3f msec\n\n', mean(roundTipDelayMilliSecsReceive), std(roundTipDelayMilliSecsReceive));
