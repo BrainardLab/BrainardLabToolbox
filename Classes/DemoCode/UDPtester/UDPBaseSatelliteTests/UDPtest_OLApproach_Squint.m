@@ -18,8 +18,8 @@ function UDPtest_OLApproach_Squint
     %% Allow up to 3 resubmissions in case of bad/timed-out transmissions
     maxAttemptsNum = 10;
 
-    totalReps = input('Run an infinite loop (0) or a predefined number of reps (e.g. 800) : ');
-    if (totalReps == 0)
+    totalReps = input('Run an infinite loop (default) or a predefined number of reps (e.g. 800) : ');
+    if isempty(totalReps)
         totalReps = Inf;
     end
     
