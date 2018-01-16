@@ -54,7 +54,7 @@ function transmissionStatus = sendMessage(obj, msgLabel, msgData, varargin)
     timedOutFlag = true;
     attemptNo = 0;
     pauseTimeSecs = 0;
-    maxAttemptsToReadACK = 10;
+    maxAttemptsToReadACK = 100;
     while (timedOutFlag) && (attemptNo < maxAttemptsToReadACK)
         attemptNo = attemptNo + 1;
         timeOutMessage = sprintf('while waiting to receive acknowledgment for messageLabel: ''%s'' (attempt no: %d/%d)', messageLabel, attemptNo, maxAttemptsToReadACK);
@@ -64,6 +64,11 @@ function transmissionStatus = sendMessage(obj, msgLabel, msgData, varargin)
         else 
             transmissionStatus = obj.NO_ACKNOWLDGMENT_WITHIN_TIMEOUT_PERIOD;
         end
+    end
+    
+    if (timedOutFlag)
+        % Try to read the line anyway ?
+        transmissionStatus = matlabNUDP('receive', udpHandle);
     end
 end
 
