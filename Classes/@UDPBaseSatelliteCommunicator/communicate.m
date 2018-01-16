@@ -9,7 +9,7 @@
 % period, the waitMessage() method informs the sender and we keep waiting
 % to obtain a new message up to the maxAttemptsNum.
 
-function [messageReceived, status, roundTripDelayMilliSecs, attemptNo] = communicate(obj, packetNo, communicationPacket, varargin)
+function [messageReceived, status, roundTripDelayMilliSecs, attemptsNo] = communicate(obj, packetNo, communicationPacket, varargin)
     % Parse optinal input parameters.
     p = inputParser;
     p.addParameter('beVerbose', false, @islogical);
@@ -39,14 +39,14 @@ function [messageReceived, status, roundTripDelayMilliSecs, attemptNo] = communi
                 obj.localHostName, packetNo, communicationPacket.udpChannel, communicationPacket.timeOutSecs);
         end
 
-        attemptNo = 1;
-        status = obj.sendMessage(communicationPacket.messageLabel, communicationPacket.messageData, ...
+        attemptsNo = 1;
+        [status, ackAttemptsNum] = obj.sendMessage(communicationPacket.messageLabel, communicationPacket.messageData, ...
             'timeOutSecs', communicationPacket.timeOutSecs, ...
             'maxAttemptsNum', maxAttemptsNum ...
-        );
-
+        ); 
+        
         noACK = true;
-        while (attemptNo < maxAttemptsNum) && (noACK)
+        while (attemptsNo < maxAttemptsNum) && (noACK)
             switch status
                 case obj.ACKNOWLEDGMENT
                     if beVerbose
@@ -55,38 +55,38 @@ function [messageReceived, status, roundTripDelayMilliSecs, attemptNo] = communi
                     noACK = false;
                 case obj.NO_ACKNOWLDGMENT_WITHIN_TIMEOUT_PERIOD
                     obj.displayMessage(sprintf('received status ''%s'' from remote host (packet no: %d)', status, packetNo), communicationPacket.messageLabel, communicationPacket.messageData, packetNo, 'alert', true);
-                    attemptNo = attemptNo + 1;
+                    attemptsNo = attemptsNo + 1;
                     % Pause for 0.5 seconds before resending
                     pause(0.5)
                     % Flush the queue
                     obj.flushQueue();
-                    fprintf('\n<strong>Attempting to send message ''%s'' again (attempt #%d)</strong>\n', communicationPacket.messageLabel, attemptNo);
-                    status = obj.sendMessage(communicationPacket.messageLabel, communicationPacket.messageData, ...
+                    fprintf('\n<strong>Attempting to send message ''%s'' again (attempt #%d)</strong>\n', communicationPacket.messageLabel, attemptsNo);
+                    [status, ackAttemptsNum] = obj.sendMessage(communicationPacket.messageLabel, communicationPacket.messageData, ...
                             'timeOutSecs', communicationPacket.timeOutSecs, ...
                             'maxAttemptsNum', maxAttemptsNum ...
                     );
                 case { obj.UNEXPECTED_MESSAGE_LABEL_RECEIVED, obj.BAD_TRANSMISSION}
                     obj.displayMessage(sprintf('received status ''%s'' from remote host (packet no: %d)', status, packetNo), communicationPacket.messageLabel, communicationPacket.messageData, packetNo, 'alert', true);
-                    attemptNo = attemptNo + 1;
+                    attemptsNo = attemptsNo + 1;
                     % Pause for 0.5 seconds before resending
                     pause(0.5)
                     % Flush the queue
                     obj.flushQueue();
-                    fprintf('\n<strong>Attempting to send the  message ''%s'' again (attempt #%d)</strong>\n', communicationPacket.messageLabel, attemptNo);
-                    status = obj.sendMessage(communicationPacket.messageLabel, communicationPacket.messageData, ...
+                    fprintf('\n<strong>Attempting to send the  message ''%s'' again (attempt #%d)</strong>\n', communicationPacket.messageLabel, attemptsNo);
+                    [status, ackAttemptsNum] = obj.sendMessage(communicationPacket.messageLabel, communicationPacket.messageData, ...
                             'timeOutSecs', communicationPacket.timeOutSecs, ...
                             'maxAttemptsNum', maxAttemptsNum ...
                     );
                 otherwise
                     obj.displayMessage(sprintf('received unexpected status ''%s'' from remote host (packet no: %d)', status, packetNo), communicationPacket.messageLabel, communicationPacket.messageData, packetNo, 'alert', true);
-                    attemptNo = attemptNo + 1;
+                    attemptsNo = attemptsNo + 1;
                     % Pause for 0.5 seconds
                     pause(0.5)
                     % Flush the queue
                     obj.flushQueue();
                     % Resend package
-                    fprintf('\n<strong>Attempting to send the  message ''%s'' again (attempt #%d)</strong>\n', communicationPacket.messageLabel, attemptNo);
-                    status = obj.sendMessage(communicationPacket.messageLabel, communicationPacket.messageData, ...
+                    fprintf('\n<strong>Attempting to send the  message ''%s'' again (attempt #%d)</strong>\n', communicationPacket.messageLabel, attemptsNo);
+                    [status, ackAttemptsNum] = obj.sendMessage(communicationPacket.messageLabel, communicationPacket.messageData, ...
                             'timeOutSecs', communicationPacket.timeOutSecs, ...
                             'maxAttemptsNum', maxAttemptsNum ...
                     );
@@ -96,11 +96,12 @@ function [messageReceived, status, roundTripDelayMilliSecs, attemptNo] = communi
         if (noACK)
             error('Communicate() bailed out: failure to receive ACK after %d attempts of transmission\n', maxAttemptsNum);
         else
-            if (attemptNo > 1)
-                fprintf('\n<strong>Succesfully transmitted message on attempt %d.</strong>\n', attemptNo);
+            if (attemptsNo > 1)
+                fprintf('\n<strong>Succesfully transmitted message on attempt %d.</strong>\n', attemptsNo);
             end
         end
         roundTripDelayMilliSecs = toc * 1000;
+        attemptsNo = attemptsNo + ackAttemptsNum-1;
         
     else
         % We are receiving a packet
@@ -109,19 +110,19 @@ function [messageReceived, status, roundTripDelayMilliSecs, attemptNo] = communi
                 obj.localHostName, packetNo, communicationPacket.udpChannel, communicationPacket.timeOutSecs);
         end
 
-        attemptNo = 1;
+        attemptsNo = 1;
         receivedPacket = obj.waitForMessage(communicationPacket.messageLabel, ...
             'timeOutSecs', obj.maxSecondsToWaitForReceivingAnExpectedMessage ...
         );
 
         % Compute status of operation
         status = 'to be determined';
-        while (attemptNo < maxAttemptsNum) && ~(strcmp(status, obj.GOOD_TRANSMISSION))
+        while (attemptsNo < maxAttemptsNum) && ~(strcmp(status, obj.GOOD_TRANSMISSION))
             
             status = obj.GOOD_TRANSMISSION;
             if (receivedPacket.timedOutFlag)
                 status = obj.MESSAGE_FAILED_TO_ARRIVE_WITHIN_MAX_WAIT_PERIOD;
-                obj.displayMessage(sprintf('received no message within the max wait period (attempt no. %d)', attemptNo), communicationPacket.messageLabel, [], packetNo, 'alert', true);
+                obj.displayMessage(sprintf('received no message within the max wait period (attempt no. %d)', attemptsNo), communicationPacket.messageLabel, [], packetNo, 'alert', true);
             end
 
             if (receivedPacket.badTransmissionFlag)
@@ -136,16 +137,16 @@ function [messageReceived, status, roundTripDelayMilliSecs, attemptNo] = communi
                 continue;
             end
             
-            attemptNo = attemptNo + 1;
-            fprintf('\n<strong>Waiting to receive a resubmission for message label: ''%s'' (attempt #%d, packet no: %d)</strong>\n', communicationPacket.messageLabel, attemptNo, packetNo);
+            attemptsNo = attemptsNo + 1;
+            fprintf('\n<strong>Waiting to receive a resubmission for message label: ''%s'' (attempt #%d, packet no: %d)</strong>\n', communicationPacket.messageLabel, attemptsNo, packetNo);
             receivedPacket = obj.waitForMessage(communicationPacket.messageLabel, ...
                 'timeOutSecs', obj.maxSecondsToWaitForReceivingAnExpectedMessage ...
             );
         end % while
 
         if (strcmp(status, obj.GOOD_TRANSMISSION))
-            if (attemptNo>1)
-                fprintf('\n<strong>Succesfully received message on attempt %d.</strong>\n', attemptNo); 
+            if (attemptsNo>1)
+                fprintf('\n<strong>Succesfully received message on attempt %d.</strong>\n', attemptsNo); 
             end
             if (beVerbose)
                 obj.displayMessage('received expected message', receivedPacket.messageLabel, receivedPacket.messageData, packetNo);

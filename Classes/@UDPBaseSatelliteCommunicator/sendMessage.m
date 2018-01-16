@@ -2,7 +2,7 @@
 % we wait up to timeOutSecs to receive an acknowledgment. If we do not, the
 % waitForMessageOrTimeout() method throws an exception.
 
-function transmissionStatus = sendMessage(obj, msgLabel, msgData, varargin)
+function [transmissionStatus, attemptsNo] = sendMessage(obj, msgLabel, msgData, varargin)
     p = inputParser;
     p.addRequired('msgLabel',@ischar);
     p.addRequired('msgData');
