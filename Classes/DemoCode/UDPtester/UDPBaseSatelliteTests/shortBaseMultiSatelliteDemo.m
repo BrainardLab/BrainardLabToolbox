@@ -1,7 +1,7 @@
 function shortBaseMultiSatelliteDemo
     
     %% Set the timeOutSecs param
-    timeOutSecs = 10/1000;
+    timeOutSecs = 20/1000;
     
     %% Allow up to 3 resubmissions before the program crashes
     maxAttemptsNum = 3;

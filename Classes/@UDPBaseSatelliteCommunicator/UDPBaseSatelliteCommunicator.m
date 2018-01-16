@@ -21,6 +21,7 @@ classdef UDPBaseSatelliteCommunicator < handle
         timeOutsCount         % number of timeouts
         flushDelay            % seconds to wait before flushing the UDP queue
         transmissionMode      % either 'SINGLE_BYTES', or 'WORDS'
+    	maxSecondsToWaitForReceivingAnExpectedMessage  % seconds to sit and wait until a message arrives
     end
 
     properties (Access = private)
@@ -79,6 +80,7 @@ classdef UDPBaseSatelliteCommunicator < handle
             obj.transmissionMode = p.Results.transmissionMode;
             obj.localHostName = obj.getLocalHostName();
             obj.flushDelay = 0.1;
+            obj.maxSecondsToWaitForReceivingAnExpectedMessage = 10;
             
             if strcmp(obj.verbosity,'max')
                 fprintf('%s Initialized.\n', obj.selfSignature);
