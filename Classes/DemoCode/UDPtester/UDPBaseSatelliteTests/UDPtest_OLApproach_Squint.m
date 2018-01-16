@@ -103,11 +103,11 @@ function UDPtest_OLApproach_Squint
         visualizeDemoData('open', recordVideo, {satellite1HostName, satellite2HostName});
     end
 
-    % Init repetition number
-    r = 0;
-    
     % Init the attempts package counter
     attemptsCounter = zeros(1,maxAttemptsNum);
+    
+    % Init repetition number
+    r = 0;
     
     % Enter the testing loop
     while r < totalReps
