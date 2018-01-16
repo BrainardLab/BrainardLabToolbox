@@ -7,12 +7,14 @@ function transmissionStatus = sendMessage(obj, msgLabel, msgData, varargin)
     p.addRequired('msgLabel',@ischar);
     p.addRequired('msgData');
     p.addOptional('timeOutSecs', 5, @isnumeric);
+    p.addParameter('maxAttemptsNum',1, @isnumeric); 
     parse(p,  msgLabel, msgData, varargin{:});
 
-    messageLabel = p.Results.msgLabel;
-    messageData  = p.Results.msgData;
-    timeOutSecs  = p.Results.timeOutSecs;
-    udpHandle    = obj.udpHandle;
+    messageLabel    = p.Results.msgLabel;
+    messageData     = p.Results.msgData;
+    timeOutSecs     = p.Results.timeOutSecs;
+    maxAttemptsNum  = p.Results.maxAttemptsNum;
+    udpHandle       = obj.udpHandle;
     
     % Serialize data
     byteStream = getByteStreamFromArray(messageData);
@@ -48,16 +50,14 @@ function transmissionStatus = sendMessage(obj, msgLabel, msgData, varargin)
     
     % Send the trailing message label
     matlabNUDP('send', udpHandle, messageLabel);
-
-    
+   
     % Wait for acknowledgment that the message was received OK
     timedOutFlag = true;
-    attemptNo = 0;
+    attemptsNo = 0;
     pauseTimeSecs = 0;
-    maxAttemptsToReadACK = 100;
-    while (timedOutFlag) && (attemptNo < maxAttemptsToReadACK)
-        attemptNo = attemptNo + 1;
-        timeOutMessage = sprintf('while waiting to receive acknowledgment for messageLabel: ''%s'' (attempt no: %d/%d)', messageLabel, attemptNo, maxAttemptsToReadACK);
+    while (timedOutFlag) && (attemptNo < maxAttemptsNum)
+        attemptsNo = attemptsNo + 1;
+        timeOutMessage = sprintf('while waiting to receive acknowledgment for messageLabel: ''%s'' (attempt no: %d/%d)', messageLabel, attemptsNo, maxAttemptsToReadACK);
         timedOutFlag = obj.waitForMessageOrTimeout(timeOutSecs, pauseTimeSecs, timeOutMessage);
         if (~timedOutFlag)
             transmissionStatus = matlabNUDP('receive', udpHandle);

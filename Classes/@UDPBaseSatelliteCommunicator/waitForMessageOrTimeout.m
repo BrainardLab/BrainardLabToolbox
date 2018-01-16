@@ -10,7 +10,9 @@ function timedOutFlag = waitForMessageOrTimeout(obj, timeOutSecs, pauseTimeSecs,
         elapsedTime = toc;
         if (elapsedTime > timeOutSecs)
             timedOutFlag = true;
-            printTimeOutMessage(timeOutMessage);
+            if (~isempty(timeOutMessage))
+                printTimeOutMessage(timeOutMessage);
+            end
         end
     end
 end

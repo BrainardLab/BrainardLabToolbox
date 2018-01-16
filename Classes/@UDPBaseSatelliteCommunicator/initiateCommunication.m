@@ -82,7 +82,7 @@ function initiateCommunication(obj, hostRoles, hostNames, triggerMessage, allSat
             % Set the current udpHandle
             obj.udpHandle = obj.satelliteInfo(satelliteName).satelliteChannelID; 
             % Send trigger and wait for up to 1 seconds to receive acknowledgment
-            status = obj.sendMessage(triggerMessage, '', 'timeOutSecs',  5);
+            status = obj.sendMessage(triggerMessage, '', 'timeOutSecs',  5, 'maxAttemptsNum', 10);
             if (~strcmp(status, obj.ACKNOWLEDGMENT))
                 error('Satellite ''%s'' did not respond within the timeOutPeriod to the trigger message: ''%s''. Restart program.\n', satelliteName, triggerMessage);
             end
@@ -94,7 +94,7 @@ function initiateCommunication(obj, hostRoles, hostNames, triggerMessage, allSat
             % Set the current udpHandle
             obj.udpHandle = obj.satelliteInfo(satelliteName).satelliteChannelID; 
             % Send trigger and wait for up to 4 seconds to receive acknowledgment
-            status = obj.sendMessage(allSatellitesAreAGOMessage, '', 'timeOutSecs',  1);
+            status = obj.sendMessage(allSatellitesAreAGOMessage, '', 'timeOutSecs',  5, 'maxAttemptsNum', 10);
             if (~strcmp(status, obj.ACKNOWLEDGMENT))
                 error('Satellite ''%s'' did not respond within the timeOutPeriod to the allSatellitesAreAGOMessage message: ''%s''. Restart program.\n', satelliteName, allSatellitesAreAGOMessage);
             end
