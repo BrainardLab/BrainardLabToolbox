@@ -89,7 +89,7 @@ classdef UDPBaseSatelliteCommunicator < handle
 
         % Public API (low-level)
         packet = waitForMessage(obj, msgLabel, varargin);
-        transmissionStatus = sendMessage(obj, msgLabel, msgData, varargin);
+        [transmissionStatus, ackAttemptsNo] = sendMessage(obj, msgLabel, msgData, varargin);
         displayMessage(obj, action,  messageLabel, messageData, packetNo, varargin);
         flushedContents = flushQueue(obj);
 
