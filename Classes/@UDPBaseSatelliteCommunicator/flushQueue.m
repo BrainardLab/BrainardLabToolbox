@@ -11,6 +11,6 @@ function flushedContents = flushQueue(obj)
     flushedContents = '';
     fprintf('Will flush\n');
     while (matlabNUDP('check', obj.udpHandle) == 1)
-        flushedContents = matlabNUDP('receive', obj.udpHandle)
+        flushedContents = matlabNUDP('receive', obj.udpHandle);
     end
 end
