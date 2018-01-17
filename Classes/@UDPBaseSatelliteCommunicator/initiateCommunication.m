@@ -103,10 +103,10 @@ function initiateCommunication(obj, hostRoles, hostNames, triggerMessage, allSat
     % Now send the allSatellitesAreAGOMessage
     
     if (obj.localHostIsBase)
-        packetSequence = designTriggerPacketSequenceForBase(UDPobj, satelliteHostNames, allSatellitesAreAGOMessage, timeOutSecs);
+        packetSequence = designTriggerPacketSequenceForBase(obj, satelliteHostNames, allSatellitesAreAGOMessage, timeOutSecs);
         fprintf('<strong>Sending the ''all satellites are a GO'' message to all satellites.</strong>\n'); 
     else
-        packetSequence = designTriggerPacketSequenceForSatellite(UDPobj, satelliteName, allSatellitesAreAGOMessage, timeOutSecs);
+        packetSequence = designTriggerPacketSequenceForSatellite(obj, satelliteName, allSatellitesAreAGOMessage, timeOutSecs);
         fprintf('<strong>Waiting for the ''all satellites are a GO'' message from base.</strong>\n');
     end
     
