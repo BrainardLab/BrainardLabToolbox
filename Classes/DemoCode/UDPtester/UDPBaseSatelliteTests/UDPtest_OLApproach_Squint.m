@@ -11,11 +11,11 @@
 % Let it run for as long as you want, then ^C to terminate.
 % 
 % 1/12/2018  NPC Wrote it
-%
+% 1/17/2018  NPC Improvements in timing and handling of timeouts, dropbox syncing pause
 
 function UDPtest_OLApproach_Squint
     
-    %% Allow up to 3 resubmissions in case of bad/timed-out transmissions
+    %% Allow up to this many attempts to send/read a packet
     maxAttemptsNum = 10;
 
     totalReps = input('Run an infinite loop (default) or a predefined number of reps (e.g. 800) : ');
@@ -23,6 +23,17 @@ function UDPtest_OLApproach_Squint
         totalReps = Inf;
     end
     
+    %% Pause dropbox syncing ?
+    pauseDropBox = input('Pause dropbox syncing [y/n], (default: y)');
+    if (isempty(pauseDropBox)) || ((ischar(pauseDropBox))&&(strcmpi(pauseDropBox, 'y')))
+        dropBoxSyncingStatus = pauseUnpauseDropbox('command', '--pause');
+        fprintf('DropBox syncing status set to %d\n',dropBoxSyncingStatus);
+        pauseDropBox = true;
+    else
+        pauseDropBox = false;
+    end
+    
+    %% Select location (this detemines what computers are playing together)
     %location = 'nicolas_office';
     location = 'OLroom';
     
@@ -103,13 +114,13 @@ function UDPtest_OLApproach_Squint
         visualizeDemoData('open', recordVideo, {satellite1HostName, satellite2HostName});
     end
 
-    % Init the attempts package counter
+    %% Init the attempts package counter
     attemptsCounter = zeros(1,maxAttemptsNum);
     
-    % Init repetition number
+    %% Init repetition number
     r = 0;
     
-    % Enter the testing loop
+    %% Enter the testing loop
     while r < totalReps
         r = r + 1;
         roundTipDelayMilliSecsTransmit = [];
@@ -148,11 +159,16 @@ function UDPtest_OLApproach_Squint
         fprintf('MEAN and STD roundtrip for receiving packages: %2.3f %2.3f msec\n\n', mean(roundTipDelayMilliSecsReceive), std(roundTipDelayMilliSecsReceive));
     end  % while (r < totalReps)
     
+    %% Resume dropbox syncing
+    if (pauseDropbox)
+        dropBoxSyncingStatus = pauseUnpauseDropbox('command','--resume');
+        fprintf('DropBox syncing status set to %d\n',dropBoxSyncingStatus);
+    end
+    
     %% Close video file
     if (iAmTheBase && visualizeComm)
         visualizeDemoData('close', recordVideo, {satellite1HostName, satellite2HostName});
     end
-
 
     %% Nested function for visualizing the demo
     function visualizeDemoData(mode, recordVideo, satteliteNames)
