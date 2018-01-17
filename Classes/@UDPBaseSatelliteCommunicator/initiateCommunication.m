@@ -82,7 +82,7 @@ function initiateCommunication(obj, hostRoles, hostNames, triggerMessage, allSat
             % Set the current udpHandle
             obj.udpHandle = obj.satelliteInfo(satelliteName).satelliteChannelID; 
             % Send trigger and wait for up to 1 seconds to receive acknowledgment
-            status = obj.sendMessage(triggerMessage, '', 'timeOutSecs',  5, 'maxAttemptsNum', 10);
+            status = obj.sendMessage(triggerMessage, '', 'timeOutSecs',  10, 'maxAttemptsNum', 10);
             if (~strcmp(status, obj.ACKNOWLEDGMENT))
                 error('Satellite ''%s'' did not respond within the timeOutPeriod to the trigger message: ''%s''. Restart program.\n', satelliteName, triggerMessage);
             end
@@ -94,7 +94,7 @@ function initiateCommunication(obj, hostRoles, hostNames, triggerMessage, allSat
             % Set the current udpHandle
             obj.udpHandle = obj.satelliteInfo(satelliteName).satelliteChannelID; 
             % Send trigger and wait for up to 4 seconds to receive acknowledgment
-            status = obj.sendMessage(allSatellitesAreAGOMessage, '', 'timeOutSecs',  5, 'maxAttemptsNum', 10);
+            status = obj.sendMessage(allSatellitesAreAGOMessage, '', 'timeOutSecs',  10, 'maxAttemptsNum', 10);
             if (~strcmp(status, obj.ACKNOWLEDGMENT))
                 error('Satellite ''%s'' did not respond within the timeOutPeriod to the allSatellitesAreAGOMessage message: ''%s''. Restart program.\n', satelliteName, allSatellitesAreAGOMessage);
             end
@@ -117,9 +117,9 @@ function initiateCommunication(obj, hostRoles, hostNames, triggerMessage, allSat
         
         fprintf('Received the trigger message, will wait 5 seconds for the BASE to transmit that all satellites are a GO !\n');
         % Wait for 5 seconds to receive the allSatellitesAreAGOMessage message from the base
-        receivedPacket = obj.waitForMessage(allSatellitesAreAGOMessage, 'timeOutSecs', 5); 
+        receivedPacket = obj.waitForMessage(allSatellitesAreAGOMessage, 'timeOutSecs', 10); 
         if (receivedPacket.timedOutFlag)
-            error('Timed out after 5 seconds while waiting to receive the ''%s'' message.', allSatellitesAreAGOMessage);
+            error('Timed out after 10 seconds while waiting to receive the ''%s'' message.', allSatellitesAreAGOMessage);
         end
         if (receivedPacket.badTransmissionFlag)
             error('Bad data  during the ''%s'' message.', allSatellitesAreAGOMessage);
