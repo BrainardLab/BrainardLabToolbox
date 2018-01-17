@@ -67,10 +67,6 @@ function initiateCommunication(obj, hostRoles, hostNames, triggerMessage, allSat
     end
             
     if (obj.localHostIsBase)
-        % flush any remaining bits
-        pause(1.0);
-        obj.flushQueue();
-        
         fprintf('Are the satellite(s) ready to go?. Hit enter if so.\n'); pause; clc; 
         iSatelliteNames = keys(obj.satelliteInfo);
         for k = 1:numel(iSatelliteNames)
@@ -98,10 +94,6 @@ function initiateCommunication(obj, hostRoles, hostNames, triggerMessage, allSat
         end % for k
         
     else
-        % flush any remaining bits
-        pause(0.5);
-        obj.flushQueue();
-            
         % Set the current udpHandle
         obj.udpHandle = obj.satelliteInfo(obj.localHostName).satelliteChannelID; 
         
