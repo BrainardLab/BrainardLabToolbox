@@ -81,7 +81,7 @@ function initiateCommunication(obj, hostRoles, hostNames, triggerMessage, allSat
         obj.flushQueue();
         
         % design trigger sequence
-        packetSequence = designTriggerPacketSequenceForSatellite(obj, satelliteName, triggerMessage, timeOutSecs); 
+        packetSequence = designTriggerPacketSequenceForSatellite(obj, satelliteName, triggerMessage, Inf); 
     
         fprintf('<strong>Waiting for the trigger message from base.</strong>\n'); 
     end
