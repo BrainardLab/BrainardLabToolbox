@@ -51,9 +51,6 @@ function initiateCommunication(obj, hostRoles, hostNames, triggerMessage, allSat
             % Close udp channel, then re-open it
             matlabNUDP('close', obj.udpHandle);
             matlabNUDP('open', obj.udpHandle, obj.localIP, obj.satelliteInfo(satelliteName).satelliteIP, obj.satelliteInfo(satelliteName).portNo);
-
-            % flush any remaining bits
-            obj.flushQueue();
         end
     else 
         % We are a satellite
@@ -66,14 +63,14 @@ function initiateCommunication(obj, hostRoles, hostNames, triggerMessage, allSat
         %end
 
         matlabNUDP('close', obj.udpHandle);
-        matlabNUDP('open', obj.udpHandle, obj.localIP, obj.baseInfo.baseIP, obj.satelliteInfo(satelliteName).portNo);
-
-        % flush any remaining bits
-        obj.flushQueue();   
+        matlabNUDP('open', obj.udpHandle, obj.localIP, obj.baseInfo.baseIP, obj.satelliteInfo(satelliteName).portNo); 
     end
-
-    
+            
     if (obj.localHostIsBase)
+        % flush any remaining bits
+        pause(1.0);
+        obj.flushQueue();
+        
         fprintf('Are the satellite(s) ready to go?. Hit enter if so.\n'); pause; clc; 
         iSatelliteNames = keys(obj.satelliteInfo);
         for k = 1:numel(iSatelliteNames)
@@ -101,8 +98,13 @@ function initiateCommunication(obj, hostRoles, hostNames, triggerMessage, allSat
         end % for k
         
     else
+        % flush any remaining bits
+        pause(0.5);
+        obj.flushQueue();
+            
         % Set the current udpHandle
         obj.udpHandle = obj.satelliteInfo(obj.localHostName).satelliteChannelID; 
+        
         % Wait for ever to receive the trigger message from the base
         receivedPacket = obj.waitForMessage(triggerMessage, ...
                 'timeOutSecs', Inf, ...
