@@ -8,6 +8,10 @@ function initiateCommunication(obj, hostRoles, hostNames, triggerMessage, allSat
     parse(p,varargin{:});
     beVerbose = p.Results.beVerbose;
     
+    % Time out duration and max attempts num to establish communication
+    timeOutSecs = 10;
+    maxAttemptsNum = 5;
+    
     % Who are we?
     localHostName = obj.localHostName;
     
@@ -28,9 +32,9 @@ function initiateCommunication(obj, hostRoles, hostNames, triggerMessage, allSat
     
     % initialize UDP communication(s)
     if (obj.localHostIsBase)
-        iSatelliteNames = keys(obj.satelliteInfo);
+        satelliteHostNames = keys(obj.satelliteInfo);
     else
-        iSatelliteNames{1} = obj.localHostName;
+        satelliteHostNames{1} = obj.localHostName;
     end
     
     for udpHandle = obj.MIN_UDP_HANDLE:obj.MAX_UDP_HANDLE
@@ -39,9 +43,9 @@ function initiateCommunication(obj, hostRoles, hostNames, triggerMessage, allSat
     
     if (obj.localHostIsBase)
         % We are the base
-        for k = 1:numel(iSatelliteNames)  
+        for k = 1:numel(satelliteHostNames)  
             % Set updHandle for communication with this satellite
-            satelliteName = iSatelliteNames{k};
+            satelliteName = satelliteHostNames{k};
             obj.udpHandle = obj.satelliteInfo(satelliteName).satelliteChannelID;
 
             if strcmp(obj.verbosity,'max')
@@ -53,10 +57,13 @@ function initiateCommunication(obj, hostRoles, hostNames, triggerMessage, allSat
             matlabNUDP('open', obj.udpHandle, obj.localIP, obj.satelliteInfo(satelliteName).satelliteIP, obj.satelliteInfo(satelliteName).portNo);        
             obj.flushQueue();
         end
+        
+        packetSequence = designTriggerPacketSequenceForBase(UDPobj, satelliteHostNames, triggerMessage, timeOutSecs);
+        fprintf('Are the satellite(s) ready to go?. Hit enter if so.\n'); pause; clc; 
     else 
         % We are a satellite
         % Set updHandle for communicating with base
-        satelliteName = iSatelliteNames{1};
+        satelliteName = satelliteHostNames{1};
         obj.udpHandle = obj.satelliteInfo(satelliteName).satelliteChannelID;
             
         if strcmp(obj.verbosity,'max')
@@ -67,21 +74,64 @@ function initiateCommunication(obj, hostRoles, hostNames, triggerMessage, allSat
         matlabNUDP('close', obj.udpHandle);
         matlabNUDP('open', obj.udpHandle, obj.localIP, obj.baseInfo.baseIP, obj.satelliteInfo(satelliteName).portNo); 
         obj.flushQueue();
+        
+        packetSequence = designTriggerPacketSequenceForSatellite(UDPobj, satelliteName, triggerMessage, timeOutSecs); 
     end
-            
+    
+    % Communicate the triggerMessage      
+    for packetNo = 1:numel(packetSequence)
+       % Communicate packet
+       [theMessageReceived, theCommunicationStatus, roundTipDelayMilliSecs, attemptsForThisPacket] = ...
+                UDPobj.communicate(packetNo, packetSequence{packetNo}, ...
+                    'maxAttemptsNum', maxAttemptsNum, ...
+                    'beVerbose', beVerbose, ...
+                    'displayPackets', displayPackets...
+                 );
+    end % packetNo
+        
+    % If we reach this point, we have sent the trigger message and all sattelites have replied.
+    % Now send the allSatellitesAreAGOMessage
+    
     if (obj.localHostIsBase)
-        fprintf('Are the satellite(s) ready to go?. Hit enter if so.\n'); pause; clc; 
-        iSatelliteNames = keys(obj.satelliteInfo);
+        packetSequence = designTriggerPacketSequenceForBase(UDPobj, satelliteHostNames, allSatellitesAreAGOMessage, timeOutSecs);
+    else
+        packetSequence = designTriggerPacketSequenceForSatellite(UDPobj, satelliteName, allSatellitesAreAGOMessage, timeOutSecs);
+    end
+    
+    % Communicate the  allSatellitesAreAGOMessage   
+    for packetNo = 1:numel(packetSequence)
+       % Communicate packet
+       [theMessageReceived, theCommunicationStatus, roundTipDelayMilliSecs, attemptsForThisPacket] = ...
+                UDPobj.communicate(packetNo, packetSequence{packetNo}, ...
+                    'maxAttemptsNum', maxAttemptsNum, ...
+                    'beVerbose', beVerbose, ...
+                    'displayPackets', displayPackets...
+                 );
+    end % packetNo
+    
+    if (obj.localHostIsBase)
+        fprintf('Successfully established communication with all sattelites.\n');
+    else
+        fprintf('Successfully established communication with all base.\n');
+    end
+   
+    
+%{
+    OLD STUFF
+    if (obj.localHostIsBase)
+        
         for k = 1:numel(iSatelliteNames)
             satelliteName = iSatelliteNames{k};
             fprintf('Initiating communication with satellite ''%s''.\n', satelliteName);
             % Set the current udpHandle
             obj.udpHandle = obj.satelliteInfo(satelliteName).satelliteChannelID; 
+            
             % Send trigger and wait for up to 1 seconds to receive acknowledgment
             status = obj.sendMessage(triggerMessage, '', 'timeOutSecs',  10, 'maxAttemptsNum', 10);
             if (~strcmp(status, obj.ACKNOWLEDGMENT))
                 error('Satellite ''%s'' did not respond within the timeOutPeriod to the trigger message: ''%s''. Restart program.\n', satelliteName, triggerMessage);
             end
+            
         end % for k
         
         for k = 1:numel(iSatelliteNames)
@@ -89,11 +139,13 @@ function initiateCommunication(obj, hostRoles, hostNames, triggerMessage, allSat
             fprintf('Sending the * all satellites are a go * message to ''%s''.\n', satelliteName);
             % Set the current udpHandle
             obj.udpHandle = obj.satelliteInfo(satelliteName).satelliteChannelID; 
+            
             % Send trigger and wait for up to 4 seconds to receive acknowledgment
             status = obj.sendMessage(allSatellitesAreAGOMessage, '', 'timeOutSecs',  10, 'maxAttemptsNum', 10);
             if (~strcmp(status, obj.ACKNOWLEDGMENT))
                 error('Satellite ''%s'' did not respond within the timeOutPeriod to the allSatellitesAreAGOMessage message: ''%s''. Restart program.\n', satelliteName, allSatellitesAreAGOMessage);
             end
+            
         end % for k
         
     else
@@ -125,6 +177,48 @@ function initiateCommunication(obj, hostRoles, hostNames, triggerMessage, allSat
             error('Expected: ''%s'', Received: ''%s''.', allSatellitesAreAGOMessage, receivedPacket.mismatchedMessageLabel);
         end
     end
+    
+%}    
+    
+end
+
+function packetSequence = designTriggerPacketSequenceForBase(UDPobj, satelliteHostNames, triggerMessage, timeOutSecs)
+    % Define the communication  packetSequence
+    packetSequence = {};
+
+    % Get base host name
+    baseHostName = UDPobj.baseInfo.baseHostName;
+    
+    for satIndex = 1:numel(satelliteHostNames)
+        satelliteHostName = satelliteHostNames{satIndex};
+        direction = sprintf('%s -> %s', baseHostName, satelliteHostName);
+        messageLabel = triggerMessage;
+        messageData = '';
+        packetSequence{numel(packetSequence)+1} = UDPobj.makePacket(...
+            satelliteHostName,...
+            direction, ...
+            messageLabel, 'withData', messageData, ...
+            'timeOutSecs', timeOutSecs ...
+        );
+    end % satIndex
+end
+
+function packetSequence = designTriggerPacketSequenceForSatellite(UDPobj, satelliteHostName, triggerMessage, timeOutSecs) 
+    % Define the communication  packetSequence
+    packetSequence = {};
+    
+    % Get base host name
+    baseHostName = UDPobj.baseInfo.baseHostName;
+    
+    direction = sprintf('%s -> %s', baseHostName, satelliteHostName);
+    expectedMessageLabel = triggerMessage;
+    
+    packetSequence{numel(packetSequence)+1} = UDPobj.makePacket(...
+            satelliteHostName,...
+            direction, ...
+            expectedMessageLabel, ...
+            'timeOutSecs', timeOutSecs ...
+    );
 end
 
 function iHaveThatRole  = localHostRoleIs(localHostName, hostNames, hostRoles, theRole)
