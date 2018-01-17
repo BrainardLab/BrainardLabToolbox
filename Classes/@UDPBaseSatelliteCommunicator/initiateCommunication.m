@@ -52,7 +52,7 @@ function initiateCommunication(obj, hostRoles, hostNames, triggerMessage, allSat
             matlabNUDP('close', obj.udpHandle);
             matlabNUDP('open', obj.udpHandle, obj.localIP, obj.satelliteInfo(satelliteName).satelliteIP, obj.satelliteInfo(satelliteName).portNo);
         
-            obj.flush();
+            obj.flushQueue();
             
             % Close udp channel, then re-open it
             matlabNUDP('close', obj.udpHandle);
@@ -71,7 +71,7 @@ function initiateCommunication(obj, hostRoles, hostNames, triggerMessage, allSat
         matlabNUDP('close', obj.udpHandle);
         matlabNUDP('open', obj.udpHandle, obj.localIP, obj.baseInfo.baseIP, obj.satelliteInfo(satelliteName).portNo); 
         
-        obj.flush();
+        obj.flushQueue();
         
         matlabNUDP('close', obj.udpHandle);
         matlabNUDP('open', obj.udpHandle, obj.localIP, obj.baseInfo.baseIP, obj.satelliteInfo(satelliteName).portNo); 
