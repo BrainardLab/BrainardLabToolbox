@@ -11,6 +11,7 @@ function initiateCommunication(obj, hostRoles, hostNames, triggerMessage, allSat
     % Time out duration and max attempts num to establish communication
     timeOutSecs = 10;
     maxAttemptsNum = 5;
+    displayPackets = false;
     
     % Who are we?
     localHostName = obj.localHostName;
@@ -58,8 +59,12 @@ function initiateCommunication(obj, hostRoles, hostNames, triggerMessage, allSat
             obj.flushQueue();
         end
         
-        packetSequence = designTriggerPacketSequenceForBase(UDPobj, satelliteHostNames, triggerMessage, timeOutSecs);
-        fprintf('Are the satellite(s) ready to go?. Hit enter if so.\n'); pause; clc; 
+        % design trigger sequence
+        
+        packetSequence = designTriggerPacketSequenceForBase(obj, satelliteHostNames, triggerMessage, timeOutSecs);
+        fprintf('<strong>Are the satellite(s) ready to go?. Hit enter if so.</strong>\n'); pause; clc; 
+    
+        fprintf('<strong>Sending the trigger message to all satellites.</strong>\n'); 
     else 
         % We are a satellite
         % Set updHandle for communicating with base
@@ -75,14 +80,19 @@ function initiateCommunication(obj, hostRoles, hostNames, triggerMessage, allSat
         matlabNUDP('open', obj.udpHandle, obj.localIP, obj.baseInfo.baseIP, obj.satelliteInfo(satelliteName).portNo); 
         obj.flushQueue();
         
-        packetSequence = designTriggerPacketSequenceForSatellite(UDPobj, satelliteName, triggerMessage, timeOutSecs); 
+        % design trigger sequence
+        packetSequence = designTriggerPacketSequenceForSatellite(obj, satelliteName, triggerMessage, timeOutSecs); 
+    
+        fprintf('<strong>Waiting for the trigger message from base.</strong>\n'); 
     end
     
+    
+        
     % Communicate the triggerMessage      
     for packetNo = 1:numel(packetSequence)
        % Communicate packet
        [theMessageReceived, theCommunicationStatus, roundTipDelayMilliSecs, attemptsForThisPacket] = ...
-                UDPobj.communicate(packetNo, packetSequence{packetNo}, ...
+                obj.communicate(packetNo, packetSequence{packetNo}, ...
                     'maxAttemptsNum', maxAttemptsNum, ...
                     'beVerbose', beVerbose, ...
                     'displayPackets', displayPackets...
@@ -94,15 +104,17 @@ function initiateCommunication(obj, hostRoles, hostNames, triggerMessage, allSat
     
     if (obj.localHostIsBase)
         packetSequence = designTriggerPacketSequenceForBase(UDPobj, satelliteHostNames, allSatellitesAreAGOMessage, timeOutSecs);
+        fprintf('<strong>Sending the ''all satellites are a GO'' message to all satellites.</strong>\n'); 
     else
         packetSequence = designTriggerPacketSequenceForSatellite(UDPobj, satelliteName, allSatellitesAreAGOMessage, timeOutSecs);
+        fprintf('<strong>Waiting for the ''all satellites are a GO'' message from base.</strong>\n');
     end
     
     % Communicate the  allSatellitesAreAGOMessage   
     for packetNo = 1:numel(packetSequence)
        % Communicate packet
        [theMessageReceived, theCommunicationStatus, roundTipDelayMilliSecs, attemptsForThisPacket] = ...
-                UDPobj.communicate(packetNo, packetSequence{packetNo}, ...
+                obj.communicate(packetNo, packetSequence{packetNo}, ...
                     'maxAttemptsNum', maxAttemptsNum, ...
                     'beVerbose', beVerbose, ...
                     'displayPackets', displayPackets...
