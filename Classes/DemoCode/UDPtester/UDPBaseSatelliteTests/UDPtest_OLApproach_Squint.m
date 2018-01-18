@@ -52,7 +52,7 @@ function UDPtest_OLApproach_Squint
             hostRoles = {'base',          'satellite',       'satellite'};
 
             % Set the timeOutSecs param
-            timeOutSecs = 15/1000;
+            timeOutSecs = 40/1000;
         
         case 'OLroom'
             % Define communication scheme

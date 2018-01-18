@@ -125,74 +125,8 @@ function initiateCommunication(obj, hostRoles, hostNames, triggerMessage, allSat
     if (obj.localHostIsBase)
         fprintf('Successfully established communication with all sattelites.\n');
     else
-        fprintf('Successfully established communication with all base.\n');
-    end
-   
-    
-%{
-    OLD STUFF
-    if (obj.localHostIsBase)
-        
-        for k = 1:numel(iSatelliteNames)
-            satelliteName = iSatelliteNames{k};
-            fprintf('Initiating communication with satellite ''%s''.\n', satelliteName);
-            % Set the current udpHandle
-            obj.udpHandle = obj.satelliteInfo(satelliteName).satelliteChannelID; 
-            
-            % Send trigger and wait for up to 1 seconds to receive acknowledgment
-            status = obj.sendMessage(triggerMessage, '', 'timeOutSecs',  10, 'maxAttemptsNum', 10);
-            if (~strcmp(status, obj.ACKNOWLEDGMENT))
-                error('Satellite ''%s'' did not respond within the timeOutPeriod to the trigger message: ''%s''. Restart program.\n', satelliteName, triggerMessage);
-            end
-            
-        end % for k
-        
-        for k = 1:numel(iSatelliteNames)
-            satelliteName = iSatelliteNames{k};
-            fprintf('Sending the * all satellites are a go * message to ''%s''.\n', satelliteName);
-            % Set the current udpHandle
-            obj.udpHandle = obj.satelliteInfo(satelliteName).satelliteChannelID; 
-            
-            % Send trigger and wait for up to 4 seconds to receive acknowledgment
-            status = obj.sendMessage(allSatellitesAreAGOMessage, '', 'timeOutSecs',  10, 'maxAttemptsNum', 10);
-            if (~strcmp(status, obj.ACKNOWLEDGMENT))
-                error('Satellite ''%s'' did not respond within the timeOutPeriod to the allSatellitesAreAGOMessage message: ''%s''. Restart program.\n', satelliteName, allSatellitesAreAGOMessage);
-            end
-            
-        end % for k
-        
-    else
-        % Set the current udpHandle
-        obj.udpHandle = obj.satelliteInfo(obj.localHostName).satelliteChannelID; 
-        
-        % Wait for ever to receive the trigger message from the base
-        receivedPacket = obj.waitForMessage(triggerMessage, ...
-                'timeOutSecs', Inf, ...
-                'pauseTimeSecs', 0.05 ...
-        );      
-            
-        if (receivedPacket.badTransmissionFlag)
-            error('received message contains bad data');
-        elseif (~isempty(receivedPacket.mismatchedMessageLabel))
-            error('received message with wrong label (expected: ''%s'')', receivedPacket.mismatchedMessageLabel);
-        end
-        
-        fprintf('Received the trigger message, will wait 5 seconds for the BASE to transmit that all satellites are a GO !\n');
-        % Wait for 5 seconds to receive the allSatellitesAreAGOMessage message from the base
-        receivedPacket = obj.waitForMessage(allSatellitesAreAGOMessage, 'timeOutSecs', 10); 
-        if (receivedPacket.timedOutFlag)
-            error('Timed out after 10 seconds while waiting to receive the ''%s'' message.', allSatellitesAreAGOMessage);
-        end
-        if (receivedPacket.badTransmissionFlag)
-            error('Bad data  during the ''%s'' message.', allSatellitesAreAGOMessage);
-        end
-        if (~isempty(receivedPacket.mismatchedMessageLabel))
-            error('Expected: ''%s'', Received: ''%s''.', allSatellitesAreAGOMessage, receivedPacket.mismatchedMessageLabel);
-        end
-    end
-    
-%}    
-    
+        fprintf('Successfully established communication with the base.\n');
+    end   
 end
 
 function packetSequence = designTriggerPacketSequenceForBase(UDPobj, satelliteHostNames, triggerMessage, timeOutSecs)
