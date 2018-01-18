@@ -1,10 +1,15 @@
 % Method that waits for a message to be received for a timeOutSecs period.
 % If a message is not received, we print the associated timeOutMessage.
-function timedOutFlag = waitForMessageOrTimeout(obj, timeOutSecs, pauseTimeSecs, visualizeWaiting, timeOutMessage)
+function timedOutFlag = waitForMessageOrTimeout(obj, timeOutSecs, pauseTimeSecs, timeOutMessage)
     tic
     timedOutFlag = false;
     noInputs = true;
     nDots = -1;
+    if isinf(timeOutSecs)
+        visualizeWaiting = true;
+    else
+        visualizeWaiting = false;
+    end
     while (noInputs) && (~timedOutFlag)
         [noInputs, nDots] = lazyCheck(obj, nDots, pauseTimeSecs, visualizeWaiting);
         elapsedTime = toc;
