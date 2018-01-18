@@ -47,13 +47,16 @@ function packet = waitForMessage(obj, msgLabel, varargin)
     end
 
     subsequentPauseTimeSecsInLazyWaitForMessage = 0;
-    subsequentPauseTimeSecsInLazyWaitForMessage = pauseTimeSecsInLazyWaitForMessage;
+    subsequentTimeouts = false;
+    %subsequentPauseTimeSecsInLazyWaitForMessage = pauseTimeSecsInLazyWaitForMessage;
+    
     
     % Read the number of bytes
-    timeOutMessage = sprintf('while waiting to receive number of bytes for message ''%s''', expectedMessageLabel);
-    packet.timedOutFlag = obj.waitForMessageOrTimeout(timeOutSecs, subsequentPauseTimeSecsInLazyWaitForMessage, timeOutMessage);
-    if (packet.timedOutFlag); return; end
-    
+    if (subsequentTimeouts)
+        timeOutMessage = sprintf('while waiting to receive number of bytes for message ''%s''', expectedMessageLabel);
+        packet.timedOutFlag = obj.waitForMessageOrTimeout(timeOutSecs, subsequentPauseTimeSecsInLazyWaitForMessage, timeOutMessage);
+        if (packet.timedOutFlag); return; end
+    end
     
     bytesString = matlabNUDP('receive', udpHandle);
     numBytes = str2double(bytesString);
@@ -63,35 +66,42 @@ function packet = waitForMessage(obj, msgLabel, varargin)
         pauseSecs = 0;
         theData = zeros(1,numBytes);
         for k = 1:numBytes
-            timeOutMessage = sprintf('while waiting to receive byte %d/%d of message ''%s''', k, numBytes, expectedMessageLabel);
-            packet.timedOutFlag = obj.waitForMessageOrTimeout(timeOutSecs, subsequentPauseTimeSecsInLazyWaitForMessage, timeOutMessage);
-            if (packet.timedOutFlag); return; end
+            if (subsequentTimeouts)
+                timeOutMessage = sprintf('while waiting to receive byte %d/%d of message ''%s''', k, numBytes, expectedMessageLabel);
+                packet.timedOutFlag = obj.waitForMessageOrTimeout(timeOutSecs, subsequentPauseTimeSecsInLazyWaitForMessage, timeOutMessage);
+                if (packet.timedOutFlag); return; end
+            end
             datum = matlabNUDP('receive', udpHandle);
             theData(k) = str2double(datum);
         end
     else
-        % Read words
-        pauseSecs = 0;
         % Read number of words
-        timeOutMessage = sprintf('while waiting to receive number of words for message ''%s''', expectedMessageLabel);
-        packet.timedOutFlag = obj.waitForMessageOrTimeout(timeOutSecs, subsequentPauseTimeSecsInLazyWaitForMessage, timeOutMessage);
-        
+        if (subsequentTimeouts)
+            timeOutMessage = sprintf('while waiting to receive number of words for message ''%s''', expectedMessageLabel);
+            packet.timedOutFlag = obj.waitForMessageOrTimeout(timeOutSecs, subsequentPauseTimeSecsInLazyWaitForMessage, timeOutMessage);
+            if (packet.timedOutFlag); return; end
+        end
         wordsNum = str2double(matlabNUDP('receive', udpHandle));
         allWords = char(ones(wordsNum, 3*obj.WORD_LENGTH, 'uint8'));
         % Read each word
         for wordIndex = 1:wordsNum
-            timeOutMessage = sprintf('while waiting to receive word %d/%d of message ''%s''', wordIndex, wordsNum, expectedMessageLabel);
-            packet.timedOutFlag = obj.waitForMessageOrTimeout(timeOutSecs, subsequentPauseTimeSecsInLazyWaitForMessage, timeOutMessage);
-            if (packet.timedOutFlag); return; end
+            if (subsequentTimeouts)
+                timeOutMessage = sprintf('while waiting to receive word %d/%d of message ''%s''', wordIndex, wordsNum, expectedMessageLabel);
+                packet.timedOutFlag = obj.waitForMessageOrTimeout(timeOutSecs, subsequentPauseTimeSecsInLazyWaitForMessage, timeOutMessage);
+                if (packet.timedOutFlag); return; end
+            end
+            
             datum = matlabNUDP('receive', udpHandle);
             allWords(wordIndex,1:numel(datum)) = datum;
         end
     end
 
     % Read the message label again
-    timeOutMessage = sprintf('while waiting to verify the label of message ''%s''', expectedMessageLabel);
-    packet.timedOutFlag = obj.waitForMessageOrTimeout(timeOutSecs, subsequentPauseTimeSecsInLazyWaitForMessage, timeOutMessage);
-    if (packet.timedOutFlag); return; end
+    if (subsequentTimeouts)
+        timeOutMessage = sprintf('while waiting to verify the label of message ''%s''', expectedMessageLabel);
+        packet.timedOutFlag = obj.waitForMessageOrTimeout(timeOutSecs, subsequentPauseTimeSecsInLazyWaitForMessage, timeOutMessage);
+        if (packet.timedOutFlag); return; end
+    end
     
     trailingMessageLabel = matlabNUDP('receive', udpHandle);
     if (~strcmp(packet.messageLabel,trailingMessageLabel))
