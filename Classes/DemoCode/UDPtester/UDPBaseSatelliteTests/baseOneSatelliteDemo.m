@@ -64,7 +64,7 @@ function baseOneSatelliteDemo
 
     %% Who the heck are we?
     localHostIsTheBase      = contains(UDPobj.localHostName, baseHostName);
-    localHostIsTheSatellite = contains(UDPobj.localHostName, satellite1HostName);
+    localHostIsTheSatellite = contains(UDPobj.localHostName, satelliteHostName);
     
      %% Make packetSequences for the base
     if (localHostIsTheBase)
