@@ -81,7 +81,8 @@ function initiateCommunication(obj, hostRoles, hostNames, triggerMessage, allSat
         
         % design trigger sequence
         pauseTimeSecsInLazyWaitForMessage = 0.05;
-        packetSequence = designTriggerPacketSequenceForSatellite(obj, satelliteName, triggerMessage, Inf, pauseTimeSecsInLazyWaitForMessage); 
+        visualizeWaiting = true;
+        packetSequence = designTriggerPacketSequenceForSatellite(obj, satelliteName, triggerMessage, Inf, visualizeWaiting, pauseTimeSecsInLazyWaitForMessage); 
     
         fprintf('<strong>Waiting for the trigger message from base.</strong>\n'); 
     end
@@ -106,7 +107,9 @@ function initiateCommunication(obj, hostRoles, hostNames, triggerMessage, allSat
         packetSequence = designTriggerPacketSequenceForBase(obj, satelliteHostNames, allSatellitesAreAGOMessage, timeOutSecs);
         fprintf('<strong>Sending the ''all satellites are a GO'' message to all satellites.</strong>\n'); 
     else
-        packetSequence = designTriggerPacketSequenceForSatellite(obj, satelliteName, allSatellitesAreAGOMessage, timeOutSecs, 0);
+        pauseTimeSecsInLazyWaitForMessage = 0.0;
+        visualizeWaiting = false;
+        packetSequence = designTriggerPacketSequenceForSatellite(obj, satelliteName, allSatellitesAreAGOMessage, timeOutSecs, visualizeWaiting, pauseTimeSecsInLazyWaitForMessage);
         fprintf('<strong>Waiting for the ''all satellites are a GO'' message from base.</strong>\n');
     end
     
