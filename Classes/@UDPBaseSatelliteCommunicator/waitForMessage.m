@@ -11,6 +11,7 @@ function packet = waitForMessage(obj, msgLabel, varargin)
     p.addOptional('pauseTimeSecsInLazyWaitForMessage', 0, @isnumeric);
     parse(p,msgLabel,varargin{:});
 
+    timeOutSecs = p.Results.timeOutSecs;
     pauseTimeSecsInLazyWaitForMessage = p.Results.pauseTimeSecsInLazyWaitForMessage;
     waitSecsToReceivePacket = p.Results.waitSecsToReceivePacket;
     expectedMessageLabel = p.Results.msgLabel;
