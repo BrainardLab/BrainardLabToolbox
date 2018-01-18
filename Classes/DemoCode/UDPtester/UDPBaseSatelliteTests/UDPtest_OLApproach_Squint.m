@@ -18,6 +18,9 @@ function UDPtest_OLApproach_Squint
     %% Allow up to this many attempts to send/read a packet
     maxAttemptsNum = 10;
 
+    %% lazy polling interval (here 10 milliseconds)
+    lazyPollIntervalSeconds = 10/1000;
+    
     totalReps = input('Run an infinite loop (default) or a predefined number of reps (e.g. 800) : ');
     if isempty(totalReps)
         totalReps = Inf;
@@ -34,7 +37,7 @@ function UDPtest_OLApproach_Squint
     end
     
     %% Select location (this detemines what computers are playing together)
-    %location = 'nicolas_office';
+    location = 'nicolas_office';
     location = 'OLroom';
     
     switch (location)  
@@ -83,7 +86,8 @@ function UDPtest_OLApproach_Squint
     
     %% Instantiate the UDPBaseSatelliteCommunicator object to handle all communications
     UDPobj = UDPBaseSatelliteCommunicator.instantiateObject(hostNames, hostIPs, hostRoles, beVerbose, 'transmissionMode', 'SINGLE_BYTES');
-
+    UDPobj.lazyPollIntervalSeconds = lazyPollIntervalSeconds;
+    
     %% Who the heck are we?
     iAmTheBase = contains(UDPobj.localHostName, baseHostName);
     iAmSatellite1 = contains(UDPobj.localHostName, satellite1HostName);
