@@ -63,8 +63,8 @@ function baseOneSatelliteDemo
     UDPobj = UDPBaseSatelliteCommunicator.instantiateObject(hostNames, hostIPs, hostRoles, beVerbose, 'transmissionMode', 'SINGLE_BYTES');
 
     %% Set some custom properties
-    UDPobj.maxSecondsToWaitForReceivingAnExpectedMessage = 10;  % seconds to sit and wait until a message arrives
-    UDPobj.lazyPollIntervalSeconds = 20;                        % how long to wait between polls when waiting for a message
+    UDPobj.maxSecondsToWaitForReceivingAnExpectedMessage = 10;       % seconds to sit and wait until a message arrives
+    UDPobj.lazyPollIntervalSeconds = 20/1000;                        % how long to wait between polls when waiting for a message
     
     %% Who the heck are we?
     localHostIsTheBase      = contains(UDPobj.localHostName, baseHostName);
