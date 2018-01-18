@@ -40,7 +40,7 @@ function baseOneSatelliteDemo
             hostRoles = {'base',          'satellite' };
 
             % Set the timeOutSecs param
-            timeOutSecs = 15/1000;
+            timeOutSecs = 40/1000;
             
         otherwise
             error('The computer configuration in location ''%s'' is not known\n', location)
