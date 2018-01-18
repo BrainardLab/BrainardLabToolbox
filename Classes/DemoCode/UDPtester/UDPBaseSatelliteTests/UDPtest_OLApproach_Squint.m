@@ -38,7 +38,7 @@ function UDPtest_OLApproach_Squint
     
     %% Select location (this detemines what computers are playing together)
     location = 'nicolas_office';
-    location = 'OLroom';
+    %location = 'OLroom';
     
     switch (location)  
         case 'nicolas_office'
