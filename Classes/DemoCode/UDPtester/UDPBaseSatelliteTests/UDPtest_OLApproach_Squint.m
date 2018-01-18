@@ -17,9 +17,6 @@ function UDPtest_OLApproach_Squint
     
     %% Allow up to this many attempts to send/read a packet
     maxAttemptsNum = 10;
-
-    %% lazy polling interval (here 10 milliseconds)
-    lazyPollIntervalSeconds = 20/1000;
     
     totalReps = input('Run an infinite loop (default) or a predefined number of reps (e.g. 800) : ');
     if isempty(totalReps)
@@ -38,7 +35,7 @@ function UDPtest_OLApproach_Squint
     
     %% Select location (this detemines what computers are playing together)
     location = 'nicolas_office';
-    location = 'OLroom';
+    %location = 'OLroom';
     
     switch (location)  
         case 'nicolas_office'
@@ -51,9 +48,10 @@ function UDPtest_OLApproach_Squint
             hostIPs   = {'128.91.12.90',  '128.91.12.144',   '128.91.12.155'};
             hostRoles = {'base',          'satellite',       'satellite'};
 
-            % Set the timeOutSecs param
-            timeOutSecs = 40/1000;
-        
+            % Set the lazyPollInterval and the timeOutSecs params
+            timeOutSecs = 50/1000;
+            lazyPollIntervalSeconds = 10/1000;
+            
         case 'OLroom'
             % Define communication scheme
             baseHostName = 'gka06';
@@ -64,8 +62,9 @@ function UDPtest_OLApproach_Squint
             hostIPs   = {'128.91.59.227',  '128.91.59.157',   '128.91.59.228'};
             hostRoles = {'base',           'satellite',       'satellite'};
 
-            % Set the timeOutSecs param
+           % Set the lazyPollInterval and the timeOutSecs params
             timeOutSecs = 60/1000;
+            lazyPollIntervalSeconds = 20/1000;
             
         otherwise
             error('The computer configuration in location ''%s'' is not known\n', location)
