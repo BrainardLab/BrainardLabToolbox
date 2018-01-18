@@ -19,7 +19,7 @@ function UDPtest_OLApproach_Squint
     maxAttemptsNum = 10;
 
     %% lazy polling interval (here 10 milliseconds)
-    lazyPollIntervalSeconds = 10/1000;
+    lazyPollIntervalSeconds = 20/1000;
     
     totalReps = input('Run an infinite loop (default) or a predefined number of reps (e.g. 800) : ');
     if isempty(totalReps)
@@ -38,7 +38,7 @@ function UDPtest_OLApproach_Squint
     
     %% Select location (this detemines what computers are playing together)
     location = 'nicolas_office';
-    %location = 'OLroom';
+    location = 'OLroom';
     
     switch (location)  
         case 'nicolas_office'
@@ -65,7 +65,7 @@ function UDPtest_OLApproach_Squint
             hostRoles = {'base',           'satellite',       'satellite'};
 
             % Set the timeOutSecs param
-            timeOutSecs = 40/1000;
+            timeOutSecs = 50/1000;
             
         otherwise
             error('The computer configuration in location ''%s'' is not known\n', location)
