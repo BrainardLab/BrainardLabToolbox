@@ -65,7 +65,7 @@ function UDPtest_OLApproach_Squint
             hostRoles = {'base',           'satellite',       'satellite'};
 
             % Set the timeOutSecs param
-            timeOutSecs = 50/1000;
+            timeOutSecs = 60/1000;
             
         otherwise
             error('The computer configuration in location ''%s'' is not known\n', location)
