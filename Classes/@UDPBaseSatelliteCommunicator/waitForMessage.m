@@ -35,7 +35,7 @@ function packet = waitForMessage(obj, msgLabel, varargin)
     );
 
     % Read the leading packet label
-    timeOutMessage = sprintf('while waiting for message ''%s'' to arrive', expectedMessageLabel);
+    timeOutMessage = sprintf('while lazy waiting for message ''%s'' to arrive', expectedMessageLabel);
     packet.timedOutFlag = obj.waitForMessageOrTimeout(waitSecsToReceivePacket, pauseTimeSecsInLazyWaitForMessage,  timeOutMessage);
     if (packet.timedOutFlag); return; end
     
