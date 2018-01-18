@@ -1,33 +1,49 @@
-function shortBaseMultiSatelliteDemo
+% A testing program to test UDP communication between a base and a
+% satellite using the @UDPBaseSatelliteCommunicator class. 
+%
+% Adjust the timeOutSecs param so that you minimize the transmission errors.
+% Let it run for as long as you want, then ^C to terminate.
+% To use the pauseUnpauseDropbox method, you must first use tbUseProject('OLApproach_Squint)
+%
+% 1/12/2018  NPC Wrote it
+
+function baseOneSatelliteDemo
+
+    %% Allow up to this many attempts to send/read a packet
+    maxAttemptsNum = 10;
+
+    totalReps = input('Run an infinite loop (default) or a predefined number of reps (e.g. 800) : ');
+    if isempty(totalReps)
+        totalReps = Inf;
+    end
     
-    %% Allow up to 3 resubmissions before the program crashes
-    maxAttemptsNum = 3;
-
-    location = 'nicolas_office';
-    if strcmp(location,'nicolas_office')
-        % Define communication scheme
-        baseHostName = 'manta';
-        satellite1HostName = 'ionean';
-        satellite2HostName = 'leviathan';
-        
-        hostNames = {baseHostName,    satellite1HostName, satellite2HostName };
-        hostIPs   = {'128.91.12.90',  '128.91.12.144',   '128.91.12.155'};
-        hostRoles = {'base',          'satellite',       'satellite'};
-        
-        % Set the timeOutSecs param
-        timeOutSecs = 20/1000;
+    %% Pause dropbox syncing ?
+    pauseDropBox = input('Pause dropbox syncing [y/n], (default: y)');
+    if (isempty(pauseDropBox)) || ((ischar(pauseDropBox))&&(strcmpi(pauseDropBox, 'y')))
+        dropBoxSyncingStatus = pauseUnpauseDropbox('command', '--pause');
+        fprintf('DropBox syncing status set to %d\n',dropBoxSyncingStatus);
+        pauseDropBox = true;
     else
-        % Define communication scheme
-        baseHostName = 'gka06';
-        satellite1HostName = 'monkfish';
-        satellite2HostName = 'gka33';
+        pauseDropBox = false;
+    end
+    
+    %% Select location (this detemines what computers are playing together)
+    location = 'manta_ionean';
+    
+    switch (location)  
+        case 'manta_ionean'
+            % Define communication scheme
+            baseHostName = 'manta';
+            satelliteHostName = 'ionean';
+            hostNames = {baseHostName,    satelliteHostName };
+            hostIPs   = {'128.91.12.90',  '128.91.12.144' };
+            hostRoles = {'base',          'satellite' };
 
-        hostNames = {baseHostName,     satellite1HostName, satellite2HostName };
-        hostIPs   = {'128.91.59.227',  '128.91.59.157',   '128.91.59.228'};
-        hostRoles = {'base',           'satellite',       'satellite'};
-        
-        % Set the timeOutSecs param
-        timeOutSecs = 40/1000;
+            % Set the timeOutSecs param
+            timeOutSecs = 15/1000;
+            
+        otherwise
+            error('The computer configuration in location ''%s'' is not known\n', location)
     end
     
     %% Control what is printed on the command window
@@ -47,26 +63,20 @@ function shortBaseMultiSatelliteDemo
     UDPobj = UDPBaseSatelliteCommunicator.instantiateObject(hostNames, hostIPs, hostRoles, beVerbose, 'transmissionMode', 'SINGLE_BYTES');
 
     %% Who the heck are we?
-    iAmTheBase = contains(UDPobj.localHostName, baseHostName);
-    iAmSatellite1 = contains(UDPobj.localHostName, satellite1HostName);
-    iAmSatellite2 = contains(UDPobj.localHostName, satellite2HostName);
+    localHostIsTheBase      = contains(UDPobj.localHostName, baseHostName);
+    localHostIsTheSatellite = contains(UDPobj.localHostName, satelliteHostName);
     
      %% Make packetSequences for the base
-    if (iAmTheBase)
+    if (localHostIsTheBase)
         packetSequence = designPacketSequenceForBase(UDPobj, ...
-            {satellite1HostName, satellite2HostName},...
+            {satelliteHostName},...
             timeOutSecs, coeffPoints);
     end
 
     %% Make packetSequences for satellite(s)
-    if (iAmSatellite1)
-        packetSequence = designPacketSequenceForSatellite1(UDPobj, ...
-            satellite1HostName, ...
-            timeOutSecs, coeffPoints);
-    end
-    if (iAmSatellite2)
-        packetSequence = designPacketSequenceForSatellite2(UDPobj, ...
-            satellite2HostName, ...
+    if (localHostIsTheSatellite)
+        packetSequence = designPacketSequenceForSatellite(UDPobj, ...
+            satelliteHostName, ...
             timeOutSecs, coeffPoints);
     end
     
@@ -77,54 +87,65 @@ function shortBaseMultiSatelliteDemo
     UDPobj.initiateCommunication(hostRoles,  hostNames, triggerMessage, allSatellitesAreAGOMessage, 'beVerbose', beVerbose);
 
     %% Init demo
-    if (iAmTheBase && visualizeComm)
+    if (localHostIsTheBase && visualizeComm)
         visualizeDemoData('open', recordVideo, {satellite1HostName, satellite2HostName});
     end
 
-    % Init repetition number
+    %% Init the attempts package counter
+    attemptsCounter = zeros(1,maxAttemptsNum);
+    
+    %% Init repetition number
     r = 0;
     
-    % Infinite loop
-    while (1)
-       
-    r = r + 1;
-    roundTipDelayMilliSecsTransmit = [];
-    roundTipDelayMilliSecsReceive = [];
-    
-    %% Execute communication protocol
-    for packetNo = 1:numel(packetSequence)
-        % Transmit packet
-        
-        [theMessageReceived, theCommunicationStatus, roundTipDelayMilliSecs] = ...
-            UDPobj.communicate(packetNo, packetSequence{packetNo}, ...
-                'maxAttemptsNum', maxAttemptsNum, ...
-                'beVerbose', beVerbose, ...
-                'displayPackets', displayPackets...
-             );
-        
-        if (UDPobj.isATransmissionPacket(packetSequence{packetNo}.direction, UDPobj.localHostName))
-            roundTipDelayMilliSecsTransmit(numel(roundTipDelayMilliSecsTransmit)+1) = roundTipDelayMilliSecs;
-        else
-            roundTipDelayMilliSecsReceive(numel(roundTipDelayMilliSecsReceive)+1) = roundTipDelayMilliSecs;
+    %% Enter the testing loop
+    while r < totalReps
+        r = r + 1;
+        roundTipDelayMilliSecsTransmit = [];
+        roundTipDelayMilliSecsReceive = [];
+
+        %% Execute communication protocol
+        for packetNo = 1:numel(packetSequence)
+            % Communicate packet
+            [theMessageReceived, theCommunicationStatus, roundTipDelayMilliSecs, attemptsForThisPacket] = ...
+                UDPobj.communicate(packetNo, packetSequence{packetNo}, ...
+                    'maxAttemptsNum', maxAttemptsNum, ...
+                    'beVerbose', beVerbose, ...
+                    'displayPackets', displayPackets...
+                 );
+
+            % Update stats
+            attemptsCounter(attemptsForThisPacket) = attemptsCounter(attemptsForThisPacket) + 1;
+            
+            if (UDPobj.isATransmissionPacket(packetSequence{packetNo}.direction, UDPobj.localHostName))
+                roundTipDelayMilliSecsTransmit(numel(roundTipDelayMilliSecsTransmit)+1) = roundTipDelayMilliSecs;
+            else
+                roundTipDelayMilliSecsReceive(numel(roundTipDelayMilliSecsReceive)+1) = roundTipDelayMilliSecs;
+            end
+
+            % Update demo
+            if (localHostIsTheBase && visualizeComm)
+                 visualizeDemoData('add', recordVideo, {satellite1HostName, satellite2HostName});
+            end
+        end % packetNo
+
+        fprintf('\nRepetition %d\n', r);
+        for k = 1:maxAttemptsNum
+            fprintf('Numer of packages that required %d attempt(s): %d\n', k, attemptsCounter(k));
         end
-        
-         % Update demo
-         if (iAmTheBase && visualizeComm)
-             visualizeDemoData('add', recordVideo, {satellite1HostName, satellite2HostName});
-         end
-    end % packetNo
+        fprintf('MEAN and STD roundtrip for transmitting packages: %2.3f %2.3f msec\n', mean(roundTipDelayMilliSecsTransmit), std(roundTipDelayMilliSecsTransmit));
+        fprintf('MEAN and STD roundtrip for receiving packages: %2.3f %2.3f msec\n\n', mean(roundTipDelayMilliSecsReceive), std(roundTipDelayMilliSecsReceive));
+    end  % while (r < totalReps)
     
-    fprintf('\nRepetition %d\n', r);
-    fprintf('MEAN and STD roundtrip for transmitting packages: %2.1f %2.1f msec\n', mean(roundTipDelayMilliSecsTransmit), std(roundTipDelayMilliSecsTransmit));
-    fprintf('MEAN and STD roundtrip for receiving packages: %2.1f %2.1f msec\n\n', mean(roundTipDelayMilliSecsReceive), std(roundTipDelayMilliSecsReceive));
-    
-    end  % while (1)
+    %% Resume dropbox syncing
+    if (pauseDropbox)
+        dropBoxSyncingStatus = pauseUnpauseDropbox('command','--resume');
+        fprintf('DropBox syncing status set to %d\n',dropBoxSyncingStatus);
+    end
     
     %% Close video file
-    if (iAmTheBase && visualizeComm)
-        visualizeDemoData('close', recordVideo, {satellite1HostName, satellite2HostName});
+    if (localHostIsTheBase && visualizeComm)
+        visualizeDemoData('close', recordVideo, {satelliteHostName});
     end
-
 
     %% Nested function for visualizing the demo
     function visualizeDemoData(mode, recordVideo, satteliteNames)
@@ -261,11 +282,10 @@ function shortBaseMultiSatelliteDemo
         end % if (~isempty(theMessageReceived))
     end % visualizeDemoData
 end
-
 %
-% METHOD TO DESIGN PACKET SEQUENCE FOR SATTELITE-1
+% METHOD TO DESIGN PACKET SEQUENCE FOR SATTELITE
 %
-function packetSequence = designPacketSequenceForSatellite1(UDPobj, satelliteHostName, timeOutSecs, coeffPoints)
+function packetSequence = designPacketSequenceForSatellite(UDPobj, satelliteHostName, timeOutSecs, coeffPoints)
     % Define the communication  packetSequence
     packetSequence = {};
 
@@ -327,44 +347,8 @@ function packetSequence = designPacketSequenceForSatellite1(UDPobj, satelliteHos
             'timeOutSecs', timeOutSecs ...                                            % Allow this many secs to receive ACK (from remote host) that message was received
         );
     end
+
 end
-
-%
-% METHOD TO DESIGN PACKET SEQUENCE FOR SATTELITE-1
-%
-function packetSequence = designPacketSequenceForSatellite2(UDPobj, satelliteHostName, timeOutSecs, coeffPoints)
-    % Define the communication  packetSequence
-    packetSequence = {};
-
-    % Get base host name
-    baseHostName = UDPobj.baseInfo.baseHostName;
-
-    % Satellite providing cosine coefficients whenever Base asks for one.
-    for k = 1:coeffPoints
-        % Satellite waits to receive trigger message from Base to send next cos-coefficient
-        direction = sprintf('%s -> %s', baseHostName, satelliteHostName);
-        expectedMessageLabel = sprintf('BASE(%s)_TO_SATTELITE(%s)___SEND_ME_NEXT_SIN_COEFF', baseHostName, satelliteHostName);
- 
-        packetSequence{numel(packetSequence)+1} = UDPobj.makePacket(...
-            satelliteHostName,...
-            direction, ...
-            expectedMessageLabel, ...
-            'timeOutSecs', timeOutSecs ...                                            % Wait for this many secs to receive this message
-        );
-
-        direction = sprintf('%s <- %s', baseHostName, satelliteHostName);
-        messageLabel = sprintf('SATTELITE(%s)___SENDING_SIN_COEFF', satelliteHostName);
-        messageData = sin(2*pi*k/coeffPoints);
-
-        packetSequence{numel(packetSequence)+1} = UDPobj.makePacket(...
-            satelliteHostName, ...
-            direction, ...
-            messageLabel, 'withData', messageData, ...
-            'timeOutSecs', timeOutSecs ...                                            % Allow this many secs to receive ACK (from remote host) that message was received
-        );
-    end
-end
-
 
 %
 % METHOD TO DESIGN PACKET SEQUENCE FOR BASE
@@ -438,29 +422,5 @@ function packetSequence = designPacketSequenceForBase(UDPobj, satelliteHostNames
             'timeOutSecs', timeOutSecs ...                                            % Allow this many secs to receive ACK (from remote host) that message was received
         );
 
-    
-        % Tell satellite-2 to send next the sin-coefficient
-        satelliteName = satelliteHostNames{2};
-        direction = sprintf('%s -> %s', baseHostName, satelliteName);
-        messageLabel = sprintf('BASE(%s)_TO_SATTELITE(%s)___SEND_ME_NEXT_SIN_COEFF', baseHostName, satelliteName);
-        
-        packetSequence{numel(packetSequence)+1} = UDPobj.makePacket(...
-            satelliteName,...
-            direction, ...
-            messageLabel, 'withData', 'right now, please',...
-            'timeOutSecs', timeOutSecs ...                                            % Wait for this many secs to receive this message
-        );
-
-        % Read the next cos-coeff from satellite-1
-        direction = sprintf('%s <- %s', baseHostName, satelliteName);
-        messageLabel = sprintf('SATTELITE(%s)___SENDING_SIN_COEFF', satelliteName);
-        
-        packetSequence{numel(packetSequence)+1} = UDPobj.makePacket(...
-            satelliteName, ...
-            direction, ...
-            messageLabel, ...
-            'timeOutSecs', timeOutSecs ...                                            % Allow this many secs to receive ACK (from remote host) that message was received
-        );
-    
     end
 end

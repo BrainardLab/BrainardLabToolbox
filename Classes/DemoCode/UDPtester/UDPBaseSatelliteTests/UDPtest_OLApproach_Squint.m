@@ -34,33 +34,38 @@ function UDPtest_OLApproach_Squint
     end
     
     %% Select location (this detemines what computers are playing together)
-    %location = 'nicolas_office';
-    location = 'OLroom';
+    location = 'nicolas_office';
+    %location = 'OLroom';
     
-    if strcmp(location,'nicolas_office')
-        % Define communication scheme
-        baseHostName = 'manta';
-        satellite1HostName = 'ionean';
-        satellite2HostName = 'leviathan';
-        
-        hostNames = {baseHostName,    satellite1HostName, satellite2HostName };
-        hostIPs   = {'128.91.12.90',  '128.91.12.144',   '128.91.12.155'};
-        hostRoles = {'base',          'satellite',       'satellite'};
-        
-        % Set the timeOutSecs param
-        timeOutSecs = 15/1000;
-    elseif strcmp(location,'OLroom')
-        % Define communication scheme
-        baseHostName = 'gka06';
-        satellite1HostName = 'monkfish';
-        satellite2HostName = 'gka33';
+    switch (location)  
+        case 'nicolas_office'
+            % Define communication scheme
+            baseHostName = 'manta';
+            satellite1HostName = 'ionean';
+            satellite2HostName = 'leviathan';
 
-        hostNames = {baseHostName,     satellite1HostName, satellite2HostName };
-        hostIPs   = {'128.91.59.227',  '128.91.59.157',   '128.91.59.228'};
-        hostRoles = {'base',           'satellite',       'satellite'};
+            hostNames = {baseHostName,    satellite1HostName, satellite2HostName };
+            hostIPs   = {'128.91.12.90',  '128.91.12.144',   '128.91.12.155'};
+            hostRoles = {'base',          'satellite',       'satellite'};
+
+            % Set the timeOutSecs param
+            timeOutSecs = 15/1000;
         
-        % Set the timeOutSecs param
-        timeOutSecs = 40/1000;
+        case 'OLroom'
+            % Define communication scheme
+            baseHostName = 'gka06';
+            satellite1HostName = 'monkfish';
+            satellite2HostName = 'gka33';
+
+            hostNames = {baseHostName,     satellite1HostName, satellite2HostName };
+            hostIPs   = {'128.91.59.227',  '128.91.59.157',   '128.91.59.228'};
+            hostRoles = {'base',           'satellite',       'satellite'};
+
+            % Set the timeOutSecs param
+            timeOutSecs = 40/1000;
+            
+        otherwise
+            error('The computer configuration in location ''%s'' is not known\n', location)
     end
     
     %% Control what is printed on the command window
