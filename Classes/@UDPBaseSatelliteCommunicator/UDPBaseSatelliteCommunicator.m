@@ -123,7 +123,7 @@ classdef UDPBaseSatelliteCommunicator < handle
     end
 
     methods (Access = private)
-        timedOutFlag = waitForMessageOrTimeout(obj, timeoutSecs, pauseTimeSecs, timeOutMessage);
+        timedOutFlag = waitForMessageOrTimeout(obj, timeoutSecs, pauseTimeSecs, visualizeWaiting, timeOutMessage);
         executeTimeOut(obj, timeOutMessage);
     end % private methods
 end
