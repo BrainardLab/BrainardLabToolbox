@@ -60,7 +60,6 @@ function initiateCommunication(obj, hostRoles, hostNames, triggerMessage, allSat
         end
         
         % design trigger sequence
-        
         packetSequence = designTriggerPacketSequenceForBase(obj, satelliteHostNames, triggerMessage, timeOutSecs);
         fprintf('<strong>Are the satellite(s) ready to go?. Hit enter if so.</strong>\n'); pause; clc; 
     
@@ -81,7 +80,8 @@ function initiateCommunication(obj, hostRoles, hostNames, triggerMessage, allSat
         obj.flushQueue();
         
         % design trigger sequence
-        packetSequence = designTriggerPacketSequenceForSatellite(obj, satelliteName, triggerMessage, Inf); 
+        pauseTimeSecsInLazyWaitForMessage = 0.05;
+        packetSequence = designTriggerPacketSequenceForSatellite(obj, satelliteName, triggerMessage, Inf, pauseTimeSecsInLazyWaitForMessage); 
     
         fprintf('<strong>Waiting for the trigger message from base.</strong>\n'); 
     end
@@ -106,7 +106,7 @@ function initiateCommunication(obj, hostRoles, hostNames, triggerMessage, allSat
         packetSequence = designTriggerPacketSequenceForBase(obj, satelliteHostNames, allSatellitesAreAGOMessage, timeOutSecs);
         fprintf('<strong>Sending the ''all satellites are a GO'' message to all satellites.</strong>\n'); 
     else
-        packetSequence = designTriggerPacketSequenceForSatellite(obj, satelliteName, allSatellitesAreAGOMessage, timeOutSecs);
+        packetSequence = designTriggerPacketSequenceForSatellite(obj, satelliteName, allSatellitesAreAGOMessage, timeOutSecs, 0);
         fprintf('<strong>Waiting for the ''all satellites are a GO'' message from base.</strong>\n');
     end
     
@@ -215,7 +215,7 @@ function packetSequence = designTriggerPacketSequenceForBase(UDPobj, satelliteHo
     end % satIndex
 end
 
-function packetSequence = designTriggerPacketSequenceForSatellite(UDPobj, satelliteHostName, triggerMessage, timeOutSecs) 
+function packetSequence = designTriggerPacketSequenceForSatellite(UDPobj, satelliteHostName, triggerMessage, timeOutSecs, pauseTimeSecsInLazyWaitForMessage) 
     % Define the communication  packetSequence
     packetSequence = {};
     
@@ -229,6 +229,7 @@ function packetSequence = designTriggerPacketSequenceForSatellite(UDPobj, satell
             satelliteHostName,...
             direction, ...
             expectedMessageLabel, ...
+            'pauseTimeSecsInLazyWaitForMessage', pauseTimeSecsInLazyWaitForMessage, ...
             'timeOutSecs', timeOutSecs ...
     );
 end
