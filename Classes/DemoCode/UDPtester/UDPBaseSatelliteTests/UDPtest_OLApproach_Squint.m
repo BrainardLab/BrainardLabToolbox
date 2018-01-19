@@ -84,7 +84,7 @@ function UDPtest_OLApproach_Squint
     visualizeComm = false;
     
     %% Instantiate the UDPBaseSatelliteCommunicator object to handle all communications
-    UDPobj = UDPBaseSatelliteCommunicator.instantiateObject(hostNames, hostIPs, hostRoles, beVerbose, 'transmissionMode', 'SINGLE_BYTES');
+    UDPobj = UDPBaseSatelliteCommunicator.instantiateObject(hostNames, hostIPs, hostRoles, beVerbose, 'transmissionMode', 'WORDS');
     UDPobj.lazyPollIntervalSeconds = lazyPollIntervalSeconds;
     
     %% Who the heck are we?
