@@ -12,8 +12,8 @@ function predictedProportions = qpPFColorMaterialModel(stimParams,psiParams,F)
 %     stimParams     Matrix, with each row being a vector of stimulus parameters.
 %                    The vector contains in order:
 %                       colorMatchColorCoord - inferred position on the color dimension for the first competitor in the pair
-%                       materialMatchColorCoord - inferred position on the material dimension for the first competitor in the pair
-%                       colorMatchMaterialCoord - inferred position on the color dimension for the second competitor in the pair
+%                       materialMatchColorCoord - inferred position on the color dimension for the second competitor in the pair
+%                       colorMatchMaterialCoord - inferred position on the material dimension for the first competitor in the pair
 %                       materialMatchMaterialCoord - inferred position on the material dimension for the second competitor in the pair
 %
 %     psiParams      Row vector of parameters. This contains in order
