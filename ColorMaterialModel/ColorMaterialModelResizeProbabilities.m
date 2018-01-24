@@ -14,7 +14,7 @@ function resizedMatrix = ColorMaterialModelResizeProbabilities(theDataProb, inde
 % 
 % 06/15/2017 ar    Wrote it. 
 
-resizedMatrix = zeros(max(indexMatrix.rowIndex), max(indexMatrix.columnIndex));
+resizedMatrix = NaN(max(indexMatrix.rowIndex), max(indexMatrix.columnIndex));
 for i = 1:length(indexMatrix.overallColorMaterialPairIndices)
     if indexMatrix.colorMatchFirst(i) == 1
         resizedMatrix(indexMatrix.rowIndex((i)), indexMatrix.columnIndex((i))) = ...

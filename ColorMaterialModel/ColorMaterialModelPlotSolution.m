@@ -27,6 +27,12 @@ close all;
 % that we loaded.
 colorMaterialDataProb = ColorMaterialModelResizeProbabilities(theDataProb, indexMatrix);
 colorMaterialSolutionProb = ColorMaterialModelResizeProbabilities(predictedProbabilitiesBasedOnSolution, indexMatrix);
+subjectName = params.subjectName; 
+cd (figDir)
+
+% tempFS= 20; 
+% tempMS = 20; 
+% tempLW = 3; 
 
 % Unpack passed params.  
 [returnedMaterialMatchColorCoords,returnedColorMatchMaterialCoords,returnedW,returnedSigma]  = ColorMaterialModelXToParams(returnedModelParams, params); 
@@ -115,17 +121,22 @@ end
 
 %% Plot the color and material of the stimuli obtained from the fit in the 2D representational space
 f2 = figure; hold on; 
-plot(returnedMaterialMatchColorCoords, zeros(size(returnedMaterialMatchColorCoords)),'ro', ...
-    'MarkerFaceColor', 'r', 'MarkerSize', thisMarkerSize); 
+thisMarkerSize = 16; 
+thisLineWidth = 2; 
+plot(returnedMaterialMatchColorCoords, zeros(size(returnedMaterialMatchColorCoords)),'ko', ...
+    'MarkerFaceColor', 'k', 'MarkerSize', thisMarkerSize, 'LineWidth', thisLineWidth); 
 line([xMin, xMax], [0,0],'color', 'k'); 
-plot(zeros(size(returnedColorMatchMaterialCoords)), returnedColorMatchMaterialCoords, 'bo',...
-    'MarkerFaceColor', 'b', 'MarkerSize', thisMarkerSize); 
+plot(zeros(size(returnedColorMatchMaterialCoords)), returnedColorMatchMaterialCoords, 'ko',...
+    'MarkerFaceColor', 'k', 'MarkerSize', thisMarkerSize, 'LineWidth', thisLineWidth); 
 axis([xMin, xMax,yMin, yMax])
 line([0,0],[yMin, yMax],  'color', 'k'); 
 axis('square')
-xlabel('color positions', 'FontSize', thisFontSize);
-ylabel('material positions','FontSize', thisFontSize);
+xlabel('Color', 'FontSize', thisFontSize);
+ylabel('Material','FontSize', thisFontSize);
+set(gca, 'xTick', [xMin, 0, xMax],'FontSize', 26);
+set(gca, 'yTick', [yMin, 0, yMax],'FontSize', 26);
 ax(4)=gca;
+
 if saveFigs
     savefig(f2, [subjectName, 'RecoveredPositions2D.fig'])
     FigureSave([subjectName, 'RecoveredPositions2D'], f2, 'pdf'); 
@@ -202,7 +213,7 @@ rangeOfMaterialMatchColorCoordinates = repmat(rangeOfMaterialMatchColorCoordinat
     'whichMatch', 'colorMatch', 'whichFit', 'MLDS','returnedWeight', returnedW, ...
     'fontSize', thisFontSize, 'markerSize', thisMarkerSize, 'lineWidth', thisLineWidth);
 ax(5)=thisAxis3;
-
+FigureSave([params.subjectName, 'ModelFitColorXAxis'], thisFig3, 'pdf');
 % Get values for reverse plotting
 for whichColorCoordinate = 1:length(params.materialMatchColorCoords)
 
@@ -257,6 +268,5 @@ for i=1:nImages
         axis([0 1.05 0 1.05])
     end
 end
-cd (figDir)
 FigureSave([params.subjectName, 'Main'], gcf, 'pdf');
 end
