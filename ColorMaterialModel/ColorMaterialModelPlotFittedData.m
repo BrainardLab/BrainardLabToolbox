@@ -13,7 +13,7 @@ clear; close all;
 % separately (as a part of the main model/experimental analysis. 
 MAINDEMO = true; 
 if MAINDEMO
-    dataDir = '/Users/Shared/Matlab/Toolboxes/BrainardLabToolbox/ColorMaterialModel/DemoData/';
+    dataDir = pwd; '/Users/Shared/Matlab/Toolboxes/BrainardLabToolbox/ColorMaterialModel/DemoData/';
 else
     dataDir = '/Users/ana/Dropbox (Aguirre-Brainard Lab)/CNST_analysis/ColorMaterial/DemoData/';
 end
@@ -26,10 +26,17 @@ simulatedW = 0.5;
 nDataSets = 1; 
 fileName = ['DemoData' num2str(simulatedW) 'W' num2str(nBlocks) 'Blocks' num2str(nDataSets) 'Fit.mat']; 
 cd(dataDir)
-load(fileName);
+load('pairIndicesPilot.mat')
+load('/Users/ana/Desktop/untitled folder/CfljSolutionNew-weightVary.mat')
+load('/Users/ana/Desktop/ParamsPilot.mat')
 for whichSet = 1:length(dataSet)
-    ColorMaterialModelPlotSolution(dataSet{whichSet}.probabilitiesFromSimulatedData, dataSet{whichSet}.predictedProbabilitiesBasedOnSolution, ...
-        dataSet{whichSet}.returnedParams, indexMatrix, params, figDir, ...
-        saveFig, weibullplots, ...
-        dataSet{whichSet}.probabilitiesForActualPositions);
+%     ColorMaterialModelPlotSolution(dataSet{whichSet}.probabilitiesFromSimulatedData, dataSet{whichSet}.predictedProbabilitiesBasedOnSolution, ...
+%         dataSet{whichSet}.returnedParams, indexMatrix, params, figDir, ...
+%         saveFig, weibullplots, ...
+%         dataSet{whichSet}.probabilitiesForActualPositions);
+whichCondition = 1; 
+    ColorMaterialModelPlotSolution(thisSubject.condition{whichCondition}.pFirstChosen, ...
+        thisSubject.condition{whichCondition}.predictedProbabilitiesBasedOnSolution, ...
+        thisSubject.condition{whichCondition}.returnedParams, indexMatrix, params, pwd, ...
+        saveFig, weibullplots);
 end
