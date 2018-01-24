@@ -61,33 +61,39 @@ end
 
 switch p.Results.whichFit
     case 'MLDS'
-        text(-3, 1.05, sprintf('w = %.2f', p.Results.returnedWeight), 'FontSize', thisFontSize);
+       % text(-3, 1.05, sprintf('w = %.2f', p.Results.returnedWeight), 'FontSize', thisFontSize);
         switch  p.Results.whichMatch
             case 'colorMatch'
                 %      title(sprintf('MLDS fits for different material steps'),'FontName','Helvetica','FontSize',thisFontSize);
-                xlabel('Material Match Color Coords ','FontName','Helvetica','FontSize',thisFontSize);
+                xlabel('Material Match Color Difference (\Delta C)','FontName','Helvetica','FontSize',thisFontSize);
                 ylabel('p Color Match chosen','FontName','Helvetica','FontSize',thisFontSize);
             case 'materialMatch'
                 %        title(sprintf('MLDS fits for different color steps'),'FontName','Helvetica','FontSize',thisFontSize);
-                xlabel('Color Match Material Coords ','FontName','Helvetica','FontSize',thisFontSize);
+                xlabel('Color Match Material Difference (\Delta M)','FontName','Helvetica','FontSize',thisFontSize);
                 ylabel('p Material Match chosen','FontName','Helvetica','FontSize',thisFontSize);
         end
     case 'weibull'
         switch p.Results.whichMatch
             case 'colorMatch'
                 % title(sprintf('Weibull fits for different material steps'),'FontName','Helvetica','FontSize',thisFontSize);
-                xlabel('Material Match Color Coords ','FontName','Helvetica','FontSize',thisFontSize);
+                xlabel('Material Match Color Difference (\Delta C)','FontName','Helvetica','FontSize',thisFontSize);
                 ylabel('p Color Match chosen','FontName','Helvetica','FontSize',thisFontSize);
                 
             case 'materialMatch'
                 % title(sprintf('Weibull fits for different color steps'),'FontName','Helvetica','FontSize',thisFontSize);
-                xlabel('Color Match Material Coords ','FontName','Helvetica','FontSize',thisFontSize);
+                xlabel('Color Match Material Difference (\delta M)','FontName','Helvetica','FontSize',thisFontSize);
                 ylabel('p Material Match chosen','FontName','Helvetica','FontSize',thisFontSize);
         end
 end
 
 %plot(0, 0.5, 'kx', 'LineWidth',2)
 axis([xMin xMax 0 1.05])
-axis square
-set(gca,'FontName','Helvetica','FontSize',thisFontSize,'FontSize', thisFontSize);
+set(gca,'FontName','Helvetica','FontSize',20,'FontSize', 20);
+set(gca, 'YTick', [0.0:0.25:1]);
+set(gca, 'XTick', [-3:1:3]);
+set(gca,'YTickLabel',num2str(get(gca,'YTick')','%.2f'))
+
+if strcmp(p.Results.whichFit, 'MLDS')
+    set(gca, 'XTickLabel', {'-3', '-2', '-1', '0', '+1', '+2', '+3'});
+end
 currentAxis = gca; 
