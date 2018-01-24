@@ -3,6 +3,10 @@
 % Description:
 %    This script shows QUEST+ employed to estimate the parameters of the
 %    cubic version of the color material model.
+%
+%    To keep things managable in terms of time, the sampling of the
+%    parameter space is sparse.  Not sure how that trades off in terms
+%    of quality of stimulus choices.
 
 % 12/19/17  dhb, ar  Created.
 % 01/05/18  dhb      Futz with bounds on parameters so it doesn't bomb.
