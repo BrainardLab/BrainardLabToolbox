@@ -24,8 +24,8 @@ qpPFFun = @(stimParams,psiParams) qpPFColorMaterialQuadModel(stimParams,psiParam
 % Each one has a different upper end of stimulus regime
 % The last of these should be the most inclusive, and
 % include stimuli that could come from any of them.
-upperLin = 4;
-upperQuad = 0.5;
+upperLin = 6;
+upperQuad = 1;
 DO_INITIALIZE = true;
 if (DO_INITIALIZE)
     stimUpperEnds = [1 2 3];
