@@ -41,7 +41,7 @@ if (DO_INITIALIZE)
         qTemp = qpParams( ...
             'qpPF',qpPFFun, ...
             'stimParamsDomainList',{-stimUpperEnds(qq):stimUpperEnds(qq), -stimUpperEnds(qq):stimUpperEnds(qq), -stimUpperEnds(qq):stimUpperEnds(qq), -stimUpperEnds(qq):stimUpperEnds(qq)}, ...
-            'psiParamsDomainList',{[1/upperLin 1 upperLin] [-upperQuad 0 upperQuad] [-upperCubic 0 upperCubic] ...
+            'psiParamsDomainList',{[1/upperLin 1/(upperLin/2) 1 upperLin/2 upperLin] [-upperQuad 0 upperQuad] [-upperCubic 0 upperCubic] ...
                                    [1/upperLin 1 upperLin] [-upperQuad 0 upperQuad] [-upperCubic 0 upperCubic] ...
                                    linspace(0.05,0.95,4)} ...
             );
@@ -83,6 +83,7 @@ for ss = 1:nSimulations
     % 0 -> choose at random from all trials.
     for tt = 1:nTrialsPerQuest
         fprintf('\tTrial block %d of %d\n',tt,nTrialsPerQuest');
+        bstart = tic;
         
         % Set the order for the specified quests and random
         questOrder = randperm(length(questOrderIn));
@@ -110,51 +111,32 @@ for ss = 1:nSimulations
             % experiment.  We never query it to decide what to do, but we
             % will use it to fit the data at the end.
             questDataAllTrials = qpUpdate(questDataAllTrials,stim,outcome);
-            %toc
         end
+        btime = toc(bstart);
+        fprintf('\t\tBlock time = %0.1f secs, %0.1f secs/trial\n',btime,btime/length(questOrder));
     end
     
     % Find out QUEST+'s estimate of the stimulus parameters, obtained
     % on the gridded parameter domain.
     psiParamsIndex = qpListMaxArg(questDataAllTrials.posterior);
     psiParamsQuest(ss,:) = questDataAllTrials.psiParamsDomain(psiParamsIndex,:);
-    fprintf('Simulated parameters: %0.1f, %0.1f, %0.1f, %0.1f, %0.2f\n', ...
-        simulatedPsiParams(1),simulatedPsiParams(2),simulatedPsiParams(3),simulatedPsiParams(4),simulatedPsiParams(5));
-    fprintf('Max posterior QUEST+ parameters: %0.1f, %0.1f, %0.2f, %0.1f, %0.2f\n', ...
-        psiParamsQuest(ss,1),psiParamsQuest(ss,2),psiParamsQuest(ss,3),psiParamsQuest(ss,4),psiParamsQuest(ss,5));
+    fprintf('Simulated parameters: %0.2f, %0.2f, %0.2f, %0.2f, %0.2f, %0.2f, %0.2f\n', ...
+        simulatedPsiParams(1),simulatedPsiParams(2),simulatedPsiParams(3),simulatedPsiParams(4), ...
+        simulatedPsiParams(5),simulatedPsiParams(6),simulatedPsiParams(7));
+    fprintf('Max posterior QUEST+ parameters: %0.2f, %0.2f, %0.2f, %0.2f, %0.2f, %0.2f, %0.2f\n', ...
+        psiParamsQuest(ss,1),psiParamsQuest(ss,2),psiParamsQuest(ss,3),psiParamsQuest(ss,4), ...
+        psiParamsQuest(ss,5),psiParamsQuest(ss,6),psiParamsQuest(ss,7));
     
     % Maximum likelihood fit.  Use psiParams from QUEST+ as the starting
     % parameter for the search, and impose as parameter bounds the range
     % provided to QUEST+.
     psiParamsFit(ss,:) = qpFit(questDataAllTrials.trialData,questDataAllTrials.qpPF,psiParamsQuest(ss,:),questDataAllTrials.nOutcomes,...
-        'lowerBounds', [1/upperLin -upperQuad 1/upperLin -upperQuad 0],'upperBounds',[upperLin upperQuad upperLin upperQuad 1]);
-    fprintf('Maximum likelihood fit parameters: %0.1f, %0.1f, %0.2f, %0.1f, %0.2f\n', ...
-        psiParamsFit(ss,1),psiParamsFit(ss,2),psiParamsFit(ss,3),psiParamsFit(ss,4),psiParamsFit(ss,5));
+        'lowerBounds', [1/upperLin -upperQuad -upperCubic 1/upperLin -upperQuad -upperCubic 0], ...
+        'upperBounds',[upperLin upperQuad upperCubic upperLin upperQuad upperCubic 1]);
+    fprintf('Maximum likelihood fit parameters: %0.2f, %0.2f, %0.2f, %0.2f, %0.2f, %0.2f, %0.2f\n', ...
+        psiParamsFit(ss,1),psiParamsFit(ss,2),psiParamsFit(ss,3),psiParamsFit(ss,4), ...
+        psiParamsFit(ss,5),psiParamsFit(ss,6),psiParamsFit(ss,7));
     fprintf('\n');
-    
-    % Make a histogram of the fit parameters
-    figure(histFigure); clf;
-    subplot(1,3,1); hold on;
-    hist(psiParamsFit(:,1));
-    plot(simulatedPsiParams(1),2,'r*','MarkerSize',12);
-    xlim([0 5]);
-    xlabel('First Slope');
-    ylabel('Count');
-    
-    subplot(1,3,2); hold on;
-    hist(psiParamsFit(:,2));
-    plot(simulatedPsiParams(2),2,'r*','MarkerSize',12);
-    xlim([0 5]);
-    xlabel('Second Slope');
-    ylabel('Count');
-    
-    subplot(1,3,3); hold on;
-    hist(psiParamsFit(:,5));
-    plot(simulatedPsiParams(5),2,'r*','MarkerSize',12);
-    xlim([0 1]);
-    xlabel('Weight');
-    ylabel('Count');
-    drawnow;
 end
 
 %% Save
@@ -209,61 +191,4 @@ ylim([0 ceil(max(questDataAllTrials.entropyAfterTrial))]);
 xlabel('Trial Number')
 ylabel('Entropy')
 title({'Color Material Model',''});
-
-%% Plot some cuts through the QUEST+ posterior
-%
-% Posterior versus material slope and weight
-figure; clf; hold on;
-index1 = find(questDataAllTrials.psiParamsDomain(:,1) == psiParamsQuest(end,1) & ...
-    questDataAllTrials.psiParamsDomain(:,2) == psiParamsQuest(end,2) & ...
-    questDataAllTrials.psiParamsDomain(:,4) == psiParamsQuest(end,4));
-posterior1 = questDataAllTrials.posterior(index1);
-plotX = questDataAllTrials.psiParamsDomainList{3};
-plotY = questDataAllTrials.psiParamsDomainList{5};
-plotZ = reshape(posterior1,length(plotY),length(plotX));
-surf(plotX',plotY',plotZ);
-shading interp
-xlabel('Material Coordinate Slope');
-ylabel('Weight');
-zlabel('Posterior');
-title({'Color Material Model',''});
-set(gca,'View',[20 80]);
-
-% Posterior versus color slope and weight
-figure; clf; hold on;
-index1 = find(questDataAllTrials.psiParamsDomain(:,3) == psiParamsQuest(end,3) & ...
-    questDataAllTrials.psiParamsDomain(:,2) == psiParamsQuest(end,2) & ...
-    questDataAllTrials.psiParamsDomain(:,4) == psiParamsQuest(end,4));
-posterior1 = questDataAllTrials.posterior(index1);
-plotX = questDataAllTrials.psiParamsDomainList{1};
-plotY = questDataAllTrials.psiParamsDomainList{5};
-plotZ = reshape(posterior1,length(plotY),length(plotX));
-surf(plotX',plotY',plotZ);
-shading interp
-xlabel('Color Coordinate Slope');
-ylabel('Weight');
-zlabel('Posterior');
-title({'Color Material Model',''});
-set(gca,'View',[20 80]);
-
-% Posterior versus color slope and material slope
-figure; clf; hold on;
-index1 = find(questDataAllTrials.psiParamsDomain(:,5) == psiParamsQuest(end,5) & ...
-    questDataAllTrials.psiParamsDomain(:,2) == psiParamsQuest(end,2) & ...
-    questDataAllTrials.psiParamsDomain(:,4) == psiParamsQuest(end,4));
-posterior1 = questDataAllTrials.posterior(index1);
-plotX = questDataAllTrials.psiParamsDomainList{1};
-plotY = questDataAllTrials.psiParamsDomainList{3};
-plotZ = reshape(posterior1,length(plotY),length(plotX));
-surf(plotX',plotY',plotZ);
-shading interp
-xlabel('Color Coordinate Slope')
-ylabel('Material Coordinate Slope');
-zlabel('Posterior');
-title({'Color Material Model',''});
-set(gca,'View',[20 80]);
-
-
-
-
 
