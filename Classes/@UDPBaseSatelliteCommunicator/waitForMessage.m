@@ -61,6 +61,13 @@ function packet = waitForMessage(obj, msgLabel, varargin)
     bytesString = matlabNUDP('receive', udpHandle);
     numBytes = str2double(bytesString);
 
+    if (isnan(numBytes) || isinf(numBytes))
+       % Bad # of bytes - return
+       messageToPrint = sprintf('Bad number of bytes received for message ''%s''.\n', expectedMessageLabel);
+       packet = informSender_BadTransmission(obj, udpHandle, packet, expectedMessageLabel, messageToPrint);
+       return;
+    end
+    
     if (strcmp((obj.transmissionMode), 'SINGLE_BYTES'))
         % Read  bytes
         pauseSecs = 0;
@@ -82,6 +89,14 @@ function packet = waitForMessage(obj, msgLabel, varargin)
             if (packet.timedOutFlag); return; end
         end
         wordsNum = str2double(matlabNUDP('receive', udpHandle));
+        
+        if (isnan(wordsNum) || isinf(wordsNum))
+            % Bad # of words - return
+            messageToPrint = sprintf('Bad number of words received for message ''%s''.\n', expectedMessageLabel);
+            packet = informSender_BadTransmission(obj, udpHandle, packet, expectedMessageLabel, messageToPrint);
+            return;
+        end
+        
         allWords = char(ones(wordsNum, 3*obj.WORD_LENGTH, 'uint8'));
         % Read each word
         for wordIndex = 1:wordsNum
