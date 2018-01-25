@@ -34,7 +34,7 @@ function UDPtest_OLApproach_Squint
     end
     
     %% Select location (this detemines what computers are playing together)
-    location = 'nicolas_office';
+    %location = 'nicolas_office';
     location = 'OLroom';
     
     switch (location)  
@@ -63,7 +63,7 @@ function UDPtest_OLApproach_Squint
             hostRoles = {'base',           'satellite',       'satellite'};
 
            % Set the lazyPollInterval and the timeOutSecs params
-            timeOutSecs = 60/1000;
+            timeOutSecs = 70/1000;
             lazyPollIntervalSeconds = 20/1000;
             
         otherwise
@@ -84,7 +84,7 @@ function UDPtest_OLApproach_Squint
     visualizeComm = false;
     
     %% Instantiate the UDPBaseSatelliteCommunicator object to handle all communications
-    UDPobj = UDPBaseSatelliteCommunicator.instantiateObject(hostNames, hostIPs, hostRoles, beVerbose, 'transmissionMode', 'WORDS');
+    UDPobj = UDPBaseSatelliteCommunicator.instantiateObject(hostNames, hostIPs, hostRoles, beVerbose, 'transmissionMode', 'SINGLE_BYTES');
     UDPobj.lazyPollIntervalSeconds = lazyPollIntervalSeconds;
     
     %% Who the heck are we?
