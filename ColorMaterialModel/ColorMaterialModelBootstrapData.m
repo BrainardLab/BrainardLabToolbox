@@ -20,7 +20,6 @@
 for kk = 1:nRepetitions
     
     nTrialTypes = size(theData,1);
-    
     % Sanity check. 
     if (size(theData,2) ~= nBlocks)
         error('Oops');
@@ -35,18 +34,9 @@ for kk = 1:nRepetitions
                 id = randi(nBlocks,[nBlocks 1]);
                 bootstrapData(bb) = sum(theData(bb,id));
             end
-            
-        case 'qPlusPerTrialPerBlock'
-            bootstrapData = zeros(nTrialTypes,1);
-            for bb = 1:nTrialTypes
-                id = randi(nBlocks,[nBlocks 1]);
-                bootstrapData(bb) = sum(theData(bb,id));
-            end
-            
         case 'perBlock'
-            id = randi(nBlocks,[nBlocks 1]);
-            bootstrapData = sum(theData(:,id));
-        
+                id = randi(nBlocks,[nBlocks 1]);
+                bootstrapData = sum(theData(:,id));
         otherwise
             error('This bootstrap method is not implemented.')
     end
