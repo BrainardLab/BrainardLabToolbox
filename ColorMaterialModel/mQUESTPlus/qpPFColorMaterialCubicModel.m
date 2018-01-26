@@ -52,7 +52,7 @@ weight = psiParams(7);
 %% Extract and map stim parameters
 colorMatchColorCoords = colorCoordinateSlope*stimParams(:,1)+colorCoordinateQuad*(stimParams(:,1).^2)+colorCoordinateCubic*(stimParams(:,1).^3);
 materialMatchColorCoords = colorCoordinateSlope*stimParams(:,2)+colorCoordinateQuad*(stimParams(:,2).^2)+colorCoordinateCubic*(stimParams(:,2).^3);
-colorMatchMaterialCoords = materialCoordinateSlope*stimParams(:,3)+materialCoordinateQuad*(stimParams(:,3).^2)+materialCoordinateCurbic*(stimParams(:,3).^3);
+colorMatchMaterialCoords = materialCoordinateSlope*stimParams(:,3)+materialCoordinateQuad*(stimParams(:,3).^2)+materialCoordinateCubic*(stimParams(:,3).^3);
 materialMatchMaterialCoords = materialCoordinateSlope*stimParams(:,4)+materialCoordinateQuad*(stimParams(:,4).^2)+materialCoordinateCubic*(stimParams(:,4).^3);
 nStim = length(colorMatchColorCoords);
 

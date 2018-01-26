@@ -22,7 +22,7 @@ cd(fileparts(mfilename('fullpath')));
 theLookupTable = load('../colorMaterialInterpolateFunLineareuclidean');
 
 %% Define psychometric function in terms of lookup table
-qpPFFun = @(stimParams,psiParams) qpPFColorMaterialQuadModel(stimParams,psiParams,theLookupTable.colorMaterialInterpolatorFunction);
+qpPFFun = @(stimParams,psiParams) qpPFColorMaterialCubicModel(stimParams,psiParams,theLookupTable.colorMaterialInterpolatorFunction);
 
 %% Initialize three QUEST+ structures
 %
@@ -30,9 +30,9 @@ qpPFFun = @(stimParams,psiParams) qpPFColorMaterialQuadModel(stimParams,psiParam
 % The last of these should be the most inclusive, and
 % include stimuli that could come from any of them.
 upperLin = 6;
-upperQuad = 1;
-upperCubic = 1;
-DO_INITIALIZE = true;
+upperQuad = 0.5;
+upperCubic = 0.5;
+DO_INITIALIZE = false;
 if (DO_INITIALIZE)
     stimUpperEnds = [1 2 3];
     nQuests = length(stimUpperEnds);
@@ -43,7 +43,7 @@ if (DO_INITIALIZE)
             'stimParamsDomainList',{-stimUpperEnds(qq):stimUpperEnds(qq), -stimUpperEnds(qq):stimUpperEnds(qq), -stimUpperEnds(qq):stimUpperEnds(qq), -stimUpperEnds(qq):stimUpperEnds(qq)}, ...
             'psiParamsDomainList',{[1/upperLin 1/(upperLin/2) 1 upperLin/2 upperLin] [-upperQuad 0 upperQuad] [-upperCubic 0 upperCubic] ...
                                    [1/upperLin 1 upperLin] [-upperQuad 0 upperQuad] [-upperCubic 0 upperCubic] ...
-                                   linspace(0.05,0.95,4)} ...
+                                   linspace(0.05,0.95,5)} ...
             );
         questData{qq} = qpInitialize(qTemp);
     end
@@ -51,15 +51,13 @@ if (DO_INITIALIZE)
     %% Define a questStructure that has all the stimuli
     %
     % We use this as a simple way to account for every
-    % stimulus in the analysis at the end.
+    % stimulus in the analysis at the end.  Set noentropy
+    % flag so that update is fast, because we don't use this
+    % one to select trials.
     questDataAllTrials = questData{end};
     
     %% Save out initialized quests
     save(fullfile(tempdir,'initalizedQuests'),'questData','questDataAllTrials');
-    
-% Load in saved initialized thingy's
-else
-    load(fullfile(tempdir,'initalizedQuests'),'questData','questDataAllTrials');
 end
 
 %% Set up simulated observer function
@@ -69,13 +67,17 @@ simulatedObserverFun = @(x) qpSimulatedObserver(x,qpPFFun,simulatedPsiParams);
 %% Run multiple simulations
 nSimulations = 1;
 nTrialsPerQuest = 30;
-questOrderIn = [0 0 1 2 3 3 3 3];
-histFigure = figure; clf;
+questOrderIn = [0 1 2 3 3 3 3 3 3];
 for ss = 1:nSimulations
     % Load in the initialized quest structures
     fprintf('Simulation %d of %d\n',ss,nSimulations);
     clear questData questDataAllTrials
     load(fullfile(tempdir,'initalizedQuests'));
+    
+    % Force questDataAllTrials not to update entropy.  If you want to see
+    % the plot of entropies versus trials at the end, set this to false.
+    % But it will slow down the simulation by about 0.5 secs/trial.
+    questDataAllTrials.noentropy = true;
     
     % Run simulated trials, using QUEST+ to tell us what contrast to
     %
@@ -185,10 +187,11 @@ title({'Color Material Model',''});
 drawnow;
 
 %% Plot of posterior entropy versus trial number
-figure; clf; hold on
-plot(questDataAllTrials.entropyAfterTrial,'ro','MarkerSize',8,'MarkerFaceColor','r');
-ylim([0 ceil(max(questDataAllTrials.entropyAfterTrial))]);
-xlabel('Trial Number')
-ylabel('Entropy')
-title({'Color Material Model',''});
-
+if (~questDataAllTrials.noentropy)
+    figure; clf; hold on
+    plot(questDataAllTrials.entropyAfterTrial,'ro','MarkerSize',8,'MarkerFaceColor','r');
+    ylim([0 ceil(max(questDataAllTrials.entropyAfterTrial))]);
+    xlabel('Trial Number')
+    ylabel('Entropy')
+    title({'Color Material Model',''});
+end
