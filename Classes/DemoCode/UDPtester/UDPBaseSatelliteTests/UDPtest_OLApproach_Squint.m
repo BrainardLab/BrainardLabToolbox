@@ -16,7 +16,7 @@
 function UDPtest_OLApproach_Squint
     
     %% Allow up to this many attempts to send/read a packet
-    maxAttemptsNum = 10;
+    maxAttemptsNum = 20;
     
     totalReps = input('Run an infinite loop (default) or a predefined number of reps (e.g. 800) : ');
     if isempty(totalReps)
