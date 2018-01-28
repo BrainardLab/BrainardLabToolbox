@@ -24,15 +24,26 @@ theLookupTable = load('../colorMaterialInterpolateFunLineareuclidean');
 %% Define psychometric function in terms of lookup table
 qpPFFun = @(stimParams,psiParams) qpPFColorMaterialCubicModel(stimParams,psiParams,theLookupTable.colorMaterialInterpolatorFunction);
 
+%% Define parameters that set up parameter grid for QUEST+
+lowerLin = 0;
+upperLin = 6;
+lowerQuad = -0.3;
+upperQuad = -lowerQuad;
+lowerCubic = -0.3;
+upperCubic = -lowerCubic;
+lowerWeight = 0.05;
+upperWeight = 0.95;
+nLin = 4;
+nQuad = 4;
+nCubic = 4;
+nWeight = 4;
+
 %% Initialize three QUEST+ structures
 %
 % Each one has a different upper end of stimulus regime
 % The last of these should be the most inclusive, and
 % include stimuli that could come from any of them.
-upperLin = 6;
-upperQuad = 0.5;
-upperCubic = 0.5;
-DO_INITIALIZE = false;
+DO_INITIALIZE = true;
 if (DO_INITIALIZE)
     stimUpperEnds = [1 2 3];
     nQuests = length(stimUpperEnds);
@@ -41,9 +52,9 @@ if (DO_INITIALIZE)
         qTemp = qpParams( ...
             'qpPF',qpPFFun, ...
             'stimParamsDomainList',{-stimUpperEnds(qq):stimUpperEnds(qq), -stimUpperEnds(qq):stimUpperEnds(qq), -stimUpperEnds(qq):stimUpperEnds(qq), -stimUpperEnds(qq):stimUpperEnds(qq)}, ...
-            'psiParamsDomainList',{[1/upperLin 1/(upperLin/2) 1 upperLin/2 upperLin] [-upperQuad 0 upperQuad] [-upperCubic 0 upperCubic] ...
-                                   [1/upperLin 1 upperLin] [-upperQuad 0 upperQuad] [-upperCubic 0 upperCubic] ...
-                                   linspace(0.05,0.95,5)} ...
+            'psiParamsDomainList',{ linspace(lowerLin,upperLin,nLin) linspace(lowerQuad,upperQuad,nQuad) linspace(lowerCubic,upperCubic,nCubic) ...
+                                    linspace(lowerLin,upperLin,nLin) linspace(lowerQuad,upperQuad,nQuad) linspace(lowerCubic,upperCubic,nCubic) ...
+                                    linspace(lowerWeight,upperWeight,nWeight) } ...
             );
         questData{qq} = qpInitialize(qTemp);
     end
@@ -51,9 +62,7 @@ if (DO_INITIALIZE)
     %% Define a questStructure that has all the stimuli
     %
     % We use this as a simple way to account for every
-    % stimulus in the analysis at the end.  Set noentropy
-    % flag so that update is fast, because we don't use this
-    % one to select trials.
+    % stimulus in the analysis at the end.
     questDataAllTrials = questData{end};
     
     %% Save out initialized quests
@@ -74,9 +83,9 @@ for ss = 1:nSimulations
     clear questData questDataAllTrials
     load(fullfile(tempdir,'initalizedQuests'));
     
-    % Force questDataAllTrials not to update entropy.  If you want to see
-    % the plot of entropies versus trials at the end, set this to false.
-    % But it will slow down the simulation by about 0.5 secs/trial.
+    % Force questDataAllTrials not to update entropy. This speeds things up
+    % quite a bit, although you can't then make a nice plot of entropy as a
+    % function of trial.
     questDataAllTrials.noentropy = true;
     
     % Run simulated trials, using QUEST+ to tell us what contrast to
