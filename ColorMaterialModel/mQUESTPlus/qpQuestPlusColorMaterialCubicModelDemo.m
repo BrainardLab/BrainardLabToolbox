@@ -43,7 +43,7 @@ nWeight = 5;
 % Each one has a different upper end of stimulus regime
 % The last of these should be the most inclusive, and
 % include stimuli that could come from any of them.
-DO_INITIALIZE = true;
+DO_INITIALIZE = false;
 if (DO_INITIALIZE)
     stimUpperEnds = [1 2 3];
     nQuests = length(stimUpperEnds);
@@ -74,13 +74,13 @@ simulatedPsiParams = [2 0.2 0.05 4.5 -0.25 -0.1 0.8];
 simulatedObserverFun = @(x) qpSimulatedObserver(x,qpPFFun,simulatedPsiParams);
 
 %% Run multiple simulations
-nSimulations = 1;
+nSessions = 4;
 nTrialsPerQuest = 30;
 questOrderIn = [0 1 2 3 3 3 3 3 3];
-for ss = 1:nSimulations
+for ss = 1:nSessions
     % Load in the initialized quest structures
-    fprintf('Simulation %d of %d\n',ss,nSimulations);
-    clear questData questDataAllTrials
+    fprintf('Session %d of %d\n',ss,nSessions);
+    clear questData
     load(fullfile(tempdir,'initalizedQuests'));
     
     % Force questDataAllTrials not to update entropy. This speeds things up
@@ -126,32 +126,32 @@ for ss = 1:nSimulations
         btime = toc(bstart);
         fprintf('\t\tBlock time = %0.1f secs, %0.1f secs/trial\n',btime,btime/length(questOrder));
     end
-    
-    % Find out QUEST+'s estimate of the stimulus parameters, obtained
-    % on the gridded parameter domain.
-    psiParamsIndex = qpListMaxArg(questDataAllTrials.posterior);
-    psiParamsQuest(ss,:) = questDataAllTrials.psiParamsDomain(psiParamsIndex,:);
-    fprintf('Simulated parameters: %0.2f, %0.2f, %0.2f, %0.2f, %0.2f, %0.2f, %0.2f\n', ...
-        simulatedPsiParams(1),simulatedPsiParams(2),simulatedPsiParams(3),simulatedPsiParams(4), ...
-        simulatedPsiParams(5),simulatedPsiParams(6),simulatedPsiParams(7));
-    fprintf('Max posterior QUEST+ parameters: %0.2f, %0.2f, %0.2f, %0.2f, %0.2f, %0.2f, %0.2f\n', ...
-        psiParamsQuest(ss,1),psiParamsQuest(ss,2),psiParamsQuest(ss,3),psiParamsQuest(ss,4), ...
-        psiParamsQuest(ss,5),psiParamsQuest(ss,6),psiParamsQuest(ss,7));
-    
-    % Maximum likelihood fit.  Use psiParams from QUEST+ as the starting
-    % parameter for the search, and impose as parameter bounds the range
-    % provided to QUEST+.
-    psiParamsFit(ss,:) = qpFit(questDataAllTrials.trialData,questDataAllTrials.qpPF,psiParamsQuest(ss,:),questDataAllTrials.nOutcomes,...
-        'lowerBounds', [1/upperLin -upperQuad -upperCubic 1/upperLin -upperQuad -upperCubic 0], ...
-        'upperBounds',[upperLin upperQuad upperCubic upperLin upperQuad upperCubic 1]);
-    fprintf('Maximum likelihood fit parameters: %0.2f, %0.2f, %0.2f, %0.2f, %0.2f, %0.2f, %0.2f\n', ...
-        psiParamsFit(ss,1),psiParamsFit(ss,2),psiParamsFit(ss,3),psiParamsFit(ss,4), ...
-        psiParamsFit(ss,5),psiParamsFit(ss,6),psiParamsFit(ss,7));
-    fprintf('\n');
 end
 
 %% Save
-save qpQuestPlusColorMaterialModelDemo
+save(fullfile(tempdir,'qpQuestPlusColorMaterialCubicModelDemo'));
+
+% Find out QUEST+'s estimate of the stimulus parameters, obtained
+% on the gridded parameter domain.
+psiParamsIndex = qpListMaxArg(questDataAllTrials.posterior);
+psiParamsQuest(ss,:) = questDataAllTrials.psiParamsDomain(psiParamsIndex,:);
+fprintf('Simulated parameters: %0.2f, %0.2f, %0.2f, %0.2f, %0.2f, %0.2f, %0.2f\n', ...
+    simulatedPsiParams(1),simulatedPsiParams(2),simulatedPsiParams(3),simulatedPsiParams(4), ...
+    simulatedPsiParams(5),simulatedPsiParams(6),simulatedPsiParams(7));
+fprintf('Max posterior QUEST+ parameters: %0.2f, %0.2f, %0.2f, %0.2f, %0.2f, %0.2f, %0.2f\n', ...
+    psiParamsQuest(ss,1),psiParamsQuest(ss,2),psiParamsQuest(ss,3),psiParamsQuest(ss,4), ...
+    psiParamsQuest(ss,5),psiParamsQuest(ss,6),psiParamsQuest(ss,7));
+
+% Maximum likelihood fit.  Use psiParams from QUEST+ as the starting
+% parameter for the search, and impose as parameter bounds the range
+% provided to QUEST+.
+psiParamsFit(ss,:) = qpFit(questDataAllTrials.trialData,questDataAllTrials.qpPF,psiParamsQuest(ss,:),questDataAllTrials.nOutcomes,...
+    'lowerBounds', [1/upperLin -upperQuad -upperCubic 1/upperLin -upperQuad -upperCubic 0], ...
+    'upperBounds',[upperLin upperQuad upperCubic upperLin upperQuad upperCubic 1]);
+fprintf('Maximum likelihood fit parameters: %0.2f, %0.2f, %0.2f, %0.2f, %0.2f, %0.2f, %0.2f\n', ...
+    psiParamsFit(ss,1),psiParamsFit(ss,2),psiParamsFit(ss,3),psiParamsFit(ss,4), ...
+    psiParamsFit(ss,5),psiParamsFit(ss,6),psiParamsFit(ss,7));
+fprintf('\n');
 
 %% Plot for last run
 %
