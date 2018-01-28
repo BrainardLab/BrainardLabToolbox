@@ -43,7 +43,7 @@ nWeight = 5;
 % Each one has a different upper end of stimulus regime
 % The last of these should be the most inclusive, and
 % include stimuli that could come from any of them.
-DO_INITIALIZE = false;
+DO_INITIALIZE = true;
 if (DO_INITIALIZE)
     stimUpperEnds = [1 2 3];
     nQuests = length(stimUpperEnds);
