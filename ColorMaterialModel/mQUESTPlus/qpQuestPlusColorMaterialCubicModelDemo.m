@@ -74,7 +74,7 @@ simulatedPsiParams = [2 0.2 0.05 4.5 -0.25 -0.1 0.8];
 simulatedObserverFun = @(x) qpSimulatedObserver(x,qpPFFun,simulatedPsiParams);
 
 %% Run multiple simulations
-nSessions = 4;
+nSessions = 8;
 nTrialsPerQuest = 30;
 questOrderIn = [0 1 2 3 3 3 3 3 3];
 for ss = 1:nSessions
