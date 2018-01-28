@@ -69,6 +69,12 @@ if (DO_INITIALIZE)
     save(fullfile(tempdir,'initalizedQuests'),'questData','questDataAllTrials');
 end
 
+% Load in intialized questDataAllTrials.  We do this outside
+% the big loop over simulated sessions, as it is common acorss 
+% those simulated sessions.
+clear questDataAllTrials
+load(fullfile(tempdir,'initalizedQuests'),'questDataAllTrials');
+
 %% Set up simulated observer function
 simulatedPsiParams = [2 0.2 0.05 4.5 -0.25 -0.1 0.8];
 simulatedObserverFun = @(x) qpSimulatedObserver(x,qpPFFun,simulatedPsiParams);
@@ -80,8 +86,12 @@ questOrderIn = [0 1 2 3 3 3 3 3 3];
 for ss = 1:nSessions
     % Load in the initialized quest structures
     fprintf('Session %d of %d\n',ss,nSessions);
+
+    % Load just the initialized questData structures, leaving
+    % the questDataAllTrials structure intact.  We do this separately
+    % for each simulated session.
     clear questData
-    load(fullfile(tempdir,'initalizedQuests'));
+    load(fullfile(tempdir,'initalizedQuests'),'questData');
     
     % Force questDataAllTrials not to update entropy. This speeds things up
     % quite a bit, although you can't then make a nice plot of entropy as a
