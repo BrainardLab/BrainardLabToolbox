@@ -25,7 +25,7 @@ theLookupTable = load('../colorMaterialInterpolateFunLineareuclidean');
 qpPFFun = @(stimParams,psiParams) qpPFColorMaterialCubicModel(stimParams,psiParams,theLookupTable.colorMaterialInterpolatorFunction);
 
 %% Define parameters that set up parameter grid for QUEST+
-lowerLin = 0;
+lowerLin = 1;
 upperLin = 6;
 lowerQuad = -0.3;
 upperQuad = -lowerQuad;
@@ -34,9 +34,9 @@ upperCubic = -lowerCubic;
 lowerWeight = 0.05;
 upperWeight = 0.95;
 nLin = 4;
-nQuad = 4;
-nCubic = 4;
-nWeight = 4;
+nQuad = 3;
+nCubic = 3;
+nWeight = 5;
 
 %% Initialize three QUEST+ structures
 %
@@ -70,7 +70,7 @@ if (DO_INITIALIZE)
 end
 
 %% Set up simulated observer function
-simulatedPsiParams = [2 0.2 0.5 0.7 -0.3 -0.3 0.8];
+simulatedPsiParams = [2 0.2 0.05 4.5 -0.25 -0.1 0.8];
 simulatedObserverFun = @(x) qpSimulatedObserver(x,qpPFFun,simulatedPsiParams);
 
 %% Run multiple simulations
