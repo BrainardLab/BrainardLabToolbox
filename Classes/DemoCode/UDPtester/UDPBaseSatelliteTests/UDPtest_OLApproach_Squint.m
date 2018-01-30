@@ -93,8 +93,8 @@ function UDPtest_OLApproach_Squint
             hostRoles = {'base',           'satellite',       'satellite'};
 
            % Set the lazyPollInterval and the timeOutSecs params
-            timeOutSecs = 70/1000;
-            lazyPollIntervalSeconds = 20/1000;
+            timeOutSecs = 50/1000;
+            lazyPollIntervalSeconds = 10/1000;
             
         otherwise
             error('The computer configuration in location ''%s'' is not known\n', location)
