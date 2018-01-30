@@ -60,11 +60,11 @@ function baseOneSatelliteDemo
     visualizeComm = false;
     
     %% Instantiate the UDPBaseSatelliteCommunicator object to handle all communications
-    UDPobj = UDPBaseSatelliteCommunicator.instantiateObject(hostNames, hostIPs, hostRoles, beVerbose, 'transmissionMode', 'SINGLE_BYTES');
+    UDPobj = UDPBaseSatelliteCommunicator.instantiateObject(hostNames, hostIPs, hostRoles, beVerbose, 'transmissionMode', 'WORDS');
 
     %% Set some custom properties
     UDPobj.maxSecondsToWaitForReceivingAnExpectedMessage = 10;       % seconds to sit and wait until a message arrives
-    UDPobj.lazyPollIntervalSeconds = 10/1000;                        % how long to wait between polls when waiting for a message
+    UDPobj.lazyPollIntervalSeconds = 20/1000;                        % how long to wait between polls when waiting for a message
     
     %% Who the heck are we?
     localHostIsTheBase      = contains(UDPobj.localHostName, baseHostName);
@@ -88,7 +88,7 @@ function baseOneSatelliteDemo
     %% Initiate the base / multi-satellite communication
     triggerMessage = 'Go!';                                     % Tell each satellite to start listening
     allSatellitesAreAGOMessage = 'All Satellites Are A GO!';    % Tell each satellite that all its peers are ready-to-go
-    UDPobj.initiateCommunication(hostRoles,  hostNames, triggerMessage, allSatellitesAreAGOMessage, 'beVerbose', beVerbose);
+    UDPobj.initiateCommunication(hostRoles,  hostNames, triggerMessage, allSatellitesAreAGOMessage, maxAttemptsNum, 'beVerbose', beVerbose);
 
     %% Init demo
     if (localHostIsTheBase && visualizeComm)

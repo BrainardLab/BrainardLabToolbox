@@ -1,7 +1,7 @@
 % Method to open UDP communication channels between base and sattelites.
 % Once UDP channels are open, we instruct the base to send the triggerMessage to all
 % the sattelites, and we wait for all sattelites to respond with an allSatellitesAreAGOMessage
-function initiateCommunication(obj, hostRoles, hostNames, triggerMessage, allSatellitesAreAGOMessage, varargin)
+function initiateCommunication(obj, hostRoles, hostNames, triggerMessage, allSatellitesAreAGOMessage, maxAttemptsNum, varargin)
 
     p = inputParser;
     p.addOptional('beVerbose', true, @islogical);
@@ -10,7 +10,6 @@ function initiateCommunication(obj, hostRoles, hostNames, triggerMessage, allSat
     
     % Time out duration and max attempts num to establish communication
     timeOutSecs = 10;
-    maxAttemptsNum = 5;
     displayPackets = false;
     
     % Who are we?

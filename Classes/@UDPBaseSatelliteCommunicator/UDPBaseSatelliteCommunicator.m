@@ -102,7 +102,7 @@ classdef UDPBaseSatelliteCommunicator < handle
         % Public API (higher-level)
 
         % Method that established communication between local and remote host
-        initiateCommunication(obj, hostRoles, hostNames, triggerMessage, varargin);
+        initiateCommunication(obj, hostRoles, hostNames, triggerMessage, maxAttemptsNum, varargin);
 
         % Method that constructs a communication packet
         packet = makePacket(obj, satelliteChannel, direction, message, varargin);
