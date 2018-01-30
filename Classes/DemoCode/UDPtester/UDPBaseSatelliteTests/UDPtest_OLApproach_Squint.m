@@ -36,6 +36,7 @@ function UDPtest_OLApproach_Squint
     %% Select location (this detemines what computers are playing together)
     location = 'nicolas_office';
     location = 'nicolas_office2';
+    location = 'nicolas_office3';
     %location = 'OLroom';
     
     switch (location)  
@@ -64,8 +65,22 @@ function UDPtest_OLApproach_Squint
             hostRoles = {'base',          'satellite',       'satellite'};
 
             % Set the lazyPollInterval and the timeOutSecs params
-            timeOutSecs = 70/1000;
-            lazyPollIntervalSeconds = 20/1000;
+            timeOutSecs = 120/1000;
+            lazyPollIntervalSeconds = 30/1000;
+            
+        case 'nicolas_office3'
+            % Define communication scheme
+            baseHostName = 'ionean';
+            satellite1HostName = 'manta';
+            satellite2HostName = 'leviathan';
+
+            hostNames = {baseHostName,    satellite1HostName, satellite2HostName };
+            hostIPs   = {'128.91.12.144' '128.91.12.90',  '128.91.12.155'};
+            hostRoles = {'base',          'satellite',       'satellite'};
+
+            % Set the lazyPollInterval and the timeOutSecs params
+            timeOutSecs = 50/1000;
+            lazyPollIntervalSeconds = 10/1000;
             
         case 'OLroom'
             % Define communication scheme
