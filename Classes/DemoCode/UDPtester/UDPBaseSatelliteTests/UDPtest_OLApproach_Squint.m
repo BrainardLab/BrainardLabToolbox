@@ -64,8 +64,8 @@ function UDPtest_OLApproach_Squint
             hostRoles = {'base',          'satellite',       'satellite'};
 
             % Set the lazyPollInterval and the timeOutSecs params
-            timeOutSecs = 50/1000;
-            lazyPollIntervalSeconds = 10/1000;
+            timeOutSecs = 70/1000;
+            lazyPollIntervalSeconds = 20/1000;
             
         case 'OLroom'
             % Define communication scheme
