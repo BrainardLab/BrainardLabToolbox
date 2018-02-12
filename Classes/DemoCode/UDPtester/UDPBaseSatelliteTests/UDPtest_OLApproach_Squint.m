@@ -16,8 +16,8 @@
 function UDPtest_OLApproach_Squint
     
     %% Allow up to this many attempts to send/read a packet
-    maxAttemptsNum = 10;
-
+    maxAttemptsNum = 20;
+    
     totalReps = input('Run an infinite loop (default) or a predefined number of reps (e.g. 800) : ');
     if isempty(totalReps)
         totalReps = Inf;
@@ -34,8 +34,10 @@ function UDPtest_OLApproach_Squint
     end
     
     %% Select location (this detemines what computers are playing together)
-    %location = 'nicolas_office';
-    location = 'OLroom';
+    location = 'nicolas_office';
+    location = 'nicolas_office2';
+    location = 'nicolas_office3';
+    %location = 'OLroom';
     
     switch (location)  
         case 'nicolas_office'
@@ -48,9 +50,38 @@ function UDPtest_OLApproach_Squint
             hostIPs   = {'128.91.12.90',  '128.91.12.144',   '128.91.12.155'};
             hostRoles = {'base',          'satellite',       'satellite'};
 
-            % Set the timeOutSecs param
-            timeOutSecs = 15/1000;
-        
+            % Set the lazyPollInterval and the timeOutSecs params
+            timeOutSecs = 50/1000;
+            lazyPollIntervalSeconds = 10/1000;
+            
+        case 'nicolas_office2'
+            % Define communication scheme
+            baseHostName = 'leviathan';
+            satellite1HostName = 'ionean';
+            satellite2HostName = 'manta';
+
+            hostNames = {baseHostName,    satellite1HostName, satellite2HostName };
+            hostIPs   = {'128.91.12.155', '128.91.12.144',   '128.91.12.90'};
+            hostRoles = {'base',          'satellite',       'satellite'};
+
+            % Set the lazyPollInterval and the timeOutSecs params
+            timeOutSecs = 120/1000;
+            lazyPollIntervalSeconds = 30/1000;
+            
+        case 'nicolas_office3'
+            % Define communication scheme
+            baseHostName = 'ionean';
+            satellite1HostName = 'manta';
+            satellite2HostName = 'leviathan';
+
+            hostNames = {baseHostName,    satellite1HostName, satellite2HostName };
+            hostIPs   = {'128.91.12.144' '128.91.12.90',  '128.91.12.155'};
+            hostRoles = {'base',          'satellite',       'satellite'};
+
+            % Set the lazyPollInterval and the timeOutSecs params
+            timeOutSecs = 50/1000;
+            lazyPollIntervalSeconds = 10/1000;
+            
         case 'OLroom'
             % Define communication scheme
             baseHostName = 'gka06';
@@ -61,8 +92,9 @@ function UDPtest_OLApproach_Squint
             hostIPs   = {'128.91.59.227',  '128.91.59.157',   '128.91.59.228'};
             hostRoles = {'base',           'satellite',       'satellite'};
 
-            % Set the timeOutSecs param
-            timeOutSecs = 40/1000;
+           % Set the lazyPollInterval and the timeOutSecs params
+            timeOutSecs = 50/1000;
+            lazyPollIntervalSeconds = 10/1000;
             
         otherwise
             error('The computer configuration in location ''%s'' is not known\n', location)
@@ -83,7 +115,8 @@ function UDPtest_OLApproach_Squint
     
     %% Instantiate the UDPBaseSatelliteCommunicator object to handle all communications
     UDPobj = UDPBaseSatelliteCommunicator.instantiateObject(hostNames, hostIPs, hostRoles, beVerbose, 'transmissionMode', 'SINGLE_BYTES');
-
+    UDPobj.lazyPollIntervalSeconds = lazyPollIntervalSeconds;
+    
     %% Who the heck are we?
     iAmTheBase = contains(UDPobj.localHostName, baseHostName);
     iAmSatellite1 = contains(UDPobj.localHostName, satellite1HostName);
@@ -112,7 +145,7 @@ function UDPtest_OLApproach_Squint
     %% Initiate the base / multi-satellite communication
     triggerMessage = 'Go!';                                     % Tell each satellite to start listening
     allSatellitesAreAGOMessage = 'All Satellites Are A GO!';    % Tell each satellite that all its peers are ready-to-go
-    UDPobj.initiateCommunication(hostRoles,  hostNames, triggerMessage, allSatellitesAreAGOMessage, 'beVerbose', beVerbose);
+    UDPobj.initiateCommunication(hostRoles,  hostNames, triggerMessage, allSatellitesAreAGOMessage, maxAttemptsNum, 'beVerbose', beVerbose);
 
     %% Init demo
     if (iAmTheBase && visualizeComm)

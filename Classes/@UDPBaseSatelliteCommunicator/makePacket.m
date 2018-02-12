@@ -8,7 +8,8 @@ function packet = makePacket(obj, satelliteName, direction, message, varargin)
     p.addParameter('withData', []);
     p.addParameter('timeOutSecs',  5, @isnumeric);
     p.addParameter('attemptsNo', 1, @isnumeric);
-    p.addParameter('pauseTimeSecsInLazyWaitForMessage', 0, @isnumeric);
+    p.addParameter('pauseTimeSecsInLazyWaitForMessage', obj.lazyPollIntervalSeconds, @isnumeric);
+
     p.parse(varargin{:});
     data = p.Results.withData;
 

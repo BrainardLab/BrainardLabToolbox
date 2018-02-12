@@ -6,7 +6,12 @@ classdef UDPBaseSatelliteCommunicator < handle
 %
 % 10/20/2017   NPC   Wrote it
 %
-
+    % public properties
+    properties
+        maxSecondsToWaitForReceivingAnExpectedMessage   % seconds to sit and wait until a message arrives
+        lazyPollIntervalSeconds                         % how long to wait between polls when waiting for a message
+    end
+    
 	% Protected properties.
 	properties (SetAccess = protected)
         localHostName
@@ -21,7 +26,7 @@ classdef UDPBaseSatelliteCommunicator < handle
         timeOutsCount         % number of timeouts
         flushDelay            % seconds to wait before flushing the UDP queue
         transmissionMode      % either 'SINGLE_BYTES', or 'WORDS'
-    	maxSecondsToWaitForReceivingAnExpectedMessage  % seconds to sit and wait until a message arrives
+    	
     end
 
     properties (Access = private)
@@ -81,6 +86,7 @@ classdef UDPBaseSatelliteCommunicator < handle
             obj.localHostName = obj.getLocalHostName();
             obj.flushDelay = 0.3;
             obj.maxSecondsToWaitForReceivingAnExpectedMessage = 10;
+            obj.lazyPollIntervalSeconds = 10/1000;
             
             if strcmp(obj.verbosity,'max')
                 fprintf('%s Initialized.\n', obj.selfSignature);
@@ -96,7 +102,7 @@ classdef UDPBaseSatelliteCommunicator < handle
         % Public API (higher-level)
 
         % Method that established communication between local and remote host
-        initiateCommunication(obj, hostRoles, hostNames, triggerMessage, varargin);
+        initiateCommunication(obj, hostRoles, hostNames, triggerMessage, maxAttemptsNum, varargin);
 
         % Method that constructs a communication packet
         packet = makePacket(obj, satelliteChannel, direction, message, varargin);
