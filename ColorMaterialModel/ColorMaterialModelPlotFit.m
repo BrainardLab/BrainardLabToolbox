@@ -18,6 +18,7 @@ function [h, currentAxis] = ColorMaterialModelPlotFit(theSmoothVals,theSmoothPre
 %  fontSize - font size on the plots 
 %  lineWidth - line width on the plots
 %  markerSize - marker size on the plots
+%  dataOnly - do not plot the model
 %
 % Output: 
 %   h - figure handle
@@ -25,6 +26,7 @@ function [h, currentAxis] = ColorMaterialModelPlotFit(theSmoothVals,theSmoothPre
 %
 %   12/xx/2016 ar Wrote it
 %   06/21/2017 ar Checked, added comments. 
+%   02/15/2017 ar Added plot data only option. 
 
 p = inputParser;
 p.addParameter('whichMatch','colorMatch', @ischar);
@@ -33,6 +35,7 @@ p.addParameter('whichFit','MLDS', @ischar);
 p.addParameter('fontSize', 12, @isnumeric); 
 p.addParameter('lineWidth', 12, @isnumeric); 
 p.addParameter('markerSize', 12, @isnumeric); 
+p.addParameter('dataOnly', false, @islogical); 
 p.parse(varargin{:});
 
 thisMarkerSize = p.Results.markerSize-2; 
@@ -51,11 +54,15 @@ xMax =  differenceSteps(end)+0.5;
 h = figure; clf; hold on
 for i = 1:size(theData,2)
     if i < 4
-         plot(differenceSteps,theData(:,i),'o','MarkerEdgeColor',stepColors{i},'MarkerSize',thisMarkerSize, 'LineWidth', thisLineWidth);
-         plot(theSmoothVals(:,i),theSmoothPreds(:,i),'--','color', stepColors{i}, 'LineWidth',thisLineWidth);
+        plot(differenceSteps,theData(:,i),'o','MarkerEdgeColor',stepColors{i},'MarkerSize',thisMarkerSize, 'LineWidth', thisLineWidth);
+        if (p.Results.dataOnly == 0) && strcmp(p.Results.whichFit, 'MLDS')
+            plot(theSmoothVals(:,i),theSmoothPreds(:,i),'--','color', stepColors{i}, 'LineWidth',thisLineWidth);
+        end
     else
         plot(differenceSteps,theData(:,i),'o','MarkerFaceColor',stepColors{i},'MarkerEdgeColor',stepColors{i},'MarkerSize',thisMarkerSize);
-        plot(theSmoothVals(:,i),theSmoothPreds(:,i),'color', stepColors{i}, 'LineWidth',thisLineWidth);
+        if (p.Results.dataOnly == 0) && strcmp(p.Results.whichFit, 'MLDS')
+            plot(theSmoothVals(:,i),theSmoothPreds(:,i),'color', stepColors{i}, 'LineWidth',thisLineWidth);
+        end
     end
 end
 
