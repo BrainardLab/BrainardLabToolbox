@@ -11,7 +11,6 @@
 % 12/19/17  dhb, ar  Created.
 % 01/05/18  dhb      Futz with bounds on parameters so it doesn't bomb.
 % 01/24/18  dhb      Cubic version.
-% 02/16/18  dhb      Parmeter check version.
 
 %% Close out stray figures
 clear; close all;
@@ -20,6 +19,7 @@ clear; close all;
 cd(fileparts(mfilename('fullpath')));
 
 %% We need the lookup table.  Load it.
+%theLookupTable = load('../colorMaterialInterpolateFunLineareuclidean');
 theLookupTable = load('../colorMaterialInterpolateFunLineareuclidean');
 
 %% Define psychometric function in terms of lookup table
@@ -34,10 +34,15 @@ lowerCubic = -0.3;
 upperCubic = -lowerCubic;
 lowerWeight = 0.05;
 upperWeight = 0.95;
-nLin = 4;
-nQuad = 3;
-nCubic = 3;
+nLin = 5;
+nQuad = 4;
+nCubic = 4;
 nWeight = 5;
+
+% Set up parameter constraints.  Might do more beautifully someday
+maxStimValue = 3;
+maxPosition = 20;
+minSpacing = 0.25;
 
 %% Initialize three QUEST+ structures
 %
@@ -55,7 +60,8 @@ if (DO_INITIALIZE)
             'stimParamsDomainList',{-stimUpperEnds(qq):stimUpperEnds(qq), -stimUpperEnds(qq):stimUpperEnds(qq), -stimUpperEnds(qq):stimUpperEnds(qq), -stimUpperEnds(qq):stimUpperEnds(qq)}, ...
             'psiParamsDomainList',{ linspace(lowerLin,upperLin,nLin) linspace(lowerQuad,upperQuad,nQuad) linspace(lowerCubic,upperCubic,nCubic) ...
                                     linspace(lowerLin,upperLin,nLin) linspace(lowerQuad,upperQuad,nQuad) linspace(lowerCubic,upperCubic,nCubic) ...
-                                    linspace(lowerWeight,upperWeight,nWeight) } ...
+                                    linspace(lowerWeight,upperWeight,nWeight) }, ...
+            'filterPsiParamsDomainFun',@(psiParams) qpQuestPlusColorMaterialCubicModelParamsCheck(psiParams,maxStimValue,maxPosition,minSpacing) ...
             );
     end
     
@@ -66,14 +72,14 @@ if (DO_INITIALIZE)
     questDataAllTrials = questData{end};
     
     %% Save out initialized quests
-    save(fullfile(tempdir,'initalizedQuests'),'questData','questDataAllTrials');
+    save(fullfile(tempdir,'initalizedQuestsParamsCheck'),'questData','questDataAllTrials');
 end
 
 % Load in intialized questDataAllTrials.  We do this outside
 % the big loop over simulated sessions, as it is common acorss 
 % those simulated sessions.
 clear questDataAllTrials
-load(fullfile(tempdir,'initalizedQuests'),'questDataAllTrials');
+load(fullfile(tempdir,'initalizedQuestsParamsCheck'),'questDataAllTrials');
 
 %% Set up simulated observer function
 simulatedPsiParams = [2 0.2 0.05 4.5 -0.25 -0.1 0.8];
