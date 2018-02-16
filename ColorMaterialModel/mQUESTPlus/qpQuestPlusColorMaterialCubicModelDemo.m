@@ -38,6 +38,13 @@ nQuad = 3;
 nCubic = 3;
 nWeight = 5;
 
+% Set up parameter constraints.  Might do more beautifully someday
+maxStimValue = 3;
+maxPostion = 20;
+minSpacing = 0.25;
+% 'filterPsiParamsDomainFun',@(psiParams) qpQuestPlusColorMaterialCubicModelParamsCheck(psiParams,maxStimValuemaxPosition,minSpacing) ...
+
+
 %% Initialize three QUEST+ structures
 %
 % Each one has a different upper end of stimulus regime
