@@ -11,6 +11,7 @@
 % 12/19/17  dhb, ar  Created.
 % 01/05/18  dhb      Futz with bounds on parameters so it doesn't bomb.
 % 01/24/18  dhb      Cubic version.
+% 02/16/18  dhb      Parmeter check version.
 
 %% Close out stray figures
 clear; close all;
@@ -49,7 +50,7 @@ if (DO_INITIALIZE)
     nQuests = length(stimUpperEnds);
     for qq = 1:nQuests
         fprintf('Initializing quest structure %d\n',qq)
-        questData{qq}= qpInitialize( ...
+        questData{qq} = qpInitialize( ...
             'qpPF',qpPFFun, ...
             'stimParamsDomainList',{-stimUpperEnds(qq):stimUpperEnds(qq), -stimUpperEnds(qq):stimUpperEnds(qq), -stimUpperEnds(qq):stimUpperEnds(qq), -stimUpperEnds(qq):stimUpperEnds(qq)}, ...
             'psiParamsDomainList',{ linspace(lowerLin,upperLin,nLin) linspace(lowerQuad,upperQuad,nQuad) linspace(lowerCubic,upperCubic,nCubic) ...

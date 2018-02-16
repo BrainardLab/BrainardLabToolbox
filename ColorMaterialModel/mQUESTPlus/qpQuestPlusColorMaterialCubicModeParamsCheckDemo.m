@@ -33,9 +33,9 @@ lowerCubic = -0.3;
 upperCubic = -lowerCubic;
 lowerWeight = 0.05;
 upperWeight = 0.95;
-nLin = 4;
-nQuad = 3;
-nCubic = 3;
+nLin = 5;
+nQuad = 4;
+nCubic = 4;
 nWeight = 5;
 
 % Set up parameter constraints.  Might do more beautifully someday
@@ -54,7 +54,7 @@ if (DO_INITIALIZE)
     nQuests = length(stimUpperEnds);
     for qq = 1:nQuests
         fprintf('Initializing quest structure %d\n',qq)
-        questData{qq}= qpInitialize( ...
+        questData{qq} = qpInitialize( ...
             'qpPF',qpPFFun, ...
             'stimParamsDomainList',{-stimUpperEnds(qq):stimUpperEnds(qq), -stimUpperEnds(qq):stimUpperEnds(qq), -stimUpperEnds(qq):stimUpperEnds(qq), -stimUpperEnds(qq):stimUpperEnds(qq)}, ...
             'psiParamsDomainList',{ linspace(lowerLin,upperLin,nLin) linspace(lowerQuad,upperQuad,nQuad) linspace(lowerCubic,upperCubic,nCubic) ...
