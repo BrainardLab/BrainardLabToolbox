@@ -12,6 +12,13 @@ function probability = ColorMaterialModelGetProbabilityFromLookupTable(F,colorMa
 %
 %     The target is assumed to live at nominal coordinates 0,0, a fact that is baked into the lookup table.
 %
+%     Because a cubic lookup table can ring, we allow for possibility that
+%     returned probability from the lookup table might be a little less
+%     than 0 or a little greater than one.  Currently the tolerance is 2%.
+%     In these cases, the routine returns 0 or 1 as appropriately.  A
+%     bigger deviation from the expected bounds on probability throws an
+%     error.
+%
 % Input: 
 %     F - gridded interpolation function based on a look up table. 
 % 	  colorMatchColorCoordGrid - current position of color match on color dimension
@@ -29,9 +36,26 @@ function probability = ColorMaterialModelGetProbabilityFromLookupTable(F,colorMa
 % See also:
 %    ColorMaterialModelBuildLookupTable.
 
-% 2/2/17 ar Wrote it. 
+% 02/2/17 ar        Wrote it. 
+% 02/16/18 dhb, ar  Add check for returned value and implement tolerance.
 
 probability = F(colorMatchColorCoordGrid,materialMatchColorCoordGrid,colorMatchMaterialCoordGrid,materialMatchMaterialCoordsGrid, weightGrid);
+tolerance = 0.02;
+
+% Check on bounds
+if (probability < 0)
+    if (probability > -tolerance
+        probability = 0;
+    else
+        error('Table returns probability too much less than 0');
+    end
+elseif (probability > 1)
+    if (probability < 1 + tolerance)
+        probability = 1;
+    else
+        error('Table returns probability greater than 1');
+    end
+end
 
 
 end

@@ -19,6 +19,7 @@ clear; close all;
 cd(fileparts(mfilename('fullpath')));
 
 %% We need the lookup table.  Load it.
+%theLookupTable = load('../colorMaterialInterpolateFunLineareuclidean');
 theLookupTable = load('../colorMaterialInterpolateFunLineareuclidean');
 
 %% Define psychometric function in terms of lookup table
