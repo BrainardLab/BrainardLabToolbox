@@ -40,20 +40,22 @@ function probability = ColorMaterialModelGetProbabilityFromLookupTable(F,colorMa
 % 02/16/18 dhb, ar  Add check for returned value and implement tolerance.
 
 probability = F(colorMatchColorCoordGrid,materialMatchColorCoordGrid,colorMatchMaterialCoordGrid,materialMatchMaterialCoordsGrid, weightGrid);
-tolerance = 0.02;
+tolerance = 0.05;
 
 % Check on bounds
 if (probability < 0)
-    if (probability > -tolerance
+    if (probability > -tolerance)
         probability = 0;
     else
+         probability
         error('Table returns probability too much less than 0');
     end
 elseif (probability > 1)
     if (probability < 1 + tolerance)
         probability = 1;
     else
-        error('Table returns probability greater than 1');
+        probability
+       error('Table returns probability greater than 1');
     end
 end
 
