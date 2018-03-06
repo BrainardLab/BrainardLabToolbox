@@ -25,17 +25,18 @@ else
     dataDir = '/Users/ana/Dropbox (Aguirre-Brainard Lab)/CNST_analysis/ColorMaterial/DemoData/';
 end
 figDir = dataDir;
-
+for which = 7
 %% Load a data set (given the params)
 nBlocks = 24; 
 simulatedW = 0.5; 
 nDataSets = 1; 
-fileName = ['DemoData' num2str(simulatedW) 'W' num2str(nBlocks) 'Blocks' num2str(nDataSets) '.mat']; 
+fileName = ['DemoData' num2str(simulatedW) 'W' num2str(nBlocks) 'Blocks' num2str(nDataSets) 'Linear' num2str(which) '.mat']; 
+
 cd(dataDir)
 load(fileName); 
 
 % Plot the solution? Save the plots? Include Weibull plots?
-plotSolution = 1;
+plotSolution = 0;
 saveFig = 0; 
 weibullplots = 0; 
 params.subjectName = fileName(1:end-4); 
@@ -43,12 +44,17 @@ params.subjectName = fileName(1:end-4);
 %% Set model parameters 
 % Specify which method to use for looking up probabilities. 
 params.whichMethod = 'lookup'; % options: 'lookup', 'simulate' or 'analytic'
-params.whichDistance = 'euclidean'; % options: euclidean, cityblock (or any metric enabled by pdist function). 
 
 % For simulate method, set up how many simulations to use for predicting probabilities.  
 if strcmp(params.whichMethod, 'simulate')
     params.nSimulate = 1000;
 end
+
+params.conditionCode = 'demo'; 
+params.addNoise = true;
+params.whichDistance = 'euclidean';
+load (['colorMaterialInterpolateFunLinear' params.whichDistance '.mat'])
+params.F = colorMaterialInterpolatorFunction; % for lookup.
 
 % What sort of position fitting are we doing, and if smooth the order of the polynomial.
 % Options:
@@ -114,4 +120,12 @@ for whichSet = 1:length(dataSet)
 end
 % Save current fit
 cd(dataDir)
-save([params.subjectName 'Fit.mat'], 'dataSet', 'params', 'pairInfo', 'indexMatrix')
+
+switch params.whichPositions
+    case 'full'
+        save([params.subjectName 'Fit' params.whichPositions 'CityBlock' '.mat'], 'dataSet', 'params', 'pairInfo', 'indexMatrix')
+    case 'smoothSpacing'
+        spacingCode = {'Linear', 'Quadratic', 'Cubic'}; 
+        save([params.subjectName 'Fit' params.whichPositions spacingCode{num2str(params.smoothOrder)} 'CityBlock' '.mat'], 'dataSet', 'params', 'pairInfo', 'indexMatrix')
+end
+end

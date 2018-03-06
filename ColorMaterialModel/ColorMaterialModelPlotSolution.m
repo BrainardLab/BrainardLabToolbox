@@ -30,10 +30,6 @@ colorMaterialSolutionProb = ColorMaterialModelResizeProbabilities(predictedProba
 subjectName = params.subjectName; 
 cd (figDir)
 
-% tempFS= 20; 
-% tempMS = 20; 
-% tempLW = 3; 
-
 % Unpack passed params.  
 [returnedMaterialMatchColorCoords,returnedColorMatchMaterialCoords,returnedW,returnedSigma]  = ColorMaterialModelXToParams(returnedModelParams, params); 
 
@@ -41,8 +37,8 @@ cd (figDir)
 % Note: paramters this small will not look nice in single figures, but will
 % look nice in the main combo-figure. 
 thisFontSize = 20; 
-thisMarkerSize = 16; 
-thisLineWidth = 1; 
+thisMarkerSize = 20-4; 
+thisLineWidth = 2; 
 
 %% Figure 1. Plot measured vs. predicted probabilities
 f1 = figure; hold on
@@ -121,8 +117,8 @@ end
 
 %% Plot the color and material of the stimuli obtained from the fit in the 2D representational space
 f2 = figure; hold on; 
-thisMarkerSize = 16; 
-thisLineWidth = 2; 
+% thisMarkerSize = 16; 
+% thisLineWidth = 2; 
 plot(returnedMaterialMatchColorCoords, zeros(size(returnedMaterialMatchColorCoords)),'ko', ...
     'MarkerFaceColor', 'k', 'MarkerSize', thisMarkerSize, 'LineWidth', thisLineWidth); 
 line([xMin, xMax], [0,0],'color', 'k'); 
