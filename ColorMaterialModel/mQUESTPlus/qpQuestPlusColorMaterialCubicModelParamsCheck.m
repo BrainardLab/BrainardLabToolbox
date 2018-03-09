@@ -1,8 +1,7 @@
-function paramsOK = qpPFColorMaterialModelParamsCheck(psiParams,maxStimValue,maxPosition,minSpacing)
-% qpPFCircularParamsCheck  Parameter check for qpPFCicula
-%
+function paramsOK = qpQuestPlusColorMaterialCubicModelParamsCheck(psiParams,maxStimValue,maxPosition,minSpacing)
+% qpQuestPlusColorMaterialCubicModelParamsCheck  Parameter check for cubic model
 % Usage:
-%     paramsOK = qpPFCircularParamCheck(psiParams,maxStimValue,maxPosition,minSpacing)
+%     paramsOK = qpQuestPlusColorMaterialCubicModelParamsCheck(psiParams,maxStimValue,maxPosition,minSpacing)
 %
 % Description:
 %     Check whether passed parameters are valid for color material cubic
