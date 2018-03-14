@@ -49,7 +49,7 @@ minSpacing = 0.25;
 % Each one has a different upper end of stimulus regime
 % The last of these should be the most inclusive, and
 % include stimuli that could come from any of them.
-DO_INITIALIZE = true;
+DO_INITIALIZE = false;
 if (DO_INITIALIZE)
     stimUpperEnds = [1 2 3];
     nQuests = length(stimUpperEnds);
@@ -82,7 +82,7 @@ clear questDataAllTrials
 load(fullfile(tempdir,'initalizedQuestsParamsCheck'),'questDataAllTrials');
 
 %% Set up simulated observer function
-simulatedPsiParams = [2 0.2 0.05 4.5 -0.25 -0.1 0.8];
+simulatedPsiParams = [2.4646    0.2091    0.3000    2.3131   -0.0091   -0.0030    0.8818];
 simulatedObserverFun = @(x) qpSimulatedObserver(x,qpPFFun,simulatedPsiParams);
 
 %% Run multiple simulations
@@ -97,7 +97,7 @@ for ss = 1:nSessions
     % the questDataAllTrials structure intact.  We do this separately
     % for each simulated session.
     clear questData
-    load(fullfile(tempdir,'initalizedQuests'),'questData');
+    load(fullfile(tempdir,'initalizedQuestsParamsCheck'),'questData');
     
     % Force questDataAllTrials not to update entropy. This speeds things up
     % quite a bit, although you can't then make a nice plot of entropy as a
