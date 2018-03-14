@@ -147,6 +147,9 @@ end
 %% Save
 save(fullfile(tempdir,'qpQuestPlusColorMaterialCubicModelDemo'));
 
+% Get stim counts
+stimCounts = qpCounts(qpData(questDataAllTrials.trialData),questDataAllTrials.nOutcomes);
+
 % Find out QUEST+'s estimate of the stimulus parameters, obtained
 % on the gridded parameter domain.
 psiParamsIndex = qpListMaxArg(questDataAllTrials.posterior);
@@ -154,9 +157,13 @@ psiParamsQuest(ss,:) = questDataAllTrials.psiParamsDomain(psiParamsIndex,:);
 fprintf('Simulated parameters: %0.2f, %0.2f, %0.2f, %0.2f, %0.2f, %0.2f, %0.2f\n', ...
     simulatedPsiParams(1),simulatedPsiParams(2),simulatedPsiParams(3),simulatedPsiParams(4), ...
     simulatedPsiParams(5),simulatedPsiParams(6),simulatedPsiParams(7));
+fprintf('Log likelihood of data given simulated params: %0.2f\n', ...
+    -qpLogLikelihood(simulatedPsiParams,stimCounts,questDataAllTrials.qpPF));
 fprintf('Max posterior QUEST+ parameters: %0.2f, %0.2f, %0.2f, %0.2f, %0.2f, %0.2f, %0.2f\n', ...
     psiParamsQuest(ss,1),psiParamsQuest(ss,2),psiParamsQuest(ss,3),psiParamsQuest(ss,4), ...
     psiParamsQuest(ss,5),psiParamsQuest(ss,6),psiParamsQuest(ss,7));
+fprintf('Log likelihood of data max posterior params: %0.2f\n', ...
+    -qpLogLikelihood(psiParamsQuest,stimCounts,questDataAllTrials.qpPF));
 
 % Maximum likelihood fit.  Use psiParams from QUEST+ as the starting
 % parameter for the search, and impose as parameter bounds the range
@@ -167,7 +174,15 @@ psiParamsFit(ss,:) = qpFit(questDataAllTrials.trialData,questDataAllTrials.qpPF,
 fprintf('Maximum likelihood fit parameters: %0.2f, %0.2f, %0.2f, %0.2f, %0.2f, %0.2f, %0.2f\n', ...
     psiParamsFit(ss,1),psiParamsFit(ss,2),psiParamsFit(ss,3),psiParamsFit(ss,4), ...
     psiParamsFit(ss,5),psiParamsFit(ss,6),psiParamsFit(ss,7));
+fprintf('Log likelihood of data max posterior params: %0.2f\n', ...
+    -qpLogLikelihood(psiParamsFit,stimCounts,questDataAllTrials.qpPF));
 fprintf('\n');
+
+%% Here enter your cubic parameters in qp form, and compute and print log likelihood
+% as above.
+% anaParams = [];
+% fprintf('Log likelihood of ana''s params: %0.2f\n', ...
+%     -qpLogLikelihood(anaParams,stimCounts,questDataAllTrials.qpPF));
 
 %% Plot for last run
 %
