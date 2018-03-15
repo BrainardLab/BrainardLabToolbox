@@ -23,8 +23,8 @@ cVec2 = diff(colorMatchMaterialCoords);
 c1 = -[cVec1 cVec2]' + sigma/params.sigmaFactor;
 
 % This constraint forces the values to be within range
-c1Vec = abs(materialMatchColorCoords) - params.maxPosition;
-c2Vec = abs(colorMatchMaterialCoords) - params.maxPosition;
+c1Vec = abs(materialMatchColorCoords) - params.maxPositionValue;
+c2Vec = abs(colorMatchMaterialCoords) - params.maxPositionValue;
 c2 = [c1Vec(:) ; c2Vec(:)];
 
 % This is the whole constraint

@@ -158,12 +158,12 @@ fprintf('Simulated parameters: %0.2f, %0.2f, %0.2f, %0.2f, %0.2f, %0.2f, %0.2f\n
     simulatedPsiParams(1),simulatedPsiParams(2),simulatedPsiParams(3),simulatedPsiParams(4), ...
     simulatedPsiParams(5),simulatedPsiParams(6),simulatedPsiParams(7));
 fprintf('Log likelihood of data given simulated params: %0.2f\n', ...
-    -qpLogLikelihood(simulatedPsiParams,stimCounts,questDataAllTrials.qpPF));
+    -qpLogLikelihood(stimCounts,questDataAllTrials.qpPF,simulatedPsiParams));
 fprintf('Max posterior QUEST+ parameters: %0.2f, %0.2f, %0.2f, %0.2f, %0.2f, %0.2f, %0.2f\n', ...
     psiParamsQuest(ss,1),psiParamsQuest(ss,2),psiParamsQuest(ss,3),psiParamsQuest(ss,4), ...
     psiParamsQuest(ss,5),psiParamsQuest(ss,6),psiParamsQuest(ss,7));
 fprintf('Log likelihood of data max posterior params: %0.2f\n', ...
-    -qpLogLikelihood(psiParamsQuest,stimCounts,questDataAllTrials.qpPF));
+    -qpLogLikelihood(stimCounts,questDataAllTrials.qpPF, psiParamsQuest));
 
 % Maximum likelihood fit.  Use psiParams from QUEST+ as the starting
 % parameter for the search, and impose as parameter bounds the range
@@ -175,14 +175,14 @@ fprintf('Maximum likelihood fit parameters: %0.2f, %0.2f, %0.2f, %0.2f, %0.2f, %
     psiParamsFit(ss,1),psiParamsFit(ss,2),psiParamsFit(ss,3),psiParamsFit(ss,4), ...
     psiParamsFit(ss,5),psiParamsFit(ss,6),psiParamsFit(ss,7));
 fprintf('Log likelihood of data max posterior params: %0.2f\n', ...
-    -qpLogLikelihood(psiParamsFit,stimCounts,questDataAllTrials.qpPF));
+    -qpLogLikelihood(stimCounts,questDataAllTrials.qpPF, psiParamsFit));
 fprintf('\n');
 
 %% Here enter your cubic parameters in qp form, and compute and print log likelihood
 % as above.
-% anaParams = [];
-% fprintf('Log likelihood of ana''s params: %0.2f\n', ...
-%     -qpLogLikelihood(anaParams,stimCounts,questDataAllTrials.qpPF));
+anaParams = [ 12.4417   -0.0000   -0.6417    0.2500   -0.0000    0.0000    0.0462    1.0000]';
+fprintf('Log likelihood of ana''s params: %0.2f\n', ...
+    -qpLogLikelihood(stimCounts,questDataAllTrials.qpPF,anaParams));
 
 %% Plot for last run
 %
