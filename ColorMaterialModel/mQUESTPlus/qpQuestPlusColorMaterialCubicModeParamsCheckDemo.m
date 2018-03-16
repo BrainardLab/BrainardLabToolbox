@@ -20,7 +20,7 @@ cd(fileparts(mfilename('fullpath')));
 
 %% We need the lookup table.  Load it.
 %theLookupTable = load('../colorMaterialInterpolateFunLineareuclidean');
-theLookupTable = load('../colorMaterialInterpolateFunLineareuclidean');
+theLookupTable = load('../colorMaterialInterpolateFunCubiceuclidean');
 
 %% Define psychometric function in terms of lookup table
 qpPFFun = @(stimParams,psiParams) qpPFColorMaterialCubicModel(stimParams,psiParams,theLookupTable.colorMaterialInterpolatorFunction);
