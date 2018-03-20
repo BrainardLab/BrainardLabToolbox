@@ -231,7 +231,7 @@ for k1 = 1:length(params.tryMaterialSpacingValues)
 end
 
 %% Right here, have option to start with passed initial parameters and compare
-\% how we did to the above, and take the final best.
+% how we did to the above, and take the final best.
 
 toc
 end

@@ -60,9 +60,8 @@ for i = 1:nPairs
                 colorMatchMaterialCoord,materialMatchMaterialCoord, w, sigma, p.Results.addNoise, p.Results.whichDistance);
             rng(s);
         case 'lookup'
-            % Replace this with function with
-            % ColorMaterialModelGetProbabilityFromLookupTable.
-            predictedProbabilities(i) = p.Results.Fobj(colorMatchColorCoord,materialMatchColorCoord,colorMatchMaterialCoord,materialMatchMaterialCoord, w);
+            predictedProbabilities(i) = ColorMaterialModelGetProbabilityFromLookupTable(p.Results.Fobj, ...
+                colorMatchColorCoord,materialMatchColorCoord,colorMatchMaterialCoord,materialMatchMaterialCoord, w);
     end
     
     if (isnan(predictedProbabilities(i)))

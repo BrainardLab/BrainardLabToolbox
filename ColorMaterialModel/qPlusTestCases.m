@@ -1,4 +1,6 @@
-
+% ColorMaterialModelqPlusTestProgram
+% Compare the outputs of qPlus and our fitting routine in terms of
+% likelihoods of the initial set data set as well as the solution. 
 
 % Initialize
 clear; close all; 
@@ -51,13 +53,14 @@ fprintf('\n');
 % our initial experiments.
 cd(analysisDir)
 params = getqPlusPilotExpParams;
-
+params.whichDistance = 'euclidean'; 
+params.interpCode = 'Cubic';
 % Set up initial modeling paramters (add on)
 params = getqPlusPilotModelingParams(params);
 
 % Set up more modeling parameters
 % What sort of position fitting ('full', 'smoothOrder').
-params.whichPositions = 'smoothSpacing';
+params.whichPositions = 'full';
 params.smoothOrder = 3; 
 
 % Does material/color weight vary in fit? ('weightVary', 'weightFixed').
@@ -82,8 +85,9 @@ for t = 1:length(thisTempSet.questDataAllTrials.trialData)
 end
 clear thisTempSet;
 
+
 % compute likelihood on a unconcatenated version of what quest kicks out
-[a, b, c, d] = ColorMaterialModelXToParams([simulatedPsiParams, 1], params);
+fprintf('Get likelihood of an unconcatenated version. \n');
 thisSet.pairColorMatchColorCoords = thisSet.trialData(:,1);
 thisSet.pairMaterialMatchColorCoords = thisSet.trialData(:,2);
 thisSet.pairColorMatchMaterialCoords = thisSet.trialData(:,3);
@@ -103,6 +107,7 @@ thisSet.pFirstChosen = thisSet.firstChosen./thisSet.newNTrials;
 fprintf('Main fitting log 10 likelihood of data given simulated params, trial-by-trial data: %0.2f\n', ...
     thisSet.initialLogLikely);
 
+fprintf('Get likelihood of an concatenated version. \n');
 % concatenate across blocks
 thisSet.rawTrialData = thisSet.trialData;
 thisSet.newTrialData = qPlusConcatenateRawData(thisSet.rawTrialData, indices);
@@ -117,7 +122,6 @@ thisSet.newNTrials = thisSet.newTrialData(:,6);
 thisSet.pFirstChosen = thisSet.firstChosen./thisSet.newNTrials;
 
 % Get the parameters that were simulated
-[a, b, c, d] = ColorMaterialModelXToParams([simulatedPsiParams, 1], params);
 [thisSet.initialLogLikely, thisSet.predictedResponses] = ...
     ColorMaterialModelComputeLogLikelihood(...
     simulatedPsiParams(1)*thisSet.pairColorMatchColorCoords + simulatedPsiParams(2)*thisSet.pairColorMatchColorCoords.^2+ simulatedPsiParams(3)*thisSet.pairColorMatchColorCoords.^3, ...
@@ -131,8 +135,7 @@ fprintf('Main fitting log 10 likelihood of data given simulated params: %0.2f\n'
     thisSet.initialLogLikely);
 
 % Model
-[thisSet.returnedParams, thisSet.logLikelyFit, thisSet.predictedProbabilitiesBasedOnSolution] = ...
-    FitColorMaterialModelMLDS(thisSet.pairColorMatchColorCoords, ...
+[thisSet.returnedParams, thisSet.logLikelyFit, thisSet.predictedProbabilitiesBasedOnSolution] =  FitColorMaterialModelMLDS(thisSet.pairColorMatchColorCoords, ...
     thisSet.pairMaterialMatchColorCoords,...
     thisSet.pairColorMatchMaterialCoords, ...
     thisSet.pairMaterialMatchMaterialCoords,...
@@ -141,3 +144,5 @@ fprintf('Main fitting log 10 likelihood of data given simulated params: %0.2f\n'
 % extract parameters
 [thisSet.returnedMaterialMatchColorCoords, thisSet.returnedColorMatchMaterialCoords, ...
     thisSet.returnedW, thisSet.returnedSigma]  = ColorMaterialModelXToParams(thisSet.returnedParams, params);
+fprintf('Log 10 likelihood of data fit our model: %0.2f\n', ...
+    thisSet.logLikelyFit);
