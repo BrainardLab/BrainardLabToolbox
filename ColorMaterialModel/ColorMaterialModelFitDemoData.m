@@ -12,17 +12,15 @@
 clear; close all;
 
 %% Set relevant preferences and directories. 
-%setpref('ColorMaterialModel','demoDataDir','/Users/Shared/Matlab/Toolboxes/BrainardLabToolbox/ColorMaterialModel/DemoData/');
-setpref('ColorMaterialModel','demoDataDir','/Users/dhb/Documents/Matlab/toolboxes/BrainardLabToolbox/ColorMaterialModel/DemoData/');
 
 % Main demo for the toolbox and larger audience. 
 % If this is set to false, then the data is saved on dropbox and analyzed
 % separately (as a part of the main model/experimental analysis. 
 MAINDEMO = true; 
 if MAINDEMO
-    dataDir = '/Users/ana/Documents/MATLAB/toolboxes/BrainardLabToolbox/ColorMaterialModel/DemoData/';
+    dataDir = [getpref('ColorMaterial', 'mainCodeDir'), '/DemoData'];
 else
-    dataDir = '/Users/ana/Dropbox (Aguirre-Brainard Lab)/CNST_analysis/ColorMaterial/DemoData/';
+    dataDir = getpref('ColorMaterial', 'demoDataDir'); 
 end
 figDir = dataDir;
 for which = 7
@@ -44,7 +42,7 @@ params.subjectName = fileName(1:end-4);
 %% Set model parameters 
 % Specify which method to use for looking up probabilities. 
 params.whichMethod = 'lookup'; % options: 'lookup', 'simulate' or 'analytic'
-
+params.maxPosition = 20; 
 % For simulate method, set up how many simulations to use for predicting probabilities.  
 if strcmp(params.whichMethod, 'simulate')
     params.nSimulate = 1000;
@@ -60,7 +58,7 @@ params.F = colorMaterialInterpolatorFunction; % for lookup.
 % Options:
 %  'full' - Weights vary
 %  'smoothSpacing' - Weights computed according to a polynomial fit.
-params.whichPositions = 'full';
+params.whichPositions = 'smoothSpacing';
 if strcmp(params.whichPositions, 'smoothSpacing')
     params.smoothOrder = 1; % this option is only for smoothSpacing
 end
