@@ -111,6 +111,11 @@ options = optimset(options,'Diagnostics','off','Display','off','LargeScale','off
 % We search over various initial spacings and take the best result.
 % There are two loops. One sets the positions of the competitors
 % in the solution in the color dimension, the other tries different initial spacings for material dimension.
+if params.qpParamsStart
+    params.tryMaterialSpacingValues = params.tryColorSpacingValues(1); 
+    params.tryColorSpacingValues = params.tryColorSpacingValues(1); 
+    params.tryWeightValues = params.tryWeightValues(1); 
+end
 logLikelyFit = -Inf;
 for k1 = 1:length(params.tryMaterialSpacingValues)
     for k2 = 1:length(params.tryColorSpacingValues)
@@ -135,8 +140,12 @@ for k1 = 1:length(params.tryMaterialSpacingValues)
                     error('Unknown whichPosition method specified');
                     
             end
-            initialParams = ColorMaterialModelParamsToX(initialMaterialMatchColorCoords,initialColorMatchMaterialCoords,params.tryWeightValues(k3),params.sigma);
-            
+            if params.qpParamsStart
+                initialParams = params.qpInitialParams;
+            else
+                initialParams = ColorMaterialModelParamsToX(initialMaterialMatchColorCoords,initialColorMatchMaterialCoords,...
+                    params.tryWeightValues(k3),params.sigma);
+            end
             % Create bounds vectors and start with situation where no
             % parameters can vary.  This then gets adjusted according to
             % the particular fit method we are running, just below.
