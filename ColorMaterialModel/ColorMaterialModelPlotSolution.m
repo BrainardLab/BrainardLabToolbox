@@ -30,35 +30,31 @@ colorMaterialSolutionProb = ColorMaterialModelResizeProbabilities(predictedProba
 subjectName = params.subjectName; 
 cd (figDir)
 
-% tempFS= 20; 
-% tempMS = 20; 
-% tempLW = 3; 
-
 % Unpack passed params.  
 [returnedMaterialMatchColorCoords,returnedColorMatchMaterialCoords,returnedW,returnedSigma]  = ColorMaterialModelXToParams(returnedModelParams, params); 
 
 % Set plot parameters. 
 % Note: paramters this small will not look nice in single figures, but will
 % look nice in the main combo-figure. 
-thisFontSize = 6; 
-thisMarkerSize = 6; 
-thisLineWidth = 1; 
+thisFontSize = 20; 
+thisMarkerSize = 20-4; 
+thisLineWidth = 2; 
 
 %% Figure 1. Plot measured vs. predicted probabilities
-figure; hold on
+f1 = figure; hold on
 plot(theDataProb, predictedProbabilitiesBasedOnSolution,'ro','MarkerSize',thisMarkerSize-2,'MarkerFaceColor','r');
-rmse = ComputeRealRMSE(theDataProb,predictedProbabilitiesBasedOnSolution);
-text(0.07, 0.92, sprintf('rmseFit = %.4f', rmse), 'FontSize', thisFontSize);
-if nargin == 9
-    plot(theDataProb,actualProbs,'bo','MarkerSize',thisMarkerSize-2);
-    rmseComp = ComputeRealRMSE(theDataProb,actualProbs); 
-    text(0.07, 0.82, sprintf('rmseActual = %.4f', rmseComp), 'FontSize', thisFontSize);
-    legend('Fit Parameters', 'Simulated Parameters', 'Location', 'NorthWest')
-    legend boxoff
-else
-    legend('Fit Parameters', 'Location', 'NorthWest')
-    legend boxoff
-end
+% rmse = ComputeRealRMSE(theDataProb,predictedProbabilitiesBasedOnSolution);
+% text(0.07, 0.92, sprintf('rmseFit = %.4f', rmse), 'FontSize', thisFontSize);
+% if nargin == 9
+%     plot(theDataProb,actualProbs,'bo','MarkerSize',thisMarkerSize-2);
+%     rmseComp = ComputeRealRMSE(theDataProb,actualProbs); 
+%     text(0.07, 0.82, sprintf('rmseActual = %.4f', rmseComp), 'FontSize', thisFontSize);
+%     legend('Fit Parameters', 'Simulated Parameters', 'Location', 'NorthWest')
+%     legend boxoff
+% else
+%     legend('Fit Parameters', 'Location', 'NorthWest')
+%     legend boxoff
+% end
 line([0, 1], [0,1], 'color', 'k');
 axis('square'); axis([0 1 0 1]);
 set(gca,  'FontSize', thisFontSize);
@@ -67,7 +63,7 @@ ylabel('Predicted p');
 set(gca, 'xTick', [0, 0.5, 1]);
 set(gca, 'yTick', [0, 0.5, 1]);
 ax(1)=gca;
-
+   FigureSave([subjectName, 'RMSE'], f1, 'pdf'); 
 % Prepare for figure 2. Fit cubic spline to the data
 % We do this separately for color and material dimension
 xMin = -params.maxPositionValue;
@@ -121,8 +117,8 @@ end
 
 %% Plot the color and material of the stimuli obtained from the fit in the 2D representational space
 f2 = figure; hold on; 
-thisMarkerSize = 16; 
-thisLineWidth = 2; 
+% thisMarkerSize = 16; 
+% thisLineWidth = 2; 
 plot(returnedMaterialMatchColorCoords, zeros(size(returnedMaterialMatchColorCoords)),'ko', ...
     'MarkerFaceColor', 'k', 'MarkerSize', thisMarkerSize, 'LineWidth', thisLineWidth); 
 line([xMin, xMax], [0,0],'color', 'k'); 
@@ -138,7 +134,7 @@ set(gca, 'yTick', [yMin, 0, yMax],'FontSize', 26);
 ax(4)=gca;
 
 if saveFigs
-    savefig(f2, [subjectName, 'RecoveredPositions2D.fig'])
+  %  savefig(f2, [subjectName, 'RecoveredPositions2D.fig'])
     FigureSave([subjectName, 'RecoveredPositions2D'], f2, 'pdf'); 
 end
 %% Figure 3. Plot descriptive Weibull fits to the data. 
@@ -182,7 +178,7 @@ end
 returnedColorMatchColorCoord =  FColor(params.targetColorCoord);
 returnedMaterialMatchMaterialCoord = FMaterial(params.targetMaterialCoord);
 
-% Find the predicted probabilities for a range of possible color coordinates 
+% Find the predicted probabilities for a range of possible color coordinates
 rangeOfMaterialMatchColorCoordinates =  linspace(min(params.materialMatchColorCoords), max(params.materialMatchColorCoords), 100)';
 % Find the predicted probabilities for a range of possible material
 % coordinates - for the reverse model.
@@ -203,9 +199,12 @@ for whichMaterialCoordinate = 1:length(params.colorMatchMaterialCoords)
         returnedMaterialMatchColorCoord(whichColorCoordinate) = FColor(rangeOfMaterialMatchColorCoordinates(whichColorCoordinate));
         
         % Compute the model predictions
-        modelPredictions(whichColorCoordinate, whichMaterialCoordinate) = ColorMaterialModelComputeProb(params.targetColorCoord,params.targetMaterialCoord, ...
-            returnedColorMatchColorCoord,returnedMaterialMatchColorCoord(whichColorCoordinate),...
-            returnedColorMatchMaterialCoord(whichMaterialCoordinate), returnedMaterialMatchMaterialCoord, returnedW, returnedSigma);
+        %         modelPredictions(whichColorCoordinate, whichMaterialCoordinate) = ColorMaterialModelComputeProb(params.targetColorCoord,params.targetMaterialCoord, ...
+        %             returnedColorMatchColorCoord,returnedMaterialMatchColorCoord(whichColorCoordinate),...
+        %             returnedColorMatchMaterialCoord(whichMaterialCoordinate), returnedMaterialMatchMaterialCoord, returnedW, returnedSigma);
+        modelPredictions(whichColorCoordinate, whichMaterialCoordinate) = ColorMaterialModelGetProbabilityFromLookupTable(params.F,returnedColorMatchColorCoord,returnedMaterialMatchColorCoord(whichColorCoordinate),...
+            returnedColorMatchMaterialCoord(whichMaterialCoordinate), returnedMaterialMatchMaterialCoord,returnedW);
+        
     end
 end
 rangeOfMaterialMatchColorCoordinates = repmat(rangeOfMaterialMatchColorCoordinates,[1, length(params.materialMatchColorCoords)]);
@@ -214,23 +213,29 @@ rangeOfMaterialMatchColorCoordinates = repmat(rangeOfMaterialMatchColorCoordinat
     'fontSize', thisFontSize, 'markerSize', thisMarkerSize, 'lineWidth', thisLineWidth);
 ax(5)=thisAxis3;
 FigureSave([params.subjectName, 'ModelFitColorXAxis'], thisFig3, 'pdf');
+
 % Get values for reverse plotting
 for whichColorCoordinate = 1:length(params.materialMatchColorCoords)
-
+    
     % Get the inferred material position for this color match
-    % Note that this is read from cubic spline fit.  
+    % Note that this is read from cubic spline fit.
     returnedMaterialMatchColorCoord(whichColorCoordinate) = FColor(params.materialMatchColorCoords(whichColorCoordinate));
     
     % Get the inferred color position for a range of material matches
     for whichMaterialCoordinate = 1:length(rangeOfColorMatchMaterialCoordinates)
         % Get the position of the material match using our FColor function
         returnedColorMatchMaterialCoord(whichMaterialCoordinate) = FMaterial(rangeOfColorMatchMaterialCoordinates(whichMaterialCoordinate));
-                
+        
         % Compute the model predictions
-        modelPredictions2(whichMaterialCoordinate, whichColorCoordinate) = 1-ColorMaterialModelComputeProb(params.targetColorCoord,params.targetMaterialCoord, ...
+        %         modelPredictions2(whichMaterialCoordinate, whichColorCoordinate) = 1-ColorMaterialModelComputeProb(params.targetColorCoord,params.targetMaterialCoord, ...
+        %             returnedColorMatchColorCoord,returnedMaterialMatchColorCoord(whichColorCoordinate),...
+        %             returnedColorMatchMaterialCoord(whichMaterialCoordinate), returnedMaterialMatchMaterialCoord, ...
+        %             returnedW, returnedSigma);
+        
+        modelPredictions2(whichMaterialCoordinate, whichColorCoordinate) = 1 - ColorMaterialModelGetProbabilityFromLookupTable(params.F,...
             returnedColorMatchColorCoord,returnedMaterialMatchColorCoord(whichColorCoordinate),...
             returnedColorMatchMaterialCoord(whichMaterialCoordinate), returnedMaterialMatchMaterialCoord, ...
-            returnedW, returnedSigma);
+            returnedW);
     end
 end
 rangeOfColorMatchMaterialCoordinates = repmat(rangeOfColorMatchMaterialCoordinates,[1, length(params.colorMatchMaterialCoords)]);

@@ -11,7 +11,6 @@
 % 12/19/17  dhb, ar  Created.
 % 01/05/18  dhb      Futz with bounds on parameters so it doesn't bomb.
 % 01/24/18  dhb      Cubic version.
-% 02/16/18  dhb      Parmeter check version.
 
 %% Close out stray figures
 clear; close all;
@@ -20,7 +19,8 @@ clear; close all;
 cd(fileparts(mfilename('fullpath')));
 
 %% We need the lookup table.  Load it.
-theLookupTable = load('../colorMaterialInterpolateFunLineareuclidean');
+%theLookupTable = load('../colorMaterialInterpolateFunLineareuclidean');
+theLookupTable = load('../colorMaterialInterpolateFunCubiceuclidean');
 
 %% Define psychometric function in terms of lookup table
 qpPFFun = @(stimParams,psiParams) qpPFColorMaterialCubicModel(stimParams,psiParams,theLookupTable.colorMaterialInterpolatorFunction);
@@ -34,17 +34,22 @@ lowerCubic = -0.3;
 upperCubic = -lowerCubic;
 lowerWeight = 0.05;
 upperWeight = 0.95;
-nLin = 4;
-nQuad = 3;
-nCubic = 3;
+nLin = 5;
+nQuad = 4;
+nCubic = 4;
 nWeight = 5;
+
+% Set up parameter constraints.  Might do more beautifully someday
+maxStimValue = 3;
+maxPosition = 20;
+minSpacing = 0.25;
 
 %% Initialize three QUEST+ structures
 %
 % Each one has a different upper end of stimulus regime
 % The last of these should be the most inclusive, and
 % include stimuli that could come from any of them.
-DO_INITIALIZE = true;
+DO_INITIALIZE = false;
 if (DO_INITIALIZE)
     stimUpperEnds = [1 2 3];
     nQuests = length(stimUpperEnds);
@@ -55,7 +60,8 @@ if (DO_INITIALIZE)
             'stimParamsDomainList',{-stimUpperEnds(qq):stimUpperEnds(qq), -stimUpperEnds(qq):stimUpperEnds(qq), -stimUpperEnds(qq):stimUpperEnds(qq), -stimUpperEnds(qq):stimUpperEnds(qq)}, ...
             'psiParamsDomainList',{ linspace(lowerLin,upperLin,nLin) linspace(lowerQuad,upperQuad,nQuad) linspace(lowerCubic,upperCubic,nCubic) ...
                                     linspace(lowerLin,upperLin,nLin) linspace(lowerQuad,upperQuad,nQuad) linspace(lowerCubic,upperCubic,nCubic) ...
-                                    linspace(lowerWeight,upperWeight,nWeight) } ...
+                                    linspace(lowerWeight,upperWeight,nWeight) }, ...
+            'filterPsiParamsDomainFun',@(psiParams) qpQuestPlusColorMaterialCubicModelParamsCheck(psiParams,maxStimValue,maxPosition,minSpacing) ...
             );
     end
     
@@ -66,17 +72,17 @@ if (DO_INITIALIZE)
     questDataAllTrials = questData{end};
     
     %% Save out initialized quests
-    save(fullfile(tempdir,'initalizedQuests'),'questData','questDataAllTrials');
+    save(fullfile(tempdir,'initalizedQuestsParamsCheck'),'questData','questDataAllTrials');
 end
 
 % Load in intialized questDataAllTrials.  We do this outside
 % the big loop over simulated sessions, as it is common acorss 
 % those simulated sessions.
 clear questDataAllTrials
-load(fullfile(tempdir,'initalizedQuests'),'questDataAllTrials');
+load(fullfile(tempdir,'initalizedQuestsParamsCheck'),'questDataAllTrials');
 
 %% Set up simulated observer function
-simulatedPsiParams = [2 0.2 0.05 4.5 -0.25 -0.1 0.8];
+simulatedPsiParams = [2.4646    0.2091    0.3000    2.3131   -0.0091   -0.0030    0.8818];
 simulatedObserverFun = @(x) qpSimulatedObserver(x,qpPFFun,simulatedPsiParams);
 
 %% Run multiple simulations
@@ -91,7 +97,7 @@ for ss = 1:nSessions
     % the questDataAllTrials structure intact.  We do this separately
     % for each simulated session.
     clear questData
-    load(fullfile(tempdir,'initalizedQuests'),'questData');
+    load(fullfile(tempdir,'initalizedQuestsParamsCheck'),'questData');
     
     % Force questDataAllTrials not to update entropy. This speeds things up
     % quite a bit, although you can't then make a nice plot of entropy as a
@@ -141,26 +147,35 @@ end
 %% Save
 save(fullfile(tempdir,'qpQuestPlusColorMaterialCubicModelDemo'));
 
+% Get stim counts
+stimCounts = qpCounts(qpData(questDataAllTrials.trialData),questDataAllTrials.nOutcomes);
+
 % Find out QUEST+'s estimate of the stimulus parameters, obtained
 % on the gridded parameter domain.
 psiParamsIndex = qpListMaxArg(questDataAllTrials.posterior);
-psiParamsQuest(ss,:) = questDataAllTrials.psiParamsDomain(psiParamsIndex,:);
+psiParamsQuest = questDataAllTrials.psiParamsDomain(psiParamsIndex,:);
 fprintf('Simulated parameters: %0.2f, %0.2f, %0.2f, %0.2f, %0.2f, %0.2f, %0.2f\n', ...
     simulatedPsiParams(1),simulatedPsiParams(2),simulatedPsiParams(3),simulatedPsiParams(4), ...
     simulatedPsiParams(5),simulatedPsiParams(6),simulatedPsiParams(7));
+fprintf('Log 10 likelihood of data given simulated params: %0.2f\n', ...
+    qpLogLikelihood(stimCounts,questDataAllTrials.qpPF,simulatedPsiParams)/log(10));
 fprintf('Max posterior QUEST+ parameters: %0.2f, %0.2f, %0.2f, %0.2f, %0.2f, %0.2f, %0.2f\n', ...
-    psiParamsQuest(ss,1),psiParamsQuest(ss,2),psiParamsQuest(ss,3),psiParamsQuest(ss,4), ...
-    psiParamsQuest(ss,5),psiParamsQuest(ss,6),psiParamsQuest(ss,7));
+    psiParamsQuest(1),psiParamsQuest(2),psiParamsQuest(3),psiParamsQuest(4), ...
+    psiParamsQuest(5),psiParamsQuest(6),psiParamsQuest(7));
+fprintf('Log 10 likelihood of data quest''s max posterior params: %0.2f\n', ...
+    qpLogLikelihood(stimCounts,questDataAllTrials.qpPF, psiParamsQuest)/log(10));
 
 % Maximum likelihood fit.  Use psiParams from QUEST+ as the starting
 % parameter for the search, and impose as parameter bounds the range
 % provided to QUEST+.
-psiParamsFit(ss,:) = qpFit(questDataAllTrials.trialData,questDataAllTrials.qpPF,psiParamsQuest(ss,:),questDataAllTrials.nOutcomes,...
+psiParamsFit = qpFit(questDataAllTrials.trialData,questDataAllTrials.qpPF,psiParamsQuest(:),questDataAllTrials.nOutcomes,...
     'lowerBounds', [1/upperLin -upperQuad -upperCubic 1/upperLin -upperQuad -upperCubic 0], ...
     'upperBounds',[upperLin upperQuad upperCubic upperLin upperQuad upperCubic 1]);
 fprintf('Maximum likelihood fit parameters: %0.2f, %0.2f, %0.2f, %0.2f, %0.2f, %0.2f, %0.2f\n', ...
-    psiParamsFit(ss,1),psiParamsFit(ss,2),psiParamsFit(ss,3),psiParamsFit(ss,4), ...
-    psiParamsFit(ss,5),psiParamsFit(ss,6),psiParamsFit(ss,7));
+    psiParamsFit(1),psiParamsFit(2),psiParamsFit(3),psiParamsFit(4), ...
+    psiParamsFit(5),psiParamsFit(6),psiParamsFit(7));
+fprintf('Log 10 likelihood of data fit max likelihood params: %0.2f\n', ...
+    qpLogLikelihood(stimCounts,questDataAllTrials.qpPF, psiParamsFit)/log(10));
 fprintf('\n');
 
 %% Plot for last run
