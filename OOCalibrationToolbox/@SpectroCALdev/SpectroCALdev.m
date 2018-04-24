@@ -113,7 +113,7 @@ classdef SpectroCALdev < Radiometer
         function obj = switchLaserState(obj, laserState)
             % Check whether to turn laser on or off
             if laserState == 0
-                obj.sendCommand('*CONTR:LASER 0');CP,1);
+                obj.sendCommand('*CONTR:LASER 0');
             elseif laserState == 1
                 obj.sendCommand('*CONTR:LASER 1');
             end
