@@ -26,7 +26,7 @@ theLookupTable = load('../colorMaterialInterpolateFunCubiceuclidean');
 qpPFFun = @(stimParams,psiParams) qpPFColorMaterialCubicModel(stimParams,psiParams,theLookupTable.colorMaterialInterpolatorFunction);
 
 %% Define parameters that set up parameter grid for QUEST+
-lowerLin = 1;
+lowerLin = 0.5;
 upperLin = 6;
 lowerQuad = -0.3;
 upperQuad = -lowerQuad;
@@ -43,6 +43,9 @@ nWeight = 5;
 maxStimValue = 3;
 maxPosition = 20;
 minSpacing = 0.25;
+
+% Does a simple simulation as in the experiment. 
+ALSO_SIMULATE = false;
 
 %% Initialize three QUEST+ structures
 %
@@ -82,11 +85,11 @@ clear questDataAllTrials
 load(fullfile(tempdir,'initalizedQuestsParamsCheck'),'questDataAllTrials');
 
 %% Set up simulated observer function
-simulatedPsiParams = [2.4646    0.2091    0.3000    2.3131   -0.0091   -0.0030    0.8818];
+simulatedPsiParams = [3 0 0 2 0 0 0.2];
 simulatedObserverFun = @(x) qpSimulatedObserver(x,qpPFFun,simulatedPsiParams);
 
 %% Run multiple simulations
-nSessions = 8;
+nSessions = 1;
 nTrialsPerQuest = 30;
 questOrderIn = [0 1 2 3 3 3 3 3 3];
 for ss = 1:nSessions
@@ -103,6 +106,7 @@ for ss = 1:nSessions
     % quite a bit, although you can't then make a nice plot of entropy as a
     % function of trial.
     questDataAllTrials.noentropy = true;
+    questDataAllTrials1 = questDataAllTrials;
     
     % Run simulated trials, using QUEST+ to tell us what contrast to
     %
@@ -126,6 +130,19 @@ for ss = 1:nSessions
             end
             
             % Simulate outcome
+            if (ALSO_SIMULATE)
+                targetC = normrnd(0,1);
+                targetM = normrnd(0,1);
+                weight = 0.2;
+                d1 = sqrt( (weight*(3*stim(1) + normrnd(0,1) - targetC))^2 + ((1-weight)*(2*stim(3) + normrnd(0,1) - targetM))^2 );
+                d2 = sqrt( (weight*(3*stim(2) + normrnd(0,1) - targetC))^2 + ((1-weight)*(2*stim(4) + normrnd(0,1) - targetM))^2 );
+                if (d1 < d2) 
+                    outcome1 =1;
+                else
+                    outcome1 = 2;
+                end
+                questDataAllTrials1 = qpUpdate(questDataAllTrials1,stim,outcome1);
+            end
             outcome = simulatedObserverFun(stim);
             
             % Update quest data structure, if not a randomly inserted trial
@@ -138,6 +155,7 @@ for ss = 1:nSessions
             % experiment.  We never query it to decide what to do, but we
             % will use it to fit the data at the end.
             questDataAllTrials = qpUpdate(questDataAllTrials,stim,outcome);
+
         end
         btime = toc(bstart);
         fprintf('\t\tBlock time = %0.1f secs, %0.1f secs/trial\n',btime,btime/length(questOrder));
@@ -164,6 +182,13 @@ fprintf('Max posterior QUEST+ parameters: %0.2f, %0.2f, %0.2f, %0.2f, %0.2f, %0.
     psiParamsQuest(5),psiParamsQuest(6),psiParamsQuest(7));
 fprintf('Log 10 likelihood of data quest''s max posterior params: %0.2f\n', ...
     qpLogLikelihood(stimCounts,questDataAllTrials.qpPF, psiParamsQuest)/log(10));
+
+if (SIMULATE)
+    stimCounts1 = qpCounts(qpData(questDataAllTrials1.trialData),questDataAllTrials1.nOutcomes);
+    fprintf('Log 10 likelihood of data given simulated params and by hand simulated responses: %0.2f\n', ...
+    qpLogLikelihood(stimCounts1,questDataAllTrials1.qpPF,simulatedPsiParams)/log(10));
+end
+    
 
 % Maximum likelihood fit.  Use psiParams from QUEST+ as the starting
 % parameter for the search, and impose as parameter bounds the range
