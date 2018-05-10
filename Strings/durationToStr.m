@@ -53,6 +53,10 @@ function str = durationToStr(dur, varargin)
     durationToStr(seconds(65),'OxfordComma', false)
 %}
 %{
+    %% '1 minute'
+    durationToStr(seconds(60))
+%}
+%{
     %% '0 years, 0 days, 0 hours, 1 minute, 5 seconds, and 0 milliseconds'
     durationToStr(seconds(65),'dropZero', false)
 %}
@@ -88,7 +92,10 @@ str = strjoin(strComponents', ', ');
 
 %% Insert 'and'
 if parser.Results.and
-    str = insertAfter(str,find(str == ',',1,'last'),' and'); 
+    lastComma = find(str == ',',1,'last');
+    if ~isempty(lastComma)
+        str = insertAfter(str,lastComma,' and');
+    end
 end
 
 %% Remove Oxford comma
