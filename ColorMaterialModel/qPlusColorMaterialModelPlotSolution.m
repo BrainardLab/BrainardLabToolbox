@@ -1,59 +1,78 @@
-function ColorMaterialModelPlotSolution(theDataProb, predictedProbabilitiesBasedOnSolution, returnedModelParams,...
-    params, figDir, saveFigs)
-% ColorMaterialModelPlotSolution(theDataProb, predictedProbabilitiesBasedOnSolution, returnedModelParams,...
+function [colorSlope, materialSlope] = qPlusColorMaterialModelPlotSolution(theDataProb, predictedProbabilitiesBasedOnSolution, nTrialsPerPair, returnedModelParams,...
+    params, figDir, saveFigs, colorMaterialData)
+% qPlusColorMaterialModelPlotSolution(theDataProb, predictedProbabilitiesBasedOnSolution, returnedModelParams,...
 %    indexMatrix, params, figDir, saveFig, weibullplots, actualProbs)
-% Make a nice plot of the data and MLDS-based model fit.
+% Plot model solution for the experiments that use qPlus in stimulus
+% selection. 
 %
+% Outputs: 
+% colorSlope - the slope of positions of the stimuli on the color
+%               dimension (model solution) vs. nominal color positions
+% materialSlope - the slope of positions of the stimuli on the material
+%               dimension (model solution) vs. nominal color positions 
 % Inputs:
 %   theDataProb - the data probabilities measured in the experiment
 %   predictedProbabilitiesBasedOnSolution - predictions based on solutions
+%   nTrialsPerPair - number of trials for each pair for which we have
+%                    measured/predicted probability
 %   returnedModelParams - returned model parameters
 %   params -  standard experiment specifications structure
 %   figDir -  specify figure directory
 %   saveFigs - save intermediate figures? main figure is going to be saved by default. 
-
-% 06/15/2017 ar Added comments and made small changes to the code. 
+%              This option is obsolete, but we want to keep that flag for just 
+%              in case we change how we plot the data.    
+%   colorMaterialData - measuredProbabilities for color-material functions (importnat:
+%            rows are color levels (M0), columns are material levels (C0) 
+%
+% 05/30/18 ar Adapted the previous color-material model code for the
+%               qPlus implementation
+% 07/11/18 ar Added the color-material data matrix, extracted from qPlus data 
 
 % Close all open figures; 
 close all; 
 
-% Reformat probabilities to look only at color/material tradeoff
-% Indices that reformating is based on are saved in the data matrix
-% that we loaded.
-subjectName = params.subjectName; 
+% Move to the directory in which we will save figures. 
 cd (figDir)
-
-% tempFS= 20; 
-% tempMS = 20; 
-% tempLW = 3; 
-
-% Unpack passed params.  
-[returnedMaterialMatchColorCoords,returnedColorMatchMaterialCoords,returnedW,returnedSigma]  = ColorMaterialModelXToParams(returnedModelParams, params); 
-
 % Set plot parameters. 
-% Note: paramters this small will not look nice in single figures, but will
+% Note: parameters this small will not look nice in single figures, but will
 % look nice in the main combo-figure. 
 thisFontSize = 6; 
 thisMarkerSize = 6; 
 thisLineWidth = 1; 
 
+% Unpack model parameters.  
+[returnedMaterialMatchColorCoords,returnedColorMatchMaterialCoords,returnedW, returnedSigma]  = ColorMaterialModelXToParams(returnedModelParams, params); 
+
+% Check that the solution is valid: if the minimal enforced step is
+% enforced, if the solution is monotonic (in terms of returned positions)
+tolerance = 1e-4; 
+minimalEnforcedStep = (params.sigma/params.sigmaFactor)-tolerance;  
+if (any(diff(returnedMaterialMatchColorCoords) < minimalEnforcedStep)) || (any(diff(returnedColorMatchMaterialCoords) < minimalEnforcedStep))
+    error('Either minimal step or monotonicity constraint are not enforced.');
+end
+if size(returnedMaterialMatchColorCoords,2)==7
+    colorSlope = regress(returnedMaterialMatchColorCoords', params.colorMatchMaterialCoords');
+    materialSlope = regress(returnedColorMatchMaterialCoords', params.materialMatchColorCoords');
+else
+    colorSlope = regress(returnedMaterialMatchColorCoords, params.colorMatchMaterialCoords');
+    materialSlope = regress(returnedColorMatchMaterialCoords, params.materialMatchColorCoords');
+end
+
 %% Figure 1. Plot measured vs. predicted probabilities
 figure; hold on
-plot(theDataProb, predictedProbabilitiesBasedOnSolution,'ro','MarkerSize',thisMarkerSize-2,'MarkerFaceColor','r');
-rmse = ComputeRealRMSE(theDataProb,predictedProbabilitiesBasedOnSolution);
-text(0.07, 0.92, sprintf('rmseFit = %.4f', rmse), 'FontSize', thisFontSize);
-legend('Fit Parameters', 'Location', 'NorthWest')
-legend boxoff
+index = find(nTrialsPerPair > 1); % Only plot trials that have been repeated more than once.  
+scatter(theDataProb(index), predictedProbabilitiesBasedOnSolution(index)',nTrialsPerPair(index), 'MarkerFaceColor', 'r', 'MarkerEdgeColor', 'r');
 line([0, 1], [0,1], 'color', 'k');
 axis('square'); axis([0 1 0 1]);
 set(gca,  'FontSize', thisFontSize);
-xlabel('Measured p');
-ylabel('Predicted p');
+xlabel('Measured probabilities');
+ylabel('Predicted probabilities');
 set(gca, 'xTick', [0, 0.5, 1]);
 set(gca, 'yTick', [0, 0.5, 1]);
-ax(1)=gca;
+% Set position of this figure in the main figure. 
+ax(2)=gca;
 
-% Prepare for figure 2. Fit cubic spline to the data
+% Prepare values for figure 2. Fit cubic spline to the data
 % We do this separately for color and material dimension
 xMin = -params.maxPositionValue;
 xMax = params.maxPositionValue;
@@ -61,8 +80,8 @@ yMin = -params.maxPositionValue;
 yMax = params.maxPositionValue;
 
 splineOverX = linspace(xMin,xMax,1000);
-splineOverX(splineOverX>max(params.materialMatchColorCoords))=NaN;
-splineOverX(splineOverX<min(params.materialMatchColorCoords))=NaN; 
+splineOverX(splineOverX>max(params.materialMatchColorCoords)) = NaN;
+splineOverX(splineOverX<min(params.materialMatchColorCoords)) = NaN; 
 
 % Find a cubic fit to the data for both color and material. 
 FColor = griddedInterpolant(params.materialMatchColorCoords, returnedMaterialMatchColorCoords,'cubic');
@@ -76,33 +95,17 @@ inferredPositionsMaterial  = FMaterial(splineOverX);
 fColor = figure; hold on; 
 plot(params.materialMatchColorCoords,returnedMaterialMatchColorCoords,'ro'); 
 plot(splineOverX, inferredPositionsColor, 'r', 'MarkerSize', thisMarkerSize);
+plot(params.colorMatchMaterialCoords,returnedColorMatchMaterialCoords,'bo')
+plot(splineOverX,inferredPositionsMaterial, 'b', 'MarkerSize', thisMarkerSize);
 plot([xMin xMax],[yMin yMax],'--', 'LineWidth', thisLineWidth, 'color', [0.5 0.5 0.5]);
 %title('Color dimension')
 axis([xMin, xMax,yMin, yMax])
 axis('square')
-xlabel('Color "true" position');
+xlabel('Color/Material "true" position');
 ylabel('Inferred position');
 set(gca, 'xTick', [xMin, 0, xMax],'FontSize', thisFontSize);
 set(gca, 'yTick', [yMin, 0, yMax],'FontSize', thisFontSize);
-ax(2)=gca;
 
-%% Figure 2. Plot positions from fit versus actual simulated positions 
-fMaterial = figure; hold on; 
-plot(params.colorMatchMaterialCoords,returnedColorMatchMaterialCoords,'bo')
-plot(splineOverX,inferredPositionsMaterial, 'b', 'MarkerSize', thisMarkerSize);
-plot([xMin xMax],[yMin yMax],'--', 'LineWidth', thisLineWidth, 'color', [0.5 0.5 0.5]);
-%title('Material dimension')
-axis([xMin, xMax,yMin, yMax])
-axis('square')
-xlabel('Material "true" position');
-ylabel('Inferred position');
-set(gca, 'xTick', [xMin, 0, xMax],'FontSize', thisFontSize);
-set(gca, 'yTick', [yMin, 0, yMax],'FontSize', thisFontSize);
-ax(3)=gca;
-if saveFigs
-    FigureSave([subjectName, 'RecoveredPositionsSpline'], fColor, 'pdf'); 
-    FigureSave([subjectName, 'RecoveredPositionsSpline'], fMaterial, 'pdf'); 
-end
 
 %% Plot the color and material of the stimuli obtained from the fit in the 2D representational space
 f2 = figure; hold on; 
@@ -115,18 +118,62 @@ axis([xMin, xMax,yMin, yMax])
 line([0,0],[yMin, yMax],  'color', 'k'); 
 axis('square')
 xlabel('Color', 'FontSize', thisFontSize);
-ylabel('Material','FontSize', thisFontSize);
+ylabel(['Observer ' params.subjectName; '  Material  '],'FontSize', thisFontSize);
 set(gca, 'xTick', [xMin, 0, xMax],'FontSize', thisMarkerSize);
 set(gca, 'yTick', [yMin, 0, yMax],'FontSize', thisMarkerSize);
-ax(4)=gca;
+ax(1)=gca;
 
-if saveFigs
-    savefig(f2, [subjectName, 'RecoveredPositions2D.fig'])
-    FigureSave([subjectName, 'RecoveredPositions2D'], f2, 'pdf'); 
+%% Plot predictions of the model through the actual data
+
+% These are the target color and material coordinates. 
+returnedColorMatchColorCoord =  FColor(params.targetColorCoord);
+returnedMaterialMatchMaterialCoord = FMaterial(params.targetMaterialCoord);
+
+% Find the predicted probabilities for a range of possible color coordinates
+% (for when we plot a range of color variation values for a fixed material level).  
+rangeOfMaterialMatchColorCoordinates =  linspace(min(params.materialMatchColorCoords), max(params.materialMatchColorCoords), 100)';
+
+% Find the predicted probabilities for a range of possible material coordinates
+% (when we plot the range of material variations for a fixed color level) 
+rangeOfColorMatchMaterialCoordinates =  linspace(min(params.colorMatchMaterialCoords), max(params.colorMatchMaterialCoords), 100)';
+
+% Plot for the material match vs. color match 
+% Loop over each material coordinate of the color match to get a predicted curve for each one.
+for whichMaterialCoordinate = 1:length(params.colorMatchMaterialCoords)
+    
+    % Get the inferred material position for the color match of fixed
+    % material level (read from cubic spline fit).
+    returnedColorMatchMaterialCoord(whichMaterialCoordinate) = FMaterial(params.colorMatchMaterialCoords(whichMaterialCoordinate));
+    
+    % Get the inferred color position for a range of material matches that
+    % can take range of different values on color dimension. 
+    for whichColorCoordinate = 1:length(rangeOfMaterialMatchColorCoordinates)
+        % Get the position of the material match using our FColor function
+        returnedMaterialMatchColorCoord(whichColorCoordinate) = FColor(rangeOfMaterialMatchColorCoordinates(whichColorCoordinate));
+        
+        % Compute the model predictions
+        modelPredictions(whichColorCoordinate, whichMaterialCoordinate) = ColorMaterialModelGetProbabilityFromLookupTable(params.F,...
+            returnedColorMatchColorCoord,returnedMaterialMatchColorCoord(whichColorCoordinate),...
+            returnedColorMatchMaterialCoord(whichMaterialCoordinate), returnedMaterialMatchMaterialCoord,returnedW);
+    end
 end
+rangeOfMaterialMatchColorCoordinates = repmat(rangeOfMaterialMatchColorCoordinates,[1, length(params.materialMatchColorCoords)]);
+
+% We can either not plot color-material data or we can include then in the graph 
+if isempty (colorMaterialData)
+    [thisFig3, thisAxis3] = ColorMaterialModelPlotFitNoData(rangeOfMaterialMatchColorCoordinates, modelPredictions, params.materialMatchColorCoords, colorMaterialData, ...
+        'whichMatch', 'colorMatch', 'whichFit', 'MLDS','returnedWeight', returnedW, ...
+        'fontSize', thisFontSize, 'markerSize', thisMarkerSize, 'lineWidth', thisLineWidth);
+else
+    [thisFig3, thisAxis3] = ColorMaterialModelPlotFit(rangeOfMaterialMatchColorCoordinates, modelPredictions, params.materialMatchColorCoords, colorMaterialData, ...
+        'whichMatch', 'colorMatch', 'whichFit', 'MLDS','returnedWeight', returnedW, ...
+        'fontSize', thisFontSize, 'markerSize', thisMarkerSize, 'lineWidth', thisLineWidth);
+end
+ax(3)=thisAxis3;
+%FigureSave([params.subjectName, 'ModelFitColorXAxis'], thisFig3, 'pdf');
 
 % Combine all figures into a combo-figure.
-nImagesPerRow = 2;
+nImagesPerRow = 3;
 nImages = length(ax);
 figure;
 for i=1:nImages
@@ -144,11 +191,20 @@ for i=1:nImages
     ylabel(get(get(ax(i),'ylabel'),'string'));
     title(get(get(ax(i),'title'),'string'));
     axis square
-    if i > 4
+    if i > 2
         axis([params.colorMatchMaterialCoords(1) params.colorMatchMaterialCoords(end) 0 1.05])
-    elseif i == 1
+        set(gca, 'XTick', [-3:3])
+    elseif i == 2
         axis([0 1.05 0 1.05])
     end
+    %text(-30, 23, 'A')
+    if i == 1
+        text(-19, 21, ['w = ' num2str(round(returnedW,2))])
+    end
+    %text(24, 23, 'B')
+    %text(77.5, 23, 'C')
 end
 FigureSave([params.subjectName, 'Main'], gcf, 'pdf');
+%FigureSave([params.subjectName, num2str(round(returnedW,2)) 'Main'], gcf, 'pdf');
+
 end
