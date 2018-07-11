@@ -1,32 +1,26 @@
 %function [h, currentAxis] = ColorMaterialModelPlotFitNoData(theSmoothVals,theSmoothPreds, differenceSteps, varargin)
 function [h, currentAxis] = ColorMaterialModelPlotFitNoData(theSmoothVals,theSmoothPreds, differenceSteps, varargin)
 %
-% Plots the model fit to the data - either our color-material MLDS model or the descriptive Weibull model to the data.
-% The plots include only the color-material tradeoff. 
+% Plots the color-material MLDS model fit without the data. 
+% Can be used for color-only, material-only or color-material tradeoff. 
 %
 % Input: 
 %   theSmoothVals - range of values for the x-axis
 %   theSmoothPreds - corresponding range of predictions from the fit (y-axis)
 %   differenceSteps - number of color/material steps (x-axis) 
-%   theData - experimental data: if colorMatch the row x column format of
-%             the data is rows: color-varies columns: material-varies but
-%             if materialMatch: rows: material vary, columns: color-vary. 
 %   whichMatch - string - either 'colorMatch' or 'materialMatch' - defines
 %                what choice probabilities (i.e. matrix orientation) we're plotting
 %  returnedWeight - current returned weight (so we can plot it)
-%  whichFit - our (MLDS) model or Weibull
+%  whichFit - our (MLDS) model or Weibull 
 %  fontSize - font size on the plots 
 %  lineWidth - line width on the plots
-%  markerSize - marker size on the plots
-%  dataOnly - do not plot the model
 %
 % Output: 
 %   h - figure handle
 %   currentAxis - axes properties of the current figure. 
 %
-%   12/xx/2016 ar Wrote it
-%   06/21/2017 ar Checked, added comments. 
-%   02/15/2017 ar Added plot data only option. 
+%   06/xx/2018 ar Adapted it from ColorMaterialModelPlot 
+%   07/11/2018 ar Clean up
 
 p = inputParser;
 p.addParameter('whichMatch','colorMatch', @ischar);
@@ -34,7 +28,6 @@ p.addParameter('returnedWeight',0.5, @isnumeric);
 p.addParameter('whichFit','MLDS', @ischar);
 p.addParameter('fontSize', 12, @isnumeric); 
 p.addParameter('lineWidth', 12, @isnumeric); 
-p.addParameter('markerSize', 12, @isnumeric); 
 p.parse(varargin{:});
 
 thisLineWidth = p.Results.lineWidth; 
@@ -47,14 +40,14 @@ green = [34, 139, 34]./255.*1.2;
 stepColors = {red, green, blue, 'k', blue, green, red};
 xMin = differenceSteps(1)-0.5;
 xMax =  differenceSteps(end)+0.5;
-    
+  
 % Plot color-material trade off fits
 h = figure; clf; hold on
 for i = 1:length(differenceSteps)
     if i < 4
-            plot(theSmoothVals(:,i),theSmoothPreds(:,i),'--','color', stepColors{i}, 'LineWidth',thisLineWidth);
+        plot(theSmoothVals(:,i),theSmoothPreds(:,i),'--','color', stepColors{i}, 'LineWidth',thisLineWidth);
     else
-            plot(theSmoothVals(:,i),theSmoothPreds(:,i),'color', stepColors{i}, 'LineWidth',thisLineWidth);
+        plot(theSmoothVals(:,i),theSmoothPreds(:,i),'color', stepColors{i}, 'LineWidth',thisLineWidth);
     end
 end
 
@@ -88,8 +81,7 @@ set(gca, 'XTick', [-3:1:3]);
 set(gca,'YTickLabel',num2str(get(gca,'YTick')','%.2f'))
 
 if strcmp(p.Results.whichFit, 'MLDS')
- %   set(gca, 'XTickLabel', {'C-3', 'C-2', 'C-1', 'C0', 'C+1', 'C+2', 'C+3'});
+ %  set(gca, 'XTickLabel', {'C-3', 'C-2', 'C-1', 'C0', 'C+1', 'C+2', 'C+3'});
     set(gca, 'XTickLabel', {'-3', '-2', '-1', '0', '1', '2', '3'});
-
 end
 currentAxis = gca; 
