@@ -22,16 +22,34 @@ function [A,Ainv,Q] = EllipsoidMatricesGenerate(ellParams)
 % The Euler angles are passed to eul2rotm and interpretted in its default
 % 'ZYX' order.  Thus the Euler angles are in radians.
 %
-% 6/27/16  dhb  Back to the future.  Wrote this.  It feels like 1988.
+% The parameterization of Q follows that in 
+%   Poirson AB, Wandell BA, Varner DC, Brainard DH. 1990. Surface
+%   characterizations of color thresholds. J. Opt. Soc. Am. A 7: 783-89.
+% See particularly pp. 784-785.
+%
+% 06/27/16  dhb  Back to the future.  Wrote this.  It feels like 1988.
+% 08/16/18  dhb  Change parameterization to match paper.
 
 % Handle offset case
 if (length(ellParams == 9))
     ellParams = ellParams(1:6);
 end
 
-D = diag(ellParams(1:3));
-R = eul2rotm(ellParams(4:6)');
-Ainv = R*D;
-A = inv(Ainv);
+%% This was the code prior to 08/16/18.
+%
+% It represents a different parameterization
+% of Q, but we now like the current parameterization
+% better, because the current one matches how we think.
+
+% D = diag(ellParams(1:3));
+% R = eul2rotm(ellParams(4:6)');
+% Ainv = R*D;
+% A = inv(Ainv);
+
+S = diag(ellParams(1:3));
+V = eul2rotm(ellParams(4:6)');
+A = S*V';
+Ainv = inv(A);
+
 Q = A'*A;
 

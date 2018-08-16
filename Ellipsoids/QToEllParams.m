@@ -5,6 +5,11 @@ function ellParams = QToEllParams(Q)
 % parameters of an ellipsoid, in the ellParams form of three scalars and
 % three euler angles, as one column vector.
 %
+% The parameterization of Q follows that in 
+%   Poirson AB, Wandell BA, Varner DC, Brainard DH. 1990. Surface
+%   characterizations of color thresholds. J. Opt. Soc. Am. A 7: 783-89.
+% See particularly pp. 784-785.
+%
 % Notice that the may recover the scalar prameters in a different order than
 % we put them in with, so that creating Q from ellParams and then recovering
 % the ellParams vector can lead to two different parameter vectors.  What is 
@@ -15,13 +20,15 @@ function ellParams = QToEllParams(Q)
 % just for the search routines, and we don't really ever need to get them
 % back once we have Q.
 %
-% 7/4/16  dhb  Wrote it.
+% 07/04/16  dhb  Wrote it.
+% 08/16/18  dhb  Change parameterization to match paper.
 
-[u,s,v] = svd(Q);
-scalers = 1./diag(sqrt(s))';
-eul = rotm2eul(u);
+[~,S,V] = svd(Q);
+scalers = diag(sqrt(S))';
+eul = rotm2eul(V);
+
 ellParams = [scalers  eul]';
-[ACheck,AinvCheck,QCheck] = EllipsoidMatricesGenerate(ellParams);
+[~,~,QCheck] = EllipsoidMatricesGenerate(ellParams);
 if (max(abs(QCheck(:)-Q(:))) > 1e-8)
     error('Cannot recover ellipsoid parameters from Q');
 end
