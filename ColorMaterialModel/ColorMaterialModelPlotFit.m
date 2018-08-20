@@ -68,18 +68,27 @@ end
 
 switch p.Results.whichFit
     case 'MLDS'
-       % text(-3, 1.05, sprintf('w = %.2f', p.Results.returnedWeight), 'FontSize', thisFontSize);
+        % text(-3, 1.05, sprintf('w = %.2f', p.Results.returnedWeight), 'FontSize', thisFontSize);
         switch  p.Results.whichMatch
             case 'colorMatch'
                 %title(sprintf('MLDS fits for different material steps'),'FontName','Helvetica','FontSize',thisFontSize);
-                xlabel('Material Match Color Difference (\Delta C)','FontName','Helvetica','FontSize',thisFontSize);
+                xlabel('Material Match Color Diff. (\Delta C)','FontName','Helvetica','FontSize',thisFontSize);
                 %xlabel('Material Match Color Difference','FontName','Helvetica','FontSize',thisFontSize);
-               
-                ylabel('p Color Match chosen','FontName','Helvetica','FontSize',thisFontSize);
+                ylabel('p Color Match Chosen','FontName','Helvetica','FontSize',thisFontSize);
             case 'materialMatch'
                 %        title(sprintf('MLDS fits for different color steps'),'FontName','Helvetica','FontSize',thisFontSize);
-                xlabel('Color Match Material Difference (\Delta M)','FontName','Helvetica','FontSize',thisFontSize);
-                ylabel('p Material Match chosen','FontName','Helvetica','FontSize',thisFontSize);
+                xlabel('Color Match Material Diff. (\Delta M)','FontName','Helvetica','FontSize',thisFontSize);
+                ylabel('p Material Match Chosen','FontName','Helvetica','FontSize',thisFontSize);
+            case 'colorVariationOnly'
+                %title(sprintf('MLDS fits for different material steps'),'FontName','Helvetica','FontSize',thisFontSize);
+                xlabel('Test2 Color Diff. (\Delta C)','FontName','Helvetica','FontSize',thisFontSize);
+                %xlabel('Material Match Color Difference','FontName','Helvetica','FontSize',thisFontSize);
+                ylabel('p Test1 Chosen','FontName','Helvetica','FontSize',thisFontSize);
+            case 'materialVariationOnly'
+                %title(sprintf('MLDS fits for different material steps'),'FontName','Helvetica','FontSize',thisFontSize);
+                xlabel('Test2 Material Diff. (\Delta M)','FontName','Helvetica','FontSize',thisFontSize);
+                %xlabel('Material Match Color Difference','FontName','Helvetica','FontSize',thisFontSize);
+                ylabel('p Test1 Chosen','FontName','Helvetica','FontSize',thisFontSize);
         end
     case 'weibull'
         switch p.Results.whichMatch
