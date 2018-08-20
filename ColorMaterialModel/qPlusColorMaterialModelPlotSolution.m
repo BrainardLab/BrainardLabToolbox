@@ -65,8 +65,8 @@ scatter(theDataProb(index), predictedProbabilitiesBasedOnSolution(index)',nTrial
 line([0, 1], [0,1], 'color', 'k');
 axis('square'); axis([0 1 0 1]);
 set(gca,  'FontSize', thisFontSize);
-xlabel('Measured probabilities');
-ylabel('Predicted probabilities');
+xlabel('Measured proportions');
+ylabel('Predicted proportions');
 set(gca, 'xTick', [0, 0.5, 1]);
 set(gca, 'yTick', [0, 0.5, 1]);
 % Set position of this figure in the main figure. 
