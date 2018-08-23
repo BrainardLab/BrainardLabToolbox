@@ -1,19 +1,27 @@
 function [A,Ainv,Q,ellParamsFit] = EllipsoidFit(x,ellParams0,fitCenterOffset,isXYEllipse)
-% [A,Ainv,Q,ellParamsFit] = EllipsoidFit(x,[ellParams0],[offset])
+% Fit an ellipsoid (or ellipse) to data
 %
-% Find the ellipsoid that goes through a set of passed points in the
-% columns of matrix x.  The method follows that described in:
-%   Poirson AB, Wandell BA, Varner DC, Brainard DH. 1990. Surface
-%   characterizations of color thresholds. J. Opt. Soc. Am. A 7: 783-89
-% 
-% You can pass an initial set of ellipse parameters.  If this argument is missing
-% or empty, the routine tries to do something sensible.
+% Syntax
+%     [A,Ainv,Q,ellParamsFit] = EllipsoidFit(x,[ellParams0],[offset])
 %
-% If isXYEllipse is true, the z dimension center position is locked to
-% zero.  This is useful when we are using the ellipsoid code to fit data
-% which is restricted to the xy plane.  This is a bit of hack, and may not
-% be completely robust.
+% Description:
+%     Find the ellipsoid that goes through a set of passed points in the
+%     columns of matrix x.  The method follows that described in:
+%        Poirson AB, Wandell BA, Varner DC, Brainard DH. 1990. Surface
+%        characterizations of color thresholds. J. Opt. Soc. Am. A 7: 783-89
 % 
+%     You can pass an initial set of ellipse parameters.  If this argument is missing
+%     or empty, the routine tries to do something sensible.
+%
+%     If isXYEllipse is true, the z dimension center position is locked to
+%     zero.  This is useful when we are using the ellipsoid code to fit data
+%     which is restricted to the xy plane.  This is a bit of hack, and may not
+%     be completely robust.
+%
+% Inputs:
+%
+% Outputs:
+%
 % See EllipsoidMatricesGenerate for the parameter convention.
 % 
 % 07/04/16  dhb  Wrote it.
