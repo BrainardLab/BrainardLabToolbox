@@ -18,7 +18,7 @@ function R = deg2rotm(deg)
 %
 % Examples are provided in the source code.
 %
-% See also:
+% See also: rotm2deg, eul2rotm, rotm2eul
 %
 
 % History
