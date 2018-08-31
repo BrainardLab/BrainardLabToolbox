@@ -126,6 +126,11 @@ classdef Radiometer < handle
             end
         end
         
+        % Destructor
+        function delete(obj)
+            obj.shutDown;
+        end
+        
         % Setter method for property verbosity
         function set.verbosity(obj, new_verbosity)
             obj.privateSetVerbosity(new_verbosity);
