@@ -1,20 +1,21 @@
 % Method to search all known portDeviceNames to determine whether there is a match for the attached serial devices
 %
 function obj = privateGetPortString(obj)
+    % Enumerate cu* devices - they correspond to serial ports:
+    portDeviceFilesCU = dir('/dev/cu*');
+
+    % Enumerate tty.usb* devices - they correspond to serial ports:
+    portDeviceFilesTTY_USB = dir('/dev/tty.usb*');    
+    
+    % Combine port device files
+    portDeviceFiles = [portDeviceFilesCU(:); portDeviceFilesTTY_USB(:)];
+
+
     % For each serial type in the portDeviceNames cell array, see if any attached serial
     % devices names match.
-    indices = [];
-    
-    for i = 1:length(obj.portDeviceNames)
-        stringPattern = obj.portDeviceNames{i};
-        for j = 1:length(obj.portDeviceFiles)
-            fprintf('Looking for pattern ''%s'' in string ''%s'' .\n', stringPattern, lower(obj.portDeviceFiles(j).name));
-            if (~isempty(strfind(lower(obj.portDeviceFiles(j).name), stringPattern)))
-                indices = [indices j];
-            end
-        end
-    end
+    indices = find(contains({portDeviceFiles.name},obj.portDeviceNames));
 
+    % Throw error if no matching device file was found
     if (isempty(indices))
         obj.portDeviceNames
         for j = 1:length(obj.portDeviceFiles)
@@ -23,12 +24,12 @@ function obj = privateGetPortString(obj)
         error('No devices found. Make sure that your radiometer is plugged in.');
     end
 
-    numPortsFound = length(indices);
+    % Print which ports we have found
     fprintf('Ports found:\n');
-    for k = 1:numPortsFound
-        fprintf('[%d]: %s\n', k, obj.portDeviceFiles(indices(k)).name);
+    for k = 1:length(indices)
+        fprintf('[%d]: %s\n', k, portDeviceFiles(indices(k)).name);
     end
 
-    obj.portString = sprintf('/dev/%s',obj.portDeviceFiles(indices(1)).name);
+    obj.portString = sprintf('/dev/%s',portDeviceFiles(indices(1)).name);
     fprintf('Will attempt to open %s.\n', obj.portString);
 end % getPortString

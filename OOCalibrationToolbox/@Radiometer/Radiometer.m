@@ -72,15 +72,6 @@ classdef Radiometer < handle
     properties (Access = private)
         % List of serial port devices to look for.
         portDeviceNames = { lower('keyserial1'), lower('usbmodem'), lower('usbserial'), lower('cu.USA') };
-    
-        % Enumerate cu* devices - they correspond to serial ports:
-        portDeviceFilesCU = dir('/dev/cu*');
-
-        % Enumerate tty.usb* devices - they correspond to serial ports:
-        portDeviceFilesTTY_USB = dir('/dev/tty.usb*');
-
-        % Concatenation of above portDeviceFiles
-        portDeviceFiles;
         
         % Private Verbosity
         privateVerbosity;
@@ -111,9 +102,6 @@ classdef Radiometer < handle
     methods
         % Constructor
         function obj = Radiometer(verbosity, devPortString)
-            % Concatenate all portDevicefiles
-            obj.portDeviceFiles = [obj.portDeviceFilesCU(:); obj.portDeviceFilesTTY_USB(:)];
-        
             obj.verbosity = verbosity;
             if ~isempty(devPortString)
                 obj.portString = devPortString;
