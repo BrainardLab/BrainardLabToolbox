@@ -337,8 +337,13 @@ classdef GLWindow < handle
 				otherwise
 					error('Invalid display type of "%s" requested.', GLWObj.DisplayType);
 			end
-		end
+        end
 		
+        % Destructor
+        function delete(GLWObj)
+            close(GLWObj)
+        end
+        
 		% Closes all windows attached to the GLWindow.
 		close(GLWObj)
 		
