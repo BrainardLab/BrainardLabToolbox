@@ -41,6 +41,7 @@ function [A,Ainv,Q] = EllipsoidMatricesGenerate(ellParams,varargin)
 %
 % 06/27/16  dhb  Back to the future.  Wrote this.  It feels like 1988.
 % 08/16/18  dhb  Change parameterization to match paper.
+% 11/20/18  dhb  Remove transpose from scalar arg to deg2rotm.
 
 % Examples:
 %{
@@ -61,7 +62,7 @@ p.parse(ellParams,varargin{:});
 switch(p.Results.dimension)
     case 2
         S = diag(ellParams(1:2));
-        V = deg2rotm(ellParams(3)');  
+        V = deg2rotm(ellParams(3));  
         if (length(ellParams) == 5)
             error('Translation not yet implemented');
         end
