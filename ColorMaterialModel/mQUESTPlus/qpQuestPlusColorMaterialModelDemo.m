@@ -4,6 +4,8 @@ function qpQuestPlusColorMaterialModelDemo
 % Description:
 %    This script shows QUEST+ employed to estimate the parameters of the linear
 %    version of the color material model.
+%    Main demo code for implemeted qPlus model in Color-Material
+%    experiment. 
 
 % 07/08/17  dhb  Created.
 

@@ -193,7 +193,8 @@ for k1 = 1:length(params.tryMaterialSpacingValues)
             vub(end) = params.sigma;
             vlb(end) = params.sigma;
             
-            % Print out log likelihood of where we started
+            % Print out log likelihood of where we started. Useful for
+            % debugging purposes. 
             %             [fTemp,~] = FitColorMaterialModelMLDSFun(initialParams, ...
             %                 pairColorMatchColorsCoords,pairMaterialMatchColorCoords, ...
             %                 pairColorMatchMaterialCoords,pairMaterialMatchMaterialCoords, ...
@@ -203,15 +204,11 @@ for k1 = 1:length(params.tryMaterialSpacingValues)
             % Run the search
             switch (params.whichPositions)
                 case 'smoothSpacing'
-                    % Need to use nonlinear constraint function for this
-                    % version.
                     xTemp = fmincon(@(x)FitColorMaterialModelMLDSFun(x, ...
                         pairColorMatchColorsCoords,pairMaterialMatchColorCoords, ...
                         pairColorMatchMaterialCoords,pairMaterialMatchMaterialCoords, ...
                         theResponses, nTrials, params),initialParams,A,b,[],[],vlb,vub,@(x)FitColorMaterialModelMLDSConstraint(x,params),options);
                 case 'full'
-                    % Constraints are linear in parameter, so don't call
-                    % nonlinear constraint function here.
                     xTemp = fmincon(@(x)FitColorMaterialModelMLDSFun(x,...
                         pairColorMatchColorsCoords,pairMaterialMatchColorCoords, ...
                         pairColorMatchMaterialCoords,pairMaterialMatchMaterialCoords, ...
@@ -241,10 +238,5 @@ end
 
 %% Right here, have option to start with passed initial parameters and compare
 % how we did to the above, and take the final best.
-
 toc
 end
-
-
-
-
