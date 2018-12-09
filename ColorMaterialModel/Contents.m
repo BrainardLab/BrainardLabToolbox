@@ -8,8 +8,10 @@
 %
 % ColorMaterialModelBuildLookupTable.m     - Build a 5-dimensional lookup table of probabilities. 
 % ColorMaterialModelComputeLogLikelihood   - Various functions related to distributions and Bayesian calculations.
+% ColorMaterialModelComputeLogLikelihoodSimple  - Basic formula for computing loglikelihood for a binomial trial type
 % ColorMaterialModelComputeProb            - Compute probability of responses for MLDS-based model.
 % ColorMaterialModelComputeProbTest        - Tests that ColorMaterialModelComputeProb works as we expect.
+% ColorMaterialModelComputeProbBySimulation - Computes probabilities that one  test in a pair is chosen, given the parameters
 % ColorMaterialModelComputeWeibullProb     - Compute probability of responses for descriptive Weibull model
 % ColorMaterialModelCrossValidation        - Demo program for cross-validating MLDS fits.
 % ColorMaterialModelDemo                   - Demo program that fits the model to simulated or example data.
@@ -17,6 +19,7 @@
 % ColorMaterialModelPlotFit                - Make a nice plot of either Weibull or MLDS-based model fit
 % ColorMaterialModelPlotFitNoData          - Plots the color-material MLDS model fit without the data. 
 % ColorMaterialModelPlotSolution           - Make all sorts of nice plots of the data and the MLDS solution. 
+% ColorMaterialModelResizeProbabilities    - Reformats probabilities into a matrix suitable for plotting data onto color-material trade off functions
 % ColorMaterialModelSimulateResponse       - Various functions related to distributions and Bayesian calculations.
 % ColorMaterialModelXToParams              - Pack the vector of MLDS-based model parameters into structure.
 % FitColorMaterialModelMLDS                - Use numerical search to fit the model.

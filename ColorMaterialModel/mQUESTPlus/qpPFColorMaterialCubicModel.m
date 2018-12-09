@@ -6,7 +6,7 @@ function predictedProportions = qpPFColorMaterialCubicModel(stimParams,psiParams
 %
 % Description:
 %     Compute the proportions of each outcome for the color material model psychometric
-%     function, using the quadratic relation between nominal and perceptual stimulus positions.
+%     function, using the cubic relation between nominal and perceptual stimulus positions.
 %
 % Input:
 %     stimParams     Matrix, with each row being a vector of stimulus parameters.

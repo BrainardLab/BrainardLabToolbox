@@ -11,13 +11,15 @@
 
 function GamePadDemo
 
+    %mglGetKeyEvent;
+    
     % Instantiate a gamePad object
     gamePad = GamePad();
     
     keepGoing = true;
     while (keepGoing)
         % Read the gamePad
-        [action, time, timeString, state] = gamePad.read();
+        [action, time, timeString] = gamePad.read();
         
         switch (action)
             case gamePad.noChange       % do nothing
