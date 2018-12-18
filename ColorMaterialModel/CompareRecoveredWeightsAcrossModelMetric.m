@@ -4,7 +4,14 @@
 clear all; close all;
 
 nSets = 10; % 9 sets are just demo data, one is abby's data - recovered paramters from cubic model (this is set 7).
-
+tempDirName = 'LinCubicTestData';
+if isempty(tempDirName)
+    dataDir = '/Users/ana/Dropbox (Aguirre-Brainard Lab)/CNST_analysis/ColorMaterial/DemoData/';
+else
+    dataDir = ['/Users/ana/Dropbox (Aguirre-Brainard Lab)/CNST_analysis/ColorMaterial/DemoData/' tempDirName];
+end
+    
+cd(dataDir)
 for i = 1:nSets
     
     % For each model keep original positions and weights as well as the
@@ -12,14 +19,15 @@ for i = 1:nSets
     % we denote linear model with a, quadratic with b, cubic with c and
     % full with d. 
     
-    load(['DemoData0.5W24Blocks1Linear' num2str(i) 'FitfullCityBlock.mat'])
+    load(['DemoData0.5W24Blocks1Linear' num2str(i) 'FitFullEuclidean.mat'])
     [aColor(:,i),aMaterial(:,i), aw(i), aSigma(i)]  = ColorMaterialModelXToParams(dataSet{1}.returnedParams, params); clear dataSet
     allADev(i,:) = [aColor(:,i)',aMaterial(:,i)', aw(i), aSigma(i)] - [params.materialMatchColorCoords, params.colorMatchMaterialCoords, params.w, params.sigma];
      weights1(i) = params.w;
-    load(['DemoData0.5W24Blocks1Linear' num2str(i) 'FitFull.mat'])
+    load(['DemoData0.5W24Blocks1Linear' num2str(i) 'FitFullEuclidean.mat'])
     [bColor(:,i),bMaterial(:,i), bw(i), bSigma(i)] = ColorMaterialModelXToParams(dataSet{1}.returnedParams, params); clear dataSet
     allBDev(i,:) = [bColor(:,i)',bMaterial(:,i)', bw(i), bSigma(i)]- [params.materialMatchColorCoords, params.colorMatchMaterialCoords, params.w, params.sigma];
-    
+    params.materialMatchColorCoords
+    params.colorMatchMaterialCoords
       % record Initial parameters;
     weights(i) = params.w;
     positionsC(i,:) = params.materialMatchColorCoords;
