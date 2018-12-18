@@ -106,15 +106,27 @@ ylabel('Inferred position');
 set(gca, 'xTick', [xMin, 0, xMax],'FontSize', thisFontSize);
 set(gca, 'yTick', [yMin, 0, yMax],'FontSize', thisFontSize);
 
-
 %% Plot the color and material of the stimuli obtained from the fit in the 2D representational space
 f2 = figure; hold on; 
-plot(returnedMaterialMatchColorCoords, zeros(size(returnedMaterialMatchColorCoords)),'ko', ...
-    'MarkerFaceColor', 'k', 'MarkerSize', thisMarkerSize, 'LineWidth', thisLineWidth); 
-line([xMin, xMax], [0,0],'color', 'k'); 
-plot(zeros(size(returnedColorMatchMaterialCoords)), returnedColorMatchMaterialCoords, 'ko',...
-    'MarkerFaceColor', 'k', 'MarkerSize', thisMarkerSize, 'LineWidth', thisLineWidth); 
+blue = [28, 134, 238]./255; 
+red = [238, 59, 59]./255; 
+green = [34, 139, 34]./255.*1.2; 
+stepColors = {red, green, blue, 'k', blue, green, red};
+for i = 1:length(returnedMaterialMatchColorCoords)
+    if i > 3
+        plot(returnedMaterialMatchColorCoords(i), zeros(size(returnedMaterialMatchColorCoords(i))),'o', ...
+            'MarkerFaceColor', stepColors{i}, 'MarkerEdgeColor', stepColors{i}, 'MarkerSize', thisMarkerSize, 'LineWidth', thisLineWidth);
+        plot(zeros(size(returnedColorMatchMaterialCoords(i))), returnedColorMatchMaterialCoords(i), 'o',...
+            'MarkerFaceColor', stepColors{i}, 'MarkerEdgeColor', stepColors{i}, 'MarkerSize', thisMarkerSize, 'LineWidth', thisLineWidth);
+    else
+        plot(returnedMaterialMatchColorCoords(i), zeros(size(returnedMaterialMatchColorCoords(i))),'o', ...
+            'MarkerEdgeColor', stepColors{i}, 'MarkerSize', thisMarkerSize, 'LineWidth', thisLineWidth);
+        plot(zeros(size(returnedColorMatchMaterialCoords(i))), returnedColorMatchMaterialCoords(i), 'o',...
+            'MarkerEdgeColor', stepColors{i}, 'MarkerSize', thisMarkerSize, 'LineWidth', thisLineWidth);
+    end
+end
 axis([xMin, xMax,yMin, yMax])
+line([xMin, xMax], [0,0],'color', 'k');    
 line([0,0],[yMin, yMax],  'color', 'k'); 
 axis('square')
 xlabel('Color', 'FontSize', thisFontSize);
@@ -161,9 +173,9 @@ rangeOfMaterialMatchColorCoordinates = repmat(rangeOfMaterialMatchColorCoordinat
 
 % We can either not plot color-material data or we can include then in the graph 
 if isempty (colorMaterialData)
-    [thisFig3, thisAxis3] = ColorMaterialModelPlotFitNoData(rangeOfMaterialMatchColorCoordinates, modelPredictions, params.materialMatchColorCoords, colorMaterialData, ...
+    [thisFig3, thisAxis3] = ColorMaterialModelPlotFitNoData(rangeOfMaterialMatchColorCoordinates, modelPredictions, params.materialMatchColorCoords, ...
         'whichMatch', 'colorMatch', 'whichFit', 'MLDS','returnedWeight', returnedW, ...
-        'fontSize', thisFontSize, 'markerSize', thisMarkerSize, 'lineWidth', thisLineWidth);
+        'fontSize', thisFontSize, 'lineWidth', thisLineWidth);
 else
     [thisFig3, thisAxis3] = ColorMaterialModelPlotFit(rangeOfMaterialMatchColorCoordinates, modelPredictions, params.materialMatchColorCoords, colorMaterialData, ...
         'whichMatch', 'colorMatch', 'whichFit', 'MLDS','returnedWeight', returnedW, ...
@@ -205,6 +217,7 @@ for i=1:nImages
     %text(77.5, 23, 'C')
 end
 FigureSave([params.subjectName, 'Main'], gcf, 'pdf');
+%fixed weight option
 %FigureSave([params.subjectName, num2str(round(returnedW,2)) 'Main'], gcf, 'pdf');
 
 end
