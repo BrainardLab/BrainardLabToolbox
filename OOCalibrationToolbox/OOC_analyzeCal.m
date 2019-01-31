@@ -1,7 +1,7 @@
 function OOC_analyzeCal
 
     % Load a calibration file
-    defaultCalFile = 'BOLDScreen';
+    defaultCalFile = 'ViewSonic-1_Calib';
     try
         [cal, calFilename] = GetCalibrationStructure('Enter calibration filename',defaultCalFile,[]);
     catch err
