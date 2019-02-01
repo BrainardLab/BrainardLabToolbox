@@ -39,21 +39,21 @@ function plotSpectralAditivityData(obj, figureGroupIndex)
         hold on
         
         % Plot predicted spectrum as filled line plot
-        [xd, yd] = stairs(spectralAxis, predictedSpd);
-        faceColor = [0.7 0.7 0.7]; edgeColor = 'none';
+        [xd, yd] = stairs(spectralAxis, predictedSpd*1000);
+        faceColor = [0.5 0.5 0.5]; edgeColor = 'none';
         obj.makeShadedPlot(xd, yd, faceColor, edgeColor);
      
         % Plot measured as a line plot on top
-        stairs(spectralAxis, measuredSpd, 'Color', 'r', 'LineWidth', 2.0);
+        stairs(spectralAxis, measuredSpd*1000, 'Color', 'r', 'LineWidth', 1.0);
         
-        set(gca, 'XLim', [380,780], 'YLim', [0 1.05*max([max(predictedSpd) max(measuredSpd)])]);
+        set(gca, 'XLim', [380,780], 'YLim', [0 1.05*1000*max([max(predictedSpd) max(measuredSpd)])]);
         box on;
         hleg = legend({' measured ', ' predicted '}, 'Location', 'NorthEast');
-        set(hleg,'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 10);
+        set(hleg,'FontName', 'Helvetica', 'Fontweight', 'normal', 'FontSize', 10);
         set(gca, 'Color', [1 1 1], 'XColor', 'b', 'YColor', 'b');
-        set(gca, 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);
-        xlabel('Wavelength (nm)', 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);
-        ylabel('Power', 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14); 
+        set(gca, 'FontName', 'Helvetica', 'Fontweight', 'normal', 'FontSize', 14);
+        xlabel('\it wavelength (nm)', 'FontName', 'Helvetica', 'Fontweight', 'normal', 'FontSize', 14);
+        ylabel('\it power (mWatts)', 'FontName', 'Helvetica', 'Fontweight', 'normal', 'FontSize', 14); 
       
         % Finish plot
         drawnow;
@@ -63,7 +63,7 @@ function plotSpectralAditivityData(obj, figureGroupIndex)
                         'Position',  [0.01 0.01 0.1 0.1], ...
                         'String',   ' Export ', ...
                         'Fontsize',  14, ...      
-                        'FontWeight','Bold', ...
+                        'FontWeight','normal', ...
                         'ForegroundColor',     [0.2 0.2 0.2], ...
                         'Callback',  {@obj.SaveFigure_Callback, gcf,  get(h, 'Name')} ...
                 );
@@ -98,43 +98,43 @@ function plotDeviationData(obj, figureGroupIndex)
     plot(nominalxyY(3,:),deviationsxyY2(1,:),'b+', 'MarkerFaceColor', 'none', 'MarkerSize', 6);
     xlim([min(nominalxyY(3,:))-1 max(nominalxyY(3,:))+1]); ylim([-0.2 0.2]);
     hleg = legend('meas #1', 'meas #2', 'Location', 'SouthEast');
-    set(hleg,'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 10);
+    set(hleg,'FontName', 'Helvetica', 'FontSize', 10);
     box on;
     set(gca, 'Color', [1.0 1.0 1.0], 'XColor', 'b', 'YColor', 'b');
-    set(gca, 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);
-    xlabel('Nominal Y-luminance (cd/m2)', 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);
-    ylabel('Delta x-chroma (meas-nominal)', 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);  
+    set(gca, 'FontName', 'Helvetica',  'FontSize', 14);
+    xlabel('\it nominal luminance (cd/m^2)', 'FontName', 'Helvetica',  'FontSize', 14);
+    ylabel('\it delta x-chroma (meas-nominal)', 'FontName', 'Helvetica',  'FontSize', 14);  
     
     title(sprintf('Max abs deviation %0.4f\n',max(abs([deviationsxyY1(1,:) deviationsxyY2(1,:)]))), ...
-        'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 10);
+        'FontName', 'Helvetica', 'Fontweight', 'normal', 'FontSize', 10);
         
     subplot(1,3,2); hold on
     plot(nominalxyY(3,:),deviationsxyY1(2,:),'r+', 'MarkerFaceColor', 'none', 'MarkerSize', 6);
     plot(nominalxyY(3,:),deviationsxyY2(2,:),'b+', 'MarkerFaceColor', 'none', 'MarkerSize', 6);
     xlim([min(nominalxyY(3,:))-1 max(nominalxyY(3,:))+1]); ylim([-0.2 0.2]);
     hleg = legend('meas #1', 'meas #2', 'Location', 'SouthEast');
-    set(hleg,'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 10);
+    set(hleg,'FontName', 'Helvetica',  'FontSize', 10);
     box on;
     set(gca, 'Color', [1.0 1.0 1.0], 'XColor', 'b', 'YColor', 'b');
-    set(gca, 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);
-    xlabel('Nominal Y-luminance (cd/m2)', 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);
-    ylabel('Delta y-chroma (meas-nominal)', 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14); 
+    set(gca, 'FontName', 'Helvetica',  'FontSize', 14);
+    xlabel('\it nominal luminance (cd/m2)', 'FontName', 'Helvetica',  'FontSize', 14);
+    ylabel('\it delta y-chroma (meas-nominal)', 'FontName', 'Helvetica',  'FontSize', 14); 
     title(sprintf('Max abs deviation %0.4f\n',max(abs([deviationsxyY1(2,:) deviationsxyY2(2,:)]))), ...
-        'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 10);
+        'FontName', 'Helvetica', 'Fontweight', 'normal', 'FontSize', 10);
 
     subplot(1,3,3); hold on
     plot(nominalxyY(3,:),deviationsxyY1(3,:),'r+', 'MarkerFaceColor', 'none', 'MarkerSize', 6);
     plot(nominalxyY(3,:),deviationsxyY2(3,:),'b+', 'MarkerFaceColor', 'none', 'MarkerSize', 6);
     xlim([min(nominalxyY(3,:))-1 max(nominalxyY(3,:))+1]); ylim([-10 10]);
     hleg = legend('meas #1', 'meas #2', 'Location', 'SouthEast');
-    set(hleg,'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 10);
+    set(hleg,'FontName', 'Helvetica',  'FontSize', 10);
     box on;
     set(gca, 'Color', [1.0 1.0 1.0], 'XColor', 'b', 'YColor', 'b');
-    set(gca, 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);
-    xlabel('Nominal Y-luminance (cd/m2)', 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);
-    ylabel('Delta Y-lum (meas-nominal)', 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14); 
+    set(gca, 'FontName', 'Helvetica', 'FontSize', 14);
+    xlabel('\it nominal luminance (cd/m2)', 'FontName', 'Helvetica', 'FontSize', 14);
+    ylabel('\it delta luminance (meas-nominal)', 'FontName', 'Helvetica',  'FontSize', 14); 
     title(sprintf('Max abs deviation %0.2f\n',max(abs([deviationsxyY1(3,:) deviationsxyY2(3,:)]))), ...
-        'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 10);
+        'FontName', 'Helvetica', 'Fontweight', 'normal', 'FontSize', 10);
     
 
     % Finish plot
@@ -145,7 +145,7 @@ function plotDeviationData(obj, figureGroupIndex)
                         'Position',  [0.01 0.01 0.1 0.1], ...
                         'String',   ' Export ', ...
                         'Fontsize',  14, ...      
-                        'FontWeight','Bold', ...
+                        'FontWeight','normal', ...
                         'ForegroundColor',     [0.2 0.2 0.2], ...
                         'Callback',  {@obj.SaveFigure_Callback, gcf,  get(h, 'Name')} ...
                 );
@@ -177,12 +177,12 @@ function plotBasicLinearityData(obj, figureGroupIndex)
     axis([0.1 0.7 0.1 0.7]);
     axis('square');
     hleg = legend('measurement #1', 'measurement #2', 'Location', 'SouthEast');
-    set(hleg,'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 10);
+    set(hleg,'FontName', 'Helvetica', 'Fontweight', 'normal', 'FontSize', 10);
     box on;
     set(gca, 'Color', [1.0 1.0 1.0], 'XColor', 'b', 'YColor', 'b');
-    set(gca, 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);
-    xlabel('Nominal x-chroma', 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);
-    ylabel('Measured x-chroma', 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);    
+    set(gca, 'FontName', 'Helvetica', 'Fontweight', 'normal', 'FontSize', 14);
+    xlabel('\it nominal x-chroma', 'FontName', 'Helvetica', 'Fontweight', 'normal', 'FontSize', 14);
+    ylabel('\it measured x-chroma', 'FontName', 'Helvetica', 'Fontweight', 'normal', 'FontSize', 14);    
     
 
     subplot(1,3,2); hold on
@@ -192,12 +192,12 @@ function plotBasicLinearityData(obj, figureGroupIndex)
     axis([0.1 0.7 0.1 0.7]);
     axis('square');
     hleg = legend('measurement #1', 'measurement #2', 'Location', 'SouthEast');
-    set(hleg,'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 10);
+    set(hleg,'FontName', 'Helvetica', 'Fontweight', 'normal', 'FontSize', 10);
     box on;
     set(gca, 'Color', [1.0 1.0 1.0], 'XColor', 'b', 'YColor', 'b');
-    set(gca, 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);
-    xlabel('Nominal y-chroma', 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);
-    ylabel('Measured y-chroma', 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14); 
+    set(gca, 'FontName', 'Helvetica', 'Fontweight', 'normal', 'FontSize', 14);
+    xlabel('\it nominal y-chroma', 'FontName', 'Helvetica', 'Fontweight', 'normal', 'FontSize', 14);
+    ylabel('\it measured y-chroma', 'FontName', 'Helvetica', 'Fontweight', 'normal', 'FontSize', 14); 
     
     
     subplot(1,3,3); hold on
@@ -209,12 +209,12 @@ function plotBasicLinearityData(obj, figureGroupIndex)
     axis([minVal maxVal minVal maxVal]);
     axis('square');
     hleg = legend('measurement #1', 'measurement #2', 'Location', 'SouthEast');
-    set(hleg,'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 10);
+    set(hleg,'FontName', 'Helvetica', 'Fontweight', 'normal', 'FontSize', 10);
     box on;
     set(gca, 'Color', [1.0 1.0 1.0], 'XColor', 'b', 'YColor', 'b');
-    set(gca, 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);
-    xlabel('Nominal Y-luminance', 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);
-    ylabel('Measured Y-luminance', 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);  
+    set(gca, 'FontName', 'Helvetica', 'Fontweight', 'normal', 'FontSize', 14);
+    xlabel('\it nominal luminance', 'FontName', 'Helvetica', 'Fontweight', 'normal', 'FontSize', 14);
+    ylabel('\it measured luminance', 'FontName', 'Helvetica', 'Fontweight', 'normal', 'FontSize', 14);  
         
     % Finish plot
     drawnow;
@@ -224,7 +224,7 @@ function plotBasicLinearityData(obj, figureGroupIndex)
                         'Position',  [0.01 0.01 0.1 0.1], ...
                         'String',   ' Export ', ...
                         'Fontsize',  14, ...      
-                        'FontWeight','Bold', ...
+                        'FontWeight','normal', ...
                         'ForegroundColor',     [0.2 0.2 0.2], ...
                         'Callback',  {@obj.SaveFigure_Callback, gcf,  get(h, 'Name')} ...
                 );

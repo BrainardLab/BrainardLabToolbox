@@ -4,5 +4,5 @@ function makeShadedPlot(obj, x,y, faceColor, edgeColor)
     px = [px(1) px px(end)];
     py = [1*eps py 2*eps];
     pz = -10*eps*ones(size(py)); 
-    patch(px,py,pz,'FaceColor',faceColor,'EdgeColor',edgeColor);
+    patch(px,py,pz,'FaceColor',faceColor,'EdgeColor',edgeColor, 'FaceAlpha', 0.5);
 end

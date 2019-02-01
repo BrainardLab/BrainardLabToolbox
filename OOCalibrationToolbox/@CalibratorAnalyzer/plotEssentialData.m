@@ -64,45 +64,46 @@ function plotRepeatibilityData(obj, figureGroupIndex)
     % Luminance of RGB primaries as a function of gamma input value
     subplot(1,3,1); hold on
     lumIndex = 3;
+    markerSize = 10;
     for trialIndex = 1:nAverages
-        plot(gammaInput, squeeze(primary_xyY(trialIndex, 1, lumIndex, :)), 'r.-');
-        plot(gammaInput, squeeze(primary_xyY(trialIndex, 2, lumIndex, :)), 'g.-');
-        plot(gammaInput, squeeze(primary_xyY(trialIndex, 3, lumIndex, :)), 'b.-');
+        plot(gammaInput, squeeze(primary_xyY(trialIndex, 1, lumIndex, :)), 'ro-', 'MarkerSize', markerSize, 'MarkerFaceColor', [1 0.5 0.5]);
+        plot(gammaInput, squeeze(primary_xyY(trialIndex, 2, lumIndex, :)), 'go-', 'MarkerSize', markerSize, 'MarkerFaceColor', [0.5 1 0.5]);
+        plot(gammaInput, squeeze(primary_xyY(trialIndex, 3, lumIndex, :)), 'bo-', 'MarkerSize', markerSize, 'MarkerFaceColor', [0.5 0.5 1]);
     end
     axis([0 1 0 maxLum]);
     box on;
     set(gca, 'Color', [1.0 1.0 1.0], 'XColor', 'b', 'YColor', 'b');
-    set(gca, 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);
-    xlabel('Settings value', 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);
-    ylabel('Luminance in cd/m2', 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);    
+    set(gca, 'FontName', 'Helvetica', 'Fontweight', 'normal', 'FontSize', 14);
+    xlabel('\it settings value', 'FontName', 'Helvetica',  'FontSize', 14);
+    ylabel('\it luminance (cd/m^2)', 'FontName', 'Helvetica',  'FontSize', 14);    
     
     % x-chromaticity of RGB primaries as a function of gamma input value
     subplot(1,3,2); hold on
     for trialIndex = 1:nAverages
-        plot(gammaInput, squeeze(primary_xyY(trialIndex, 1, xChromaIndex, :)), 'r.-');
-        plot(gammaInput, squeeze(primary_xyY(trialIndex, 2, xChromaIndex, :)), 'g.-');
-        plot(gammaInput, squeeze(primary_xyY(trialIndex, 3, xChromaIndex, :)), 'b.-');
+        plot(gammaInput, squeeze(primary_xyY(trialIndex, 1, xChromaIndex, :)), 'ro-', 'MarkerSize', markerSize, 'MarkerFaceColor', [1 0.5 0.5]);
+        plot(gammaInput, squeeze(primary_xyY(trialIndex, 2, xChromaIndex, :)), 'go-', 'MarkerSize', markerSize, 'MarkerFaceColor', [0.5 1 0.5]);
+        plot(gammaInput, squeeze(primary_xyY(trialIndex, 3, xChromaIndex, :)), 'bo-', 'MarkerSize', markerSize, 'MarkerFaceColor', [0.5 0.5 1]);
     end
     axis([0 1 0 1]);
     box on;
     set(gca, 'Color', [1.0 1.0 1.0], 'XColor', 'b', 'YColor', 'b');
-    set(gca, 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);
-    xlabel('Settings value', 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);
-    ylabel('x-chromaticity', 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);  
+    set(gca, 'FontName', 'Helvetica', 'Fontweight', 'normal', 'FontSize', 14);
+    xlabel('\it settings value', 'FontName', 'Helvetica',  'FontSize', 14);
+    ylabel('\it x-chromaticity', 'FontName', 'Helvetica',  'FontSize', 14);  
     
     % y-chromaticity of RGB primaries as a function of gamma input value
     subplot(1,3,3); hold on
     for trialIndex = 1:nAverages
-        plot(gammaInput, squeeze(primary_xyY(trialIndex, 1, yChromaIndex, :)), 'r.-');
-        plot(gammaInput, squeeze(primary_xyY(trialIndex, 2, yChromaIndex, :)), 'g.-');
-        plot(gammaInput, squeeze(primary_xyY(trialIndex, 3, yChromaIndex, :)), 'b.-');
+        plot(gammaInput, squeeze(primary_xyY(trialIndex, 1, yChromaIndex, :)), 'ro-', 'MarkerSize', markerSize, 'MarkerFaceColor', [1 0.5 0.5]);
+        plot(gammaInput, squeeze(primary_xyY(trialIndex, 2, yChromaIndex, :)), 'go-', 'MarkerSize', markerSize, 'MarkerFaceColor', [0.5 1 0.5]);
+        plot(gammaInput, squeeze(primary_xyY(trialIndex, 3, yChromaIndex, :)), 'bo-', 'MarkerSize', markerSize, 'MarkerFaceColor', [0.5 0.5 1]);
     end
     axis([0 1 0 1]);
     box on;
-    xlabel('Settings value', 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);
-    ylabel('y-chromaticity', 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);  
+    xlabel('\it settings value', 'FontName', 'Helvetica',  'FontSize', 14);
+    ylabel('\it y-chromaticity', 'FontName', 'Helvetica',  'FontSize', 14);  
     set(gca, 'Color', [1.0 1.0 1.0], 'XColor', 'b', 'YColor', 'b');
-    set(gca, 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);
+    set(gca, 'FontName', 'Helvetica', 'Fontweight', 'normal', 'FontSize', 14);
     % Finish plot
     drawnow;
     
@@ -188,7 +189,7 @@ function plotPrimaryChromaticityStabilityData(obj, figureGroupIndex)
             end
             %edgeColor = faceColor;
             
-            plot(xyYMon(1,k), xyYMon(2,k), 's', 'MarkerFaceColor', faceColor, 'MarkerEdgeColor', edgeColor, 'MarkerSize', 12);
+            plot(xyYMon(1,k), xyYMon(2,k), 's', 'MarkerFaceColor', faceColor, 'MarkerEdgeColor', [0 0 0], 'MarkerSize', 4);
         end
     
         %xmean = mean(squeeze(xyYMon(1,:)));
@@ -197,14 +198,14 @@ function plotPrimaryChromaticityStabilityData(obj, figureGroupIndex)
         axis([0 1 0 1]);
         axis('square');
         
-        xlabel('x chromaticity', 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 18);
+        xlabel('\it x chromaticity', 'FontName', 'Helvetica',  'FontSize', 18);
         %if (primaryIndex == 1)
-            ylabel('y chromaticity', 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 18);
+            ylabel('\it y chromaticity', 'FontName', 'Helvetica',  'FontSize', 18);
         %else
         %    ylabel('');
         %end
         set(gca, 'Color', [1.0 1.0 1.0], 'XColor', 'b', 'YColor', 'b');
-        set(gca, 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 18);
+        set(gca, 'FontName', 'Helvetica', 'FontSize', 18);
         %title(sprintf('%s primary',primaryNames{primaryIndex}));
         box on;
     end
@@ -217,7 +218,7 @@ function plotPrimaryChromaticityStabilityData(obj, figureGroupIndex)
                         'Position',  [0.01 0.01 0.1 0.1], ...
                         'String',   ' Export ', ...
                         'Fontsize',  14, ...      
-                        'FontWeight','Bold', ...
+                        'FontWeight','normal', ...
                         'ForegroundColor',     [0.2 0.2 0.2], ...
                         'Callback',  {@obj.SaveFigure_Callback, gcf,  get(h, 'Name')} ...
                 );
@@ -256,13 +257,13 @@ function plotChromaticityData(obj, figureGroupIndex)
     
     legendsMatrix= {'Red', 'Green', 'Blue', 'Ambient'};
     hleg = legend(legendsMatrix, 'Location', 'EastOutside');
-    set(hleg,'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 12);
+    set(hleg,'FontName', 'Helvetica',  'FontSize', 12);
     
     axis([0 1 0 1]); axis('square');
-    xlabel('x chromaticity', 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);
-    ylabel('y chromaticity', 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);
+    xlabel('\it x chromaticity', 'FontName', 'Helvetica',  'FontSize', 14);
+    ylabel('\it y chromaticity', 'FontName', 'Helvetica',  'FontSize', 14);
     set(gca, 'Color', [1.0 1.0 1.0], 'XColor', 'b', 'YColor', 'b');
-    set(gca, 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);
+    set(gca, 'FontName', 'Helvetica', 'FontSize', 14);
     box 'on'
     
     % Finish plot
@@ -273,7 +274,7 @@ function plotChromaticityData(obj, figureGroupIndex)
                         'Position',  [0.01 0.01 0.1 0.1], ...
                         'String',   ' Export ', ...
                         'Fontsize',  14, ...      
-                        'FontWeight','Bold', ...
+                        'FontWeight','normal', ...
                         'ForegroundColor',     [0.2 0.2 0.2], ...
                         'Callback',  {@obj.SaveFigure_Callback, gcf,  get(h, 'Name')} ...
                 );
@@ -333,18 +334,18 @@ function plotFullSpectra(obj, primaryIndex, primaryName, figureGroupIndex, legen
                 edgeColor = 'none';
             end
         end
-        y = squeeze(fullSpectra(k,:));
+        y = squeeze(fullSpectra(k,:))*1000;
         obj.makeShadedPlot(x,y, faceColor, edgeColor);
         legendsMatrix{k} = sprintf('%0.2f', rawGammaInput(size(fullSpectra,1)-k+1));
     end
     hleg = legend(legendsMatrix, 'Location', legendPosition);
-    set(hleg,'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 10);
+    set(hleg,'FontName', 'Helvetica','FontSize', 10);
     
     %plot(obj.spectralAxis, fullSpectra);
-    xlabel('Wavelength (nm)', 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);
-    ylabel('Power', 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);
+    xlabel('\it wavelength (nm)', 'FontName', 'Helvetica',  'FontSize', 14);
+    ylabel('\it power (mWatts)', 'FontName', 'Helvetica',  'FontSize', 14);
     set(gca, 'Color', [1.0 1.0 1.0], 'XColor', 'b', 'YColor', 'b');
-    set(gca, 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);
+    set(gca, 'FontName', 'Helvetica',  'FontSize', 14);
     axis([380,780,-Inf,Inf]);
     box on;
     
@@ -366,10 +367,10 @@ function plotFullSpectra(obj, primaryIndex, primaryName, figureGroupIndex, legen
         plot(x,y, 'k-');
     end
     %plot(obj.spectralAxis, scaledSpectra);
-    xlabel('Wavelength (nm)', 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);
-    ylabel('Normalized Power', 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);
+    xlabel('\it wavelength (nm)', 'FontName', 'Helvetica', 'FontSize', 14);
+    ylabel('\it normalized power', 'FontName', 'Helvetica',  'FontSize', 14);
     set(gca, 'Color', [1.0 1.0 1.0], 'XColor', 'b', 'YColor', 'b');
-    set(gca, 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);
+    set(gca, 'FontName', 'Helvetica',  'FontSize', 14);
     axis([380,780,-Inf,Inf]);
     box on;
     
@@ -381,7 +382,7 @@ function plotFullSpectra(obj, primaryIndex, primaryName, figureGroupIndex, legen
                         'Position',  [0.01 0.01 0.1 0.1], ...
                         'String',   ' Export ', ...
                         'Fontsize',  14, ...      
-                        'FontWeight','Bold', ...
+                        'FontWeight','normal', ...
                         'ForegroundColor',     [0.2 0.2 0.2], ...
                         'Callback',  {@obj.SaveFigure_Callback, gcf,  get(h, 'Name')} ...
                 );
@@ -404,13 +405,13 @@ function plotAmbientData(obj,  figureGroupIndex)
     
     % Plot data
     x = spectralAxis;
-    y = squeeze(P_ambient(:,1));
+    y = squeeze(P_ambient(:,1))*1000;
     faceColor = [0.9 0.9 0.9]; edgeColor = [0.3 0.3 0.3];
     obj.makeShadedPlot(x,y, faceColor, edgeColor);
     set(gca, 'Color', [1.0 1.0 1.0], 'XColor', 'b', 'YColor', 'b');
-    set(gca, 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);
-    xlabel('Wavelength (nm)', 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);
-    ylabel('Power', 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);
+    set(gca, 'FontName', 'Helvetica',  'FontSize', 14);
+    xlabel('\it wavelength (nm)', 'FontName', 'Helvetica', 'FontSize', 14);
+    ylabel('\it power (mWatts)', 'FontName', 'Helvetica',  'FontSize', 14);
     %title('Ambient spectra', 'Fontsize', 13, 'Fontname', 'helvetica', 'Fontweight', 'bold');
     axis([380,780, 0,Inf]);
     box on;
@@ -423,7 +424,7 @@ function plotAmbientData(obj,  figureGroupIndex)
                         'Position',  [0.01 0.01 0.1 0.1], ...
                         'String',   ' Export ', ...
                         'Fontsize',  14, ...      
-                        'FontWeight','Bold', ...
+                        'FontWeight','normal', ...
                         'ForegroundColor',     [0.2 0.2 0.2], ...
                         'Callback',  {@obj.SaveFigure_Callback, gcf,  get(h, 'Name')} ...
                 );
@@ -452,31 +453,31 @@ function plotSpectralData(obj, figureGroupIndex)
 
     % Plot data
     x = spectralAxis;
-    y = squeeze(P_device(:,1));
+    y = squeeze(P_device(:,1))*1000;
     faceColor = [1.0 0.7 0.7]; edgeColor = 'r';
     obj.makeShadedPlot(x,y, faceColor, edgeColor);
     
-    y = squeeze(P_device(:,2));
+    y = squeeze(P_device(:,2))*1000;
     faceColor = [0.7 1.0 0.7]; edgeColor = 'g';
     obj.makeShadedPlot(x,y, faceColor, edgeColor);
     
-    y = squeeze(P_device(:,3));
+    y = squeeze(P_device(:,3))*1000;
     faceColor = [0.7 0.7 1.0]; edgeColor = 'b';
     obj.makeShadedPlot(x,y, faceColor, edgeColor);
 
-    y = squeeze(P_device(:,1));
+    y = squeeze(P_device(:,1))*1000;
     plot(x,y, 'r-');
     
-    y = squeeze(P_device(:,2));
+    y = squeeze(P_device(:,2))*1000;
     plot(x,y, 'g-');
     
-    y = squeeze(P_device(:,3));
+    y = squeeze(P_device(:,3))*1000;
     plot(x,y, 'b-');
     
     set(gca, 'Color', [1.0 1.0 1.0], 'XColor', 'b', 'YColor', 'b');
-    set(gca, 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);
-    xlabel('Wavelength (nm)', 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);
-    ylabel('Power', 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);
+    set(gca, 'FontName', 'Helvetica',  'FontSize', 14);
+    xlabel('\it wavelength (nm)', 'FontName', 'Helvetica',  'FontSize', 14);
+    ylabel('\it power (mWatts)', 'FontName', 'Helvetica', 'FontSize', 14);
     
     %title('Primary spectra', 'Fontsize', 13, 'Fontname', 'helvetica', 'Fontweight', 'bold');
     axis([380,780,-Inf,Inf]);
@@ -492,7 +493,7 @@ function plotSpectralData(obj, figureGroupIndex)
         axis([380,780,-Inf,Inf]);
     end
     box on;
-    set(gca, 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);
+    set(gca, 'FontName', 'Helvetica',  'FontSize', 14);
     
     % Finish plot
     drawnow;
@@ -503,7 +504,7 @@ function plotSpectralData(obj, figureGroupIndex)
                         'Position',  [0.01 0.01 0.1 0.1], ...
                         'String',   ' Export ', ...
                         'Fontsize',  14, ...      
-                        'FontWeight','Bold', ...
+                        'FontWeight','normal', ...
                         'ForegroundColor',     [0.2 0.2 0.2], ...
                         'Callback',  {@obj.SaveFigure_Callback, gcf,  get(h, 'Name')} ...
                 );
@@ -528,11 +529,11 @@ function plotGammaData(obj, figureGroupIndex)
     if (primariesNum > 3)
         subplot(1,2,1); hold on;
     end
-    
+    markersize = 5;
     % Plot fitted data
-    plot(gammaInput, gammaTable(:,1),'r-');
-    plot(gammaInput, gammaTable(:,2),'g-');
-    plot(gammaInput, gammaTable(:,3),'b-');
+    plot(gammaInput, gammaTable(:,1),'r.-', 'MarkerFaceColor', [1 0.5 0.5], 'MarkerSize', markersize);
+    plot(gammaInput, gammaTable(:,2),'g.-', 'MarkerFaceColor', [0.5 1 0.5], 'MarkerSize', markersize);
+    plot(gammaInput, gammaTable(:,3),'b.-', 'MarkerFaceColor', [0.5 0.5 1], 'MarkerSize', markersize);
     
     if (primariesNum > 3)
         subplot(1,2,2); hold on;
@@ -559,10 +560,11 @@ function plotGammaData(obj, figureGroupIndex)
             'bs', 'MarkerFaceColor', [1.0 1.0 0.8], 'MarkerEdgeColor', [0 0 1]);
     end
     
-    xlabel('Settings value', 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);
-    ylabel('Normalized output', 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);
+    xlabel('\it settings value', 'FontName', 'Helvetica',  'FontSize', 14);
+    ylabel('\it normalized output', 'FontName', 'Helvetica', 'FontSize', 14);
     %title('Gamma functions', 'Fontsize', 13, 'Fontname', 'helvetica', 'Fontweight', 'bold');
-    axis([0 1 0 1.2]);
+    axis([0 1 0 1]);
+    axis 'square'
 
     if (primariesNum > 3)
         subplot(1,2,2); hold on;
@@ -583,14 +585,14 @@ function plotGammaData(obj, figureGroupIndex)
                 'bs', 'MarkerFaceColor', [1.0 1.0 0.8], 'MarkerEdgeColor', [0 0 1]);
         end
     
-        xlabel('Input value', 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);
-        ylabel('Normalized output', 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);
+        xlabel('\it input value', 'FontName', 'Helvetica',  'FontSize', 14);
+        ylabel('\it normalized output', 'FontName', 'Helvetica',  'FontSize', 14);
         %title('Gamma functions', 'Fontsize', 13, 'Fontname', 'helvetica', 'Fontweight', 'bold');
         axis([0 1 0 1.2]);
     end
     
     set(gca, 'Color', [1.0 1.0 1.0], 'XColor', 'b', 'YColor', 'b');
-    set(gca, 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);
+    set(gca, 'FontName', 'Helvetica', 'FontSize', 14);
     box on;
     
     % Finish plot

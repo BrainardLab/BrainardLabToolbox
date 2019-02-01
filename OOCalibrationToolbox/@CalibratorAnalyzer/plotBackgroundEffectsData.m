@@ -42,7 +42,7 @@ function plotSpectra(obj, spectra, maxAll, settings, figureGroupIndex)
         spdDiff = (squeeze(spectra(backgroundSettingIndex,:)) - zeroBackgroundSPD);
         maxSPDdiff(backgroundSettingIndex) = max(abs(spdDiff));
         edgeColor = squeeze(lineColors(backgroundSettingIndex,:));
-        plot(spectralAxis, spdDiff, '-', 'Color', edgeColor, 'LineWidth', 2.0);
+        plot(spectralAxis, spdDiff*1000, '-', 'Color', edgeColor, 'LineWidth', 2.0);
         
         legendsMatrix{backgroundSettingIndex} = sprintf('bg=(%0.2f, %0.2f, %0.2f)', ...
             obj.newStyleCal.backgroundDependenceSetup.bgSettings(1,backgroundSettingIndex), ...
@@ -54,13 +54,13 @@ function plotSpectra(obj, spectra, maxAll, settings, figureGroupIndex)
     [hleg, objh,outh,outm] = legend(legendsMatrix, 'Location', 'NorthEast');
     set(objh,'linewidth',2);
 
-    set(hleg,'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 12, 'Color', 'none', 'LineWidth', 0.1);
+    set(hleg,'FontName', 'Helvetica', 'Fontweight', 'normal', 'FontSize', 12, 'Color', 'none', 'LineWidth', 0.1);
     box on;
-    axis([380,780, -maxAll/2 maxAll/2]);
+    axis([380,780, -maxAll/2*1000 maxAll/2*1000]);
     set(gca, 'Color', [1 1 1], 'XColor', 'b', 'YColor', 'b');
-    set(gca, 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);
-    xlabel('Wavelength (nm)', 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14);
-    ylabel('SPD(lambda | bg) - SPD(lambda | bg=(0,0,0))', 'FontName', 'Helvetica', 'Fontweight', 'bold', 'FontSize', 14); 
+    set(gca, 'FontName', 'Helvetica', 'Fontweight', 'normal', 'FontSize', 14);
+    xlabel('\it wavelength (nm)', 'FontName', 'Helvetica', 'Fontweight', 'normal', 'FontSize', 14);
+    ylabel('\it SPD(lambda | bg) - SPD(lambda | bg=(0,0,0))', 'FontName', 'Helvetica', 'Fontweight', 'normal', 'FontSize', 14); 
     
     % Finish plot
     drawnow;
@@ -70,7 +70,7 @@ function plotSpectra(obj, spectra, maxAll, settings, figureGroupIndex)
                         'Position',  [0.01 0.01 0.1 0.1], ...
                         'String',   ' Export ', ...
                         'Fontsize',  14, ...      
-                        'FontWeight','Bold', ...
+                        'FontWeight','normal', ...
                         'ForegroundColor',     [0.2 0.2 0.2], ...
                         'Callback',  {@obj.SaveFigure_Callback, gcf,  get(h, 'Name')} ...
                 );
