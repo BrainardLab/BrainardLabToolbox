@@ -6,6 +6,8 @@ function LinearizationTutorial
 %
 % 11/17/2014  npc   Wrote it.
 %
+% Also see: ExploreCalibrationFile.m
+%
 
     %% Initialize state
     close all;
