@@ -47,9 +47,12 @@ function OOC_measureStimuli
     
     % Loop over stimuli and reps
     for iStim = 1:nStimuli
+        queryString = sprintf('\nHit enter to measure stimulus %d of %d:', iStim,nStimuli);
+        Speak(queryString, 'Fiona')
         for iRepeat = 1:nRepeats
             % Ask user to proceed
-            queryString = sprintf('\nHit enter to take measurement (stim:%d, repeat:%d):', iStim, iRepeat);
+            queryString = sprintf('\nHit enter for repeat %d of %d):', iRepeat, nRepeats);
+            Speak(queryString, 'Fiona')
             GetWithDefault(queryString, 0);
             
             % Measure the source
@@ -76,6 +79,8 @@ function OOC_measureStimuli
     
     % Shutdown DBLab_Radiometer object and close the associated device
     DB_PR670obj.shutDown();
+   
+    Speak('All done', 'Fiona')     
 end
 
 % Method to plot the data as they are collected
