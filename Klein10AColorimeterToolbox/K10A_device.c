@@ -179,7 +179,7 @@ void mexFunction(int nlhs,      /* number of output (return) arguments */
     
     /* Create an 1x1 array of unsigned 32-bit integer to store the status  */
     /* This will be the first output argument */
-    const int dims[] = {1, 1};
+    size_t dims[] = {1, 1};
     int nDims = 2;
     plhs[0] = mxCreateNumericArray(nDims, dims, mxINT32_CLASS, mxREAL);
     int *status;
