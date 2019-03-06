@@ -1,4 +1,16 @@
 function measureLuminanceModulation256Hz()
+% measureLuminanceModulation256Hz - Demonstrates the usage of the 
+% K10A_device driver for streaming 256Hz luminance measurements.
+%
+% Syntax:
+% measureLuminanceModulation256Hz()
+%
+% Description:
+% Stream and visualize luminance data at 256 Hz using the Klein K10 device
+%
+%
+% History:
+% 3/6/2019   npc    Wrote it.
 
     % Open the Klein
     openKlein();
