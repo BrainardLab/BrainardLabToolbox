@@ -1,28 +1,28 @@
 function OOC_measureStimuli
-% Measure the radiance of a number of stimuli using the PR670
+% Measure the radiance of a number of stimuli using the PR650
 %
-% For more PR670 options see OOC_testPR670
+% For more PR650 options see OOC_testPR650
 %
 %
-    % Try to open the PR670
-    DB_PR670obj = [];
+    % Try to open the PR650
+    DB_PR650obj = [];
     
     try 
-        % Open the PR-670
-        DB_PR670obj = PR670dev(...
+        % Open the PR-650
+        DB_PR650obj = PR650dev(...
                 'verbosity',        1, ...       % 1 -> minimum verbosity
-                'devicePortString', [] ...       % empty -> automatic port detection)
+                'devicePortString', '/dev/cu.USA19H146P1.1' ...       % empty -> automatic port detection)
         );
 
     catch err
-       if (isempty(DB_PR670obj))
+       if (isempty(DB_PR650obj))
             IOPort('closeall')
        else
             % Exit remote control
-            fprintf(2,'\nAn exception was raised. Shutting down PR670. Please wait ...\n');
+            fprintf(2,'\nAn exception was raised. Shutting down PR650. Please wait ...\n');
             
             % Shutdown DBLab_Radiometer object and close the associated device
-            DB_PR670obj.shutDown();
+            DB_PR650obj.shutDown();
         end
         
         rethrow(err)
@@ -56,11 +56,11 @@ function OOC_measureStimuli
             GetWithDefault(queryString, 0);
             
             % Measure the source
-            DB_PR670obj.measure();
+            DB_PR650obj.measure();
             
             % Retrieve the data
-            radiance = DB_PR670obj.measurement.energy;
-            wavelengths = DB_PR670obj.measurement.spectralAxis;
+            radiance = DB_PR650obj.measurement.energy;
+            wavelengths = DB_PR650obj.measurement.spectralAxis;
             
             % Save the data
             if (iStim*iRepeat == 1)
@@ -78,7 +78,7 @@ function OOC_measureStimuli
     save(dataFileName, 'radianceData', 'wavelengths');
     
     % Shutdown DBLab_Radiometer object and close the associated device
-    DB_PR670obj.shutDown();
+    DB_PR650obj.shutDown();
    
     Speak('All done', 'Fiona')     
 end
