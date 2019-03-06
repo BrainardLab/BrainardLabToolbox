@@ -21,16 +21,24 @@ function measureLuminanceModulation256Hz()
     pause()
     
     % Set the luminance range
-    maxLuminance = setKleinLuminanceRange();
+    luminanceCorrectionFactor = setKleinLuminanceRange();
+    maxLuminance = 120;
     
     % Stream for 2 seconds
     streamDurationSeconds = 2;
     
     %
+    stimNum = 2;
+    filename = sprintf('%s.mat', GetWithDefault('Enter data filename : ', 'kleinData'));
+    
     try
-        for k = 1:10
-            stream256HzDataFromKlein(streamDurationSeconds, maxLuminance);
+        for i = 1:stimNum
+            [luminance256HzData(i,:), ...
+             xChroma8HzData(i,:), yChroma8HzData(i,:), zChroma8HzData(i,:)] = ...
+                stream256HzDataFromKlein(streamDurationSeconds, luminanceCorrectionFactor, maxLuminance, i, stimNum);
         end
+        save(filename, 'luminance256HzData', 'xChroma8HzData', 'yChroma8HzData', 'zChroma8HzData');
+        Speak('All done.', 'Fiona');
         
         closeKlein();
     catch e
@@ -56,34 +64,69 @@ function testKlein()
     
 end
 
-function stream256HzDataFromKlein(streamDurationSeconds, maxLuminance)
+function [correctedLuminanceData, correctedXdata8HzStream, ...
+    correctedYdata8HzStream, correctedZdata8HzStream] = ...
+    stream256HzDataFromKlein(streamDurationSeconds, luminanceCorrectionFactor, maxLuminance, iStim, stimNum)
 
+    queryString = sprintf('Measuring stimulus %2.0f of %2.0f. Hit enter to proceed.', iStim, stimNum);
+    Speak(queryString, 'Fiona')
+    pause
+    
     [status, uncorrectedYdata256HzStream, ...
                      correctedXdata8HzStream, ...
                      correctedYdata8HzStream, ...
                      correctedZdata8HzStream] = K10A_device('sendCommand', 'Standard Stream', streamDurationSeconds);
-                 
-    % Correct luminance data
-    minLum = min(correctedYdata8HzStream);
-    maxLum = max(correctedYdata8HzStream);
-    maxV = max(uncorrectedYdata256HzStream);
-    minV = min(uncorrectedYdata256HzStream);
-    normalizedLuminanceData = (uncorrectedYdata256HzStream-minV)/(maxV-minV);
-    correctedLuminanceData = normalizedLuminanceData * (maxLum-minLum)+minLum;
+    clearKleinPort()
     
+    % Correct 256 Hz luminance data
+    correctedLuminanceData = uncorrectedYdata256HzStream * luminanceCorrectionFactor;
     
-    time = (1:length(correctedLuminanceData))/256.0 * 1000.0;
-    figure(1); clf;
-    plot(time, correctedLuminanceData, 'k.-');
+    time256Hz = (1:length(uncorrectedYdata256HzStream))/256.0 * 1000.0;
+    time8Hz = (1:length(correctedXdata8HzStream))/8*1000.0;
+    
+    plotData(time256Hz, time8Hz, correctedLuminanceData, correctedXdata8HzStream, correctedYdata8HzStream, correctedZdata8HzStream, maxLuminance)
+    
+     % Reset streaming communication params. Make sure that all is OK.
+    [status, response] = K10A_device('sendCommand', 'SingleShot XYZ');
+end
+
+function plotData(time256Hz, time8Hz, luminance256HzData, cieX8HzData, cieY8HzData, cieZ8HzData, maxLuminance)
+    
+    hFig = figure(1); clf;
+    set(hFig, 'Position', [10 10 1050 450]);
+    subplot(2,2,1);
+    plot(time256Hz, luminance256HzData, 'k.-');
+    hold on;
+    plot(time8Hz, cieY8HzData, 'rs-');
     xlabel('time (msec)');
     ylabel('luminance (cd/m2)');
-    set(gca, 'XTick', 0:200:time(end), 'XLim', [0 time(end)], 'YLim', [0 maxLuminance], 'YTick', 0:50:maxLuminance);
+    set(gca, 'XTick', 0:200:time256Hz(end), 'XLim', [0 time256Hz(end)], 'YLim', [0 maxLuminance], 'YTick', 0:50:maxLuminance, 'FontSize', 12);
+    grid on; box on
+    
+    xChroma8Hz = cieX8HzData./(cieX8HzData+cieY8HzData+cieZ8HzData);
+    yChroma8Hz = cieY8HzData./(cieX8HzData+cieY8HzData+cieZ8HzData);
+    
+    
+    subplot(2,2,3);
+    plot(time8Hz, xChroma8Hz, 'rs-'); hold on;
+    plot(time8Hz, yChroma8Hz, 'bs-');
+    xlabel('time (msec)');
+    ylabel('x/y-chroma');
+    set(gca, 'XTick', 0:200:time256Hz(end), 'XLim', [0 time256Hz(end)], 'YLim', [0 0.6], 'YTick', 0:0.1:1, 'FontSize', 12);
+    grid on; box on
+    
+    subplot(2,2,[2 4]);
+    plot(xChroma8Hz, yChroma8Hz, 'ks-');
+    xlabel('y-chroma');
+    ylabel('y-chroma');
+    axis 'square'
+    set(gca, 'YLim', [0.1 0.6], 'YTick', 0:0.1:1, 'YLim', [0.1 0.6], 'YTick', 0:0.1:1, 'FontSize', 12);
     grid on; box on
     drawnow;
 
 end
 
-function maxLuminance = setKleinLuminanceRange()
+function luminanceCorrectionFactor = setKleinLuminanceRange()
 
     disp('Select a luminance range');
     disp('Range 1: Can measure down to 0.001 cd/m^2, saturates at around  19 cd/m^2');
@@ -119,6 +162,33 @@ function maxLuminance = setKleinLuminanceRange()
             maxLuminance = 240;
     end
     
+    streamDurationSeconds = 3.0;
+    disp('Measuring luminance correction factors for the next 5 seconds');
+    disp('Point the Klein at the monitor with a steady white background');
+    queryString = sprintf('Calibrating luminance signal. Hit enter and wait for %2.0f seconds', streamDurationSeconds);
+    Speak(queryString, 'Fiona')
+    pause
+            
+    [status, uncorrectedYdata256HzStream, ...
+                     correctedXdata8HzStream, ...
+                     correctedYdata8HzStream, ...
+                     correctedZdata8HzStream] = K10A_device('sendCommand', 'Standard Stream', streamDurationSeconds);
+                 
+    luminanceCorrectionFactor = max(correctedYdata8HzStream) / max(uncorrectedYdata256HzStream)
+    
+     % Reset streaming communication params. Make sure that all is OK.
+    [status, response] = K10A_device('sendCommand', 'SingleShot XYZ');
+    
+    clearKleinPort();
+    Speak('Done calibrating', 'Fiona');
+end
+
+function clearKleinPort()
+% ----- READ ANY DATA AVAILABLE AT THE PORT ---------------------------
+    [status, dataRead] = K10A_device('readPort');
+    if ((status == 0) && (length(dataRead) > 0))
+        fprintf('Read data: %s (%d chars)\n', dataRead, length(dataRead));
+    end
 end
 
 function closeKlein()
@@ -143,7 +213,7 @@ function openKlein()
     end
     
     % ----- SETUP DEFAULT COMMUNICATION PARAMS ----------------------------
-    speed     = 9600;
+    speed     = 9600; % 4800; % 9600;
     wordSize  = 8;
     parity    = 'n';
     timeOut   = 50000;
@@ -158,20 +228,14 @@ function openKlein()
     end
     
     % ----- READ ANY DATA AVAILABLE AT THE PORT ---------------------------
-    [status, dataRead] = K10A_device('readPort');
-    if ((status == 0) && (length(dataRead) > 0))
-        fprintf('Read data: %s (%d chars)\n', dataRead, length(dataRead));
-    end
+    clearKleinPort()
     
     % ----- WRITE SOME DUMMY DATA TO THE PORT -----------------------------
     status = K10A_device('writePort', 'Do you feel lucky, punk?');
     
 
     % ----- READ ANY DATA AVAILABLE ATTHE PORT ----------------------------
-    [status, dataRead] = K10A_device('readPort');
-    if ((status == 0) && (length(dataRead) > 0))
-        fprintf('Read data: %s (%d chars)\n', dataRead, length(dataRead));
-    end 
+    clearKleinPort()
     
     
     % ------------- GET THE SERIAL NO OF THE KLEIN METER ------------------
@@ -179,6 +243,10 @@ function openKlein()
         K10A_device('sendCommand', 'Model and SerialNo');
     fprintf('Serial no and model: %s\n', modelAndSerialNo);
     
+    if (~strcmp(modelAndSerialNo, 'P0K-10-A U005700  <0>'))
+        clearKleinPort();
+        error('Serial number is invalid. Expected ''P0K-10-A U005700  <0>''.');
+    end
     
     % ------------ GET THE FIRMWARE REVISION OF THE KLEIN METER -----------
     [status, response] = K10A_device('sendCommand', 'FlickerCal & Firmware');
