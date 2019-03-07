@@ -45,7 +45,7 @@ function plotData(time256Hz, time8Hz, luminance256HzData, X8HzData, Y8HzData, Z8
         plot(time256Hz, luminance256HzData(iStim,:), 'k.-');
         hold on;
         %plot(time8Hz, Y8HzData(iStim,:), 'rs-');
-        set(gca, 'XTick', 0:500:time256Hz(end), 'XLim', [0 time256Hz(end)], 'YLim', [0 maxLuminance], 'YTick', 0:50:maxLuminance, 'FontSize', 14);
+        set(gca, 'XTick', 0:500:time256Hz(end), 'XLim', [0 time256Hz(end)], 'YLim', [0 maxLuminance], 'YTick', 0:20:maxLuminance, 'FontSize', 14);
         if (scaleLuminancePlots)
             set(gca, 'YLim', [min(squeeze(luminance256HzData(iStim,:))) max(squeeze(luminance256HzData(iStim,:)))]);
         end
