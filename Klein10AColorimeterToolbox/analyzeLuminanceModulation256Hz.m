@@ -5,25 +5,26 @@ function analyzeLuminanceModulation256Hz
     
     % Set to true to scale individual luminance plot to their own range
     % or set it to false for no scaling.
-    scaleLuminancePlots = true;
+    scaleLuminancePlots = ~true;
     
     % Import and visualize the data
     for iFile = 1:numel(fileNames)
-        [luminance256HzData, X8HzData, Y8HzData, Z8HzData, time256Hz, time8Hz] = importData(fileNames{iFile});
-        plotData(time256Hz, time8Hz, luminance256HzData, X8HzData, Y8HzData, Z8HzData, scaleLuminancePlots, fileNames{iFile});
+        [rootDir, luminance256HzData, X8HzData, Y8HzData, Z8HzData, time256Hz, time8Hz] = importData(fileNames{iFile});
+        plotData(time256Hz, time8Hz, luminance256HzData, X8HzData, Y8HzData, Z8HzData, scaleLuminancePlots, rootDir, fileNames{iFile});
     end
 end
 
-function [luminance256HzData, xChroma8HzData, yChroma8HzData, zChroma8HzData, time256Hz, time8Hz] = importData(fileName)
+function [rootDir, luminance256HzData, xChroma8HzData, yChroma8HzData, zChroma8HzData, time256Hz, time8Hz] = importData(fileName)
     [rootDir,~] = fileparts(which(mfilename));
-    load(fullfile(rootDir, 'measurements', fileName), ...
+    rootDir = fullfile(rootDir, 'measurements');
+    load(fullfile(rootDir,  fileName), ...
         'luminance256HzData', 'xChroma8HzData', 'yChroma8HzData', 'zChroma8HzData');
     time256Hz = (1:size(luminance256HzData,2))/256.0 * 1000.0;
     time8Hz = (1:size(xChroma8HzData,2))/8*1000.0;
 end
 
 
-function plotData(time256Hz, time8Hz, luminance256HzData, X8HzData, Y8HzData, Z8HzData, scaleLuminancePlots, fileName)
+function plotData(time256Hz, time8Hz, luminance256HzData, X8HzData, Y8HzData, Z8HzData, scaleLuminancePlots, rootDir, fileName)
     maxLuminance = max(luminance256HzData(:));
     hFig = figure(1); clf;
     set(hFig, 'Position', [10 10 2400 1300]);
@@ -79,7 +80,7 @@ function plotData(time256Hz, time8Hz, luminance256HzData, X8HzData, Y8HzData, Z8
         drawnow;
     end
     
-    NicePlot.exportFigToPDF(sprintf('%s.pdf', fileName), hFig, 300);
+    NicePlot.exportFigToPDF(fullfile(rootDir, sprintf('%s.pdf', fileName)), hFig, 300);
 end
 
 
