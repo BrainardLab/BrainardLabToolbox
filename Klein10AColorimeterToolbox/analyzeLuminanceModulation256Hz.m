@@ -1,10 +1,13 @@
 function analyzeLuminanceModulation256Hz
+
+    % The data filenames
     fileNames = {'mtrp_flicker.mat', 'mtrp_flickernull.mat'};
     
     % Set to true to scale individual luminance plot to their own range
     % or set it to false for no scaling.
     scaleLuminancePlots = true;
     
+    % Import and visualize the data
     for iFile = 1:numel(fileNames)
         [luminance256HzData, X8HzData, Y8HzData, Z8HzData, time256Hz, time8Hz] = importData(fileNames{iFile});
         plotData(time256Hz, time8Hz, luminance256HzData, X8HzData, Y8HzData, Z8HzData, scaleLuminancePlots, fileNames{iFile});
