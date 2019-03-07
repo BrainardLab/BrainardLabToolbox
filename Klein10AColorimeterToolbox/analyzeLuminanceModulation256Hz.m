@@ -1,8 +1,13 @@
 function analyzeLuminanceModulation256Hz
-    fileNames = {'mtrp_flicker.mat', 'mtrp_flickernull.mat'}
+    fileNames = {'mtrp_flicker.mat', 'mtrp_flickernull.mat'};
+    
+    % Set to true to scale individual luminance plot to their own range
+    % or set it to false for no scaling.
+    scaleLuminancePlots = true;
+    
     for iFile = 1:numel(fileNames)
         [luminance256HzData, X8HzData, Y8HzData, Z8HzData, time256Hz, time8Hz] = importData(fileNames{iFile});
-        plotData(time256Hz, time8Hz, luminance256HzData, X8HzData, Y8HzData, Z8HzData, fileNames{iFile});
+        plotData(time256Hz, time8Hz, luminance256HzData, X8HzData, Y8HzData, Z8HzData, scaleLuminancePlots, fileNames{iFile});
     end
 end
 
@@ -15,7 +20,7 @@ function [luminance256HzData, xChroma8HzData, yChroma8HzData, zChroma8HzData, ti
 end
 
 
-function plotData(time256Hz, time8Hz, luminance256HzData, X8HzData, Y8HzData, Z8HzData, fileName)
+function plotData(time256Hz, time8Hz, luminance256HzData, X8HzData, Y8HzData, Z8HzData, scaleLuminancePlots, fileName)
     maxLuminance = max(luminance256HzData(:));
     hFig = figure(1); clf;
     set(hFig, 'Position', [10 10 2400 1300]);
@@ -31,12 +36,16 @@ function plotData(time256Hz, time8Hz, luminance256HzData, X8HzData, Y8HzData, Z8
        'bottomMargin',   0.04, ...
        'topMargin',      0.00);
     
+   
     for iStim = 1:nStim
         subplot('Position', subplotPosVectors(iStim,1).v);
         plot(time256Hz, luminance256HzData(iStim,:), 'k.-');
         hold on;
         %plot(time8Hz, Y8HzData(iStim,:), 'rs-');
         set(gca, 'XTick', 0:500:time256Hz(end), 'XLim', [0 time256Hz(end)], 'YLim', [0 maxLuminance], 'YTick', 0:50:maxLuminance, 'FontSize', 14);
+        if (scaleLuminancePlots)
+            set(gca, 'YLim', [min(squeeze(luminance256HzData(iStim,:))) max(squeeze(luminance256HzData(iStim,:)))]);
+        end
         
         if (iStim == nStim)
             xlabel('time (msec)');
