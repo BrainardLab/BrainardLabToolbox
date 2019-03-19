@@ -58,7 +58,7 @@ function plotRepeatibilityData(obj, figureGroupIndex)
     maxLum     = max(max(max(squeeze(primary_xyY(:, :, lumIndex, :)))));
     
     % Init figure
-    h = figure('Name', 'Measurement Repeatability', 'NumberTitle', 'off', 'Visible', 'off'); 
+    h = figure('Name', 'Measurement Stability', 'NumberTitle', 'off', 'Visible', 'off'); 
     clf; hold on;
     
     % Luminance of RGB primaries as a function of gamma input value

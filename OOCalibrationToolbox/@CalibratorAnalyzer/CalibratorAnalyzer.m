@@ -36,7 +36,7 @@ classdef CalibratorAnalyzer < handle
     % Public methods
     methods
         % Constructor
-        function obj = CalibratorAnalyzer(cal, calFileName)
+        function obj = CalibratorAnalyzer(cal, calFileName, calDir)
             
             % Generate CalStructOBJ to handle the (new-style) cal struct
             [obj.calStructOBJ, ~] = ObjectToHandleCalOrCalStruct(cal);
@@ -44,8 +44,7 @@ classdef CalibratorAnalyzer < handle
             if (obj.calStructOBJ.inputCalHasNewStyleFormat)
                 % Make a copy of the imported cal
                 obj.newStyleCal = cal;
-                
-                calFolder = CalDataFolder([],calFileName);
+                calFolder = calDir; % CalDataFolder([],calFileName, calDir);
                 calPlotFolder = fullfile(calFolder,'Plots');
                 if (~exist(calPlotFolder,'dir'))
                     unix(['mkdir ' calPlotFolder]);
@@ -104,6 +103,11 @@ classdef CalibratorAnalyzer < handle
         % Method to export a plot
         SaveFigure_Callback(obj, hObject, eventdata, current_gcf, fileDir, fileName)
     end  % private methods
+    
+    % Static methods
+    methods (Static)
+        [calFilename, calDir, cal] = selectCalFile();
+    end
     
 end
 

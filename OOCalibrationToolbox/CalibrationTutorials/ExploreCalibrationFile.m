@@ -8,10 +8,7 @@
 function ExploreCalibrationFile
 
     % Load calibration file
-    load('/Users/nicolas/Downloads/MetropsisScreen.mat')
-    
-    % Select the last calibration
-    theCal = cals{end};
+    [calFilename, calDir, theCal] = CalibratorAnalyzer.selectCalFile();
     
     % Visualize the primary SPDs and the gamma tables
     visualizeBasicData(theCal);
@@ -212,8 +209,6 @@ end
 
 % Plot the gamma curves
 function PlotGammaTables(rawGammaInput, rawGammaTable, gammaInput, gammaTable)
-    global figNum
-    figNum = figNum + 1;
     
     % Steup subplot position vectors
     subplotPosVectors = NicePlot.getSubPlotPosVectors(...
@@ -241,7 +236,7 @@ function PlotGammaTables(rawGammaInput, rawGammaTable, gammaInput, gammaTable)
     % Specify no legends
     legends = {'interpolated gamma', 'raw gamma (measured)'};
     
-    hFig = figure(figNum);
+    hFig = figure();
     set(hFig, 'Position', [100 100 1000 275]);
     
     for primaryIndex = 1:size(rawGammaTable,2)
