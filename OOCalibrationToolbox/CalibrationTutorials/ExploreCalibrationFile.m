@@ -14,10 +14,10 @@ function ExploreCalibrationFile
     visualizeBasicData(theCal);
     
     % Visualize results from the primary additivity tests
-    visualizePrimaryAdditivityData(theCal);
+    %visualizePrimaryAdditivityData(theCal);
     
     % Visualize results from the spatial independence tests
-    visualizeSpatialIndependenceData(theCal);
+    %visualizeSpatialIndependenceData(theCal);
 end
 
 function visualizeBasicData(theCal)
