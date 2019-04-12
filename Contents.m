@@ -13,7 +13,7 @@
 % Configuration                 - BrainardLabToolbox configuration files.
 % ColorMaterialModel            - Model the color material experiment, extending the MLDSColorSelection idea.
 % D70Toolbox             		- Tools for processing digital camera images, particular those from a Nikon D70.
-% DisplaySupport                - 
+% DisplaySupport                - Routines for doing useful display related things.
 % Ellipses               		- Routines related to fitting ellipses.
 %                               - Should be harmonized with Ellipsoids code.
 % Ellipsoids                    - Routines related to fitting ellipsoids.
@@ -23,6 +23,7 @@
 % HDRStereoToolbox              - Collection of routines for driving the SONY OLED Stereo rig in 10-bits (Linux mostly)
 % Java                   		- Java support.
 % Klein10AColorimeterToolbox 	- Mex driver and scripts for interfacing with the Klein K10A high-sensitivity photometer
+% Metropsis                     - Routines related to Metropsis psychophysical rig.
 % mglSupport             		- Support routines for mgl stuff.
 % MOGLSupport            		- Do useful things in MOGL dipslay environement.
 % MLDSColorSelection     		- Maximum Likelihood Difference Scaling routines we use to derive infered match in the color selection paradigm. 
