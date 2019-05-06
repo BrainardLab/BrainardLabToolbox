@@ -13,6 +13,8 @@
 %    following values: 'normal', 'bit++', or 'hdr'.  Default: 'normal'.
 % * 'Fullscreen', logical - Toggles fullscreen mode on/off.  Default:
 %    true.
+% * 'SpoofFullscreen', logical - Spoof full screen mode - helps with later OSXs.  Default:
+%    true.
 % * 'SceneDimensions', 1x2 or 1x3 (for stereo) double - Specifies the axes range of the
 %    embedded OpenGL window.  That means if you specify a value of [10 10],
 %    the window will only display objects drawn into the [-5 5 -5 5] axes
@@ -82,6 +84,9 @@ classdef GLWindow < handle
 		% Toggles fullscreen mode.
 		FullScreen;
 		
+        % Spoof fullscreen mode.
+		SpoofFullScreen;
+        
 		% Toggles cursor visibility.
 		HideCursor;
 		
@@ -208,6 +213,7 @@ classdef GLWindow < handle
 			parser = inputParser;
 			parser.addParamValue('WindowID', []);
 			parser.addParamValue('FullScreen', []);
+            parser.addParamValue('SpoofFullScreen', true);
 			parser.addParamValue('WindowPosition', []);
 			parser.addParamValue('WindowSize', []);
 			parser.addParamValue('OpenGLDebugLevel', []);
@@ -256,6 +262,7 @@ classdef GLWindow < handle
 			% These properties are set first because other properties need
 			% to know their values before being set.
 			GLWObj.FullScreen = parserResults.FullScreen;
+            GLWObj.SpoofFullScreen = parserResults.SpoofFullScreen;
 			GLWObj.DisplayType = parserResults.DisplayType;
 			
 			% If not in any sort of Bits++ mode, force AutoGamma to be off
