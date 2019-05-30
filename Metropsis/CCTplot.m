@@ -21,14 +21,15 @@ function theFig = CCTplot(fName,varargin)
 % Optional key/value pairs
 %     'figHandle'    - Figure handle to plot in.  Creates new figure if empty
 %                      (default empty).
-%     'plotColor'    - Color arg accepted by plot.
+%     'plotColor'    - Color arg accepted by plot (default red).
 %
 % See also:
 %
 
 % History:
 %    04/11/19  dce       Wrote it.  File parsing code provided by ncp.
-%    04/12/19  dce, dhb  Comments and tweaking.
+%    04/12/19  dce, dhb  Comments and tweaking, added ellipse fitting code
+%    05/30/19  dce       Minor edits 
 
 % Examples:
 %{
@@ -38,9 +39,6 @@ function theFig = CCTplot(fName,varargin)
     CCTplot('/Volumes/Users1/Dropbox (Aguirre-Brainard Lab)/MTRP_data/Exp_CCTE/Subject_TOME_BURGE/TOME_BURGE_1.txt')
     CCTplot('/Volumes/Users1/Dropbox (Aguirre-Brainard Lab)/MTRP_data/Exp_CCTE/Subject_DEENA ELUL/DEENA ELUL_2 copy.txt')
 %}
-
-% Close figures
-close all;
 
 % Parse key/value pairs
 p = inputParser;
@@ -91,15 +89,14 @@ if (isempty(p.Results.figHandle))
     set(theFig,'Position',[15   630   900   700]);
 end
 set(gca,'FontName','Helvetica','FontSize',16);
-plot(u_prime,v_prime,'ro','MarkerEdgeColor',p.Results.plotColor,'MarkerFaceColor',p.Results.plotColor','MarkerSize',10);
-plot(center_u_prime_w, center_v_prime_w, 'b*','MarkerSize',8);
-plot(fitEllipseIn2D(1,:),fitEllipseIn2D(2,:),'g','LineWidth',2);
+plot(u_prime,v_prime,'ro','MarkerEdgeColor',p.Results.plotColor,'MarkerFaceColor',p.Results.plotColor','MarkerSize',8);
+%plot(center_u_prime_w, center_v_prime_w, 'b*','MarkerSize',8);
+% plot(fitEllipseIn2D(1,:),fitEllipseIn2D(2,:),'g','LineWidth',2);
 xlim([0.1 0.3]);
 ylim([0.35 0.55]);
 axis('square');
-xlabel(LiteralUnderscore('u_prime'),'FontSize',18);
-ylabel(LiteralUnderscore('v_prime'),'FontSize',18);
-
+xlabel('u\_prime','FontSize',18);
+ylabel('v\_prime','FontSize',18);
 end
 
 % Function for parsing the text file
