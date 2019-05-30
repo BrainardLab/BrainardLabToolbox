@@ -26,9 +26,12 @@ for wIndex = 1:GLWObj.NumWindows
     if ~GLWObj.MGLLegacy
         mglSetParam('multisampling', GLWObj.Multisampling);
     end
-	
+    
 	% Open the OpenGL window.
 	if GLWObj.FullScreen
+        if GLWObj.SpoofFullScreen
+            mglSetParam('spoofFullScreen',1);
+        end
 		mglOpen(GLWObj.WindowInfo(wIndex).WindowID);
 	else
 		mglOpen(0, GLWObj.WindowSize(1), GLWObj.WindowSize(2));

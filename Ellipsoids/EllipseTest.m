@@ -11,6 +11,9 @@
 %% Clear
 clear; close all;
 
+%% Fit center offset?
+fitCenterOffset = false;
+
 %% Load in the data
 whichDataSet = 4;
 theRawData = load('dataForEllipseTest.mat');
@@ -23,10 +26,25 @@ theData1(3,:) = 0.5;
 theData2 = 0.5*theData0;
 theData2(3,:) = -0.5;
 theDataToFit = [theData0 theData1 theData2];
-[fitA,fitAinv,fitQ,fitEllParams] = EllipsoidFit(theDataToFit,[],true,true);
+
+%% Deal with offset
+%
+% Our ellipse fitting routine tested here does not allow fitting of the
+% center offset. Although we should fix this, for now deal with by
+% subtracting the mean of the data from the data
+if (~fitCenterOffset)
+    theDataToFit = theDataToFit-mean(theDataToFit,1);
+end
+
+%% Fit using general routine
+[fitA,fitAinv,fitQ,fitEllParams] = EllipsoidFit(theDataToFit,[],fitCenterOffset,true);
 
 %% Grab ellipsoid center from params.  
-fitXCenter = fitEllParams(7:9);
+if (fitCenterOffset)
+    fitXCenter = fitEllParams(7:9);
+else
+    fitXCenter = zeros(3,1);
+end
 
 %% Get the LM plane ellipse from the fit
 nThetaEllipse = 200;
