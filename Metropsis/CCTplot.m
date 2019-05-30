@@ -29,7 +29,7 @@ function theFig = CCTplot(fName,varargin)
 % History:
 %    04/11/19  dce       Wrote it.  File parsing code provided by ncp.
 %    04/12/19  dce, dhb  Comments and tweaking, added ellipse fitting code
-%    05/30/19  dce       Minor edits 
+%    05/30/19  dce       Minor edits, moved file parsing code to a separate routine  
 
 % Examples:
 %{
@@ -67,21 +67,21 @@ end
 % Try to fit an ellipse to the data
 %
 % We have several ellipse fitting routines.
-theData = [u_prime-center_u_prime_w v_prime-center_v_prime_w zeros(size(u_prime))]';
-initialFactor = 15;
-ellRanges = max(theData,[],2)-min(theData,[],2);
-ellParams0 = [1./ellRanges'.^0.5 0 0 0]';
-ellParams0(1:3) = ellParams0(1:3)*initialFactor;
-ellParams0(isinf(ellParams0)) = 1;
-[fitA,fitAinv,fitQ,fitEllParams] = EllipsoidFit(theData,ellParams0,false,true);
-fitCenter = [center_u_prime_w center_v_prime_w 0]';
-
-% Get ellipse from fit
-nThetaEllipse = 200;
-circleIn2D = UnitCircleGenerate(nThetaEllipse);
-circleIn3DPlane = [circleIn2D(1,:) ; circleIn2D(2,:) ; zeros(size(circleIn2D(1,:)))];
-fitEllipseIn3DPlane = PointsOnEllipsoidFind(fitQ,circleIn3DPlane,fitCenter);
-fitEllipseIn2D = fitEllipseIn3DPlane(1:3,:);
+% theData = [u_prime-center_u_prime_w v_prime-center_v_prime_w zeros(size(u_prime))]';
+% initialFactor = 15;
+% ellRanges = max(theData,[],2)-min(theData,[],2);
+% ellParams0 = [1./ellRanges'.^0.5 0 0 0]';
+% ellParams0(1:3) = ellParams0(1:3)*initialFactor;
+% ellParams0(isinf(ellParams0)) = 1;
+% [fitA,fitAinv,fitQ,fitEllParams] = EllipsoidFit(theData,ellParams0,false,true);
+% fitCenter = [center_u_prime_w center_v_prime_w 0]';
+% 
+% % Get ellipse from fit
+% nThetaEllipse = 200;
+% circleIn2D = UnitCircleGenerate(nThetaEllipse);
+% circleIn3DPlane = [circleIn2D(1,:) ; circleIn2D(2,:) ; zeros(size(circleIn2D(1,:)))];
+% fitEllipseIn3DPlane = PointsOnEllipsoidFind(fitQ,circleIn3DPlane,fitCenter);
+% fitEllipseIn2D = fitEllipseIn3DPlane(1:3,:);
 
 % Plot u_prime and v_prime
 if (isempty(p.Results.figHandle))
@@ -99,115 +99,6 @@ xlabel('u\_prime','FontSize',18);
 ylabel('v\_prime','FontSize',18);
 end
 
-% Function for parsing the text file
-function [v_prime_w, u_prime_w, azimuthsTable] = ParseCCTTextfile(fName)
-
-% Retrieve v_prime_w, u_prime_w
-[v_prime_w, u_prime_w] = getValuesOfUVprimeW(fName);
-
-% Retrieve azimuths table
-azimuthsTable = getAzimuthsTable(fName);
-end
-
-function azimuthsTable = getAzimuthsTable(fName)
-
-azimuthsTable = [];
-
-% Lines we are searching for before we start extracting the azimuths table
-targetLine1 = 'Saturation';
-targetLine2 = 'Std';
-
-% Open file
-fid = fopen(fName);
-
-% Scan file one line at a time
-tline = fgetl(fid);
-
-while ischar(tline)
-    % check for targetLine1
-    if contains(tline, targetLine1)
-        % check for targetLine2
-        tline = fgetl(fid);
-        if (contains(tline, targetLine2))
-            keepLooping = true;
-            while (keepLooping)
-                % keep reading lines and filling table long as they start with 'azimuth'
-                azimuthTableRowVals = getAzimuthTableRowFromLineString(fgetl(fid));
-                if (isempty(azimuthTableRowVals))
-                    % All done
-                    keepLooping = false;
-                else
-                    % Insert row
-                    row = size(azimuthsTable,1)+1;
-                    azimuthsTable(row,:) = azimuthTableRowVals;
-                end
-            end % while (keepLooping)
-        else
-            fprintf('Did not detect line: ''%s''.', targetLine2);
-        end
-    end
-    % Read next line
-    tline = fgetl(fid);
-end
-fclose(fid);
-%disp(azimuthsTable);
-
-end
-
-function vals = getAzimuthTableRowFromLineString(lineString)
-[~, notMatched] = regexp(lineString,'\s+', 'match', 'split');
-% Check that first item is 'azimuth'
-if (strcmp(notMatched{1}, 'azimuth'))
-    vals(1) = str2double(notMatched{2});
-    vals(2) = str2double(notMatched{3});
-    vals(3) = str2double(notMatched{6});
-else
-    vals = [];
-end
-end
-
-
-function [v_prime_w, u_prime_w] = getValuesOfUVprimeW(fName)
-
-% Lines we are searching for before we start extracting the v_prime_w, u_prime_w
-targetLine1 = 'Independent Variables';
-targetLine2 = 'Value';
-
-% Open file
-fid = fopen(fName);
-
-% Scan first line
-tline = fgetl(fid);
-
-% Scan file one line at a time
-while ischar(tline)
-    % check for targetLine1
-    if contains(tline, targetLine1)
-        % Read the targetLine2
-        tline = fgetl(fid);
-        if (contains(tline, targetLine2))
-            % It is, read next 2 lines to get the 'v_prime_w' and 'u_prime_w' values
-            v_prime_w = getPropertyValueFromLineString(fgetl(fid), 'v_prime_w');
-            u_prime_w = getPropertyValueFromLineString(fgetl(fid), 'u_prime_w');
-        else
-            fprintf('Did not detect line: ''%s''.', targetLine2);
-        end
-    end
-    % Read next line
-    tline = fgetl(fid);
-end
-fclose(fid);
-
-end
-
-function val = getPropertyValueFromLineString(lineString, propertyName)
-splitStr = regexp(lineString,propertyName,'split');
-if (numel(splitStr) < 2)
-    error(sprintf('Did not find a value in line: ''%s'' for property named: ''%s''.', lineString, propertyName));
-else
-    val = str2double(splitStr{2});
-end
-end
 
 
 
