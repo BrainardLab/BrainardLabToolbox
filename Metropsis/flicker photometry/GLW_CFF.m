@@ -1,4 +1,4 @@
-function GLW_CFF(varargin)
+function GLW_CFF(fName, varargin)
 % Heterochromatic flicker photometry experiment using GLWindow
 %
 % Syntax:
@@ -13,35 +13,39 @@ function GLW_CFF(varargin)
 %    intensity and adjustments on the screen. It is designed for displays
 %    with frame rates of 60 or 120 Hz.
 %
-% Inputs 
-%    none
+% Inputs (optional)
+%    fName             - Matlab string ending in .mat. Indicates name of 
+%                        file you want to create/save data to. Default is
+%                        'results.mat'
 %
 % Outputs:
 %    none
 %
 % Optional key/value pairs:
-%    fName           - Matlab string ending in .mat. Indicates name of file
-%                     you want to create/save data to. Default is
-%                     'results.mat'
-%    viewDistance    - double indicating viewing distance in mm. Default
-%                      is 400. Can only use if you also input a filename
+%    'viewDistance'    - double indicating viewing distance in mm. Default
+%                        is 400. Can only use if you also input a filename
 %
 
 % History:
 %    06/05/19  dce       Wrote it. Visual angle conversion code from ar
 %                        ('ImageSizeFromAngle.m')
+%    06/06/19  dce       Minor edits, input error checking
 
 % Examples:
 %{
     GLW_CFF
-    GLW_CFF('fName', 'Deena.mat')
-    GLW_CFF('fName', 'Deena.mat', 'viewDistance', 1000)
+    GLW_CFF('Deena.mat')
+    GLW_CFF('Deena.mat', 'viewDistance', 1000)
 %}
 
 %parse input
+if nargin == 0
+    fName = 'results.mat'; %default filename
+elseif nargin > 3
+    error('too many inputs'); 
+end 
 p = inputParser;
-p.addParameter('viewDistance', 400);
-p.addParameter('fName', 'results.mat');
+p.addParameter('viewDistance', 400, @(x) (isnumeric(x) & isscalar(x)));
 p.parse(varargin{:});
 
 %get information on display
@@ -132,14 +136,14 @@ try
     
     %clean up once user finishes
     ListenChar(0);
-    win.close;
-    
+    win.close; 
+   
     %display results
     fprintf('chosen intensity of green is %g \n', g);
     fprintf('adjustment history: g = ');
     fprintf('%g ', g_values);
     fprintf('\n');
-    save(p.Results.fName, 'g_values');
+    save(fName, 'g_values');
     
 catch e %handle errors
     ListenChar(0);
