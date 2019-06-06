@@ -65,23 +65,23 @@ for i = 1:highestIndex
 end
 
 % Try to fit an ellipse to the data
-%
-% We have several ellipse fitting routines.
-% theData = [u_prime-center_u_prime_w v_prime-center_v_prime_w zeros(size(u_prime))]';
-% initialFactor = 15;
-% ellRanges = max(theData,[],2)-min(theData,[],2);
-% ellParams0 = [1./ellRanges'.^0.5 0 0 0]';
-% ellParams0(1:3) = ellParams0(1:3)*initialFactor;
-% ellParams0(isinf(ellParams0)) = 1;
-% [fitA,fitAinv,fitQ,fitEllParams] = EllipsoidFit(theData,ellParams0,false,true);
-% fitCenter = [center_u_prime_w center_v_prime_w 0]';
-% 
-% % Get ellipse from fit
-% nThetaEllipse = 200;
-% circleIn2D = UnitCircleGenerate(nThetaEllipse);
-% circleIn3DPlane = [circleIn2D(1,:) ; circleIn2D(2,:) ; zeros(size(circleIn2D(1,:)))];
-% fitEllipseIn3DPlane = PointsOnEllipsoidFind(fitQ,circleIn3DPlane,fitCenter);
-% fitEllipseIn2D = fitEllipseIn3DPlane(1:3,:);
+
+%We have several ellipse fitting routines.
+theData = [u_prime-center_u_prime_w v_prime-center_v_prime_w zeros(size(u_prime))]';
+initialFactor = 15;
+ellRanges = max(theData,[],2)-min(theData,[],2);
+ellParams0 = [1./ellRanges'.^0.5 0 0 0]';
+ellParams0(1:3) = ellParams0(1:3)*initialFactor;
+ellParams0(isinf(ellParams0)) = 1;
+[fitA,fitAinv,fitQ,fitEllParams] = EllipsoidFit(theData,ellParams0,false,true);
+fitCenter = [center_u_prime_w center_v_prime_w 0]';
+
+% Get ellipse from fit
+nThetaEllipse = 200;
+circleIn2D = UnitCircleGenerate(nThetaEllipse);
+circleIn3DPlane = [circleIn2D(1,:) ; circleIn2D(2,:) ; zeros(size(circleIn2D(1,:)))];
+fitEllipseIn3DPlane = PointsOnEllipsoidFind(fitQ,circleIn3DPlane,fitCenter);
+fitEllipseIn2D = fitEllipseIn3DPlane(1:3,:);
 
 % Plot u_prime and v_prime
 if (isempty(p.Results.figHandle))
@@ -90,8 +90,7 @@ if (isempty(p.Results.figHandle))
 end
 set(gca,'FontName','Helvetica','FontSize',16);
 plot(u_prime,v_prime,'ro','MarkerEdgeColor',p.Results.plotColor,'MarkerFaceColor',p.Results.plotColor','MarkerSize',8);
-%plot(center_u_prime_w, center_v_prime_w, 'b*','MarkerSize',8);
-% plot(fitEllipseIn2D(1,:),fitEllipseIn2D(2,:),'g','LineWidth',2);
+plot(fitEllipseIn2D(1,:),fitEllipseIn2D(2,:),p.Results.plotColor,'LineWidth',2);
 xlim([0.1 0.3]);
 ylim([0.35 0.55]);
 axis('square');
