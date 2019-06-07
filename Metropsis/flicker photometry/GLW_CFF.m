@@ -58,7 +58,7 @@ height = size(2) / 2;
 try
     %instructions window
     intro = GLWindow('BackgroundColor', [0 0 0], 'SceneDimensions',...
-        size, 'windowID', length(disp), 'HideCursor', true);
+        size, 'windowID', length(disp));
     intro.addText('A flashing red and green circle will appear on the screen',...
         'Center', [0 0.3 * height], 'FontSize', 75, 'Color', [1 1 1],...
         'Name', 'line1');
@@ -81,7 +81,7 @@ try
     
     %create stimulus window
     win = GLWindow('BackgroundColor', [0.5 0.5 0.5], 'SceneDimensions',...
-        size, 'windowID', length(disp), 'HideCursor', false);
+        size, 'windowID', length(disp));
     
     %calculate diameter of circle in mm and add circle
     angle = 2; %visual angle (degrees)
@@ -109,7 +109,7 @@ try
         win.draw;
         
         count = count + 1;
-        if (frameRate == 120 && count == 3) | frameRate == 60
+        if (frameRate == 120 && count == 3) || frameRate == 60
             red = ~red;
             count = 1;
         end
@@ -154,6 +154,6 @@ catch e %handle errors
 end
 end
 
-%TO DO: helper function to convert RGB values to LMS color space
-function [L M S] = LMS_to_RGB([R G B])
-end 
+%TO DO: helper function to convert LMS values to RGB color space
+% function [R G B] = LMS_to_RGB([L M S])
+% end 
