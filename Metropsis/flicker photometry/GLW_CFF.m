@@ -72,12 +72,13 @@ try
         'Center', [0 -0.3 * height], 'FontSize', 75, 'Color', [1 1 1],...
         'Name', 'line4');
     intro.open;
+    mglDisplayCursor(0); 
     
     duration = 8; %duration that instructions appear (s)
     for i = 1:(frameRate * duration)
         intro.draw;
     end
-    intro.close;
+    intro.close; 
     
     %create stimulus window
     win = GLWindow('BackgroundColor', [0.5 0.5 0.5], 'SceneDimensions',...
@@ -89,7 +90,8 @@ try
     win.addOval([0 0], [diameter diameter], [1 0 0], 'Name', 'circle');
     
     %enable character listening
-    win.open;
+    win.open; 
+    mglDisplayCursor(0); 
     ListenChar(2);
     FlushEvents;
     
@@ -136,6 +138,7 @@ try
     
     %clean up once user finishes
     ListenChar(0);
+    mglDisplayCursor(1);
     win.close; 
    
     %display results
@@ -147,6 +150,7 @@ try
     
 catch e %handle errors
     ListenChar(0);
+    mglDisplayCursor(1); 
     if ~isempty(win)
         win.close;
     end
@@ -154,6 +158,6 @@ catch e %handle errors
 end
 end
 
-%TO DO: helper function to convert LMS values to RGB color space
-% function [R G B] = LMS_to_RGB([L M S])
-% end 
+%TO DO: helper function to convert LMS input values to RGB color space
+function RGBvals = LMS_to_RGB(input) 
+end 
