@@ -81,10 +81,10 @@ try
     
     %create stimulus window
     win = GLWindow('BackgroundColor', [0.5 0.5 0.5], 'SceneDimensions',...
-        size, 'windowID', length(disp), 'HideCursor', true);
+        size, 'windowID', length(disp), 'HideCursor', false);
     
     %calculate diameter of circle in mm and add circle
-    angle = 1; %visual angle (degrees)
+    angle = 2; %visual angle (degrees)
     diameter = tan(deg2rad(angle/2)) * (2 * p.Results.viewDistance);
     win.addOval([0 0], [diameter diameter], [1 0 0], 'Name', 'circle');
     
@@ -153,3 +153,7 @@ catch e %handle errors
     rethrow(e);
 end
 end
+
+%TO DO: helper function to convert RGB values to LMS color space
+function [L M S] = LMS_to_RGB([R G B])
+end 
