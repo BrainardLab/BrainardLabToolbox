@@ -11,7 +11,7 @@ function OOC_checkPR650(varargin)
     end
 
     pr650obj = [];
-    devicePortString = '';  % or select from ls -a /dev/cu*, e.g. '/dev/cu.usbmodem1a21'
+    devicePortString = '/dev/tty.KeySerial1';  % or select from ls -a /dev/cu*, e.g. '/dev/cu.usbmodem1a21'
     
     try
         pr650obj = PR650dev('verbosity', verb, 'devicePortString', devicePortString);
