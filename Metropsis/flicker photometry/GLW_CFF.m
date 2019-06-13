@@ -11,7 +11,7 @@ function GLW_CFF(fName, varargin)
 %    the flicker (u = adjust up, d = adjust down, q = quit adjustment). The
 %    program saves subjects' adjustment history and displays their chosen
 %    intensity and adjustments on the screen. It is designed for displays
-%    with frame rates of 60 or 120 Hz.
+%    with 60 or 120 Hz frame rates and includes code for verifying timing.
 %
 % Inputs (optional)
 %    fName             - Matlab string ending in .mat. Indicates name of 
@@ -21,31 +21,36 @@ function GLW_CFF(fName, varargin)
 % Outputs:
 %    none
 %
-% Optional key/value pairs:
-%    'viewDistance'    - double indicating viewing distance in mm. Default
-%                        is 400. Can only use if you also input a filename
+% Optional key/value pairs (can only use if you input a filename): 
+%    'viewDistance'   - double indicating viewing distance in mm. Default
+%                       is 400. 
 %
+%    'maxFrames'      - double indicating the maximum number of frames,
+%                       mostly used for timing verification. Default is Inf
 
-% History:
+%History:
 %    06/05/19  dce       Wrote it. Visual angle conversion code from ar
 %                        ('ImageSizeFromAngle.m')
 %    06/06/19  dce       Minor edits, input error checking
+%    06/13/19  dce       Added code to verify timing/find missed frames
 
 % Examples:
 %{
     GLW_CFF
     GLW_CFF('Deena.mat')
     GLW_CFF('Deena.mat', 'viewDistance', 1000)
+    GLW_CFF('Deena.mat', 'maxFrames', 3600)
 %}
 
 %parse input
 if nargin == 0
     fName = 'results.mat'; %default filename
-elseif nargin > 3
+elseif nargin > 5
     error('too many inputs'); 
 end 
 p = inputParser;
 p.addParameter('viewDistance', 400, @(x) (isnumeric(x) & isscalar(x)));
+p.addParameter('maxFrames', Inf, @(x) (isnumeric(x) & isscalar(x)));
 p.parse(varargin{:});
 
 %get information on display
@@ -100,8 +105,16 @@ try
     g = 0.05; %initial green intensity
     g_values = [0.05]; %vector to store subject's adjustment values
     
+    %timing check parameters
+    maxFrames = p.Results.maxFrames;
+    elapsedFrames = 1; 
+    if isfinite(maxFrames)
+        timeStamps = zeros(1,maxFrames); 
+    end
+    
     %loop to swich oval color and parse user input
-    while true
+    while elapsedFrames <= maxFrames
+        %draw circle
         if red
             color = [1 0 0];
         else
@@ -110,13 +123,21 @@ try
         win.setObjectColor('circle', color);
         win.draw;
         
+        %save timestamp
+        if isfinite(maxFrames) 
+            timeStamps(elapsedFrames) = mglGetSecs;
+            elapsedFrames = elapsedFrames + 1;
+        end 
+        
+        %switch color if needed
         count = count + 1;
         if (frameRate == 120 && count == 3) || frameRate == 60
             red = ~red;
             count = 1;
         end
         
-        if CharAvail %check for user input
+        %check for user input
+        if CharAvail 
             switch GetChar
                 case 'q' %quit adjustment
                     break;
@@ -141,6 +162,31 @@ try
     mglDisplayCursor(1);
     win.close; 
    
+    %plot timing results
+    if isfinite(maxFrames)
+        timeSteps = diff(timeStamps);
+        save('timeSteps','timeSteps');
+        figure(1);
+        plot(timeSteps, 'r');
+        yline(1/frameRate, 'b');
+        yline(2/frameRate, 'g');
+        yline(0,'g');
+        axis([0 maxFrames 0 2.5/frameRate]);
+        title('Frame Rate');
+        xlabel('Frame');
+        ylabel('Duration (s)');
+        legend('Measured Frame Rate', 'Target Frame Rate',...
+            'Skipped Frame');
+        
+        figure(2);
+        deviation = timeSteps - (1/frameRate);
+        plot(deviation, 'r');
+        axis([0 maxFrames -2/frameRate 2/frameRate]);
+        title('Deviations from Frame Rate');
+        xlabel('Frame');
+        ylabel('Difference Between Measured and Target Duration (s)');
+    end 
+    
     %display results
     fprintf('chosen intensity of green is %g \n', g);
     fprintf('adjustment history: g = ');
