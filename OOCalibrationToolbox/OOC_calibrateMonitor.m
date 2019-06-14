@@ -611,8 +611,8 @@ function radiometerOBJ = generateRadiometerObject()
     if (strcmp(selectedRadiometerType, 'PR650dev'))
         radiometerOBJ = PR650dev(...
             'verbosity',        1, ...       % 1 -> minimum verbosity
-            'devicePortString', [] ...       % empty -> automatic port detection
-            );
+            'devicePortString', '/dev/cu.USA19H146P1.1'); %PR650 port string
+
     elseif (strcmp(selectedRadiometerType, 'PR670dev'))
         radiometerOBJ = PR670dev(...
             'verbosity',        1, ...       % 1 -> minimum verbosity

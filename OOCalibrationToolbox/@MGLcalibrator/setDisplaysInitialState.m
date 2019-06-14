@@ -38,6 +38,7 @@ function setDisplaysInitialState(obj, userPrompt)
     
     % Blank screen to be measured
     mglSwitchDisplay(calStruct.describe.whichScreen);
+    mglSetParam('spoofFullScreen',1);
     mglOpen(calStruct.describe.whichScreen);
     mglScreenCoordinates;
     
