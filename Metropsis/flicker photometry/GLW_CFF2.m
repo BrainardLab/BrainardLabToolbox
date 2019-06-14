@@ -1,5 +1,6 @@
 function GLW_CFF(fName, varargin)
-% Heterochromatic flicker photometry experiment using GLWindow
+% Heterochromatic flicker photometry experiment using GLWindow. This
+% version only lets subjects respond in between stimulus presentations
 %
 % Syntax:
 %   GLW_CFF
@@ -14,16 +15,16 @@ function GLW_CFF(fName, varargin)
 %    with 60 or 120 Hz frame rates and includes code for verifying timing.
 %
 % Inputs (optional)
-%    fName             - Matlab string ending in .mat. Indicates name of 
+%    fName             - Matlab string ending in .mat. Indicates name of
 %                        file you want to create/save data to. Default is
 %                        'CFFresults.mat'
 %
 % Outputs:
 %    none
 %
-% Optional key/value pairs (can only use if you input a filename): 
+% Optional key/value pairs (can only use if you input a filename):
 %    'viewDistance'   - double indicating viewing distance in mm. Default
-%                       is 400. 
+%                       is 400.
 %
 %    'maxFrames'      - double indicating the maximum number of frames,
 %                       mostly used for timing verification. Default is Inf
@@ -38,7 +39,7 @@ function GLW_CFF(fName, varargin)
 %{
     GLW_CFF
     GLW_CFF('Deena.mat')
-    GLW_CFF('Deena.mat', 'viewDistance', 1000)
+    GLW_CFF('Deena.mat', 'viewDistance', 1000) %1 meter viewing distance
     GLW_CFF('Deena.mat', 'maxFrames', 3600)
 %}
 
@@ -46,8 +47,8 @@ function GLW_CFF(fName, varargin)
 if nargin == 0
     fName = 'CFFresults.mat'; %default filename
 elseif nargin > 5
-    error('too many inputs'); 
-end 
+    error('too many inputs');
+end
 p = inputParser;
 p.addParameter('viewDistance', 400, @(x) (isnumeric(x) & isscalar(x)));
 p.addParameter('maxFrames', Inf, @(x) (isnumeric(x) & isscalar(x)));
@@ -77,13 +78,13 @@ try
         'Center', [0 -0.3 * height], 'FontSize', 75, 'Color', [1 1 1],...
         'Name', 'line4');
     intro.open;
-    mglDisplayCursor(0); 
+    mglDisplayCursor(0);
     
     duration = 8; %duration that instructions appear (s)
     for i = 1:(frameRate * duration)
         intro.draw;
     end
-    intro.close; 
+    intro.close;
     
     %create stimulus window
     win = GLWindow('BackgroundColor', [0.5 0.5 0.5], 'SceneDimensions',...
@@ -95,27 +96,32 @@ try
     win.addOval([0 0], [diameter diameter], [1 0 0], 'Name', 'circle');
     
     %enable character listening
-    win.open; 
-    mglDisplayCursor(0); 
-    ListenChar(2);
-    FlushEvents;
+    win.open;
+    mglDisplayCursor(0);
     
-    count = 1; %frame counter to delay color change for 120Hz display
+    count = 1; %frame counter
+    responseCounter = 1; %used to keep drawing response patch
     red = true; %oval color tracker
     g = 0.05; %initial green intensity
     g_values = [0.05]; %vector to store subject's adjustment values
     
     %timing check parameters
     maxFrames = p.Results.maxFrames;
-    elapsedFrames = 1; 
+    elapsedFrames = 1;
     if isfinite(maxFrames)
-        timeStamps = zeros(1,maxFrames); 
+        timeStamps = zeros(1,maxFrames);
     end
     
     %loop to swich oval color and parse user input
     while elapsedFrames <= maxFrames
+        
         %draw circle
-        if red
+        if (mod(elapsedFrames,3 * frameRate) == 0)
+            color = [0.5 0.5 0.5];
+            responseCounter = 1;
+        elseif responseCounter <= frameRate && elapsedFrames > frameRate
+            color = [0.5 0.5 0.5];
+        elseif red
             color = [1 0 0];
         else
             color = [0 g 0];
@@ -124,10 +130,9 @@ try
         win.draw;
         
         %save timestamp
-        if isfinite(maxFrames) 
+        if isfinite(maxFrames)
             timeStamps(elapsedFrames) = mglGetSecs;
-            elapsedFrames = elapsedFrames + 1;
-        end 
+        end
         
         %switch color if needed
         count = count + 1;
@@ -137,31 +142,39 @@ try
         end
         
         %check for user input
-        if CharAvail 
-            switch GetChar
-                case 'q' %quit adjustment
-                    break;
-                case 'u' %adjust green up
-                    g = g + 0.05;
-                    if g > 1
-                        g = 1;
-                    end
-                    g_values = [g_values, g];
-                case 'd' %adjust green down
-                    g = g - 0.05;
-                    if g < 0
-                        g = 0;
-                    end
-                    g_values = [g_values, g];
+        if color == [0.5 0.5 0.5]
+            ListenChar(2);
+            FlushEvents;
+            if CharAvail
+                switch GetChar
+                    case 'q' %quit adjustment
+                        ListenChar(0);
+                        break;
+                    case 'u' %adjust green up
+                        g = g + 0.05;
+                        if g > 1
+                            g = 1;
+                        end
+                        g_values = [g_values, g];
+                    case 'd' %adjust green down
+                        g = g - 0.05;
+                        if g < 0
+                            g = 0;
+                        end
+                        g_values = [g_values, g];
+                end
             end
+            ListenChar(0);
         end
+        elapsedFrames = elapsedFrames + 1;
+        responseCounter = responseCounter + 1;
     end
     
     %clean up once user finishes
-    ListenChar(0);
+    ListenChar(0); 
     mglDisplayCursor(1);
-    win.close; 
-   
+    win.close;
+    
     %plot timing results
     if isfinite(maxFrames)
         timeSteps = diff(timeStamps);
@@ -185,7 +198,7 @@ try
         title('Deviations from Frame Rate');
         xlabel('Frame');
         ylabel('Difference Between Measured and Target Duration (s)');
-    end 
+    end
     
     %display results
     fprintf('chosen intensity of green is %g \n', g);
@@ -195,15 +208,10 @@ try
     save(fName, 'g_values');
     
 catch e %handle errors
-    ListenChar(0);
-    mglDisplayCursor(1); 
+    mglDisplayCursor(1);
     if ~isempty(win)
         win.close;
     end
     rethrow(e);
 end
 end
-
-%TO DO: helper function to convert LMS input values to RGB color space
-function RGBvals = LMS_to_RGB(input) 
-end 
