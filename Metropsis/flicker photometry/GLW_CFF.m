@@ -41,6 +41,11 @@ function GLW_CFF(fName, varargin)
     GLW_CFF('Deena.mat', 'viewDistance', 1000)
     GLW_CFF('Deena.mat', 'maxFrames', 3600)
 %}
+%load calibration information 
+[cal,cals] = LoadCalFile('MetropsisCalibration',[],getpref('BrainardLabToolbox','CalDataFolder'));
+load T_cones_ss2 %cone fundamentals 
+cal = SetSensorColorSpace(cal,T_cones_ss2, S_cones_ss2);
+cal = SetGammaMethod(cal,0);
 
 %parse input
 if nargin == 0
