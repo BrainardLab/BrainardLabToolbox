@@ -14,16 +14,16 @@ function GLW_CFF(fName, varargin)
 %    with 60 or 120 Hz frame rates and includes code for verifying timing.
 %
 % Inputs (optional)
-%    fName             - Matlab string ending in .mat. Indicates name of 
+%    fName             - Matlab string ending in .mat. Indicates name of
 %                        file you want to create/save data to. Default is
 %                        'CFFresults.mat'
 %
 % Outputs:
 %    none
 %
-% Optional key/value pairs (can only use if you input a filename): 
+% Optional key/value pairs (can only use if you input a filename):
 %    'viewDistance'   - double indicating viewing distance in mm. Default
-%                       is 400. 
+%                       is 400.
 %
 %    'maxFrames'      - double indicating the maximum number of frames,
 %                       mostly used for timing verification. Default is Inf
@@ -43,9 +43,9 @@ function GLW_CFF(fName, varargin)
     GLW_CFF('Deena.mat', 'maxFrames', 3600)
 %}
 
-%load calibration information 
+%load calibration information
 [cal,cals] = LoadCalFile('MetropsisCalibration',[],getpref('BrainardLabToolbox','CalDataFolder'));
-load T_cones_ss2 %cone fundamentals 
+load T_cones_ss2 %cone fundamentals
 cal = SetSensorColorSpace(cal,T_cones_ss2, S_cones_ss2);
 cal = SetGammaMethod(cal,0);
 
@@ -53,8 +53,8 @@ cal = SetGammaMethod(cal,0);
 if nargin == 0
     fName = 'CFFresults.mat'; %default filename
 elseif nargin > 5
-    error('too many inputs'); 
-end 
+    error('too many inputs');
+end
 p = inputParser;
 p.addParameter('viewDistance', 400, @(x) (isnumeric(x) & isscalar(x)));
 p.addParameter('maxFrames', Inf, @(x) (isnumeric(x) & isscalar(x)));
@@ -84,41 +84,46 @@ try
         'Center', [0 -0.3 * height], 'FontSize', 75, 'Color', [1 1 1],...
         'Name', 'line4');
     intro.open;
-    mglDisplayCursor(0); 
+    mglDisplayCursor(0);
     
     duration = 8; %duration that instructions appear (s)
     for i = 1:(frameRate * duration)
         intro.draw;
     end
-    intro.close; 
+    intro.close;
     
     %create stimulus window
-    backgroundColor = [0.5 0.5 0.5]; %should this stay in rgb? 
+    backgroundColor = [0.5 0.5 0.5]; %should this be switched to lms?
     win = GLWindow('BackgroundColor', backgroundColor, 'SceneDimensions',...
         size, 'windowID', length(disp));
     
     %calculate diameter of circle in mm and add circle
     angle = 2; %visual angle (degrees)
     diameter = tan(deg2rad(angle/2)) * (2 * p.Results.viewDistance);
+    
     redColor = SensorToSettings(cal, [0.04235 0.0140 0.0011]')'; %stimulates l cones 3 times as much as m cones
     win.addOval([0 0], [diameter diameter], redColor, 'Name', 'circle');
     
     %enable character listening
-    win.open; 
-    mglDisplayCursor(0); 
+    win.open;
+    mglDisplayCursor(0);
     ListenChar(2);
     FlushEvents;
     
     count = 1; %frame counter to delay color change for 120Hz display
     red = true; %oval color tracker
     m = 0.1009; %initial m cone intensity
-    m_values = [0.1009]; %vector to store subject's adjustment values
+    green = SensorToSettings(cal, [0.128 m 0.03]')';
+    
+    %     m_values = zeros(100);
+    %     m_values(1) = 0.1009; %vector to store subject's adjustment values
+    %     spacetracker = 2;
     
     %timing check parameters
     maxFrames = p.Results.maxFrames;
-    elapsedFrames = 1; 
+    elapsedFrames = 1;
     if isfinite(maxFrames)
-        timeStamps = zeros(1,maxFrames); 
+        timeStamps = zeros(1,maxFrames);
     end
     
     %loop to swich oval color and parse user input
@@ -127,16 +132,16 @@ try
         if red
             color = redColor;
         else
-            color = SensorToSettings(cal, [0.128 m 0.03]')';
+            color = green;
         end
         win.setObjectColor('circle', color);
         win.draw;
         
         %save timestamp
-        if isfinite(maxFrames) 
+        if isfinite(maxFrames)
             timeStamps(elapsedFrames) = mglGetSecs;
             elapsedFrames = elapsedFrames + 1;
-        end 
+        end
         
         %switch color if needed
         count = count + 1;
@@ -146,7 +151,7 @@ try
         end
         
         %check for user input
-        if CharAvail 
+        if CharAvail
             switch GetChar
                 case 'q' %quit adjustment
                     break;
@@ -155,13 +160,17 @@ try
                     if m > 0.1284
                         m = 0.1284;
                     end
-                    m_values = [m_values, m];
+                        %                     m_values(spacetracker) = m;
+                        %                     spacetracker = spacetracker + 1;
+                        green = SensorToSettings(cal, [0.128 m 0.03]')';
                 case 'd' %adjust green down
                     m = m - 0.001375;
                     if m < 0.1009
                         m = 0.1009;
                     end
-                    m_values = [m_values, m];
+                    %                     m_values(spacetracker) = m;
+                    %                     spacetracker = spacetracker + 1;
+                    green = SensorToSettings(cal, [0.128 m 0.03]')';
             end
         end
     end
@@ -169,8 +178,8 @@ try
     %clean up once user finishes
     ListenChar(0);
     mglDisplayCursor(1);
-    win.close; 
-   
+    win.close;
+    
     %plot timing results
     if isfinite(maxFrames)
         timeSteps = diff(timeStamps);
@@ -194,7 +203,7 @@ try
         title('Deviations from Frame Rate');
         xlabel('Frame');
         ylabel('Difference Between Measured and Target Duration (s)');
-    end 
+    end
     
     %display results
     fprintf('chosen intensity of green is %g \n', m);
@@ -205,7 +214,7 @@ try
     
 catch e %handle errors
     ListenChar(0);
-    mglDisplayCursor(1); 
+    mglDisplayCursor(1);
     if ~isempty(win)
         win.close;
     end
