@@ -33,6 +33,7 @@ function GLW_CFF(fName, varargin)
 %                        ('ImageSizeFromAngle.m')
 %    06/06/19  dce       Minor edits, input error checking
 %    06/13/19  dce       Added code to verify timing/find missed frames
+%    06/21/19  dce       Added calibration routine
 
 % Examples:
 %{
@@ -41,6 +42,7 @@ function GLW_CFF(fName, varargin)
     GLW_CFF('Deena.mat', 'viewDistance', 1000)
     GLW_CFF('Deena.mat', 'maxFrames', 3600)
 %}
+
 %load calibration information 
 [cal,cals] = LoadCalFile('MetropsisCalibration',[],getpref('BrainardLabToolbox','CalDataFolder'));
 load T_cones_ss2 %cone fundamentals 
@@ -91,13 +93,15 @@ try
     intro.close; 
     
     %create stimulus window
-    win = GLWindow('BackgroundColor', [0.5 0.5 0.5], 'SceneDimensions',...
+    backgroundColor = [0.5 0.5 0.5]; %should this stay in rgb? 
+    win = GLWindow('BackgroundColor', backgroundColor, 'SceneDimensions',...
         size, 'windowID', length(disp));
     
     %calculate diameter of circle in mm and add circle
     angle = 2; %visual angle (degrees)
     diameter = tan(deg2rad(angle/2)) * (2 * p.Results.viewDistance);
-    win.addOval([0 0], [diameter diameter], [1 0 0], 'Name', 'circle');
+    redColor = SensorToSettings(cal, [0.04235 0.0140 0.0011]')'; %stimulates l cones 3 times as much as m cones
+    win.addOval([0 0], [diameter diameter], redColor, 'Name', 'circle');
     
     %enable character listening
     win.open; 
@@ -107,8 +111,8 @@ try
     
     count = 1; %frame counter to delay color change for 120Hz display
     red = true; %oval color tracker
-    g = 0.05; %initial green intensity
-    g_values = [0.05]; %vector to store subject's adjustment values
+    m = 0.1009; %initial green intensity
+    m_values = [0.1009]; %vector to store subject's adjustment values
     
     %timing check parameters
     maxFrames = p.Results.maxFrames;
@@ -121,9 +125,9 @@ try
     while elapsedFrames <= maxFrames
         %draw circle
         if red
-            color = [1 0 0];
+            color = redColor;
         else
-            color = [0 g 0];
+            color = SensorToSettings(cal, [0.128 m 0.03]')';
         end
         win.setObjectColor('circle', color);
         win.draw;
@@ -147,17 +151,17 @@ try
                 case 'q' %quit adjustment
                     break;
                 case 'u' %adjust green up
-                    g = g + 0.05;
-                    if g > 1
-                        g = 1;
+                    m = m + 0.001375; %allow 20 steps
+                    if m > 0.1284
+                        m = 0.1284;
                     end
-                    g_values = [g_values, g];
+                    m_values = [m_values, m];
                 case 'd' %adjust green down
-                    g = g - 0.05;
-                    if g < 0
-                        g = 0;
+                    m = m - 0.001375;
+                    if m < 0.1009
+                        m = 0.1009;
                     end
-                    g_values = [g_values, g];
+                    m_values = [m_values, m];
             end
         end
     end
@@ -193,11 +197,11 @@ try
     end 
     
     %display results
-    fprintf('chosen intensity of green is %g \n', g);
-    fprintf('adjustment history: g = ');
-    fprintf('%g ', g_values);
+    fprintf('chosen intensity of green is %g \n', m);
+    fprintf('adjustment history: m = ');
+    fprintf('%g ', m_values);
     fprintf('\n');
-    save(fName, 'g_values');
+    save(fName, 'm_values');
     
 catch e %handle errors
     ListenChar(0);
@@ -208,7 +212,3 @@ catch e %handle errors
     rethrow(e);
 end
 end
-
-%TO DO: helper function to convert LMS input values to RGB color space
-function RGBvals = LMS_to_RGB(input) 
-end 
