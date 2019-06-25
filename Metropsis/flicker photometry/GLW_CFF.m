@@ -111,7 +111,7 @@ try
     
     count = 1; %frame counter to delay color change for 120Hz display
     red = true; %oval color tracker
-    m = 0.1009; %initial green intensity
+    m = 0.1009; %initial m cone intensity
     m_values = [0.1009]; %vector to store subject's adjustment values
     
     %timing check parameters
