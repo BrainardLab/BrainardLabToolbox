@@ -89,7 +89,7 @@ if (isempty(p.Results.figHandle))
     set(theFig,'Position',[15   630   900   700]);
 end
 set(gca,'FontName','Helvetica','FontSize',16);
-plot(u_prime,v_prime,'ro','MarkerEdgeColor',p.Results.plotColor,'MarkerFaceColor',p.Results.plotColor','MarkerSize',8);
+plot(u_prime,v_prime,'ro','MarkerEdgeColor',p.Results.plotColor,'MarkerFaceColor',p.Results.plotColor','MarkerSize',6);
 plot(fitEllipseIn2D(1,:),fitEllipseIn2D(2,:),p.Results.plotColor,'LineWidth',2);
 xlim([0.1 0.3]);
 ylim([0.35 0.55]);

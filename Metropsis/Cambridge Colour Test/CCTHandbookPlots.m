@@ -1,6 +1,6 @@
 function CCTHandbookPlots(fName)
 % Plots CCT subject data against various datasets from the CCT handbook
-
+%
 % Syntax:
 %    CCTHandbookPlots(fName)
 %
@@ -9,8 +9,9 @@ function CCTHandbookPlots(fName)
 %    handbook (protanopic, deuteranopic, anomalous trichromatic, and normal)
 %    against data obtained from subjects in the Metropsis implementation of
 %    the CCT. It uses the CCTplot routine to parse subjects' results files
-%    and saves results as png files.(Data points were obtained from the CCT
-%    handbook using WebPlotDigitizer, a free online program)
+%    and saves results as PDF files in an experimental directory.(Data 
+%    points were obtained from the CCT handbook using WebPlotDigitizer, a
+%    free online program). 
 %
 % Inputs
 %    fName          - Matlab string with filename. Can be relative to
@@ -20,16 +21,22 @@ function CCTHandbookPlots(fName)
 %    none
 %
 % Optional key-value pairs
-%    none 
+%    none
 
 % History:
 %    05/31/19  dce       Wrote routine
 %    06/06/19  dce       Added ellipse-fitting code from dhb
+%    06/26/19  dce       Added code to create folder and save as PDF
 
 % Examples:
 %{
     CCTHandbookPlots('/Users/geoffreyaguirre/Documents/Deena CCT spreadsheets/TOME_BURGE_1 copy.txt')
 %}
+
+%parse subject ID from filename and create folder to store plots
+subjectID = fName(end-14:end-6);
+directory = '/Users/deena/Dropbox (Aguirre-Brainard Lab)/MELA_analysis/projectDichromat/CCTE plots';
+mkdir(directory, subjectID);
 
 %normal observer
 xn = [0.19402985074626866, 0.1962686567164179, 0.19402985074626866,...
@@ -48,13 +55,16 @@ yn = [0.47204724409448684, 0.46102362204724284, 0.4633858267716523,...
     0.47204724409448684, 0.46653543307086487];
 fit = fitEllipse(xn', yn');
 
-normal = CCTplot(fName);
+figure(1) = CCTplot(fName);
 hold on;
-plot(xn, yn, 'bo', 'MarkerFaceColor', 'b', 'MarkerSize', 8); 
+plot(xn, yn, 'bo', 'MarkerFaceColor', 'b', 'MarkerSize', 6);
 plot(fit(1,:), fit(2,:), 'b', 'LineWidth', 2);
 title('Comparison of Subject Results to Normal Observer Results',...
-    'FontSize', 22);
-legend('Subject', 'Subject Fit', 'Normal Observer', 'Normal Fit'); 
+    'FontSize', 18);
+legend('Subject', 'Subject Fit', 'Normal Observer', 'Normal Fit');
+
+normalName = [directory, '/', subjectID, '/', subjectID,'_normal'];
+print('-bestfit', normalName, '-dpdf');
 
 %protanope
 xp = [0.18775510204081636, 0.13673469387755105, 0.1693877551020408,...
@@ -70,12 +80,15 @@ yp = [0.4771456527816606, 0.47233715403969806, 0.462510483645513,...
     0.47120492032429406, 0.4773133911098686];
 fit = fitEllipse(xp', yp');
 
-protanope = CCTplot(fName);
+figure(2) = CCTplot(fName);
 hold on;
-plot(xp, yp, 'bo', 'MarkerFaceColor', 'b', 'MarkerSize', 8);
+plot(xp, yp, 'bo', 'MarkerFaceColor', 'b', 'MarkerSize', 6);
 plot(fit(1,:), fit(2,:), 'b', 'LineWidth', 2);
-title('Comparison of Subject Results to Protanope Results', 'FontSize', 22);
-legend('Subject', 'Subject Fit', 'Protanope', 'Protanope Fit'); 
+title('Comparison of Subject Results to Protanope Results', 'FontSize', 18);
+legend('Subject', 'Subject Fit', 'Protanope', 'Protanope Fit');
+
+protanopeName = [directory, '/', subjectID, '/', subjectID,'_protanope'];
+print('-bestfit', protanopeName, '-dpdf');
 
 %deuteranope
 xd = [0.26640832851359164, 0.22490952656366187, 0.24329422457242006,...
@@ -94,13 +107,17 @@ yd = [0.46844418739155574, 0.4771494670742791, 0.4545137569197719,...
     0.46671403784185733, 0.47197170949351397];
 fit = fitEllipse(xd', yd');
 
-deuteranope = CCTplot(fName);
+figure(3) = CCTplot(fName);
 hold on;
-plot(xd, yd, 'bo', 'MarkerFaceColor', 'b', 'MarkerSize', 8);
+plot(xd, yd, 'bo', 'MarkerFaceColor', 'b', 'MarkerSize', 6);
 plot(fit(1,:), fit(2,:), 'b', 'LineWidth', 2);
 title('Comparison of Subject Results to Deuteranope Results',...
-    'FontSize', 22);
-legend('Subject', 'Subject Fit', 'Deuteranope', 'Deuteranope Fit'); 
+    'FontSize', 18);
+legend('Subject', 'Subject Fit', 'Deuteranope', 'Deuteranope Fit');
+
+deuteranopeName = [directory, '/', subjectID, '/', subjectID,...
+    '_deuteranope'];
+print('-bestfit', deuteranopeName, '-dpdf');
 
 %anomalous trichromat
 xa = [0.17755102040816323, 0.17959183673469387, 0.19183673469387752,...
@@ -117,18 +134,21 @@ ya = [0.4755381604696673, 0.4693597987140062, 0.47544031311154594,...
     0.4774252166620073, 0.4733156276209114, 0.4651104277327369];
 fit = fitEllipse(xa', ya');
 
-anomalous = CCTplot(fName);
+figure(4) = CCTplot(fName);
 hold on;
-plot(xa, ya, 'bo', 'MarkerFaceColor', 'b', 'MarkerSize', 8);
+plot(xa, ya, 'bo', 'MarkerFaceColor', 'b', 'MarkerSize', 6);
 plot(fit(1,:), fit(2,:), 'b', 'LineWidth', 2);
 title('Comparison of Subject Results to Anomalous Trichromat Results',...
-    'FontSize', 22);
+    'FontSize', 18);
 legend('Subject', 'Subject Fit', 'Anomalous Trichromat',...
-    'Anomalous Trichromat Fit'); 
+    'Anomalous Trichromat Fit');
 
+trichromatName = [directory, '/', subjectID, '/', subjectID,...
+    '_anomalousTrichromat'];
+print('-bestfit', trichromatName, '-dpdf');
 end
 
-%ellipse-fitting routine from dhb 
+%ellipse-fitting routine from dhb
 function fitEllipseIn2D = fitEllipse(u_prime, v_prime)
 center_u_prime_w = 0.1977;
 center_v_prime_w = 0.4689;
