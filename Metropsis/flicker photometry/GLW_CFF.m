@@ -34,6 +34,8 @@ function GLW_CFF(fName, varargin)
 %    06/06/19  dce       Minor edits, input error checking
 %    06/13/19  dce       Added code to verify timing/find missed frames
 %    06/21/19  dce       Added calibration routine
+%    06/27/19  dce       Modified user adjustment process to avoid skipped
+%                        frames
 
 % Examples:
 %{
@@ -42,12 +44,6 @@ function GLW_CFF(fName, varargin)
     GLW_CFF('Deena.mat', 'viewDistance', 1000)
     GLW_CFF('Deena.mat', 'maxFrames', 3600)
 %}
-
-%load calibration information
-[cal,cals] = LoadCalFile('MetropsisCalibration',[],getpref('BrainardLabToolbox','CalDataFolder'));
-load T_cones_ss2 %cone fundamentals
-cal = SetSensorColorSpace(cal,T_cones_ss2, S_cones_ss2);
-cal = SetGammaMethod(cal,0);
 
 %parse input
 if nargin == 0
@@ -64,13 +60,35 @@ p.parse(varargin{:});
 disp = mglDescribeDisplays;
 last = disp(end); %we will be using the last display
 frameRate = last.refreshRate;
-size = last.screenSizeMM; %scale window based on screen dimensions in mm
-height = size(2) / 2;
+screenSize = last.screenSizeMM; %screen dimensions in mm
+height = screenSize(2) / 2;
+
+%load calibration information
+[cal,cals] = LoadCalFile('MetropsisCalibration',[],...
+    getpref('BrainardLabToolbox','CalDataFolder'));
+load T_cones_ss2 %cone fundamentals
+cal = SetSensorColorSpace(cal,T_cones_ss2, S_cones_ss2);
+cal = SetGammaMethod(cal,0);
+
+%calculate table of green RGB values
+greenArray = zeros(3,21);
+greenArray(1,:) = 0.128;
+greenArray(2,:) = 0.1009:0.001375:0.1284;
+greenArray(3,:) = 0.03;
+for i = 1:21
+    greenArray(:,i) = SensorToSettings(cal, greenArray(:,i));
+end
+greenPosition = 1; %initial position in table of values 
+
+%create array to store adjustment history
+adjustmentArray = zeros(3,100);
+adjustmentArray(:,1) = greenArray(:,1); 
+adjustmentArrayPosition = 2;
 
 try
     %instructions window
     intro = GLWindow('BackgroundColor', [0 0 0], 'SceneDimensions',...
-        size, 'windowID', length(disp));
+        screenSize, 'windowID', length(disp));
     intro.addText('A flashing red and green circle will appear on the screen',...
         'Center', [0 0.3 * height], 'FontSize', 75, 'Color', [1 1 1],...
         'Name', 'line1');
@@ -95,14 +113,14 @@ try
     %create stimulus window
     backgroundColor = [0.5 0.5 0.5]; %should this be switched to lms?
     win = GLWindow('BackgroundColor', backgroundColor, 'SceneDimensions',...
-        size, 'windowID', length(disp));
+        screenSize, 'windowID', length(disp));
     
-    %calculate diameter of circle in mm and add circle
+    %calculate color of circle and diameter in mm. Then add circle. 
+    %red color stimulates l cones 3 times as much as m cones
+    red = SensorToSettings(cal, [0.04235 0.0140 0.0011]')'; 
     angle = 2; %visual angle (degrees)
-    diameter = tan(deg2rad(angle/2)) * (2 * p.Results.viewDistance);
-    
-    redColor = SensorToSettings(cal, [0.04235 0.0140 0.0011]')'; %stimulates l cones 3 times as much as m cones
-    win.addOval([0 0], [diameter diameter], redColor, 'Name', 'circle');
+    diameter = tan(deg2rad(angle/2)) * (2 * p.Results.viewDistance); 
+    win.addOval([0 0], [diameter diameter], red, 'Name', 'circle');
     
     %enable character listening
     win.open;
@@ -110,18 +128,10 @@ try
     ListenChar(2);
     FlushEvents;
     
-    count = 1; %frame counter to delay color change for 120Hz display
-    red = true; %oval color tracker
-    m = 0.1009; %initial m cone intensity
-    green = SensorToSettings(cal, [0.128 m 0.03]')';
-    
-    %     m_values = zeros(100);
-    %     m_values(1) = 0.1009; %vector to store subject's adjustment values
-    %     spacetracker = 2;
-    
-    %timing check parameters
-    maxFrames = p.Results.maxFrames;
+    %initial parameters 
+    trackRed = true; %stimulus color tracker
     elapsedFrames = 1;
+    maxFrames = p.Results.maxFrames;
     if isfinite(maxFrames)
         timeStamps = zeros(1,maxFrames);
     end
@@ -129,10 +139,10 @@ try
     %loop to swich oval color and parse user input
     while elapsedFrames <= maxFrames
         %draw circle
-        if red
-            color = redColor;
+        if trackRed
+            color = red;
         else
-            color = green;
+            color = greenArray(:,greenPosition)';
         end
         win.setObjectColor('circle', color);
         win.draw;
@@ -140,14 +150,13 @@ try
         %save timestamp
         if isfinite(maxFrames)
             timeStamps(elapsedFrames) = mglGetSecs;
-            elapsedFrames = elapsedFrames + 1;
         end
         
+        elapsedFrames = elapsedFrames + 1;
         %switch color if needed
-        count = count + 1;
-        if (frameRate == 120 && count == 3) || frameRate == 60
-            red = ~red;
-            count = 1;
+        if (frameRate == 120 && mod(elapsedFrames, 2) == 1)...
+                || frameRate == 60
+            trackRed = ~trackRed;
         end
         
         %check for user input
@@ -156,22 +165,19 @@ try
                 case 'q' %quit adjustment
                     break;
                 case 'u' %adjust green up
-                    m = m + 0.001375; %allow 20 steps
-                    if m > 0.1284
-                        m = 0.1284;
+                    greenPosition = greenPosition + 1;
+                    if greenPosition > 21 %20 steps
+                        greenPosition = 21;
                     end
-                        %                     m_values(spacetracker) = m;
-                        %                     spacetracker = spacetracker + 1;
-                        green = SensorToSettings(cal, [0.128 m 0.03]')';
                 case 'd' %adjust green down
-                    m = m - 0.001375;
-                    if m < 0.1009
-                        m = 0.1009;
+                    greenPosition = greenPosition - 1;
+                    if greenPosition < 1 %20 steps
+                        greenPosition = 1;
                     end
-                    %                     m_values(spacetracker) = m;
-                    %                     spacetracker = spacetracker + 1;
-                    green = SensorToSettings(cal, [0.128 m 0.03]')';
             end
+            adjustmentArray(:,adjustmentArrayPosition)...
+                = greenArray(:,greenPosition);
+            adjustmentArrayPosition = adjustmentArrayPosition + 1; 
         end
     end
     
@@ -205,12 +211,20 @@ try
         ylabel('Difference Between Measured and Target Duration (s)');
     end
     
-    %display results
-    fprintf('chosen intensity of green is %g \n', m);
-    fprintf('adjustment history: m = ');
-    fprintf('%g ', m_values);
-    fprintf('\n');
-    save(fName, 'm_values');
+    %format adjustment history array  
+    adjustmentArray = adjustmentArray(adjustmentArray ~= 0); 
+    col = length(adjustmentArray)/3;
+    adjustmentArray = reshape(adjustmentArray, [3 col]);
+    for i = 1:col
+        adjustmentArray(:,i) = SettingsToSensor(cal, adjustmentArray(:,i)); 
+    end 
+    adjustmentArray = adjustmentArray(2,:); 
+    
+    fprintf('chosen intensity of m cone is %g \n', adjustmentArray(end));
+    fprintf('adjustment history: ');
+    fprintf('%g, ', adjustmentArray); 
+    fprintf('\n'); 
+    save(fName, 'adjustmentArray');
     
 catch e %handle errors
     ListenChar(0);
