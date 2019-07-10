@@ -7,10 +7,10 @@ function GLW_CFF(fName, varargin)
 % Description:
 %    Implements a heterochromatic flicker photometry experiment using
 %    GLWindow. Subjects see a red and green light flickering at 30Hz and
-%    use keypresses to adjust the intensity of the green light to minimize
-%    the flicker (u = adjust up, d = adjust down, q = quit adjustment). The
-%    program saves subjects' adjustment history and displays their chosen
-%    intensity and adjustments on the screen. It is designed for displays
+%    use keypresses to adjust the m cone contrast to minimize the flicker 
+%    (u = adjust up, d = adjust down, q = quit adjustment). The program 
+%    saves subjects' adjustment history and displays their chosen m cone
+%    contrast and adjustments on the screen. It is designed for displays  
 %    with 60 or 120 Hz frame rates and includes code for verifying timing.
 %
 % Inputs (optional)
@@ -23,10 +23,13 @@ function GLW_CFF(fName, varargin)
 %
 % Optional key/value pairs (can only use if you input a filename):
 %    'viewDistance'   - double indicating viewing distance in mm. Default
-%                       is 400.
+%                       is 400
 %
 %    'maxFrames'      - double indicating the maximum number of frames,
 %                       mostly used for timing verification. Default is Inf
+%
+%    'calFile'        - string with name of calibration file. Default is 
+%                       'MetropsisCalibration' 
 
 %History:
 %    06/05/19  dce       Wrote it. Visual angle conversion code from ar
@@ -36,6 +39,8 @@ function GLW_CFF(fName, varargin)
 %    06/21/19  dce       Added calibration routine
 %    06/27/19  dce       Modified user adjustment process to avoid skipped
 %                        frames
+%    07/10/19  dce       Rewrote stimuli to be in terms of cone contrast 
+%                        values rather than rgb values. 
 
 % Examples:
 %{
@@ -43,17 +48,19 @@ function GLW_CFF(fName, varargin)
     GLW_CFF('Deena.mat')
     GLW_CFF('Deena.mat', 'viewDistance', 1000)
     GLW_CFF('Deena.mat', 'maxFrames', 3600)
+    GLW_CFF('Deena.mat', 'calFile', 'MetropsisCalibration')
 %}
 
 %parse input
 if nargin == 0
     fName = 'CFFresults.mat'; %default filename
-elseif nargin > 5
+elseif nargin > 7
     error('too many inputs');
 end
 p = inputParser;
 p.addParameter('viewDistance', 400, @(x) (isnumeric(x) & isscalar(x)));
 p.addParameter('maxFrames', Inf, @(x) (isnumeric(x) & isscalar(x)));
+p.addParameter('calFile', 'MetropsisCalibration', @(x) (isstring(x))); 
 p.parse(varargin{:});
 
 %get information on display
@@ -64,26 +71,25 @@ screenSize = last.screenSizeMM; %screen dimensions in mm
 height = screenSize(2) / 2;
 
 %load calibration information
-[cal,cals] = LoadCalFile('MetropsisCalibration',[],...
-    getpref('BrainardLabToolbox','CalDataFolder'));
+[cal,cals] = LoadCalFile(p.Results.calFile,[],getpref('BrainardLabToolbox','CalDataFolder'));
 load T_cones_ss2 %cone fundamentals
 cal = SetSensorColorSpace(cal,T_cones_ss2, S_cones_ss2);
 cal = SetGammaMethod(cal,0);
 
-%calculate table of green RGB values
-greenArray = zeros(3,21);
-greenArray(1,:) = 0.128;
-greenArray(2,:) = 0.1009:0.001375:0.1284;
-greenArray(3,:) = 0.03;
+%fill table with m contrast values. Contrast values go from 0 to 16.5757%
+% (max contrast on the Metropsis display for the given background)
+mArray = zeros(3,21);
+mArray(2,:) = 0:0.00828785:0.165757; 
+
+%convert contrast values to RGB values 
 for i = 1:21
-    greenArray(:,i) = SensorToSettings(cal, greenArray(:,i));
+    mArray(:,i) = contrastTorgb(cal, mArray(:,i), 'RGB', true); 
 end
-greenPosition = 1; %initial position in table of values 
+mPosition = 1; %initial position in table of values
 
 %create array to store adjustment history
 adjustmentArray = zeros(3,100);
-adjustmentArray(:,1) = greenArray(:,1); 
-adjustmentArrayPosition = 2;
+adjustmentArrayPosition = 2; %initial position in adjustment history array
 
 try
     %instructions window
@@ -111,16 +117,15 @@ try
     intro.close;
     
     %create stimulus window
-    backgroundColor = [0.5 0.5 0.5]; %should this be switched to lms?
-    win = GLWindow('BackgroundColor', backgroundColor, 'SceneDimensions',...
-        screenSize, 'windowID', length(disp));
+    win = GLWindow('BackgroundColor', [0.5 0.5 0.5],...
+        'SceneDimensions', screenSize, 'windowID', length(disp));
     
     %calculate color of circle and diameter in mm. Then add circle. 
-    %red color stimulates l cones 3 times as much as m cones
-    red = SensorToSettings(cal, [0.04235 0.0140 0.0011]')'; 
+    %lCone color is set to 10% l contrast
+    lCone = contrastTorgb(cal, [0.1 0 0], 'RGB', true); 
     angle = 2; %visual angle (degrees)
     diameter = tan(deg2rad(angle/2)) * (2 * p.Results.viewDistance); 
-    win.addOval([0 0], [diameter diameter], red, 'Name', 'circle');
+    win.addOval([0 0], [diameter diameter], lCone, 'Name', 'circle');
     
     %enable character listening
     win.open;
@@ -129,7 +134,7 @@ try
     FlushEvents;
     
     %initial parameters 
-    trackRed = true; %stimulus color tracker
+    trackLCone = true; %stimulus color tracker
     elapsedFrames = 1;
     maxFrames = p.Results.maxFrames;
     if isfinite(maxFrames)
@@ -139,10 +144,10 @@ try
     %loop to swich oval color and parse user input
     while elapsedFrames <= maxFrames
         %draw circle
-        if trackRed
-            color = red;
+        if trackLCone
+            color = lCone;
         else
-            color = greenArray(:,greenPosition)';
+            color = mArray(:,mPosition)';
         end
         win.setObjectColor('circle', color);
         win.draw;
@@ -151,12 +156,11 @@ try
         if isfinite(maxFrames)
             timeStamps(elapsedFrames) = mglGetSecs;
         end
-        
         elapsedFrames = elapsedFrames + 1;
+        
         %switch color if needed
-        if (frameRate == 120 && mod(elapsedFrames, 2) == 1)...
-                || frameRate == 60
-            trackRed = ~trackRed;
+        if (frameRate == 120 && mod(elapsedFrames, 2) == 1) || frameRate == 60 
+            trackLCone = ~trackLCone;
         end
         
         %check for user input
@@ -165,18 +169,18 @@ try
                 case 'q' %quit adjustment
                     break;
                 case 'u' %adjust green up
-                    greenPosition = greenPosition + 1;
-                    if greenPosition > 21 %20 steps
-                        greenPosition = 21;
+                    mPosition = mPosition + 1;
+                    if mPosition > 21 %20 steps
+                        mPosition = 21;
                     end
                 case 'd' %adjust green down
-                    greenPosition = greenPosition - 1;
-                    if greenPosition < 1 %20 steps
-                        greenPosition = 1;
+                    mPosition = mPosition - 1;
+                    if mPosition < 1 %20 steps
+                        mPosition = 1;
                     end
             end
-            adjustmentArray(:,adjustmentArrayPosition)...
-                = greenArray(:,greenPosition);
+            %store new m value in adjustment history table 
+            adjustmentArray(:,adjustmentArrayPosition) = mArray(:,mPosition);
             adjustmentArrayPosition = adjustmentArrayPosition + 1; 
         end
     end
@@ -199,8 +203,7 @@ try
         title('Frame Rate');
         xlabel('Frame');
         ylabel('Duration (s)');
-        legend('Measured Frame Rate', 'Target Frame Rate',...
-            'Skipped Frame');
+        legend('Measured Frame Rate', 'Target Frame Rate', 'Skipped Frame');
         
         figure(2);
         deviation = timeSteps - (1/frameRate);
@@ -220,18 +223,14 @@ try
     end 
     adjustmentArray = adjustmentArray(2,:); 
     
-    fprintf('chosen intensity of m cone is %g \n', adjustmentArray(end));
+    fprintf('chosen m cone contrast is %g \n', adjustmentArray(end));
     fprintf('adjustment history: ');
     fprintf('%g, ', adjustmentArray); 
     fprintf('\n'); 
     save(fName, 'adjustmentArray');
-    
 catch e %handle errors
     ListenChar(0);
     mglDisplayCursor(1);
-    if ~isempty(win)
-        win.close;
-    end
     rethrow(e);
 end
 end

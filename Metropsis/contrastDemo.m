@@ -11,9 +11,10 @@ function contrastDemo
 %    contrast values for a particular cone. Maximum and minimum contrast 
 %    values were calculated from the calibration file of the Metropsis 
 %    Display++ monitor, but the program can be applied to other monitors 
-%    with some tweaking. The program runs automatically and terminates when 
-%    the user presses a key.
-%
+%    with some tweaking. The program assumes a gray background with rgb  
+%    values [0.5 0.5 0.5]. It runs automatically and terminates when the 
+%    user presses any key.
+
 % Inputs:
 %    none
 %
@@ -68,9 +69,8 @@ for i = 1:6
 end
 
 %create window and add grid
-win = GLWindow('BackgroundColor', [0 0 0],'SceneDimensions', size);
-win.addMondrian(6, 6, size, mondrianColors, 'Name', 'grid');
-setObjectProperty(win, 'grid', 'Border', 2); %border dimensions
+win = GLWindow('BackgroundColor', PrimaryToSettings(cal, [0.5 0.5 0.5]),'SceneDimensions', size);
+win.addMondrian(6, 6, size, mondrianColors, 'Border', 7);
 
 %add labels for rows
 xPos = size(1) * (-5/12);
