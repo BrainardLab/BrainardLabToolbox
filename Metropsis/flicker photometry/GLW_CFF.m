@@ -78,11 +78,11 @@ cal = SetGammaMethod(cal,0);
 
 %fill table with m contrast values. Contrast values go from 0 to 16.5757%
 % (max contrast on the Metropsis display for the given background)
-mArray = zeros(3,21);
-mArray(2,:) = 0:0.00828785:0.165757; 
+mArray = zeros(3,20);
+mArray(2,:) = 0.00828785:0.00828785:0.165757; 
 
 %convert contrast values to RGB values 
-for i = 1:21
+for i = 1:20
     mArray(:,i) = contrastTorgb(cal, mArray(:,i), 'RGB', true); 
 end
 mPosition = 1; %initial position in table of values
@@ -122,7 +122,7 @@ try
     
     %calculate color of circle and diameter in mm. Then add circle. 
     %lCone color is set to 10% l contrast
-    lCone = contrastTorgb(cal, [0.1 0 0], 'RGB', true); 
+    lCone = contrastTorgb(cal, [0.154933 0 0], 'RGB', true); 
     angle = 2; %visual angle (degrees)
     diameter = tan(deg2rad(angle/2)) * (2 * p.Results.viewDistance); 
     win.addOval([0 0], [diameter diameter], lCone, 'Name', 'circle');
@@ -170,8 +170,8 @@ try
                     break;
                 case 'u' %adjust green up
                     mPosition = mPosition + 1;
-                    if mPosition > 21 %20 steps
-                        mPosition = 21;
+                    if mPosition > 20 %20 steps
+                        mPosition = 20;
                     end
                 case 'd' %adjust green down
                     mPosition = mPosition - 1;
@@ -193,7 +193,6 @@ try
     %plot timing results
     if isfinite(maxFrames)
         timeSteps = diff(timeStamps);
-        save('timeSteps','timeSteps');
         figure(1);
         plot(timeSteps, 'r');
         yline(1/frameRate, 'b');
