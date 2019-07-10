@@ -37,8 +37,9 @@ disp = mglDescribeDisplays;
 last = disp(end); %we will be using the last display
 size = last.screenSizePixel;
 
-%create matrix and fill with contrast values for each cone, Maximum and
-% minimum values were calculated through trial and error
+%Create matrix and fill with contrast values for each cone. Maximum and
+%minimum values were calculated to six decimal places through trial and 
+%error 
 contrastValues = zeros(6,6);
 contrastValues(1,:) = 0:0.0294888:0.147444; %l contrast up (max 14.74%)
 contrastValues(2,:) = 0:-0.0294888:-0.147444; %l contrast down (min -14.74%)
@@ -52,6 +53,7 @@ mondrianColors = zeros(6,6,3);
 mondrianColors(:,:,1) = contrastValues;
 for i = 1:6
     for j = 1:6
+        %convert each contrast value to an rgb triplet 
         switch i
             case {1,2} %l cone
                 mondrianColors(i,j,:) = contrastTorgb(cal, [mondrianColors(i,j,1) 0 0]);
