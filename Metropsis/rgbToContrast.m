@@ -1,47 +1,63 @@
-function lmsContrast = rgbToContrast(rgb, background, cal)
+function contrast = rgbToContrast(cal,rgb,varargin)
 % Convert rgb primaries to cone contrast values 
 %
 % Syntax:
-%  	 rgbToContrast(rgb, background) 
+%  	 rgbToContrast(cal, rgb) 
 %
 % Description:
 %    Using the calibration file for a particular monitor, converts monitor
-%    primaries (rgb) to cone contrast values. 
+%    primaries (rgb) to cone contrast values. Assumes that a calibration
+%    file and cone fundamentals have already been loaded. 
 %
 % Inputs: 
-%    rgb                -1x3 vector containing monitor primary values r, g,
-%                        and b for the stimulus. Each value must be a 
-%                        decimal between 0 and 1.
-%    background         -1x3 vector containing monitor primary values r, g,
-%                        and b for the background. Each value must be a 
+%    cal                -calibration struct for the monitor 
+%
+%    rgb                -1x3 row vector containing monitor primary values
+%                        r, g, and b for the stimulus. Each value must be a 
 %                        decimal between 0 and 1.
 % 
 % Outputs:
-%    lmsContrast        -1x3 vector containing cone contrast values for the 
-%                        l, m, and s cones. Each contrast value must be a
-%                        decimal between -1 and 1. 
+%   contrast            -1x3 row vector containing cone contrast values for  
+%                        the l, m, and s cones. Each contrast value must be 
+%                        a decimal between -1 and 1. 
 %
 % Optional key/value pairs:
-%    none
+%    'Background'       -1x3 row vector containing monitor primary values 
+%                        r, g, and b for the background. Each value must be 
+%                        a decimal between 0 and 1. Defaults to 
+%                        [0.5 0.5 0.5]. 
 
 % History:
 %    07/01/19  dce       Wrote routine
+%    07/09/19  dce       Minor edits
 
 % Examples:
 %{
-    rgbToContrast([0.3, 0.4, 0.5], [0.5 0.5 0.5])
-%}0
+    rgbToContrast(cal, [0.3, 0.4, 0.5])
+    rgbToContrast(cal, [0.3, 0.4, 0.5], 'Background', [0 0 0])
+%}
 
-%background lms values 
-lmsBackground = PrimaryToSensor(cal, background')';
+%parse input
+if nargin < 2
+    error('Too few inputs'); 
+end 
+p = inputParser;
+p.addParameter('Background', [0.5 0.5 0.5], @(x) isnumeric(x) && isvector(x));
+p.parse(varargin{:});
+
+%express background color in terms of cone fundamentals (lms)
+lmsBackground = PrimaryToSensor(cal, p.Results.Background')';
 lBg = lmsBackground(1);
 mBg = lmsBackground(2);
 sBg = lmsBackground(3); 
+
+%express stimulus color in terms of cone fundamentals (lms) 
+lms = PrimaryToSensor(cal, rgb')';
 
 %calculate contrast from stimulus and background lms values 
 lC = (lms(1) - lBg) / lBg;
 mC = (lms(2) - mBg) / mBg;
 sC = (lms(3) - sBg) / sBg;
-lmsContrast = [lC, mC, sC]; 
+contrast = [lC, mC, sC]; 
 
 end
