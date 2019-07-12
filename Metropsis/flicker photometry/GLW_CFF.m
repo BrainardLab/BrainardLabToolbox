@@ -170,12 +170,12 @@ try
                     break;
                 case 'u' %adjust green up
                     mPosition = mPosition + 1;
-                    if mPosition > 20 %20 steps
+                    if mPosition > 20 
                         mPosition = 20;
                     end
                 case 'd' %adjust green down
                     mPosition = mPosition - 1;
-                    if mPosition < 1 %20 steps
+                    if mPosition < 1 
                         mPosition = 1;
                     end
             end
@@ -190,22 +190,23 @@ try
     mglDisplayCursor(1);
     win.close;
     
-    %plot timing results
     if isfinite(maxFrames)
+        %plot frame durations 
         timeSteps = diff(timeStamps);
         figure(1);
-        plot(timeSteps, 'r');
-        yline(1/frameRate, 'b');
-        yline(2/frameRate, 'g');
-        yline(0,'g');
+        plot(timeSteps, 'r'); %actual frame durations 
+        yline(1/frameRate, 'b'); %target frame rate 
+        yline(2/frameRate, 'g'); %double target frame rate
+        yline(0,'g'); %0 time 
         axis([0 maxFrames 0 2.5/frameRate]);
         title('Frame Rate');
         xlabel('Frame');
         ylabel('Duration (s)');
         legend('Measured Frame Rate', 'Target Frame Rate', 'Skipped Frame');
         
+        %plot deviations from target frame rate
         figure(2);
-        deviation = timeSteps - (1/frameRate);
+        deviation = timeSteps - (1/frameRate); 
         plot(deviation, 'r');
         axis([0 maxFrames -2/frameRate 2/frameRate]);
         title('Deviations from Frame Rate');
@@ -213,7 +214,7 @@ try
         ylabel('Difference Between Measured and Target Duration (s)');
     end
     
-    %format adjustment history array  
+    %reformat adjustment history array  
     adjustmentArray = adjustmentArray(adjustmentArray ~= 0); 
     col = length(adjustmentArray)/3;
     adjustmentArray = reshape(adjustmentArray, [3 col]);
