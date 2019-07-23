@@ -94,6 +94,7 @@ plot(fitEllipseIn2D(1,:),fitEllipseIn2D(2,:),p.Results.plotColor,'LineWidth',2);
 xlim([0.1 0.3]);
 ylim([0.35 0.55]);
 axis('square');
+title([fName(end-14:end-6) ' CCTE Results'], 'Interpreter','none');
 xlabel('u\_prime','FontSize',18);
 ylabel('v\_prime','FontSize',18);
 end
