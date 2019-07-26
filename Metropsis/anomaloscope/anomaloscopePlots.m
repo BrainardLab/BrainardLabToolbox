@@ -11,9 +11,10 @@ function anomaloscopePlots(varargin)
 %    plots: one of protanopes' matches, one of deuteranopes' matches, one
 %    comparing the matches of protanopes and of deuteranopes with two
 %    L-cone variants, and one plotting a least-squares line of best fit for 
-%    each subject. Data points were obtained from PDF reports of
+%    each subject. To avoid overwriting files, it is advidable to change 
+%    default PDF filenames. Data points were obtained from PDF reports of
 %    anomaloscope results using a pixel color algorithm on
-%    WebPlotDigitizer, a free online program).
+%    WebPlotDigitizer, a free online program. 
 %
 % Inputs
 %    none
@@ -48,7 +49,7 @@ end
 %% Make/choose directory for saving plots
 baseDir = '/Users/deena/Dropbox (Aguirre-Brainard Lab)/MELA_analysis/projectDichromat/anomaloscope plots';
 
-% make folder for Pitt diagram/no Pitt diagram
+% Make folder for Pitt diagram/no Pitt diagram
 if p.Results.pittDiagram
     directory = fullfile(baseDir, 'pittBackground');
 else
@@ -64,7 +65,7 @@ xMin = 0;
 xMax = 73;
 yMin = 0;
 yMax = 45;
-xVals = xMin:xMax; %vector with possible x values 
+xVals = xMin:xMax; %vector with range of possible x values 
 
 %% Deuteranopes
 % Data
@@ -689,34 +690,38 @@ hold off;
 
 %% Comparison
 % Data
-deuteranopes1_X = MELA_3003_X;
-deuteranopes1_Y = MELA_3003_Y;
-deuteranopes2_X = [MELA_3004_X; MELA_3009_X; MELA_3011_X; MELA_3012_X; MELA_3016_X; MELA_3019_X];
-deuteranopes2_Y = [MELA_3004_Y; MELA_3009_Y; MELA_3011_Y; MELA_3012_Y; MELA_3016_Y; MELA_3019_Y];
+deuteranopesLong_X = MELA_3003_X;
+deuteranopesLong_Y = MELA_3003_Y;
+deuteranopesShort_X = [MELA_3004_X; MELA_3009_X; MELA_3011_X; MELA_3012_X; MELA_3016_X; MELA_3019_X];
+deuteranopesShort_Y = [MELA_3004_Y; MELA_3009_Y; MELA_3011_Y; MELA_3012_Y; MELA_3016_Y; MELA_3019_Y];
 protanopes_X = [MELA_3006_X; MELA_3007_X];
 protanopes_Y = [MELA_3006_Y; MELA_3007_Y];
 
-% Calculate lines of best fit for each subject group using least squares method
-d1Fit = polyfit(deuteranopes1_X, deuteranopes1_Y, 1);
-d2Fit = polyfit(deuteranopes2_X, deuteranopes2_Y, 1);
+% Calculate lines of best fit for each subject group using least squares
+% method. polyfit() returns a slope and intercept for each group
+dLongFit = polyfit(deuteranopesLong_X, deuteranopesLong_Y, 1);
+dShortFit = polyfit(deuteranopesShort_X, deuteranopesShort_Y, 1);
 pFit = polyfit(protanopes_X, protanopes_Y, 1);
 
-d1FitY = (xVals * d1Fit(1)) + d1Fit(2);
-d2FitY = (xVals * d2Fit(1)) + d2Fit(2);
+% Calculate y values of groups' fit lines from formula parameters
+dLongFitY = (xVals * dLongFit(1)) + dLongFit(2);
+dShortFitY = (xVals * dShortFit(1)) + dShortFit(2);
 pFitY = (xVals * pFit(1)) + pFit(2);
 
 % Create figure and add image background if applicable
 figure(3);
-hold on;
 if p.Results.pittDiagram
     imagesc([xMin xMax], [yMin yMax], flipud(pittDiagram));
+    hold on; 
     set(gca, 'ydir', 'normal');
+else 
+    hold on; 
 end
 
 % Plot data and best-fit lines
-plot(deuteranopes1_X, deuteranopes1_Y, 'y.', deuteranopes2_X,...
-    deuteranopes2_Y, 'b.', protanopes_X, protanopes_Y, 'c.', 'MarkerSize', 14);
-plot(xVals, d1FitY, 'y', xVals, d2FitY, 'b', xVals, pFitY, 'c', 'LineWidth', 2.5);
+plot(deuteranopesLong_X, deuteranopesLong_Y, 'y.', deuteranopesShort_X,...
+    deuteranopesShort_Y, 'b.', protanopes_X, protanopes_Y, 'c.', 'MarkerSize', 14);
+plot(xVals, dLongFitY, 'y', xVals, dShortFitY, 'b', xVals, pFitY, 'c', 'LineWidth', 2.5);
 
 % If not using image background, set axes and grid
 if ~p.Results.pittDiagram
@@ -727,14 +732,15 @@ end
 title('Comparison of Deuteranope and Protanope Matches', 'FontSize', 16);
 xlabel('Mixing Light', 'FontSize', 14);
 ylabel('Reference Light', 'FontSize', 14);
-legend('Deuteranopes 1', 'Deuteranopes 2', 'Protanopes');
+legend('Deuteranopes Long', 'Deuteranopes Short', 'Protanopes');
 
 % Save PDF
 print('-bestfit', fullfile(directory, 'comparison'), '-dpdf');
 hold off
 
 %% Plot with lines of best fit for each subject 
-%Calculate lines of best fit for each subject using least squares method 
+% Calculate lines of best fit for each subject using least squares method. 
+% polyfit() returns a slope and intercept for each subject
 MELA_3003Fit = polyfit(MELA_3003_X, MELA_3003_Y, 1);
 MELA_3004Fit = polyfit(MELA_3004_X, MELA_3004_Y, 1);
 MELA_3006Fit = polyfit(MELA_3006_X, MELA_3006_Y, 1);
@@ -745,6 +751,7 @@ MELA_3012Fit = polyfit(MELA_3012_X, MELA_3012_Y, 1);
 MELA_3016Fit = polyfit(MELA_3016_X, MELA_3016_Y, 1);
 MELA_3019Fit = polyfit(MELA_3019_X, MELA_3019_Y, 1);
 
+% Calculate y values of subjects' fit lines from formula parameters 
 MELA_3003FitY = (xVals * MELA_3003Fit(1)) + MELA_3003Fit(2);
 MELA_3004FitY = (xVals * MELA_3004Fit(1)) + MELA_3004Fit(2);
 MELA_3006FitY = (xVals * MELA_3006Fit(1)) + MELA_3006Fit(2);
@@ -782,6 +789,6 @@ legend('MELA\_3003', 'MELA\_3004','MELA\_3006', 'MELA\_3007',...
     'MELA\_3009', 'MELA\_3011', 'MELA\_3012', 'MELA\_3016', 'MELA\_3019');
 
 % Save PDF
-print('-bestfit', fullfile(directory, 'subject_fits'), '-dpdf');
+print('-bestfit', fullfile(directory, 'subjectFits'), '-dpdf');
 hold off;
 end
