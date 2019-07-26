@@ -109,8 +109,8 @@ function [v_prime_w, u_prime_w] = getValuesOfUVprimeW(fName)
             tline = fgetl(fid);
             if (contains(tline, targetLine2))
                 % It is, read next 2 lines to get the 'v_prime_w' and 'u_prime_w' values
-                v_prime_w = getPropertyValueFromLineString(fgetl(fid), 'v_prime_w'); 
                 u_prime_w = getPropertyValueFromLineString(fgetl(fid), 'u_prime_w');
+                v_prime_w = getPropertyValueFromLineString(fgetl(fid), 'v_prime_w'); 
             else
                 fprintf('Did not detect line: ''%s''.', targetLine2);
             end
