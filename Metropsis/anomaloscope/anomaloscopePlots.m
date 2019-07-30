@@ -10,11 +10,11 @@ function anomaloscopePlots(varargin)
 %    obtained by dce, summer 2019). The routine produces and saves four
 %    plots: one of protanopes' matches, one of deuteranopes' matches, one
 %    comparing the matches of protanopes and of deuteranopes with two
-%    L-cone variants, and one plotting a least-squares line of best fit for 
-%    each subject. To avoid overwriting files, it is advidable to change 
+%    L-cone variants, and one plotting a least-squares line of best fit for
+%    each subject. To avoid overwriting files, it is advidable to change
 %    default PDF filenames. Data points were obtained from PDF reports of
 %    anomaloscope results using a pixel color algorithm on
-%    WebPlotDigitizer, a free online program. 
+%    WebPlotDigitizer, a free online program.
 %
 % Inputs
 %    none
@@ -41,7 +41,7 @@ p.addParameter('pittDiagram', true, @(x) (islogical(x)));
 p.parse(varargin{:});
 
 %% If applicable, load Pitt diagram image to use as plotting background
-close all; 
+close all;
 if p.Results.pittDiagram
     pittDiagram = imread('/Users/deena/Dropbox (Aguirre-Brainard Lab)/MELA_materials/projectDichromat/pittDiagram.jpg');
 end
@@ -65,7 +65,7 @@ xMin = 0;
 xMax = 73;
 yMin = 0;
 yMax = 45;
-xVals = xMin:xMax; %vector with range of possible x values 
+xVals = xMin:xMax; %vector with range of possible x values
 
 %% Deuteranopes
 % Data
@@ -712,10 +712,10 @@ pFitY = (xVals * pFit(1)) + pFit(2);
 figure(3);
 if p.Results.pittDiagram
     imagesc([xMin xMax], [yMin yMax], flipud(pittDiagram));
-    hold on; 
+    hold on;
     set(gca, 'ydir', 'normal');
-else 
-    hold on; 
+else
+    hold on;
 end
 
 % Plot data and best-fit lines
@@ -738,8 +738,8 @@ legend('Deuteranopes Long', 'Deuteranopes Short', 'Protanopes');
 print('-bestfit', fullfile(directory, 'comparison'), '-dpdf');
 hold off
 
-%% Plot with lines of best fit for each subject 
-% Calculate lines of best fit for each subject using least squares method. 
+%% Plot with lines of best fit for each subject
+% Calculate lines of best fit for each subject using least squares method.
 % polyfit() returns a slope and intercept for each subject
 MELA_3003Fit = polyfit(MELA_3003_X, MELA_3003_Y, 1);
 MELA_3004Fit = polyfit(MELA_3004_X, MELA_3004_Y, 1);
@@ -751,7 +751,7 @@ MELA_3012Fit = polyfit(MELA_3012_X, MELA_3012_Y, 1);
 MELA_3016Fit = polyfit(MELA_3016_X, MELA_3016_Y, 1);
 MELA_3019Fit = polyfit(MELA_3019_X, MELA_3019_Y, 1);
 
-% Calculate y values of subjects' fit lines from formula parameters 
+% Calculate y values of subjects' fit lines from formula parameters
 MELA_3003FitY = (xVals * MELA_3003Fit(1)) + MELA_3003Fit(2);
 MELA_3004FitY = (xVals * MELA_3004Fit(1)) + MELA_3004Fit(2);
 MELA_3006FitY = (xVals * MELA_3006Fit(1)) + MELA_3006Fit(2);
@@ -770,11 +770,15 @@ if p.Results.pittDiagram
     set(gca, 'ydir', 'normal');
 end
 
-% Plot data
-plot(xVals, MELA_3003FitY, 'y', xVals, MELA_3004FitY, 'm', xVals,...
-    MELA_3006FitY, 'c', xVals, MELA_3007FitY, xVals, MELA_3009FitY,...
+% Set plot colors and plot data 
+colors = [1 1 0; 1 0 1; 0 1 1; 0 0.4470 0.7410; 0.8500 0.3250 0.0980;...
+    0.9290 0.6940 0.1250; 0.4940 0.1840 0.5560; 0.4660 0.6740 0.1880;...
+    0.3010 0.7450 0.9330];
+set(gca, 'ColorOrder', colors);
+plot(xVals, MELA_3003FitY, xVals, MELA_3004FitY, xVals,...
+    MELA_3006FitY, xVals, MELA_3007FitY, xVals, MELA_3009FitY,...
     xVals, MELA_3011FitY, xVals, MELA_3012FitY, xVals, MELA_3016FitY,...
-     xVals, MELA_3019FitY, 'LineWidth', 2.5); 
+    xVals, MELA_3019FitY, 'LineWidth', 2.5);
 
 % If not using image background, set axes and grid
 if ~p.Results.pittDiagram
