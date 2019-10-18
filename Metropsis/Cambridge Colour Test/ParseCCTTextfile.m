@@ -23,9 +23,12 @@ function [v_prime_w, u_prime_w, azimuthsTable] = ParseCCTTextfile(fName)
 
 % History:
 %    05/30/19  dce       Created routine using code provided by ncp 
+%    10/18/19  dce       Added u_prime_w and v_prime_w manually since MTRP
+%                        text files no longer contain this center
 
     % Retrieve v_prime_w, u_prime_w
-    [v_prime_w, u_prime_w] = getValuesOfUVprimeW(fName);
+    v_prime_w = 0.4689; 
+    u_prime_w = 0.1977;  
     % Retrieve azimuths table
     azimuthsTable = getAzimuthsTable(fName);
 end
