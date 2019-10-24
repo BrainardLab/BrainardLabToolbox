@@ -2,9 +2,9 @@ EXRToolbox
 ===========
 
 EXRToolbox is a MATLAB toolbox for importing and exporting multi-band EXR images,
-based on the HDRToolbox developed by Francesco Banterle and the 
-TinyEXR implementation developed by Syoyo Fujita. It does not depend on any libraries
-and it has been successfuly compiled in 
+based on the TinyEXR implementation developed by Syoyo Fujita and the
+HDRToolbox developed by Francesco Banterle. EXRToolbox does not require installation 
+of any EXR libraries and it has been successfuly compiled in Mac OS HighSierra, Mojave, and Catalina.
 
 License: This software is distributed under GPL v3 license (see license.txt)
 
