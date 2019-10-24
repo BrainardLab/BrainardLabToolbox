@@ -1,4 +1,15 @@
 function exrMakeAll()
+% Compile the multi-channel EXR import/export mexfiles
+% 
+% Syntax:
+%   exrMakeAll();
+%
+% Description:
+%    Compile the multi-channel EXR import/export mexfiles
+%
+% History:
+% 10/242019   Nicolas P. Cottaris   Wrote it
+%
 
     % Save current dir
     saveDir = pwd;

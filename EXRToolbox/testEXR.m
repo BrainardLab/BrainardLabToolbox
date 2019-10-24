@@ -1,11 +1,25 @@
 function testEXR
+% Test import/export functionality for multi-channel EXR images
+% 
+% Syntax:
+%   testEXR();
+%
+% Description:
+%    Imports a number of multi-channel EXR images, alters them, and exports
+%    them. Then contrasts the original EXR images to the altered ones in the 
+%    non-altered image regions to ensure that the data in those regions match.
+%
+% History:
+% 10/242019   Nicolas P. Cottaris   Wrote it
+%
 
-    % Collection of EXR images to test
+    % Collection of EXR import/modify/export to test (short list)
     testImagesShort = {...
        'Gamut' ...                      % CIE chromaticity diagram
        'MitsubaCylinder_31channels' ... % 31-band blender image
         };
     
+    % Collection of EXR import/modify/export to test (long list)
     testImagesLong = {...
        'StillLife' ...                  % very high dynanic range
        'Gamut' ...                      % CIE chromaticity diagram
@@ -16,8 +30,10 @@ function testEXR
        'LightField' ...                 % 31-band light-field image
         };
     
+    % Choose one of the two lists
     testImages = testImagesShort;
-    % Determine the root directory
+    
+    % Set the root directory
     [rootDir, ~] = fileparts(which(mfilename));
     
     % Go !
@@ -29,7 +45,7 @@ end
 
 function testEXRImportExport(testImage, imIndex, exrImageRootDir)
 
-    % Set image folders
+    % Set input/output image folders
     inputImageFolder = 'inputEXRImages';
     outputImageFolder = 'outputEXRImages';
     
@@ -68,17 +84,17 @@ function testEXRImportExport(testImage, imIndex, exrImageRootDir)
         mkdir(outputImageFolder);
     end
     
-    % Import the EXR image
+    % Import the multi-channel EXR image
     [inputEXRimage, inputEXRchannelNames] = importEXRImage(filenameIn);
 
-    % Display the EXR image
+    % Display the multi-channel EXR image
     figNum = imIndex;
     displayEXRimage(figNum, sprintf('%s-input',filenameIn), inputEXRimage, inputEXRchannelNames, toneMapGain, []);
     
     % Alter the EXR image (up/down flipping of the central pixels)
     [outputEXRimage, scrambledROI] = scrambleEXRImage(inputEXRimage);
     
-    % Typecast the altered EXR image
+    % Typecast the altered EXR image as doubles
     if (~isa(outputEXRimage, 'double'))
         warning('This image is not a double, automatic cast to double for saving it as EXR.');
         outputEXRImage = double(outputEXRimage);
@@ -90,20 +106,21 @@ function testEXRImportExport(testImage, imIndex, exrImageRootDir)
         outputEXRchannelNames{chIndex} = sprintf('%s', inputEXRchannelNames{chIndex});
     end
 
-    % Export the EXR image
+    % Export the multi-channel EXR image and associated channel names
     exportEXRImage(filenameOut, outputEXRimage, outputEXRchannelNames);
     fprintf('Scrambled EXR image saved in %s\n', filenameOut);
     
-    % Import and display the saved image
+    % Import and display the previously scrambled and exported EXR image
     [outputEXRimage, outputEXRchannelNames] = importEXRImage(filenameOut);
     figNum = imIndex+1000;
     displayEXRimage(figNum, sprintf('%s-scrambled',filenameIn), outputEXRimage, outputEXRchannelNames, toneMapGain, scrambledROI);
     
-    % Compare input and output EXRimages
+    % Compare original and scrambled EXRimages in the non-scrambled regions
     figNum = imIndex+2000;
     compareEXRimages(figNum, sprintf('%s-diff',filenameIn), inputEXRimage,outputEXRimage, inputEXRchannelNames, scrambledROI);
 end
 
+% Method to alter (up/down flip) a multi-channel EXR image
 function [outputEXRImage, scrambledROI] = scrambleEXRImage(inputEXRimage)
     outputEXRImage = inputEXRimage;
     mRows = size(outputEXRImage,1);
@@ -119,6 +136,8 @@ function [outputEXRImage, scrambledROI] = scrambleEXRImage(inputEXRimage)
     scrambledROI.y = [min(mm) min(mm) max(mm) max(mm) min(mm)];
 end
 
+% Method to compare the original multi-channel EXR and scrambled
+% multi-channel EXR image in the non-scrambled regions.
 function compareEXRimages(figNum, figureName, inputEXRImage,outputEXRImage, inputEXRchannelNames, scrambledROI)
     
     % find pixel indices with scrambled data
@@ -171,6 +190,8 @@ function compareEXRimages(figNum, figureName, inputEXRImage,outputEXRImage, inpu
         
 end
 
+% Method to display a multi-channel EXR image. Each channel is displayed as
+% a separate image.
 function displayEXRimage(figNum, figureName, inputEXRimage, inputEXRchannelNames, toneMapGain, scrambledROI)
     
     % Tonemap
@@ -228,6 +249,7 @@ function displayEXRimage(figNum, figureName, inputEXRimage, inputEXRchannelNames
     end
 end
 
+% Method used to tonemap components of an EXR image.
 function img = toneMap(img, gain)
     img(img<0) = 0;
     img = img / max(img(:));
