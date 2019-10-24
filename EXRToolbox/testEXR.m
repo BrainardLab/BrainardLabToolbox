@@ -2,8 +2,8 @@ function testEXR
 
     % Collection of EXR images to test
     testImages = {...
-      % 'StillLife' ...                 % very high dynanic range
-      % 'Gamut' ...                     % CIE chromaticity diagram
+       'StillLife' ...                  % very high dynanic range
+       'Gamut' ...                     % CIE chromaticity diagram
       % 'Balls_RGB' ...                 % specular reflectances
        'Flower_RGB' ...                 % a flower image
       % 'MitsubaSphere_31channels' ...  % 31-band sphere
@@ -55,6 +55,12 @@ function testEXRImportExport(testImage, imIndex, exrImageRootDir)
     % Set input and output filenames
     filenameIn = fullfile(exrImageRootDir, inputImageFolder, imageName);
     filenameOut = strrep(fullfile(exrImageRootDir, outputImageFolder, imageName),'.exr', '_output.exr');
+    
+    % Generate output image folder if it does not exist
+    [outputImageFolder, ~] = fileparts(filenameOut);
+    if (~isdir(outputImageFolder))
+        mkdir(outputImageFolder);
+    end
     
     % Import the EXR image
     [inputEXRimage, inputEXRchannelNames] = importEXRImage(filenameIn);
