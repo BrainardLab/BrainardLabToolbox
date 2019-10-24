@@ -5,9 +5,11 @@ function testEXR
 %   testEXR();
 %
 % Description:
-%    Imports a number of multi-channel EXR images, alters them, and exports
-%    them. Then contrasts the original EXR images to the altered ones in the 
-%    non-altered image regions to ensure that the data in those regions match.
+%    Imports and visualizes a number of test EXR images (located in the 
+%    inputEXRimages directory) and will export (in the outpoutEXRimages directory) 
+%    a scrambled version of each input EXR image, in which the central region is 
+%    flipped vertically. Then compares the input and the output EXR images 
+%    to make sure they match in the non-scrambled regions.
 %
 % History:
 % 10/242019   Nicolas P. Cottaris   Wrote it
