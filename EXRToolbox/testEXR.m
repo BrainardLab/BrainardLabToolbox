@@ -73,7 +73,7 @@ function testEXRImportExport(testImage, imIndex, exrImageRootDir)
 
     % Display the EXR image
     figNum = imIndex;
-    displayEXRimage(figNum, inputEXRimage, inputEXRchannelNames, toneMapGain, []);
+    displayEXRimage(figNum, sprintf('%s-input',filenameIn), inputEXRimage, inputEXRchannelNames, toneMapGain, []);
     
     % Alter the EXR image (up/down flipping of the central pixels)
     [outputEXRimage, scrambledROI] = scrambleEXRImage(inputEXRimage);
@@ -97,11 +97,11 @@ function testEXRImportExport(testImage, imIndex, exrImageRootDir)
     % Import and display the saved image
     [outputEXRimage, outputEXRchannelNames] = importEXRImage(filenameOut);
     figNum = imIndex+1000;
-    displayEXRimage(figNum, outputEXRimage, outputEXRchannelNames, toneMapGain, scrambledROI);
+    displayEXRimage(figNum, sprintf('%s-scrambled',filenameIn), outputEXRimage, outputEXRchannelNames, toneMapGain, scrambledROI);
     
     % Compare input and output EXRimages
     figNum = imIndex+2000;
-    compareEXRimages(figNum,inputEXRimage,outputEXRimage, inputEXRchannelNames, scrambledROI);
+    compareEXRimages(figNum, sprintf('%s-diff',filenameIn), inputEXRimage,outputEXRimage, inputEXRchannelNames, scrambledROI);
 end
 
 function [outputEXRImage, scrambledROI] = scrambleEXRImage(inputEXRimage)
@@ -119,7 +119,7 @@ function [outputEXRImage, scrambledROI] = scrambleEXRImage(inputEXRimage)
     scrambledROI.y = [min(mm) min(mm) max(mm) max(mm) min(mm)];
 end
 
-function compareEXRimages(figNum,inputEXRImage,outputEXRImage, inputEXRchannelNames, scrambledROI)
+function compareEXRimages(figNum, figureName, inputEXRImage,outputEXRImage, inputEXRchannelNames, scrambledROI)
     
     % find pixel indices with scrambled data
     x = 1:size(inputEXRImage,2);
@@ -130,7 +130,8 @@ function compareEXRimages(figNum,inputEXRImage,outputEXRImage, inputEXRchannelNa
                   (Y>=min(scrambledROI.y) & Y<=max(scrambledROI.y)));
     
     hFig = figure(figNum); clf;
-    set(hFig, 'Color', [0.1 0.1 0.1], 'Position', [10+30*rand(1,1), 10+50*rand(1,1), 1500, 900]);
+    set(hFig, 'Color', [0.1 0.1 0.1], 'Name', figureName, ...
+        'Position', [10+30*rand(1,1), 10+50*rand(1,1), 1500, 900]);
     channelsNum = size(inputEXRImage,3);
     for k = 1: channelsNum 
         if (channelsNum > 30)
@@ -170,14 +171,15 @@ function compareEXRimages(figNum,inputEXRImage,outputEXRImage, inputEXRchannelNa
         
 end
 
-function displayEXRimage(figNum, inputEXRimage, inputEXRchannelNames, toneMapGain, scrambledROI)
+function displayEXRimage(figNum, figureName, inputEXRimage, inputEXRchannelNames, toneMapGain, scrambledROI)
     
     % Tonemap
     img = toneMap(inputEXRimage, toneMapGain);
     
     % Display
     hFig = figure(figNum); clf;
-    set(hFig, 'Color', [0.1 0.1 0.1], 'Position', [10+30*rand(1,1), 10+50*rand(1,1), 1500, 900]);
+    set(hFig, 'Color', [0.1 0.1 0.1], 'Name', figureName, ...
+        'Position', [10+30*rand(1,1), 10+50*rand(1,1), 1500, 900]);
     channelsNum = size(img,3);
     for k = 1: channelsNum 
         if (channelsNum > 30)
