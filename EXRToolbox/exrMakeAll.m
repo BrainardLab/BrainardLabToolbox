@@ -1,5 +1,11 @@
 function exrMakeAll()
 
+    % Save current dir
+    saveDir = pwd;
+    % Get root dir abd cd to it
+    [rootDir, ~] = fileparts(which(mfilename));
+    cd(rootDir);
+    
     mexFileNames = {'importEXRImage.cpp', 'exportEXRImage.cpp'};
     
     for k = 1:numel(mexFileNames)
@@ -11,4 +17,6 @@ function exrMakeAll()
         end
     end
     
+    % Change to old dir
+    cd(saveDir);
 end
