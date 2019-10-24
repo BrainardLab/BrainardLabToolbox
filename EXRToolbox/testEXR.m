@@ -128,11 +128,11 @@ function [outputEXRImage, scrambledROI] = scrambleEXRImage(inputEXRimage)
     mRows = size(outputEXRImage,1);
     nCols = size(outputEXRImage,2);
     mn = min([mRows nCols]);
-    mm = floor(mRows/2) + [-floor(mn/3):floor(mn/3)];
-    mm2 = mm(end:-1:1);
-    nn = floor(nCols/2) + [-floor(mn/3):floor(mn/3)];
+    rr = -floor(mn/3):floor(mn/3);
+    mm = floor(mRows/2) + rr;
+    nn = floor(nCols/2) + rr;
     for chIndex = 1:size(outputEXRImage,3)
-        outputEXRImage(mm,nn,chIndex) = outputEXRImage(mm2,nn,chIndex);
+        outputEXRImage(mm,nn,chIndex) = outputEXRImage(mm(end:-1:1),nn,chIndex);
     end
     scrambledROI.x = [min(nn) max(nn) max(nn) min(nn) min(nn)];
     scrambledROI.y = [min(mm) min(mm) max(mm) max(mm) min(mm)];
