@@ -1,16 +1,22 @@
 function testEXR
 
     % Collection of EXR images to test
-    testImages = {...
-       'StillLife' ...                  % very high dynanic range
-       'Gamut' ...                     % CIE chromaticity diagram
-      % 'Balls_RGB' ...                 % specular reflectances
-       'Flower_RGB' ...                 % a flower image
-      % 'MitsubaSphere_31channels' ...  % 31-band sphere
-       'MitsubaCycliner_31channels' ... % 31-band blender image
-      % 'LightField' ...                % 31-band light-field image
+    testImagesShort = {...
+       'Gamut' ...                      % CIE chromaticity diagram
+       'MitsubaCylinder_31channels' ... % 31-band blender image
         };
-
+    
+    testImagesLong = {...
+       'StillLife' ...                  % very high dynanic range
+       'Gamut' ...                      % CIE chromaticity diagram
+       'Balls_RGB' ...                  % specular reflectances
+       'Flower_RGB' ...                 % a flower image
+       'MitsubaSphere_31channels' ...   % 31-band sphere
+       'MitsubaCylinder_31channels' ... % 31-band blender image
+       'LightField' ...                 % 31-band light-field image
+        };
+    
+    testImages = testImagesShort;
     % Determine the root directory
     [rootDir, ~] = fileparts(which(mfilename));
     
@@ -44,7 +50,7 @@ function testEXRImportExport(testImage, imIndex, exrImageRootDir)
         case 'MitsubaSphere_31channels'
             imageName = 'TestSphereMitsuba.exr';
             toneMapGain = 2;
-        case 'MitsubaCycliner_31channels'
+        case 'MitsubaCylinder_31channels'
             imageName = 'Demo1-001.exr';
             toneMapGain = 1;
         case 'LightField'
