@@ -10,6 +10,7 @@ function exrMakeAll()
     
     for k = 1:numel(mexFileNames)
         try
+            fprintf('\nCompiling mex file %s ...', mexFileNames{k});
             mex(mexFileNames{k});
         catch err
             fprintf('%s failed to compile', mexFileNames{k});
