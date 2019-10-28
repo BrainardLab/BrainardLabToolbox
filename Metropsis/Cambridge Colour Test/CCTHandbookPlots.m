@@ -35,7 +35,9 @@ function CCTHandbookPlots(fName)
 
 %parse subject ID from filename and create folder to store plots
 subjectID = fName(end-14:end-6); %changed for new file naming system 
-directory = '/Users/deena/Dropbox (Aguirre-Brainard Lab)/MELA_analysis/projectDichromat/CCTE plots';
+[~, userID] = system('whoami');
+userID = strtrim(userID);
+directory = fullfile('Users',userID,'Dropbox (Aguirre-Brainard Lab)/MELA_analysis/projectDichromat/CCTE plots');
 mkdir(directory, subjectID);
 
 %normal observer
