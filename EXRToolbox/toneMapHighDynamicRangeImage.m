@@ -9,6 +9,10 @@ function toneMapHighDynamicRangeImage
 %    channel using a global Reinhardt tone mapping method
 %    and visualizes the tone-mapped image.
 %
+% Tonemapping reference:
+%    "Photographic Tone Reproduction for Digital Images", by Reinhardt,
+%    Stark, Shirley and Ferwerda
+%
 % History:
 % 11/1/2019   Nicolas P. Cottaris   Wrote it
 %
