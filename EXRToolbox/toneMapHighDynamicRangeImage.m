@@ -1,4 +1,17 @@
 function toneMapHighDynamicRangeImage
+% Tonemap multi-channel EXR images
+% 
+% Syntax:
+%   toneMapHighDynamicRangeImage();
+%
+% Description:
+%    Imports and visualizes raw EXR images. Tonemaps the luminance
+%    channel using a global Reinhardt tone mapping method
+%    and visualizes the tone-mapped image.
+%
+% History:
+% 11/1/2019   Nicolas P. Cottaris   Wrote it
+%
 
     % Set the root directory
     [rootDir, ~] = fileparts(which(mfilename));
@@ -10,12 +23,12 @@ function toneMapHighDynamicRangeImage
     theRGBSettingsImage = importImage(rootDir, inputImageFolder, imageName);
     
     % The tonemapping factor (try different values to see the effect)
-    alpha = 0.04;
+    alpha = 0.06;
     
     % Assume theRGBSettingsImage is corrected for a display gamma of 2.0, i.e. 
     % that it is raised to the power of 1/gamma, so undo this to get
-    % theRGBPrimariesImage (linear RGB)
-    gamma = 2.5;
+    % theRGBPrimariesImage (linear RGB).
+    gamma = 2;
     theRGBPrimariesImage = theRGBSettingsImage .^ gamma;
     
     % Load the display on which to present the high dynamic range image

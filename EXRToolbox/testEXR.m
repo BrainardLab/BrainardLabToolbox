@@ -12,7 +12,7 @@ function testEXR
 %    to make sure they match in the non-scrambled regions.
 %
 % History:
-% 10/242019   Nicolas P. Cottaris   Wrote it
+% 10/24/2019   Nicolas P. Cottaris   Wrote it
 %
 
     % Collection of EXR import/modify/export to test (short list)
