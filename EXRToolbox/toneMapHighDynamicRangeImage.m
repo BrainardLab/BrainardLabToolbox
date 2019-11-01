@@ -22,12 +22,15 @@ function toneMapHighDynamicRangeImage
     addpath(genpath(rootDir));
     
     % Select the high dynamic range image to import
-    imageName = 'Balls.exr';
+    imageName = 'Rec709.exr'; % 'WideColorGamut.exr' % 'Balls.exr'; % 'Rec709.exr'; % 'Balls.exr';
     inputImageFolder = 'inputEXRImages';
     theRGBSettingsImage = importImage(rootDir, inputImageFolder, imageName);
     
+    % One watt of light at 555 nm has luminous flux of 683 lumens.
+    wattsToLumensConversionFactor = 683;
+    
     % The tonemapping factor (try different values to see the effect)
-    alpha = 0.06;
+    alpha = 0.07;
     
     % Assume theRGBSettingsImage is corrected for a display gamma of 2.0, i.e. 
     % that it is raised to the power of 1/gamma, so undo this to get
@@ -39,41 +42,109 @@ function toneMapHighDynamicRangeImage
     load('resources/display.mat', 'display');
   
     % Compute display's gun luminances and the XYZ->RGB matrix
-    [displayPrimaryLuminances, displayXYZtoRGB] = displayParams(display.spd, display.wave);
+    [displayPrimaryLuminances, displayXYZtoRGB] = displayParams(display.spd, display.wave, wattsToLumensConversionFactor);
     
     % Compute the chroma and luminance components
-    [theChromaticitiesVector, theLuminancesVector, nCols,mRows] = chromaLumaChannelsFromRGBPrimaries(theRGBPrimariesImage, displayXYZtoRGB);
-
+    [theChromaticitiesVector, theLuminancesVector, nCols,mRows] = chromaLumaChannelsFromRGBPrimaries(theRGBPrimariesImage, displayXYZtoRGB, wattsToLumensConversionFactor);
+    maxInputLuminance = max(theLuminancesVector)
+    
     % Tone map theLuminancesVector
-    theToneMappedLuminancesVector = toneMapLuminance(theLuminancesVector, alpha, displayPrimaryLuminances);
+    theToneMappedLuminancesVector = toneMapLuminance(theLuminancesVector, alpha, displayPrimaryLuminances, maxInputLuminance);
+    maxToneMappedLuminance = max(theToneMappedLuminancesVector)
     
     % Compute the primary values from the tonemapped luminances, and chroma channels
-    theRGBPrimariesToneMappedImage = RGBPrimariesFromChromaLumaChannels(theChromaticitiesVector, theToneMappedLuminancesVector, displayXYZtoRGB, nCols,mRows);
+    theRGBPrimariesToneMappedImage = RGBPrimariesFromChromaLumaChannels(theChromaticitiesVector, theToneMappedLuminancesVector, displayXYZtoRGB, nCols,mRows, wattsToLumensConversionFactor);
 
     % Compute the RGB settings of the tonemapped image by applying the inverse gamma
     theRGBSettingsToneMappedImage = theRGBPrimariesToneMappedImage .^ (1/gamma);
     
     % Display original and tone mapped image
     figure(1); clf;
-    subplot(1,2,1);
-    imshow(theRGBSettingsImage)
+    subplot(3,3,1);
+    imshow(theRGBSettingsImage, [0 1])
     title('no tone map');
     
-    subplot(1,2,2);
-    imshow(theRGBSettingsToneMappedImage);
+    subplot(3,3,4);
+    imshow(theRGBSettingsToneMappedImage, [0 1]);
     title(sprintf('tone mapped, alpha = %2.3f', alpha));
+    
+    subplot(3,3,[2 3 5 6]);
+    lumRange = [0 max([max(theLuminancesVector) max(theToneMappedLuminancesVector)])];
+    
+    yyaxis left
+    lumBins = linspace(lumRange(1), lumRange(2), 50);
+    if (lumRange(2) < 1)
+        lumTicks = 0.1;
+    elseif (lumRange(2) < 5)
+        lumTicks = 0.25;
+    elseif (lumRange(2) < 10)
+        lumTicks = 1;
+    elseif (lumRange(2) < 50)
+        lumTicks = 5;
+    elseif (lumRange(2) < 100)
+        lumTicks = 10;
+    elseif (lumRange(2) < 500)
+        lumTicks = 50;
+    else
+        lumTicks = 100;
+    end
+    h1 = histogram(theLuminancesVector, lumBins); hold on;
+    h2 = histogram(theToneMappedLuminancesVector, lumBins);
+    h1.FaceColor = [0.0 0 0];
+    h2.FaceColor = [0.9 0.2 0.1];
+    set(gca, 'XLim', lumRange,  'XTick', 0:lumTicks:lumRange(2), 'YLim', [0.9 10000], 'YTick', [1 10 100 1000 10000], 'YTickLabel', {'1', '10', '100', '1000', '10000'},'YScale', 'log', 'YColor', 'k');
+    ylabel('pixels num');
+    
+    yyaxis right
+    plot(theLuminancesVector,theToneMappedLuminancesVector, 'k.');
+    
+    set(gca, 'XLim', lumRange, 'YLim', lumRange, 'XTick', 0:lumTicks:lumRange(2), 'YTick', 0:lumTicks:lumRange(2), 'YColor', 'r');
+    grid on
+    xlabel('input image luminances (cd/m2)');
+    ylabel('tonemapped image luminances (cd/m2)');
+    
+    subplot(3,3,7)
+    rIn  = theRGBPrimariesImage(:,:,1);
+    rOut = theRGBPrimariesToneMappedImage(:,:,1);
+    rRange = [0 max([max(rIn(:)) max(rOut(:))])];
+    plot(rIn(:), rOut(:), 'r.');
+    set(gca, 'XLim', rRange, 'YLim', rRange);
+    axis 'square';
+    xlabel('R no tone map'); ylabel('R tone mapped');
+    
+    subplot(3,3,8)
+    rIn  = theRGBPrimariesImage(:,:,2);
+    rOut = theRGBPrimariesToneMappedImage(:,:,2);
+    rRange = [0 max([max(rIn(:)) max(rOut(:))])];
+    plot(rIn(:), rOut(:), 'g.');
+    set(gca, 'XLim', rRange, 'YLim', rRange);
+    axis 'square';
+    xlabel('G no tone map'); ylabel('G tone mapped');
+    
+    subplot(3,3,9)
+    rIn  = theRGBPrimariesImage(:,:,3);
+    rOut = theRGBPrimariesToneMappedImage(:,:,3);
+    rRange = [0 max([max(rIn(:)) max(rOut(:))])];
+    plot(rIn(:), rOut(:), 'b.');
+    set(gca, 'XLim', rRange, 'YLim', rRange);
+    axis 'square';
+    xlabel('B no tone map'); ylabel('B tone mapped');
+    
 end
 
 
-function theRGBPrimariesImage = RGBPrimariesFromChromaLumaChannels(theChromaticitiesVector, theLuminancesVector, displayXYZtoRGB, nCols,mRows)
+function theRGBPrimariesImage = RGBPrimariesFromChromaLumaChannels(theChromaticitiesVector, theLuminancesVector, displayXYZtoRGB, nCols,mRows, wattsToLumensConversionFactor)
     % Form the xyY (chroma/luma) matrix
-    xyY = cat(1, theChromaticitiesVector, theLuminancesVector);
+    xyY = cat(1, theChromaticitiesVector, theLuminancesVector/wattsToLumensConversionFactor);
     
     % xyY to XYZ transformation (chroma/luma to XYZ tristimulus coords)
     XYZCalFormat = xyYToXYZ(xyY);
     
     % Apply the XYZ -> RGB transformation
     rgbPrimariesImageCalFormat = displayXYZtoRGB * XYZCalFormat;
+    
+    % Clip at 1.
+    rgbPrimariesImageCalFormat(rgbPrimariesImageCalFormat>1) = 1;
 
     % Correct and report any negative RGB primary values
     rgbPrimariesImageCalFormat = correctNegativeRGBValues(rgbPrimariesImageCalFormat, 'negative after tone mapping');
@@ -105,21 +176,18 @@ function RGBprimariesCalFormat = correctNegativeRGBValues(RGBprimariesCalFormat,
 end
 
 
-function [displayLuminances, displayXYZtoRGB] = displayParams(displaySPDs, displayWavelengthAxis)
+function [displayLuminances, displayXYZtoRGB] = displayParams(displaySPDs, displayWavelengthAxis, wattsToLumensConversionFactor)
     % Load the '31 XYZ color matching functions
     load('T_xyz1931.mat', 'S_xyz1931', 'T_xyz1931');
     
     % Spline the XYZ '31 CMFs to match the displayWavelengthAxis
     XYZcolorMatchingFunctions = SplineCmf(S_xyz1931, T_xyz1931, WlsToS(displayWavelengthAxis));
-    
-    % One watt of light at 555 nm has luminous flux of 683 lumens.
-    wattsToLumensConversionFactor = 683;
 
     % Compute the max luminances of the display
     displayLuminances = wattsToLumensConversionFactor * XYZcolorMatchingFunctions(2,:) * displaySPDs;
     
     % Compute the XYZ tristimulus values of the display primaries
-    displayXYZCalFormat = wattsToLumensConversionFactor * XYZcolorMatchingFunctions * displaySPDs;
+    displayXYZCalFormat = XYZcolorMatchingFunctions * displaySPDs;
 
     % Compute the display's XYZ -> RGB matrix
     displayPrimariesCalFormat = [...
@@ -130,7 +198,7 @@ function [displayLuminances, displayXYZtoRGB] = displayParams(displaySPDs, displ
     displayXYZtoRGB = (displayXYZCalFormat' \ displayPrimariesCalFormat')';
 end
 
-function theToneMappedLuminancesVector = toneMapLuminance(theLuminancesVector, alpha, displayPrimaryLuminances)
+function theToneMappedLuminancesVector = toneMapLuminance(theLuminancesVector, alpha, displayPrimaryLuminances, maxInputLuminance)
     % Compute the log-average luminance (image key)
     delta = 0.0001; % small delta to avoid taking log(0) when encountering pixels with zero luminance
     theKey = exp((1/numel(theLuminancesVector))*sum(log(theLuminancesVector + delta)));
@@ -139,11 +207,11 @@ function theToneMappedLuminancesVector = toneMapLuminance(theLuminancesVector, a
     theScaledLuminancesVector = alpha / theKey * theLuminancesVector;
     
     % Compress high luminances (tonemapping)
-    peakLuminance = sum(displayPrimaryLuminances);
+    peakLuminance = maxInputLuminance; % sum(displayPrimaryLuminances);
     theToneMappedLuminancesVector = peakLuminance * theScaledLuminancesVector ./ (1.0+theScaledLuminancesVector);
 end
 
-function [theChromaticitiesVector, theLuminancesVector, nCols,mRows] = chromaLumaChannelsFromRGBPrimaries(theRGBPrimariesImage, displayXYZtoRGB)
+function [theChromaticitiesVector, theLuminancesVector, nCols,mRows] = chromaLumaChannelsFromRGBPrimaries(theRGBPrimariesImage, displayXYZtoRGB, wattsToLumensConversionFactor)
     % Transform the RGB image [Rows x Cols x 3] into a [3 x N] matrix for faster computations
     [rgbPrimariesImageCalFormat,nCols,mRows] = ImageToCalFormat(theRGBPrimariesImage);
     
@@ -158,7 +226,7 @@ function [theChromaticitiesVector, theLuminancesVector, nCols,mRows] = chromaLum
     
     % Return the chromaticities and the luminances vectors
     theChromaticitiesVector = xyYCalFormat(1:2,:);
-    theLuminancesVector = xyYCalFormat(3,:);
+    theLuminancesVector = xyYCalFormat(3,:)*wattsToLumensConversionFactor;
 end
 
 
@@ -175,4 +243,6 @@ function theImage = importImage(rootDir, inputImageFolder, imageName)
     theImage(:,:,1) = exrImage(:,:,RchannelIndex );
     theImage(:,:,2) = exrImage(:,:,GchannelIndex );
     theImage(:,:,3) = exrImage(:,:,BchannelIndex );
+    
+    theImage = theImage/max(theImage(:));
 end
