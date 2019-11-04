@@ -21,16 +21,10 @@ function toneMapHighDynamicRangeImage
     [rootDir, ~] = fileparts(which(mfilename));
     addpath(genpath(rootDir));
     
-    % Select the high dynamic range image to import
-    imageName = 'Rec709.exr'; % 'WideColorGamut.exr' % 'Balls.exr'; % 'Rec709.exr'; % 'Balls.exr';
+    % Select a high dynamic range image to import
+    imageName = 'Rec709.exr'; % 'Rec709.exr'; % 'Balls.exr';
     inputImageFolder = 'inputEXRImages';
     theRGBSettingsImage = importImage(rootDir, inputImageFolder, imageName);
-    
-    % One watt of light at 555 nm has luminous flux of 683 lumens.
-    wattsToLumensConversionFactor = 683;
-    
-    % The tonemapping factor (try different values to see the effect)
-    alpha = 0.07;
     
     % Assume theRGBSettingsImage is corrected for a display gamma of 2.0, i.e. 
     % that it is raised to the power of 1/gamma, so undo this to get
@@ -41,16 +35,19 @@ function toneMapHighDynamicRangeImage
     % Load the display on which to present the high dynamic range image
     load('resources/display.mat', 'display');
   
-    % Compute display's gun luminances and the XYZ->RGB matrix
-    [displayPrimaryLuminances, displayXYZtoRGB] = displayParams(display.spd, display.wave, wattsToLumensConversionFactor);
+    % One watt of light at 555 nm has luminous flux of 683 lumens.
+    wattsToLumensConversionFactor = 683;
+    
+    % Compute display's XYZ->RGB matrix
+    displayXYZtoRGB = wattsToLumensConversionFactor * inv(displayGet(display, 'rgb2xyz'));
     
     % Compute the chroma and luminance components
     [theChromaticitiesVector, theLuminancesVector, nCols,mRows] = chromaLumaChannelsFromRGBPrimaries(theRGBPrimariesImage, displayXYZtoRGB, wattsToLumensConversionFactor);
-    maxInputLuminance = max(theLuminancesVector)
+    maxToMinLuminanceRatio = max(theLuminancesVector)/min(theLuminancesVector);
     
     % Tone map theLuminancesVector
-    theToneMappedLuminancesVector = toneMapLuminance(theLuminancesVector, alpha, displayPrimaryLuminances, maxInputLuminance);
-    maxToneMappedLuminance = max(theToneMappedLuminancesVector)
+    alpha = 0.05; % This ia the tonemapping factor. It is a free parameter. Different images look better with alpha values depending on their dynamic range.
+    theToneMappedLuminancesVector = toneMapLuminance(theLuminancesVector, alpha);
     
     % Compute the primary values from the tonemapped luminances, and chroma channels
     theRGBPrimariesToneMappedImage = RGBPrimariesFromChromaLumaChannels(theChromaticitiesVector, theToneMappedLuminancesVector, displayXYZtoRGB, nCols,mRows, wattsToLumensConversionFactor);
@@ -59,6 +56,15 @@ function toneMapHighDynamicRangeImage
     theRGBSettingsToneMappedImage = theRGBPrimariesToneMappedImage .^ (1/gamma);
     
     % Display original and tone mapped image
+    visualizeResults(theRGBSettingsImage, theRGBSettingsToneMappedImage, ...
+        theRGBPrimariesImage, theRGBPrimariesToneMappedImage, ...
+        theLuminancesVector, theToneMappedLuminancesVector);
+end
+
+function visualizeResults(theRGBSettingsImage, theRGBSettingsToneMappedImage, ...
+    theRGBPrimariesImage, theRGBPrimariesToneMappedImage, ...
+    theLuminancesVector, theToneMappedLuminancesVector)
+
     figure(1); clf;
     subplot(3,3,1);
     imshow(theRGBSettingsImage, [0 1])
@@ -66,7 +72,7 @@ function toneMapHighDynamicRangeImage
     
     subplot(3,3,4);
     imshow(theRGBSettingsToneMappedImage, [0 1]);
-    title(sprintf('tone mapped, alpha = %2.3f', alpha));
+    title('tone mapped image')
     
     subplot(3,3,[2 3 5 6]);
     lumRange = [0 max([max(theLuminancesVector) max(theToneMappedLuminancesVector)])];
@@ -88,10 +94,8 @@ function toneMapHighDynamicRangeImage
     else
         lumTicks = 100;
     end
-    h1 = histogram(theLuminancesVector, lumBins); hold on;
-    h2 = histogram(theToneMappedLuminancesVector, lumBins);
-    h1.FaceColor = [0.0 0 0];
-    h2.FaceColor = [0.9 0.2 0.1];
+    h1 = histogram(theLuminancesVector, lumBins, 'EdgeColor', 'b', 'LineWidth', 1.5); hold on;
+    h2 = histogram(theToneMappedLuminancesVector, lumBins, 'EdgeColor', 'r', 'LineWidth', 1.5, 'DisplayStyle', 'stairs');
     set(gca, 'XLim', lumRange,  'XTick', 0:lumTicks:lumRange(2), 'YLim', [0.9 10000], 'YTick', [1 10 100 1000 10000], 'YTickLabel', {'1', '10', '100', '1000', '10000'},'YScale', 'log', 'YColor', 'k');
     ylabel('pixels num');
     
@@ -129,7 +133,7 @@ function toneMapHighDynamicRangeImage
     set(gca, 'XLim', rRange, 'YLim', rRange);
     axis 'square';
     xlabel('B no tone map'); ylabel('B tone mapped');
-    
+   
 end
 
 
@@ -176,38 +180,16 @@ function RGBprimariesCalFormat = correctNegativeRGBValues(RGBprimariesCalFormat,
 end
 
 
-function [displayLuminances, displayXYZtoRGB] = displayParams(displaySPDs, displayWavelengthAxis, wattsToLumensConversionFactor)
-    % Load the '31 XYZ color matching functions
-    load('T_xyz1931.mat', 'S_xyz1931', 'T_xyz1931');
-    
-    % Spline the XYZ '31 CMFs to match the displayWavelengthAxis
-    XYZcolorMatchingFunctions = SplineCmf(S_xyz1931, T_xyz1931, WlsToS(displayWavelengthAxis));
-
-    % Compute the max luminances of the display
-    displayLuminances = wattsToLumensConversionFactor * XYZcolorMatchingFunctions(2,:) * displaySPDs;
-    
-    % Compute the XYZ tristimulus values of the display primaries
-    displayXYZCalFormat = XYZcolorMatchingFunctions * displaySPDs;
-
-    % Compute the display's XYZ -> RGB matrix
-    displayPrimariesCalFormat = [...
-        1 0 0; ...  % RGB primaries leading corresponding to the R channel SPD (i.e., displaySPDs(1,:)
-        0 1 0; ...  % RGB primaries leading corresponding to the G channel SPD (i.e., displaySPDs(2,:)
-        0 0 1 ...   % RGB primaries leading corresponding to the B channel SPD (i.e., displaySPDs(3,:)
-    ];
-    displayXYZtoRGB = (displayXYZCalFormat' \ displayPrimariesCalFormat')';
-end
-
-function theToneMappedLuminancesVector = toneMapLuminance(theLuminancesVector, alpha, displayPrimaryLuminances, maxInputLuminance)
+function theToneMappedLuminancesVector = toneMapLuminance(theLuminancesVector, alpha)
     % Compute the log-average luminance (image key)
     delta = 0.0001; % small delta to avoid taking log(0) when encountering pixels with zero luminance
     theKey = exp((1/numel(theLuminancesVector))*sum(log(theLuminancesVector + delta)));
-    
+    fprintf('Scene key: %f\n', theKey);
     % Compute the scaled luminances vector
     theScaledLuminancesVector = alpha / theKey * theLuminancesVector;
     
     % Compress high luminances (tonemapping)
-    peakLuminance = maxInputLuminance; % sum(displayPrimaryLuminances);
+    peakLuminance = max(theLuminancesVector);
     theToneMappedLuminancesVector = peakLuminance * theScaledLuminancesVector ./ (1.0+theScaledLuminancesVector);
 end
 
