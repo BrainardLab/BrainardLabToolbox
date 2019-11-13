@@ -43,11 +43,11 @@ p.parse(varargin{:});
 %% Load data. If applicable, load Pitt diagram image to use as plotting background
 load anomaloscopeData.mat 
 if p.Results.pittDiagram
-    pittDiagram = imread('/Users/deena/Dropbox (Aguirre-Brainard Lab)/MELA_materials/projectDichromat/pittDiagram.jpg');
+    pittDiagram = imread('/Users/subjectinfo/Dropbox (Aguirre-Brainard Lab)/MELA_materials/projectDichromat/pittDiagram.jpg');
 end
 
 %% Make/choose directory for saving plots
-baseDir = '/Users/deena/Dropbox (Aguirre-Brainard Lab)/MELA_analysis/projectDichromat/anomaloscope plots';
+baseDir = '/Users/subjectinfo/Dropbox (Aguirre-Brainard Lab)/MELA_analysis/projectDichromat/anomaloscope plots';
 
 % Make folder for Pitt diagram/no Pitt diagram
 if p.Results.pittDiagram
@@ -82,7 +82,9 @@ end
 plot(MELA_3003_X, MELA_3003_Y, '.', MELA_3004_X, MELA_3004_Y, '.',...
     MELA_3009_X, MELA_3009_Y, '.', MELA_3011_X, MELA_3011_Y, '.',...
     MELA_3012_X, MELA_3012_Y, '.', MELA_3016_X, MELA_3016_Y, '.',...
-    MELA_3019_X, MELA_3019_Y, '.', 'MarkerSize', 14);
+    MELA_3019_X, MELA_3019_Y, '.', MELA_3032_X, MELA_3032_Y, '.',...
+    MELA_3035_X, MELA_3035_Y, '.',...
+    'MarkerSize', 14);
 
 % If not using image background, set axes and grid
 if ~p.Results.pittDiagram
@@ -94,10 +96,10 @@ title('Deuteranope Matches', 'FontSize', 16);
 xlabel('Mixing Light', 'FontSize', 14);
 ylabel('Reference Light', 'FontSize', 14);
 legend('MELA\_3003', 'MELA\_3004', 'MELA\_3009', 'MELA\_3011',...
-    'MELA\_3012', 'MELA\_3016', 'MELA\_3019');
+    'MELA\_3012', 'MELA\_3016', 'MELA\_3019', 'MELA\_3032', 'MELA\_3035');
 
 % Save PDF
-print('-bestfit', fullfile(directory, 'deuteranopes'), '-dpdf');
+print('-bestfit', fullfile(directory, 'deuteranopesNew'), '-dpdf');
 hold off;
 
 %% Protanopes
@@ -110,7 +112,8 @@ if p.Results.pittDiagram
 end
 
 % Plot data
-plot(MELA_3006_X, MELA_3006_Y, '.', MELA_3007_X, MELA_3007_Y, '.', 'MarkerSize', 14);
+plot(MELA_3006_X, MELA_3006_Y, '.', MELA_3007_X, MELA_3007_Y, '.',...
+    MELA_3037_X, MELA_3037_Y, '.', 'MarkerSize', 14);
 
 % If not using image background, set axes and grid
 if ~p.Results.pittDiagram
@@ -121,20 +124,20 @@ end
 title('Protanope Matches', 'FontSize', 16);
 xlabel('Mixing Light', 'FontSize', 14);
 ylabel('Reference Light', 'FontSize', 14);
-legend('MELA\_3006', 'MELA\_3007');
+legend('MELA\_3006', 'MELA\_3007', 'MELA\_3037');
 
 % Save PDF
-print('-bestfit', fullfile(directory, 'protanopes'), '-dpdf');
+print('-bestfit', fullfile(directory, 'protanopesNew'), '-dpdf');
 hold off;
 
 %% Comparison
 % Data
 deuteranopesLong_X = MELA_3003_X;
 deuteranopesLong_Y = MELA_3003_Y;
-deuteranopesShort_X = [MELA_3004_X; MELA_3009_X; MELA_3011_X; MELA_3012_X; MELA_3016_X; MELA_3019_X];
-deuteranopesShort_Y = [MELA_3004_Y; MELA_3009_Y; MELA_3011_Y; MELA_3012_Y; MELA_3016_Y; MELA_3019_Y];
-protanopes_X = [MELA_3006_X; MELA_3007_X];
-protanopes_Y = [MELA_3006_Y; MELA_3007_Y];
+deuteranopesShort_X = [MELA_3004_X; MELA_3009_X; MELA_3011_X; MELA_3012_X; MELA_3016_X; MELA_3019_X; MELA_3032_X; MELA_3035_X];
+deuteranopesShort_Y = [MELA_3004_Y; MELA_3009_Y; MELA_3011_Y; MELA_3012_Y; MELA_3016_Y; MELA_3019_Y; MELA_3032_X; MELA_3035_X];
+protanopes_X = [MELA_3006_X; MELA_3007_X; MELA_3037_X];
+protanopes_Y = [MELA_3006_Y; MELA_3007_Y; MELA_3037_Y];
 
 % Calculate lines of best fit for each subject group using least squares
 % method. polyfit() returns a slope and intercept for each group
@@ -174,7 +177,7 @@ ylabel('Reference Light', 'FontSize', 14);
 legend('Deuteranopes Long', 'Deuteranopes Short', 'Protanopes');
 
 % Save PDF
-print('-bestfit', fullfile(directory, 'comparison'), '-dpdf');
+print('-bestfit', fullfile(directory, 'comparisonNew'), '-dpdf');
 hold off
 
 %% Plot with lines of best fit for each subject
@@ -189,6 +192,9 @@ MELA_3011Fit = polyfit(MELA_3011_X, MELA_3011_Y, 1);
 MELA_3012Fit = polyfit(MELA_3012_X, MELA_3012_Y, 1);
 MELA_3016Fit = polyfit(MELA_3016_X, MELA_3016_Y, 1);
 MELA_3019Fit = polyfit(MELA_3019_X, MELA_3019_Y, 1);
+MELA_3032Fit = polyfit(MELA_3032_X, MELA_3032_Y, 1);
+MELA_3035Fit = polyfit(MELA_3035_X, MELA_3035_Y, 1);
+MELA_3037Fit = polyfit(MELA_3037_X, MELA_3037_Y, 1);
 
 % Calculate y values of subjects' fit lines from formula parameters
 MELA_3003FitY = (xVals * MELA_3003Fit(1)) + MELA_3003Fit(2);
@@ -200,6 +206,9 @@ MELA_3011FitY = (xVals * MELA_3011Fit(1)) + MELA_3011Fit(2);
 MELA_3012FitY = (xVals * MELA_3012Fit(1)) + MELA_3012Fit(2);
 MELA_3016FitY = (xVals * MELA_3016Fit(1)) + MELA_3016Fit(2);
 MELA_3019FitY = (xVals * MELA_3019Fit(1)) + MELA_3019Fit(2);
+MELA_3032FitY = (xVals * MELA_3032Fit(1)) + MELA_3032Fit(2);
+MELA_3035FitY = (xVals * MELA_3035Fit(1)) + MELA_3035Fit(2);
+MELA_3037FitY = (xVals * MELA_3037Fit(1)) + MELA_3037Fit(2);
 
 % Create figure and add image background if applicable
 figure(4);
@@ -212,12 +221,13 @@ end
 % Set plot colors and plot data 
 colors = [1 1 0; 1 0 1; 0 1 1; 0 0.4470 0.7410; 0.8500 0.3250 0.0980;...
     0.9290 0.6940 0.1250; 0.4940 0.1840 0.5560; 0.4660 0.6740 0.1880;...
-    0.3010 0.7450 0.9330];
+    0.3010 0.7450 0.9330; 0.73 0.74 0; 0.5 1 0.5; 0.5 0.5 1; 1 1 0.5];
 set(gca, 'ColorOrder', colors);
 plot(xVals, MELA_3003FitY, xVals, MELA_3004FitY, xVals,...
     MELA_3006FitY, xVals, MELA_3007FitY, xVals, MELA_3009FitY,...
     xVals, MELA_3011FitY, xVals, MELA_3012FitY, xVals, MELA_3016FitY,...
-    xVals, MELA_3019FitY, 'LineWidth', 2.5);
+    xVals, MELA_3019FitY, xVals, MELA_3032FitY, xVals, MELA_3035FitY,...
+    xVals, MELA_3037FitY, 'LineWidth', 2.5);
 
 % If not using image background, set axes and grid
 if ~p.Results.pittDiagram
@@ -229,9 +239,10 @@ title('Subject Lines of Best Fit', 'FontSize', 16);
 xlabel('Mixing Light', 'FontSize', 14);
 ylabel('Reference Light', 'FontSize', 14);
 legend('MELA\_3003', 'MELA\_3004','MELA\_3006', 'MELA\_3007',...
-    'MELA\_3009', 'MELA\_3011', 'MELA\_3012', 'MELA\_3016', 'MELA\_3019');
+    'MELA\_3009', 'MELA\_3011', 'MELA\_3012', 'MELA\_3016', 'MELA\_3019',...
+    'MELA\_3032', 'MELA\_3035', 'MELA\_3037');
 
 % Save PDF
-print('-bestfit', fullfile(directory, 'subjectFits'), '-dpdf');
+print('-bestfit', fullfile(directory, 'subjectFitsNew'), '-dpdf');
 hold off;
 end
