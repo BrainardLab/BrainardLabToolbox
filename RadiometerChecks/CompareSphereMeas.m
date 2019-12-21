@@ -1,8 +1,8 @@
 function CompareSphereMeas
 % CompareSphereMeas
 %
-% Compare the three measurements of the sphere for a given date
-
+% Compare the three measurements of the sphere for a given date.
+%
 % 09/09/17  dhb  Update to use prefs for where data live and go.
 % 11/09/17  npc  Fixed some path issues. Also added PTB-3 to the path.  
 %                This is not included in the BrainardLabToolbox config for
@@ -41,7 +41,7 @@ curDir = pwd;
 cd(fullfile(radiometerChecksDir,'xNewMeter'));
 if (exist(['NewUCSB_Sphere_' dateStr '.mat'],'file'))
     fprintf('Loading NewUCSB PR-650 data\n');
-    newMeterData = load(['NewUCSB_Sphere_' dateStr]);
+    newMeterData = load(['NewUCSB_Sphere_' dateStr],'wls','theSpectra');
     wlsNewMeter = newMeterData.wls;
     spectrumNewMeter = zeros(size(wlsNewMeter));
     for i = 1:length(newMeterData.theSpectra)
@@ -55,12 +55,11 @@ else
     spectrumNewMeter = [];
 end
 
-
 %% Load the Penn PR-650
 cd(fullfile(radiometerChecksDir,'xPennMeter'));
 if (exist(['Penn_Sphere_' dateStr '.mat'],'file'))
     fprintf('Loading Penn PR-650 data\n');
-    pennMeterData = load(['Penn_Sphere_' dateStr]);
+    pennMeterData = load(['Penn_Sphere_' dateStr],'wls','theSpectra');
     wlsPennMeter = pennMeterData.wls;
     spectrumPennMeter = zeros(size(wlsPennMeter));
     for i = 1:length(pennMeterData.theSpectra)
@@ -79,7 +78,7 @@ cd(curDir);
 cd(fullfile(radiometerChecksDir, 'xPR-670_1'));
 if (exist(['PR-670_1_Sphere_' dateStr '.mat'],'file')) 
     fprintf('Loading PR-670_1 data\n');
-    pr670_1_MeterData = load(['PR-670_1_Sphere_' dateStr]);
+    pr670_1_MeterData = load(['PR-670_1_Sphere_' dateStr],'wls','theSpectra');
     wlsPr670_1_Meter = pr670_1_MeterData.wls;
     spectrumPr670_1_Meter = zeros(size(wlsPr670_1_Meter));
     for i = 1:length(pr670_1_MeterData.theSpectra)
@@ -98,7 +97,7 @@ cd(curDir);
 cd(fullfile(radiometerChecksDir, 'xPR-670_2'));
 if (exist(['PR-670_2_Sphere_' dateStr '.mat'],'file')) 
     fprintf('Loading PR-670_2 data\n');
-    pr670_2_MeterData = load(['PR-670_2_Sphere_' dateStr]);
+    pr670_2_MeterData = load(['PR-670_2_Sphere_' dateStr],'wls','theSpectra');
     wlsPr670_2_Meter = pr670_2_MeterData.wls;
     spectrumPr670_2_Meter = zeros(size(wlsPr670_2_Meter));
     for i = 1:length(pr670_2_MeterData.theSpectra)
