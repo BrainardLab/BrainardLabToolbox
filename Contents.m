@@ -27,6 +27,7 @@
 % mglSupport             		- Support routines for mgl stuff.
 % MOGLSupport            		- Do useful things in MOGL dipslay environement.
 % MLDSColorSelection     		- Maximum Likelihood Difference Scaling routines we use to derive infered match in the color selection paradigm. 
+% ObserverModel                 - Code used for observer simulation, initially in ForcedChoiceCM, but here so it may be reused.
 % OneLiners              		- Misc short useful routines.
 % OOCailbrationToolbox   		- A collection of MATLAB classes for display calibration using different measurements devices and graphics libraries
 % Overrides						- Collection of MATLAB scripts that override PTB-3 functions for BrainardLab-specific use
