@@ -39,7 +39,7 @@ function opponentContrast = LMSToOpponentContrast(colorDiffParams,referenceLMS,c
     colorDiffParams.byWeight = 1.5;
     colorDiffParams.M = GetOpponentContrastMatrix(colorDiffParams);
     referenceLMS = [1 1 1]';
-    comparisonLMS = [2 0.5 1.5]';
+    comparisonLMS = [1 0.99 1.00]';
     opponentContrast = LMSToOpponentContrast(colorDiffParams,referenceLMS,comparisonLMS)
     opponentContrast = LMSToOpponentContrast(colorDiffParams,referenceLMS,2*referenceLMS)
     if (any(abs(opponentContrast - [1 0 0]')) > 1e-6)
@@ -52,5 +52,28 @@ coneContrast = (comparisonLMS - referenceLMS) ./ referenceLMS;
 
 % And then to opponent contrast
 opponentContrast = colorDiffParams.M*coneContrast;
+
+COMPARE_LAB = true;
+CHECK_MATRIX = false;
+if (COMPARE_LAB)
+    load T_xyz1931;
+    load T_cones_ss2
+    T_cones = T_cones_ss2;
+    S = S_cones_ss2;
+    T_xyz = SplineCmf(S_xyz1931,T_xyz1931,S);
+    M_LMSToXYZ = (T_cones'\T_xyz')';
+    if (CHECK_MATRIX)
+        T_xyzCheck = M_LMSToXYZ*T_cones;
+        figure; clf; hold on
+        plot(T_xyz','r','LineWidth',4);
+        plot(T_xyzCheck','b','LineWidth',2);
+    end
+    referenceXYZ = M_LMSToXYZ*referenceLMS;
+    comparisonXYZ = M_LMSToXYZ*comparisonLMS;
+    referenceLab = XYZToLab(referenceXYZ,referenceXYZ);
+    comparisonLab = XYZToLab(comparisonXYZ,referenceXYZ);
+    comparisonDE = ComputeDE(comparisonLab,referenceLab); 
+end
+
 
    
