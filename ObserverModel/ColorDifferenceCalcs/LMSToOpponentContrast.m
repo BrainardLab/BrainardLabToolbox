@@ -62,6 +62,7 @@ if (COMPARE_LAB)
     S = S_cones_ss2;
     T_xyz = SplineCmf(S_xyz1931,T_xyz1931,S);
     M_LMSToXYZ = (T_cones'\T_xyz')';
+    M_XYZToLMS = inv(M_LMSToXYZ);
     if (CHECK_MATRIX)
         T_xyzCheck = M_LMSToXYZ*T_cones;
         figure; clf; hold on
@@ -75,5 +76,26 @@ if (COMPARE_LAB)
     comparisonDE = ComputeDE(comparisonLab,referenceLab); 
 end
 
+% Choose some LMS coordinates.  We can think later about exactly what these
+% should be
+refLMS = [whatsi];
 
+% Convert reference to Lab, using reference as white point
+refLab = [100 0 0];
+
+% Sample LAB points on a unit sphere around refLab.
+% There is a routine called SampleSphere that might be helpful.
+nPointsOnSpere = 100;
+sphereLab = SampleSphere(...);
+    
+% Convert sphere Lab points back to LMS
+sphereLMS = [ ...];
+    
+% Now we want to choose our opponent metric scalings so that the opponent
+% space distance between refLMS and sphereLMS is as close to one (on
+% average) as we can make it.
+%
+% Set the noise sd to XX as part of this.
+% Then use parameter search on the three axis scalings to bring the average
+% opponent distance as close to XX as possible.
    
