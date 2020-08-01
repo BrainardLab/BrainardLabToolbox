@@ -11,7 +11,8 @@ function excitations = ContrastToExcitations(contrast,backgroundExcitations)
 %     Convert excitations (e.g., cone excitations) to contrast
 %
 % Inputs:
-%     contrast               - Contrast representation of the excitations
+%     contrast               - Matrix with contrast representation in the
+%                              columns.
 %     backgroundExcitations  - Column vector of background excitations.
 %
 % Outputs:
@@ -30,7 +31,7 @@ function excitations = ContrastToExcitations(contrast,backgroundExcitations)
 %{
     clear;
     backgroundLMS = [1 1 1]';
-    contrast = [1 -0.5 0.5]';
+    contrast = [1 -0.5 0.5 ; 2 1.5 1]';
     comparisonLMS = ContrastToExcitations(contrast,backgroundLMS)
     contrastCheck = ExcitationsToContrast(comparisonLMS,backgroundLMS);
     if (any(contrast-contrastCheck) > 1e-8)
