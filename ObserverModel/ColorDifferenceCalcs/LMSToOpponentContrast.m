@@ -16,7 +16,9 @@ function opponentContrast = LMSToOpponentContrast(colorDiffParams,referenceLMS,c
 %     referenceLMS           - LMS coordinates of the reference with
 %                              respect to which contrast is computed.
 %     comparisonLMS          - LMS coordinates of the stimulus whose
-%                              contrast is computed.
+%                              contrast is computed.  This can be a matrix
+%                              with multiple columns, and return will be of
+%                              same size.
 %
 % Outputs:
 %   opponentContrast         - Contrast representation of the comparison
@@ -29,6 +31,7 @@ function opponentContrast = LMSToOpponentContrast(colorDiffParams,referenceLMS,c
 
 % History:
 %   08/09/19  dhb   Wrote it.
+%   08/08/20  dhb   Allow matrix for comparisonLMS
 
 % Examples:
 %{
@@ -39,7 +42,7 @@ function opponentContrast = LMSToOpponentContrast(colorDiffParams,referenceLMS,c
     colorDiffParams.byWeight = 1.5;
     colorDiffParams.M = GetOpponentContrastMatrix(colorDiffParams);
     referenceLMS = [1 1 1]';
-    comparisonLMS = [1 0.99 1.00]';
+    comparisonLMS = [1 0.99 1.00 ; 0.99 1 1.01]';
     opponentContrast = LMSToOpponentContrast(colorDiffParams,referenceLMS,comparisonLMS)
     opponentContrast = LMSToOpponentContrast(colorDiffParams,referenceLMS,2*referenceLMS)
     if (any(abs(opponentContrast - [1 0 0]')) > 1e-6)
@@ -47,13 +50,20 @@ function opponentContrast = LMSToOpponentContrast(colorDiffParams,referenceLMS,c
     end
 %}
 
+% Check sizes
+if (size(referenceLMS,2) ~= 1)
+    error('Can only have one reference');
+end
+
 % Go to cone contrast         
 coneContrast = (comparisonLMS - referenceLMS) ./ referenceLMS;
 
 % And then to opponent contrast
 opponentContrast = colorDiffParams.M*coneContrast;
 
-COMPARE_LAB = true;
+% This shows how to compute CIELAB DE for the same inputs. Very slow
+% becaues of the load commands, keep it as false for general use.
+COMPARE_LAB = false;
 CHECK_MATRIX = false;
 if (COMPARE_LAB)
     load T_xyz1931;
