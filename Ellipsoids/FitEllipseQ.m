@@ -41,6 +41,9 @@ function [ellParams,AConstraint,Ainv,Q] = FitEllipseQ(theData,varargin)
 %                      major/minor axis distinction is relaxed - either x
 %                      or y axis of ellipse can be longer.
 %    ratioMax        - Maximum major/minor axis ratio.  Default 100.
+%    errorScalar     - Multiply RMSE by this in error function, to bring it
+%                      into scale where fmincon is happy.  Default 1000.
+%                      Try adjusting if search is getting stuck.
 %
 % See also: PointsOnEllipseQ, EllipsoidMatricesGenerate, UnitCircleGenerate.
 
@@ -49,8 +52,9 @@ function [ellParams,AConstraint,Ainv,Q] = FitEllipseQ(theData,varargin)
 
 % Parse input
 p = inputParser; p.KeepUnmatched = false;
-p.addParameter('lockAngleAt0','false',@isboolean);
+p.addParameter('lockAngleAt0',false,@islogical);
 p.addParameter('ratioMax',100,@isnumeric);
+p.addParameter('errorScalar',1000,@isnumeric);
 p.parse(varargin{:});
 
 % Set up fmincon
@@ -94,7 +98,7 @@ if (iscell(theData))
             AConstraintCell = [AConstraintCell 0];
         end
     end
-    ellParamsRaw = fmincon(@(x)fitErrorFunction(x,theData),x0Cell,AConstraintCell,bConstraint,[],[],vlbVecCell,vubVecCell,[],options);
+    ellParamsRaw = fmincon(@(x)fitErrorFunction(x,theData,p.Results.errorScalar),x0Cell,AConstraintCell,bConstraint,[],[],vlbVecCell,vubVecCell,[],options);
     
     % Unpack the parameters into cell arrays.
     for cc = 1:length(theData)
@@ -112,14 +116,14 @@ if (iscell(theData))
  
 % Just one data set.  Fit and convert.  No muss, no fuss.
 else
-    ellParams = fmincon(@(x)fitErrorFunction(x,theData),x0,AConstraint,bConstraint,[],[],vlbVec,vubVec,[],options);
+    ellParams = fmincon(@(x)fitErrorFunction(x,theData,p.Results.errorScalar),x0,AConstraint,bConstraint,[],[],vlbVec,vubVec,[],options);
     [AConstraint,Ainv,Q] = EllipsoidMatricesGenerate(ellParams,'dimension',2);
 end
 
 end
 
 % Error function for FitEllipseQ. Internal to this function.
-function f = fitErrorFunction(x,theData)
+function f = fitErrorFunction(x,theData,errorScalar)
 
 f = 0;
 pointCounter = 0;
@@ -142,7 +146,7 @@ if (iscell(theData))
         end
     end
     
-% If just one dataset just do that.
+% If one dataset just do that.
 else  
     [~,~,Q] = EllipsoidMatricesGenerate(x,'dimension',2);
     for ii = 1:size(theData,2)
@@ -156,6 +160,6 @@ else
 end
 
 % Convert SSE to RMSE
-f = sqrt(f/pointCounter);
+f = errorScalar*sqrt(f/pointCounter);
 
 end
