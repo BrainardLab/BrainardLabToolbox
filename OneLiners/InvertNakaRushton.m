@@ -41,7 +41,7 @@ else
     error('Inproper format for passed parameter vector');
 end
 
-if (any(y < 0) || any(y > A))
+if (any(y < 0) || any(y > A+1e-6))
     error('Input y must be in range [0-Rmax]');
 end
 
