@@ -1,4 +1,4 @@
-function T = ComputeObserverFundamentals(coneParams,S)
+function [T,T_energy,T_quantal] = ComputeObserverFundamentals(coneParams,S)
 % Compute cone fundamentals from cone parameter structure
 %
 % Syntax:
@@ -8,7 +8,9 @@ function T = ComputeObserverFundamentals(coneParams,S)
 %     Compute cone fundamentals from a structure describing the parameters
 %     of a cone fundamentlals model.
 %
-%     Fundamentals are in energy units and normalized to a max of one.
+%     T matrix is fundamentals are in energy units and normalized to a max of one.
+%     Can also pick up not normalized in either energy or quantal units as
+%     additional returns.
 %
 % Inputs:
 %     coneParams                      - Structure providing parameters for
@@ -19,7 +21,14 @@ function T = ComputeObserverFundamentals(coneParams,S)
 % Outputs:
 %     T                               - Matrix of fundamentals, PTB matrix
 %                                       format with each fundamental in a
-%                                       row.
+%                                       row.  Normalized in energy units.
+%     T_energy                        - Matrix of fundamentals, PTB matrix
+%                                       format with each fundamental in a
+%                                       row.  Not normalized, in energy units.
+%     T_quantal                       - Matrix of fundamentals, PTB matrix
+%                                       format with each fundamental in a row.
+%                                       Not normalized, and in quantal
+%                                       units.
 %
 % Optional key/value pairs:
 %    None.
@@ -51,9 +60,9 @@ switch (coneParams.type)
             ComputeCIEConeFundamentals(MakeItS(S),coneParams.fieldSizeDegrees,coneParams.ageYears,coneParams.pupilDiamMM, ...
             [],[],[], ...
             [],[],[],coneParams.indDiffParams);
-        T = EnergyToQuanta(S,T_quantal')';
+        T_energy = EnergyToQuanta(S,T_quantal')';
         for ii = 1:3
-            T(ii,:) = T(ii,:)/max(T(ii,:));
+            T(ii,:) = T_energy(ii,:)/max(T_energy(ii,:));
         end        
      
     otherwise
