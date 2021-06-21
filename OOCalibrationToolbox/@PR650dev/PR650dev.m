@@ -45,6 +45,15 @@ classdef PR650dev < Radiometer
             verbosity       = p.verbosity;
             devPortString   = p.devicePortString;
             
+            % Check BrainardLabToolbox prefs for a customized device port
+            % and if there is one use that one
+            BLToolboxPrefs = getpref('BrainardLabToolbox');
+            if (isfield(BLToolboxPrefs, 'PR650DevicePortString')) && (~isempty(BLToolboxPrefs.PR650DevicePortString))
+                fprintf('Overriding passed devPortString (%s) with the one found in BrainardLabToolbox prefs (%s)\n', ...
+                    devPortString, BLToolboxPrefs.PR650DevicePortString);
+                devPortString = BLToolboxPrefs.PR650DevicePortString;
+            end
+            
             % Call the super-class constructor.
             obj = obj@Radiometer(verbosity, devPortString);
             
