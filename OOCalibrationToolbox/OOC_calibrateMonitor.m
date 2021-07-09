@@ -243,7 +243,7 @@ function [displaySettings, calibratorOptions] = generateConfigurationForNaturaIm
         'displayPrimariesNum',      3, ...                          % for regular displays this is always 3 (RGB) 
         'displayDeviceType',        'monitor', ...                  % this should always be set to 'monitor' for now
         'displayDeviceName',        'NaturaImageThresholds', ...               % a name for the display been calibrated
-        'calibrationFile',          'NaturaImageThresholds', ...               % name of calibration file to be generated
+        'calibrationFile',          getpref('NaturaImageThresholds','CalDataFile'); ... % name of calibration file to be generated
         'comment',                  'NaturaImageThresholds' ...                % some comment, could be anything
         };
     
