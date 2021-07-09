@@ -15,6 +15,7 @@ function OOC_calibrateMonitor
     AvailableCalibrationConfigs = {  ...
         'MetropsisCalibration'
         'VirtualWorldCalibration'
+        'NaturaImageThresholds'
         'ColorMaterialCalibration' 
         'ViewSonicProbe'
         'BOLDscreen'
@@ -26,7 +27,7 @@ function OOC_calibrateMonitor
         'HTCVive'
     };
     
-    defaultCalibrationConfig = AvailableCalibrationConfigs{1};
+    defaultCalibrationConfig = AvailableCalibrationConfigs{3};
     while (true)
         fprintf('Available calibration configurations \n');
         for k = 1:numel(AvailableCalibrationConfigs)
@@ -52,6 +53,9 @@ function OOC_calibrateMonitor
         
         case 'VirtualWorldCalibration'
             configFunctionHandle = @generateConfigurationForVirtualWorldCalibration;
+       
+        case 'NaturalImageThresholds'
+            configFunctionHandle = @generateConfigurationForNaturalImageThresholds;
             
         case 'ColorMaterialCalibration' 
             configFunctionHandle = @generateConfigurationForColorMaterialCalibration;
@@ -147,7 +151,7 @@ end
 % Tracker LCD)
 function [displaySettings, calibratorOptions] = generateConfigurationForColorMaterialCalibration()
     % Specify where to send the 'Calibration Done' notification email
-    emailAddressForNotification = 'radonjic@upenn.edu';
+    emailAddressForNotification = 'clairecm@sas.upenn.edu';
     
     % Specify the @Calibrator's initialization params. 
     % Users should tailor these according to their hardware specs. 
@@ -225,6 +229,45 @@ function [displaySettings, calibratorOptions] = generateConfigurationForVirtualW
     );
 end
 
+function [displaySettings, calibratorOptions] = generateConfigurationForNaturaImageThresholds()
+    % Specify where to send the 'Calibration Done' notification email
+    emailAddressForNotification = 'vsin@sas.upenn.edu';
+    
+    % Specify the @Calibrator's initialization params. 
+    % Users should tailor these according to their hardware specs. 
+    % These can be set once only, at the time the @Calibrator object is instantiated.
+    displaySettings = { ...
+        'screenToCalibrate',        2, ...                          % which display to calibrate. main screen = 1, second display = 2
+        'desiredScreenSizePixel',   [1920 1080], ...                % pixels along the width and height of the display to be calibrated
+        'desiredRefreshRate',       60, ...                        % refresh rate in Hz
+        'displayPrimariesNum',      3, ...                          % for regular displays this is always 3 (RGB) 
+        'displayDeviceType',        'monitor', ...                  % this should always be set to 'monitor' for now
+        'displayDeviceName',        'NaturaImageThresholds', ...               % a name for the display been calibrated
+        'calibrationFile',          'NaturaImageThresholds', ...               % name of calibration file to be generated
+        'comment',                  'NaturaImageThresholds' ...                % some comment, could be anything
+        };
+    
+    % Specify the @Calibrator's optional params using a CalibratorOptions object
+    % To see what options are available type: doc CalibratorOptions
+    % Users should tailor these according to their experimental needs.
+    calibratorOptions = CalibratorOptions( ...
+        'verbosity',                        2, ...
+        'whoIsDoingTheCalibration',         input('Enter your name: ','s'), ...
+        'emailAddressForDoneNotification',  GetWithDefault('Enter email address for done notification',  emailAddressForNotification), ...
+        'blankOtherScreen',                 0, ...                          % whether to blank other displays attached to the host computer (1=yes, 0 = no), ...
+        'whichBlankScreen',                 1, ...                          % screen number of the display to be blanked  (main screen = 1, second display = 2)
+        'blankSettings',                    [0 0 0], ...           % color of the whichBlankScreen 
+        'bgColor',                          [0.7451, 0.7451, 0.7451], ...     % color of the background  
+        'fgColor',                          [0 ; 0 ; 0], ...     % color of the foreground
+        'meterDistance',                    1, ...                        % distance between radiometer and screen in meters
+        'leaveRoomTime',                    10, ...                          % seconds allowed to leave room
+        'nAverage',                         2, ...                          % number of repeated measurements for averaging
+        'nMeas',                            25, ...                         % samples along gamma curve
+        'boxSize',                          150, ...                        % size of calibration stimulus in pixels
+        'boxOffsetX',                       0, ...                          % x-offset from center of screen (neg: leftwards, pos:rightwards)         
+        'boxOffsetY',                       0 ...                           % y-offset from center of screen (neg: upwards, pos: downwards)                      
+    );
+end
 
 function [displaySettings, calibratorOptions] = generateConfigurationForMetropsisCalibration()
     % Specify where to send the 'Calibration Done' notification email
@@ -607,11 +650,10 @@ function radiometerOBJ = generateRadiometerObject()
     selectedRadiometerType = radiometerTypes{radiometerIndex};
     fprintf('Will employ an %s radiometer object [%d].\n', selectedRadiometerType, radiometerIndex);
     
-    
     if (strcmp(selectedRadiometerType, 'PR650dev'))
         radiometerOBJ = PR650dev(...
             'verbosity',        1, ...       % 1 -> minimum verbosity
-            'devicePortString', '/dev/cu.USA19H146P1.1'); %PR650 port string
+            'devicePortString', '/dev/cu.KeySerial1'); %PR650 port string
 
     elseif (strcmp(selectedRadiometerType, 'PR670dev'))
         radiometerOBJ = PR670dev(...
