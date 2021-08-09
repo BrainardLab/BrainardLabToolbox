@@ -23,7 +23,7 @@ sigma = 0.1; % used for simulation.
 
 % spacingRange = [0.15, 0.5, 1, 3, 5]; old spacing range. 
 spacingRange = [0.15, 5];
-nSimulations = 100;
+nSimulations = 1;
 
 % create competitor pairs for a given set of competitors. 
 thePairs = nchoosek(1:nCompetitors,2); 
