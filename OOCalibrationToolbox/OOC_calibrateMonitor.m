@@ -25,6 +25,7 @@ function OOC_calibrateMonitor
         'InVivoSensaVue_FlatPanel'
         'AppleThunderboltDisplay'
         'HTCVive'
+        'SACC'
     };
     
     defaultCalibrationConfig = AvailableCalibrationConfigs{3};
@@ -84,7 +85,10 @@ function OOC_calibrateMonitor
             configFunctionHandle = @generateConfigurationForInVivoSensaVue_FlatPanel;   
 
         case 'HTCVive'
-            configFunctionHandle = @generateConfigurationForHTCVive;   
+            configFunctionHandle = @generateConfigurationForHTCVive;  
+            
+        case 'SACC'
+            configFunctionHandle = @generateConfigurationForSACC; 
             
         otherwise
             configFunctionHandle = @generateConfigurationForViewSonicProbe;
@@ -568,7 +572,50 @@ function [displaySettings, calibratorOptions] = generateConfigurationForInVivoSe
     );
 end
 
-% configuration function for HTCVive
+% Configuration function for the SACC display (LED/DLP optical system)
+function [displaySettings, calibratorOptions] = generateConfigurationForSACC()
+    % Specify where to send the 'Calibration Done' notification email
+    emailAddressForNotification = 'seminoh@sas.upenn.edu';
+    
+    % Specify the @Calibrator's initialization params. 
+    % Users should tailor these according to their hardware specs. 
+    % These can be set once only, at the time the @Calibrator object is instantiated.
+    displaySettings = { ...
+        'screenToCalibrate',        1, ...                          % which display to calibrate. main screen = 1, second display = 2
+        'desiredScreenSizePixel',   [1920 1080], ...                % pixels along the width and height of the display to be calibrated
+        'desiredRefreshRate',       60, ...                         % refresh rate in Hz
+        'displayPrimariesNum',      3, ...                          % for regular displays this is always 3 (RGB) 
+        'displayDeviceType',        'monitor', ...                  % this should always be set to 'monitor' for now
+        'displayDeviceName',        'SACC', ...                     % a name for the display been calibrated
+        'calibrationFile',          'SACC', ...                     % name of calibration file to be generated
+        'comment',                  'The SACC LED/DLP optical system' ...          % some comment, could be anything
+        };
+    
+    % Specify the @Calibrator's optional params using a CalibratorOptions object
+    % To see what options are available type: doc CalibratorOptions
+    % Users should tailor these according to their experimental needs.
+    calibratorOptions = CalibratorOptions( ...
+        'verbosity',                        2, ...
+        'whoIsDoingTheCalibration',         input('Enter your name: ','s'), ...
+        'emailAddressForDoneNotification',  GetWithDefault('Enter email address for done notification',  emailAddressForNotification), ...
+        'blankOtherScreen',                 0, ...                          % whether to blank other displays attached to the host computer (1=yes, 0 = no), ...
+        'whichBlankScreen',                 1, ...                          % screen number of the display to be blanked  (main screen = 1, second display = 2)
+        'blankSettings',                    [0.0 0.0 0.0], ...              % color of the whichBlankScreen 
+        'bgColor',                          [0.3962 0.3787 0.4039], ...     % color of the background  
+        'fgColor',                          [0.3962 0.3787 0.4039], ...     % color of the foreground
+        'meterDistance',                    1.0, ...                        % distance between radiometer and screen in meters
+        'leaveRoomTime',                    3, ...                          % seconds allowed to leave room
+        'nAverage',                         2, ...                          % number of repeated measurements for averaging
+        'nMeas',                            21, ...                         % samples along gamma curve
+        'boxSize',                          150, ...                        % size of calibration stimulus in pixels
+        'boxOffsetX',                       0, ...                          % x-offset from center of screen (neg: leftwards, pos:rightwards)         
+        'boxOffsetY',                       0 ...                           % y-offset from center of screen (neg: upwards, pos: downwards)                      
+    );
+
+end
+
+
+% Configuration function for HTCVive
 function [displaySettings, calibratorOptions] = generateConfigurationForHTCVive()
     % Specify where to send the 'Calibration Done' notification email
     emailAddressForNotification = 'manuel.spitschan@psy.ox.ac.uk';
