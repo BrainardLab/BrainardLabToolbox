@@ -581,9 +581,9 @@ function [displaySettings, calibratorOptions] = generateConfigurationForSACC()
     % Users should tailor these according to their hardware specs. 
     % These can be set once only, at the time the @Calibrator object is instantiated.
     displaySettings = { ...
-        'screenToCalibrate',        1, ...                          % which display to calibrate. main screen = 1, second display = 2
+        'screenToCalibrate',        2, ...                          % which display to calibrate. main screen = 1, second display = 2
         'desiredScreenSizePixel',   [1920 1080], ...                % pixels along the width and height of the display to be calibrated
-        'desiredRefreshRate',       60, ...                         % refresh rate in Hz
+        'desiredRefreshRate',       120, ...                         % refresh rate in Hz
         'displayPrimariesNum',      3, ...                          % for regular displays this is always 3 (RGB) 
         'displayDeviceType',        'monitor', ...                  % this should always be set to 'monitor' for now
         'displayDeviceName',        'SACC', ...                     % a name for the display been calibrated
@@ -607,7 +607,7 @@ function [displaySettings, calibratorOptions] = generateConfigurationForSACC()
         'leaveRoomTime',                    3, ...                          % seconds allowed to leave room
         'nAverage',                         2, ...                          % number of repeated measurements for averaging
         'nMeas',                            21, ...                         % samples along gamma curve
-        'boxSize',                          150, ...                        % size of calibration stimulus in pixels
+        'boxSize',                          600, ...                        % size of calibration stimulus in pixels (it was 150 / Semin)
         'boxOffsetX',                       0, ...                          % x-offset from center of screen (neg: leftwards, pos:rightwards)         
         'boxOffsetY',                       0 ...                           % y-offset from center of screen (neg: upwards, pos: downwards)                      
     );
@@ -705,7 +705,7 @@ function radiometerOBJ = generateRadiometerObject()
     elseif (strcmp(selectedRadiometerType, 'PR670dev'))
         radiometerOBJ = PR670dev(...
             'verbosity',        1, ...       % 1 -> minimum verbosity
-            'devicePortString', [] ...       % empty -> automatic port detection
+            'devicePortString', '/dev/ttyACM0' ...       % empty -> automatic port detection
             );
         
         % Specify extra properties

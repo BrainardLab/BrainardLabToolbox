@@ -32,7 +32,7 @@ end
 
 % Linux platform
 if (strfind(sysInfo.MatlabPlatform, 'GLNXA64'))
-    toolboxDir = sprintf('/home/%s/Documents/MATLAB/toolboxes', sysinfo.userShortName);
+    toolboxDir = sprintf('/home/%s/Documents/MATLAB/toolboxes', sysInfo.userShortName);
 end
 
 toolboxList = GetSubdirectories(toolboxDir);
