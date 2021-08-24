@@ -29,6 +29,12 @@ elseif (strcmp(sysInfo.userShortName, 'colorlab')  && strcmp(sysInfo.localHostNa
 else
     toolboxDir = sprintf('/Users/%s/Documents/MATLAB/toolboxes',sysInfo.userShortName);
 end
+
+% Linux platform
+if (strfind(sysInfo.MatlabPlatform, 'GLNXA64'))
+    toolboxDir = sprintf('/home/%s/Documents/MATLAB/toolboxes', sysinfo.userShortName);
+end
+
 toolboxList = GetSubdirectories(toolboxDir);
 numToolboxes = length(toolboxList);
 
