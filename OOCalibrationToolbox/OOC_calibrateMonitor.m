@@ -606,7 +606,7 @@ function [displaySettings, calibratorOptions] = generateConfigurationForSACC()
         'meterDistance',                    1.0, ...                        % distance between radiometer and screen in meters
         'leaveRoomTime',                    3, ...                          % seconds allowed to leave room
         'nAverage',                         2, ...                          % number of repeated measurements for averaging
-        'nMeas',                            21, ...                         % samples along gamma curve
+        'nMeas',                            4, ...                          % samples along gamma curve
         'boxSize',                          600, ...                        % size of calibration stimulus in pixels (it was 150 / Semin)
         'boxOffsetX',                       0, ...                          % x-offset from center of screen (neg: leftwards, pos:rightwards)         
         'boxOffsetY',                       0 ...                           % y-offset from center of screen (neg: upwards, pos: downwards)                      
