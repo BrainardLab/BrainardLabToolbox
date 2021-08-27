@@ -16,12 +16,16 @@ function OOC_calibrateMonitor
         'MetropsisCalibration'
         'VirtualWorldCalibration'
         'NaturaImageThresholds'
+        'ColorMaterialCalibration' 
+        'ViewSonicProbe'
         'BOLDscreen'
+        'SamsungOLEDpanel'
+        'Left_SONY_PVM2541A'
+        'Right_SONY_PVM2541A'
         'InVivoSensaVue_FlatPanel'
         'AppleThunderboltDisplay'
         'HTCVive'
         'SACC'
-        'SACCPrimary'
     };
     
     defaultCalibrationConfig = AvailableCalibrationConfigs{3};
@@ -54,11 +58,28 @@ function OOC_calibrateMonitor
         case 'NaturalImageThresholds'
             configFunctionHandle = @generateConfigurationForNaturalImageThresholds;
             
+        case 'ColorMaterialCalibration' 
+            configFunctionHandle = @generateConfigurationForColorMaterialCalibration;
+            
+        case 'ViewSonicProbe'
+            configFunctionHandle = @generateConfigurationForViewSonicProbe;
+            
         case 'BOLDscreen'
             configFunctionHandle = @generateConfigurationForBOLDScreen;
 
+        case 'SamsungOLEDpanel'
+            configFunctionHandle = @generateConfigurationForSamsungOLED;
+            
         case 'AppleThunderboltDisplay'
             configFunctionHandle = @generateConfigurationForAppleThunderboltDisplay;
+            
+        case 'Left_SONY_PVM2541A'
+            configFunctionHandle = @generateConfigurationForSONY_PVM2541A;
+            runtimeParams = 'Left';
+        
+        case 'Right_SONY_PVM2541A'
+            configFunctionHandle = @generateConfigurationForSONY_PVM2541A;
+            runtimeParams = 'Right';
             
         case 'InVivoSensaVue_FlatPanel'
             configFunctionHandle = @generateConfigurationForInVivoSensaVue_FlatPanel;   
@@ -68,9 +89,6 @@ function OOC_calibrateMonitor
             
         case 'SACC'
             configFunctionHandle = @generateConfigurationForSACC; 
-
-        case 'SACCPrimary1'
-            configFunctionHandle = @generateConfigurationForSACCPrimary1;       
             
         otherwise
             configFunctionHandle = @generateConfigurationForViewSonicProbe;
@@ -132,6 +150,48 @@ function OOC_calibrateMonitor
     end % end try/catch
 end
 
+
+% configuration function for ColorMaterialCalibration (previously: Eye
+% Tracker LCD)
+function [displaySettings, calibratorOptions] = generateConfigurationForColorMaterialCalibration()
+    % Specify where to send the 'Calibration Done' notification email
+    emailAddressForNotification = 'clairecm@sas.upenn.edu';
+    
+    % Specify the @Calibrator's initialization params. 
+    % Users should tailor these according to their hardware specs. 
+    % These can be set once only, at the time the @Calibrator object is instantiated.
+    displaySettings = { ...
+        'screenToCalibrate',        2, ...                          % which display to calibrate. main screen = 1, second display = 2
+        'desiredScreenSizePixel',   [1920 1080], ...                % pixels along the width and height of the display to be calibrated
+        'desiredRefreshRate',       60, ...                        % refresh rate in Hz
+        'displayPrimariesNum',      3, ...                          % for regular displays this is always 3 (RGB) 
+        'displayDeviceType',        'monitor', ...                  % this should always be set to 'monitor' for now
+        'displayDeviceName',        'ColorMaterialCalibration', ...               % a name for the display been calibrated
+        'calibrationFile',          'ColorMaterialCalibration', ...               % name of calibration file to be generated
+        'comment',                  'Color Material Display' ...                % some comment, could be anything
+        };
+    
+    % Specify the @Calibrator's optional params using a CalibratorOptions object
+    % To see what options are available type: doc CalibratorOptions
+    % Users should tailor these according to their experimental needs.
+    calibratorOptions = CalibratorOptions( ...
+        'verbosity',                        2, ...
+        'whoIsDoingTheCalibration',         input('Enter your name: ','s'), ...
+        'emailAddressForDoneNotification',  GetWithDefault('Enter email address for done notification',  emailAddressForNotification), ...
+        'blankOtherScreen',                 0, ...                          % whether to blank other displays attached to the host computer (1=yes, 0 = no), ...
+        'whichBlankScreen',                 1, ...                          % screen number of the display to be blanked  (main screen = 1, second display = 2)
+        'blankSettings',                    [0 0 0], ...           % color of the whichBlankScreen 
+        'bgColor',                          [0.7451, 0.7451, 0.7451], ...     % color of the background  
+        'fgColor',                          [0 ; 0 ; 0], ...     % color of the foreground
+        'meterDistance',                    1, ...                        % distance between radiometer and screen in meters
+        'leaveRoomTime',                    10, ...                          % seconds allowed to leave room
+        'nAverage',                         2, ...                          % number of repeated measurements for averaging
+        'nMeas',                            25, ...                         % samples along gamma curve
+        'boxSize',                          150, ...                        % size of calibration stimulus in pixels
+        'boxOffsetX',                       0, ...                          % x-offset from center of screen (neg: leftwards, pos:rightwards)         
+        'boxOffsetY',                       0 ...                           % y-offset from center of screen (neg: upwards, pos: downwards)                      
+    );
+end
 
 function [displaySettings, calibratorOptions] = generateConfigurationForVirtualWorldCalibration()
     % Specify where to send the 'Calibration Done' notification email
@@ -253,6 +313,57 @@ function [displaySettings, calibratorOptions] = generateConfigurationForMetropsi
     );
 end
 
+% configuration function for SONYScreen
+function [displaySettings, calibratorOptions] = generateConfigurationForSONY_PVM2541A(LeftOrRight)
+    % Specify where to send the 'Calibration Done' notification email
+    emailAddressForNotification = 'cottaris@sas.upenn.edu';
+    
+    if strcmp(LeftOrRight, 'Left')
+        displayDeviceName = 'Left_SONY_PVM_OLED';
+        calibrationFileName = 'Left_SONY_PVM_OLED';
+    elseif strcmp(LeftOrRight, 'Right')
+        displayDeviceName = 'Right_SONY_PVM_OLED';
+        calibrationFileName = 'Right_SONY_PVM_OLED';
+    else
+        error('You must specify Left or Right screen');
+    end
+    % Specify the @Calibrator's initialization params. 
+    % Users should tailor these according to their hardware specs. 
+    % These can be set once only, at the time the @Calibrator object is instantiated.
+    displaySettings = { ...
+        'screenToCalibrate',        2, ...                          % which display to calibrate. main screen = 1, second display = 2
+        'desiredScreenSizePixel',   [1920 1080], ...                % pixels along the width and height of the display to be calibrated
+        'desiredRefreshRate',       60, ...                         % refresh rate in Hz
+        'displayPrimariesNum',      3, ...                          % for regular displays this is always 3 (RGB) 
+        'displayDeviceType',        'monitor', ...                  % this should always be set to 'monitor' for now
+        'displayDeviceName',        displayDeviceName, ...          % a name for the display been calibrated
+        'calibrationFile',          calibrationFileName, ...        % name of calibration file to be generated
+        'comment',                  'Stereo HDR Rig' ...            % some comment, could be anything
+        };
+    
+    % Specify the @Calibrator's optional params using a CalibratorOptions object
+    % To see what options are available type: doc CalibratorOptions
+    % Users should tailor these according to their experimental needs.
+    calibratorOptions = CalibratorOptions( ...
+        'verbosity',                        2, ...
+        'whoIsDoingTheCalibration',         input('Enter your name: ','s'), ...
+        'emailAddressForDoneNotification',  GetWithDefault('Enter email address for done notification',  emailAddressForNotification), ...
+        'blankOtherScreen',                 0, ...                          % whether to blank other displays attached to the host computer (1=yes, 0 = no), ...
+        'whichBlankScreen',                 1, ...                          % screen number of the display to be blanked  (main screen = 1, second display = 2)
+        'blankSettings',                    [0.25 0.25 0.25], ...           % color of the whichBlankScreen 
+        'bgColor',                          [0.3962 0.3787 0.4039], ...     % color of the background  
+        'fgColor',                          [0.3962 0.3787 0.4039], ...     % color of the foreground
+        'meterDistance',                    0.5, ...                        % distance between radiometer and screen in meters
+        'leaveRoomTime',                    1, ...                          % seconds allowed to leave room
+        'nAverage',                         5, ...                          % number of repeated measurements for averaging
+        'nMeas',                            15, ...                         % samples along gamma curve
+        'boxSize',                          150, ...                        % size of calibration stimulus in pixels
+        'boxOffsetX',                       0, ...                          % x-offset from center of screen (neg: leftwards, pos:rightwards)         
+        'boxOffsetY',                       0 ...                           % y-offset from center of screen (neg: upwards, pos: downwards)                      
+    );
+end
+
+
 % configuration function for BOLDScreen
 function [displaySettings, calibratorOptions] = generateConfigurationForBOLDScreen()
     % Specify where to send the 'Calibration Done' notification email
@@ -294,6 +405,49 @@ function [displaySettings, calibratorOptions] = generateConfigurationForBOLDScre
     );
 end
 
+
+% configuration function for ViewSonicProbe
+function [displaySettings, calibratorOptions] = generateConfigurationForViewSonicProbe()
+
+    % Specify where to send the 'Calibration Done' notification email
+    emailAddressForNotification = 'cottaris@sas.upenn.edu';
+    
+    % Specify the @Calibrator's initialization params. 
+    % Users should tailor these according to their hardware specs. 
+    % These can be set once only, at the time the @Calibrator object is instantiated.
+    displaySettings = { ...
+        'screenToCalibrate',        2, ...                          % which display to calibrate. main screen = 1, second display = 2
+        'desiredScreenSizePixel',   [1920 1080], ...                % pixels along the width and height of the display to be calibrated
+        'desiredRefreshRate',       60, ...                         % refresh rate in Hz
+        'displayPrimariesNum',      3, ...                          % for regular displays this is always 3 (RGB) 
+        'displayDeviceType',        'monitor', ...                  % this should always be set to 'monitor' for now
+        'displayDeviceName',        'ViewSonicProbe', ...           % a name for the display been calibrated
+        'calibrationFile',          'ViewSonicProbe', ...           % name of calibration file to be generated
+        'comment',                  'Scallops display' ...          % some comment, could be anything
+        };
+    
+    % Specify the @Calibrator's optional params using a CalibratorOptions object
+    % To see what options are available type: doc CalibratorOptions
+    % Users should tailor these according to their experimental needs.
+    calibratorOptions = CalibratorOptions( ...
+        'verbosity',                        2, ...
+        'whoIsDoingTheCalibration',         input('Enter your name: ','s'), ...
+        'emailAddressForDoneNotification',  GetWithDefault('Enter email address for done notification',  emailAddressForNotification), ...
+        'blankOtherScreen',                 0, ...                          % whether to blank other displays attached to the host computer (1=yes, 0 = no), ...
+        'whichBlankScreen',                 1, ...                          % screen number of the display to be blanked  (main screen = 1, second display = 2)
+        'blankSettings',                    [0.25 0.25 0.25], ...           % color of the whichBlankScreen 
+        'bgColor',                          [0.3962 0.3787 0.4039], ...     % color of the background  
+        'fgColor',                          [0.3962 0.3787 0.4039], ...     % color of the foreground
+        'meterDistance',                    0.5, ...                        % distance between radiometer and screen in meters
+        'leaveRoomTime',                    1, ...                          % seconds allowed to leave room
+        'nAverage',                         3, ...                          % number of repeated measurements for averaging
+        'nMeas',                            11, ...                          % samples along gamma curve
+        'boxSize',                          150, ...                        % size of calibration stimulus in pixels
+        'boxOffsetX',                       0, ...                          % x-offset from center of screen (neg: leftwards, pos:rightwards)         
+        'boxOffsetY',                       0 ...                           % y-offset from center of screen (neg: upwards, pos: downwards)                      
+    );
+end
+
 % configuration function for AppleThunderboltDisplay
 function [displaySettings, calibratorOptions] = generateConfigurationForAppleThunderboltDisplay()
     % Specify where to send the 'Calibration Done' notification email
@@ -325,6 +479,48 @@ function [displaySettings, calibratorOptions] = generateConfigurationForAppleThu
         'blankSettings',                    [0.3 0.0 0.0], ...              % color of the whichBlankScreen 
         'bgColor',                          [0.3962 0.5 0.9039], ...     % color of the background  
         'fgColor',                          [0.3962 0.5 0.9039], ...     % color of the foreground
+        'meterDistance',                    0.5, ...                        % distance between radiometer and screen in meters
+        'leaveRoomTime',                    1, ...                          % seconds allowed to leave room
+        'nAverage',                         2, ...                          % number of repeated measurements for averaging
+        'nMeas',                            21, ...                         % samples along gamma curve
+        'boxSize',                          150, ...                        % size of calibration stimulus in pixels
+        'boxOffsetX',                       0, ...                          % x-offset from center of screen (neg: leftwards, pos:rightwards)         
+        'boxOffsetY',                       0 ...                           % y-offset from center of screen (neg: upwards, pos: downwards)                      
+    );
+end
+
+% configuration function for SamsungOLED
+function [displaySettings, calibratorOptions] = generateConfigurationForSamsungOLED()
+
+    % Specify where to send the 'Calibration Done' notification email
+    emailAddressForNotification = 'cottaris@sas.upenn.edu';
+    
+    % Specify the @Calibrator's initialization params. 
+    % Users should tailor these according to their hardware specs. 
+    % These can be set once only, at the time the @Calibrator object is instantiated.
+    displaySettings = { ...
+        'screenToCalibrate',        1, ...                          % which display to calibrate. main screen = 1, second display = 2
+        'desiredScreenSizePixel',   [1920 1080], ...                % pixels along the width and height of the display to be calibrated
+        'desiredRefreshRate',       [], ...                         % refresh rate in Hz
+        'displayPrimariesNum',      3, ...                          % for regular displays this is always 3 (RGB) 
+        'displayDeviceType',        'monitor', ...                  % this should always be set to 'monitor' for now
+        'displayDeviceName',        'SamsungOLED', ...              % a name for the display been calibrated
+        'calibrationFile',          'SamsungOLEDPanel', ...         % name of calibration file to be generated
+        'comment',                  'The Samsung OLED in mirror mode' ...          % some comment, could be anything
+        };
+    
+    % Specify the @Calibrator's optional params using a CalibratorOptions object
+    % To see what options are available type: doc CalibratorOptions
+    % Users should tailor these according to their experimental needs.
+    calibratorOptions = CalibratorOptions( ...
+        'verbosity',                        2, ...
+        'whoIsDoingTheCalibration',         input('Enter your name: ','s'), ...
+        'emailAddressForDoneNotification',  GetWithDefault('Enter email address for done notification',  emailAddressForNotification), ...
+        'blankOtherScreen',                 0, ...                          % whether to blank other displays attached to the host computer (1=yes, 0 = no), ...
+        'whichBlankScreen',                 1, ...                          % screen number of the display to be blanked  (main screen = 1, second display = 2)
+        'blankSettings',                    [0.0 0.0 0.0], ...              % color of the whichBlankScreen 
+        'bgColor',                          [0.3962 0.3787 0.4039], ...     % color of the background  
+        'fgColor',                          [0.3962 0.3787 0.4039], ...     % color of the foreground
         'meterDistance',                    0.5, ...                        % distance between radiometer and screen in meters
         'leaveRoomTime',                    1, ...                          % seconds allowed to leave room
         'nAverage',                         2, ...                          % number of repeated measurements for averaging
@@ -415,47 +611,6 @@ function [displaySettings, calibratorOptions] = generateConfigurationForSACC()
         'boxOffsetX',                       0, ...                          % x-offset from center of screen (neg: leftwards, pos:rightwards)         
         'boxOffsetY',                       0 ...                           % y-offset from center of screen (neg: upwards, pos: downwards)                      
     );
-
-    % Configuration function for the SACC display (LED/DLP optical system)
-function [displaySettings, calibratorOptions] = generateConfigurationForSACCPrimary1()
-    % Specify where to send the 'Calibration Done' notification email
-    emailAddressForNotification = 'seminoh@sas.upenn.edu';
-    
-    % Specify the @Calibrator's initialization params. 
-    % Users should tailor these according to their hardware specs. 
-    % These can be set once only, at the time the @Calibrator object is instantiated.
-    displaySettings = { ...
-        'screenToCalibrate',        2, ...                          % which display to calibrate. main screen = 1, second display = 2
-        'desiredScreenSizePixel',   [1920 1080], ...                % pixels along the width and height of the display to be calibrated
-        'desiredRefreshRate',       120, ...                        % refresh rate in Hz
-        'displayPrimariesNum',      16, ...                         % for regular displays this is always 3 (RGB) 
-        'displayDeviceType',        'monitor', ...                  % this should always be set to 'monitor' for now
-        'displayDeviceName',        'SACCPrimary1', ...             % a name for the display been calibrated
-        'calibrationFile',          'SACCPrimary1', ...             % name of calibration file to be generated
-        'comment',                  'The SACC LED/DLP subprimary optical system' ...          % some comment, could be anything
-        };
-    
-    % Specify the @Calibrator's optional params using a CalibratorOptions object
-    % To see what options are available type: doc CalibratorOptions
-    % Users should tailor these according to their experimental needs.
-    calibratorOptions = CalibratorOptions( ...
-        'verbosity',                        2, ...
-        'whoIsDoingTheCalibration',         input('Enter your name: ','s'), ...
-        'emailAddressForDoneNotification',  GetWithDefault('Enter email address for done notification',  emailAddressForNotification), ...
-        'blankOtherScreen',                 0, ...                          % whether to blank other displays attached to the host computer (1=yes, 0 = no), ...
-        'whichBlankScreen',                 1, ...                          % screen number of the display to be blanked  (main screen = 1, second display = 2)
-        'blankSettings',                    [0.0 0.0 0.0], ...              % color of the whichBlankScreen 
-        'bgColor',                          [0.3962 0.3787 0.4039], ...     % color of the background  
-        'fgColor',                          [0.3962 0.3787 0.4039], ...     % color of the foreground
-        'meterDistance',                    1.0, ...                        % distance between radiometer and screen in meters
-        'leaveRoomTime',                    3, ...                          % seconds allowed to leave room
-        'nAverage',                         2, ...                          % number of repeated measurements for averaging
-        'nMeas',                            4, ...                          % samples along gamma curve
-        'boxSize',                          600, ...                        % size of calibration stimulus in pixels (it was 150 / Semin)
-        'boxOffsetX',                       0, ...                          % x-offset from center of screen (neg: leftwards, pos:rightwards)         
-        'boxOffsetY',                       0 ...                           % y-offset from center of screen (neg: upwards, pos: downwards)                      
-    );
-
 
 end
 
@@ -578,7 +733,7 @@ end
 % Users should not modify this function unless they know what they are doing.
 function calibratorOBJ = selectAndInstantiateCalibrator(calibratorInitParams, radiometerOBJ)
     % List of available @Calibrator objects
-    calibratorTypes = {'MGL-based', 'PsychImaging-based (8-bit)' 'SACCPrimary'};
+    calibratorTypes = {'MGL-based', 'PsychImaging-based (8-bit)'};
     calibratorsNum  = numel(calibratorTypes);
     
     % Ask the user to select a calibrator type
@@ -603,9 +758,6 @@ function calibratorOBJ = selectAndInstantiateCalibrator(calibratorInitParams, ra
             
         elseif strcmp(selectedCalibratorType, 'PsychImaging-based (8-bit)')
             calibratorOBJ = PsychImagingCalibrator(calibratorInitParams);
-
-        elseif strcmp(selectedCalibratorType, 'SACCPrimary')
-            calibratorOBJ = SACCPrimaryCalibrator(calibratorInitParams);
         end
         
     catch err
