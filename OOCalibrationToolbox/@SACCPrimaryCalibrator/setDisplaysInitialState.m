@@ -48,18 +48,47 @@ function setDisplaysInitialState(obj, userPrompt)
     targetSettings = [1 1 1];
     obj.updateBackgroundAndTarget(calStruct.describe.bgColor, targetSettings, calStruct.describe.useBitsPP)  
 
+    % Connect to the projector
+    isReady = Datapixx('open'); 
+    isReady = Datapixx('IsReady');
+    
+    % Set the initial state as both primary and sub-primary current=0
+    for j=1:3 % Primary(0-2)
+        for i=1:16 % Sub-primary(0-15)
+            Datapixx('SetPropixxHSLedCurrent', j-1, i-1, InitialCurrent); 
+        end
+    end
+    
     % [SEMIN]
     % Put here any code required to initialize the subprimaries. 
     switch (obj.whichPrimary)
         case 1
             % Turn off subprimaries for primaries 2 and 3, turn on all
             % subprimaries for primary 1.
+            PrimaryColor=0;
+            current=252;
+            for i=1:16 % Sub-primary
+                Datapixx('SetPropixxHSLedCurrent', PrimaryColor, i-1, current); 
+            end
+                        
         case 2
             % Turn off subprimaries for primaries 1 and 3, turn on all
             % subprimaries for primary 2.
+            PrimaryColor=1;
+            current=252;
+            for i=1:16 % Sub-primary
+                Datapixx('SetPropixxHSLedCurrent', PrimaryColor, i-1, current); 
+            end
+            
         case 3
             % Turn off subprimaries for primaries 1 and 2, turn on all
             % subprimaries for primary 3.
+            PrimaryColor=2;
+            current=252;
+            for i=1:16 % Sub-primary
+                Datapixx('SetPropixxHSLedCurrent', PrimaryColor, i-1, current); 
+            end
+            
         otherwise
             error('SACC display has only three primaries');
     end

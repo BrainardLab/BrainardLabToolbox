@@ -69,7 +69,7 @@ function OOC_calibrateMonitor
         case 'SACC'
             configFunctionHandle = @generateConfigurationForSACC; 
 
-        case 'SACCPrimary1'
+        case 'SACCPrimary'
             configFunctionHandle = @generateConfigurationForSACCPrimary1;       
             
         otherwise
@@ -415,6 +415,7 @@ function [displaySettings, calibratorOptions] = generateConfigurationForSACC()
         'boxOffsetX',                       0, ...                          % x-offset from center of screen (neg: leftwards, pos:rightwards)         
         'boxOffsetY',                       0 ...                           % y-offset from center of screen (neg: upwards, pos: downwards)                      
     );
+end
 
     % Configuration function for the SACC display (LED/DLP optical system)
 function [displaySettings, calibratorOptions] = generateConfigurationForSACCPrimary1()
@@ -618,6 +619,5 @@ function calibratorOBJ = selectAndInstantiateCalibrator(calibratorInitParams, ra
         end
         
         rethrow(err)
-    end % end try/catch
+   end % end try/catch
 end
-
