@@ -6,7 +6,7 @@ function [measurement, S] = updateStimulusAndMeasure(obj, bgSettings, targetSett
     % [SEMIN]
     % Use a loop to modify this to print out values of all settings entries.
     if (obj.options.verbosity > 1)
-        % targetSettings should be in size of 1x16 or 16x1
+        % targetSettings should be in size of 1x16 or 16x1 (show 16 
         fprintf('        Target settings    : %2.3f %2.3f %2.3f %2.3f %2.3f %2.3f %2.3f %2.3f %2.3f %2.3f %2.3f %2.3f %2.3f %2.3f %2.3f %2.3f \n\n', targetSettings);
     end
     

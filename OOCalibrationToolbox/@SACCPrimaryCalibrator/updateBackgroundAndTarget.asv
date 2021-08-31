@@ -35,18 +35,18 @@ function updateBackgroundAndTarget(obj, bgSettings, targetSettings, useBitsPP)
             case 2 % Adjust subprimaries for primary 2
                 % Loop over subprimaries and set each
                 for i=1:nSubprimaries 
-                    Datapixx('SetPropixxHSLedCurrent', 0, i-1, 0); % Primary 1
-                    Datapixx('SetPropixxHSLedCurrent', 1, i-1, round(targetSettings(i))); % Primary 2
+                    Datapixx('SetPropixxHSLedCurrent', 0, i-1, )); % Primary 1
+                    Datapixx('SetPropixxHSLedCurrent', 1, i-1, 0); % Primary 2
                     Datapixx('SetPropixxHSLedCurrent', 2, i-1, 0); % Primary 3
                 end 
                 
                 
             case 3 % Adjust subprimaries for primary 3
-                % Loop over subprimaries and set each
+                 % Loop over subprimaries and set each
                 for i=1:nSubprimaries 
-                    Datapixx('SetPropixxHSLedCurrent', 0, i-1, 0); % Primary 1
+                    Datapixx('SetPropixxHSLedCurrent', 0, i-1, round(targetSettings(i))); % Primary 1
                     Datapixx('SetPropixxHSLedCurrent', 1, i-1, 0); % Primary 2
-                    Datapixx('SetPropixxHSLedCurrent', 2, i-1, round(targetSettings(i))); % Primary 3
+                    Datapixx('SetPropixxHSLedCurrent', 2, i-1, 0); % Primary 3
                 end 
                 
             otherwise

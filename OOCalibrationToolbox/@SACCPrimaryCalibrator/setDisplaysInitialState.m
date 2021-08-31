@@ -65,28 +65,34 @@ function setDisplaysInitialState(obj, userPrompt)
         case 1
             % Turn off subprimaries for primaries 2 and 3, turn on all
             % subprimaries for primary 1.
-            PrimaryColor=0;
-            current=252;
+            current_on=252;
+            current_off=0;
             for i=1:16 % Sub-primary
-                Datapixx('SetPropixxHSLedCurrent', PrimaryColor, i-1, current); 
+                Datapixx('SetPropixxHSLedCurrent', 0, i-1, current_on); % Primary 1
+                Datapixx('SetPropixxHSLedCurrent', 1, i-1, current_off); % Primary 2
+                Datapixx('SetPropixxHSLedCurrent', 2, i-1, current_off); % Primary 3
             end
                         
         case 2
             % Turn off subprimaries for primaries 1 and 3, turn on all
             % subprimaries for primary 2.
-            PrimaryColor=1;
-            current=252;
+            current_on=252;
+            current_off=0;
             for i=1:16 % Sub-primary
-                Datapixx('SetPropixxHSLedCurrent', PrimaryColor, i-1, current); 
+                Datapixx('SetPropixxHSLedCurrent', 0, i-1, current_off); % Primary 1
+                Datapixx('SetPropixxHSLedCurrent', 1, i-1, current_on); % Primary 2
+                Datapixx('SetPropixxHSLedCurrent', 2, i-1, current_off); % Primary 3
             end
             
         case 3
             % Turn off subprimaries for primaries 1 and 2, turn on all
             % subprimaries for primary 3.
-            PrimaryColor=2;
-            current=252;
+            current_on=252;
+            current_off=0;
             for i=1:16 % Sub-primary
-                Datapixx('SetPropixxHSLedCurrent', PrimaryColor, i-1, current); 
+                Datapixx('SetPropixxHSLedCurrent', 0, i-1, current_off); % Primary 1
+                Datapixx('SetPropixxHSLedCurrent', 1, i-1, current_off); % Primary 2
+                Datapixx('SetPropixxHSLedCurrent', 2, i-1, current_on); % Primary 3
             end
             
         otherwise
