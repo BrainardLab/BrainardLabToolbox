@@ -55,7 +55,7 @@ function setDisplaysInitialState(obj, userPrompt)
     % Set the initial state as both primary and sub-primary current=0
     for j=1:3 % Primary(0-2)
         for i=1:16 % Sub-primary(0-15)
-            Datapixx('SetPropixxHSLedCurrent', j-1, i-1, InitialCurrent); 
+            Datapixx('SetPropixxHSLedCurrent', j-1, i-1, 0); 
         end
     end
     

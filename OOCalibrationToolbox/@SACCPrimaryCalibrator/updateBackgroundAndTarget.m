@@ -40,7 +40,6 @@ function updateBackgroundAndTarget(obj, bgSettings, targetSettings, useBitsPP)
                     Datapixx('SetPropixxHSLedCurrent', 2, i-1, 0); % Primary 3
                 end 
                 
-                
             case 3 % Adjust subprimaries for primary 3
                 % Loop over subprimaries and set each
                 for i=1:nSubprimaries 
