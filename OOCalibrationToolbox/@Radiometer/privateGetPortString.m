@@ -16,14 +16,11 @@ function obj = privateGetPortString(obj)
 
     % For each serial type in the portDeviceNames cell array, see if any attached serial
     % devices names match.
-    {portDeviceFiles.name}
-    obj.portDeviceNames
-   
-    indices = find(contains({portDeviceFiles.name},obj.portDeviceNames))
+    indices = find(contains({portDeviceFiles.name},obj.portDeviceNames));
     
     % Retry with lower device file names
     if (isempty(indices))
-        indices = find(contains(lower({portDeviceFiles.name}),obj.portDeviceNames))
+        indices = find(contains(lower({portDeviceFiles.name}),obj.portDeviceNames));
     end
     
     % Throw error if no matching device file was found

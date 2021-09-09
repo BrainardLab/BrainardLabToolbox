@@ -545,13 +545,13 @@ function radiometerOBJ = generateRadiometerObject()
     
     if (strcmp(selectedRadiometerType, 'PR650dev'))
         radiometerOBJ = PR650dev(...
-            'verbosity',        1, ...       % 1 -> minimum verbosity
-            'devicePortString', '/dev/cu.KeySerial1'); %PR650 port string
+            'verbosity',        1, ...                  % 1 -> minimum verbosity
+            'devicePortString', '/dev/cu.KeySerial1');  % PR650 port string
 
-    elseif (strcmp(selectedRadiometerType, 'PR670dev')) % [Semin] / PR670 is connected to either '/dev/ttyACM0' or '/dev/ttyACM1'
+    elseif (strcmp(selectedRadiometerType, 'PR670dev'))
         radiometerOBJ = PR670dev(...
             'verbosity',        1, ...       % 1 -> minimum verbosity
-            'devicePortString', '/dev/ttyACM1' ...       % empty -> automatic port detection
+            'devicePortString', [] ...       % empty -> automatic port detection
             );
         
         % Specify extra properties
