@@ -8,7 +8,7 @@ function obj = privateGetPortString(obj)
     portDeviceFilesTTY_USB = dir('/dev/tty.usb*');    
     
     % Enumerate tty.acm* devices - they correspond to serial ports on Ubuntu linux:
-    portDeviceFilesTTYACM = dir('/dev/ttyACM*');    
+    portDeviceFilesTTYACM = dir('/dev/ttyacm*');    
     
     % Combine port device files
     portDeviceFiles = [portDeviceFilesCU(:); portDeviceFilesTTY_USB(:) portDeviceFilesTTYACM(:)];
