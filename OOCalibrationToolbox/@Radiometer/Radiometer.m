@@ -71,7 +71,7 @@ classdef Radiometer < handle
     % Private properties
     properties (Access = private)
         % List of serial port devices to look for.
-        portDeviceNames = { lower('keyserial1'), lower('usbmodem'), lower('usbserial'), lower('cu.USA'), lower('ACM') };
+        portDeviceNames = { lower('keyserial1'), lower('usbmodem'), lower('usbserial'), lower('cu.USA'), lower('ACM'), 'ACM'};
         
         % Private Verbosity
         privateVerbosity;

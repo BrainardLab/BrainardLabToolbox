@@ -8,7 +8,7 @@ function obj = privateGetPortString(obj)
     portDeviceFilesTTY_USB = dir('/dev/tty.usb*');    
     
     % Enumerate tty.acm* devices - they correspond to serial ports on Ubuntu linux:
-    portDeviceFilesTTYACM = dir('/dev/ttyacm*');    
+    portDeviceFilesTTYACM = dir('/dev/ttyACM*');    
     
     % Combine port device files
     portDeviceFiles = [portDeviceFilesCU(:); portDeviceFilesTTY_USB(:) portDeviceFilesTTYACM(:)];
@@ -16,11 +16,14 @@ function obj = privateGetPortString(obj)
 
     % For each serial type in the portDeviceNames cell array, see if any attached serial
     % devices names match.
-    indices = find(contains({portDeviceFiles.name},obj.portDeviceNames));
+    {portDeviceFiles.name}
+    obj.portDeviceNames
+   
+    indices = find(contains({portDeviceFiles.name},obj.portDeviceNames))
     
     % Retry with lower device file names
     if (isempty(indices))
-        indices = find(contains(lower({portDeviceFiles.name}),obj.portDeviceNames));
+        indices = find(contains(lower({portDeviceFiles.name}),obj.portDeviceNames))
     end
     
     % Throw error if no matching device file was found
