@@ -4,7 +4,11 @@ function result = measure(obj, varargin)
     if (obj.verbosity > 9)
         fprintf('In PR670.measure\n');
     end
-
+    
+    if (obj.emulateHardware)
+        fprintf(2,'PR670obj.measure()- Emulating hardware\n');
+    end
+    
     % initialize to empty result
     result = [];
     

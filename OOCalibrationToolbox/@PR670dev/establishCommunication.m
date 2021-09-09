@@ -1,9 +1,16 @@
 % Method to establish communication with the PR670
-function obj = establishCommunication(obj)    
+function obj = establishCommunication(obj)   
+
     if (obj.verbosity > 9)
         fprintf('In PR670obj.establishCommunication() method\n');
     end
     
+    if (obj.emulateHardware)
+        fprintf(2,'PR670obj.establishCommunication()- Emulating hardware\n');
+        return;
+    end
+    
+        
     % Attempt to open the port
     handshakeCode = 'Lenient DontFlushOnWrite=1';
     

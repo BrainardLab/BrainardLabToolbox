@@ -42,7 +42,6 @@ function measurement = adjustMeasurement(obj, userOptions)
         end
         measurement = obj.nativeMeasurement;
     end
-        
 end
 
 

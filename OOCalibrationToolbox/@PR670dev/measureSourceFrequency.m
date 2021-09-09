@@ -4,6 +4,12 @@ function sourceFreq = measureSourceFrequency(obj)
         fprintf('In measureSourceFrequency\n');
     end
     
+    if (obj.emulateHardware)
+        sourceFreq = 0;
+        fprintf(2,'PR670obj.measureSourceFrequency()- Emulating hardware\n');
+        return;
+    end
+    
     timeoutInSeconds = 10;
     
     % Flushing buffers

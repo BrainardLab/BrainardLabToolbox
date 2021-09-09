@@ -5,6 +5,11 @@ function obj = setOptions(obj, varargin)
         fprintf('In PR670obj.setOptions() method\n');
     end
     
+    if (obj.emulateHardware)
+        fprintf(2,'PR670obj.setOptions()- Emulating hardware\n');
+        return;
+    end
+    
     
     if (~isempty(varargin))
         % Configure an inputParser to examine whether the options passed to us are valid

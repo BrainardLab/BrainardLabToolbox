@@ -5,6 +5,12 @@ function obj = privateSetCyclesToAverage(obj, newCyclesToAverage)
         fprintf('In privateSetCyclesToAverage\n');
     end
     
+    if (obj.emulateHardware)
+        obj.privateCyclesToAverage = newCyclesToAverage;
+        fprintf(2,'PR670obj.privateSetCyclesToAverage()- Emulating hardware\n');
+        return;
+    end
+    
     % determine if new value is different than its private counterpart
     if (obj.valuesAreSame(newCyclesToAverage, obj.privateCyclesToAverage))
         return;

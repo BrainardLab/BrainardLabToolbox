@@ -4,6 +4,16 @@ function measureSPD(obj)
         fprintf('In PR670obj.measureSPD() method\n');
     end
     
+    if (obj.emulateHardware)
+        fprintf(2,'PR670obj.measureSPD()- Emulating hardware\n');
+        obj.measurementQuality = -99;
+        spectralAxis = SToWls(obj.nativeS);
+        obj.nativeMeasurement.spectralAxis = spectralAxis(:);
+        obj.nativeMeasurement.energy = zeros(1,numel(spectralAxis));
+        return;
+    end
+    
+    
     % Flushing buffers
     dumpStr = '0';
     while ~isempty(dumpStr)

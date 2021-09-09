@@ -5,6 +5,12 @@ function obj = privateSetExposureTime(obj, newExposureTime)
         fprintf('In privateSetExposureTime\n');
     end
     
+    if (obj.emulateHardware)
+        obj.privateExposureTime = newExposureTime;
+        fprintf(2,'PR670obj.privateSetExposureTime()- Emulating hardware\n');
+        return;
+    end
+    
     % determine if new value is different than its private counterpart
     if (obj.valuesAreSame(newExposureTime, obj.privateExposureTime))
         return;

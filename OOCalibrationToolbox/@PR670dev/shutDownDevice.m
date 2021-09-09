@@ -4,6 +4,11 @@ function obj = shutDownDevice(obj)
         fprintf('In PR670obj.shutDown() method\n');
     end
     
+    if (obj.emulateHardware)
+        fprintf(2,'PR670obj.shutDownDevice()- Emulating hardware\n');
+        return;
+    end
+    
     if (~isempty(obj.portHandle))
         pause(2.0);
         obj.writeSerialPortCommand('commandString', 'Q', 'appendCR', false);

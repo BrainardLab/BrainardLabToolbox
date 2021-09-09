@@ -5,6 +5,12 @@ function obj = privateSetSyncMode(obj, newSyncMode)
         fprintf('In privateSetSyncMode\n');
     end
     
+    if (obj.emulateHardware)
+        obj.privateSyncMode = newSyncMode;
+        fprintf(2,'PR670obj.pprivateSetSyncMode()- Emulating hardware\n');
+        return;
+    end
+    
     % determine if new value is different than its private counterpart
     if (obj.valuesAreSame(newSyncMode, obj.privateSyncMode))
         return;

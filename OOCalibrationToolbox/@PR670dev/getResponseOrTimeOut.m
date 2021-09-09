@@ -1,6 +1,12 @@
 % Method to read a response from the PR670 or timeout after timeoutInSeconds
 function response = getResponseOrTimeOut(obj, timeoutInSeconds, timeoutString)
 
+    if (obj.emulateHardware)
+        response = '';
+        fprintf(2,'PR670obj.getResponseOrTimeOut()- Emulating hardware\n');
+        return;
+    end
+    
     waited = 0;
     inStr =[];
     while isempty(inStr) && (waited < timeoutInSeconds)

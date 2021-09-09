@@ -1,4 +1,11 @@
 function PR670config = getConfiguration(obj)
+
+    if (obj.emulateHardware)
+        PR670config = struct();
+        fprintf(2,'PR670obj.getConfiguration()- Emulating hardware\n');
+        return;
+    end
+    
     % Flushing buffers
     dumpStr = '0';
     while ~isempty(dumpStr)

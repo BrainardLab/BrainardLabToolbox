@@ -4,6 +4,12 @@ function serialNum = getDeviceSerialNumber(obj)
         fprintf('In PR670obj.getDeviceSerialNumber() method\n');
     end
     
+    if (obj.emulateHardware)
+        serialNum = '0123456789';
+        fprintf(2,'PR670obj.getDeviceSerialNumber()- Emulating hardware\n');
+        return;
+    end
+    
     % Flush the buffers.
     dumpStr = '0';
     while ~isempty(dumpStr)

@@ -4,6 +4,11 @@ function obj = openPort(obj)
         fprintf('In PR670obj.openPort() method\n');
     end
     
+    if (obj.emulateHardware)
+        fprintf(2,'PR670obj.openPort()- Emulating hardware\n');
+        return;
+    end
+    
     % Attempt to open the port
     handshakeCode = 'Lenient DontFlushOnWrite=1';
     

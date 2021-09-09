@@ -4,6 +4,12 @@ function obj = privateSetApertureSize(obj, newApertureSize)
         fprintf('In privateSetApertureSize\n');
     end
     
+    if (obj.emulateHardware)
+        obj.privateApertureSize = newApertureSize;
+        fprintf(2,'PR670obj.privateSetApertureSize()- Emulating hardware\n');
+        return;
+    end
+    
     % determine if new value is different than its private counterpart
     if (obj.valuesAreSame(newApertureSize, obj.privateApertureSize))
         return;

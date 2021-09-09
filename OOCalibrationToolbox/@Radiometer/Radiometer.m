@@ -20,6 +20,10 @@ classdef Radiometer < handle
         % Verbosity level (1 = minimal, 10 = max)
         verbosity
         
+        % Flag indicating whether to emulate the hardware (simulate a PR670
+        % when none is connected)
+        emulateHardware
+        
         % Information on the Radiometer's host computer and enviromnent
         hostInfo
         
@@ -101,17 +105,25 @@ classdef Radiometer < handle
     % Public methods
     methods
         % Constructor
-        function obj = Radiometer(verbosity, devPortString)
+        function obj = Radiometer(verbosity, devPortString, emulateHardware)
             obj.verbosity = verbosity;
-            if ~isempty(devPortString)
-                obj.portString = devPortString;
+            obj.emulateHardware = emulateHardware;
+            
+            if (~obj.emulateHardware)
+                if ~isempty(devPortString)
+                    obj.portString = devPortString;
+                else
+                    obj = obj.privateGetPortString();
+                end
+
+                if (obj.verbosity > 9)
+                    fprintf('In Radiometer.constructor() method\n');
+                end
             else
-                obj = obj.privateGetPortString();
+                obj.portString = devPortString;
+                fprintf(2,'Radiometer()- Emulating hardware\n');
             end
             
-            if (obj.verbosity > 9)
-                fprintf('In Radiometer.constructor() method\n');
-            end
         end
         
         % Destructor

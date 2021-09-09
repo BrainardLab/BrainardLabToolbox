@@ -12,6 +12,11 @@ function triggerMeasure(obj)
         end
     end
     
+    if (obj.emulateHardware)
+        fprintf(2,'PR670obj.triggerMeasure()- Emulating hardware\n');
+        return;
+    end
+    
     % Flushing buffers
     dumpStr = '0';
     while ~isempty(dumpStr)

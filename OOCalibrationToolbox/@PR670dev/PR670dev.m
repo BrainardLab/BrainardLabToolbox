@@ -69,8 +69,9 @@ classdef PR670dev < Radiometer
         % Constructor
         function obj = PR670dev(varargin)  
             parser = inputParser;
-            parser.addParamValue('verbosity',   1);
-            parser.addParamValue('devicePortString',  []);
+            parser.addParameter('verbosity', 1, @isscalar);
+            parser.addParameter('devicePortString',  [], @(x)(isempty(x) || (ischar(x))));
+            parser.addParameter('emulateHardware', false, @islogical);
             
             % Execute the parser
             parser.parse(varargin{:});
@@ -78,9 +79,10 @@ classdef PR670dev < Radiometer
             p = parser.Results;
             verbosity       = p.verbosity;
             devPortString   = p.devicePortString;
+            emulateHardware = p.emulateHardware;
             
             % Call the super-class constructor.
-            obj = obj@Radiometer(verbosity, devPortString);
+            obj = obj@Radiometer(verbosity, devPortString, emulateHardware);
             
             if (obj.verbosity > 9)
                 fprintf('In PR670dev.constructor() method\n');

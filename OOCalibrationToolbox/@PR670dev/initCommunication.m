@@ -4,6 +4,11 @@ function obj = initCommunication(obj)
         fprintf('In PR670obj.initCommunication() method\n');
     end
 
+    if (obj.emulateHardware)
+        fprintf(2,'PR670obj.initCommunication()- Emulating hardware\n');
+        return;
+    end
+    
     try 
         % Attempt to communicate. 
         % Tell the PR-670 to exit remote mode.  We do this to ensure a response from

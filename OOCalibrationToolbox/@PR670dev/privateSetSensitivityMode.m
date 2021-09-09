@@ -5,6 +5,12 @@ function obj = privateSetSensitivityMode(obj, newSensitivityMode)
         fprintf('In privateSetSensitivityMode\n');
     end
     
+    if (obj.emulateHardware)
+        obj.privateSensitivityMode = newSensitivityMode;
+        fprintf(2,'PR670obj.privateSetSensitivityMode()- Emulating hardware\n');
+        return;
+    end
+    
     % determine if new value is different than its private counterpart
     if (obj.valuesAreSame(newSensitivityMode, obj.privateSensitivityMode))
         return;
