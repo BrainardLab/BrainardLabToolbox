@@ -22,9 +22,12 @@ function OOC_calibrateMonitor
         'HTCVive'
         'SACC'
         'SACCPrimary'
+        'debugMode'
     };
     
-    defaultCalibrationConfig = AvailableCalibrationConfigs{3};
+    % Default config is debugMode
+    defaultCalibrationConfig = AvailableCalibrationConfigs{find(contains(AvailableCalibrationConfigs, 'debugMode'))};
+    
     while (true)
         fprintf('Available calibration configurations \n');
         for k = 1:numel(AvailableCalibrationConfigs)
@@ -72,6 +75,9 @@ function OOC_calibrateMonitor
         case 'SACCPrimary'
             configFunctionHandle = @generateConfigurationForSACCPrimary1;       
             
+        case 'debugMode'
+            configFunctionHandle = @generateConfigurationForDebugMode;
+            
         otherwise
             configFunctionHandle = @generateConfigurationForViewSonicProbe;
     end
@@ -83,7 +89,7 @@ function OOC_calibrateMonitor
     end
     
     % Generate the Radiometer object, here a PR650obj.
-    radiometerOBJ = generateRadiometerObject();
+    radiometerOBJ = generateRadiometerObject(calibrationConfig);
     
     % Generate the calibrator object
     calibratorOBJ = generateCalibratorObject(displaySettings, radiometerOBJ, mfilename);
@@ -417,7 +423,8 @@ function [displaySettings, calibratorOptions] = generateConfigurationForSACC()
     );
 end
 
-    % Configuration function for the SACC display (LED/DLP optical system)
+
+% Configuration function for the SACC display (LED/DLP optical system)
 function [displaySettings, calibratorOptions] = generateConfigurationForSACCPrimary1()
     % Specify where to send the 'Calibration Done' notification email
     emailAddressForNotification = 'seminoh@sas.upenn.edu';
@@ -456,8 +463,6 @@ function [displaySettings, calibratorOptions] = generateConfigurationForSACCPrim
         'boxOffsetX',                       0, ...                          % x-offset from center of screen (neg: leftwards, pos:rightwards)         
         'boxOffsetY',                       0 ...                           % y-offset from center of screen (neg: upwards, pos: downwards)                      
     );
-
-
 end
 
 
@@ -502,6 +507,46 @@ function [displaySettings, calibratorOptions] = generateConfigurationForHTCVive(
     );
 end
 
+function [displaySettings, calibratorOptions] = generateConfigurationForDebugMode()
+        % Specify where to send the 'Calibration Done' notification email
+    emailAddressForNotification = 'cottaris@upenn.edu';
+    
+    % Specify the @Calibrator's initialization params. 
+    % Users should tailor these according to their hardware specs. 
+    % These can be set once only, at the time the @Calibrator object is instantiated.
+    displaySettings = { ...
+        'screenToCalibrate',        2, ...                          % which display to calibrate. main screen = 1, second display = 2
+        'desiredScreenSizePixel',   [1280 720], ...                % pixels along the width and height of the display to be calibrated
+        'desiredRefreshRate',       60, ...                         % refresh rate in Hz
+        'displayPrimariesNum',      3, ...                          % for regular displays this is always 3 (RGB) 
+        'displayDeviceType',        'monitor', ...                  % this should always be set to 'monitor' for now
+        'displayDeviceName',        'debugMode', ...                     % a name for the display been calibrated
+        'calibrationFile',          'debugMode', ...                     % name of calibration file to be generated
+        'comment',                  'The is just for debugging the calibration' ...          % some comment, could be anything
+        };
+    
+    % Specify the @Calibrator's optional params using a CalibratorOptions object
+    % To see what options are available type: doc CalibratorOptions
+    % Users should tailor these according to their experimental needs.
+    calibratorOptions = CalibratorOptions( ...
+        'verbosity',                        2, ...
+        'whoIsDoingTheCalibration',         input('Enter your name: ','s'), ...
+        'emailAddressForDoneNotification',  GetWithDefault('Enter email address for done notification',  emailAddressForNotification), ...
+        'blankOtherScreen',                 0, ...                          % whether to blank other displays attached to the host computer (1=yes, 0 = no), ...
+        'whichBlankScreen',                 1, ...                          % screen number of the display to be blanked  (main screen = 1, second display = 2)
+        'blankSettings',                    [0.0 0.0 0.0], ...              % color of the whichBlankScreen 
+        'bgColor',                          [0.3962 0.3787 0.4039], ...     % color of the background  
+        'fgColor',                          [0.3962 0.3787 0.4039], ...     % color of the foreground
+        'meterDistance',                    1.0, ...                        % distance between radiometer and screen in meters
+        'leaveRoomTime',                    3, ...                          % seconds allowed to leave room
+        'nAverage',                         2, ...                          % number of repeated measurements for averaging
+        'nMeas',                            4, ...                          % samples along gamma curve
+        'boxSize',                          100, ...                        % size of calibration stimulus in pixels (it was 150 / Semin)
+        'boxOffsetX',                       0, ...                          % x-offset from center of screen (neg: leftwards, pos:rightwards)         
+        'boxOffsetY',                       0 ...                           % y-offset from center of screen (neg: upwards, pos: downwards)                      
+    );
+end
+
 
 % Function to generate the calibrator object.
 % Users should not modify this function unless they know what they are doing.
@@ -523,8 +568,16 @@ function calibratorOBJ = generateCalibratorObject(displaySettings, radiometerOBJ
 end
 
 
-function radiometerOBJ = generateRadiometerObject()
+function radiometerOBJ = generateRadiometerObject(calibrationConfig)
 
+    if (strcmp(calibrationConfig, 'debugMode'))
+        % Dummy radiometer - measurements will be all zeros
+        radiometerOBJ = PR670dev('emulateHardware',  true);
+        fprintf('Will employ a dummy PR670dev radiometer (all measurements will be zeros).\n');
+        return;
+    end
+    
+    
     % List of available @Radiometer objects
     radiometerTypes = {'PR650dev', 'PR670dev', 'SpectroCALdev'};
     radiometersNum  = numel(radiometerTypes);
