@@ -27,6 +27,9 @@ function setDisplaysInitialState(obj, userPrompt)
     % single screen, not stereo, not Samsung)
     Screen('Preference', 'SkipSyncTests', 1);
     
+    % Conserve VideoRam (this is crucial for M1-based Macs)
+    Screen('Preference','ConserveVRAM',16384);
+    
     % Start PsychImaging
     PsychImaging('PrepareConfiguration');
     
