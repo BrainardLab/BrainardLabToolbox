@@ -22,7 +22,9 @@ function obj = plotAllData(obj)
             obj.plotEssentialData(figureGroupIndex);
         elseif (figureGroupIndex == 2)
             gridDims = obj.linearityChecksGridDims;
-            obj.plotLinearityCheckData(figureGroupIndex);
+            if (~isempty(obj.newStyleCal.rawData.basicLinearityMeasurements1))
+                obj.plotLinearityCheckData(figureGroupIndex);
+            end
         elseif (figureGroupIndex == 3)
             gridDims = obj.backgroundEffectsGridDims;
             obj.plotBackgroundEffectsData(figureGroupIndex);

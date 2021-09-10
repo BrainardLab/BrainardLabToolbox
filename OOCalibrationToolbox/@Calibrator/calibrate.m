@@ -27,26 +27,32 @@ function obj = calibrate(obj)
     % Initialize states of the screen to be measured and the other screen
     obj.setDisplaysInitialState(userPrompt);
 
-    % Begin by some basic linearity measurements (first pass). 
-    % These may be compared to what happens when we predict the same values from the calibration itself.
-    if (~isempty(calStruct.basicLinearitySetup))
-        fprintf('1. Basic linearity measurements, pass 1 ... \n');
-        
-        % allocate storage for all basic measurements
-        settingsNumToBeMeasured  = size(calStruct.basicLinearitySetup.settings,2);
-        obj.rawData.basicLinearityMeasurements1 = zeros(settingsNumToBeMeasured, obj.measurementChannelsNum);
-        
-        % set background settings
-        backgroundSettings = calStruct.describe.bgColor;
-        
-        % Measure the SPD for all the settings in the calStruct.basicLinearitySetup
-        for settingsIndex = 1:settingsNumToBeMeasured
-            settingsToTest = calStruct.basicLinearitySetup.settings(:,settingsIndex);
-            [obj.rawData.basicLinearityMeasurements1(settingsIndex,:), obj.rawData.S] = ...
-                obj.updateStimulusAndMeasure(backgroundSettings, settingsToTest, calStruct.describe.useBitsPP);
-        end % for settingsIndex
-    end  % if (~isempty(calStruct.basicLinearitySetup))
-   
+    if (obj.options.skipLinearityTest)
+         fprintf('1. Skipping basic linearity measurements, pass 1 ... \n');
+         obj.rawData.basicLinearityMeasurements1 = [];
+    else
+        % Begin by some basic linearity measurements (first pass). 
+        % These may be compared to what happens when we predict the same values from the calibration itself.
+        if (~isempty(calStruct.basicLinearitySetup))
+            fprintf('1. Basic linearity measurements, pass 1 ... \n');
+
+            % allocate storage for all basic measurements
+            settingsNumToBeMeasured  = size(calStruct.basicLinearitySetup.settings,2);
+            obj.rawData.basicLinearityMeasurements1 = zeros(settingsNumToBeMeasured, obj.measurementChannelsNum);
+
+            % set background settings
+            backgroundSettings = calStruct.describe.bgColor;
+
+            % Measure the SPD for all the settings in the calStruct.basicLinearitySetup
+            for settingsIndex = 1:settingsNumToBeMeasured
+                settingsToTest = calStruct.basicLinearitySetup.settings(:,settingsIndex);
+                [obj.rawData.basicLinearityMeasurements1(settingsIndex,:), obj.rawData.S] = ...
+                    obj.updateStimulusAndMeasure(backgroundSettings, settingsToTest, calStruct.describe.useBitsPP);
+            end % for settingsIndex
+        end  % if (~isempty(calStruct.basicLinearitySetup))
+    end
+    
+    
     
     % Follow-up with full specturm gamma curve measurements for each phosphor.
     % Compute range of input gamma values
@@ -118,26 +124,29 @@ function obj = calibrate(obj)
     end % for repeatIndex 
 
 
+    if (obj.options.skipLinearityTest)
+         fprintf('3. Skipping basic linearity measurements, pass 2 ... \n');
+         obj.rawData.basicLinearityMeasurements2 = [];
+    else
+        % Repeat the basic linearity tests (second pass)
+        if (~isempty(calStruct.basicLinearitySetup))
+            fprintf('3. Basic linearity measurements, pass 2 ...\n');
 
-    % Repeat the basic linearity tests (second pass)
-    if (~isempty(calStruct.basicLinearitySetup))
-        fprintf('3. Basic linearity measurements, pass 2 ...\n');
-        
-        % allocate storage for all basic measurements
-        settingsNumToBeMeasured = size(calStruct.basicLinearitySetup.settings,2);
-        obj.rawData.basicLinearityMeasurements2 = zeros(settingsNumToBeMeasured, obj.measurementChannelsNum);
-        
-         % set background settings
-        backgroundSettings = calStruct.describe.bgColor';
-        
-        % Measure the SPD for all the settings in the calStruct.basicLinearitySetup
-        for settingsIndex = 1:settingsNumToBeMeasured
-            settingsToTest = calStruct.basicLinearitySetup.settings(:,settingsIndex);
-            [obj.rawData.basicLinearityMeasurements2(settingsIndex,:), obj.rawData.S] = ...
-                obj.updateStimulusAndMeasure(backgroundSettings, settingsToTest, calStruct.describe.useBitsPP);
-        end % for settingsIndex
-    end  % if (~isempty(calStruct.basicLinearitySetup))
-    
+            % allocate storage for all basic measurements
+            settingsNumToBeMeasured = size(calStruct.basicLinearitySetup.settings,2);
+            obj.rawData.basicLinearityMeasurements2 = zeros(settingsNumToBeMeasured, obj.measurementChannelsNum);
+
+             % set background settings
+            backgroundSettings = calStruct.describe.bgColor';
+
+            % Measure the SPD for all the settings in the calStruct.basicLinearitySetup
+            for settingsIndex = 1:settingsNumToBeMeasured
+                settingsToTest = calStruct.basicLinearitySetup.settings(:,settingsIndex);
+                [obj.rawData.basicLinearityMeasurements2(settingsIndex,:), obj.rawData.S] = ...
+                    obj.updateStimulusAndMeasure(backgroundSettings, settingsToTest, calStruct.describe.useBitsPP);
+            end % for settingsIndex
+        end  % if (~isempty(calStruct.basicLinearitySetup))
+    end
 
     
     % Continue with the dependence of test on background test.

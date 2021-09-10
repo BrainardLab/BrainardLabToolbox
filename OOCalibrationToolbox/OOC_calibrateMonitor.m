@@ -82,11 +82,13 @@ function OOC_calibrateMonitor
             configFunctionHandle = @generateConfigurationForViewSonicProbe;
     end
     
+
     if (isempty(runtimeParams))
         [displaySettings, calibratorOptions] = configFunctionHandle();
     else
         [displaySettings, calibratorOptions] = configFunctionHandle(runtimeParams);
     end
+
     
     % Generate the Radiometer object, here a PR650obj.
     radiometerOBJ = generateRadiometerObject(calibrationConfig);
@@ -543,7 +545,8 @@ function [displaySettings, calibratorOptions] = generateConfigurationForDebugMod
         'nMeas',                            4, ...                          % samples along gamma curve
         'boxSize',                          100, ...                        % size of calibration stimulus in pixels (it was 150 / Semin)
         'boxOffsetX',                       0, ...                          % x-offset from center of screen (neg: leftwards, pos:rightwards)         
-        'boxOffsetY',                       0 ...                           % y-offset from center of screen (neg: upwards, pos: downwards)                      
+        'boxOffsetY',                       0, ...                           % y-offset from center of screen (neg: upwards, pos: downwards)                      
+        'skipLinearityTest',                true ...
     );
 end
 
@@ -650,6 +653,7 @@ function calibratorOBJ = selectAndInstantiateCalibrator(calibratorInitParams, ra
     fprintf('Will employ an %s calibrator object [%d].\n', selectedCalibratorType, calibratorIndex);
     
     calibratorOBJ = [];
+
     try
         % Instantiate an Calibrator object with the required configration variables.
         if strcmp(selectedCalibratorType, 'MGL-based')
