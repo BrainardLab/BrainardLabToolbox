@@ -5,11 +5,17 @@ function bgSpectra = BGspectraConversion(obj, propertyValue)
     targetSettingsNum     = size(obj.inputCal.backgroundDependenceSetup.settings,2);
     for backgroundSettingsIndex = 1:backgroundSettingsNum
         tmp = zeros(spectralSamples,targetSettingsNum); 
-        for targetSettingsIndex = 1: targetSettingsNum
-            tmp(:, targetSettingsIndex) = ...
-            reshape(squeeze(propertyValue(backgroundSettingsIndex, targetSettingsIndex, :)), ...
-            [spectralSamples  1] );
+        
+        if (isempty(propertyValue))
+            tmp = [];
+        else
+            for targetSettingsIndex = 1: targetSettingsNum
+                tmp(:, targetSettingsIndex) = ...
+                reshape(squeeze(propertyValue(backgroundSettingsIndex, targetSettingsIndex, :)), ...
+                [spectralSamples  1] );
+            end
         end
+        
         bgSpectra{backgroundSettingsIndex} = tmp;
     end 
 end

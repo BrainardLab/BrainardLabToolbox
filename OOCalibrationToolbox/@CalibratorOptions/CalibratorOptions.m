@@ -60,8 +60,10 @@ classdef CalibratorOptions
         % X-offset (in pixels) of square on screen (used to check off-axis monitor properties)
         boxOffsetY = 0;
                 
-        % Flag indicaring whether to skip the linearity test
+        % Flags indicating whether to skip certain tests
         skipLinearityTest = false;
+        skipBackgroundDependenceTest = false;
+        skipAmbientLightMeasurement = false;
         
         % Number of basis vectors in the linear calibration model
         primaryBasesNum = 1;
@@ -118,6 +120,8 @@ classdef CalibratorOptions
             parser.addParameter('primaryBasesNum',                 obj.primaryBasesNum);
             parser.addParameter('gamma',                           obj.gamma);
             parser.addParameter('skipLinearityTest',               obj.skipLinearityTest);
+            parser.addParameter('skipBackgroundDependenceTest',    obj.skipBackgroundDependenceTest);
+            parser.addParameter('skipAmbientLightMeasurement',     obj.skipAmbientLightMeasurement);
             
             % Execute the parser
             parser.parse(varargin{:});

@@ -149,45 +149,54 @@ function obj = calibrate(obj)
     end
 
     
-    % Continue with the dependence of test on background test.
-    if (~isempty(calStruct.backgroundDependenceSetup))
-        fprintf('4. Effect of background measurements ...\n');
-        
-        % allocate storage for all dependence measurements
-        settingsNumToBeMeasured    = size(calStruct.backgroundDependenceSetup.settings,2);
-        backgroundsNumToBeMeasured = size(calStruct.backgroundDependenceSetup.bgSettings,2);
-        obj.rawData.backgroundDependenceMeasurements = zeros(backgroundsNumToBeMeasured, settingsNumToBeMeasured, obj.measurementChannelsNum);
-        
-        for bgIndex = 1:backgroundsNumToBeMeasured
-            backgroundSettings = calStruct.backgroundDependenceSetup.bgSettings(:,bgIndex);
-            for settingsIndex = 1:settingsNumToBeMeasured
-                settingsToTest = calStruct.backgroundDependenceSetup.settings(:,settingsIndex);
-                [obj.rawData.backgroundDependenceMeasurements(bgIndex, settingsIndex,:), obj.rawData.S] = ...
-                    obj.updateStimulusAndMeasure(backgroundSettings, settingsToTest, calStruct.describe.useBitsPP);
+    if (obj.options.skipBackgroundDependenceTest)
+        fprintf('4. Skipping background measurements ...\n');
+        obj.rawData.backgroundDependenceMeasurements = [];
+    else
+        % Continue with the dependence of test on background test.
+        if (~isempty(calStruct.backgroundDependenceSetup))
+            fprintf('4. Effect of background measurements ...\n');
+
+            % allocate storage for all dependence measurements
+            settingsNumToBeMeasured    = size(calStruct.backgroundDependenceSetup.settings,2);
+            backgroundsNumToBeMeasured = size(calStruct.backgroundDependenceSetup.bgSettings,2);
+            obj.rawData.backgroundDependenceMeasurements = zeros(backgroundsNumToBeMeasured, settingsNumToBeMeasured, obj.measurementChannelsNum);
+
+            for bgIndex = 1:backgroundsNumToBeMeasured
+                backgroundSettings = calStruct.backgroundDependenceSetup.bgSettings(:,bgIndex);
+                for settingsIndex = 1:settingsNumToBeMeasured
+                    settingsToTest = calStruct.backgroundDependenceSetup.settings(:,settingsIndex);
+                    [obj.rawData.backgroundDependenceMeasurements(bgIndex, settingsIndex,:), obj.rawData.S] = ...
+                        obj.updateStimulusAndMeasure(backgroundSettings, settingsToTest, calStruct.describe.useBitsPP);
+                end
             end
         end
     end
 
+    if (obj.options.skipAmbientLightMeasurement)
+        fprintf('5. Skipping ambient light measurement ...\n');
+        % Set it to zero, because the ambient is used in the computation
+        obj.rawData.ambientMeasurements = zeros(1, obj.rawData.S(3));
+    else
+        % Conclude with the ambient measurements
+        % Re-initialize states of the screens
+        fprintf('5. Ambient light measurements ...\n');
 
-    % Conclude with the ambient measurements
-    % Re-initialize states of the screens
-    fprintf('5. Ambient light measurements ...\n');
-    
-    backgroundSettings  = calStruct.describe.bgColor';
-    settingsToTest      = [0.0 0.0 0.0]';
-    
-    for repeatIndex = 1:calStruct.describe.nAverage
-        [ambientMeasurement, obj.rawData.S]  = obj.updateStimulusAndMeasure(backgroundSettings, settingsToTest, calStruct.describe.useBitsPP);
-        if (repeatIndex == 1)
-            obj.rawData.ambientMeasurements = ambientMeasurement;
-        else
-            obj.rawData.ambientMeasurements = obj.rawData.ambientMeasurements + ambientMeasurement;
+        backgroundSettings  = calStruct.describe.bgColor';
+        settingsToTest      = [0.0 0.0 0.0]';
+
+        for repeatIndex = 1:calStruct.describe.nAverage
+            [ambientMeasurement, obj.rawData.S]  = obj.updateStimulusAndMeasure(backgroundSettings, settingsToTest, calStruct.describe.useBitsPP);
+            if (repeatIndex == 1)
+                obj.rawData.ambientMeasurements = ambientMeasurement;
+            else
+                obj.rawData.ambientMeasurements = obj.rawData.ambientMeasurements + ambientMeasurement;
+            end
         end
+
+        % compute average
+        obj.rawData.ambientMeasurements = obj.rawData.ambientMeasurements / calStruct.describe.nAverage;
     end
-    
-    % compute average
-    obj.rawData.ambientMeasurements = obj.rawData.ambientMeasurements / calStruct.describe.nAverage;
-   
 
     % Report time
     t1 = clock;

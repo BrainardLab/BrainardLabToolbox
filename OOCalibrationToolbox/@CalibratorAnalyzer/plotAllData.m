@@ -27,7 +27,9 @@ function obj = plotAllData(obj)
             end
         elseif (figureGroupIndex == 3)
             gridDims = obj.backgroundEffectsGridDims;
-            obj.plotBackgroundEffectsData(figureGroupIndex);
+            if (~isempty(obj.newStyleCal.rawData.backgroundDependenceMeasurements))
+                obj.plotBackgroundEffectsData(figureGroupIndex);
+            end
         end
         
         % Undock group
