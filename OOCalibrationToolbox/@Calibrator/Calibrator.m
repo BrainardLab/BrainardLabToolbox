@@ -156,17 +156,17 @@ classdef Calibrator < handle
         function obj = Calibrator(initParams) 
             % Configure an inputParser to examine whether the options passed to us are valid
             parser = inputParser;
-            parser.addParamValue('executiveScriptName',             obj.executiveScriptName);
-            parser.addParamValue('calibrationFile',                 obj.calibrationFile);
-            parser.addParamValue('radiometerObj',                   obj.radiometerObj);
-            parser.addParamValue('screenToCalibrate',               obj.screenToCalibrate);
-            parser.addParamValue('desiredRefreshRate',              obj.desiredRefreshRate);
-            parser.addParamValue('displayTemporalDither',           obj.displayTemporalDither);
-            parser.addParamValue('desiredScreenSizePixel',          obj.desiredScreenSizePixel);
-            parser.addParamValue('displayDeviceType',               obj.displayDeviceType);
-            parser.addParamValue('displayPrimariesNum',             obj.displayPrimariesNum);
-            parser.addParamValue('displayDeviceName',               obj.displayDeviceName);
-            parser.addParamValue('comment',                         obj.comment);
+            parser.addParameter('executiveScriptName',             obj.executiveScriptName);
+            parser.addParameter('calibrationFile',                 obj.calibrationFile);
+            parser.addParameter('radiometerObj',                   obj.radiometerObj);
+            parser.addParameter('screenToCalibrate',               obj.screenToCalibrate);
+            parser.addParameter('desiredRefreshRate',              obj.desiredRefreshRate);
+            parser.addParameter('displayTemporalDither',           obj.displayTemporalDither);
+            parser.addParameter('desiredScreenSizePixel',          obj.desiredScreenSizePixel);
+            parser.addParameter('displayDeviceType',               obj.displayDeviceType);
+            parser.addParameter('displayPrimariesNum',             obj.displayPrimariesNum);
+            parser.addParameter('displayDeviceName',               obj.displayDeviceName);
+            parser.addParameter('comment',                         obj.comment);
             % Execute the parser
             parser.parse(initParams{:});
             % Create a standard Matlab structure from the parser results.

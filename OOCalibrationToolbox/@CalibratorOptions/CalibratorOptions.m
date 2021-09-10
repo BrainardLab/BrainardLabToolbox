@@ -97,23 +97,23 @@ classdef CalibratorOptions
             
             % Configure an inputParser to examine whether the options passed to us are valid
             parser = inputParser;
-            parser.addParamValue('verbosity',                       obj.verbosity);
-            parser.addParamValue('whoIsDoingTheCalibration',        obj.whoIsDoingTheCalibration);
-            parser.addParamValue('emailAddressForDoneNotification', obj.emailAddressForDoneNotification);
-            parser.addParamValue('blankOtherScreen',                obj.blankOtherScreen);
-            parser.addParamValue('whichBlankScreen',                obj.whichBlankScreen);
-            parser.addParamValue('blankSettings',                   obj.blankSettings);
-            parser.addParamValue('fgColor',                         obj.fgColor);
-            parser.addParamValue('bgColor',                         obj.bgColor);
-            parser.addParamValue('meterDistance',                   obj.meterDistance);
-            parser.addParamValue('leaveRoomTime',                   obj.leaveRoomTime);
-            parser.addParamValue('nAverage',                        obj.nAverage);
-            parser.addParamValue('nMeas',                           obj.nMeas);
-            parser.addParamValue('boxSize',                         obj.boxSize);
-            parser.addParamValue('boxOffsetX',                      obj.boxOffsetX);
-            parser.addParamValue('boxOffsetY',                      obj.boxOffsetY);
-            parser.addParamValue('primaryBasesNum',                 obj.primaryBasesNum);
-            parser.addParamValue('gamma',                           obj.gamma);
+            parser.addParameter('verbosity',                       obj.verbosity);
+            parser.addParameter('whoIsDoingTheCalibration',        obj.whoIsDoingTheCalibration);
+            parser.addParameter('emailAddressForDoneNotification', obj.emailAddressForDoneNotification);
+            parser.addParameter('blankOtherScreen',                obj.blankOtherScreen);
+            parser.addParameter('whichBlankScreen',                obj.whichBlankScreen);
+            parser.addParameter('blankSettings',                   obj.blankSettings);
+            parser.addParameter('fgColor',                         obj.fgColor);
+            parser.addParameter('bgColor',                         obj.bgColor);
+            parser.addParameter('meterDistance',                   obj.meterDistance);
+            parser.addParameter('leaveRoomTime',                   obj.leaveRoomTime);
+            parser.addParameter('nAverage',                        obj.nAverage);
+            parser.addParameter('nMeas',                           obj.nMeas);
+            parser.addParameter('boxSize',                         obj.boxSize);
+            parser.addParameter('boxOffsetX',                      obj.boxOffsetX);
+            parser.addParameter('boxOffsetY',                      obj.boxOffsetY);
+            parser.addParameter('primaryBasesNum',                 obj.primaryBasesNum);
+            parser.addParameter('gamma',                           obj.gamma);
             
             % Execute the parser
             parser.parse(varargin{:});
