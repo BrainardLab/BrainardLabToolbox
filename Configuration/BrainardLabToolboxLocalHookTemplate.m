@@ -87,7 +87,8 @@ setpref(toolboxName, 'ptbBaseDir', ptbBaseDir);
 % we point at that. Otherwise this is set to empty.
 %
 % Specific projects can override this to have the calibration files
-% written to a project specific location.
+% written to a project specific location.  This should be set to the full
+% path to the desired directory.
 psychCalLocalData = tbLocateToolbox('PsychCalLocalData');
 setpref(toolboxName,'CalDataFolder',psychCalLocalData);
 
