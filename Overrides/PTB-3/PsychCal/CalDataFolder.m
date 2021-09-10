@@ -100,6 +100,8 @@ if (nargin < 3 || isempty(calDir))
             end
             directory = deblank(directory(1,:));
         end
+    else
+        directory = calDir;
     end
 else
     directory = calDir;
