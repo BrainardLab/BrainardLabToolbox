@@ -7,7 +7,7 @@ function plotBackgroundEffectsData(obj, figureGroupIndex)
         maxAll(settingIndex) = max(max(spectra));
     end
     
-    maxAll = max(maxAll);
+    maxAll = max([0.01 max(maxAll)]);
     
     for settingIndex = 1:size(obj.newStyleCal.backgroundDependenceSetup.settings,2)
         spectra = squeeze(obj.newStyleCal.rawData.backgroundDependenceMeasurements(:,settingIndex,:));

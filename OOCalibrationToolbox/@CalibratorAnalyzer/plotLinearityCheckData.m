@@ -46,7 +46,7 @@ function plotSpectralAditivityData(obj, figureGroupIndex)
         % Plot measured as a line plot on top
         stairs(spectralAxis, measuredSpd*1000, 'Color', 'r', 'LineWidth', 1.0);
         
-        set(gca, 'XLim', [380,780], 'YLim', [0 1.05*1000*max([max(predictedSpd) max(measuredSpd)])]);
+        set(gca, 'XLim', [380,780], 'YLim', [0 max([0.1 1.05*1000*max([max(predictedSpd) max(measuredSpd)])])]);
         box on;
         hleg = legend({' measured ', ' predicted '}, 'Location', 'NorthEast');
         set(hleg,'FontName', 'Helvetica', 'Fontweight', 'normal', 'FontSize', 10);

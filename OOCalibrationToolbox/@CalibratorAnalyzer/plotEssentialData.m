@@ -70,7 +70,7 @@ function plotRepeatibilityData(obj, figureGroupIndex)
         plot(gammaInput, squeeze(primary_xyY(trialIndex, 2, lumIndex, :)), 'go-', 'MarkerSize', markerSize, 'MarkerFaceColor', [0.5 1 0.5]);
         plot(gammaInput, squeeze(primary_xyY(trialIndex, 3, lumIndex, :)), 'bo-', 'MarkerSize', markerSize, 'MarkerFaceColor', [0.5 0.5 1]);
     end
-    axis([0 1 0 maxLum]);
+    axis([0 1 0 max([0.1 maxLum])]);
     box on;
     set(gca, 'Color', [1.0 1.0 1.0], 'XColor', 'b', 'YColor', 'b');
     set(gca, 'FontName', 'Helvetica', 'Fontweight', 'normal', 'FontSize', 14);
