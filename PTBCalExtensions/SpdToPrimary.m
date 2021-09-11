@@ -1,4 +1,4 @@
-function [primary,predictedSpd,errorFraction,gamutMargin] = OLSpdToPrimary(cal, targetSpd, varargin)
+function [primary,predictedSpd,errorFraction,gamutMargin] = OLSpdToPrimary(calOrCalStruct, targetSpd, varargin)
 % Converts a spectrum into normalized primary OneLight mirror values.
 %
 % Syntax:
@@ -98,11 +98,27 @@ function [primary,predictedSpd,errorFraction,gamutMargin] = OLSpdToPrimary(cal, 
  
 % Examples:
 %{
-    cal = OLGetCalibrationStructure('CalibrationType','DemoCal','CalibrationFolder',fullfile(tbLocateToolbox('OneLightToolbox'),'OLDemoCal'),'CalibrationDate','latest');
-    primaryIn = rand(size(cal.computed.pr650M,2),1);
-    spd1 = OLPrimaryToSpd(cal,primaryIn);
-    primaryOut = OLSpdToPrimary(cal,spd1,'primaryHeadroom',0,'lambda',0);
-    spd2 = OLPrimaryToSpd(cal,primaryOut);
+    % Get a calibration
+    calOrCalStruct = LoadCalFile('SACCPrimary1');
+    if (isempty(calOrCalStruct))
+        error('Need an appropriate calibration file');
+    end
+
+    % Hack to handle what should not happen, P_ambient is empty.
+    if (isempty(calOrCalStruct.processedData.P_ambient))
+        Stemp = calOrCalStruct.rawData.S;
+        calOrCalStruct.processedData.P_ambient = zeros(size(SToWls(Stemp)));
+        clear Stemp;
+    end
+
+    % Go object oriented
+    calStructOBJ = ObjectToHandleCalOrCalStruct(calOrCalStruct);
+
+    % Now test the routine
+    primaryIn = rand(size(calStructOBJ.get('P_device'),2),1);
+    spd1 = PrimaryToSpd(calStructOBJ,primaryIn);
+    primaryOut = SpdToPrimary(calStructOBJ,spd1,'primaryHeadroom',0,'lambda',0);
+    spd2 = PrimaryToSpd(calStructOBJ,primaryOut);
     figure; clf;
     plot(primaryIn,primaryOut,'ro','MarkerSize',4,'MarkerFaceColor','r');
     axis([0 1 0 1]); axis('square');
@@ -125,6 +141,9 @@ p.addParameter('spdToleranceFraction', 0.01, @isscalar);
 p.addParameter('maxSearchIter',300,@isscalar);
 p.parse(varargin{:});
 params = p.Results;
+
+%% Force desired format
+calStructOBJ = ObjectToHandleCalOrCalStruct(calOrCalStruct);
 
 %% Parameters
 if (p.Results.verbose)
