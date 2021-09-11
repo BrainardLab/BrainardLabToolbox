@@ -34,6 +34,22 @@ classdef SACCPrimaryCalibrator < Calibrator
         
         % the original LUT (to be restored upon termination)
         origLUT;
+        
+        % logical to physical mapping
+        logicalToPhysical = [0:7 9:15];
+        
+        % number of subprimaries
+        nSubprimaries  = 15;
+        
+        % number of projector primaries
+        nPrimaries = 3;
+        
+        % nInputLevels
+        nInputLevels = 252;
+        
+        % subprimary setting to determine black level for measurements.
+        arbitraryBlack = 0.05; % Range = 0-1
+        
     end
     
     

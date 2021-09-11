@@ -13,21 +13,21 @@ function obj = shutDown(obj)
     unix(CommandNormalMode)
 
     % Set the projector default settings when you can get when turning on 
-    CurrentDefault = 252;
+    CurrentDefault = obj.nInputLevels;
     
     % Set Primary1 
     for i=[13,14,15] % SubPrimary
-        Datapixx('SetPropixxHSLedCurrent', 0, i-1, CurrentDefault); 
+        Datapixx('SetPropixxHSLedCurrent', 0, obj.logicalToPhysical(i), CurrentDefault); 
     end
     
     % Set Primary2
     for i=[1,5,6,7] % SubPrimary
-        Datapixx('SetPropixxHSLedCurrent', 1, i-1, CurrentDefault);
+        Datapixx('SetPropixxHSLedCurrent', 1, obj.logicalToPhysical(i), CurrentDefault);
     end
     
     % Set Primary3
     for i=[1,2,3] % SubPrimary 
-        Datapixx('SetPropixxHSLedCurrent', 2, i-1, CurrentDefault); 
+        Datapixx('SetPropixxHSLedCurrent', 2, obj.logicalToPhysical(i), CurrentDefault); 
     end
 
     % Close everything. Here we should also reset the PTB verbosity

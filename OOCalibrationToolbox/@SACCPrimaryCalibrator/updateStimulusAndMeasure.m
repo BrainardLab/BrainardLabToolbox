@@ -5,9 +5,10 @@ function [measurement, S] = updateStimulusAndMeasure(obj, bgSettings, targetSett
 
     % [SEMIN]
     % Use a loop to modify this to print out values of all settings entries.
+   
     if (obj.options.verbosity > 1)
-        for i=1:nSubprimaries
-        fprintf('        Target settings %2.0f   : %2.3f \n\n',i,targetSettings(i));
+        for i=1:obj.nSubprimaries
+        fprintf('        Target settings %2.0f   : %2.3f \n\n',i,round(252*targetSettings(i)));
         end
     end
     
