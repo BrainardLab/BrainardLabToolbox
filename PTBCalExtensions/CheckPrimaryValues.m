@@ -62,7 +62,7 @@ function [inGamut, gamutMargins] = CheckPrimaryValues(primaryValues,gamutMinMax)
 %}
 
 %%
-gamutMargins = OLGamutMargins(primaryValues,gamutMinMax); 
+gamutMargins = GamutMargins(primaryValues,gamutMinMax); 
     
 inGamut = all(gamutMargins >= 0);
 end

@@ -210,21 +210,21 @@ end
 gamutMinMax = gamutMinMax + p.Results.primaryHeadroom * [1 -1];
 
 %% Truncate primaries by gamut tolerance
-primary = OLTruncateGamutTolerance(primary,gamutMinMax,p.Results.primaryTolerance);
+primary = TruncateGamutTolerance(primary,gamutMinMax,p.Results.primaryTolerance);
 
 %% Get gamut margins
-gamutMargins = OLGamutMargins(primary(:), gamutMinMax);
+gamutMargins = GamutMargins(primary(:), gamutMinMax);
 gamutMargin = max(-gamutMargins);
 
 %% Check if in gamut, get margin
-inGamut = OLCheckPrimaryValues(primary(:), gamutMinMax);
+inGamut = CheckPrimaryValues(primary(:), gamutMinMax);
 
 %% Error if necessary
 if (p.Results.checkPrimaryOutOfRange && ~inGamut)
     error('At least one primary values is out of gamut');
 else
     % In this case, force primaries to be within gamut
-    primary = OLTruncatePrimaryValues(primary,gamutMinMax);
+    primary = TruncatePrimaryValues(primary,gamutMinMax);
 end
 
 end
