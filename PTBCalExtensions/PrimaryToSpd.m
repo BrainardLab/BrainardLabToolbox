@@ -38,12 +38,12 @@ p.addRequired('primary',@isnumeric);
 p.addParameter('differentialMode', false, @islogical);
 p.parse(calOrCalStruct,primary,varargin{:});
 
-%% Specify @CalStruct object that will handle all access to the calibration data.
+%% Make sure we have @CalStruct object that will handle all access to the calibration data.
+%
 % From this point onward, all access to the calibration data is accomplised via the calStructOBJ.
 [calStructOBJ, inputArgIsACalStructOBJ] = ObjectToHandleCalOrCalStruct(calOrCalStruct);
 if (~inputArgIsACalStructOBJ)
-    % The input (calOrCalStruct) is a cal struct. Clear it to avoid  confusion.
-    clear 'calOrCalStruct';
+    error('The input (calOrCalStruct) is not a cal struct.');
 end
 
 %% Predict spd

@@ -34,6 +34,9 @@
 % PathUtilities          		- Manipulate and get info about Matlab path.
 % Plotting               		- Support for plotting.
 % Psychometric           		- Support for psychometric calculations.
+% PTBCalExtensions              - Extensions to PTB cal data architecture.
+%                               - Work with our object oriented code.  Mainly for handling displays with
+%                               - more than three primaries.
 % PTBSupport             		- Do useful things in Psychtoolbox display environment.
 % RadiometerChecks              - Code we use to check our radiometers.
 % SpectralData           		- Misc spectral data.
