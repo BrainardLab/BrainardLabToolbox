@@ -51,6 +51,9 @@ classdef CalibratorOptions
         % Number of samples in the [0..1] range (RGB settings) 
         nMeas = 25;
         
+        % Number of primaries
+        nDevices = 3;
+        
         % Target size (in pixels)
         boxSize = 150;
         
@@ -64,6 +67,9 @@ classdef CalibratorOptions
         skipLinearityTest = false;
         skipBackgroundDependenceTest = false;
         skipAmbientLightMeasurement = false;
+        
+        % Custom linearity setup
+        customLinearitySetup = [];
         
         % Number of basis vectors in the linear calibration model
         primaryBasesNum = 1;
@@ -114,11 +120,13 @@ classdef CalibratorOptions
             parser.addParameter('leaveRoomTime',                   obj.leaveRoomTime);
             parser.addParameter('nAverage',                        obj.nAverage);
             parser.addParameter('nMeas',                           obj.nMeas);
+            parser.addParameter('nDevices',                        obj.nDevices);
             parser.addParameter('boxSize',                         obj.boxSize);
             parser.addParameter('boxOffsetX',                      obj.boxOffsetX);
             parser.addParameter('boxOffsetY',                      obj.boxOffsetY);
             parser.addParameter('primaryBasesNum',                 obj.primaryBasesNum);
             parser.addParameter('gamma',                           obj.gamma);
+            parser.addParameter('customLinearitySetup',            [], @obj.linearitySetupValidationFunction);
             parser.addParameter('skipLinearityTest',               obj.skipLinearityTest);
             parser.addParameter('skipBackgroundDependenceTest',    obj.skipBackgroundDependenceTest);
             parser.addParameter('skipAmbientLightMeasurement',     obj.skipAmbientLightMeasurement);
@@ -153,6 +161,42 @@ classdef CalibratorOptions
                                 ]';        
                 
         end
+        
+        % Validation method for customLinearitySetup
+        function isValid = linearitySetupValidationFunction(obj,x)
+            isValid  = false;
+
+            if (isempty(x))
+                isValid = true;
+                return;
+            elseif (isstruct(x))
+                if (isfield(x, 'settings'))
+                    if ((isnumeric(x.settings)) && ismatrix(x.settings))
+                        % Check dimensionality
+                        assert(size(x.settings,1) == obj.nDevices, 'The rows in customLinearitySetup.settings (%d) does not match the number of primaries (%d)', size(x.settings,1), obj.nDevices);
+                        assert(mod(size(x.settings,2), 1+obj.nDevices)==0, 'The columns in customLinearitySetup.settings (%d)is not an integer multiplier of 1+ number of primaries (%d)', size(x.settings,2), obj.nDevices);
+                        
+                        % Check that the settings are adequate for testing linearity
+                        skip = 1+obj.nDevices;
+                        size(x.settings,2)
+                        kValues = 1:skip:(size(x.settings,2)-skip)+1;
+                        for k = 1:length(kValues)
+                            kk = kValues(k);
+                            for primaryIndex = 1:obj.nDevices
+                              assert(x.settings(primaryIndex,kk) == x.settings(primaryIndex,kk+primaryIndex), ...
+                                  'incosistent linearity check values');
+                              assert(x.settings(primaryIndex,kk) == sum(x.settings(:,kk+primaryIndex),1), ...
+                                  'incosistent linearity check values');
+                            end
+                        end
+                        
+                        isValid = true;
+                        return;
+                    end
+                end
+            end
+        end
+            
         
         % Setter method for property verbosity
         function obj = set.verbosity(obj, newValue)
@@ -198,7 +242,10 @@ classdef CalibratorOptions
         
         % Getter for dependent property basicLinearitySetup
         function basicLinearitySetup = get.basicLinearitySetup(obj)
-            basicLinearitySetup.settings = [ ...
+            if (~isempty(obj.customLinearitySetup))
+                basicLinearitySetup = obj.customLinearitySetup;
+            else
+                basicLinearitySetup.settings = [ ...
                                 [1.00 1.00 1.00] ; ...
                                 [1.00 0.00 0.00] ; ...
                                 [0.00 1.00 0.00] ; ...
@@ -232,6 +279,7 @@ classdef CalibratorOptions
                                 [0.4674    0.4249    0.3573]; ...
                                 [0.4106    0.4399    0.5388]; ...
                             ]';
+            end
                         
         end
         

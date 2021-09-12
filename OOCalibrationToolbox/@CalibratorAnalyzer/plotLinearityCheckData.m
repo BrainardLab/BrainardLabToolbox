@@ -18,18 +18,32 @@ function plotSpectralAditivityData(obj, figureGroupIndex)
     % Compute spectral axis
     spectralAxis = SToWls(obj.calStructOBJ.get('S'));
     
-    kValues = [1 5 9 13];
+    skip = 1+obj.calStructOBJ.cal.nDevices;
+    kValues = 1:skip:min([13 size(obj.newStyleCal.rawData.basicLinearityMeasurements1,1)-skip]);  
+    
     for k = 1:length(kValues)
         kk = kValues(k);
-        measuredSpd  = obj.newStyleCal.rawData.basicLinearityMeasurements1(kk,:) - ambSpd; 
-        predictedSpd = (obj.newStyleCal.rawData.basicLinearityMeasurements1(kk+1,:)-ambSpd) + ...
-                       (obj.newStyleCal.rawData.basicLinearityMeasurements1(kk+2,:)-ambSpd) + ...
-                       (obj.newStyleCal.rawData.basicLinearityMeasurements1(kk+3,:)-ambSpd);
+        measuredSpd  = obj.newStyleCal.rawData.basicLinearityMeasurements1(kk,:) - ambSpd;
+        
+        % Sum over all nDevices
+        predictedSpd = sum(obj.newStyleCal.rawData.basicLinearityMeasurements1(kk+(1:obj.calStructOBJ.cal.nDevices),:),1);
+        
+        % Subtract ambient Spd
+        predictedSpd = bsxfun(@minus, predictedSpd, ambSpd*obj.calStructOBJ.cal.nDevices);
+        
+%         predictedSpd = (obj.newStyleCal.rawData.basicLinearityMeasurements1(kk+1,:)-ambSpd) + ...
+%                        (obj.newStyleCal.rawData.basicLinearityMeasurements1(kk+2,:)-ambSpd) + ...
+%                        (obj.newStyleCal.rawData.basicLinearityMeasurements1(kk+3,:)-ambSpd);
 
-        figName = sprintf('Additivity check RGB =(%d %d %d)e-2', ...
-            round(100*obj.newStyleCal.basicLinearitySetup.settings(1,kk)), ...
-            round(100*obj.newStyleCal.basicLinearitySetup.settings(2,kk)), ...
-            round(100*obj.newStyleCal.basicLinearitySetup.settings(3,kk)));
+        if (obj.calStructOBJ.cal.nDevices == 3)
+            figName = sprintf('Additivity check RGB =(%d %d %d)e-2', ...
+                round(100*obj.newStyleCal.basicLinearitySetup.settings(1,kk)), ...
+                round(100*obj.newStyleCal.basicLinearitySetup.settings(2,kk)), ...
+                round(100*obj.newStyleCal.basicLinearitySetup.settings(3,kk)));
+        else
+            figName = sprintf('Additivity check (multi-primary) #%d', k);
+        end
+        
 
         % Init figure
         h = figure('Name', figName, 'NumberTitle', 'off', 'Visible', 'off'); 

@@ -148,11 +148,12 @@ function [displaySettings, calibratorOptions] = generateConfigurationForVirtualW
     % Specify the @Calibrator's initialization params. 
     % Users should tailor these according to their hardware specs. 
     % These can be set once only, at the time the @Calibrator object is instantiated.
+    displayPrimariesNum = 3;
     displaySettings = { ...
         'screenToCalibrate',        2, ...                          % which display to calibrate. main screen = 1, second display = 2
         'desiredScreenSizePixel',   [1920 1080], ...                % pixels along the width and height of the display to be calibrated
         'desiredRefreshRate',       60, ...                        % refresh rate in Hz
-        'displayPrimariesNum',      3, ...                          % for regular displays this is always 3 (RGB) 
+        'displayPrimariesNum',      displayPrimariesNum, ...                          % for regular displays this is always 3 (RGB) 
         'displayDeviceType',        'monitor', ...                  % this should always be set to 'monitor' for now
         'displayDeviceName',        'VirtualWorldCalibration', ...               % a name for the display been calibrated
         'calibrationFile',          'VirtualWorldCalibration', ...               % name of calibration file to be generated
@@ -175,6 +176,7 @@ function [displaySettings, calibratorOptions] = generateConfigurationForVirtualW
         'leaveRoomTime',                    10, ...                          % seconds allowed to leave room
         'nAverage',                         2, ...                          % number of repeated measurements for averaging
         'nMeas',                            25, ...                         % samples along gamma curve
+        'nDevices',                         displayPrimariesNum, ...        % number of primaries
         'boxSize',                          150, ...                        % size of calibration stimulus in pixels
         'boxOffsetX',                       0, ...                          % x-offset from center of screen (neg: leftwards, pos:rightwards)         
         'boxOffsetY',                       0 ...                           % y-offset from center of screen (neg: upwards, pos: downwards)                      
@@ -188,11 +190,12 @@ function [displaySettings, calibratorOptions] = generateConfigurationForNaturaIm
     % Specify the @Calibrator's initialization params. 
     % Users should tailor these according to their hardware specs. 
     % These can be set once only, at the time the @Calibrator object is instantiated.
+    displayPrimariesNum = 3;
     displaySettings = { ...
         'screenToCalibrate',        2, ...                          % which display to calibrate. main screen = 1, second display = 2
         'desiredScreenSizePixel',   [1920 1080], ...                % pixels along the width and height of the display to be calibrated
         'desiredRefreshRate',       60, ...                        % refresh rate in Hz
-        'displayPrimariesNum',      3, ...                          % for regular displays this is always 3 (RGB) 
+        'displayPrimariesNum',      displayPrimariesNum, ...                          % for regular displays this is always 3 (RGB) 
         'displayDeviceType',        'monitor', ...                  % this should always be set to 'monitor' for now
         'displayDeviceName',        'NaturaImageThresholds', ...               % a name for the display been calibrated
         'calibrationFile',          getpref('NaturaImageThresholds','CalDataFile'); ... % name of calibration file to be generated
@@ -215,6 +218,7 @@ function [displaySettings, calibratorOptions] = generateConfigurationForNaturaIm
         'leaveRoomTime',                    10, ...                          % seconds allowed to leave room
         'nAverage',                         2, ...                          % number of repeated measurements for averaging
         'nMeas',                            25, ...                         % samples along gamma curve
+        'nDevices',                         displayPrimariesNum, ...        % number of primaries
         'boxSize',                          150, ...                        % size of calibration stimulus in pixels
         'boxOffsetX',                       0, ...                          % x-offset from center of screen (neg: leftwards, pos:rightwards)         
         'boxOffsetY',                       0 ...                           % y-offset from center of screen (neg: upwards, pos: downwards)                      
@@ -228,11 +232,12 @@ function [displaySettings, calibratorOptions] = generateConfigurationForMetropsi
     % Specify the @Calibrator's initialization params. 
     % Users should tailor these according to their hardware specs. 
     % These can be set once only, at the time the @Calibrator object is instantiated.
+    displayPrimariesNum = 3;
     displaySettings = { ...
         'screenToCalibrate',        2, ...                          % which display to calibrate. main screen = 1, second display = 2
         'desiredScreenSizePixel',   [1920 1080], ...                % pixels along the width and height of the display to be calibrated
         'desiredRefreshRate',       120, ...                        % refresh rate in Hz
-        'displayPrimariesNum',      3, ...                          % for regular displays this is always 3 (RGB) 
+        'displayPrimariesNum',      displayPrimariesNum, ...                          % for regular displays this is always 3 (RGB) 
         'displayDeviceType',        'monitor', ...                  % this should always be set to 'monitor' for now
         'displayDeviceName',        'MetropsisCalibration', ...               % a name for the display been calibrated
         'calibrationFile',          'MetropsisCalibration', ...               % name of calibration file to be generated
@@ -255,6 +260,7 @@ function [displaySettings, calibratorOptions] = generateConfigurationForMetropsi
         'leaveRoomTime',                    60, ...                          % seconds allowed to leave room
         'nAverage',                         2, ...                          % number of repeated measurements for averaging
         'nMeas',                            25, ...                         % samples along gamma curve
+        'nDevices',                         displayPrimariesNum, ...        % number of primaries
         'boxSize',                          150, ...                        % size of calibration stimulus in pixels
         'boxOffsetX',                       0, ...                          % x-offset from center of screen (neg: leftwards, pos:rightwards)         
         'boxOffsetY',                       0 ...                           % y-offset from center of screen (neg: upwards, pos: downwards)                      
@@ -269,11 +275,12 @@ function [displaySettings, calibratorOptions] = generateConfigurationForBOLDScre
     % Specify the @Calibrator's initialization params. 
     % Users should tailor these according to their hardware specs. 
     % These can be set once only, at the time the @Calibrator object is instantiated.
+    displayPrimariesNum = 3;
     displaySettings = { ...
         'screenToCalibrate',        2, ...                          % which display to calibrate. main screen = 1, second display = 2
         'desiredScreenSizePixel',   [1920 1080], ...                % pixels along the width and height of the display to be calibrated
         'desiredRefreshRate',       120, ...                        % refresh rate in Hz
-        'displayPrimariesNum',      3, ...                          % for regular displays this is always 3 (RGB) 
+        'displayPrimariesNum',      displayPrimariesNum, ...                          % for regular displays this is always 3 (RGB) 
         'displayDeviceType',        'monitor', ...                  % this should always be set to 'monitor' for now
         'displayDeviceName',        'BOLDScreen', ...               % a name for the display been calibrated
         'calibrationFile',          'BOLDScreen', ...               % name of calibration file to be generated
@@ -296,6 +303,7 @@ function [displaySettings, calibratorOptions] = generateConfigurationForBOLDScre
         'leaveRoomTime',                    1, ...                          % seconds allowed to leave room
         'nAverage',                         1, ...                          % number of repeated measurements for averaging
         'nMeas',                            15, ...                         % samples along gamma curve
+        'nDevices',                         displayPrimariesNum, ...        % number of primaries
         'boxSize',                          150, ...                        % size of calibration stimulus in pixels
         'boxOffsetX',                       0, ...                          % x-offset from center of screen (neg: leftwards, pos:rightwards)         
         'boxOffsetY',                       0 ...                           % y-offset from center of screen (neg: upwards, pos: downwards)                      
@@ -310,11 +318,12 @@ function [displaySettings, calibratorOptions] = generateConfigurationForAppleThu
     % Specify the @Calibrator's initialization params. 
     % Users should tailor these according to their hardware specs. 
     % These can be set once only, at the time the @Calibrator object is instantiated.
+    displayPrimariesNum = 3;
     displaySettings = { ...
         'screenToCalibrate',        2, ...                          % which display to calibrate. main screen = 1, second display = 2
         'desiredScreenSizePixel',   [2560 1440], ...                % pixels along the width and height of the display to be calibrated
         'desiredRefreshRate',       [], ...                         % refresh rate in Hz
-        'displayPrimariesNum',      3, ...                          % for regular displays this is always 3 (RGB) 
+        'displayPrimariesNum',      displayPrimariesNum, ...                          % for regular displays this is always 3 (RGB) 
         'displayDeviceType',        'monitor', ...                  % this should always be set to 'monitor' for now
         'displayDeviceName',        'AppleThunderboltDisplay', ...         % a name for the display been calibrated
         'calibrationFile',          'AppleThunderboltDisplay', ...         % name of calibration file to be generated
@@ -337,6 +346,7 @@ function [displaySettings, calibratorOptions] = generateConfigurationForAppleThu
         'leaveRoomTime',                    1, ...                          % seconds allowed to leave room
         'nAverage',                         2, ...                          % number of repeated measurements for averaging
         'nMeas',                            21, ...                         % samples along gamma curve
+        'nDevices',                         displayPrimariesNum, ...        % number of primaries
         'boxSize',                          150, ...                        % size of calibration stimulus in pixels
         'boxOffsetX',                       0, ...                          % x-offset from center of screen (neg: leftwards, pos:rightwards)         
         'boxOffsetY',                       0 ...                           % y-offset from center of screen (neg: upwards, pos: downwards)                      
@@ -351,11 +361,12 @@ function [displaySettings, calibratorOptions] = generateConfigurationForInVivoSe
     % Specify the @Calibrator's initialization params. 
     % Users should tailor these according to their hardware specs. 
     % These can be set once only, at the time the @Calibrator object is instantiated.
+    displayPrimariesNum = 3;
     displaySettings = { ...
         'screenToCalibrate',        1, ...                          % which display to calibrate. main screen = 1, second display = 2
         'desiredScreenSizePixel',   [1600 900], ...                % pixels along the width and height of the display to be calibrated
         'desiredRefreshRate',       [], ...                         % refresh rate in Hz
-        'displayPrimariesNum',      3, ...                          % for regular displays this is always 3 (RGB) 
+        'displayPrimariesNum',      displayPrimariesNum, ...                          % for regular displays this is always 3 (RGB) 
         'displayDeviceType',        'monitor', ...                  % this should always be set to 'monitor' for now
         'displayDeviceName',        'InVivoSensaVueFlatPanel', ...  % a name for the display been calibrated
         'calibrationFile',          'InVivoSensaVueFlatPanel', ...  % name of calibration file to be generated
@@ -378,6 +389,7 @@ function [displaySettings, calibratorOptions] = generateConfigurationForInVivoSe
         'leaveRoomTime',                    1, ...                          % seconds allowed to leave room
         'nAverage',                         1, ...                          % number of repeated measurements for averaging
         'nMeas',                            15, ...                         % samples along gamma curve
+        'nDevices',                         displayPrimariesNum, ...        % number of primaries
         'boxSize',                          150, ...                        % size of calibration stimulus in pixels
         'boxOffsetX',                       0, ...                          % x-offset from center of screen (neg: leftwards, pos:rightwards)         
         'boxOffsetY',                       0 ...                           % y-offset from center of screen (neg: upwards, pos: downwards)                      
@@ -392,11 +404,12 @@ function [displaySettings, calibratorOptions] = generateConfigurationForSACC()
     % Specify the @Calibrator's initialization params. 
     % Users should tailor these according to their hardware specs. 
     % These can be set once only, at the time the @Calibrator object is instantiated.
+    displayPrimariesNum = 3;
     displaySettings = { ...
         'screenToCalibrate',        2, ...                          % which display to calibrate. main screen = 1, second display = 2
         'desiredScreenSizePixel',   [1920 1080], ...                % pixels along the width and height of the display to be calibrated
-        'desiredRefreshRate',       120, ...                         % refresh rate in Hz
-        'displayPrimariesNum',      3, ...                          % for regular displays this is always 3 (RGB) 
+        'desiredRefreshRate',       120, ...                        % refresh rate in Hz
+        'displayPrimariesNum',      displayPrimariesNum, ...        % for regular displays this is always 3 (RGB) 
         'displayDeviceType',        'monitor', ...                  % this should always be set to 'monitor' for now
         'displayDeviceName',        'SACC', ...                     % a name for the display been calibrated
         'calibrationFile',          'SACC', ...                     % name of calibration file to be generated
@@ -419,6 +432,7 @@ function [displaySettings, calibratorOptions] = generateConfigurationForSACC()
         'leaveRoomTime',                    3, ...                          % seconds allowed to leave room
         'nAverage',                         2, ...                          % number of repeated measurements for averaging
         'nMeas',                            4, ...                          % samples along gamma curve
+        'nDevices',                         displayPrimariesNum, ...        % number of primaries
         'boxSize',                          600, ...                        % size of calibration stimulus in pixels (it was 150 / Semin)
         'boxOffsetX',                       0, ...                          % x-offset from center of screen (neg: leftwards, pos:rightwards)         
         'boxOffsetY',                       0 ...                           % y-offset from center of screen (neg: upwards, pos: downwards)                      
@@ -434,11 +448,12 @@ function [displaySettings, calibratorOptions] = generateConfigurationForSACCPrim
     % Specify the @Calibrator's initialization params. 
     % Users should tailor these according to their hardware specs. 
     % These can be set once only, at the time the @Calibrator object is instantiated.
+    displayPrimariesNum = 16;
     displaySettings = { ...
         'screenToCalibrate',        2, ...                          % which display to calibrate. main screen = 1, second display = 2
         'desiredScreenSizePixel',   [1920 1080], ...                % pixels along the width and height of the display to be calibrated
         'desiredRefreshRate',       120, ...                        % refresh rate in Hz
-        'displayPrimariesNum',      16, ...                         % for regular displays this is always 3 (RGB) 
+        'displayPrimariesNum',      displayPrimariesNum, ...        % for regular displays this is always 3 (RGB) 
         'displayDeviceType',        'monitor', ...                  % this should always be set to 'monitor' for now
         'displayDeviceName',        'SACCPrimary1', ...             % a name for the display been calibrated
         'calibrationFile',          'SACCPrimary1', ...             % name of calibration file to be generated
@@ -461,6 +476,7 @@ function [displaySettings, calibratorOptions] = generateConfigurationForSACCPrim
         'leaveRoomTime',                    3, ...                          % seconds allowed to leave room
         'nAverage',                         2, ...                          % number of repeated measurements for averaging
         'nMeas',                            4, ...                          % samples along gamma curve
+        'nDevices',                         displayPrimariesNum, ...        % number of primaries
         'boxSize',                          600, ...                        % size of calibration stimulus in pixels (it was 150 / Semin)
         'boxOffsetX',                       0, ...                          % x-offset from center of screen (neg: leftwards, pos:rightwards)         
         'boxOffsetY',                       0 ...                           % y-offset from center of screen (neg: upwards, pos: downwards)                      
@@ -476,11 +492,12 @@ function [displaySettings, calibratorOptions] = generateConfigurationForHTCVive(
     % Specify the @Calibrator's initialization params. 
     % Users should tailor these according to their hardware specs. 
     % These can be set once only, at the time the @Calibrator object is instantiated.
+    displayPrimariesNum = 3;
     displaySettings = { ...
         'screenToCalibrate',        2, ...                          % which display to calibrate. main screen = 1, second display = 2
         'desiredScreenSizePixel',   [1680 1050], ...                % pixels along the width and height of the display to be calibrated
         'desiredRefreshRate',       [], ...                         % refresh rate in Hz
-        'displayPrimariesNum',      3, ...                          % for regular displays this is always 3 (RGB) 
+        'displayPrimariesNum',      displayPrimariesNum, ...                          % for regular displays this is always 3 (RGB) 
         'displayDeviceType',        'monitor', ...                  % this should always be set to 'monitor' for now
         'displayDeviceName',        'HTCVive', ...  % a name for the display been calibrated
         'calibrationFile',          'HTCVive', ...  % name of calibration file to be generated
@@ -503,6 +520,7 @@ function [displaySettings, calibratorOptions] = generateConfigurationForHTCVive(
         'leaveRoomTime',                    1, ...                          % seconds allowed to leave room
         'nAverage',                         1, ...                          % number of repeated measurements for averaging
         'nMeas',                            15, ...                         % samples along gamma curve
+        'nDevices',                         displayPrimariesNum, ...        % number of primaries
         'boxSize',                          150, ...                        % size of calibration stimulus in pixels
         'boxOffsetX',                       0, ...                          % x-offset from center of screen (neg: leftwards, pos:rightwards)         
         'boxOffsetY',                       0 ...                           % y-offset from center of screen (neg: upwards, pos: downwards)                      
@@ -516,11 +534,13 @@ function [displaySettings, calibratorOptions] = generateConfigurationForDebugMod
     % Specify the @Calibrator's initialization params. 
     % Users should tailor these according to their hardware specs. 
     % These can be set once only, at the time the @Calibrator object is instantiated.
+    
+    displayPrimariesNum = 3;
     displaySettings = { ...
         'screenToCalibrate',        2, ...                          % which display to calibrate. main screen = 1, second display = 2
-        'desiredScreenSizePixel',   [1280 720], ...                % pixels along the width and height of the display to be calibrated
+        'desiredScreenSizePixel',   [1280 720], ...                 % pixels along the width and height of the display to be calibrated
         'desiredRefreshRate',       60, ...                         % refresh rate in Hz
-        'displayPrimariesNum',      3, ...                          % for regular displays this is always 3 (RGB) 
+        'displayPrimariesNum',      displayPrimariesNum, ...                          % for regular displays this is always 3 (RGB) 
         'displayDeviceType',        'monitor', ...                  % this should always be set to 'monitor' for now
         'displayDeviceName',        'debugMode', ...                     % a name for the display been calibrated
         'calibrationFile',          'debugMode', ...                     % name of calibration file to be generated
@@ -530,6 +550,19 @@ function [displaySettings, calibratorOptions] = generateConfigurationForDebugMod
     % Specify the @Calibrator's optional params using a CalibratorOptions object
     % To see what options are available type: doc CalibratorOptions
     % Users should tailor these according to their experimental needs.
+    
+    customLinearitySetup.settings = [ ...
+                                [1.00 0.5 0.25] ; ...  % Composite
+                                [1.00 0.00 0.00]; ...  % Component 1
+                                [0.00 0.5 0.00] ; ...  % Component 2
+                                [0.00 0.00 0.25]; ...  % Component 3
+                                [0.5 0.25 1]; ...      % Composite
+                                [0.5 0 0]; ...         % Component 1
+                                [0 0.25 0]; ...        % Component 2
+                                [0 0.0 1] ...          % Component 3
+                               ]';
+                  
+
     calibratorOptions = CalibratorOptions( ...
         'verbosity',                        2, ...
         'whoIsDoingTheCalibration',         input('Enter your name: ','s'), ...
@@ -543,10 +576,11 @@ function [displaySettings, calibratorOptions] = generateConfigurationForDebugMod
         'leaveRoomTime',                    3, ...                          % seconds allowed to leave room
         'nAverage',                         2, ...                          % number of repeated measurements for averaging
         'nMeas',                            4, ...                          % samples along gamma curve
+        'nDevices',                         displayPrimariesNum, ...        % number of primaries
         'boxSize',                          100, ...                        % size of calibration stimulus in pixels (it was 150 / Semin)
         'boxOffsetX',                       0, ...                          % x-offset from center of screen (neg: leftwards, pos:rightwards)         
         'boxOffsetY',                       0, ...                           % y-offset from center of screen (neg: upwards, pos: downwards)                      
-        'skipLinearityTest',                true, ...
+        'customLinearitySetup',             customLinearitySetup, ...
         'skipAmbientLightMeasurement',      true, ...
         'skipBackgroundDependenceTest',     true ...
     );
