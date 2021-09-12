@@ -19,7 +19,7 @@ function plotSpectralAditivityData(obj, figureGroupIndex)
     spectralAxis = SToWls(obj.calStructOBJ.get('S'));
     
     skip = 1+obj.calStructOBJ.cal.nDevices;
-    kValues = 1:skip:min([13 size(obj.newStyleCal.rawData.basicLinearityMeasurements1,1)-skip]);  
+    kValues = 1:skip:min([13 size(obj.newStyleCal.rawData.basicLinearityMeasurements1,1)-skip+1]);  
     
     for k = 1:length(kValues)
         kk = kValues(k);
