@@ -178,9 +178,10 @@ classdef CalStruct < handle
         function obj = CalStruct(cal, varargin)
             
             parser = inputParser;
-			parser.addParamValue('verbosity', 0);
+			parser.addParameter('verbosity', 0);
             % Execute the parser
 			parser.parse(varargin{:});
+            
             % Create a standard Matlab structure from the parser results.
 			parserResults = parser.Results;
             pNames = fieldnames(parserResults);

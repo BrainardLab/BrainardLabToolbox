@@ -3,7 +3,7 @@
 % by parsing the obj.oldFormatFieldMap.
 function cal = generateUpdatedCal(obj)
 
-    if (obj.verbosity > 1)
+    if (obj.verbosity > 0)
         fprintf('Generating cal with old-style format.\n');
     end
     
@@ -20,7 +20,7 @@ function cal = generateUpdatedCal(obj)
         if ~isempty(calPath)
             propertyName  = obj.fieldMap(unifiedFieldNames{k}).propertyName;
             propertyValue = eval(sprintf('obj.%s;',propertyName));
-            if (obj.verbosity > 1)
+            if (obj.verbosity > 0)
                 fprintf('%02d. Loading cal.%-30s <-- %s\n',k, calPath, propertyName); 
             end
             eval(sprintf('cal.%s = propertyValue;',calPath));
