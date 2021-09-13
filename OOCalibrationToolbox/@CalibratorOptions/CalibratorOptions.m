@@ -71,6 +71,9 @@ classdef CalibratorOptions
         % Custom background dependence setup
         customBackgroundDependenceSetup = [];
         
+        % Calibrator type specific params struct
+        calibratorTypeSpecificParamsStruct = [];
+        
         % Number of basis vectors in the linear calibration model
         primaryBasesNum = 1;
         
@@ -127,6 +130,7 @@ classdef CalibratorOptions
             parser.addParameter('gamma',                           obj.gamma);
             parser.addParameter('customLinearitySetup',            [], @obj.linearitySetupValidationFunction);
             parser.addParameter('customBackgroundDependenceSetup', [], @obj.backgroundDependenceSetupValidationFunction);
+            parser.addParameter('calibratorTypeSpecificParamsStruct', [], @(x)(isempty(x) || isstruct(x)));
             parser.addParameter('skipLinearityTest',               obj.skipLinearityTest);
             parser.addParameter('skipBackgroundDependenceTest',    obj.skipBackgroundDependenceTest);
             parser.addParameter('skipAmbientLightMeasurement',     obj.skipAmbientLightMeasurement);

@@ -29,9 +29,15 @@ Screen('Preference', 'SkipSyncTests', 1);
 % Start PsychImaging
 PsychImaging('PrepareConfiguration');
 
+% Get custom params 
+if (~isempty(obj.options.calibratorTypeSpecificParamsStruct))
+    % Background settings
+    backgroundSettings = obj.options.calibratorTypeSpecificParamsStruct.DLPbackgroundSettings;
+end
+    
 % Open master display (screen to be calibrated)
 [obj.masterWindowPtr, obj.screenRect] = ...
-    PsychImaging('OpenWindow', calStruct.describe.whichScreen-1, 255*calStruct.describe.bgColor, screenRect, pixelSize, [], stereoMode);
+    PsychImaging('OpenWindow', calStruct.describe.whichScreen-1, 255*backgroundSettings, screenRect, pixelSize, [], stereoMode);
 LoadIdentityClut(obj.masterWindowPtr);
 
 % Blank other screen.
@@ -48,7 +54,7 @@ end  % blackOtherScreen
 %     targetSettings = [1 1 1];
 targetSettings = ones(1,obj.nSubprimaries); % Setting for SACC Subprimary calibration (Semin)
 
-obj.updateBackgroundAndTarget(calStruct.describe.bgColor, targetSettings, calStruct.describe.useBitsPP)
+obj.updateBackgroundAndTarget(backgroundSettings, targetSettings, calStruct.describe.useBitsPP)
 
 % Connect to the projector
 isReady = Datapixx('open');

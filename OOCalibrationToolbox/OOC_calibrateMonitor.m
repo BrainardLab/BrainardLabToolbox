@@ -460,6 +460,11 @@ function [displaySettings, calibratorOptions] = generateConfigurationForSACCPrim
         'comment',                  'The SACC LED/DLP subprimary optical system' ...          % some comment, could be anything
         };
     
+    % SACCPrimary calibrator - specific params struct
+    SACCPrimaryCalibratorSpecificParamsStruct = struct(...
+        'DLPbackgroundSettings', [0.5 0.5 0.5] ...
+    );
+
     % Specify the @Calibrator's optional params using a CalibratorOptions object
     % To see what options are available type: doc CalibratorOptions
     % Users should tailor these according to their experimental needs.
@@ -469,7 +474,7 @@ function [displaySettings, calibratorOptions] = generateConfigurationForSACCPrim
         'emailAddressForDoneNotification',  GetWithDefault('Enter email address for done notification',  emailAddressForNotification), ...
         'blankOtherScreen',                 0, ...                          % whether to blank other displays attached to the host computer (1=yes, 0 = no), ...
         'whichBlankScreen',                 1, ...                          % screen number of the display to be blanked  (main screen = 1, second display = 2)
-        'blankSettings',                    zeros(1,displayPrimariesNum), ...              % color of the whichBlankScreen 
+        'blankSettings',                    zeros(1,displayPrimariesNum), ...         % color of the whichBlankScreen 
         'bgColor',                          0.05*ones(1,displayPrimariesNum), ...     % color of the background  
         'fgColor',                          0.05*ones(1,displayPrimariesNum), ...     % color of the foreground
         'meterDistance',                    1.0, ...                        % distance between radiometer and screen in meters
@@ -482,7 +487,8 @@ function [displaySettings, calibratorOptions] = generateConfigurationForSACCPrim
         'boxOffsetY',                       0, ...                           % y-offset from center of screen (neg: upwards, pos: downwards)                      
         'skipLinearityTest',                true, ...
         'skipAmbientLightMeasurement',      true, ...
-        'skipBackgroundDependenceTest',     true ...
+        'skipBackgroundDependenceTest',     true, ...
+        'calibratorTypeSpecificParamsStruct', SACCPrimaryCalibratorSpecificParamsStruct ...
     );
 end
 
@@ -556,14 +562,14 @@ function [displaySettings, calibratorOptions] = generateConfigurationForDebugMod
     
     % Custom linearity settings for checking additivity of primaries
     customLinearitySetup.settings = [ ...
-            [1.00 0.5 0.25] ; ...  % Composite
-            [1.00 0.00 0.00]; ...  % Component 1
-            [0.00 0.5 0.00] ; ...  % Component 2
-            [0.00 0.00 0.25]; ...  % Component 3
-            [0.5 0.25 1]; ...      % Composite
-            [0.5 0 0]; ...         % Component 1
-            [0 0.25 0]; ...        % Component 2
-            [0 0.0 1] ...          % Component 3
+            [1.00 0.50 0.25] ; ...  % Composite 1
+            [1.00 0.00 0.00]; ...   % Component 1R
+            [0.00 0.50 0.00] ; ...  % Component 1G
+            [0.00 0.00 0.25]; ...   % Component 1B
+            [0.50 0.25 1.00]; ...   % Composite 2
+            [0.50 0.00 0.00]; ...   % Component 2R
+            [0.00 0.25 0.00]; ...   % Component 2G
+            [0.00 0.00 1.00] ...    % Component 2B
     ]';
                   
     % Custom settings for checking dependence of target on background
@@ -588,7 +594,8 @@ function [displaySettings, calibratorOptions] = generateConfigurationForDebugMod
           'fitBreakThresh',   0.02, ...
           'nInputLevels',     252 ...
     );
-            
+        
+    
     calibratorOptions = CalibratorOptions( ...
         'verbosity',                        2, ...
         'whoIsDoingTheCalibration',         input('Enter your name: ','s'), ...
