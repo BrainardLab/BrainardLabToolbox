@@ -9,15 +9,19 @@ function plotBackgroundEffectsData(obj, figureGroupIndex)
     
     maxAll = max([0.01 max(maxAll)]);
     
-    for settingIndex = 1:size(obj.newStyleCal.backgroundDependenceSetup.settings,2)
+    for settingIndex = 1:min([ 6 size(obj.newStyleCal.backgroundDependenceSetup.settings,2)])
         spectra = squeeze(obj.newStyleCal.rawData.backgroundDependenceMeasurements(:,settingIndex,:));
         plotSpectra(obj, spectra, maxAll, obj.newStyleCal.backgroundDependenceSetup.settings(:,settingIndex), figureGroupIndex);
     end
 end
 
-function plotSpectra(obj, spectra, maxAll, settings, figureGroupIndex)
+function plotSpectra(obj, spectra, maxAll, settings, figureGroupIndex, settingsIndex, settingsIndicesNum)
     % Init figure
-    h = figure('Name', sprintf('Effects of background on RGB =(%d %d %d)e-2', round(100*settings(1)), round(100*settings(2)), round(100*settings(3))), 'NumberTitle', 'off', 'Visible', 'off'); 
+    if (numel(settings) == 3)
+        h = figure('Name', sprintf('Effects of background on RGB =(%d %d %d)e-2', round(100*settings(1)), round(100*settings(2)), round(100*settings(3))), 'NumberTitle', 'off', 'Visible', 'off'); 
+    else
+        h = figure('Name', sprintf('Effects of background on target %d/%d', settingsIndex, settingsIndicesNum), 'NumberTitle', 'off', 'Visible', 'off'); 
+    end
     clf; hold on;
 
     % Compute spectral axis
@@ -44,10 +48,15 @@ function plotSpectra(obj, spectra, maxAll, settings, figureGroupIndex)
         edgeColor = squeeze(lineColors(backgroundSettingIndex,:));
         plot(spectralAxis, spdDiff*1000, '-', 'Color', edgeColor, 'LineWidth', 2.0);
         
-        legendsMatrix{backgroundSettingIndex} = sprintf('bg=(%0.2f, %0.2f, %0.2f)', ...
-            obj.newStyleCal.backgroundDependenceSetup.bgSettings(1,backgroundSettingIndex), ...
-            obj.newStyleCal.backgroundDependenceSetup.bgSettings(2,backgroundSettingIndex), ...
-            obj.newStyleCal.backgroundDependenceSetup.bgSettings(3,backgroundSettingIndex));
+        if (size(obj.newStyleCal.backgroundDependenceSetup.bgSettings,1) == 3)
+            legendsMatrix{backgroundSettingIndex} = sprintf('bg=(%0.2f, %0.2f, %0.2f)', ...
+                obj.newStyleCal.backgroundDependenceSetup.bgSettings(1,backgroundSettingIndex), ...
+                obj.newStyleCal.backgroundDependenceSetup.bgSettings(2,backgroundSettingIndex), ...
+                obj.newStyleCal.backgroundDependenceSetup.bgSettings(3,backgroundSettingIndex));
+        else
+            legendsMatrix{backgroundSettingIndex} = sprintf('background setting %d/%d (multiprimary)', backgroundSettingIndex, backgroundSettingsNum);
+        end
+        
     end
     maxSPDdiff = max(maxSPDdiff);
     

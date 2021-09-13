@@ -551,18 +551,33 @@ function [displaySettings, calibratorOptions] = generateConfigurationForDebugMod
     % To see what options are available type: doc CalibratorOptions
     % Users should tailor these according to their experimental needs.
     
+    % Custom linearity settings for checking additivity of primaries
     customLinearitySetup.settings = [ ...
-                                [1.00 0.5 0.25] ; ...  % Composite
-                                [1.00 0.00 0.00]; ...  % Component 1
-                                [0.00 0.5 0.00] ; ...  % Component 2
-                                [0.00 0.00 0.25]; ...  % Component 3
-                                [0.5 0.25 1]; ...      % Composite
-                                [0.5 0 0]; ...         % Component 1
-                                [0 0.25 0]; ...        % Component 2
-                                [0 0.0 1] ...          % Component 3
-                               ]';
+            [1.00 0.5 0.25] ; ...  % Composite
+            [1.00 0.00 0.00]; ...  % Component 1
+            [0.00 0.5 0.00] ; ...  % Component 2
+            [0.00 0.00 0.25]; ...  % Component 3
+            [0.5 0.25 1]; ...      % Composite
+            [0.5 0 0]; ...         % Component 1
+            [0 0.25 0]; ...        % Component 2
+            [0 0.0 1] ...          % Component 3
+    ]';
                   
-
+    % Custom settings for checking dependence of target on background
+    customBackgroundDependenceSetup = struct(...
+        'bgSettings', [ ...
+            [1.0 1.0 1.0]; ...   % Background 1
+            [1.0 0.0 0.0]; ...   % Background 2
+            [0.0 1.0 0.0]; ...   % Background 3
+            [0.0 0.0 1.0]; ...   % Background 4
+            [0.0 0.0 0.0] ...    % Background 5 - an all zeros background must always be specified
+            ]', ...
+        'settings', [ ...
+            [1.0 1.0 1.0]; ...   % Target 1
+            [0.5 0.5 0.5] ...    % Target 2
+            ]' ...
+    );
+    
     calibratorOptions = CalibratorOptions( ...
         'verbosity',                        2, ...
         'whoIsDoingTheCalibration',         input('Enter your name: ','s'), ...
@@ -581,8 +596,8 @@ function [displaySettings, calibratorOptions] = generateConfigurationForDebugMod
         'boxOffsetX',                       0, ...                          % x-offset from center of screen (neg: leftwards, pos:rightwards)         
         'boxOffsetY',                       0, ...                           % y-offset from center of screen (neg: upwards, pos: downwards)                      
         'customLinearitySetup',             customLinearitySetup, ...
-        'skipAmbientLightMeasurement',      true, ...
-        'skipBackgroundDependenceTest',     true ...
+        'customBackgroundDependenceSetup',  customBackgroundDependenceSetup, ...
+        'skipAmbientLightMeasurement',      true ...
     );
 end
 

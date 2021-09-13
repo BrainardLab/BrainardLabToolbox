@@ -41,7 +41,7 @@ function plotSpectralAditivityData(obj, figureGroupIndex)
                 round(100*obj.newStyleCal.basicLinearitySetup.settings(2,kk)), ...
                 round(100*obj.newStyleCal.basicLinearitySetup.settings(3,kk)));
         else
-            figName = sprintf('Additivity check (multi-primary) #%d', k);
+            figName = sprintf('Additivity check (multi-primary) setup %d/%d', k, length(kValues));
         end
         
 

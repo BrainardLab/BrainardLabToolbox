@@ -34,10 +34,7 @@ classdef CalibratorOptions
         fgColor = [0.3000  0.6000  0.5000];
         
         % Settings for measurements that allow a background linearity check
-        backgroundDependenceSetup = struct( ...
-                    'bgSettings',   [], ...
-                    'settings',     [] ...
-                    );     
+        backgroundDependenceSetup;   
                 
         % Distance of meter to display in meters
         meterDistance = 0.5;
@@ -71,6 +68,9 @@ classdef CalibratorOptions
         % Custom linearity setup
         customLinearitySetup = [];
         
+        % Custom background dependence setup
+        customBackgroundDependenceSetup = [];
+        
         % Number of basis vectors in the linear calibration model
         primaryBasesNum = 1;
         
@@ -86,10 +86,8 @@ classdef CalibratorOptions
 
     properties (Dependent = true)
         % Settings for measurements that allow a basic linearity check
-        % This is dependent because it depends on fgColor
-        basicLinearitySetup = struct( ...
-                'settings', [] ...
-            );
+        % This is dependent because it may depend on fgColor
+        basicLinearitySetup;
     end % Dependent properties
     
     % Public methods
@@ -127,6 +125,7 @@ classdef CalibratorOptions
             parser.addParameter('primaryBasesNum',                 obj.primaryBasesNum);
             parser.addParameter('gamma',                           obj.gamma);
             parser.addParameter('customLinearitySetup',            [], @obj.linearitySetupValidationFunction);
+            parser.addParameter('customBackgroundDependenceSetup', [], @obj.backgroundDependenceSetupValidationFunction);
             parser.addParameter('skipLinearityTest',               obj.skipLinearityTest);
             parser.addParameter('skipBackgroundDependenceTest',    obj.skipBackgroundDependenceTest);
             parser.addParameter('skipAmbientLightMeasurement',     obj.skipAmbientLightMeasurement);
@@ -139,42 +138,71 @@ classdef CalibratorOptions
             for k = 1:length(pNames)
                 obj.(pNames{k}) = parserResults.(pNames{k}); 
             end
-            
-            obj.backgroundDependenceSetup.bgSettings = [ ...
-                                    [1.0 1.0 1.0]; ...
-                                    [1.0 0.0 0.0]; ...
-                                    [0.0 1.0 0.0]; ...
-                                    [0.0 0.0 1.0]; ...
-                                    [0.5 0.5 0.5]; ...
-                                    [0.5 0.0 0.0]; ...
-                                    [0.0 0.5 0.0]; ...
-                                    [0.0 0.0 0.5]; ...
-                                    [0.0 0.0 0.0]  ... 
-                                ]';
-            obj.backgroundDependenceSetup.settings = [ ...
-                                    [1.0 1.0 1.0]; ...
-                                    [0.5 0.5 0.5]; ...
-                                    [0.5 0.0 0.0]; ...
-                                    [0.0 0.5 0.0]; ...
-                                    [0.0 0.0 0.5]; ...
-                                    [0.0 0.0 0.0]  ...
-                                ]';        
-                
+  
         end
+        
+         % Validation method for customLinearitySetup
+        function isValid = backgroundDependenceSetupValidationFunction(obj,x)
+            
+            % Assume something wrong
+            isValid  = false;
+            
+            if (isempty(x))
+                % Empty is fine, because we will use the built in default linearity setup
+                isValid = true;
+                return;
+            elseif (isstruct(x))
+                if ((isfield(x, 'settings')) && (isfield(x, 'bgSettings')))
+                    
+                    if ((isnumeric(x.settings)) && ismatrix(x.settings)) && ...
+                       ((isnumeric(x.bgSettings)) && ismatrix(x.bgSettings))
+                   
+                        assert(size(x.settings,1) == obj.nDevices, 'The rows in customBackgroundDependenceSetup.settings (%d) does not match the number of primaries (%d)', size(x.settings,1), obj.nDevices);
+                        assert(size(x.bgSettings,1) == obj.nDevices, 'The rows in customBackgroundDependenceSetup.bgSettings (%d) does not match the number of primaries (%d)', size(x.bgSettings,1), obj.nDevices);
+                        assert(max(x.bgSettings(:)) <= 1.0, 'customBackgroundDependenceSetup.bgSettings is out of range (>1)');
+                        assert(min(x.bgSettings(:)) >= 0.0, 'customBackgroundDependenceSetup.bgSettings is out of range (<0)');
+                        assert(max(x.settings(:)) <= 1.0, 'customBackgroundDependenceSetup.settings is out of range (>1)');
+                        assert(min(x.settings(:)) >= 0.0, 'customBackgroundDependenceSetup.settings is out of range (<0)');
+                        
+                        % Check that one of the bgSettings is all zeros
+                        allZerosEntryFound = false;
+                        for k = 1:size(x.bgSettings,2)
+                            if (sum(squeeze(x.bgSettings(:,k))) == 0.0)
+                                allZerosEntryFound = true;
+                            end
+                        end
+                        assert(allZerosEntryFound, 'customBackgroundDependenceSetup.bgSettings does not contain an all-zeros entry.');
+                        
+                        isValid = true;
+                        return;
+                    end
+                    
+                end
+            end
+                    
+        end
+        
         
         % Validation method for customLinearitySetup
         function isValid = linearitySetupValidationFunction(obj,x)
+            
+            % Assume something wrong
             isValid  = false;
 
             if (isempty(x))
+                % Empty is fine, because we will use the built in default linearity setup
                 isValid = true;
                 return;
             elseif (isstruct(x))
                 if (isfield(x, 'settings'))
+                    
                     if ((isnumeric(x.settings)) && ismatrix(x.settings))
                         % Check dimensionality
                         assert(size(x.settings,1) == obj.nDevices, 'The rows in customLinearitySetup.settings (%d) does not match the number of primaries (%d)', size(x.settings,1), obj.nDevices);
                         assert(mod(size(x.settings,2), 1+obj.nDevices)==0, 'The columns in customLinearitySetup.settings (%d)is not an integer multiplier of 1+ number of primaries (%d)', size(x.settings,2), obj.nDevices);
+                        
+                        assert(max(x.settings(:)) <= 1.0, 'customLinearitySetup.settings is out of range (>1)');
+                        assert(min(x.settings(:)) >= 0.0, 'customLinearitySetup.settings is out of range (<0)');
                         
                         % Check that the settings are adequate for testing linearity
                         skip = 1+obj.nDevices;
@@ -239,12 +267,42 @@ classdef CalibratorOptions
             end
         end
         
+        % Getter for backgroundDependenceSetup
+        function backgroundDependenceSetup = get.backgroundDependenceSetup(obj)
+            if (~isempty(obj.customBackgroundDependenceSetup))
+                % User-supplied background dependence settings
+                backgroundDependenceSetup  = obj.customBackgroundDependenceSetup;
+            else
+                % Default background dependence setup settings
+                backgroundDependenceSetup.bgSettings = [ ...
+                                    [1.0 1.0 1.0]; ...
+                                    [1.0 0.0 0.0]; ...
+                                    [0.0 1.0 0.0]; ...
+                                    [0.0 0.0 1.0]; ...
+                                    [0.5 0.5 0.5]; ...
+                                    [0.5 0.0 0.0]; ...
+                                    [0.0 0.5 0.0]; ...
+                                    [0.0 0.0 0.5]; ...
+                                    [0.0 0.0 0.0]  ... 
+                                ]';
+                backgroundDependenceSetup.settings = [ ...
+                                    [1.0 1.0 1.0]; ...
+                                    [0.5 0.5 0.5]; ...
+                                    [0.5 0.0 0.0]; ...
+                                    [0.0 0.5 0.0]; ...
+                                    [0.0 0.0 0.5]; ...
+                                    [0.0 0.0 0.0]  ...
+                                ]';  
+            end
+        end
         
         % Getter for dependent property basicLinearitySetup
         function basicLinearitySetup = get.basicLinearitySetup(obj)
             if (~isempty(obj.customLinearitySetup))
+                % User-supplied linearity setup settings
                 basicLinearitySetup = obj.customLinearitySetup;
             else
+                % Default linearity setup settings
                 basicLinearitySetup.settings = [ ...
                                 [1.00 1.00 1.00] ; ...
                                 [1.00 0.00 0.00] ; ...
@@ -279,9 +337,9 @@ classdef CalibratorOptions
                                 [0.4674    0.4249    0.3573]; ...
                                 [0.4106    0.4399    0.5388]; ...
                             ]';
-            end
-                        
+            end       
         end
+        
         
     end  % public methods
     
