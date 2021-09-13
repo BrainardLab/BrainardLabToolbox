@@ -29,10 +29,12 @@ Screen('Preference', 'SkipSyncTests', 1);
 % Start PsychImaging
 PsychImaging('PrepareConfiguration');
 
-% Get custom params 
+% Retrieve passed custom params
 if (~isempty(obj.options.calibratorTypeSpecificParamsStruct))
     % Background settings
     backgroundSettings = obj.options.calibratorTypeSpecificParamsStruct.DLPbackgroundSettings;
+else
+    backgroundSettings = [1 1 1];    
 end
     
 % Open master display (screen to be calibrated)
