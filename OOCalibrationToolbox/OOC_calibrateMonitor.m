@@ -433,7 +433,7 @@ function [displaySettings, calibratorOptions] = generateConfigurationForSACC()
         'nAverage',                         2, ...                          % number of repeated measurements for averaging
         'nMeas',                            4, ...                          % samples along gamma curve
         'nDevices',                         displayPrimariesNum, ...        % number of primaries
-        'boxSize',                          600, ...                        % size of calibration stimulus in pixels (it was 150 / Semin)
+        'boxSize',                          600, ...                        % size of calibration stimulus in pixels 
         'boxOffsetX',                       0, ...                          % x-offset from center of screen (neg: leftwards, pos:rightwards)         
         'boxOffsetY',                       0 ...                           % y-offset from center of screen (neg: upwards, pos: downwards)                      
     );
@@ -448,7 +448,7 @@ function [displaySettings, calibratorOptions] = generateConfigurationForSACCPrim
     % Specify the @Calibrator's initialization params. 
     % Users should tailor these according to their hardware specs. 
     % These can be set once only, at the time the @Calibrator object is instantiated.
-    displayPrimariesNum = 16;
+    displayPrimariesNum = 15;
     displaySettings = { ...
         'screenToCalibrate',        2, ...                          % which display to calibrate. main screen = 1, second display = 2
         'desiredScreenSizePixel',   [1920 1080], ...                % pixels along the width and height of the display to be calibrated
@@ -469,9 +469,9 @@ function [displaySettings, calibratorOptions] = generateConfigurationForSACCPrim
         'emailAddressForDoneNotification',  GetWithDefault('Enter email address for done notification',  emailAddressForNotification), ...
         'blankOtherScreen',                 0, ...                          % whether to blank other displays attached to the host computer (1=yes, 0 = no), ...
         'whichBlankScreen',                 1, ...                          % screen number of the display to be blanked  (main screen = 1, second display = 2)
-        'blankSettings',                    [0.0 0.0 0.0], ...              % color of the whichBlankScreen 
-        'bgColor',                          [0.3962 0.3787 0.4039], ...     % color of the background  
-        'fgColor',                          [0.3962 0.3787 0.4039], ...     % color of the foreground
+        'blankSettings',                    zeros(1,displayPrimariesNum), ...              % color of the whichBlankScreen 
+        'bgColor',                          0.05*ones(1,displayPrimariesNum), ...     % color of the background  
+        'fgColor',                          0.05*ones(1,displayPrimariesNum), ...     % color of the foreground
         'meterDistance',                    1.0, ...                        % distance between radiometer and screen in meters
         'leaveRoomTime',                    3, ...                          % seconds allowed to leave room
         'nAverage',                         2, ...                          % number of repeated measurements for averaging
@@ -479,7 +479,10 @@ function [displaySettings, calibratorOptions] = generateConfigurationForSACCPrim
         'nDevices',                         displayPrimariesNum, ...        % number of primaries
         'boxSize',                          600, ...                        % size of calibration stimulus in pixels (it was 150 / Semin)
         'boxOffsetX',                       0, ...                          % x-offset from center of screen (neg: leftwards, pos:rightwards)         
-        'boxOffsetY',                       0 ...                           % y-offset from center of screen (neg: upwards, pos: downwards)                      
+        'boxOffsetY',                       0, ...                           % y-offset from center of screen (neg: upwards, pos: downwards)                      
+        'skipAmbientLightMeasurement',      true, ...
+        'skipAmbientLightMeasurement',      true, ...
+        'skipBackgroundDependenceTest',     true ...
     );
 end
 
