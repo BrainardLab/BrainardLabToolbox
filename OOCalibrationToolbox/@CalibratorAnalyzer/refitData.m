@@ -28,7 +28,11 @@ function obj = refitData(obj)
         %obj.processedData.monSVs   = obj.calStructOBJ.get('monSVs');
     
         % Fit the gamma
-        nInputLevels = 1024;
+        nInputLevels = obj.calStructOBJ.get('gamma.nInputLevels');
+        if (isempty(nInputLevels))
+            nInputLevels = 1024;
+        end
+
         CalibrateFitGamma(obj.calStructOBJ, nInputLevels);
         % Update internal data reprentation
         %obj.processedData.gammaInput  = obj.calStructOBJ.get('gammaInput');
