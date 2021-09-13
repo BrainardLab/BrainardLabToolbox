@@ -111,6 +111,7 @@ classdef CalStruct < handle
         describe___gamma___exponents;
         describe___gamma___contrastThresh;
         describe___gamma___fitBreakThresh;
+        describe___gamma___nInputLevels;
         describe___gamma___useweight;
         
         % Radiometer params

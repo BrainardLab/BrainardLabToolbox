@@ -6,8 +6,12 @@ function obj = fitRawGamma(obj, nInputLevels)
     
     % Fit the gamma
     if (nargin < 2 || isempty(nInputLevels))
-        nInputLevels = 1024;
+        nInputLevels = calStructOBJ.get('gamma.nInputLevels');
+        if (isempty(nInputLevels))
+            nInputLevels = 1024;
+        end 
     end
+    
     CalibrateFitGamma(calStructOBJ, nInputLevels);
 
     % Update internal data reprentation
