@@ -581,6 +581,91 @@ function [displaySettings, calibratorOptions] = generateConfigurationForDebugMod
             ]' ...
     );
     
+    % Custom gamma fit
+    customGammaFit = struct( ...
+          'fitType',          'crtPolyLinear', ...
+          'contrastThresh',   1.0000e-03, ...
+          'fitBreakThresh',   0.02, ...
+          'nInputLevels',     252 ...
+    );
+            
+    calibratorOptions = CalibratorOptions( ...
+        'verbosity',                        2, ...
+        'whoIsDoingTheCalibration',         input('Enter your name: ','s'), ...
+        'emailAddressForDoneNotification',  GetWithDefault('Enter email address for done notification',  emailAddressForNotification), ...
+        'blankOtherScreen',                 0, ...                          % whether to blank other displays attached to the host computer (1=yes, 0 = no), ...
+        'whichBlankScreen',                 1, ...                          % screen number of the display to be blanked  (main screen = 1, second display = 2)
+        'blankSettings',                    [0.0 0.0 0.0], ...              % color of the whichBlankScreen 
+        'bgColor',                          [0.3962 0.3787 0.4039], ...     % color of the background  
+        'fgColor',                          [0.3962 0.3787 0.4039], ...     % color of the foreground
+        'meterDistance',                    1.0, ...                        % distance between radiometer and screen in meters
+        'leaveRoomTime',                    3, ...                          % seconds allowed to leave room
+        'nAverage',                         2, ...                          % number of repeated measurements for averaging
+        'nMeas',                            4, ...                          % samples along gamma curve
+        'nDevices',                         displayPrimariesNum, ...        % number of primaries
+        'boxSize',                          100, ...                        % size of calibration stimulus in pixels (it was 150 / Semin)
+        'boxOffsetX',                       0, ...                          % x-offset from center of screen (neg: leftwards, pos:rightwards)         
+        'boxOffsetY',                       0, ...                          % y-offset from center of screen (neg: upwards, pos: downwards)                      
+        'gamma',                            customGammaFit, ...
+        'skipLinearityTest',                true, ...
+        'customBackgroundDependenceSetup',  customBackgroundDependenceSetup, ...
+        'skipAmbientLightMeasurement',      true ...
+    );
+end
+
+
+
+function [displaySettings, calibratorOptions] = generateConfigurationForDebugModeOLD()
+        % Specify where to send the 'Calibration Done' notification email
+    emailAddressForNotification = 'cottaris@upenn.edu';
+    
+    % Specify the @Calibrator's initialization params. 
+    % Users should tailor these according to their hardware specs. 
+    % These can be set once only, at the time the @Calibrator object is instantiated.
+    
+    displayPrimariesNum = 3;
+    displaySettings = { ...
+        'screenToCalibrate',        2, ...                          % which display to calibrate. main screen = 1, second display = 2
+        'desiredScreenSizePixel',   [1280 720], ...                 % pixels along the width and height of the display to be calibrated
+        'desiredRefreshRate',       60, ...                         % refresh rate in Hz
+        'displayPrimariesNum',      displayPrimariesNum, ...                          % for regular displays this is always 3 (RGB) 
+        'displayDeviceType',        'monitor', ...                  % this should always be set to 'monitor' for now
+        'displayDeviceName',        'debugMode', ...                     % a name for the display been calibrated
+        'calibrationFile',          'debugMode', ...                     % name of calibration file to be generated
+        'comment',                  'The is just for debugging the calibration' ...          % some comment, could be anything
+        };
+    
+    % Specify the @Calibrator's optional params using a CalibratorOptions object
+    % To see what options are available type: doc CalibratorOptions
+    % Users should tailor these according to their experimental needs.
+    
+    % Custom linearity settings for checking additivity of primaries
+    customLinearitySetup.settings = [ ...
+            [1.00 0.5 0.25] ; ...  % Composite
+            [1.00 0.00 0.00]; ...  % Component 1
+            [0.00 0.5 0.00] ; ...  % Component 2
+            [0.00 0.00 0.25]; ...  % Component 3
+            [0.5 0.25 1]; ...      % Composite
+            [0.5 0 0]; ...         % Component 1
+            [0 0.25 0]; ...        % Component 2
+            [0 0.0 1] ...          % Component 3
+    ]';
+                  
+    % Custom settings for checking dependence of target on background
+    customBackgroundDependenceSetup = struct(...
+        'bgSettings', [ ...
+            [1.0 1.0 1.0]; ...   % Background 1
+            [1.0 0.0 0.0]; ...   % Background 2
+            [0.0 1.0 0.0]; ...   % Background 3
+            [0.0 0.0 1.0]; ...   % Background 4
+            [0.0 0.0 0.0] ...    % Background 5 - an all zeros background must always be specified
+            ]', ...
+        'settings', [ ...
+            [1.0 1.0 1.0]; ...   % Target 1
+            [0.5 0.5 0.5] ...    % Target 2
+            ]' ...
+    );
+    
     calibratorOptions = CalibratorOptions( ...
         'verbosity',                        2, ...
         'whoIsDoingTheCalibration',         input('Enter your name: ','s'), ...

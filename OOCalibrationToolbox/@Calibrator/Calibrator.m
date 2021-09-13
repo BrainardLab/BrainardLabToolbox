@@ -209,6 +209,7 @@ classdef Calibrator < handle
         
         % Setter for dependent property options
         function set.options(obj, updatedOptions)
+
             if isa(updatedOptions, 'CalibratorOptions')
                 
                 % check displayPrimariesNum for consistency with other variables
@@ -220,15 +221,15 @@ classdef Calibrator < handle
                     error('Calibrator property ''displayPrimariesNum'' does not agree with the length of the ''options.bgColor'' value.');
                 end
                 
-                if (obj.displayPrimariesNum ~= size(updatedOptions.basicLinearitySetup.settings,1))
+                if (obj.displayPrimariesNum ~= size(updatedOptions.basicLinearitySetup.settings,1)) && (updatedOptions.skipLinearityTest == false)
                     error('Calibrator property ''displayPrimariesNum'' does not agree with the rows of the ''options.basicLinearitySetup.settings'' matrix');
                 end
                 
-                if (obj.displayPrimariesNum ~= size(updatedOptions.backgroundDependenceSetup.settings,1))
+                if (obj.displayPrimariesNum ~= size(updatedOptions.backgroundDependenceSetup.settings,1)) && (updatedOptions.skipBackgroundDependenceTest == false)
                     error('Calibrator property ''displayPrimariesNum'' does not agree with the rows of the ''options.backgroundDependenceSetup.settings'' matrix');
                 end
                 
-                if (obj.displayPrimariesNum ~= size(updatedOptions.backgroundDependenceSetup.bgSettings,1))
+                if (obj.displayPrimariesNum ~= size(updatedOptions.backgroundDependenceSetup.bgSettings,1)) && (updatedOptions.skipBackgroundDependenceTest == false)
                     error('Calibrator property ''displayPrimariesNum'' does not agree with the rows of the ''options.backgroundDependenceSetup.bgSettings'' matrix');
                 end
                 
