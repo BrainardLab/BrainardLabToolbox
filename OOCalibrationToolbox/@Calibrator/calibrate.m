@@ -86,9 +86,10 @@ function obj = calibrate(obj)
            % set target color
            targetSettingsArray                           = zeros(calStruct.describe.displayPrimariesNum, calStruct.describe.nMeas);
            targetSettingsArray(currentPrimaryIndex,:)    = obj.rawData.gammaInput;
-           targetSettingsArray(otherPrimaryIndices(1),:) = ones(size(obj.rawData.gammaInput))*calStruct.describe.fgColor(otherPrimaryIndices(1));
-           targetSettingsArray(otherPrimaryIndices(2),:) = ones(size(obj.rawData.gammaInput))*calStruct.describe.fgColor(otherPrimaryIndices(2));
-                
+           for k = 1:numel(otherPrimaryIndices)
+                targetSettingsArray(otherPrimaryIndices(k),:) = ones(size(obj.rawData.gammaInput))*calStruct.describe.fgColor(otherPrimaryIndices(k));
+           end
+           
            % take first ambient reading
            fprintf('   Testing ambient #1: ...\n');
            [darkAmbient1, obj.rawData.S] = obj.updateStimulusAndMeasure(backgroundSettings, ambientSettings, calStruct.describe.useBitsPP);
@@ -183,7 +184,7 @@ function obj = calibrate(obj)
         fprintf('5. Ambient light measurements ...\n');
 
         backgroundSettings  = calStruct.describe.bgColor';
-        settingsToTest      = [0.0 0.0 0.0]';
+        settingsToTest      = zeros(calStruct.describe.displayPrimariesNum,1);
 
         for repeatIndex = 1:calStruct.describe.nAverage
             [ambientMeasurement, obj.rawData.S]  = obj.updateStimulusAndMeasure(backgroundSettings, settingsToTest, calStruct.describe.useBitsPP);
