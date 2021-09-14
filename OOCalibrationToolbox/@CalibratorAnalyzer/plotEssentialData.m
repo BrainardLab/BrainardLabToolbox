@@ -11,7 +11,7 @@ function plotEssentialData(obj, figureGroupIndex)
     if (nDevices == 3)
         lineColors = [1 0 0; 0 1 0; 0 0 1];
     else
-        lineColors = brewermap(nDevices, 'spectral');
+        lineColors = brewermap(nDevices, '*spectral');
     end
     
     % Gamma functions.
@@ -537,7 +537,7 @@ function plotAmbientData(obj,  figureGroupIndex)
     ylabel('\it power (mWatts)', 'FontName', 'Helvetica',  'FontSize', 14);
     %title('Ambient spectra', 'Fontsize', 13, 'Fontname', 'helvetica', 'Fontweight', 'bold');
     axis([380,780, 0,Inf]);
-    set(gca, 'YLim', [0 max([max(y) 100*eps])]);
+    set(gca, 'YLim', [0 max([max(y) 1000*eps])]);
     box on;
     
     % Finish plot
@@ -663,7 +663,9 @@ function plotGammaData(obj, figureGroupIndex, lineColors)
     %title('Gamma functions', 'Fontsize', 13, 'Fontname', 'helvetica', 'Fontweight', 'bold');
     axis([-0.05 1.05 -0.05 1.05]);
     axis 'square'
-    legend(handles, legends, 'Location','northwest','NumColumns',legendColumns);
+    box on
+    set(gca,  'XColor', 'b', 'YColor', 'b');
+    legend(handles, legends, 'Location','EastOutside','NumColumns',legendColumns, 'FontSize', 12);
     
     % Finish plot
     drawnow;
