@@ -209,7 +209,7 @@ function plotPrimaryChromaticityStabilityData(obj, figureGroupIndex, lineColors)
         %xmean = mean(squeeze(xyYMon(1,:)));
         %ymean = mean(squeeze(xyYMon(2,:)));
         
-        axis([0 1 0 1]);
+        axis([0 0.75 0 0.85]);
         axis('square');
         
         xlabel('\it x chromaticity', 'FontName', 'Helvetica',  'FontSize', 18);
@@ -219,7 +219,7 @@ function plotPrimaryChromaticityStabilityData(obj, figureGroupIndex, lineColors)
         %    ylabel('');
         %end
         set(gca, 'Color', [1.0 1.0 1.0], 'XColor', 'b', 'YColor', 'b');
-        set(gca, 'FontName', 'Helvetica', 'FontSize', 18);
+        set(gca, 'FontName', 'Helvetica', 'FontSize', 14);
         %title(sprintf('%s primary',primaryNames{primaryIndex}));
         box on;
     end
@@ -278,7 +278,7 @@ function plotChromaticityData(obj, figureGroupIndex, lineColors)
     hleg = legend(legends, 'Location', 'EastOutside', 'NumColumns',3);
     set(hleg,'FontName', 'Helvetica',  'FontSize', 12);
     
-    axis([0 1 0 1]); axis('square');
+    axis([0 0.75 0 0.85]); axis('square');
     xlabel('\it x chromaticity', 'FontName', 'Helvetica',  'FontSize', 14);
     ylabel('\it y chromaticity', 'FontName', 'Helvetica',  'FontSize', 14);
     set(gca, 'Color', [1.0 1.0 1.0], 'XColor', 'b', 'YColor', 'b');
@@ -493,6 +493,7 @@ function plotFullSpectra(obj, primaryIndex, primaryName, figureGroupIndex, legen
     ylabel('\it normalized power', 'FontName', 'Helvetica',  'FontSize', 14);
     set(gca, 'Color', [1.0 1.0 1.0], 'XColor', 'b', 'YColor', 'b');
     set(gca, 'FontName', 'Helvetica',  'FontSize', 14);
+   
     axis([380,780,-Inf,Inf]);
     box on;
     
@@ -536,6 +537,7 @@ function plotAmbientData(obj,  figureGroupIndex)
     ylabel('\it power (mWatts)', 'FontName', 'Helvetica',  'FontSize', 14);
     %title('Ambient spectra', 'Fontsize', 13, 'Fontname', 'helvetica', 'Fontweight', 'bold');
     axis([380,780, 0,Inf]);
+    set(gca, 'YLim', [0 max([max(y) 100*eps])]);
     box on;
     
     % Finish plot
