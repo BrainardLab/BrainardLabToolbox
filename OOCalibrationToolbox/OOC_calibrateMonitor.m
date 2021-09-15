@@ -20,8 +20,6 @@ function OOC_calibrateMonitor
         'InVivoSensaVue_FlatPanel'
         'AppleThunderboltDisplay'
         'HTCVive'
-        'SACC'
-        'SACCPrimary'
         'debugMode'
     };
     
@@ -67,13 +65,7 @@ function OOC_calibrateMonitor
             configFunctionHandle = @generateConfigurationForInVivoSensaVue_FlatPanel;   
 
         case 'HTCVive'
-            configFunctionHandle = @generateConfigurationForHTCVive;  
-            
-        case 'SACC'
-            configFunctionHandle = @generateConfigurationForSACC; 
-
-        case 'SACCPrimary'
-            configFunctionHandle = @generateConfigurationForSACCPrimary1;       
+            configFunctionHandle = @generateConfigurationForHTCVive;     
             
         case 'debugMode'
             configFunctionHandle = @generateConfigurationForDebugMode;
@@ -395,103 +387,6 @@ function [displaySettings, calibratorOptions] = generateConfigurationForInVivoSe
         'boxOffsetY',                       0 ...                           % y-offset from center of screen (neg: upwards, pos: downwards)                      
     );
 end
-
-% Configuration function for the SACC display (LED/DLP optical system)
-function [displaySettings, calibratorOptions] = generateConfigurationForSACC()
-    % Specify where to send the 'Calibration Done' notification email
-    emailAddressForNotification = 'seminoh@sas.upenn.edu';
-    
-    % Specify the @Calibrator's initialization params. 
-    % Users should tailor these according to their hardware specs. 
-    % These can be set once only, at the time the @Calibrator object is instantiated.
-    displayPrimariesNum = 3;
-    displaySettings = { ...
-        'screenToCalibrate',        2, ...                          % which display to calibrate. main screen = 1, second display = 2
-        'desiredScreenSizePixel',   [1920 1080], ...                % pixels along the width and height of the display to be calibrated
-        'desiredRefreshRate',       120, ...                        % refresh rate in Hz
-        'displayPrimariesNum',      displayPrimariesNum, ...        % for regular displays this is always 3 (RGB) 
-        'displayDeviceType',        'monitor', ...                  % this should always be set to 'monitor' for now
-        'displayDeviceName',        'SACC', ...                     % a name for the display been calibrated
-        'calibrationFile',          'SACC', ...                     % name of calibration file to be generated
-        'comment',                  'The SACC LED/DLP optical system' ...          % some comment, could be anything
-        };
-    
-    % Specify the @Calibrator's optional params using a CalibratorOptions object
-    % To see what options are available type: doc CalibratorOptions
-    % Users should tailor these according to their experimental needs.
-    calibratorOptions = CalibratorOptions( ...
-        'verbosity',                        2, ...
-        'whoIsDoingTheCalibration',         input('Enter your name: ','s'), ...
-        'emailAddressForDoneNotification',  GetWithDefault('Enter email address for done notification',  emailAddressForNotification), ...
-        'blankOtherScreen',                 0, ...                          % whether to blank other displays attached to the host computer (1=yes, 0 = no), ...
-        'whichBlankScreen',                 1, ...                          % screen number of the display to be blanked  (main screen = 1, second display = 2)
-        'blankSettings',                    [0.0 0.0 0.0], ...              % color of the whichBlankScreen 
-        'bgColor',                          [0.3962 0.3787 0.4039], ...     % color of the background  
-        'fgColor',                          [0.3962 0.3787 0.4039], ...     % color of the foreground
-        'meterDistance',                    1.0, ...                        % distance between radiometer and screen in meters
-        'leaveRoomTime',                    3, ...                          % seconds allowed to leave room
-        'nAverage',                         2, ...                          % number of repeated measurements for averaging
-        'nMeas',                            4, ...                          % samples along gamma curve
-        'nDevices',                         displayPrimariesNum, ...        % number of primaries
-        'boxSize',                          600, ...                        % size of calibration stimulus in pixels 
-        'boxOffsetX',                       0, ...                          % x-offset from center of screen (neg: leftwards, pos:rightwards)         
-        'boxOffsetY',                       0 ...                           % y-offset from center of screen (neg: upwards, pos: downwards)                      
-    );
-end
-
-
-% Configuration function for the SACC display (LED/DLP optical system)
-function [displaySettings, calibratorOptions] = generateConfigurationForSACCPrimary1()
-    % Specify where to send the 'Calibration Done' notification email
-    emailAddressForNotification = 'seminoh@sas.upenn.edu';
-    
-    % Specify the @Calibrator's initialization params. 
-    % Users should tailor these according to their hardware specs. 
-    % These can be set once only, at the time the @Calibrator object is instantiated.
-    displayPrimariesNum = 15;
-    displaySettings = { ...
-        'screenToCalibrate',        2, ...                          % which display to calibrate. main screen = 1, second display = 2
-        'desiredScreenSizePixel',   [1920 1080], ...                % pixels along the width and height of the display to be calibrated
-        'desiredRefreshRate',       120, ...                        % refresh rate in Hz
-        'displayPrimariesNum',      displayPrimariesNum, ...        % for regular displays this is always 3 (RGB) 
-        'displayDeviceType',        'monitor', ...                  % this should always be set to 'monitor' for now
-        'displayDeviceName',        'SACCPrimary1', ...             % a name for the display been calibrated
-        'calibrationFile',          'SACCPrimary1', ...             % name of calibration file to be generated
-        'comment',                  'The SACC LED/DLP subprimary optical system' ...          % some comment, could be anything
-        };
-    
-    % SACCPrimary calibrator - specific params struct
-    SACCPrimaryCalibratorSpecificParamsStruct = struct(...
-        'DLPbackgroundSettings', [0.5 0.5 0.5] ...
-    );
-
-    % Specify the @Calibrator's optional params using a CalibratorOptions object
-    % To see what options are available type: doc CalibratorOptions
-    % Users should tailor these according to their experimental needs.
-    calibratorOptions = CalibratorOptions( ...
-        'verbosity',                        2, ...
-        'whoIsDoingTheCalibration',         input('Enter your name: ','s'), ...
-        'emailAddressForDoneNotification',  GetWithDefault('Enter email address for done notification',  emailAddressForNotification), ...
-        'blankOtherScreen',                 0, ...                          % whether to blank other displays attached to the host computer (1=yes, 0 = no), ...
-        'whichBlankScreen',                 1, ...                          % screen number of the display to be blanked  (main screen = 1, second display = 2)
-        'blankSettings',                    zeros(1,displayPrimariesNum), ...         % color of the whichBlankScreen 
-        'bgColor',                          0.05*ones(1,displayPrimariesNum), ...     % color of the background  
-        'fgColor',                          0.05*ones(1,displayPrimariesNum), ...     % color of the foreground
-        'meterDistance',                    1.0, ...                        % distance between radiometer and screen in meters
-        'leaveRoomTime',                    3, ...                          % seconds allowed to leave room
-        'nAverage',                         2, ...                          % number of repeated measurements for averaging
-        'nMeas',                            4, ...                          % samples along gamma curve
-        'nDevices',                         displayPrimariesNum, ...        % number of primaries
-        'boxSize',                          600, ...                        % size of calibration stimulus in pixels (it was 150 / Semin)
-        'boxOffsetX',                       0, ...                          % x-offset from center of screen (neg: leftwards, pos:rightwards)         
-        'boxOffsetY',                       0, ...                           % y-offset from center of screen (neg: upwards, pos: downwards)                      
-        'skipLinearityTest',                true, ...
-        'skipAmbientLightMeasurement',      true, ...
-        'skipBackgroundDependenceTest',     true, ...
-        'calibratorTypeSpecificParamsStruct', SACCPrimaryCalibratorSpecificParamsStruct ...
-    );
-end
-
 
 % Configuration function for HTCVive
 function [displaySettings, calibratorOptions] = generateConfigurationForHTCVive()
