@@ -59,24 +59,14 @@ classdef SACCPrimaryCalibrator < Calibrator
         function obj = SACCPrimaryCalibrator(varargin)  
             % Call the super-class constructor.
             obj = obj@Calibrator(varargin{:});
-            
-            % Parse key-value pairs specific to this object
-            p = inputParser;
-            p.addParameter('whichPrimary', 1, @isnumeric);
-            p.addParameter('nSubprimaries', 15, @isnumeric);
-            p.addParameter('nInputLevels',252, @isnumeric);
-            p.addParameter('normalMode',true,@islogical);
-            p.addParameter('arbitraryBlack',0.05,@isnumeric);
-            p.addParameter('logicalToPhysical',[0:7 9:15],@isnumeric);
-            p.parse(varargin{:});
-
+           
             % Set object properties based on parse of key-value pairs
-            obj.whichPrimary = p.Results.whichPrimary;
-            obj.nSubprimaries = p.Results.nSubprimaries;
-            obj.nInputLevels = p.Results.nInputLevels;
-            obj.normalMode = p.Results.normalMode;
-            obj.arbitraryBlack = p.Results.arbitraryBlack;
-            obj.logicalToPhysical = p.Results.logicalToPhysical;
+%             obj.whichPrimary = whichPrimary;
+%             obj.nSubprimaries = p.Results.nSubprimaries;
+%             obj.nInputLevels = p.Results.nInputLevels;
+%             obj.normalMode = p.Results.normalMode;
+%             obj.arbitraryBlack = p.Results.arbitraryBlack;
+%             obj.logicalToPhysical = p.Results.logicalToPhysical;
             
             % Other properties
             obj.graphicsEngine = 'SACCPrimary';
