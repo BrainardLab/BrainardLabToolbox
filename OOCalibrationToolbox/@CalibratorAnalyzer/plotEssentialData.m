@@ -91,12 +91,21 @@ function plotRepeatibilityData(obj, figureGroupIndex, lineColors)
     subplot(1,3,1); hold on
     lumIndex = 3;
     markerSize = 10;
-    for trialIndex = 1:nAverages
-        for primaryIndex = 1:primariesNum
-            plot(gammaInput, squeeze(primary_xyY(trialIndex, primaryIndex, lumIndex, :)), 'ko-', ...
-                'MarkerSize', markerSize, 'MarkerFaceColor', lineColors(primaryIndex,:));
-        end
+%     for trialIndex = 1:nAverages
+%         for primaryIndex = 1:primariesNum
+%             plot(gammaInput, squeeze(primary_xyY(trialIndex, primaryIndex, lumIndex, :)), '.-', ...
+%                 'MarkerSize', markerSize, 'MarkerFaceColor', lineColors(primaryIndex,:), 'Color', lineColors(primaryIndex,:));
+%         end
+%     end
+
+    for primaryIndex = 1:primariesNum
+        x = gammaInput;
+        errorbar(x, mean(squeeze(primary_xyY(:, primaryIndex, lumIndex, :)),1), ...
+                    std(squeeze(primary_xyY(:, primaryIndex, lumIndex, :)),0,1), ...
+                'ko', 'MarkerSize', 8, 'MarkerFaceColor', lineColors(primaryIndex,:), 'MarkerEdgeColor', 0.5*lineColors(primaryIndex,:), 'LineWidth', 1.0);
+
     end
+    
     axis([0 1 0 max([0.1 maxLum])]);
     box on;
     set(gca, 'Color', [1.0 1.0 1.0], 'XColor', 'b', 'YColor', 'b');
@@ -106,32 +115,48 @@ function plotRepeatibilityData(obj, figureGroupIndex, lineColors)
     
     % x-chromaticity of RGB primaries as a function of gamma input value
     subplot(1,3,2); hold on
-    for trialIndex = 1:nAverages
-        for primaryIndex = 1:primariesNum
-            plot(gammaInput, squeeze(primary_xyY(trialIndex, primaryIndex, xChromaIndex, :)), 'ko-', ...
-                'MarkerSize', markerSize, 'MarkerFaceColor', lineColors(primaryIndex,:));
-        end
+%     for trialIndex = 1:nAverages
+%         for primaryIndex = 1:primariesNum
+%             plot(gammaInput, squeeze(primary_xyY(trialIndex, primaryIndex, xChromaIndex, :)), '.-', ...
+%                 'MarkerSize', markerSize, 'MarkerFaceColor', lineColors(primaryIndex,:), 'Color', lineColors(primaryIndex,:));
+%         end
+%     end
+    
+    for primaryIndex = 1:primariesNum
+        x = gammaInput;
+        errorbar(x, mean(squeeze(primary_xyY(:, primaryIndex, xChromaIndex, :)),1), ...
+                    std(squeeze(primary_xyY(:, primaryIndex, xChromaIndex, :)),0,1), ...
+                'ko', 'MarkerSize', 8, 'MarkerFaceColor', lineColors(primaryIndex,:), 'MarkerEdgeColor', 0.5*lineColors(primaryIndex,:), 'LineWidth', 1.0);
     end
+    
     axis([0 1 0 1]);
     box on;
-    set(gca, 'Color', [1.0 1.0 1.0], 'XColor', 'b', 'YColor', 'b');
+    set(gca, 'Color', [1.0 1.0 1], 'XColor', 'b', 'YColor', 'b');
     set(gca, 'FontName', 'Helvetica', 'Fontweight', 'normal', 'FontSize', 14);
     xlabel('\it settings value', 'FontName', 'Helvetica',  'FontSize', 14);
     ylabel('\it x-chromaticity', 'FontName', 'Helvetica',  'FontSize', 14);  
     
     % y-chromaticity of RGB primaries as a function of gamma input value
     subplot(1,3,3); hold on
-    for trialIndex = 1:nAverages
-        for primaryIndex = 1:primariesNum
-            plot(gammaInput, squeeze(primary_xyY(trialIndex, primaryIndex, yChromaIndex, :)), ...
-                'ko-', 'MarkerSize', markerSize, 'MarkerFaceColor', lineColors(primaryIndex,:));
-        end
+%     for trialIndex = 1:nAverages
+%         for primaryIndex = 1:primariesNum
+%             plot(gammaInput, squeeze(primary_xyY(trialIndex, primaryIndex, yChromaIndex, :)), '.-', ...
+%                 'MarkerSize', markerSize, 'MarkerFaceColor', lineColors(primaryIndex,:), 'Color', lineColors(primaryIndex,:));
+%         end
+%     end
+    
+    for primaryIndex = 1:primariesNum
+        x = gammaInput;
+        errorbar(x, mean(squeeze(primary_xyY(:, primaryIndex, yChromaIndex, :)),1), ...
+                    std(squeeze(primary_xyY(:, primaryIndex, yChromaIndex, :)),0,1), ...
+                'ko', 'MarkerSize', 8, 'MarkerFaceColor', lineColors(primaryIndex,:), 'MarkerEdgeColor', 0.5*lineColors(primaryIndex,:), 'LineWidth', 1.0);
     end
+    
     axis([0 1 0 1]);
     box on;
     xlabel('\it settings value', 'FontName', 'Helvetica',  'FontSize', 14);
     ylabel('\it y-chromaticity', 'FontName', 'Helvetica',  'FontSize', 14);  
-    set(gca, 'Color', [1.0 1.0 1.0], 'XColor', 'b', 'YColor', 'b');
+    set(gca, 'Color', [1.0 1.0 1], 'XColor', 'b', 'YColor', 'b');
     set(gca, 'FontName', 'Helvetica', 'Fontweight', 'normal', 'FontSize', 14);
     % Finish plot
     drawnow;
@@ -150,6 +175,15 @@ function plotRepeatibilityData(obj, figureGroupIndex, lineColors)
     obj.updateFiguresGroup(h, figureGroupIndex);
 end
 
+
+function makeShadedPlot(x,y, faceColor, edgeColor)
+    px = reshape(x, [1 numel(x)]);
+    py = reshape(y, [1 numel(y)]);
+    px = [px(1) px px(end)];
+    py = [1*eps py 2*eps];
+    pz = -10*eps*ones(size(py)); 
+    patch(px,py,pz,'FaceColor',faceColor,'EdgeColor',edgeColor, 'FaceAlpha', 0.5);
+end
 
 function plotNulPlot(obj, figureGroupIndex)
     % Init figure
@@ -185,7 +219,11 @@ function plotPrimaryChromaticityStabilityData(obj, figureGroupIndex, lineColors)
     % Get T_ensor data
     T_sensor = obj.calStructOBJ.get('T_sensor');
      
+    legends = {};
+    hpLegends = [];
     for primaryIndex = 1:primariesNum
+        legends{numel(legends)+1} = sprintf('p%d', primaryIndex);
+        
         % Put measurements into columns of a matrix from raw data in calibration file.
         fullSpectra = squeeze(obj.newStyleCal.rawData.gammaCurveMeanMeasurements(primaryIndex, :,:));
 
@@ -201,14 +239,20 @@ function plotPrimaryChromaticityStabilityData(obj, figureGroupIndex, lineColors)
         plot(xyYLocus(1,:)',xyYLocus(2,:)','k');
         
         plot(xyYMon(1,:), xyYMon(2,:), 'k-', 'LineWidth', 2.0);
-         
-        for k = 1:size(fullSpectra,1)
-            plot(xyYMon(1,k), xyYMon(2,k), 's', 'MarkerFaceColor', lineColors(primaryIndex,:), 'MarkerEdgeColor', [0 0 0], 'MarkerSize', 4);
+        
+        
+        for k = size(fullSpectra,1):-1:1
+            markerSize = (6 + 10*k/(size(fullSpectra,1)))^2;
+            if (k == size(fullSpectra,1))
+                hp = plot(xyYMon(1,k), xyYMon(2,k),  'o', 'MarkerFaceColor', lineColors(primaryIndex,:), ...
+                'MarkerEdgeColor', [0 0 0], 'MarkerSize', sqrt(markerSize));
+                hpLegends(numel(hpLegends)+1) = hp;
+            else
+                scatter(xyYMon(1,k), xyYMon(2,k), markerSize, 'o', 'MarkerFaceColor', lineColors(primaryIndex,:), ...
+                    'MarkerEdgeColor', [0 0 0], 'MarkerFaceAlpha', 0.5);
+            end
         end
     
-        %xmean = mean(squeeze(xyYMon(1,:)));
-        %ymean = mean(squeeze(xyYMon(2,:)));
-        
         axis([0 0.75 0 0.85]);
         axis('square');
         
@@ -223,6 +267,9 @@ function plotPrimaryChromaticityStabilityData(obj, figureGroupIndex, lineColors)
         %title(sprintf('%s primary',primaryNames{primaryIndex}));
         box on;
     end
+    
+    hleg = legend(hpLegends, legends, 'Location', 'EastOutside', 'NumColumns',3);
+    set(hleg,'FontName', 'Helvetica',  'FontSize', 12);
 
     % Finish plot
     drawnow;
@@ -658,14 +705,14 @@ function plotGammaData(obj, figureGroupIndex, lineColors)
         end
     end
     
-    xlabel('\it settings value', 'FontName', 'Helvetica',  'FontSize', 14);
-    ylabel('\it normalized output', 'FontName', 'Helvetica', 'FontSize', 14);
+    xlabel('\it settings value', 'FontName', 'Helvetica');
+    ylabel('\it normalized output', 'FontName', 'Helvetica');
     %title('Gamma functions', 'Fontsize', 13, 'Fontname', 'helvetica', 'Fontweight', 'bold');
     axis([-0.05 1.05 -0.05 1.05]);
     axis 'square'
     box on
-    set(gca,  'XColor', 'b', 'YColor', 'b');
-    legend(handles, legends, 'Location','EastOutside','NumColumns',legendColumns, 'FontSize', 12);
+    set(gca,  'XColor', 'b', 'YColor', 'b', 'FontSize', 14);
+    legend(handles, legends, 'Location','EastOutside','NumColumns',legendColumns);
     
     % Finish plot
     drawnow;
