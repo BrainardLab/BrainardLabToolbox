@@ -59,14 +59,6 @@ classdef SACCPrimaryCalibrator < Calibrator
         function obj = SACCPrimaryCalibrator(varargin)  
             % Call the super-class constructor.
             obj = obj@Calibrator(varargin{:});
-           
-            % Set object properties based on parse of key-value pairs
-%             obj.whichPrimary = whichPrimary;
-%             obj.nSubprimaries = p.Results.nSubprimaries;
-%             obj.nInputLevels = p.Results.nInputLevels;
-%             obj.normalMode = p.Results.normalMode;
-%             obj.arbitraryBlack = p.Results.arbitraryBlack;
-%             obj.logicalToPhysical = p.Results.logicalToPhysical;
             
             % Other properties
             obj.graphicsEngine = 'SACCPrimary';

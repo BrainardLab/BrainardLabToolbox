@@ -12,6 +12,16 @@ if ((calStruct.describe.useBitsPP) && (isempty(obj.identityGammaForBitsPP)))
     error('Support for bitsPP has not been implemented in @PsychImagingCalibrator !');
 end % if (calStruct.config.useBitsPP)
 
+% Retrieve passed custom params
+if (~isempty(obj.options.calibratorTypeSpecificParamsStruct))
+    % SACC Subprimary calibration settings
+    obj.whichPrimary = obj.options.calibratorTypeSpecificParamsStruct.whichPrimary;   
+    obj.nSubprimaries = obj.options.calibratorTypeSpecificParamsStruct.nSubprimaries;
+    obj.nInputLevels = obj.options.calibratorTypeSpecificParamsStruct.nInputLevels;
+    obj.normalMode = obj.options.calibratorTypeSpecificParamsStruct.normalMode;
+    obj.arbitraryBlack = obj.options.calibratorTypeSpecificParamsStruct.arbitraryBlack;
+    obj.logicalToPhysical = obj.options.calibratorTypeSpecificParamsStruct.logicalToPhysical;
+end
 
 % Specify stereo mode 10 for synchronized flips between left/right displays
 stereoMode = []; % 10;
