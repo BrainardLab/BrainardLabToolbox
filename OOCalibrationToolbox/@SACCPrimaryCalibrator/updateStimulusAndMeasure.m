@@ -15,7 +15,7 @@ function [measurement, S] = updateStimulusAndMeasure(obj, bgSettings, targetSett
     timeToDelay = obj.options.calibratorTypeSpecificParamsStruct.LEDWarmupDurationSeconds;
     fprintf('        Timer will count %2.1f seconds for warming up \n\n',timeToDelay);
     timerForWarmingup = timer('TimerFcn','stat=false','StartDelay',timeToDelay); % Timer setting
-    start(timerForWarmingup) % Start the timer
+    start(timerForWarmingup); % Start the timer
     for t=1:timeToDelay
          disp('.') % Just displaying the dot to see if the timer is working
          pause(1) % Pause for 1 second (so, a dot is showing per each every second)
