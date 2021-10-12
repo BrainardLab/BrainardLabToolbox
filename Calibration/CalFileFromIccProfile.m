@@ -7,7 +7,12 @@
 % with the monitor white point having a lumiance
 % of 1.
 %
+% ICC profiles store data in a scaled way that is
+% a bit obscure. This routine does not account for
+% that, yet.
+%
 % 08/15/12 dhb  Wrote it.
+% 10/03/21 dhb  Added comment about iccprofile storage format.
 
 %% Clear and close
 clear; close all;
