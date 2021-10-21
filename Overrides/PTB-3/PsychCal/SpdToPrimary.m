@@ -90,7 +90,7 @@ function [primary,predictedSpd,errorFraction,gamutMargin] = OLSpdToPrimary(calOr
 %                       faster.
 %
 % See also:
-%   OLPrimaryToSpd, OLPrimaryToSettings, OLSettingsToStartsStops, OLSpdToPrimaryTest
+%   PrimaryToSpd, PrimaryToSettings
 %
 
 % History:
