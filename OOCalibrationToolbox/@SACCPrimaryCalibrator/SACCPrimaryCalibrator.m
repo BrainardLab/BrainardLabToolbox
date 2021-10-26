@@ -45,7 +45,7 @@ classdef SACCPrimaryCalibrator < Calibrator
         nPrimaries = 3;
         
         % nInputLevels
-        nInputLevels = 252;
+        nInputLevels = 253;
         
         % subprimary setting to determine black level for measurements.
         arbitraryBlack = 0.05; % Range = 0-1

@@ -31,25 +31,25 @@ function updateBackgroundAndTarget(obj, bgSettings, targetSettings, useBitsPP)
             case 1 % Adjust subprimaries for primary 1
                 % Loop over subprimaries and set each
                 for i=1:obj.nSubprimaries 
-                    Datapixx('SetPropixxHSLedCurrent', 0, obj.logicalToPhysical(i), round(obj.nInputLevels*targetSettings(i))); % Primary 1
-                    Datapixx('SetPropixxHSLedCurrent', 1, obj.logicalToPhysical(i), round(obj.nInputLevels*obj.arbitraryBlack)); % Primary 2
-                    Datapixx('SetPropixxHSLedCurrent', 2, obj.logicalToPhysical(i), round(obj.nInputLevels*obj.arbitraryBlack)); % Primary 3
+                    Datapixx('SetPropixxHSLedCurrent', 0, obj.logicalToPhysical(i), round((obj.nInputLevels-1)*targetSettings(i))); % Primary 1
+                    Datapixx('SetPropixxHSLedCurrent', 1, obj.logicalToPhysical(i), round((obj.nInputLevels-1)*obj.arbitraryBlack)); % Primary 2
+                    Datapixx('SetPropixxHSLedCurrent', 2, obj.logicalToPhysical(i), round((obj.nInputLevels-1)*obj.arbitraryBlack)); % Primary 3
                 end 
                 
             case 2 % Adjust subprimaries for primary 2
                 % Loop over subprimaries and set each
                 for i=1:obj.nSubprimaries 
-                    Datapixx('SetPropixxHSLedCurrent', 0, obj.logicalToPhysical(i), round(obj.nInputLevels*obj.arbitraryBlack)); % Primary 1
-                    Datapixx('SetPropixxHSLedCurrent', 1, obj.logicalToPhysical(i), round(obj.nInputLevels*targetSettings(i))); % Primary 2
-                    Datapixx('SetPropixxHSLedCurrent', 2, obj.logicalToPhysical(i), round(obj.nInputLevels*obj.arbitraryBlack)); % Primary 3
+                    Datapixx('SetPropixxHSLedCurrent', 0, obj.logicalToPhysical(i), round((obj.nInputLevels-1)*obj.arbitraryBlack)); % Primary 1
+                    Datapixx('SetPropixxHSLedCurrent', 1, obj.logicalToPhysical(i), round((obj.nInputLevels-1)*targetSettings(i))); % Primary 2
+                    Datapixx('SetPropixxHSLedCurrent', 2, obj.logicalToPhysical(i), round((obj.nInputLevels-1)*obj.arbitraryBlack)); % Primary 3
                 end 
                 
             case 3 % Adjust subprimaries for primary 3
                 % Loop over subprimaries and set each
                 for i=1:obj.nSubprimaries 
-                    Datapixx('SetPropixxHSLedCurrent', 0, obj.logicalToPhysical(i), round(obj.nInputLevels*obj.arbitraryBlack)); % Primary 1
-                    Datapixx('SetPropixxHSLedCurrent', 1, obj.logicalToPhysical(i), round(obj.nInputLevels*obj.arbitraryBlack)); % Primary 2
-                    Datapixx('SetPropixxHSLedCurrent', 2, obj.logicalToPhysical(i), round(obj.nInputLevels*targetSettings(i))); % Primary 3
+                    Datapixx('SetPropixxHSLedCurrent', 0, obj.logicalToPhysical(i), round((obj.nInputLevels-1)*obj.arbitraryBlack)); % Primary 1
+                    Datapixx('SetPropixxHSLedCurrent', 1, obj.logicalToPhysical(i), round((obj.nInputLevels-1)*obj.arbitraryBlack)); % Primary 2
+                    Datapixx('SetPropixxHSLedCurrent', 2, obj.logicalToPhysical(i), round((obj.nInputLevels-1)*targetSettings(i))); % Primary 3
                 end 
                 
             otherwise
