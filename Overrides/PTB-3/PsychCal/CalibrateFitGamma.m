@@ -9,6 +9,7 @@ function [varargout] = CalibrateFitGamma(calOrCalStruct,nInputLevels)
 %
 % Fit the gamma function to the calibration measurements.  Options for field
 % 'fitType' are:
+%    identity
 %    simplePower
 %    crtLinear
 %    crtPolyLinear
@@ -61,6 +62,7 @@ function [varargout] = CalibrateFitGamma(calOrCalStruct,nInputLevels)
 %               Passing a @CalStruct object is the preferred way because it results in 
 %               (a) less overhead (@CalStruct objects are passed by reference, not by value), and
 %               (b) better control over how the calibration data are accessed.
+% 11/05/21 dhb  Add identity method
 %
 
     % Set nInputLevels
@@ -91,6 +93,20 @@ function [varargout] = CalibrateFitGamma(calOrCalStruct,nInputLevels)
 
     % Fit gamma functions.
     switch (gammaFitType)
+        case 'identity'
+            % Fit with simple power to get gammaInput right and keep
+            % various other pieces of code below happy.  But we actually
+            % store the identity mapping.
+            mGammaMassaged = rawGammaTable(:,1:nDevices);
+            for i = 1:nDevices
+                mGammaMassaged(:,i) = MakeGammaMonotonic(HalfRect(mGammaMassaged(:,i)));
+            end
+            fitType = 1;
+            [mGammaFit1a, gammaInput,nil,theExponents] = FitDeviceGamma(...
+                mGammaMassaged,rawGammaInput,fitType,nInputLevels);
+            calStructOBJ.set('gammaInput', gammaInput);
+            mGammaFit1 = gammaInput(:,ones(nDevices,1));
+            fprintf('Swapping in identity fit\n');
 
         case 'simplePower',
             mGammaMassaged = rawGammaTable(:,1:nDevices);
@@ -178,7 +194,7 @@ function [varargout] = CalibrateFitGamma(calOrCalStruct,nInputLevels)
             [mGammaFit1a,gammaInput] = FitDeviceGamma(...
                 mGammaMassaged, rawGammaInput,fitType,nInputLevels);
             mGammaFit1 = mGammaFit1a;
-            calStructOBJ.set('gammaInput', gammaInput);
+            calStructOBJ.set('gammaInput',gammaInput);
         
         case 'crtSumPow',
             if (~exist('fit','file'))
@@ -347,18 +363,28 @@ end
 % increasing.  One way that sometimes fails is when a whole bunch of
 % entries at the start are zero.  This routine fixes that up.
 function output = FixZerosAtStart(input)
+    if (size(input,1) == 1)
+        error('Gamma table has only 1 entry');
+    end
 
     output = input;
     for j = 1:size(input,2)
-        for i = 1:size(input,1)
-            if (input(i,j) > 0)
-                break;
+        if (input(1,j) ~= 0)
+            error('First entry of gamma table should be 0');
+        end
+
+        % Only do something if second entry is still 0
+        if (input(2,j) == 0)
+            for i = 2:size(input,1)
+                if (input(i,j) > 0)
+                    break;
+                end
             end
+            if (i == size(input,1))
+                error('Entire passed gamma function is zero');
+            end
+            output(1:i,j) = linspace(0,min([0.0001 input(i+1,j)/2]),i)';
         end
-        if (i == size(input,1))
-            error('Entire passed gamma function is zero');
-        end
-        output(1:i,j) = linspace(0,min([0.0001 input(i+1,j)/2]),i)';
     end
 
 end
