@@ -1,8 +1,8 @@
-function [settingsCal] = SettingsFromPointCloud(ptCloud,inputCal,ptCldSettingsCal,options)
+function [settingsCal,indicesCal] = SettingsFromPointCloud(ptCloud,inputCal,ptCldSettingsCal,options)
 % Use point cloud to convert from input to settings.
 %
 % Synopsis:
-%    [[settingsCal] = SettingsFromPointCloud(ptCloud,ptCldSettingsCal,inputCal)
+%    [[settingsCal,indicesCal] = SettingsFromPointCloud(ptCloud,ptCldSettingsCal,inputCal)
 %
 % Description:
 %     Use precomputed point cloud to convert input in cal format to settings, by
@@ -48,11 +48,12 @@ uniqueInputCal = uniqueInputCal';
 
 % For each unique contrast, find the right settings and then plug into
 % output image.
-uniqueSettingsCal = zeros(3,size(uniqueInputCal,2));
+uniqueIndicesCal = zeros(1,size(uniqueInputCal,2));
 for ll = 1:size(uniqueInputCal,2)
-    minIndex = findNearestNeighbors(ptCloud,uniqueInputCal(:,ll)',1);
-    uniqueSettingsCal(:,ll) = ptCldSettingsCal(:,minIndex);
+    uniqueIndicesCal(ll) = findNearestNeighbors(ptCloud,uniqueInputCal(:,ll)',1);
 end
+uniqueSettingsCal = ptCldSettingsCal(:,uniqueIndicesCal);
+indicesCal = uniqueIndicesCal(uniqueIC);
 settingsCal = uniqueSettingsCal(:,uniqueIC);
 
 % Say goodbye
