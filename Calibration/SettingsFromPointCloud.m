@@ -1,8 +1,8 @@
 function [settingsCal,indicesCal] = SettingsFromPointCloud(ptCloud,inputCal,ptCldSettingsCal,options)
 % Use point cloud to convert from input to settings.
 %
-% Synopsis:
-%    [[settingsCal,indicesCal] = SettingsFromPointCloud(ptCloud,ptCldSettingsCal,inputCal)
+% Syntax:
+%    [settingsCal,indicesCal] = SettingsFromPointCloud(ptCloud,inputCal,ptCldSettingsCal)
 %
 % Description:
 %     Use precomputed point cloud to convert input in cal format to settings, by
@@ -12,9 +12,19 @@ function [settingsCal,indicesCal] = SettingsFromPointCloud(ptCloud,inputCal,ptCl
 %     was set up.  A typical usage is to set up the point cloud with
 %     contrasts corresponding to all possible settings, in which case this
 %     routine gets the settings from contrast.
+%
 % Inputs:
+%    ptCloud -                    Precomputed screen point cloud results.
+%    inputCal -                   Desired input settings.  It can be
+%                                 excitations, contrasts, etc., but we use
+%                                 contrasts in SACC project.
+%    ptCldSettingsCal -           Precomputed screen point cloud settings
+%                                 in a cal format.
 %
 % Outputs:
+%    settingsCal -                Settings acquired from the point cloud.
+%    indicesCal -                 Matching indices with the locations of
+%                                 the acquired settings in the point cloud.
 %
 % Optional key/value pairs:
 %    'verbose' -                  Boolean. Default true.  Controls the printout.
@@ -22,8 +32,10 @@ function [settingsCal,indicesCal] = SettingsFromPointCloud(ptCloud,inputCal,ptCl
 % See also: SetupContrastPointCloud
 
 % History:
-%  11/19/21  dhb, smo  Pulled out as its own function.
+%    11/19/21  dhb, smo           Pulled out as its own function.
+%    11/20/21  dhb                Function has been moved in the repository BrainardLabToolbox
 
+%% Set parameters.
 arguments
     ptCloud
     inputCal
@@ -31,7 +43,7 @@ arguments
     options.verbose (1,1) = true
 end
 
-% Say hello
+%% Say hello.
 if (options.verbose)
     tic;
     fprintf('Point cloud unique contrast method, finding image settings\n');
@@ -42,7 +54,7 @@ end
 % Only look up each unique cone contrast once, and then fill into the
 % settings image. Slick!
 %
-% Find the unique cone contrasts in the image
+% Find the unique cone contrasts in the image.
 [uniqueInputCal,~,uniqueIC] = unique(inputCal','rows','stable');
 uniqueInputCal = uniqueInputCal';
 
@@ -56,7 +68,9 @@ uniqueSettingsCal = ptCldSettingsCal(:,uniqueIndicesCal);
 indicesCal = uniqueIndicesCal(uniqueIC);
 settingsCal = uniqueSettingsCal(:,uniqueIC);
 
-% Say goodbye
+%% Say goodbye.
 if (options.verbose)
-    toc
+    toc;
+end
+
 end
