@@ -23,23 +23,26 @@ function [ptCld, ptCldSettingsCal, ptCldContrastCal, ptCldExcitationsCal] = ...
 %     simple and fast enough to be feasible.
 %
 % Inputs:
-%    calObj -                     Screen cal object to use to make a point cloud.
-%    bgExcitations -              Screen background excitations for
-%                                 calculation of contrasts.
+%    calObj -                     Screen cal object to use to make a point
+%                                 cloud. This object defines both device
+%                                 properties and the sensor color space in
+%                                 which we compute contrast.
+%    bgExcitations -              Screen background excitations (aka sensor values)
+%                                 for calculation of contrasts.
 %
 % Outputs:
 %    ptCld -                      Screen point cloud results.
 %    ptCldSettingsCal -           All screen settings for desired contrasts
-%                                 in cal format. This Cal format is
-%                                 differentiated from the image to make it
-%                                 sound clearer.
-%    ptCldContrastCal -           All screen contrasts in cal format.
-%    ptCldExcitationsCal -        All screen excitations in cal format.
+%                                 in cal format. This cal format strings out the
+%                                 values for all pixesl along the columns, easier for
+%                                 color space conversions than image format.
+%    ptCldContrastCal -           All contrasts in cal format.
+%    ptCldExcitationsCal -        All excitations in cal format.
 %
 % Optional key/value pairs:
 %    'verbose' -                  Boolean. Default true.  Controls the printout.
 %
-% See also: SettingsFromPointCloud
+% See also: SettingsFromPointCloud, ImageToCalFormat, CalFormatToImage
 
 % History:
 %    11/19/21  dhb, smo           Pulled out as its own function.

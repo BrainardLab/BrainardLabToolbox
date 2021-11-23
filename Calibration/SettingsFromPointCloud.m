@@ -15,16 +15,22 @@ function [settingsCal,indicesCal] = SettingsFromPointCloud(ptCloud,inputCal,ptCl
 %
 % Inputs:
 %    ptCloud -                    Precomputed screen point cloud results.
-%    inputCal -                   Desired input settings.  It can be
+%    inputCal -                   Desired values in cal format.  It can be
 %                                 excitations, contrasts, etc., but we use
-%                                 contrasts in SACC project.
-%    ptCldSettingsCal -           Precomputed screen point cloud settings
+%                                 contrasts in SACC project.  Whatever
+%                                 these are, the same type of thing should
+%                                 be in the point cloud.
+%    ptCldSettingsCal -           The settings that correspond to the point cloud.
+%                                 That is, these are in the same order as the values
+%                                 passed into the point cloud.  Here they are in
 %                                 in a cal format.
 %
 % Outputs:
-%    settingsCal -                Settings acquired from the point cloud.
+%    settingsCal -                Settings acquired from the point cloud search.
 %    indicesCal -                 Matching indices with the locations of
 %                                 the acquired settings in the point cloud.
+%                                 Using these indices into ptCldSettingsCal
+%                                 gives the returned settingsCal.
 %
 % Optional key/value pairs:
 %    'verbose' -                  Boolean. Default true.  Controls the printout.
