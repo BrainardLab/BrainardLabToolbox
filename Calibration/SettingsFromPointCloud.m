@@ -30,7 +30,9 @@ function [settingsCal,indicesCal] = SettingsFromPointCloud(ptCloud,inputCal,ptCl
 %    indicesCal -                 Matching indices with the locations of
 %                                 the acquired settings in the point cloud.
 %                                 Using these indices into ptCldSettingsCal
-%                                 gives the returned settingsCal.
+%                                 gives the returned settingsCal.  To put
+%                                 it another way:
+%                                   settingsCal = ptCldSettingsCal(:,indicesCal);
 %
 % Optional key/value pairs:
 %    'verbose' -                  Boolean. Default true.  Controls the printout.
