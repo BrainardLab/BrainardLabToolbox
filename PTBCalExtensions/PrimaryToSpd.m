@@ -1,9 +1,9 @@
-function predictedSpd = OLPrimaryToSpd(calOrCalStruct, primary, varargin)
+function predictedSpd = PrimaryToSpd(calOrCalStruct, primary, varargin)
 % Predict spectral power distribution from primary values
 %
 % Syntax:
-%   predictedSpd = OLPrimaryToSpd(calOrCalStruct, calibration);
-%   predictedSpd = OLPrimaryToSpd(calOrCalStruct, calibration, 'differentialMode', true);
+%   predictedSpd = PrimaryToSpd(calOrCalStruct, calibration);
+%   predictedSpd = PrimaryToSpd(calOrCalStruct, calibration, 'differentialMode', true);
 %
 % Description:
 %    Takes in vectors of primary values, and a calibration, and
