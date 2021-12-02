@@ -33,6 +33,11 @@ function [settingsCal,indicesCal] = SettingsFromPointCloud(ptCloud,inputCal,ptCl
 %                                 gives the returned settingsCal.  To put
 %                                 it another way:
 %                                   settingsCal = ptCldSettingsCal(:,indicesCal);
+%                                 Note that these values come back in the
+%                                 range [1,N] where N is the number of
+%                                 vectors in the point cloud.  Subtract 1
+%                                 if you want to use these as frame buffer
+%                                 values.
 %
 % Optional key/value pairs:
 %    'verbose' -                  Boolean. Default true.  Controls the printout.
