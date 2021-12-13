@@ -10,8 +10,9 @@
 % Classes                		- Object-oriented code for various experimental tasks
 % Calibration            		- Calibration support routines.
 % Colorimetric           		- Color calculations and related.
-% Configuration                 - BrainardLabToolbox configuration files.
 % ColorMaterialModel            - Model the color material experiment, extending the MLDSColorSelection idea.
+% Configuration                 - BrainardLabToolbox configuration files.
+% ContainerUtils                - Utility functions for working with containers.
 % D70Toolbox             		- Tools for processing digital camera images, particular those from a Nikon D70.
 % DisplaySupport                - Routines for doing useful display related things.
 % Ellipses               		- Routines related to fitting ellipses.
