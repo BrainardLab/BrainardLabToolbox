@@ -1,8 +1,8 @@
-function outMat = combineContainersMat(theCellArrayOfContainers)
+function outContainer = combineContainersMat(theCellArrayOfContainers)
 % Consolidate a cell array of containers of matrices into a container of a matrix.
 % 
 % Syntax:
-%    outMat = combineContainersMat(theCellArrayOfContainers)
+%    outContainer = combineContainersMat(theCellArrayOfContainers)
 %
 % Description:
 %    Take a cell array of containers, each of which contains a matrix of
