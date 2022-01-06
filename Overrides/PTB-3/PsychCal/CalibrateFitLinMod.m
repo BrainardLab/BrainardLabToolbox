@@ -59,6 +59,16 @@ for i = 1:nDevices
     % Build a linear model
     if (nPrimaryBases ~= 0)
         % Get full linear model
+        %
+        % If we wanted to add the option of ignoring the lower input level
+        % measurements when creating the linear model, we think we'd add a
+        % parameter and then modify this to:
+        %            tempMon(:,nIgnoreForLinMod:end)
+        %            monW = monB\tempMon;
+        % Plus a similar change as indicated below when the residual basis
+        % functions are computed.  But using nPrimaryBases == 0 is
+        % basically as good or better than doing this, so we're leaving it
+        % alone for now.
         [monB,monW] = FindLinMod(tempMon, nPrimaryBases);
 
         % Express max measurement within the full linear model.
@@ -77,6 +87,7 @@ for i = 1:nDevices
         % component, and make sure convention is that this max
         % is positive.
         if (nPrimaryBases > 1)
+            % Change to FindLinMod(residMon(:,nIgnoreForLinMod:end, nPrimaryBases-1)
             residB = FindLinMod(residMon, nPrimaryBases-1);
             for j = 1: nPrimaryBases-1
                 residB(:,j) = maxPow*residB(:,j)/max(abs(residB(:,j)));
