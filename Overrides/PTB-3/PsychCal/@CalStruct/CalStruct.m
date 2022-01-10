@@ -215,8 +215,6 @@ classdef CalStruct < handle
         % Setter method for a given unified field name
         set(obj, unifiedFieldName, fieldValue);
         
-        
-        
         % Getter methods for select properties over which we want more
         % controlled access
         function value = get.rawData___S(obj)
