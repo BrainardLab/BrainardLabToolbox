@@ -1,10 +1,10 @@
-function [primary,predictedSpd,errorFraction,gamutMargin] = OLSpdToPrimary(calOrCalStruct, targetSpd, varargin)
+function [primary,predictedSpd,errorFraction,gamutMargin] = SpdToPrimary(calOrCalStruct, targetSpd, varargin)
 % Converts a spectrum into normalized primary OneLight mirror values.
 %
 % Syntax:
-%     primary = OLSpdToPrimary(calOrCalStruct, targetSpd)
-%     primary = OLSpdToPrimary(calOrCalStruct, targetSpd, 'lambda', 0.01)
-%     primary = OLSpdToPrimary(calOrCalStruct, targetSpd, 'verbose, true)
+%     primary = SpdToPrimary(calOrCalStruct, targetSpd)
+%     primary = SpdToPrimary(calOrCalStruct, targetSpd, 'lambda', 0.01)
+%     primary = SpdToPrimary(calOrCalStruct, targetSpd, 'verbose, true)
 %
 % Description:
 %    Convert a spectral power distribution to the linear 0-1 fraction of
@@ -28,10 +28,21 @@ function [primary,predictedSpd,errorFraction,gamutMargin] = OLSpdToPrimary(calOr
 %    Set value of 'checkSpd' to true to force a check on how well the
 %    target is acheived.
 %
+%    This takes vector, not matrix, input. Put a loop around the call to
+%    this function, or edit so that it loops over the columns of a passed
+%    matrix, if you want to apply to more than on spd.
+%
+%    Also note that if you know that the target is a linear combination of
+%    the device primaries, you can do this much faster with:
+%       calOrCalStruct = ObjectToHandleCalOrCalStruct(calOrCalStruct);
+%       P_device = calOrCalStruct.get('P_device');
+%       P_ambient = calOrCalStruct.get('P_ambient');
+%       primary = P_device\(targetSpd-P_ambient).
+%
 % Inputs:
 %    calOrCalStruct    - Calibration struct or object.
 %    targetSpd         - Column vector providing the target spectrum, sampled at the wavelengths
-%                        used in the calibration file (typically 380 to 780 nm in 2 nm steps).
+%                        used in the calibration file (typically 380 to 780 nm in 2 nm steps)..
 %
 % Outputs:
 %    primary           - Column vector containing the primary values for each effective primary
@@ -97,9 +108,11 @@ function [primary,predictedSpd,errorFraction,gamutMargin] = OLSpdToPrimary(calOr
 %    09/11/21  dhb  Wrote from OLSpdToPrimary.
  
 % Examples:
-%
 %{
-    % This example needs updating
+    % ETTBSkip
+    %
+    % This example needs updating.  Still written for ancestral routine
+    % OLSpdToPrimary.
     cal = OLGetCalibrationStructure('CalibrationType','DemoCal','CalibrationFolder',fullfile(tbLocateToolbox('OneLightToolbox'),'OLDemoCal'),'CalibrationDate','latest');
     primaryIn = rand(size(cal.computed.pr650M,2),1);
     spd1 = OLPrimaryToSpd(cal,primaryIn);
