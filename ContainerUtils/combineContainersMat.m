@@ -56,7 +56,11 @@ function outContainer = combineContainersMat(theCellArrayOfContainers)
                     error('Mismatch of matrix sizes within a key');
                 end
             end
-            theMat(iContainer,:) = theCellArrayOfContainers{iContainer}(theKey);
+            % Retrieve the spatiotemporal responses
+            theSpatioTemporalResponses = theCellArrayOfContainers{iContainer}(theKey);
+
+            % Reshape into a row vector
+            theMat(iContainer,:) = reshape(theSpatioTemporalResponses, [1 numel(theSpatioTemporalResponses)]);
         end
         outContainer(theKey) = theMat;
     end
