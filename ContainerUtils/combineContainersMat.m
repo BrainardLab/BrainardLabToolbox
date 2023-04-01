@@ -34,6 +34,8 @@ function outContainer = combineContainersMat(theCellArrayOfContainers)
 
 % History:
 %    12/13/21  dhb  Wrote it.
+%    31/03/23  NPC  Update it to properly deal with containers containing
+%                   multiple trials
 
     % Ensure that all containers have the same flags
     validateContainerKeys(theCellArrayOfContainers);
@@ -49,8 +51,14 @@ function outContainer = combineContainersMat(theCellArrayOfContainers)
         for iContainer = 1:numel(theCellArrayOfContainers)
             % Allocate matrix for this key
             if (iContainer == 1)
-                theMatSize = size(theCellArrayOfContainers{iContainer}(theKey));
-                theMat = zeros([numel(theCellArrayOfContainers) theMatSize]);
+                theSpatioTemporalResponses = theCellArrayOfContainers{iContainer}(theKey);
+                assert(ndims(theSpatioTemporalResponses)==3, 'The spatiotemporal responses matrix must have 3 dimensions');
+
+                theMatSize = size(theSpatioTemporalResponses);
+                nTrials = theMatSize(1);
+                theSingleTrialSpatioTemporalResponseSize = prod(theMatSize(2:3));
+
+                theMat = zeros([numel(theCellArrayOfContainers)*nTrials theSingleTrialSpatioTemporalResponseSize]);
             else
                 if (any(size(theCellArrayOfContainers{iContainer}(theKey)) ~= theMatSize))
                     error('Mismatch of matrix sizes within a key');
@@ -60,7 +68,11 @@ function outContainer = combineContainersMat(theCellArrayOfContainers)
             theSpatioTemporalResponses = theCellArrayOfContainers{iContainer}(theKey);
 
             % Reshape into a row vector
-            theMat(iContainer,:) = reshape(theSpatioTemporalResponses, [1 numel(theSpatioTemporalResponses)]);
+            for iTrial = 1:nTrials
+                theSingleTrialSpatioTemporalResponse = theSpatioTemporalResponses(iTrial,:,:);
+                theMat((iContainer-1)*nTrials+iTrial,:) = reshape(theSingleTrialSpatioTemporalResponse, [1 theSingleTrialSpatioTemporalResponseSize]);
+            end
+
         end
         outContainer(theKey) = theMat;
     end
@@ -87,3 +99,4 @@ function validateContainerKeys(theCellArrayOfContainers)
         end
     end
 end
+
