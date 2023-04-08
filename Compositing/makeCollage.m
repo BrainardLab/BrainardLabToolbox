@@ -1,12 +1,22 @@
 function makeCollage(collageFormat, collageRecipe)
-% This function composites multiple TIFF images into a single PDF file.
+% This function composites multiple TIFF images into a single PNG file.
+%
+% Description:
+%    Allows compositing of TIFF images into a single PNG file.
+%
+%    Can also do PDF with a little code tweaking, but that seems to crash
+%    for large pixels sizes.
+%
+%    Because this routine rasterizes the TIFF images, it doesn't preserve
+%    vector art and isn't useful for production, but it does save some time
+%    brining together exploratory data analyses.
 %
 % Inputs:
 %   collageFormat: a structure containing the following fields:
-%     - pixelsTall: the height of the output PDF in pixels
-%     - pixelsWide: the width of the output PDF in pixels
+%     - pixelsTall: the height of the output PNG in pixels
+%     - pixelsWide: the width of the output PNG in pixels
 %     - backgroundRGB: the RGB values of the background color in the range [0, 1]
-%     - pdfFileName: the filename of the output PDF file
+%     - pdfFileName: the filename of the output PNG file
 %
 %   collageRecipe: a cell array where each element is a structure containing the following fields:
 %     - imageDir: the directory containing the input image file
@@ -62,8 +72,8 @@ function makeCollage(collageFormat, collageRecipe)
         end
     end
 
-    fprintf('\nExporting to PDF. Please wait ....');
-    % Export to PDF
+    % Export to PNG
+    fprintf('\nExporting to PNG. Please wait ....');
     hFig = figure(100);
     set(hFig, 'Position', [10 10 round(size(collageImage,2)) round(size(collageImage,1))]);
     ax = subplot('Position', [0 0 1 1]);
@@ -71,7 +81,7 @@ function makeCollage(collageFormat, collageRecipe)
     axis(ax, 'image');
     set(ax, 'XTick', [], 'YTick',[]);
     drawnow;
-    NicePlot.exportFigToPDF(collageFormat.pdfFileName, hFig, 300);
+    NicePlot.exportFigToPNG(collageFormat.pdfFileName, hFig, 300);
     fprintf('Done !\n');
 end
 
