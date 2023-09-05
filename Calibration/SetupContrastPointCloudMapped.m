@@ -89,7 +89,7 @@ ptCldSettingsCal = IntegersToSettings(ptCldIntegersCal,'nInputLevels',screenNInp
 ptCldExcitationsCal = SettingsToSensor(calObj,ptCldSettingsCal);
 ptCldContrastCal = ExcitationsToContrast(ptCldExcitationsCal,bgExcitations);
 ptCld3DContrastCal = reduceSrchTo3DMatrix*ptCldContrastCal;
-ptCld = pointCloud(ptCld3DContrastCal ');
+ptCld = pointCloud(ptCld3DContrastCal');
 
 % Force point cloud setup by finding one nearest neighbor. This is slow,
 % but once it is done subsequent calls are considerably faster.
