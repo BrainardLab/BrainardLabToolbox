@@ -2,25 +2,28 @@ function [settingsCal,indicesCal] = SettingsFromLookup(ptCloudDesiredValuesCal,p
 % Use point cloud to convert from input to settings.
 %
 % Syntax:
-%    [settingsCal,indicesCal] = SettingsFromPointCloud(ptCloud,inputCal,ptCldSettingsCal)
-%
+%    settingsCal,indicesCal] = SettingsFromLookup(ptCloudDesiredValuesCal,ptCloudValuesCal,ptCldSettingsCal)
+
 % Description:
-%     Use precomputed point cloud to convert input in cal format to settings, by
-%     exhaustive search through the point cloud.
+%     Use precomputed values to convert input in cal format to settings, by
+%     exhaustive search.
 %
-%     The semantics of what gets converted depends on how the point cloud
-%     was set up.  A typical usage is to set up the point cloud with
+%     The semantics of what gets converted depends on how the pased values were
+%     set up.  A typical usage is to set up twith
 %     contrasts corresponding to all possible settings, in which case this
 %     routine gets the settings from contrast.
 %
+%     If the values being searched are 3D, it is much faster to use the
+%     point cloud version of this routine.
+%
 % Inputs:
-%    ptCloud -                    Precomputed screen point cloud results.
-%    inputCal -                   Desired values in cal format.  It can be
+%    ptCloudDesiredValuesCal -    Desired values in cal format.  It can be
 %                                 excitations, contrasts, etc., but we use
 %                                 contrasts in SACC project.  Whatever
 %                                 these are, the same type of thing should
 %                                 be in the point cloud.
-%    ptCldSettingsCal -           The settings that correspond to the point cloud.
+%    ptCloudValuesCal -           The values to search
+%    ptCldSettingsCal -           The settings that correspond to the values to search.
 %                                 That is, these are in the same order as the values
 %                                 passed into the point cloud.  Here they are in
 %                                 in a cal format.
@@ -42,7 +45,7 @@ function [settingsCal,indicesCal] = SettingsFromLookup(ptCloudDesiredValuesCal,p
 % Optional key/value pairs:
 %    'verbose' -                  Boolean. Default true.  Controls the printout.
 %
-% See also: SetupContrastPointCloud
+% See also: SetupContrastPointLookup, SetupContrastPointCloud, SettingsFromPointCloud
 
 % History:
 %    11/19/21  dhb, smo           Pulled out as its own function.

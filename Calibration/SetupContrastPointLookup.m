@@ -1,10 +1,8 @@
-function [ptCld, ptCldSettingsCal, ptCldContrastCal, ptCldExcitationsCal] = ...
-    SetupContrastPointCloud(calObj,bgExcitations,options)
-% Set up point cloud of contrasts for all possible settings.
+function [ptCldSettingsCal, ptCldContrastCal, ptCldExcitationsCal] = SetupContrastPointLookup(calObj,bgExcitations,options)
+% Set up lookup table values for search
 %
 % Syntax:
-%    [ptCld, ptCldSettingsCal, ptCldContrastCal, ptCldExcitationsCal] = ...
-%     SetupContrastPointCloud(calObj,bgExcitations)
+%     [ptCldSettingsCal, ptCldContrastCal, ptCldExcitationsCal] = SetupContrastPointLookup(calObj,bgExcitations,options)
 %
 % Description:
 %     Here we quantize jointly across the three primaries, using an
@@ -16,11 +14,7 @@ function [ptCld, ptCldSettingsCal, ptCldContrastCal, ptCldExcitationsCal] = ...
 %     Compute an array with all possible triplets of screen settings,
 %     quantized on the interval [0,1].
 %
-%     This method takes all possible screen settings and creates a point
-%     cloud of the corresponding cone contrasts. It then finds the settings
-%     that come as close as possible to producing the desired cone contrast
-%     at each point in the image. It's a little slow but conceptually
-%     simple and fast enough to be feasible.
+%     This method sets up the values we need for the subsequent search.
 %
 % Inputs:
 %    calObj -                     Screen cal object to use to make a point
@@ -31,7 +25,6 @@ function [ptCld, ptCldSettingsCal, ptCldContrastCal, ptCldExcitationsCal] = ...
 %                                 for calculation of contrasts.
 %
 % Outputs:
-%    ptCld -                      Screen point cloud results.
 %    ptCldSettingsCal -           All screen settings for desired contrasts
 %                                 in cal format. This cal format strings out the
 %                                 values for all pixesl along the columns, easier for
@@ -42,7 +35,7 @@ function [ptCld, ptCldSettingsCal, ptCldContrastCal, ptCldExcitationsCal] = ...
 % Optional key/value pairs:
 %    'verbose' -                  Boolean. Default true.  Controls the printout.
 %
-% See also: SettingsFromPointCloud, ImageToCalFormat, CalFormatToImage
+% See also: SettingsFromLookup, SetupContrastPointCloud, SettingsFromPointCloud, ImageToCalFormat, CalFormatToImage
 
 % History:
 %    11/19/21  dhb, smo           Pulled out as its own function.
@@ -87,9 +80,6 @@ ptCldSettingsCal = IntegersToSettings(ptCldIntegersCal,'nInputLevels',screenNInp
 % point cloud object from these.
 ptCldExcitationsCal = SettingsToSensor(calObj,ptCldSettingsCal);
 ptCldContrastCal = ExcitationsToContrast(ptCldExcitationsCal,bgExcitations);
-%ptCld3DContrastCal = reduceSrchTo3DMatrix*ptCldContrastCal;
-%ptCld = pointCloud(ptCld3DContrastCal');
-ptCld = [];
 
 % Force point cloud setup by finding one nearest neighbor. This is slow,
 % but once it is done subsequent calls are considerably faster.
