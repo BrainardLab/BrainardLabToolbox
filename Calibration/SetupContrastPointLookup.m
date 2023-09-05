@@ -1,5 +1,5 @@
 function [ptCld, ptCldSettingsCal, ptCldContrastCal, ptCldExcitationsCal] = ...
-    SetupContrastPointCloud(calObj,reduceSrchTo3DMatrix,bgExcitations,options)
+    SetupContrastPointCloud(calObj,bgExcitations,options)
 % Set up point cloud of contrasts for all possible settings.
 %
 % Syntax:
@@ -52,7 +52,6 @@ function [ptCld, ptCldSettingsCal, ptCldContrastCal, ptCldExcitationsCal] = ...
 %% Set parameters.
 arguments
     calObj
-    reduceSrchTo3DMatrix
     bgExcitations
     options.verbose (1,1) = true
 end
@@ -88,12 +87,13 @@ ptCldSettingsCal = IntegersToSettings(ptCldIntegersCal,'nInputLevels',screenNInp
 % point cloud object from these.
 ptCldExcitationsCal = SettingsToSensor(calObj,ptCldSettingsCal);
 ptCldContrastCal = ExcitationsToContrast(ptCldExcitationsCal,bgExcitations);
-ptCld3DContrastCal = reduceSrchTo3DMatrix*ptCldContrastCal;
-ptCld = pointCloud(ptCld3DContrastCal');
+%ptCld3DContrastCal = reduceSrchTo3DMatrix*ptCldContrastCal;
+%ptCld = pointCloud(ptCld3DContrastCal');
+ptCld = [];
 
 % Force point cloud setup by finding one nearest neighbor. This is slow,
 % but once it is done subsequent calls are considerably faster.
-findNearestNeighbors(ptCld,[0 0 0],1);
+% findNearestNeighbors(ptCld,[0 0 0],1);
 if (options.verbose)
     toc;
 end
