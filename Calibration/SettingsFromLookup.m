@@ -62,7 +62,7 @@ end
 %% Say hello.
 if (options.verbose)
     tic;
-    fprintf('Point cloud unique contrast method, finding image settings\n');
+    fprintf('Search lookup table contrast method, finding image settings\n');
 end
 
 %% Get image settings, fast way

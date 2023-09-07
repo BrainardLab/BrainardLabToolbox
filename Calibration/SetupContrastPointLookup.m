@@ -55,7 +55,7 @@ end
 % setting.
 if (options.verbose)
     tic;
-    fprintf('Point cloud exhaustive method, setting up cone contrast cloud, this takes a while\n')
+    fprintf('Lookup table exhaustive method, setting up lookup table\n')
 end
 
 % Get number of screen levels out of calibration object.
