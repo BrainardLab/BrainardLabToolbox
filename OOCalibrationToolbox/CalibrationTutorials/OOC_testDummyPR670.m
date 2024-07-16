@@ -24,7 +24,7 @@ function OOC_testDummyPR670
                     0.24 0.5 0.99; 1 0.1 0; 0.1 1.0 0; 0 0.1 1];
                 
 
-    DB_PR670obj = PR670dev('emulateHardware',  true);
+    DB_PR670obj = PR670dev('emulateHardware',  false, 'devicePortString','COM5');
 
     % Get some info
     fprintf('device model name : %s\n', DB_PR670obj.deviceModelName);

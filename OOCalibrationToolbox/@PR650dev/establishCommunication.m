@@ -4,8 +4,9 @@ function obj = establishCommunication(obj)
         fprintf('In PR650obj.establishCommunication() method\n');
     end
   
-    oldverbo = IOPort('Verbosity', 2);
+   oldverbo = IOPort('Verbosity', 2);
         
+
     % Attempt to open the port
     handshakeCode = 'Lenient DontFlushOnWrite=1 FlowControl=None ';
     if (isempty(obj.portHandle)) 

@@ -55,7 +55,7 @@ classdef PR650dev < Radiometer
             end
             
             % Call the super-class constructor.
-            obj = obj@Radiometer(verbosity, devPortString);
+            obj = obj@Radiometer(verbosity, devPortString, false);
             
             if (obj.verbosity > 9)
                 fprintf('In PR650dev.constructor() method\n');
