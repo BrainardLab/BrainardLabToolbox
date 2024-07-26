@@ -18,7 +18,7 @@ function OOC_checkPR670(varargin)
     % For windows computers, the 'devicePortString' must be set to 'COM1', 'COM2', 'COM3' etc
     % To find out which one, open DeviceManager and look under Ports(COM&LPT)
     % --Nicolas Jun 17,2024
-    devicePortString = 'COM5';
+    devicePortString = 'COM7';
 
     try
         pr670obj = PR670dev('verbosity', verb, 'devicePortString', devicePortString);

@@ -10,7 +10,7 @@ function obj = calibrate(obj)
 
     % Prompt user to leave the room
     userPrompt = 1; beepWhenDone = 2;
-    obj.promptUserToLeaveTheRoom(userPrompt);
+    %obj.promptUserToLeaveTheRoom(userPrompt);
     
     % Set email notification preference
     obj.setNotificationPreferences();

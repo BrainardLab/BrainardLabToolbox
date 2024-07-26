@@ -21,18 +21,25 @@ function info = GetBrainardLabStandardToolboxesSVNInfo
 
 % Get a list of all directories in /Users/Shared/Matlab/Toolboxes.  We'll
 % consider each of these directories a possible SVN controlled folder.
-sysInfo = GetComputerInfo();
-if strcmp(sysInfo.userShortName, 'melanopsin')
-    toolboxDir = '/Users/melanopsin/Documents/MATLAB/toolboxes';
-elseif (strcmp(sysInfo.userShortName, 'colorlab')  && strcmp(sysInfo.localHostName, 'mudpuppy'))
-    toolboxDir = '/Users/colorlab/Documents/MATLAB/toolboxes';
+if ispc
+    %windows-specific commands using MATLAB built-in functions
+    userShortName = getenv('USERNAME');
+    sysInfo.userShortName = strtrim(userShortName);
+    toolboxDir = sprintf('C:/Users/%s/Documents/MATLAB/toolboxes', sysInfo.userShortName);
 else
-    toolboxDir = sprintf('/Users/%s/Documents/MATLAB/toolboxes',sysInfo.userShortName);
-end
-
-% Linux platform
-if (strfind(sysInfo.MatlabPlatform, 'GLNXA64'))
-    toolboxDir = sprintf('/home/%s/Documents/MATLAB/toolboxes', sysInfo.userShortName);
+    sysInfo = GetComputerInfo();
+    if strcmp(sysInfo.userShortName, 'melanopsin')
+        toolboxDir = '/Users/melanopsin/Documents/MATLAB/toolboxes';
+    elseif (strcmp(sysInfo.userShortName, 'colorlab')  && strcmp(sysInfo.localHostName, 'mudpuppy'))
+        toolboxDir = '/Users/colorlab/Documents/MATLAB/toolboxes';
+    else
+        toolboxDir = sprintf('/Users/%s/Documents/MATLAB/toolboxes',sysInfo.userShortName);
+    end
+    
+    % Linux platform
+    if (strfind(sysInfo.MatlabPlatform, 'GLNXA64'))
+        toolboxDir = sprintf('/home/%s/Documents/MATLAB/toolboxes', sysInfo.userShortName);
+    end
 end
 
 toolboxList = GetSubdirectories(toolboxDir);
