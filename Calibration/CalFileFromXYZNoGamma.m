@@ -123,7 +123,7 @@ cal.P_device = [redXYZ greenXYZ blueXYZ];
 % cal.rawdata.rawGammaTable = [gammaFun gammaFun gammaFun];
 % cal = CalibrateFitGamma(cal);
 
-%% Save the calibration file in PsychCalLocalData
+%% Save the calibration file in PsychCalLocalData (or PsychCalDemoData)
 SaveCalFile(cal,monitorName);
 
 %% Report of some things we might care about.  These
