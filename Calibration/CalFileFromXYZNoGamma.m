@@ -63,13 +63,23 @@ cal.describe.monitor = monitorName;
 cal.describe.comment = 'Calibration derived from XYZ measurements, no gamma data';
 cal.describe.whichScreen = 1;
 computerInfo = GetComputerInfo;
-displayDescription = mglDescribeDisplays;
+
+mglAvailable = false;
+if (mglAvailable)
+    displayDescription = mglDescribeDisplays;
+end
 cal.describe.caltype = 'monitor';
 cal.describe.computer = sprintf('%s''s %s, %s', computerInfo.userShortName, computerInfo.localHostName, computerInfo.OSVersion);
 cal.describe.driver = sprintf('%s %s','unknown_driver','unknown_driver_version');
-cal.describe.hz = displayDescription(cal.describe.whichScreen).refreshRate;
-cal.describe.screenSizePixel = displayDescription(cal.describe.whichScreen).screenSizePixel;
-cal.describe.displayDescription = displayDescription(cal.describe.whichScreen);
+if (mglAvailable)
+    cal.describe.hz = displayDescription(cal.describe.whichScreen).refreshRate;
+    cal.describe.screenSizePixel = displayDescription(cal.describe.whichScreen).screenSizePixel;
+    cal.describe.displayDescription = displayDescription(cal.describe.whichScreen);
+else
+    cal.describe.hz = NaN;
+    cal.describe.screenSizePixel = NaN;
+    cal.describe.displayDescription = [];
+end
 cal.describe.date = sprintf('%s %s',date,datestr(now,14));
 cal.describe.who = 'David';
 %cal.describe.dacsize = ScreenDacBits(cal.describe.whichScreen-1);
