@@ -2,14 +2,15 @@
 % and displays data from a given calibration file.
 %
 % 4/10/2014  npc   Wrote it.
-%
+% 9/12/2024  rb changed to allow for comparisons between calibrations.
 
 classdef CalibratorAnalyzer < handle
     % Public properties
     properties
         essentialDataGridDims       = [3 3]; % 3 columns x 3 rows
         linearityChecksGridDims     = [2 3]; % 2 columns x 3 rows
-        backgroundEffectsGridDims   = [2 3]; % 2 columns x 3 rows
+        backgroundEffectsGridDims   = [3 2]; % 3 columns x 2 rows
+        comparisonGridDims          = [2 2]; % 2 columns x 2 rows
     end
     
     properties (SetAccess = private) 
@@ -18,64 +19,80 @@ classdef CalibratorAnalyzer < handle
     
     % Private properties. These must be specified at initialization time
     properties (Access = private)
-        % specific to the display system
-        desktopHandle;
-        figureGroupName;
-        figureHandlesArray;
-        
+
+        figureGroupName;  
+        figureHandlesArray;  
+
         % calStructOBJ to access imported cal data in unified way
         calStructOBJ;
-        
+        % cell array to store calStructOBJ for each file
+        calStructOBJarray = {};
         % the imported cal
         newStyleCal;
-        
+        % cell array to store the imported cal for each file
+        newStyleCalarray = {};
         % where to save plots
-        plotsExportsFolder;
+        plotsExportsFolder = {};
     end
     
     % Public methods
     methods
         % Constructor
-        function obj = CalibratorAnalyzer(cal, calFileName, calDir)
+        function obj = CalibratorAnalyzer(cals, calFilenames, calDirs)
+
+            numFiles = length(calFilenames);
             
-            % Generate CalStructOBJ to handle the (new-style) cal struct
-            [obj.calStructOBJ, ~] = ObjectToHandleCalOrCalStruct(cal);
+             % Preallocate cell arrays 
+            obj.calStructOBJarray = cell(numFiles, 1);
+            obj.newStyleCalarray = cell(numFiles, 1);
+            obj.plotsExportsFolder = cell(numFiles, 1);
+
+            for ii = 1:numFiles
+                % Extract arguments for the i-th file
+                cal = cals{ii};
+                calFilename = calFilenames{ii};
+                calDir = calDirs{ii};
+            
+                % Generate CalStructOBJ to handle the (new-style) cal struct
+                [obj.calStructOBJ, ~] = ObjectToHandleCalOrCalStruct(cal);
+
+                if (obj.calStructOBJ.inputCalHasNewStyleFormat)
+                    % Make a copy of the imported cal
+                    obj.newStyleCal = cal;
+                    calFolder = calDir; % CalDataFolder([],calFilename, calDir);
+                    calPlotFolder = fullfile(calFolder,'Plots');
+                    if (~exist(calPlotFolder,'dir'))
+                        unix(['mkdir ' calPlotFolder]);
+                    end
+                    calFilePlotFolder = fullfile(calPlotFolder,calFilename);
+                    if (~exist(calFilePlotFolder,'dir'))
+                        unix(['mkdir ' calFilePlotFolder]);
+                    end
+                    calDate = obj.calStructOBJ.get('date');
+                    thePlotFolder = fullfile(calFilePlotFolder,calDate(1:11));
+                    if (~exist(thePlotFolder,'dir'))
+                        unix(['mkdir ' thePlotFolder]);
+                    end
     
-            if (obj.calStructOBJ.inputCalHasNewStyleFormat)
-                % Make a copy of the imported cal
-                obj.newStyleCal = cal;
-                calFolder = calDir; % CalDataFolder([],calFileName, calDir);
-                calPlotFolder = fullfile(calFolder,'Plots');
-                if (~exist(calPlotFolder,'dir'))
-                    unix(['mkdir ' calPlotFolder]);
+                obj.plotsExportsFolder{ii} = thePlotFolder;
+
+                obj.calStructOBJarray{ii} = obj.calStructOBJ;
+
+                obj.newStyleCalarray{ii} = obj.newStyleCal;
+
+                else
+                    fprintf('The imported cal struct has an old-style format.\n');
+                    error('Use ''mglAnalyzeMonCalSpd'' for analysis, instead.\n');
                 end
-                calFilePlotFolder = fullfile(calPlotFolder,calFileName);
-                if (~exist(calFilePlotFolder,'dir'))
-                    unix(['mkdir ' calFilePlotFolder]);
-                end
-                calDate = obj.calStructOBJ.get('date');
-                thePlotFolder = fullfile(calFilePlotFolder,calDate(1:11));
-                if (~exist(thePlotFolder,'dir'))
-                    unix(['mkdir ' thePlotFolder]);
-                end
-    
-                obj.plotsExportsFolder = thePlotFolder;
-            else
-                fprintf('The imported cal struct has an old-style format.\n');
-                error('Use ''mglAnalyzeMonCalSpd'' for analysis, instead.\n');
             end
-    
-            % Turn off JavaFrame will become obsolete warning
-            warning('off','MATLAB:HandleGraphics:ObsoletedProperty:JavaFrame');
-            
-            % Get the desktop's Java handle
-            obj.desktopHandle = com.mathworks.mde.desk.MLDesktop.getInstance;
+     
         end
-        
+                     
         % Method to analyze the loaded calStruct
         obj = analyze(obj, essentialDataGridDims, linearityChecksGridDims);
+
     end % Public methods
-    
+
     
     % Private methods
     methods (Access = private)
@@ -86,26 +103,25 @@ classdef CalibratorAnalyzer < handle
         plotAllData(obj, essentialDataGridDims, linearityChecksGridDims);
         
         % Method to generate plots of the essential data.
-        plotEssentialData(obj, figureGroupIndex);
+        plotEssentialData(obj, figureGroupIndex, gridDims);
         
         % Method to generate plots of the linearity check data.
-        plotLinearityCheckData(obj, figureGroupIndex);
-        
-        % Method to add a figure to the Figures group
-        updateFiguresGroup(obj, figureHandle, figureGroupIndex);
-        
-        % Method to dock a figure to a window representing a group of figues
-        dockFigureToGroup(obj, figureHandle, groupName);
+        plotLinearityCheckData(obj, figureGroupIndex, gridDims);
+
+        % Method to generate plots of the background effects data.
+        plotBackgroundEffectsData(obj, figureGroupIndex, gridDims);
+
+        % Method to generate comparison plots for the essential data.
+        plotCalibrationComparison(obj, figureGroupIndex, gridDims);    
         
         % Method to generate a shaded (filled) plot
-        makeShadedPlot(obj, x,y, faceColor, edgeColor);
-        
-        % Method to export a plot
-        SaveFigure_Callback(obj, hObject, eventdata, current_gcf, fileDir, fileName)
+        makeShadedPlot(obj, x,y, faceColor, edgeColor, ax);
+       
     end  % private methods
     
     % Static methods
     methods (Static)
+        [calFilename, calDir, cal] = singleSelectCalFile();
         [calFilename, calDir, cal] = selectCalFile();
     end
     

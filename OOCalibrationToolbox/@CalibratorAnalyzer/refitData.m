@@ -1,55 +1,76 @@
 function obj = refitData(obj)
 
-    % Refit accordingly
-    refit = GetWithDefault('Refit data [0 -> no,1 -> yes]',0);
-    if (refit)
-        % Optionally, let the user specify a new type of gamma fit
-        newFitType = ...
-            GetWithDefault('Enter gamma fit type (see ''help CalibrateFitGamma'')', obj.calStructOBJ.get('gamma.fitType'));
-        
-        obj.calStructOBJ.set('gamma.fitType', newFitType);
-        
-        % Optionally, let the user specify a different number of primary bases
-        newBasesNum = ...
-            GetWithDefault('\nEnter number of primary bases', obj.calStructOBJ.get('nPrimaryBases'));
-        obj.calStructOBJ.set('nPrimaryBases', newBasesNum);
-        
-       
-        
-        % Fitting a linear model to the raw data
-        fprintf('Computing linear model.\n');
-        % Fit the linear model
-        CalibrateFitLinMod(obj.calStructOBJ);
+    refit = false; % Change this to true if you want the option to refit data 
 
-        % Update internal data reprentation
-        %obj.rawData.gammaTable     = obj.calStructOBJ.get('rawGammaTable');
-        %obj.processedData.P_device = obj.calStructOBJ.get('P_device'); 
-        %obj.processedData.T_device = obj.calStructOBJ.get('T_device');
-        %obj.processedData.monSVs   = obj.calStructOBJ.get('monSVs');
-    
-        % Fit the gamma
-        nInputLevels = obj.calStructOBJ.get('gamma.nInputLevels');
-        if (isempty(nInputLevels))
-            nInputLevels = 1024;
+    numFiles = length(obj.calStructOBJarray);
+
+    if refit == true
+
+        for i = 1:numFiles
+
+            % Refit accordingly
+            fprintf('Processing file %d of %d...\n', i, numFiles);
+            refitCurrent = GetWithDefault('Refit data [0 -> no,1 -> yes]?',0);
+
+            if (refitCurrent)
+
+                % Optionally, let the user specify a new type of gamma fit
+                newFitType = ...
+                    GetWithDefault('Enter gamma fit type (see ''help CalibrateFitGamma'')', obj.calStructOBJarray{i}.get('gamma.fitType'));
+
+                obj.calStructOBJarray{i}.set('gamma.fitType', newFitType);
+
+                % Optionally, let the user specify a different number of primary bases
+                newBasesNum = ...
+                    GetWithDefault('\nEnter number of primary bases', obj.calStructOBJarray{i}.get('nPrimaryBases'));
+                obj.calStructOBJarray{i}.set('nPrimaryBases', newBasesNum);
+
+
+                % Fitting a linear model to the raw data
+                fprintf('Computing linear model.\n');
+                % Fit the linear model
+                CalibrateFitLinMod(obj.calStructOBJarray{i});
+
+                % Update internal data reprentation
+                %obj.rawData.gammaTable     = obj.calStructOBJ{1}.get('rawGammaTable');
+                %obj.processedData.P_device = obj.calStructOBJ{1}.get('P_device');
+                %obj.processedData.T_device = obj.calStructOBJ{1}.get('T_device');
+                %obj.processedData.monSVs   = obj.calStructOBJ{1}.get('monSVs');
+
+                % Fit the gamma
+                nInputLevels = obj.calStructOBJarray{i}.get('gamma.nInputLevels');
+                if (isempty(nInputLevels))
+                    nInputLevels = 1024;
+                end
+
+                CalibrateFitGamma(obj.calStructOBJarray{i}, nInputLevels);
+                % Update internal data reprentation
+                %obj.processedData.gammaInput  = obj.calStructOBJ{1}.get('gammaInput');
+                %obj.processedData.gammaTable  = pbj.calStructOBJ{1}.get('gammaTable');
+                %obj.processedData.gammaFormat = pbj.calStructOBJ{1}.get('gammaFormat');
+
+
+                % Process the ambient data
+                %obj.processedData.P_ambient = obj.rawData.ambientMeasurements';
+                %obj.processedData.T_ambient = WlsToT(obj.rawData.S);
+
+            end
+
         end
 
-        CalibrateFitGamma(obj.calStructOBJ, nInputLevels);
-        % Update internal data reprentation
-        %obj.processedData.gammaInput  = obj.calStructOBJ.get('gammaInput');
-        %obj.processedData.gammaTable  = pbj.calStructOBJ.get('gammaTable');
-        %obj.processedData.gammaFormat = pbj.calStructOBJ.get('gammaFormat');
-    
-        
-        % Process the ambient data
-        %obj.processedData.P_ambient = obj.rawData.ambientMeasurements';
-        %obj.processedData.T_ambient = WlsToT(obj.rawData.S);
-    
+    else
+
+        disp('Refitting is off. See source code ("refitData.m") to change this setting.')
+
     end
     
-    % Load CIE '31 color matching functions
-    load T_xyz1931
-    T_xyz = SplineCmf(S_xyz1931, 683*T_xyz1931, obj.calStructOBJ.get('S'));
-    
-    % Set the sensor space to the '31 XYZ color matching functions
-    SetSensorColorSpace(obj.calStructOBJ, T_xyz, obj.calStructOBJ.get('S'));
+    for i = 1:numFiles
+        % Load CIE '31 color matching functions
+        load T_xyz1931
+        T_xyz = SplineCmf(S_xyz1931, 683*T_xyz1931, obj.calStructOBJarray{i}.get('S'));
+
+        % Set the sensor space to the '31 XYZ color matching functions
+        SetSensorColorSpace(obj.calStructOBJarray{i}, T_xyz, obj.calStructOBJarray{i}.get('S'));
+    end
+
 end

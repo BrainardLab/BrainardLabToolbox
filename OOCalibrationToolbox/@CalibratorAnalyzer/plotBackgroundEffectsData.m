@@ -1,65 +1,113 @@
 % Method to generate plots of background effects data.
-function plotBackgroundEffectsData(obj, figureGroupIndex)
+function plotBackgroundEffectsData(obj, figureGroupIndex, gridDims)
+
+  % Setting up plots
+    hFig = figure('Name', 'Background Effects Data', 'NumberTitle', 'off', ...
+                    'Position',[200, 500, 2200, 1200]);                                   
     
+    % Create a panel in the figure
+    hPanel = uipanel('Parent', hFig, 'Position', [0.05 0.05 0.9 0.9]);
+    
+    % Parameters for padding
+    horizontalPadding = 0.04; % Space on the left and right
+    verticalPadding = 0.07;   % Space on the top and bottom
+    scaleFactor = 0.95;       % Scale down the axes size
+    
+    % Extract grid dimensions
+    numRows = gridDims(2);
+    numCols = gridDims(1);
+    
+    % Calculate available width and height for axes
+    availableWidth = 1 - horizontalPadding * (numCols + 1);
+    availableHeight = 1 - verticalPadding * (numRows + 1);
+
+    % Calculate width and height of each axis
+    axWidth = (availableWidth * scaleFactor) / numCols;
+    axHeight = (availableHeight * scaleFactor) / numRows;
+
+    % Initialize positions
+    pos = cell(1, numRows * numCols);
+
+    % Calculate position for each subplot within the panel
+    for i = 1:numRows * numCols
+        row = ceil(i / numCols);  % Determine row index
+        col = mod(i - 1, numCols) + 1;  % Determine column index
+
+        % Calculate position [left, bottom, width, height]
+        left = (col - 1) * (axWidth + horizontalPadding) + horizontalPadding + 0.03;
+        bottom = 1 - row * (axHeight + verticalPadding) - verticalPadding + 0.04; % Adjust for bottom padding
+        position = [left, bottom, axWidth, axHeight];
+        pos{i} = position; % Store position in cell array
+    end
+
     % Plot background effects on the spectra of each target settings
-    for settingIndex = 1:size(obj.newStyleCal.backgroundDependenceSetup.settings,2)
-        spectra = squeeze(obj.newStyleCal.rawData.backgroundDependenceMeasurements(:,settingIndex,:));
+    for settingIndex = 1:size(obj.newStyleCalarray.backgroundDependenceSetup.settings, 2)
+        spectra = squeeze(obj.newStyleCalarray.rawData.backgroundDependenceMeasurements(:, settingIndex, :));
         maxAll(settingIndex) = max(max(spectra));
     end
     
     maxAll = max([0.01 max(maxAll)]);
     
-    for settingIndex = 1:min([ 6 size(obj.newStyleCal.backgroundDependenceSetup.settings,2)])
-        spectra = squeeze(obj.newStyleCal.rawData.backgroundDependenceMeasurements(:,settingIndex,:));
-        plotSpectra(obj, spectra, maxAll, obj.newStyleCal.backgroundDependenceSetup.settings(:,settingIndex), figureGroupIndex);
+    % Plotting logic for 9 plots maximum
+    for settingIndex = 1:min([9 size(obj.newStyleCalarray.backgroundDependenceSetup.settings, 2)])
+        spectra = squeeze(obj.newStyleCalarray.rawData.backgroundDependenceMeasurements(:, settingIndex, :));
+        % Update the call to plotSpectra to use the correct position
+        current_pos = pos{settingIndex};
+        plotSpectra(obj, hPanel, current_pos, spectra, maxAll, obj.newStyleCal.backgroundDependenceSetup.settings(:,settingIndex), figureGroupIndex);
     end
+
 end
 
-function plotSpectra(obj, spectra, maxAll, settings, figureGroupIndex, settingsIndex, settingsIndicesNum)
-    % Init figure
-    if (numel(settings) == 3)
-        h = figure('Name', sprintf('Effects of background on RGB =(%d %d %d)e-2', round(100*settings(1)), round(100*settings(2)), round(100*settings(3))), 'NumberTitle', 'off', 'Visible', 'off'); 
-    else
-        h = figure('Name', sprintf('Effects of background on target %d/%d', settingsIndex, settingsIndicesNum), 'NumberTitle', 'off', 'Visible', 'off'); 
-    end
-    clf; hold on;
+function plotSpectra(obj, hPanel, current_pos, spectra, maxAll, settings, figureGroupIndex, settingsIndex, settingsIndicesNum)
+
+    h_axes = axes('Parent', hPanel, 'Position', current_pos);
+
+    % Hold on for plotting
+    hold on;
 
     % Compute spectral axis
-    spectralAxis = SToWls(obj.calStructOBJ.get('S'));
-    
+    spectralAxis = SToWls(obj.calStructOBJarray.get('S'));
+
     % Plot data
-    backgroundSettingsNum = size(obj.newStyleCal.backgroundDependenceSetup.bgSettings,2);
+    backgroundSettingsNum = size(obj.newStyleCalarray.backgroundDependenceSetup.bgSettings,2);
     lineColors = zeros(backgroundSettingsNum,3);
-    
-    for backgroundSettingIndex = 1:backgroundSettingsNum 
-        bgSettings = obj.newStyleCal.backgroundDependenceSetup.bgSettings(:, backgroundSettingIndex);
+
+    for backgroundSettingIndex = 1:backgroundSettingsNum
+        bgSettings = obj.newStyleCalarray.backgroundDependenceSetup.bgSettings(:, backgroundSettingIndex);
         if (sum(bgSettings) == 0)
-           zeroBackgroundSPD = squeeze(spectra(backgroundSettingIndex,:));
+            zeroBackgroundSPD = squeeze(spectra(backgroundSettingIndex,:));
         end
     end
-    
+
     maxSPDdiff = zeros(1, backgroundSettingsNum);
-    
-    for backgroundSettingIndex = 1:backgroundSettingsNum 
-        lineColors(backgroundSettingIndex,:) = (obj.newStyleCal.backgroundDependenceSetup.bgSettings(:, backgroundSettingIndex))';
+
+    for backgroundSettingIndex = 1:backgroundSettingsNum
+        lineColors(backgroundSettingIndex,:) = (obj.newStyleCalarray.backgroundDependenceSetup.bgSettings(:, backgroundSettingIndex))';
         lineColors(find(lineColors > 0.75)) = 0.75;
         spdDiff = (squeeze(spectra(backgroundSettingIndex,:)) - zeroBackgroundSPD);
         maxSPDdiff(backgroundSettingIndex) = max(abs(spdDiff));
         edgeColor = squeeze(lineColors(backgroundSettingIndex,:));
-        plot(spectralAxis, spdDiff*1000, '-', 'Color', edgeColor, 'LineWidth', 2.0);
-        
-        if (size(obj.newStyleCal.backgroundDependenceSetup.bgSettings,1) == 3)
+
+        plot(h_axes, spectralAxis, spdDiff*1000, '-', 'Color', edgeColor, 'LineWidth', 2.0);
+        if (numel(settings) == 3)
+            title(sprintf('Effects of background on RGB =(%d %d %d)e-2', round(100*settings(1)), round(100*settings(2)), round(100*settings(3))), 'Visible', 'on');
+        else
+            title(sprintf('Effects of background on target %d/%d', settingsIndex, settingsIndicesNum),'Visible', 'on');
+        end
+
+        if (size(obj.newStyleCalarray.backgroundDependenceSetup.bgSettings,1) == 3)
             legendsMatrix{backgroundSettingIndex} = sprintf('bg=(%0.2f, %0.2f, %0.2f)', ...
-                obj.newStyleCal.backgroundDependenceSetup.bgSettings(1,backgroundSettingIndex), ...
-                obj.newStyleCal.backgroundDependenceSetup.bgSettings(2,backgroundSettingIndex), ...
-                obj.newStyleCal.backgroundDependenceSetup.bgSettings(3,backgroundSettingIndex));
+                obj.newStyleCalarray.backgroundDependenceSetup.bgSettings(1,backgroundSettingIndex), ...
+                obj.newStyleCalarray.backgroundDependenceSetup.bgSettings(2,backgroundSettingIndex), ...
+                obj.newStyleCalarray.backgroundDependenceSetup.bgSettings(3,backgroundSettingIndex));
         else
             legendsMatrix{backgroundSettingIndex} = sprintf('background setting %d/%d (multiprimary)', backgroundSettingIndex, backgroundSettingsNum);
         end
-        
+
     end
+
     maxSPDdiff = max(maxSPDdiff);
-    
+
     [hleg, objh,outh,outm] = legend(legendsMatrix, 'Location', 'NorthEast');
     set(objh,'linewidth',2);
 
@@ -73,17 +121,5 @@ function plotSpectra(obj, spectra, maxAll, settings, figureGroupIndex, settingsI
     
     % Finish plot
     drawnow;
-    
-    uicontrol(h,  ...
-                        'Units',    'normalized',  ...
-                        'Position',  [0.01 0.01 0.1 0.1], ...
-                        'String',   ' Export ', ...
-                        'Fontsize',  14, ...      
-                        'FontWeight','normal', ...
-                        'ForegroundColor',     [0.2 0.2 0.2], ...
-                        'Callback',  {@obj.SaveFigure_Callback, gcf,  get(h, 'Name')} ...
-                );
-            
-    % Add figure to the figures group
-    obj.updateFiguresGroup(h, figureGroupIndex);
+
 end
