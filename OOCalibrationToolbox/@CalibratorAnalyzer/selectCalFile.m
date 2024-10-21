@@ -1,5 +1,5 @@
 % Query user to load a cal file and return the calFilename and the calDir
-function [calFilename, calDir, cal] = selectCalFile()
+function [calFilename, calDir, cal, additionalCalIndex] = selectCalFile()
 
     p = getpref('BrainardLabToolbox');
     [calFilename, calDir] = uigetfile('*.mat', 'Select a calibration file to open', p.CalDataFolder, 'MultiSelect','on');
@@ -14,10 +14,12 @@ function [calFilename, calDir, cal] = selectCalFile()
         for i = 1:length(cals)
             fprintf('\tCalibration %d, date %s\n',i,cals{i}.describe.date);
         end
-        calIndex = GetWithDefault('Enter number of calibration to use',length(cals));
+        calIndex = GetWithDefault('Enter number of calibration to use [most recent is default]',length(cals));
         cal = cals{calIndex};
+        additionalCalIndex = calIndex; 
     else % If multiple additional files are selected
         cal = {};
+        additionalCalIndex = {};
         for i = 1:length(calFilename)
             % Note: This assumes that the files are in the same directory
             fullCalFile = fullfile(calDir, calFilename{i});
@@ -28,9 +30,10 @@ function [calFilename, calDir, cal] = selectCalFile()
             for i = 1:length(cals)
                 fprintf('\tCalibration %d, date %s\n',i,cals{i}.describe.date);
             end
-            calIndex = GetWithDefault('Enter number of calibration to use',length(cals));
+            calIndex = GetWithDefault('Enter number of calibration to use [most recent is default]',length(cals));
             this_cal = cals{calIndex};
             cal{end + 1} = this_cal;
+            additionalCalIndex{end + 1} = calIndex;
         end
     end
 

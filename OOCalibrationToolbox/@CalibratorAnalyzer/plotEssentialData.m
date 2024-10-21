@@ -61,6 +61,12 @@ function plotEssentialData(obj, figureGroupIndex, gridDims)
     % Gamma functions.
     plotGammaData(obj, figureGroupIndex, lineColors, hPanel, pos);
 
+    % Chromaticity data
+    plotChromaticityData(obj, figureGroupIndex, lineColors, hPanel, pos);
+
+    % Chromaticity stability
+    plotPrimaryChromaticityStabilityData(obj, figureGroupIndex, lineColors, hPanel, pos);
+
     if (nWaves > 3)
         % SPDs
         plotSpectralData(obj,  figureGroupIndex, lineColors, hPanel, pos);
@@ -73,32 +79,19 @@ function plotEssentialData(obj, figureGroupIndex, gridDims)
             plotFullSpectra(obj,  2, 'Green primary', figureGroupIndex, 'NorthEast', hPanel, pos);
             plotFullSpectra(obj,  3, 'Blue primary', figureGroupIndex, 'NorthEast', hPanel, pos);
         else
-            pDisplayed = round(nDevices/3);
-            pIndices = 1:pDisplayed;
-            plotFullSpectraMultiPrimaries(obj, pIndices, figureGroupIndex, lineColors(pIndices,:), hPanel, pos);
+            pIndices = 1:nDevices;  % Create an index vector for all devices
 
-            pIndices = pDisplayed+(1:pDisplayed);
-            plotFullSpectraMultiPrimaries(obj, pIndices, figureGroupIndex, lineColors(pIndices,:), hPanel, pos);
-
-            pIndices = (2*pDisplayed+1):nDevices;
-            plotFullSpectraMultiPrimaries(obj, pIndices, figureGroupIndex, lineColors(pIndices,:), hPanel, pos);
+            plotFullSpectraMultiPrimaries(obj, pIndices, figureGroupIndex, lineColors);
         end
 
     end
 
-
-    % Chromaticity data
-    plotChromaticityData(obj, figureGroupIndex, lineColors, hPanel, pos);
-
-    % Chromaticity stability
-    plotPrimaryChromaticityStabilityData(obj, figureGroupIndex, lineColors, hPanel, pos);
-
     % Repeatability 
-    if (obj.calStructOBJarray.get('nAverage') > 1)
-        plotRepeatibilityData(obj,  figureGroupIndex, lineColors, hPanel, pos);
-    else
-       plotNulPlot(obj, figureGroupIndex, hPanel, pos);
-    end
+    % if (obj.calStructOBJarray.get('nAverage') > 1)
+    %     plotRepeatibilityData(obj,  figureGroupIndex, lineColors, hPanel, pos);
+    % else
+    %    plotNulPlot(obj, figureGroupIndex, hPanel, pos);
+    % end
 
 end
 
@@ -230,11 +223,25 @@ function plotNulPlot(obj, figureGroupIndex, hPanel, pos)
 end
 
 function plotPrimaryChromaticityStabilityData(obj, figureGroupIndex, lineColors, hPanel, pos)
-    % Init axes with smaller size
-    scaleFactor = 0.85; % Adjust this value to change the size of the plot
-    newWidth = pos{8}(3) * scaleFactor;
-    newHeight = pos{8}(4) * scaleFactor;
-    newPosition = [pos{8}(1), pos{8}(2), newWidth, newHeight]; % Maintain the same position, but change size
+
+    % Get number of calibrated primaries
+    primariesNum = obj.calStructOBJarray.get('nDevices');
+
+    if (primariesNum > 3)
+        index = 5;
+        % Init axes
+        scaleFactor = 0.9; % Adjust this value to change the size of the plot
+        newWidth = pos{index}(3) * scaleFactor;
+        newHeight = pos{index}(4) * scaleFactor;
+        newPosition = [pos{index}(1), pos{index}(2) - 0.05, newWidth, newHeight]; % Maintain the same position, but change size
+    else
+        index = 8;
+        % Init axes
+        scaleFactor = 0.85; % Adjust this value to change the size of the plot
+        newWidth = pos{index}(3) * scaleFactor;
+        newHeight = pos{index}(4) * scaleFactor;
+        newPosition = [pos{index}(1), pos{index}(2), newWidth, newHeight]; % Maintain the same position, but change size
+    end
 
     h = axes('Parent', hPanel, 'Position', newPosition);
     ax = h;
@@ -284,14 +291,14 @@ function plotPrimaryChromaticityStabilityData(obj, figureGroupIndex, lineColors,
         axis('square');
         
         xlabel('\it x chromaticity', 'FontName', 'Helvetica',  'FontSize', 18);
-        %if (primaryIndex == 1)
+        if (primaryIndex == 1)
             ylabel('\it y chromaticity', 'FontName', 'Helvetica',  'FontSize', 18);
-        %else
-        %    ylabel('');
-        %end
+        else
+           ylabel('');
+        end
         set(gca, 'Color', [1.0 1.0 1.0], 'XColor', 'b', 'YColor', 'b');
         set(gca, 'FontName', 'Helvetica', 'FontSize', 14);
-        %title(sprintf('%s primary',primaryNames{primaryIndex}));
+        % title(sprintf('%s primary',primaryNames{primaryIndex}));
         box on;
     end
     
@@ -323,11 +330,21 @@ function plotChromaticityData(obj, figureGroupIndex, lineColors, hPanel, pos)
     % Compute the spectral locus
     xyYLocus = XYZToxyY(T_sensor);
 
-    % Init axes with smaller size
-    scaleFactor = 0.85; % Adjust this value to change the size of the plot
-    newWidth = pos{7}(3) * scaleFactor;
-    newHeight = pos{7}(4) * scaleFactor;
-    newPosition = [pos{7}(1), pos{7}(2), newWidth, newHeight]; % Maintain the same position, but change size
+    if (primariesNum > 3)
+        index = 4;
+        % Init axes
+        scaleFactor = 0.9; % Adjust this value to change the size of the plot
+        newWidth = pos{index}(3) * scaleFactor;
+        newHeight = pos{index}(4) * scaleFactor;
+        newPosition = [pos{index}(1), pos{index}(2) - 0.05, newWidth, newHeight]; % Maintain the same position, but change size
+    else
+        index = 7;
+        % Init axes
+        scaleFactor = 0.85; % Adjust this value to change the size of the plot
+        newWidth = pos{index}(3) * scaleFactor;
+        newHeight = pos{index}(4) * scaleFactor;
+        newPosition = [pos{index}(1), pos{index}(2), newWidth, newHeight]; % Maintain the same position, but change size
+    end
 
     h = axes('Parent', hPanel, 'Position', newPosition);
     ax = h;
@@ -361,6 +378,7 @@ function plotChromaticityData(obj, figureGroupIndex, lineColors, hPanel, pos)
 end
 
 function plotFullSpectraMultiPrimaries(obj, pIndices, figureGroupIndex, lineColors)
+  
     switch(numel(pIndices))
         case 1
             rows = 1; cols = 1;
@@ -381,28 +399,58 @@ function plotFullSpectraMultiPrimaries(obj, pIndices, figureGroupIndex, lineColo
         otherwise
             rows = 4; cols = 5;       
     end
-    
-    % Init axes
-    h = axes('Parent', hPanel, 'Position', pos{4});
-    ax = h;
-    hold on
-    
-    subplotPosVectors = NicePlot.getSubPlotPosVectors(...
-        'rowsNum', rows, ...
-        'colsNum', cols, ...
-        'heightMargin', 0.13, ...
-        'widthMargin', 0.06, ...
-        'leftMargin', 0.06, ...
-        'rightMargin', 0.001, ...
-        'bottomMargin', 0.09, ...
-        'topMargin', 0.05);
+
+    % Setting up plots
+    % Making another figure for the SPD stability plots, since there are
+    % more than three
+    hFig2 = figure('Name', 'Essential Data: SPD Stability', 'NumberTitle', 'off', ...
+                   'Position',[200, 500, 2200, 1200]); 
+
+    % Create a panel in the figure
+    hPanel2 = uipanel('Parent', hFig2, 'Position', [0.05 0.05 0.9 0.9]);
+
+    % Parameters for padding
+    horizontalPadding = 0.03; % Space on the left and right
+    verticalPadding = 0.0125;   % Space on the top and bottom
+    scaleFactor = 0.95;        % Scale down the axes size
+
+    % Get grid dimensions
+    numRows = rows;
+    numCols = cols;
+
+    % Calculate available width and height for axes
+    availableWidth = 1 - horizontalPadding * (numCols + 1);
+    availableHeight = 1 - verticalPadding * (numRows + 1);
+
+    % Calculate width and height of each axis
+    axWidth = (availableWidth * scaleFactor) / numCols;
+    axHeight = (availableHeight * scaleFactor) / numRows;
+    pos = [];
+
+    % Calculate position for each subplot within the panel
+    for i = 1:numRows * numCols
+        row = ceil(i / numCols);  % Determine row index
+        col = mod(i - 1, numCols) + 1;  % Determine column index
+
+        % Calculate position [left, bottom, width, height]
+        left = (col - 1) * (axWidth + horizontalPadding) + 2 * horizontalPadding;
+        bottom = 1 - row * (axHeight + verticalPadding); % Adjust for bottom padding
+        position = [left, bottom, axWidth, axHeight];
+        pos{end + 1} = position;
+
+    end
     
     % Compute spectral axis
     spectralAxis = SToWls(obj.calStructOBJarray.get('S'));
+
+    rawGammaInput = obj.calStructOBJarray.get('rawGammaInput');
     
     % Put measurements into columns of a matrix from raw data in calibration file.
     gammaCurveMeanMeasurements = obj.newStyleCalarray.rawData.gammaCurveMeanMeasurements;
-    
+
+    numColors = numel(pIndices);
+
+    index = 0;
     pk = 0;
     for r = 1:rows
         for c = 1:cols
@@ -411,43 +459,67 @@ function plotFullSpectraMultiPrimaries(obj, pIndices, figureGroupIndex, lineColo
                 primaryIndex = pIndices(pk);
                 fullSpectra   = 1000*squeeze(gammaCurveMeanMeasurements(primaryIndex, :,:));
                 scaledSpectra = 0*fullSpectra;
-                maxSpectra = fullSpectra(end,:); 
-                for gammaPoint = 1:obj.calStructOBJarray.get('nMeas')
+                maxSpectra = fullSpectra(end,:);
+                for gammaPoint = 1:obj.calStructOBJ.get('nMeas')
                     scaledSpectra(gammaPoint,:) = (fullSpectra(gammaPoint,:)' * (fullSpectra(gammaPoint,:)' \ maxSpectra'))';
                 end
 
-                subplot('Position', subplotPosVectors(r,c).v);
-                hold on;
-                x = spectralAxis;
-                
-                for k = size(scaledSpectra,1):-1:1
-                    y = squeeze(scaledSpectra(k,:));
-                    plot(x,y, 'k-', 'LineWidth', 1.0);
+                index = index + 1;
+                scaleFactor = 0.8;
+                % Setting the axes for each primary
+                ax = axes('Parent', hPanel2, 'Position',  [pos{index}(1), pos{index}(2) + 0.01, pos{index}(3)/2 * scaleFactor, pos{index}(4)* scaleFactor]);
+                hold(ax, 'on');
+
+                % Plot the full spectra
+                for k = size(fullSpectra, 1):-1:1
+                    % Get the base color from the lineColors array
+                    baseColor = lineColors(mod(primaryIndex - 1, numColors) + 1, :); % Ensure within bounds
+
+                    % Compute the face color transitioning to white
+                    fadeFactor = (size(fullSpectra, 1) - k) / (size(fullSpectra, 1) - 1); % Fade factor from 0 to 1
+                    faceColor = baseColor * (1 - fadeFactor) + [1, 1, 1] * fadeFactor; % Interpolate towards white
+
+                    edgeColor = 'none'; % Set edgeColor as needed
+
+                    y = squeeze(fullSpectra(k, :)) * 1000;
+                    obj.makeShadedPlot(spectralAxis, y, faceColor, edgeColor, ax);
+                    legendsMatrix{k} = sprintf('%0.2f', rawGammaInput(size(fullSpectra, 1) - k + 1));
                 end
-                
-                for k = size(scaledSpectra,1):-1:1
-                    y = squeeze(scaledSpectra(k,:));
-                    plot(x,y, '-', 'Color', lineColors(pk,:), 'LineWidth', 0.75);
+
+                % Set title and axis properties
+                hleg = legend(legendsMatrix, 'Location', 'northeast');
+                set(hleg,'FontName', 'Helvetica','FontSize', 10);
+                set(ax, 'Color', [1.0 1.0 1.0], 'XColor', 'b', 'YColor', 'b', 'FontName', 'Helvetica', 'FontSize', 14);
+                xlabel(ax, '\it wavelength (nm)', 'FontName', 'Helvetica', 'FontSize', 14);
+                ylabel(ax, '\it power (mWatts)', 'FontName', 'Helvetica', 'FontSize', 14);
+                axis(ax, [380, 780, -Inf, Inf]);
+                box(ax, 'on');
+
+                % Set specific titles for each primary
+                t = title(ax, sprintf('Primary %d SPD Stability', primaryIndex));
+                t.Position(1) = t.Position(1) + 15; % Move horizontally (right)
+
+                ax2 = axes('Parent', hPanel2, 'Position', [pos{index}(1) + pos{index}(3)/2 + 0.01, pos{index}(2) + 0.01, pos{index}(3)/2 * scaleFactor, pos{index}(4) * scaleFactor]);
+
+                % Plot the scaled spectra with specified colors
+                for k = size(scaledSpectra, 1):-1:1
+                    y = squeeze(scaledSpectra(k, :));
+                    plot(ax2, spectralAxis, y, 'k-');
                 end
-                
-  
-                title(sprintf('p%d', primaryIndex));
-                
-                set(gca, 'Color', [1.0 1.0 1.0], 'XColor', 'b', 'YColor', 'b');
-                set(gca, 'FontName', 'Helvetica',  'FontSize', 14);
-                axis([380,780,-Inf,Inf]);
-                box on;
+
+                % Set title and axis properties
+                set(ax2, 'Color', [1.0 1.0 1.0], 'XColor', 'b', 'YColor', 'b', 'FontName', 'Helvetica', 'FontSize', 14);
+                xlabel(ax2, '\it wavelength (nm)', 'FontName', 'Helvetica', 'FontSize', 14);
+                ylabel(ax2, '\it power (mWatts)', 'FontName', 'Helvetica', 'FontSize', 14);
+                axis(ax2, [380, 780, -Inf, Inf]);
+                box(ax2, 'on');
+
             end
         end
     end
-    
-    
-    
-    
-    
-    % Finish plot
-    drawnow;
 
+            % Finish plot
+            drawnow;
 end
 
 
@@ -574,8 +646,14 @@ end
 
 
 function plotAmbientData(obj,  figureGroupIndex, hPanel, pos)
-    % Define scale factor
-    scaleFactor = 0.85; % Adjust this value as needed
+    % Get number of calibrated primaries
+    primariesNum = obj.calStructOBJarray.get('nDevices');
+
+    if primariesNum > 3
+        scaleFactor = 0.9; 
+    else
+        scaleFactor = 0.85; 
+    end
     
     % Adjust the position using the scale factor
     scaledPosition = [pos{3}(1), pos{3}(2), pos{3}(3) * scaleFactor, pos{3}(4) * scaleFactor];
@@ -612,8 +690,14 @@ function plotAmbientData(obj,  figureGroupIndex, hPanel, pos)
 end
 
 function plotSpectralData(obj, figureGroupIndex, lineColors, hPanel, pos)
-    % Define scale factor
-    scaleFactor = 0.85; % Adjust this value as needed
+    % Get number of calibrated primaries
+    primariesNum = obj.calStructOBJarray.get('nDevices');
+
+    if primariesNum > 3
+        scaleFactor = 0.9; 
+    else
+        scaleFactor = 0.85; 
+    end
     
     % Adjust the position using the scale factor
     scaledPosition = [pos{2}(1), pos{2}(2), pos{2}(3) * scaleFactor, pos{2}(4) * scaleFactor];
@@ -626,11 +710,8 @@ function plotSpectralData(obj, figureGroupIndex, lineColors, hPanel, pos)
     % Compute spectral axis
     spectralAxis = SToWls(obj.calStructOBJarray.get('S'));
     
-    % Get data
+    % Get data 
     P_device = obj.calStructOBJarray.get('P_device');
-    
-    % Get number of calibrated primaries
-    primariesNum = obj.calStructOBJarray.get('nDevices');
 
     % Plot data
     x = spectralAxis;
@@ -659,8 +740,14 @@ function plotSpectralData(obj, figureGroupIndex, lineColors, hPanel, pos)
 end
 
 function plotGammaData(obj, figureGroupIndex, lineColors, hPanel, pos)
-    % Define scale factor
-    scaleFactor = 0.85; % Adjust this value as needed
+    % Get number of calibrated primaries
+    primariesNum = obj.calStructOBJarray.get('nDevices');
+
+    if primariesNum > 3
+        scaleFactor = 0.9; 
+    else
+        scaleFactor = 0.85; 
+    end
     
     % Adjust the position using the scale factor
     scaledPosition = [pos{1}(1), pos{1}(2), pos{1}(3) * scaleFactor, pos{1}(4) * scaleFactor];

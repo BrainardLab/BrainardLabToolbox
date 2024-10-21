@@ -20,8 +20,9 @@ function plotCalibrationComparison(obj, figureGroupIndex, gridDims)
         if (nDevices(ii) == 3)
             lineColors{ii} = [1 0 0; 0 1 0; 0 0 1];
         else
-            lineColors{ii} = brewermap(nDevices, '*spectral');
+            lineColors{ii} = brewermap(nDevices(ii), '*spectral');
         end
+
     end
 
     % Setting up plots
@@ -62,8 +63,11 @@ function plotCalibrationComparison(obj, figureGroupIndex, gridDims)
 
     end
 
-    % Gamma functions.
-    plotGammaData(obj, figureGroupIndex, lineColors, hPanel, pos);
+    if (nDevices(ii) > 3)
+        % Centering pos{2}
+        left = horizontalPadding + (availableWidth / 2) - (axWidth / 2) + 0.01;  % Centering calculation
+        pos{2} = [left, 1 - axHeight - verticalPadding, axWidth, axHeight];  % Centered position
+    end
 
     if (all(nWaves > 3))
         % SPDs
@@ -71,11 +75,13 @@ function plotCalibrationComparison(obj, figureGroupIndex, gridDims)
 
         % Ambient SPD
         plotAmbientData(obj,  figureGroupIndex, hPanel, pos);
-
     end
 
     % Chromaticity data
     plotChromaticityData(obj, figureGroupIndex, lineColors, hPanel, pos);
+
+    % Gamma functions.
+    plotGammaData(obj, figureGroupIndex, lineColors, hPanel, pos);
 
 end
 
@@ -306,43 +312,86 @@ function plotSpectralData(obj, figureGroupIndex, lineColors, hPanel, pos)
 
         x = spectralAxis{i};
 
-        for primaryIndex = 1:primariesNum{i}
-            y = squeeze(P_device{i}(:,primaryIndex))*1000;
+        if primariesNum{i} == 3
 
-            % Update the maximum y-value
-            yMax = max(yMax, max(y));
+            for primaryIndex = 1:primariesNum{i}
+                y = squeeze(P_device{i}(:,primaryIndex))*1000;
 
-            % Define colors for the different reference cal lines
-            colors = [
-                1 0 0;   % Red
-                0 1 0;   % Green
-                0 0 1    % Blue
-                ];
+                % Update the maximum y-value
+                yMax = max(yMax, max(y));
 
-             % Different line style options
-             lineStyles = {'--', ':', '-.', '-'};
+                % Define colors for the different reference cal lines
+                colors = [
+                    1 0 0;   % Red
+                    0 1 0;   % Green
+                    0 0 1    % Blue
+                    ];
 
-            % Plot fitted data (line)
-            if i == 1
-                legends{numel(legends)+1} = sprintf('p%d Ref Cal', primaryIndex);
-                lineWidth = 3; % Make the first line bold 
-                lineStyle = '-';
-            else
-                legends{numel(legends)+1} = sprintf('p%d Cal %d', primaryIndex, i);
-                lineWidth = 1.5; % Normal line width for others
-                lineStyle = lineStyles{mod(i-2, length(lineStyles)) + 1}; % Cycle through line styles
+                % Different line style options
+                lineStyles = {'--', ':', '-.', '-'};
+
+                % Plot fitted data (line)
+                if i == 1
+                    legends{numel(legends)+1} = sprintf('p%d Ref Cal', primaryIndex);
+                    lineWidth = 3; % Make the first line bold
+                    lineStyle = '-';
+                else
+                    legends{numel(legends)+1} = sprintf('p%d Cal %d', primaryIndex, i);
+                    lineWidth = 1.5; % Normal line width for others
+                    lineStyle = lineStyles{mod(i-2, length(lineStyles)) + 1}; % Cycle through line styles
+                end
+
+                % Use mod to cycle through colors
+                theColor = colors(mod(primaryIndex-1, size(colors, 1)) + 1, :); % Solid color
+
+                h1 = plot(x, y, 'LineStyle', lineStyle, 'Color', theColor, 'LineWidth', lineWidth, 'DisplayName', sprintf('Primary %d', primaryIndex));
+
+                lineHandles = [lineHandles; h1];
+
+                % Finding the max of each primary for each calibration
+                MaxValue = max(y);
+                primaryMax{end + 1} = MaxValue;
+            end
+        
+        else
+
+            for primaryIndex = 1:primariesNum{i}
+
+                y = squeeze(P_device{i}(:,primaryIndex))*1000;
+
+                % Update the maximum y-value
+                yMax = max(yMax, max(y));
+
+                % Make a color map of colors
+                colors = brewermap(primariesNum{i}, '*spectral');
+
+                % Different line style options
+                lineStyles = {'--', ':', '-.', '-'};
+
+                % Plot fitted data (line)
+                if i == 1
+                    legends{numel(legends)+1} = sprintf('p%d Ref Cal', primaryIndex);
+                    lineWidth = 3; % Make the first line bold
+                    lineStyle = '-';
+                else
+                    legends{numel(legends)+1} = sprintf('p%d Cal %d', primaryIndex, i);
+                    lineWidth = 1.5; % Normal line width for others
+                    lineStyle = lineStyles{mod(i-2, length(lineStyles)) + 1}; % Cycle through line styles
+                end
+
+                % Use mod to cycle through colors
+                theColor = colors(mod(primaryIndex-1, size(colors, 1)) + 1, :); % Solid color
+
+                h1 = plot(x, y, 'LineStyle', lineStyle, 'Color', theColor, 'LineWidth', lineWidth, 'DisplayName', sprintf('Primary %d', primaryIndex));
+
+                lineHandles = [lineHandles; h1];
+
+                % Finding the max of each primary for each calibration
+                MaxValue = max(y);
+                primaryMax{end + 1} = MaxValue;
+
             end
 
-            % Use mod to cycle through colors
-            theColor = colors(mod(primaryIndex-1, size(colors, 1)) + 1, :); % Solid color
-            
-            h1 = plot(x, y, 'LineStyle', lineStyle, 'Color', theColor, 'LineWidth', lineWidth, 'DisplayName', sprintf('Primary %d', primaryIndex));
-
-            lineHandles = [lineHandles; h1];
-
-            % Finding the max of each primary for each calibration
-            MaxValue = max(y);
-            primaryMax{end + 1} = MaxValue;
         end
 
     end
@@ -434,10 +483,6 @@ function plotSpectralData(obj, figureGroupIndex, lineColors, hPanel, pos)
                 newYAdj = newY(k) * scaleFactor{i};  % Adjust based on scale factor
                 yAdj(k, j) = newYAdj;  % Append the adjusted value
             end
-
-            % Multiplying by the scale factor
-            % newYAdj = y(j) * scaleFactor{i};
-            % yAdj = [yAdj; newYAdj];
        
             % Different line style options
             lineStyles = {'--', ':', '-.', '-'};
@@ -463,7 +508,11 @@ function plotSpectralData(obj, figureGroupIndex, lineColors, hPanel, pos)
     xlabel('\it wavelength (nm)', 'FontName', 'Helvetica',  'FontSize', 14);
     ylabel('\it power (mWatts)', 'FontName', 'Helvetica', 'FontSize', 14);
     title('Primary SPDs');
-    legend(lineHandles, legends, 'Location', 'northeast', 'NumColumns', 2);
+    if numPrimaries > 3
+        legend(lineHandles, legends, 'Location', 'northeastoutside', 'NumColumns', 2);
+    else
+        legend(lineHandles, legends, 'Location', 'northeast', 'NumColumns', 2);
+    end
 
     % Set the y-axis limits
     yMaxAdjusted = yMax * 1.1; % Increase max y-value by 10%
@@ -501,107 +550,244 @@ function plotGammaData(obj, figureGroupIndex, lineColors, hPanel, pos)
 
     end
 
-    if all(primariesNum == 3) % Checking that every entry is 3
+    if all(primariesNum == 3) % The case that every entry is 3
         legendColumns = 1;
         numSubplots = primariesNum(i);
         % 1 = red, 2 = green, 3 = blue
-    else
-        legendColumns = 3;
-    end
 
-    % Define spacing
-    spacing = 0.04; % Space between subplots
-    scaleFactor = 0.4; % Scale factor to reduce the size of each subplot
-    totalWidth = (scaleFactor * (1 - (numSubplots - 1) * spacing)) / numSubplots; % Adjusted total width
-    verticalOffset = 0.15; % Move up
-    horizontalOffset = -0.03; % Move left
+        % Define spacing
+        spacing = 0.04; % Space between subplots
+        scaleFactor = 0.4; % Scale factor to reduce the size of each subplot
+        totalWidth = (scaleFactor * (1 - (numSubplots - 1) * spacing)) / numSubplots; % Adjusted total width
+        verticalOffset = 0.15; % Move up
+        horizontalOffset = -0.03; % Move left
 
-    for i = 1:numSubplots
+        for i = 1:numSubplots
 
-        % Create an axes in the specified position for the subplot
-        leftPosition = pos{1}(1) + (i-1) * (totalWidth + spacing) + horizontalOffset; % Add spacing to the left position
-        bottomPosition = pos{1}(2) + verticalOffset; % Move up
-        h = axes('Parent', hPanel, 'Position', [leftPosition, bottomPosition, totalWidth, pos{1}(4) * scaleFactor]);
-        axes(h);
+            % Create an axes in the specified position for the subplot
+            leftPosition = pos{1}(1) + (i-1) * (totalWidth + spacing) + horizontalOffset; % Add spacing to the left position
+            bottomPosition = pos{1}(2) + verticalOffset; % Move up
+            h = axes('Parent', hPanel, 'Position', [leftPosition, bottomPosition, totalWidth, pos{1}(4) * scaleFactor]);
+            axes(h);
 
-        % nexttile(tl)
+            % nexttile(tl)
 
-        legends = {};
+            legends = {};
 
-        markersize = 5;
+            markersize = 5;
 
-        primaryIndex = i;
+            primaryIndex = i;
 
-        % Define colors for the different reference cal lines
-        colors = [
-            1 0 0;   % Red
-            0 1 0;   % Green
-            0 0 1    % Blue
-            ];
-       
-        % Different shape options
-        shapes = {'o', 's', 'd', '^', 'v', '<', '>', 'p', '*'};
+            % Define colors for the different reference cal lines
+            colors = [
+                1 0 0;   % Red
+                0 1 0;   % Green
+                0 0 1    % Blue
+                ];
 
-        hold on;
+            % Different shape options
+            shapes = {'o', 's', 'd', '^', 'v', '<', '>', 'p', '*'};
 
-        for j = 1:numFiles % Plotting each calibration on the current subplot
+            hold on;
 
-            % Plot fitted data (line)
-            if j == 1
-                legends{numel(legends)+1} = sprintf('p%d Ref Cal', primaryIndex);
-                lineWidth = 3; % Make the first line bold
-                lineStyle = '-';               
-                % Use mod to cycle through colors
-                theColor = colors(mod(primaryIndex-1, size(colors, 1)) + 1, :); % Solid color
-                plot(gammaInput{j}, gammaTable{j}(:,primaryIndex),'LineStyle', lineStyle, 'LineWidth', lineWidth, ...
-                    'MarkerFaceColor', theColor, 'Color', theColor, 'MarkerSize', markersize);
-            else
-                % Plot measured data (points)
-                % Check if each entry in rawGammaInput has 1 column
-                isSingleColumn = cellfun(@(x) size(x, 1) == 1, rawGammaInput);
-                shape = shapes{mod(j-1, length(shapes)) + 1}; % Cycle through shapes
-                % Use mod to cycle through colors
-                theColor = colors(mod(primaryIndex-1, size(colors, 1)) + 1, :); % Solid color
-         
+            for j = 1:numFiles % Plotting each calibration on the current subplot
 
-                if all(isSingleColumn)
-                    plot(rawGammaInput{j}, rawGammaTable{j}(:,primaryIndex), shape, ...
-                        'MarkerFaceColor', theColor, 'MarkerEdgeColor', theColor*0.5);
-                    legends{numel(legends)+1} = sprintf('p%d Cal %d', primaryIndex, j);
+                % Plot fitted data (line)
+                if j == 1
+                    legends{numel(legends)+1} = sprintf('p%d Ref Cal', primaryIndex);
+                    lineWidth = 3; % Make the first line bold
+                    lineStyle = '-';
+                    % Use mod to cycle through colors
+                    theColor = colors(mod(primaryIndex-1, size(colors, 1)) + 1, :); % Solid color
+                    plot(gammaInput{j}, gammaTable{j}(:,primaryIndex),'LineStyle', lineStyle, 'LineWidth', lineWidth, ...
+                        'MarkerFaceColor', theColor, 'Color', theColor, 'MarkerSize', markersize);
                 else
-                    plot(rawGammaInput{j}(primaryIndex,:), rawGammaTable{j}(:,primaryIndex), shape, ...
-                        'MarkerFaceColor', theColor, 'MarkerEdgeColor', theColor*0.5);
-                    legends{numel(legends)+1} = sprintf('p%d Cal %d', primaryIndex, j);
+                    % Plot measured data (points)
+                    % Check if each entry in rawGammaInput has 1 column
+                    isSingleColumn = cellfun(@(x) size(x, 1) == 1, rawGammaInput);
+                    shape = shapes{mod(j-1, length(shapes)) + 1}; % Cycle through shapes
+                    % Use mod to cycle through colors
+                    theColor = colors(mod(primaryIndex-1, size(colors, 1)) + 1, :); % Solid color
+
+
+                    if all(isSingleColumn)
+                        plot(rawGammaInput{j}, rawGammaTable{j}(:,primaryIndex), shape, ...
+                            'MarkerFaceColor', theColor, 'MarkerEdgeColor', theColor*0.5);
+                        legends{numel(legends)+1} = sprintf('p%d Cal %d', primaryIndex, j);
+                    else
+                        plot(rawGammaInput{j}(primaryIndex,:), rawGammaTable{j}(:,primaryIndex), shape, ...
+                            'MarkerFaceColor', theColor, 'MarkerEdgeColor', theColor*0.5);
+                        legends{numel(legends)+1} = sprintf('p%d Cal %d', primaryIndex, j);
+                    end
                 end
+                % theColor = colors(i, :); % Solid color
+                % hP = plot(gammaInput{j}, gammaTable{j}(:,primaryIndex),'LineStyle', lineStyle, 'LineWidth', lineWidth, ...
+                %     'MarkerFaceColor', theColor, 'Color', theColor, 'MarkerSize', markersize);
+                % handles(numel(handles)+1) = hP;
+
+
             end
-            % theColor = colors(i, :); % Solid color
-            % hP = plot(gammaInput{j}, gammaTable{j}(:,primaryIndex),'LineStyle', lineStyle, 'LineWidth', lineWidth, ...
-            %     'MarkerFaceColor', theColor, 'Color', theColor, 'MarkerSize', markersize);
-            % handles(numel(handles)+1) = hP;
-         
+
+            hold off
+
+            titleText = sprintf('Gamma Function p%d', i); % Customize your title text
+            text(0.5, 1.1, titleText, 'Units', 'normalized', 'HorizontalAlignment', 'center', 'FontSize', 14, 'FontWeight', 'bold');
+            xlabel('\it settings value', 'FontName', 'Helvetica');
+            ylabel('\it normalized output', 'FontName', 'Helvetica');
+            %title('Gamma functions', 'Fontsize', 13, 'Fontname', 'helvetica', 'Fontweight', 'bold');
+            axis([-0.05 1.05 -0.05 1.05]);
+            axis 'square'
+            box on
+            set(gca,  'XColor', 'b', 'YColor', 'b', 'FontSize', 14);
+
+            % Create the legend
+            lgd = legend(legends, 'Location', 'south', 'NumColumns', legendColumns);
+
+            % Adjust the legend position to be below the x-axis
+            legendPosition = get(lgd, 'Position'); % Get the current legend position
+            legendPosition(2) = legendPosition(2) - 0.1; % Adjust this value as needed
+            % Set the new position of the legend
+            set(lgd, 'Position', legendPosition);
 
         end
 
-        hold off
+    else
+        % Setting up plots
+        % Making another figure for the gamma plots, since there are
+        % more than three
 
-        titleText = sprintf('Gamma Function p%d', i); % Customize your title text
-        text(0.5, 1.1, titleText, 'Units', 'normalized', 'HorizontalAlignment', 'center', 'FontSize', 14, 'FontWeight', 'bold');
-        xlabel('\it settings value', 'FontName', 'Helvetica');
-        ylabel('\it normalized output', 'FontName', 'Helvetica');
-        %title('Gamma functions', 'Fontsize', 13, 'Fontname', 'helvetica', 'Fontweight', 'bold');
-        axis([-0.05 1.05 -0.05 1.05]);
-        axis 'square'
-        box on
-        set(gca,  'XColor', 'b', 'YColor', 'b', 'FontSize', 14);
+        % Assuming the files have the same number of primaries
+        numPrimaries = primariesNum(2);
 
-        % Create the legend
-        lgd = legend(legends, 'Location', 'south', 'NumColumns', legendColumns);
-        
-        % Adjust the legend position to be below the x-axis
-        legendPosition = get(lgd, 'Position'); % Get the current legend position
-        legendPosition(2) = legendPosition(2) - 0.1; % Adjust this value as needed
-        % Set the new position of the legend
-        set(lgd, 'Position', legendPosition);
+        pIndices = 1:numPrimaries;
+
+        switch(numel(pIndices))
+            case 1
+                rows = 1; cols = 1;
+            case 2
+                rows = 1; cols = 2;
+            case 3
+                rows = 1; cols = 3;
+            case 4
+                rows = 2; cols = 2;
+            case {5,6}
+                rows = 2; cols = 3;
+            case {7,8,9}
+                rows = 3; cols = 3;
+            case {10,11,12}
+                rows = 3; cols = 4;
+            case {13,14,15,16}
+                rows = 4; cols = 4;
+            otherwise
+                rows = 4; cols = 5;
+        end
+
+        legendColumns = 1;
+
+        hFig2 = figure('Name', 'Comparison Panel: Gamma Functions', 'NumberTitle', 'off', ...
+            'Position',[200, 500, 2200, 1200]);
+
+        % Create a panel in the figure
+        hPanel2 = uipanel('Parent', hFig2, 'Position', [0.05 0.05 0.9 0.9]);
+
+        % Parameters for padding
+        horizontalPadding = 0.03; % Space on the left and right
+        verticalPadding = 0.0125;   % Space on the top and bottom
+        scaleFactor = 0.8;        % Scale down the axes size
+
+        % Get grid dimensions
+        numRows = rows;
+        numCols = cols;
+
+        % Calculate available width and height for axes
+        availableWidth = 1 - horizontalPadding * (numCols + 1);
+        availableHeight = 1 - verticalPadding * (numRows + 1);
+
+        % Calculate width and height of each axis
+        axWidth = (availableWidth * scaleFactor) / numCols;
+        axHeight = (availableHeight * scaleFactor) / numRows;
+        pos = [];
+
+        % Calculate position for each subplot within the panel
+        for i = 1:numRows * numCols
+            row = ceil(i / numCols);  % Determine row index
+            col = mod(i - 1, numCols) + 1;  % Determine column index
+
+            % Calculate position [left, bottom, width, height]
+            left = (col - 1) * (availableWidth / numCols) + horizontalPadding + 0.05; % Center based on available width
+            bottom = 1 - row * (availableHeight / numRows) + verticalPadding; % Adjust for bottom padding
+
+            % Center the axes by adjusting the left position
+            left = left + (availableWidth / numCols - axWidth) / 2;
+
+            position = [left, bottom, axWidth, axHeight];
+            pos{end + 1} = position;
+        end
+
+        for i = 1:numPrimaries
+
+            h = axes('Parent', hPanel2, 'Position', pos{i});
+            axes(h);
+
+            % Different shape options
+            shapes = {'o', 's', 'd', '^', 'v', '<', '>', 'p', '*'};
+
+            legends = {};
+
+            markersize = 5;
+
+            primaryIndex = i;
+
+            hold on;
+
+            for j = 1:numFiles % Plotting each calibration on the current subplot
+
+                % Plot fitted data (line)
+                if j == 1
+                    legends{numel(legends)+1} = sprintf('p%d Ref Cal', primaryIndex);
+                    lineWidth = 3; % Make the first line bold
+                    lineStyle = '-';
+                    % Use mod to cycle through colors
+                    colors = brewermap(numPrimaries, '*spectral');
+                    theColor = colors(mod(primaryIndex-1, size(colors, 1)) + 1, :); % Choice of color                
+                    plot(gammaInput{j}, gammaTable{j}(:,primaryIndex),'LineStyle', lineStyle, 'LineWidth', lineWidth, ...
+                        'MarkerFaceColor', theColor,'Color', theColor, 'MarkerSize', markersize);
+                else
+                    % Plot measured data (points)
+                    % Check if each entry in rawGammaInput has 1 column
+                    isSingleColumn = cellfun(@(x) size(x, 1) == 1, rawGammaInput);
+                    shape = shapes{mod(j-1, length(shapes)) + 1}; % Cycle through shapes
+                    % Use mod to cycle through colors
+                    colors = brewermap(numPrimaries, '*spectral');
+                    theColor = colors(mod(primaryIndex-1, size(colors, 1)) + 1, :); % Choice of color
+
+                    if all(isSingleColumn)
+                        plot(rawGammaInput{j}, rawGammaTable{j}(:,primaryIndex), shape, ...
+                            'MarkerFaceColor', theColor, 'MarkerEdgeColor', theColor*0.5);
+                        legends{numel(legends)+1} = sprintf('p%d Cal %d', primaryIndex, j);
+                    else
+                        plot(rawGammaInput{j}(primaryIndex,:), rawGammaTable{j}(:,primaryIndex), shape, ...
+                            'MarkerFaceColor', theColor, 'MarkerEdgeColor', theColor*0.5);
+                        legends{numel(legends)+1} = sprintf('p%d Cal %d', primaryIndex, j);
+                    end
+                end
+
+            end
+
+            hold off
+           
+            title(sprintf('Gamma Function p%d', i), 'FontSize', 13, 'FontWeight', 'bold');
+            xlabel('\it settings value', 'FontName', 'Helvetica');
+            ylabel('\it normalized output', 'FontName', 'Helvetica');
+            axis([-0.05 1.05 -0.05 1.05]);
+            axis 'square'
+            box on
+            set(gca,  'XColor', 'b', 'YColor', 'b', 'FontSize', 14);
+
+            % Create the legend
+            lgd = legend(legends, 'Location', 'northeastoutside', 'NumColumns', legendColumns);
+
+        end
 
     end
 

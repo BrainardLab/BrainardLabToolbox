@@ -1,4 +1,4 @@
-function [calFilename, calDir, cal] = singleSelectCalFile()
+function [calFilename, calDir, cal, calIndex] = singleSelectCalFile()
 
     p = getpref('BrainardLabToolbox');
     [calFilename, calDir] = uigetfile('*.mat', 'Select a calibration file to open', p.CalDataFolder);
@@ -11,7 +11,7 @@ function [calFilename, calDir, cal] = singleSelectCalFile()
     for i = 1:length(cals)
         fprintf('\tCalibration %d, date %s\n',i,cals{i}.describe.date);
     end
-    calIndex = GetWithDefault('Enter number of calibration to use',length(cals));    
+    calIndex = GetWithDefault('Enter number of calibration to use [most recent is default]',length(cals));    
     cal = cals{calIndex};
 
 end

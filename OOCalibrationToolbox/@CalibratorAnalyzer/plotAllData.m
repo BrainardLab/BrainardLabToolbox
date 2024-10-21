@@ -1,3 +1,4 @@
+
 function obj = plotAllData(obj)
 
     figureGroupNames = {'Essential Data', 'Linearity Checks', 'Background Effects', 'Comparison Panel'};
@@ -24,7 +25,7 @@ function obj = plotAllData(obj)
                 gridDims = obj.backgroundEffectsGridDims;
                 if (~isempty(obj.newStyleCal.rawData.backgroundDependenceMeasurements))
                    obj.plotBackgroundEffectsData(figureGroupIndex, gridDims);
-               end                
+                end                
             end
 
         end

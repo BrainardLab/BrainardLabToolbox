@@ -121,8 +121,8 @@ classdef CalibratorAnalyzer < handle
     
     % Static methods
     methods (Static)
-        [calFilename, calDir, cal] = singleSelectCalFile();
-        [calFilename, calDir, cal] = selectCalFile();
+        [calFilename, calDir, cal, calIndex] = singleSelectCalFile();
+        [calFilename, calDir, cal, additionalCalIndex] = selectCalFile();
     end
     
 end

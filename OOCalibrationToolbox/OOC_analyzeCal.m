@@ -8,7 +8,7 @@ function OOC_analyzeCal
     cals = {};
     
     % Select the first calibration file
-    [calFilename, calDir, cal] = CalibratorAnalyzer.singleSelectCalFile();
+    [calFilename, calDir, cal, calIndex] = CalibratorAnalyzer.singleSelectCalFile();
     calFilenames{end+1} = calFilename;
     calDirs{end+1} = calDir;
     cals{end+1} = cal;
@@ -21,7 +21,7 @@ function OOC_analyzeCal
     if (more_cals)
 
         % Select more files
-        [calFilename, calDir, cal] = CalibratorAnalyzer.selectCalFile();
+        [calFilename, calDir, cal, additionalCalIndex] = CalibratorAnalyzer.selectCalFile();
         % If only one additional file is selected
         if (ischar(calFilename))
             calFilenames{end+1} = calFilename;
@@ -51,6 +51,11 @@ function OOC_analyzeCal
 
     calAnalyzer.analyze();
 
-    makeKey(calFilenames);
+     % Creating a key for calibration file name and date index
+    if (more_cals)  % If there is more than one calibration
+        makeKey(calFilenames, calIndex, additionalCalIndex);
+    else
+        makeKey(calFilenames, calIndex, []);
+    end
 
 end
