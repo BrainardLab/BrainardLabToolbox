@@ -29,6 +29,10 @@ function plotCalibrationComparison(obj, figureGroupIndex, gridDims)
     hFig = figure('Name', 'Comparison Panel', 'NumberTitle', 'off', ...
         'Position', [200, 500, 2200, 1200]);
 
+    % Adjust PaperSize to match the figure's dimensions
+    figPos = hFig.PaperPosition;
+    hFig.PaperSize = [figPos(3) figPos(4)]; % Set PaperSize to the figure's width and height
+
     % Create a panel in the figure
     hPanel = uipanel('Parent', hFig, 'Position', [0.05 0.05 0.9 0.9]);
 
@@ -556,18 +560,20 @@ function plotGammaData(obj, figureGroupIndex, lineColors, hPanel, pos)
         % 1 = red, 2 = green, 3 = blue
 
         % Define spacing
-        spacing = 0.04; % Space between subplots
-        scaleFactor = 0.4; % Scale factor to reduce the size of each subplot
-        totalWidth = (scaleFactor * (1 - (numSubplots - 1) * spacing)) / numSubplots; % Adjusted total width
-        verticalOffset = 0.15; % Move up
-        horizontalOffset = -0.03; % Move left
+        spacing = 0.005; % Space between subplots
+        scaleFactor = 0.67; % Scale factor to reduce the size of each subplot
+        % totalWidth = (scaleFactor * (1 - (numSubplots - 1) * spacing)) / numSubplots; % Adjusted total width
+        totalWidth = scaleFactor / numSubplots - 0.08;
+        verticalOffset = 0.07; % Move up
+        horizontalOffset = -0.02; % Move left
 
         for i = 1:numSubplots
 
             % Create an axes in the specified position for the subplot
-            leftPosition = pos{1}(1) + (i-1) * (totalWidth + spacing) + horizontalOffset; % Add spacing to the left position
-            bottomPosition = pos{1}(2) + verticalOffset; % Move up
-            h = axes('Parent', hPanel, 'Position', [leftPosition, bottomPosition, totalWidth, pos{1}(4) * scaleFactor]);
+            leftPosition = pos{1}(1) + (i - 1) * (totalWidth + spacing); % Adjusted spacing
+            bottomPosition = pos{1}(2) + verticalOffset; % Adjust vertical position
+            % Create each axes in the specified position
+            h = axes('Parent', hPanel, 'Position', [leftPosition + horizontalOffset, bottomPosition, totalWidth, pos{1}(4) * scaleFactor]);
             axes(h);
 
             % nexttile(tl)
@@ -630,10 +636,14 @@ function plotGammaData(obj, figureGroupIndex, lineColors, hPanel, pos)
 
             hold off
 
+            if i == 1
+                ylabel('\it normalized output', 'FontName', 'Helvetica');
+            end
+
             titleText = sprintf('Gamma Function p%d', i); % Customize your title text
-            text(0.5, 1.1, titleText, 'Units', 'normalized', 'HorizontalAlignment', 'center', 'FontSize', 14, 'FontWeight', 'bold');
+            text(0.5, 1.05, titleText, 'Units', 'normalized', 'HorizontalAlignment', 'center', 'FontSize', 16, 'FontWeight', 'bold');
             xlabel('\it settings value', 'FontName', 'Helvetica');
-            ylabel('\it normalized output', 'FontName', 'Helvetica');
+            % ylabel('\it normalized output', 'FontName', 'Helvetica');
             %title('Gamma functions', 'Fontsize', 13, 'Fontname', 'helvetica', 'Fontweight', 'bold');
             axis([-0.05 1.05 -0.05 1.05]);
             axis 'square'
@@ -641,7 +651,7 @@ function plotGammaData(obj, figureGroupIndex, lineColors, hPanel, pos)
             set(gca,  'XColor', 'b', 'YColor', 'b', 'FontSize', 14);
 
             % Create the legend
-            lgd = legend(legends, 'Location', 'south', 'NumColumns', legendColumns);
+            lgd = legend(legends, 'Location', 'northwest', 'NumColumns', legendColumns);
 
             % Adjust the legend position to be below the x-axis
             legendPosition = get(lgd, 'Position'); % Get the current legend position

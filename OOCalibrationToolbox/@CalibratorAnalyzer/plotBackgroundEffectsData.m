@@ -3,7 +3,11 @@ function plotBackgroundEffectsData(obj, figureGroupIndex, gridDims)
 
   % Setting up plots
     hFig = figure('Name', 'Background Effects Data', 'NumberTitle', 'off', ...
-                    'Position',[200, 500, 2200, 1200]);                                   
+                    'Position',[200, 500, 2200, 1200]);  
+
+    % Adjust PaperSize to match the figure's dimensions
+    figPos = hFig.PaperPosition;
+    hFig.PaperSize = [figPos(3) figPos(4)]; % Set PaperSize to the figure's width and height
     
     % Create a panel in the figure
     hPanel = uipanel('Parent', hFig, 'Position', [0.05 0.05 0.9 0.9]);

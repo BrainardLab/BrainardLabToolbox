@@ -24,6 +24,10 @@ function plotEssentialData(obj, figureGroupIndex, gridDims)
     hFig = figure('Name', 'Essential Data', 'NumberTitle', 'off', ...
                    'Position',[200, 500, 2200, 1200]); 
 
+    % Adjust PaperSize to match the figure's dimensions
+    figPos = hFig.PaperPosition;
+    hFig.PaperSize = [figPos(3) figPos(4)]; % Set PaperSize to the figure's width and height
+
     % Create a panel in the figure
     hPanel = uipanel('Parent', hFig, 'Position', [0.05 0.05 0.9 0.9]);
 
@@ -504,6 +508,7 @@ function plotFullSpectraMultiPrimaries(obj, pIndices, figureGroupIndex, lineColo
                 % Plot the scaled spectra with specified colors
                 for k = size(scaledSpectra, 1):-1:1
                     y = squeeze(scaledSpectra(k, :));
+                    hold(ax2, 'on');
                     plot(ax2, spectralAxis, y, 'k-');
                 end
 
@@ -584,8 +589,26 @@ function plotFullSpectra(obj, primaryIndex, primaryName, figureGroupIndex, legen
         obj.makeShadedPlot(x, y, faceColor, edgeColor, ax1);
         legendsMatrix{k} = sprintf('%0.2f', rawGammaInput(size(fullSpectra,1)-k+1));
     end
-    hleg = legend(legendsMatrix, 'Location', legendPosition);
-    set(hleg,'FontName', 'Helvetica','FontSize', 10);
+
+    spectraSize = size(fullSpectra, 1);
+
+    if spectraSize <= 11
+        hleg = legend(legendsMatrix, 'Location', 'northeast');
+        set(hleg,'FontName', 'Helvetica','FontSize', 10);
+    else % Reduce the size of the legend if there are too many entries
+        % Make a copy of legends matrix
+        legendEntries = legendsMatrix;
+
+        % Set all entries to empty except for the first, middle, and last
+        midIdx = round(spectraSize / 2);  % Find the middle index
+        legendEntries(1:end) = {''};  % Set all entries to empty
+        legendEntries{1} = legendsMatrix{1};  % Keep the first entry
+        legendEntries{midIdx} = legendsMatrix{midIdx};  % Keep the middle entry
+        legendEntries{end} = legendsMatrix{end};  % Keep the last entry
+
+        hleg = legend(legendEntries, 'Location', 'northeast');
+        set(hleg,'FontName', 'Helvetica','FontSize', 10);
+    end
     
     %plot(obj.spectralAxis, fullSpectra);
     xlabel('\it wavelength (nm)', 'FontName', 'Helvetica',  'FontSize', 14);
@@ -608,25 +631,27 @@ function plotFullSpectra(obj, primaryIndex, primaryName, figureGroupIndex, legen
 
     % Setting the axes for each primary
     if (primaryIndex == 1)
-        ax2 = axes('Parent', hPanel, 'Position', [pos{4}(1) + pos{4}(3)/2 + 0.01, pos{4}(2) + 0.01, pos{4}(3)/2 * scaleFactor, pos{4}(4) * scaleFactor]);
+        ax1 = axes('Parent', hPanel, 'Position', [pos{4}(1) + pos{4}(3)/2 + 0.01, pos{4}(2) + 0.01, pos{4}(3)/2 * scaleFactor, pos{4}(4) * scaleFactor]);
     elseif (primaryIndex == 2)
         ax2 = axes('Parent', hPanel, 'Position', [pos{5}(1) + pos{5}(3)/2 + 0.01, pos{5}(2) + 0.01, pos{5}(3)/2 * scaleFactor, pos{5}(4) * scaleFactor]);
     elseif (primaryIndex == 3)
-        ax2 = axes('Parent', hPanel, 'Position', [pos{6}(1) + pos{6}(3)/2 + 0.01, pos{6}(2) + 0.01, pos{6}(3)/2 * scaleFactor, pos{6}(4) * scaleFactor]);
+        ax3 = axes('Parent', hPanel, 'Position', [pos{6}(1) + pos{6}(3)/2 + 0.01, pos{6}(2) + 0.01, pos{6}(3)/2 * scaleFactor, pos{6}(4) * scaleFactor]);
     end
 
     for k = size(scaledSpectra,1):-1:1
         y = squeeze(scaledSpectra(k,:));
         if (primaryIndex == 1)
             faceColor = [1.0 0.7 0.7];  
-            plot(ax2, x,y, 'k-');
+            ax = ax1;
         elseif (primaryIndex == 2)
             faceColor = [0.7 1.0 0.7]; 
-            plot(ax2, x,y, 'k-');
+            ax = ax2;
         elseif (primaryIndex == 3)
             faceColor = [0.7 0.7 1.0]; 
-            plot(ax2, x,y, 'k-');
+            ax = ax3;
         end
+        hold(ax, 'on');
+        plot(ax, x,y, 'k-');
         % edgeColor = 'k';
         % obj.makeShadedPlot(x,y, faceColor, edgeColor);
         % plot(x,y, 'k-');
