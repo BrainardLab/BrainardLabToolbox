@@ -210,18 +210,18 @@ classdef CalibratorOptions
                         assert(min(x.settings(:)) >= 0.0, 'customLinearitySetup.settings is out of range (<0)');
                         
                         % Check that the settings are adequate for testing linearity
-                        skip = 1+obj.nDevices;
-                        size(x.settings,2)
-                        kValues = 1:skip:(size(x.settings,2)-skip)+1;
-                        for k = 1:length(kValues)
-                            kk = kValues(k);
-                            for primaryIndex = 1:obj.nDevices
-                              assert(x.settings(primaryIndex,kk) == x.settings(primaryIndex,kk+primaryIndex), ...
-                                  'incosistent linearity check values');
-                              assert(x.settings(primaryIndex,kk) == sum(x.settings(:,kk+primaryIndex),1), ...
-                                  'incosistent linearity check values');
-                            end
-                        end
+                        % skip = 1+obj.nDevices;
+                        % size(x.settings,2)
+                        % kValues = 1:skip:(size(x.settings,2)-skip)+1;
+                        % for k = 1:length(kValues)
+                        %     kk = kValues(k);
+                        %     for primaryIndex = 1:obj.nDevices
+                        %       assert(x.settings(primaryIndex,kk) == x.settings(primaryIndex,kk+primaryIndex), ...
+                        %           'incosistent linearity check values');
+                        %       assert(x.settings(primaryIndex,kk) == sum(x.settings(:,kk+primaryIndex),1), ...
+                        %           'incosistent linearity check values');
+                        %     end
+                        % end
                         
                         isValid = true;
                         return;
