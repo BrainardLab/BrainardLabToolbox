@@ -1,4 +1,4 @@
-function makeKey(calFilenames, calIndex, additionalCalIndex)
+function makeKey(calFilenames, calIndex, allAdditionalCal)
 
     % Make a separate figure that is a "key"
     % To match calibration number to file name
@@ -21,12 +21,12 @@ function makeKey(calFilenames, calIndex, additionalCalIndex)
     end
 
     % Accounting for the case where there's only one additional file
-    if isscalar(additionalCalIndex)
-        keyData = [calibrationNumbers, calFilenames(:), {calIndex(1), additionalCalIndex(1)}'];
-    elseif isempty(additionalCalIndex) % Or zero additional files
+    if length(allAdditionalCal) == 1
+        keyData = [calibrationNumbers, calFilenames(:), {calIndex(1), allAdditionalCal(1)}'];
+    elseif isempty(allAdditionalCal) % Or zero additional files
         keyData = [calibrationNumbers, calFilenames(:), {calIndex(1)}'];
     else % Or multiple additional files
-        calIndexData = {calIndex, additionalCalIndex{:}};
+        calIndexData = {calIndex, allAdditionalCal};
         keyData = [calibrationNumbers, calFilenames(:), calIndexData(:)];
     end
 

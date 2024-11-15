@@ -1,7 +1,7 @@
 
 function obj = plotAllData(obj)
 
-    figureGroupNames = {'Essential Data', 'Linearity Checks', 'Background Effects', 'Comparison Panel'};
+    figureGroupNames = {'Essential Data', 'Linearity Checks', 'Background Effects', 'Comparison Panel', 'Gamma Data Comparison'};
 
     numFiles = length(obj.calStructOBJarray);
 
@@ -30,18 +30,28 @@ function obj = plotAllData(obj)
 
         end
 
-    else    % If there's more than one file, create only one calibration comparison panel
+    else    % If there's more than one file, create a calibration comparison panel and a gamma comparison panel
 
-        figureGroupIndex = 4;
+        for figureGroupIndex = 4:5
 
-        % Set a group name for all the generated figures
-        obj.figureGroupName{figureGroupIndex} = figureGroupNames{figureGroupIndex};
+            % Setting up to plot figures on panel
+            gridDims = obj.comparisonGridDims;
 
-        % Setting up to plot figures on panel
-        gridDims = obj.comparisonGridDims;
-        
-        % Plot calibration comparison data
-        obj.plotCalibrationComparison(figureGroupIndex, gridDims);
+            if figureGroupIndex == 4
+                % Set group names for all the generated figures
+                obj.figureGroupName{figureGroupIndex} = figureGroupNames{figureGroupIndex};
+   
+                % Plot calibration comparison data
+                obj.plotCalibrationComparison(figureGroupIndex, gridDims);
+            elseif figureGroupIndex == 5
+                % Set group names for all the generated figures
+                obj.figureGroupName{figureGroupIndex} = figureGroupNames{figureGroupIndex};
+   
+                % Plot gamma comparison data
+                obj.plotGammaComparison(figureGroupIndex, gridDims);
+            end
+
+        end
 
     end
     

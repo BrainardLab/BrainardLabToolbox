@@ -112,7 +112,10 @@ classdef CalibratorAnalyzer < handle
         plotBackgroundEffectsData(obj, figureGroupIndex, gridDims);
 
         % Method to generate comparison plots for the essential data.
-        plotCalibrationComparison(obj, figureGroupIndex, gridDims);    
+        plotCalibrationComparison(obj, figureGroupIndex, gridDims); 
+
+        % Method to generate gamma comparison plots for the essential data.
+        plotGammaComparison(obj, figureGroupIndex, gridDims);
         
         % Method to generate a shaded (filled) plot
         makeShadedPlot(obj, x,y, faceColor, edgeColor, ax);

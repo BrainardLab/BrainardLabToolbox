@@ -28,6 +28,9 @@ function plotEssentialData(obj, figureGroupIndex, gridDims)
     figPos = hFig.PaperPosition;
     hFig.PaperSize = [figPos(3) figPos(4)]; % Set PaperSize to the figure's width and height
 
+    % Save as an editable pdf
+    set(gcf, 'Renderer', 'painters');
+
     % Create a panel in the figure
     hPanel = uipanel('Parent', hFig, 'Position', [0.05 0.05 0.9 0.9]);
 
@@ -799,14 +802,22 @@ function plotGammaData(obj, figureGroupIndex, lineColors, hPanel, pos)
     
     markersize = 5;
     % Plot fitted data
+    % FIX THIS - WHERE ARE THE LINES
     legends = {};
     handles = [];
     for primaryIndex = 1:primariesNum
         legends{numel(legends)+1} = sprintf('p%d', primaryIndex);
         theColor = lineColors(primaryIndex,:);
-        hP = plot(gammaInput, gammaTable(:,primaryIndex),'r-', 'LineWidth', 1.5, ...
+        hP = plot(gammaInput, gammaTable(:,primaryIndex),'r', 'LineWidth', 1.5, ...
             'MarkerFaceColor', theColor, 'Color', theColor, 'MarkerSize', markersize);
         handles(numel(handles)+1) = hP;
+
+        % Adding the identity line
+        % minValue = min([rawGammaInput(:); rawGammaTable(:)]); % Minimum value for axis limits
+        % maxValue = max([rawGammaInput(:); rawGammaTable(:)]); % Maximum value for axis limits
+        % hP2 = plot([minValue, maxValue], [minValue, maxValue], '-k', 'LineWidth', 7);
+        % legends{numel(legends)+1} = 'Identity Line';
+        % handles(numel(handles)+1) = hP2;
     end
 
     % Plot measured data
@@ -831,8 +842,17 @@ function plotGammaData(obj, figureGroupIndex, lineColors, hPanel, pos)
     axis 'square'
     box on
     set(gca,  'XColor', 'b', 'YColor', 'b', 'FontSize', 14);
+    % title('Gamma Functions');
     title('Gamma Functions');
-    legend(handles, legends, 'Location','EastOutside','NumColumns',legendColumns);
+    % legend(handles, legends, 'Location','EastOutside','NumColumns',legendColumns);
+    % Create dummy plot handles for custom legend entries
+    hRedDiamond = plot(NaN, NaN, 'd', 'MarkerFaceColor', 'r', 'MarkerEdgeColor', 'r');
+    hGreenDiamond = plot(NaN, NaN, 'd', 'MarkerFaceColor', 'g', 'MarkerEdgeColor', 'g');
+    hBlueDiamond = plot(NaN, NaN, 'd', 'MarkerFaceColor', 'b', 'MarkerEdgeColor', 'b');
+    % hBlackLine = plot(NaN, NaN, '-', 'Color', 'k', 'LineWidth', 7);
+
+    % Add a legend using the dummy handles
+    legend([hRedDiamond, hGreenDiamond, hBlueDiamond], {'p1', 'p2', 'p3'}, 'Location', 'EastOutside');
     
     % Finish plot
     drawnow;

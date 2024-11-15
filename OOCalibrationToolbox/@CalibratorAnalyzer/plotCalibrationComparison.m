@@ -33,6 +33,9 @@ function plotCalibrationComparison(obj, figureGroupIndex, gridDims)
     figPos = hFig.PaperPosition;
     hFig.PaperSize = [figPos(3) figPos(4)]; % Set PaperSize to the figure's width and height
 
+    % Save as an editable pdf
+    set(gcf, 'Renderer', 'painters');
+
     % Create a panel in the figure
     hPanel = uipanel('Parent', hFig, 'Position', [0.05 0.05 0.9 0.9]);
 
@@ -140,7 +143,7 @@ function plotChromaticityData(obj, figureGroupIndex, lineColors, hPanel, pos)
             end
 
             shape = shapes{mod(ii-1, length(shapes)) + 1}; % Cycle through shapes
-
+ 
             % To make the shape outlines easier to see:    
             % Use modulo to cycle through lineColors 
             originalColor = lineColors{1}(mod(primaryIndex-1, size(lineColors{1}, 1)) + 1, :);

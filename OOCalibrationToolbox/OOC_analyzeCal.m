@@ -16,30 +16,38 @@ function OOC_analyzeCal
     % If you select more files, the file that you selected first is 
     % the reference calibration
 
-    more_cals = GetWithDefault('\nWould you like to select more files? If so, the file you just selected will be the reference calibration. [0 -> no,1 -> yes]', 0);
+    more = true;
+    allAdditionalCal = {};
 
-    if (more_cals)
+    while more % Keep asking the user if they want to select another file until they say no
 
-        % Select more files
-        [calFilename, calDir, cal, additionalCalIndex] = CalibratorAnalyzer.selectCalFile();
-        % If only one additional file is selected
-        if (ischar(calFilename))
-            calFilenames{end+1} = calFilename;
-            calDirs{end+1} = calDir;
-            cals{end+1} = cal;
-            calAnalyzer = CalibratorAnalyzer(cals, calFilenames, calDirs);
-        else % If multiple additional files are selected
-            for i = 1:length(calFilename)
-                calFilenames{end+1} = calFilename{i};
+        more_cals = GetWithDefault('\nWould you like to select more files? [0 -> no,1 -> yes]', 0);
+
+        if (more_cals)
+
+            % Select more files
+            [calFilename, calDir, cal, additionalCalIndex] = CalibratorAnalyzer.selectCalFile();
+            allAdditionalCal{end + 1} = additionalCalIndex;
+            % If only one additional file is selected
+            if (ischar(calFilename))
+                calFilenames{end+1} = calFilename;
                 calDirs{end+1} = calDir;
-                cals{end+1} = cal{i};
+                cals{end+1} = cal;
+            else % If multiple additional files are selected
+                for i = 1:length(calFilename)
+                    calFilenames{end+1} = calFilename{i};
+                    calDirs{end+1} = calDir;
+                    cals{end+1} = cal{i};
+                end
             end
+
+
+        else % If you did not select any more files 
             calAnalyzer = CalibratorAnalyzer(cals, calFilenames, calDirs);
+
+            more = false;
+
         end
-
-
-    else % If you did not select any more files (not doing a comparison)
-        calAnalyzer = CalibratorAnalyzer(cals, calFilenames, calDirs);
 
     end
   
@@ -51,11 +59,12 @@ function OOC_analyzeCal
 
     calAnalyzer.analyze();
 
-     % Creating a key for calibration file name and date index
-    if (more_cals)  % If there is more than one calibration
-        makeKey(calFilenames, calIndex, additionalCalIndex);
-    else
-        makeKey(calFilenames, calIndex, []);
-    end
+     % Uncomment these lines to create a key for calibration file name and date index
+     % if ~isempty(allAdditionalCal)  % If there is more than one calibration
+     %     makeKey(calFilenames, calIndex, allAdditionalCal);
+     % else
+     %     makeKey(calFilenames, calIndex, []);
+     % end
 
 end
+
