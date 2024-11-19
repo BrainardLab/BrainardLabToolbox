@@ -602,10 +602,9 @@ function plotGammaData(obj, figureGroupIndex, lineColors, hPanel, pos)
             for j = 1:numFiles % Plotting each calibration on the current subplot
 
                 % Adjust gammaInput and gammaTable to only include every 67th point
-                indices = 1:67:numel(gammaInput); % Select every 67th index
+                indices = 1:67:numel(gammaInput{j}); % Select every 67th index
                 gammaInputSubset = gammaInput{j}(indices);
                 gammaTableSubset = gammaTable{j}(indices, primaryIndex);
-                % Get these to make sense ^^^
 
                 % Plot fitted data
                 if j == 1
@@ -647,13 +646,7 @@ function plotGammaData(obj, figureGroupIndex, lineColors, hPanel, pos)
             set(gca,  'XColor', 'b', 'YColor', 'b', 'FontSize', 14);
 
             % Create the legend
-            lgd = legend(legends, 'Location', 'northwest', 'NumColumns', legendColumns);
-
-            % Adjust the legend position to be below the x-axis
-            legendPosition = get(lgd, 'Position'); % Get the current legend position
-            legendPosition(2) = legendPosition(2) - 0.1; % Adjust this value as needed
-            % Set the new position of the legend
-            set(lgd, 'Position', legendPosition);
+            legend(legends, 'Location', 'northwest', 'NumColumns', legendColumns);
 
         end
 

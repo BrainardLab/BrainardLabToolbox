@@ -140,17 +140,23 @@ for i = 1:numSubplots
 
     hold on;
 
-    primaryColumn = {};
+    gammaTableSubset = {};
+    gammaInputSubset = {};
 
     for j = 1:numFiles % Getting gamma table for each file and color
 
-        primaryColumn{j} = gammaTable{j}(:,primaryIndex);
+        % Adjust gammaInput and gammaTable to only include every 67th point
+        indices = 1:67:numel(gammaInput{j}); % Select every 67th index
+        gammaInputSubset{j} = gammaInput{j}(indices);
+        gammaTableSubset{j} = gammaTable{j}(indices, primaryIndex);
+
+        % primaryColumn{j} = gammaTable{j}(:,primaryIndex);
 
     end
 
-    diff12 = primaryColumn{1} - primaryColumn{2};
-    diff13 = primaryColumn{1} - primaryColumn{3};
-    diff23 = primaryColumn{2} - primaryColumn{3};
+    diff12 = gammaTableSubset{1} - gammaTableSubset{2};
+    diff13 = gammaTableSubset{1} - gammaTableSubset{3};
+    diff23 = gammaTableSubset{2} - gammaTableSubset{3};
 
     diffs = {diff12, diff13, diff23};
 
@@ -165,7 +171,7 @@ for i = 1:numSubplots
         % shape = shapes{mod(j-1, length(shapes)) + 1}; 
         theColor = colors(j,:); % Cycle through colors
 
-        plot(gammaInput{j}, diffs{j},'s', ...
+        plot(gammaInputSubset{j}, diffs{j},'s', ...
             'Marker', '+', 'Color', theColor, ...
             'LineWidth', 1.5); 
 
