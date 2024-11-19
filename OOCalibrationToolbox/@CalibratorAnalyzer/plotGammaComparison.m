@@ -129,10 +129,10 @@ for i = 1:numSubplots
     primaryIndex = i;
 
     % Define colors for the different reference cal lines
-    colors = [
-        1 0 0;   % Red
-        0 0 0;   % Black
-        0 0 1    % Blue
+     colors = [
+        0 1 0;     % Green
+        0.5 0 0.5; % Purple
+        1 0.75 0.8 % Pink
         ];
 
     % Different shape options
@@ -144,7 +144,7 @@ for i = 1:numSubplots
 
     for j = 1:numFiles % Getting gamma table for each file and color
 
-        primaryColumn{j} = rawGammaTable{j}(:,primaryIndex);
+        primaryColumn{j} = gammaTable{j}(:,primaryIndex);
 
     end
 
@@ -165,7 +165,7 @@ for i = 1:numSubplots
         % shape = shapes{mod(j-1, length(shapes)) + 1}; 
         theColor = colors(j,:); % Cycle through colors
 
-        plot(rawGammaInput{j}', diffs{j},'s', ...
+        plot(gammaInput{j}, diffs{j},'s', ...
             'Marker', '+', 'Color', theColor, ...
             'LineWidth', 1.5); 
 
@@ -173,7 +173,7 @@ for i = 1:numSubplots
         % y axis is delta in normalized output
 
         if j == 1
-            legends{numel(legends)+1} = 'Ref Cal - Cal 1';
+            legends{numel(legends)+1} = 'Ref Cal - Cal 2';
         elseif j == 2
             legends{numel(legends)+1} = 'Ref Cal - Cal 3';
         elseif j == 3

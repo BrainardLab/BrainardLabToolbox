@@ -235,19 +235,25 @@ function plotPrimaryChromaticityStabilityData(obj, figureGroupIndex, lineColors,
     primariesNum = obj.calStructOBJarray.get('nDevices');
 
     if (primariesNum > 3)
+        % Init axes
         index = 5;
-        % Init axes
-        scaleFactor = 0.9; % Adjust this value to change the size of the plot
+        scaleFactor = 0.95; % Adjust this value to change the size of the plot
         newWidth = pos{index}(3) * scaleFactor;
         newHeight = pos{index}(4) * scaleFactor;
-        newPosition = [pos{index}(1), pos{index}(2) - 0.05, newWidth, newHeight]; % Maintain the same position, but change size
+        newPosition = [pos{index}(1) - 0.01, pos{index}(2) - 0.05, newWidth, newHeight]; % Maintain the same position, but change size
     else
-        index = 8;
         % Init axes
-        scaleFactor = 0.85; % Adjust this value to change the size of the plot
+        index = 1;
+        scaleFactor = 0.9; 
+
+        % Compute the size
         newWidth = pos{index}(3) * scaleFactor;
         newHeight = pos{index}(4) * scaleFactor;
-        newPosition = [pos{index}(1), pos{index}(2), newWidth, newHeight]; % Maintain the same position, but change size
+
+        % Adjust position 
+        offsetX = ((newWidth - pos{index}(3)) / 2) - 0.07;  % Half the added width
+        offsetY = 0.02;
+        newPosition = [pos{index}(1) - offsetX, pos{index}(2) - offsetY, newWidth, newHeight]; % Shifted to the right
     end
 
     h = axes('Parent', hPanel, 'Position', newPosition);
@@ -309,7 +315,7 @@ function plotPrimaryChromaticityStabilityData(obj, figureGroupIndex, lineColors,
         box on;
     end
     
-    hleg = legend(hpLegends, legends, 'Location', 'EastOutside', 'NumColumns',3);
+    hleg = legend(hpLegends, legends, 'Location', 'SouthOutside', 'NumColumns',3);
     set(hleg,'FontName', 'Helvetica',  'FontSize', 12);
     title('Primary Chromaticity Stability');
 
@@ -340,17 +346,24 @@ function plotChromaticityData(obj, figureGroupIndex, lineColors, hPanel, pos)
     if (primariesNum > 3)
         index = 4;
         % Init axes
-        scaleFactor = 0.9; % Adjust this value to change the size of the plot
+        scaleFactor = 0.95; % Adjust this value to change the size of the plot
         newWidth = pos{index}(3) * scaleFactor;
         newHeight = pos{index}(4) * scaleFactor;
-        newPosition = [pos{index}(1), pos{index}(2) - 0.05, newWidth, newHeight]; % Maintain the same position, but change size
+        newPosition = [pos{index}(1) - 0.007, pos{index}(2) - 0.05, newWidth, newHeight]; % Maintain the same position, but change size
     else
-        index = 7;
         % Init axes
-        scaleFactor = 0.85; % Adjust this value to change the size of the plot
+        index = 1;
+        scaleFactor = 0.9; 
+
+        % Compute the size
         newWidth = pos{index}(3) * scaleFactor;
         newHeight = pos{index}(4) * scaleFactor;
-        newPosition = [pos{index}(1), pos{index}(2), newWidth, newHeight]; % Maintain the same position, but change size
+
+        % Adjust position 
+        offsetX = 0.07;
+        offsetY = 0.02;
+
+        newPosition = [pos{index}(1) - offsetX, pos{index}(2) - offsetY, newWidth, newHeight];
     end
 
     h = axes('Parent', hPanel, 'Position', newPosition);
@@ -368,7 +381,7 @@ function plotChromaticityData(obj, figureGroupIndex, lineColors, hPanel, pos)
     plot(xyYAmb(1,1)',  xyYAmb(2,1)',  'ks',  'MarkerFaceColor', [0.8 0.8 0.8], 'MarkerSize', 10);
     plot(xyYLocus(1,:)',xyYLocus(2,:)','k');
     
-    hleg = legend(legends, 'Location', 'EastOutside', 'NumColumns',3);
+    hleg = legend(legends, 'Location', 'SouthOutside', 'NumColumns',4);
     set(hleg,'FontName', 'Helvetica',  'FontSize', 12);
     
     axis([0 0.75 0 0.85]); axis('square');
@@ -777,82 +790,144 @@ function plotGammaData(obj, figureGroupIndex, lineColors, hPanel, pos)
         scaleFactor = 0.85; 
     end
     
-    % Adjust the position using the scale factor
-    scaledPosition = [pos{1}(1), pos{1}(2), pos{1}(3) * scaleFactor, pos{1}(4) * scaleFactor];
-    
-    % Init axes with the scaled position
-    h = axes('Parent', hPanel, 'Position', scaledPosition);
-    ax = h;
-    hold on;
-    
-    % Get data
-    rawGammaInput   = obj.newStyleCalarray.rawData.gammaInput;
-    rawGammaTable   = obj.newStyleCalarray.rawData.gammaTable;
-    gammaInput      = obj.newStyleCalarray.processedData.gammaInput;
-    gammaTable      = obj.newStyleCalarray.processedData.gammaTable;
-    
-    % Get number of calibrated primaries
-    primariesNum = size(gammaTable,2);
-    
-    if (primariesNum == 3)
+    if primariesNum == 3
+        % Get data
+        rawGammaInput   = obj.newStyleCalarray.rawData.gammaInput; % Use this if you want to plot measured data
+        rawGammaTable   = obj.newStyleCalarray.rawData.gammaTable;  % Use this if you want to plot measured data
+        gammaInput      = obj.newStyleCalarray.processedData.gammaInput;
+        gammaTable      = obj.newStyleCalarray.processedData.gammaTable;
+
+        % Get number of calibrated primaries
+        primariesNum = size(gammaTable,2);
         legendColumns = 1;
+ 
+        for primaryIndex = 1:primariesNum
+            
+            % Setting axes
+            if primaryIndex == 1
+                index  = 7;
+                % Adjust the position using the scale factor
+                scaledPosition = [pos{index}(1) + 0.035, pos{index}(2), pos{index}(3) * scaleFactor, pos{index}(4) * scaleFactor];
+
+                % Init axes with the scaled position
+                h = axes('Parent', hPanel, 'Position', scaledPosition);
+                ax = h;
+                hold on;
+                title('Gamma Function p1')
+            elseif primaryIndex == 2
+                index  = 8;
+                % Adjust the position using the scale factor
+                scaledPosition = [pos{index}(1) + 0.035, pos{index}(2), pos{index}(3) * scaleFactor, pos{index}(4) * scaleFactor];
+
+                % Init axes with the scaled position
+                h = axes('Parent', hPanel, 'Position', scaledPosition);
+                ax = h;
+                hold on;
+                title('Gamma Function p2')
+            elseif primaryIndex == 3
+                index  = 9;
+                % Adjust the position using the scale factor
+                scaledPosition = [pos{index}(1) + 0.035, pos{index}(2), pos{index}(3) * scaleFactor, pos{index}(4) * scaleFactor];
+
+                % Init axes with the scaled position
+                h = axes('Parent', hPanel, 'Position', scaledPosition);
+                ax = h;
+                hold on;
+                title('Gamma Function p3')
+            end
+
+            % Plot fitted (normalized) data
+            legends = {};
+            handles = [];
+
+            markersize = 5;
+
+            % Adjust gammaInput and gammaTable to only include every 67th point
+            indices = 1:67:numel(gammaInput); % Select every 67th index
+            gammaInputSubset = gammaInput(indices);
+            gammaTableSubset = gammaTable(indices, primaryIndex);
+
+            legends{numel(legends)+1} = sprintf('p%d', primaryIndex);
+            theColor = lineColors(primaryIndex,:);
+            hP = plot(gammaInputSubset, gammaTableSubset, ...
+                'MarkerFaceColor', theColor, 'Color', theColor, 'MarkerSize', markersize, ...
+                'Marker', 's', 'LineStyle', 'none'); 
+            handles(numel(handles)+1) = hP;
+
+            % Adding the identity line
+            minValue = min([gammaInput(:); gammaTable(:)]); % Minimum value for axis limits
+            maxValue = max([gammaInput(:); gammaTable(:)]); % Maximum value for axis limits
+            hP2 = plot([minValue, maxValue], [minValue, maxValue], '-k', 'LineWidth', 3);
+            legends{numel(legends)+1} = 'Identity Line';
+            handles(numel(handles)+1) = hP2;
+
+            xlabel('\it settings value', 'FontName', 'Helvetica');
+            ylabel('\it normalized output', 'FontName', 'Helvetica');
+            %title('Gamma functions', 'Fontsize', 13, 'Fontname', 'helvetica', 'Fontweight', 'bold');
+            axis([-0.05 1.05 -0.05 1.05]);
+            axis 'square'
+            box on
+            set(gca,  'XColor', 'b', 'YColor', 'b', 'FontSize', 14);
+            legend(handles, legends, 'Location','EastOutside','NumColumns',legendColumns);
+        end
+
     else
+        % Adjust the position using the scale factor
+        scaledPosition = [pos{1}(1), pos{1}(2), pos{1}(3) * scaleFactor, pos{1}(4) * scaleFactor];
+
+        % Init axes with the scaled position
+        h = axes('Parent', hPanel, 'Position', scaledPosition);
+        ax = h;
+        hold on;
+
+        % Get data
+        rawGammaInput   = obj.newStyleCalarray.rawData.gammaInput;
+        rawGammaTable   = obj.newStyleCalarray.rawData.gammaTable;
+        gammaInput      = obj.newStyleCalarray.processedData.gammaInput;
+        gammaTable      = obj.newStyleCalarray.processedData.gammaTable;
+
+        % Get number of calibrated primaries
+        primariesNum = size(gammaTable,2);
         legendColumns = 3;
-    end
-    
-    markersize = 5;
-    % Plot fitted data
-    % FIX THIS - WHERE ARE THE LINES
-    legends = {};
-    handles = [];
-    for primaryIndex = 1:primariesNum
-        legends{numel(legends)+1} = sprintf('p%d', primaryIndex);
-        theColor = lineColors(primaryIndex,:);
-        hP = plot(gammaInput, gammaTable(:,primaryIndex),'r', 'LineWidth', 1.5, ...
-            'MarkerFaceColor', theColor, 'Color', theColor, 'MarkerSize', markersize);
-        handles(numel(handles)+1) = hP;
-
-        % Adding the identity line
-        % minValue = min([rawGammaInput(:); rawGammaTable(:)]); % Minimum value for axis limits
-        % maxValue = max([rawGammaInput(:); rawGammaTable(:)]); % Maximum value for axis limits
-        % hP2 = plot([minValue, maxValue], [minValue, maxValue], '-k', 'LineWidth', 7);
-        % legends{numel(legends)+1} = 'Identity Line';
-        % handles(numel(handles)+1) = hP2;
-    end
-
-    % Plot measured data
-    if (size(rawGammaInput,1) == 1)
+  
+        markersize = 5;
+        % Plot fitted data
+        legends = {};
+        handles = [];
         for primaryIndex = 1:primariesNum
+            legends{numel(legends)+1} = sprintf('p%d', primaryIndex);
             theColor = lineColors(primaryIndex,:);
-            plot(rawGammaInput, rawGammaTable(:,primaryIndex),'s', ...
-                'MarkerFaceColor', theColor, 'MarkerEdgeColor', theColor*0.5);
+            hP = plot(gammaInput, gammaTable(:,primaryIndex),'r-', 'LineWidth', 1.5, ...
+                'MarkerFaceColor', theColor, 'Color', theColor, 'MarkerSize', markersize);
+            handles(numel(handles)+1) = hP;
         end
-    else
-        for primaryIndex = 1:primariesNum
-            theColor = lineColors(primaryIndex,:);
-            plot(rawGammaInput(primaryIndex,:), rawGammaTable(:,primaryIndex),'s', ...
-                'MarkerFaceColor', theColor, 'MarkerEdgeColor', theColor*0.5);
-        end
-    end
-    
-    xlabel('\it settings value', 'FontName', 'Helvetica');
-    ylabel('\it normalized output', 'FontName', 'Helvetica');
-    %title('Gamma functions', 'Fontsize', 13, 'Fontname', 'helvetica', 'Fontweight', 'bold');
-    axis([-0.05 1.05 -0.05 1.05]);
-    axis 'square'
-    box on
-    set(gca,  'XColor', 'b', 'YColor', 'b', 'FontSize', 14);
-    % title('Gamma Functions');
-    title('Gamma Functions');
-    % legend(handles, legends, 'Location','EastOutside','NumColumns',legendColumns);
-    % Create dummy plot handles for custom legend entries
-    hRedDiamond = plot(NaN, NaN, 'd', 'MarkerFaceColor', 'r', 'MarkerEdgeColor', 'r');
-    hGreenDiamond = plot(NaN, NaN, 'd', 'MarkerFaceColor', 'g', 'MarkerEdgeColor', 'g');
-    hBlueDiamond = plot(NaN, NaN, 'd', 'MarkerFaceColor', 'b', 'MarkerEdgeColor', 'b');
-    % hBlackLine = plot(NaN, NaN, '-', 'Color', 'k', 'LineWidth', 7);
 
-    % Add a legend using the dummy handles
-    legend([hRedDiamond, hGreenDiamond, hBlueDiamond], {'p1', 'p2', 'p3'}, 'Location', 'EastOutside');
+        % Plot measured data
+        if (size(rawGammaInput,1) == 1)
+            for primaryIndex = 1:primariesNum
+                theColor = lineColors(primaryIndex,:);
+                plot(rawGammaInput, rawGammaTable(:,primaryIndex),'s', ...
+                    'MarkerFaceColor', theColor, 'MarkerEdgeColor', theColor*0.5);
+            end
+        else
+            for primaryIndex = 1:primariesNum
+                theColor = lineColors(primaryIndex,:);
+                plot(rawGammaInput(primaryIndex,:), rawGammaTable(:,primaryIndex),'s', ...
+                    'MarkerFaceColor', theColor, 'MarkerEdgeColor', theColor*0.5);
+            end
+        end
+
+        xlabel('\it settings value', 'FontName', 'Helvetica');
+        ylabel('\it normalized output', 'FontName', 'Helvetica');
+        %title('Gamma functions', 'Fontsize', 13, 'Fontname', 'helvetica', 'Fontweight', 'bold');
+        axis([-0.05 1.05 -0.05 1.05]);
+        axis 'square'
+        box on
+        set(gca,  'XColor', 'b', 'YColor', 'b', 'FontSize', 14);
+        title('Gamma Functions');
+        legend(handles, legends, 'Location','SouthEast','NumColumns',legendColumns);
+
+    end
     
     % Finish plot
     drawnow;

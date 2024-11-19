@@ -601,7 +601,13 @@ function plotGammaData(obj, figureGroupIndex, lineColors, hPanel, pos)
 
             for j = 1:numFiles % Plotting each calibration on the current subplot
 
-                % Plot fitted data (line)
+                % Adjust gammaInput and gammaTable to only include every 67th point
+                indices = 1:67:numel(gammaInput); % Select every 67th index
+                gammaInputSubset = gammaInput{j}(indices);
+                gammaTableSubset = gammaTable{j}(indices, primaryIndex);
+                % Get these to make sense ^^^
+
+                % Plot fitted data
                 if j == 1
                     legends{numel(legends)+1} = sprintf('p%d Ref Cal', primaryIndex);
                     lineWidth = 3; % Make the first line bold
@@ -611,30 +617,17 @@ function plotGammaData(obj, figureGroupIndex, lineColors, hPanel, pos)
                     plot(gammaInput{j}, gammaTable{j}(:,primaryIndex),'LineStyle', lineStyle, 'LineWidth', lineWidth, ...
                         'MarkerFaceColor', theColor, 'Color', theColor, 'MarkerSize', markersize);
                 else
-                    % Plot measured data (points)
-                    % Check if each entry in rawGammaInput has 1 column
-                    isSingleColumn = cellfun(@(x) size(x, 1) == 1, rawGammaInput);
                     shape = shapes{mod(j-1, length(shapes)) + 1}; % Cycle through shapes
                     % Use mod to cycle through colors
                     theColor = colors(mod(primaryIndex-1, size(colors, 1)) + 1, :); % Solid color
 
+                    plot(gammaInputSubset, gammaTableSubset, shape, ...
+                        'MarkerFaceColor', theColor, 'MarkerEdgeColor', theColor*0.5, ...
+                        'LineStyle', 'none');
+                    legends{numel(legends)+1} = sprintf('p%d Cal %d', primaryIndex, j);
 
-                    if all(isSingleColumn)
-                        plot(rawGammaInput{j}, rawGammaTable{j}(:,primaryIndex), shape, ...
-                            'MarkerFaceColor', theColor, 'MarkerEdgeColor', theColor*0.5);
-                        legends{numel(legends)+1} = sprintf('p%d Cal %d', primaryIndex, j);
-                    else
-                        plot(rawGammaInput{j}(primaryIndex,:), rawGammaTable{j}(:,primaryIndex), shape, ...
-                            'MarkerFaceColor', theColor, 'MarkerEdgeColor', theColor*0.5);
-                        legends{numel(legends)+1} = sprintf('p%d Cal %d', primaryIndex, j);
-                    end
                 end
-                % theColor = colors(i, :); % Solid color
-                % hP = plot(gammaInput{j}, gammaTable{j}(:,primaryIndex),'LineStyle', lineStyle, 'LineWidth', lineWidth, ...
-                %     'MarkerFaceColor', theColor, 'Color', theColor, 'MarkerSize', markersize);
-                % handles(numel(handles)+1) = hP;
-
-
+ 
             end
 
             hold off
