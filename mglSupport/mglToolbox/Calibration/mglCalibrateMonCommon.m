@@ -30,7 +30,8 @@ else
 end
 
 % Get Brainard Lab standard toolboxes info.
-cal.describe.svnInfo = GetBrainardLabStandardToolboxesSVNInfo;
+skipSVNchecks = true;
+cal.describe.svnInfo = GetBrainardLabStandardToolboxesSVNInfo(skipSVNchecks);
 
 % Fill in descriptive information
 computerInfo = GetComputerInfo;

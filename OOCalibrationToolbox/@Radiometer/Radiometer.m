@@ -13,6 +13,7 @@ classdef Radiometer < handle
 %
     % Public access.
     properties
+        skipSVNchecks = true;
     end % Public properties
 
     % Protected properties. All Radiometer subclasses can read these, but they cannot set them. 

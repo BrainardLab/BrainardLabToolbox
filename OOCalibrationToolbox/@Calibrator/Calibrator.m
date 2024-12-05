@@ -200,7 +200,8 @@ classdef Calibrator < handle
             obj.computerInfo = sprintf('%s''s %s, %s', a.userShortName, a.localHostName, a.OSVersion);
             
             % Get SVN info
-            a = GetBrainardLabStandardToolboxesSVNInfo;
+            skipSVNchecks = true;
+            a = GetBrainardLabStandardToolboxesSVNInfo(skipSVNchecks);
             obj.svnInfo    = a.svnInfo;
             obj.matlabInfo = a.matlabInfo;
             clear 'a'
