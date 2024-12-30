@@ -6,8 +6,8 @@
 % Fairchild, M. D., & Blondé, L. (2016). Individual colorimetric observer
 % model. PloS one, 11(2), e0145671.
 %
-% See also: IsomerizationsInEyeDemo (in PTB), t_conesPhotoPigment (in
-% ISETBio).
+% See also: DefaultConeParams, ComputeCIEFundamentals (in PTB),
+%   IsomerizationsInEyeDemo (in PTB), t_conesPhotoPigment (in ISETBio).
 
 % History
 %   12/30/24  dhb  Wrote the demo.
