@@ -21,11 +21,14 @@ function coneParams = DefaultConeParams(type)
 %       M Shift   - 1.5 nm
 %       S Shift   - 1.3 nm
 %
+% See Asano, Y., Fairchild, M. D., & Blondé, L. (2016). Individual
+% colorimetric observer model. PloS one, 11(2), e0145671.
+%
 % Inputs:
 %     type                          - String specifying cone parameterization type.
 %                                     'cie_asano': The CIE fundamentals
 %                                      with Asano et al. individual
-%                                      differene paramters.
+%                                      difference paramters.
 %
 % Outputs:
 %     coneParams                    - Structure with field for each parameter.
