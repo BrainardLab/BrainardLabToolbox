@@ -52,12 +52,11 @@ coneParams.pupilDiamMM = 3;
 % changes from the nominal values. Shifts in photoreceptor wavelength of
 % peak absorption are in nm.
 %
-% These are set to non-zero here just to make sure tests of agreement below
-% aren't specific to the more generic case of no shifts.
-coneParams.indDiffParams.dlens = 1;
-coneParams.indDiffParams.dmac = -2;
-coneParams.indDiffParams.dphotopigment = [5 -3 6]';
-coneParams.indDiffParams.lambdaMaxShift = [-5 2 -0.5]';
+% These are set to zero here but can be adjusted
+coneParams.indDiffParams.dlens = 0;
+coneParams.indDiffParams.dmac = 0;
+coneParams.indDiffParams.dphotopigment = [0 0 0]';
+coneParams.indDiffParams.lambdaMaxShift = [0 0 0]';
 
 %% Compute the quantal sensitivity 
 % 
@@ -108,10 +107,19 @@ for cc = 1:nConeTypes
 end
 
 %% Plot the energy-unit fundamentals
-fundamentalsFig = figure; clf; hold on;
+fundamentalsFig1 = figure; clf; hold on;
 plot(wls,T_energyExcitationProb(1,:),'r','LineWidth',6);
 plot(wls,T_energyExcitationProb(2,:),'g','LineWidth',6);
 plot(wls,T_energyExcitationProb(3,:),'b','LineWidth',6);
 xlabel('Wavelength (nm)');
 ylabel('Number of excitations'); grid on;
 title('Cone fundamental with spectrum in energy units');
+
+%% Plot the normalized energy-unit fundamentals
+fundamentalsFig2 = figure; clf; hold on;
+plot(wls,T_energyExcitationProb(1,:)/max(T_energyExcitationProb(1,:)),'r','LineWidth',6);
+plot(wls,T_energyExcitationProb(2,:)/max(T_energyExcitationProb(2,:)),'g','LineWidth',6);
+plot(wls,T_energyExcitationProb(3,:)/max(T_energyExcitationProb(3,:)),'b','LineWidth',6);
+xlabel('Wavelength (nm)');
+ylabel('Number of excitations'); grid on;
+title('Cone fundamental (normalized) with spectrum in energy units');
