@@ -14,10 +14,16 @@ function info = GetBrainardLabStandardToolboxesSVNInfo(skipSVNchecks)
 %    containing the subversion information for a particular toolbox.
 % info.matlabInfo - The matlabInfo field is what is returned by Matlab's ver command.
 % 
-% 8/16/10  dhb  Add Psychtoolbox to the list
-% 8/16/10  dhb  Also return Matlab version info
-% 12/18/12 dhb  Fix bug that skipped iset.
-% 10/4/17  npc  Look for toolboxes in new directory
+% 8/16/10   dhb   Add Psychtoolbox to the list
+% 8/16/10   dhb   Also return Matlab version info
+% 12/18/12  dhb   Fix bug that skipped iset.
+% 10/4/17   npc   Look for toolboxes in new directory
+% 3/15/2025 NPC   Removed SVN checks
+
+info.svnInfo = [];
+info.matlabInfo = ver;
+return;
+
 
 % Get a list of all directories in /Users/Shared/Matlab/Toolboxes.  We'll
 % consider each of these directories a possible SVN controlled folder.

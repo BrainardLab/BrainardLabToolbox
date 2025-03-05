@@ -16,6 +16,8 @@ function [versionInfo,codeDir] = GetAllVersionInfo(programName)
 %   [exp.versionInfo,exp.codeDir] = GetAllVersionInfo(exp.mFileName);
 %
 % 7/12/13  dhb  Wrote it.
+% 5/3/2025 NPC  Removed check for SVN.
+
 
 %% Default
 if (nargin < 1)
@@ -26,10 +28,7 @@ end
 if (~isempty(programName))
     % Get path to program.
     codeDir = fileparts(which(programName));  
-    theInfo = GetSVNInfo(codeDir);
-    if (isempty(theInfo))
-        theInfo = GetGITInfo(codeDir);
-    end
+    theInfo = GetGITInfo(codeDir);
     if (~isempty(theInfo))
         versionInfo.(sprintf('%sInfo', programName)) = theInfo;
     end
