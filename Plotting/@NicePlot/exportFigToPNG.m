@@ -37,13 +37,21 @@ function exportFigToPNG(imFileName,figHandle,dpi, varargin)
     % Save the pdf (this is the same method used by "saveas")
     if (~isempty(varargin))
         if ismember('noui', varargin{:})
-            print(figHandle,'-dpng', '-noui',imFileName,sprintf('-r%d',dpi))
+            print(figHandle,'-dpng', '-noui',imFileName,sprintf('-r%d',dpi));
+        else
+            print(figHandle,'-dpng',imFileName,sprintf('-r%d',dpi));
         end
     else
         print(figHandle,'-dpng',imFileName,sprintf('-r%d',dpi))
     end
-    fprintf('\nNicePlot: figure saved to %s.\n', imFileName);
-    
+
+    % Handle beVerbose
+    if (~isempty(varargin))
+        if ismember('beVerbose', varargin{:})
+            fprintf('\nNicePlot: figure saved to %s.\n', imFileName);
+        end
+    end
+
     % Restore the previous settings
     set(figHandle,'PaperType',prePaperType);
     set(figHandle,'PaperUnits',prePaperUnits);
