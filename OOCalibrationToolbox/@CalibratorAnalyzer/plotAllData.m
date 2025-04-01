@@ -1,13 +1,13 @@
 
 function obj = plotAllData(obj)
 
-    figureGroupNames = {'Essential Data', 'Linearity Checks', 'Background Effects', 'Comparison Panel', 'Gamma Data Comparison'};
+    figureGroupNames = {'Essential Data', 'Linearity Checks', 'Background Effects', 'Luminance vs Chromaticity Data', 'Comparison Panel', 'Gamma Data Comparison'};
 
     numFiles = length(obj.calStructOBJarray);
 
-    if numFiles == 1 % If there's only one file, create three panels of calibration graphs
+    if numFiles == 1 % If there's only one file, create four panels of calibration graphs
 
-        for figureGroupIndex = 1:3
+        for figureGroupIndex = 1:4
             
             % Set a group name for all the generated figures
             obj.figureGroupName{figureGroupIndex} = figureGroupNames{figureGroupIndex};
@@ -25,25 +25,30 @@ function obj = plotAllData(obj)
                 gridDims = obj.backgroundEffectsGridDims;
                 if (~isempty(obj.newStyleCal.rawData.backgroundDependenceMeasurements))
                    obj.plotBackgroundEffectsData(figureGroupIndex, gridDims);
-                end                
+                end   
+            elseif (figureGroupIndex == 4)
+                gridDims = obj.luminanceVsChromaticityGridDims;
+                if (~isempty(obj.newStyleCal.rawData.backgroundDependenceMeasurements))
+                   obj.plotLuminanceVsChromaticityData(figureGroupIndex, gridDims);
+                end   
             end
 
         end
 
     else    % If there's more than one file, create a calibration comparison panel and a gamma comparison panel
 
-        for figureGroupIndex = 4:5
+        for figureGroupIndex = 5:6
 
             % Setting up to plot figures on panel
             gridDims = obj.comparisonGridDims;
 
-            if figureGroupIndex == 4
+            if figureGroupIndex == 5
                 % Set group names for all the generated figures
                 obj.figureGroupName{figureGroupIndex} = figureGroupNames{figureGroupIndex};
    
                 % Plot calibration comparison data
                 obj.plotCalibrationComparison(figureGroupIndex, gridDims);
-            elseif figureGroupIndex == 5
+            elseif figureGroupIndex == 6
                 % Set group names for all the generated figures
                 obj.figureGroupName{figureGroupIndex} = figureGroupNames{figureGroupIndex};
    

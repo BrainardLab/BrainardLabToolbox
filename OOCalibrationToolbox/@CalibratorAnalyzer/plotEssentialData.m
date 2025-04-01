@@ -287,7 +287,6 @@ function plotPrimaryChromaticityStabilityData(obj, figureGroupIndex, lineColors,
         
         plot(xyYMon(1,:), xyYMon(2,:), 'k-', 'LineWidth', 2.0);
         
-        
         for k = size(fullSpectra,1):-1:1
             markerSize = (6 + 10*k/(size(fullSpectra,1)))^2;
             if (k == size(fullSpectra,1))
@@ -299,7 +298,7 @@ function plotPrimaryChromaticityStabilityData(obj, figureGroupIndex, lineColors,
                     'MarkerEdgeColor', [0 0 0], 'MarkerFaceAlpha', 0.5);
             end
         end
-    
+ 
         axis([0 0.75 0 0.85]);
         axis('square');
         
