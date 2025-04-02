@@ -10,6 +10,7 @@ classdef CalibratorAnalyzer < handle
         essentialDataGridDims       = [3 3]; % 3 columns x 3 rows
         linearityChecksGridDims     = [2 3]; % 2 columns x 3 rows
         backgroundEffectsGridDims   = [3 2]; % 3 columns x 2 rows
+        luminanceVsChromaticityGridDims = [2 1]; % 2 columns x 1 row
         comparisonGridDims          = [2 2]; % 2 columns x 2 rows
     end
     
@@ -110,6 +111,9 @@ classdef CalibratorAnalyzer < handle
 
         % Method to generate plots of the background effects data.
         plotBackgroundEffectsData(obj, figureGroupIndex, gridDims);
+
+        % Method to generate plots of the chromaticity stability across luminance.
+        plotLuminanceVsChromaticityData(obj, figureGroupIndex, gridDims);
 
         % Method to generate comparison plots for the essential data.
         plotCalibrationComparison(obj, figureGroupIndex, gridDims); 
