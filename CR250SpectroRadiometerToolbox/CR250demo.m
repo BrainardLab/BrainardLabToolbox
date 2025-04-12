@@ -1,4 +1,4 @@
-function CR250demo(mode)
+function CR250demo(mode, argument)
 % CR250Ademo- Demonstrates the usage of the CR250_device driver for
 % controlling the CR250 colorimeter.
 %
@@ -41,10 +41,57 @@ function CR250demo(mode)
             testToggleEcho();
 
         case 'testGetDeviceInfo'
-            testGetDeviceInfo('RC ID');
-            testGetDeviceInfo('RC Model');
-            testGetDeviceInfo('RC InstrumentType');
-            testGetDeviceInfo('RC Firmware');
+            showFullResponse = ~true;
+            testGetDeviceInfo('RC ID', showFullResponse);
+            testGetDeviceInfo('RC Model', showFullResponse);
+            testGetDeviceInfo('RC InstrumentType', showFullResponse);
+            testGetDeviceInfo('RC Firmware', showFullResponse);
+            testGetDeviceInfo('RS Aperture', showFullResponse);
+            testGetDeviceInfo('RC Aperture', showFullResponse);
+            testGetDeviceInfo('RC Accessory', showFullResponse);
+            testGetDeviceInfo('RC Filter', showFullResponse);
+            testGetDeviceInfo('RC SyncMode', showFullResponse);
+
+        case 'testSetSyncMode'
+            % Available syncModeNames
+            % - 'none'
+            % - 'auto'
+            % - 'manual'
+            % - 'NTSC'
+            % - 'PAL'
+            % - 'CINEMA'
+            if (nargin == 2)
+                syncModeName = argument;
+            else
+                syncModeName = 'none';
+            end
+            testSetDeviceSyncMode(syncModeName);
+
+        case 'testGetSyncMode'
+            % This does not return anything for some reason
+            testGetDeviceSyncMode()
+
+        case 'testMeasure'
+            showFullResponse = true;
+            testTakeTheMeasurement(showFullResponse);
+
+        case 'testRetrieveMeasurement'
+            if (nargin == 2)
+                measurementType = argument;
+            else
+                measurementType = 'spectrum';
+            end
+            testRetrieveTheMeasurement(measurementType);
+
+        case 'testMeasureAndRetrieve'
+            if (nargin == 2)
+                measurementType = argument;
+            else
+                measurementType = 'spectrum';
+            end
+            showFullResponse = true;
+            testTakeTheMeasurement(showFullResponse);
+            testRetrieveTheMeasurement(measurementType);
 
         case 'setMinVerbosity'
             setVerbosityLevel('min');
@@ -62,6 +109,122 @@ function CR250demo(mode)
 
 end
 
+
+%% ----- MEASUREMENT FUNCTIONALITY
+
+function  testRetrieveTheMeasurement(measurementType)
+    validMeasurementTypes = { ...
+        'spectrum' ...
+    };
+
+    switch (measurementType)
+        case 'spectrum'
+            retrieveDataCommandID = 'RM Spectrum';
+
+        otherwise
+            validMeasurementTypes
+            fprintf(2, 'Unknown measurement type: ''%s''.', measurementType);
+    end
+
+    % Retrieve the measurement
+    showFullResponse = true;
+    % Retrieve the data
+    [status, response] = CR250_device('sendCommand', retrieveDataCommandID);
+    response
+    status
+end
+
+function testTakeTheMeasurement(showFullResponse)
+    Speak('Measuring')
+    tic
+    % Conduct a measurement
+    commandID = 'M';
+    [status, response] = CR250_device('sendCommand', commandID);
+    if ((status == 0) && (~isempty(response) > 0))
+        [parsedResponse, fullResponse] = parseResponse(response, commandID);
+        fprintf('\n---> DEVICE_RESPONSE to ''%s'' command has %d lines', commandID, numel(parsedResponse));
+        for iResponseLine = 1:numel(parsedResponse)
+            fprintf('\n\tLine-%d: ''%s''', iResponseLine, parsedResponse{iResponseLine});
+        end
+        if (showFullResponse)
+            fprintf('\nFull response: ''%s''.', fullResponse);
+        end
+
+    elseif (status ~= 0)
+        fprintf(2, 'Command failed!!!. Status = %d!!!', status);
+    end
+
+    doneText = sprintf('Measurement took %2.1f seconds\n', toc);
+    Speak(doneText);
+    disp(doneText);
+end
+
+function testSetDeviceSyncMode(syncModeName)
+    validSyncModeNames = {...
+        'none' ...
+        'auto' ...
+        'manual' ...
+        'NTSC' ...
+        'PAL' ...
+        'CINEMA' ...
+    };
+
+    switch (syncModeName)
+        case 'none'
+            syncModeID = 0;
+        case 'auto'
+            syncModeID = 1;
+        case 'manual'
+            syncModeID = 2;
+        case 'NTSC'
+            syncModeID = 3;
+        case 'PAL'
+            syncModeID = 4;
+        case 'CINEMA'
+            syncModeID = 5;
+        otherwise
+            validSyncModeNames 
+            fprintf(2, 'Unknown sync mode: ''%s''.', syncModeName);
+    end % switch mode
+
+    % Set the sync mode
+    commandID = sprintf('SM SyncMode %d', syncModeID);
+    [status, response] = CR250_device('sendCommand', commandID);
+
+    if ((status == 0) && (~isempty(response) > 0))
+        % Parse response
+        [parsedResponse, fullResponse] = parseResponse(response, commandID);
+        fprintf('\n---> DEVICE_RESPONSE to ''%s'' command has %d lines', commandID, numel(parsedResponse));
+        for iResponseLine = 1:numel(parsedResponse)
+            fprintf('\n\tLine-%d: ''%s''', iResponseLine, parsedResponse{iResponseLine});
+        end
+    elseif (status ~= 0)
+        fprintf(2, 'Command failed!!!. Status = %d!!!', status);
+    end
+
+    testGetDeviceSyncMode()
+end
+
+function testGetDeviceSyncMode()
+    % Retrieve the sync mode
+    commandID = sprintf('RS SyncMode');
+    [status, response] = CR250_device('sendCommand', commandID);
+
+    if ((status == 0) && (~isempty(response) > 0))
+        % Parse response
+        [parsedResponse, fullResponse] = parseResponse(response, commandID);
+        fprintf('\n---> DEVICE_RESPONSE to ''%s'' command has %d lines', commandID, numel(parsedResponse));
+        for iResponseLine = 1:numel(parsedResponse)
+            fprintf('\n\tLine-%d: ''%s''', iResponseLine, parsedResponse{iResponseLine});
+        end
+    elseif (status ~= 0)
+        fprintf(2, 'Command failed!!!. Status = %d!!!', status);
+    end
+
+end
+
+
+%% ----- BASIC FUNCTIONALITY ----
 function setVerbosityLevel(theLevel)
      % ------ SET THE VERBOSITY LEVEL (1=minimum, 5=intermediate, 10=full)--
     switch (theLevel)
@@ -114,8 +277,10 @@ function testOpenDevice()
     % ----- READ ANY DATA AVAILABLE AT THE PORT ---------------------------
     [status, dataRead] = CR250_device('readPort');
     if ((status == 0) && (length(dataRead) > 0))
-        fprintf('Read data: %s (%d chars)\n', dataRead, length(dataRead));
-    end 
+        fprintf('Read data: %s\n', dataRead);
+    elseif (status ~= 0)
+        fprintf(2, 'Failed reading from the port!!!. Status = %d!!!', status);
+    end
 
 end  % testOpenDevice
 
@@ -128,6 +293,61 @@ function testCloseDevice()
     end
 end
 
+
+function testToggleEcho()
+    % Toggle the echo state
+    [status, deviceID] = CR250_device('sendCommand', 'E');
+end
+
+
+function testGetDeviceInfo(commandID, showFullResponse)
+    % Send the command
+    [status, response] = CR250_device('sendCommand', commandID);
+
+    if ((status == 0) && (~isempty(response) > 0))
+        % Parse response
+        [parsedResponse, fullResponse] = parseResponse(response, commandID);
+        fprintf('\n---> DEVICE_RESPONSE to ''%s'' command has %d lines', commandID, numel(parsedResponse));
+        for iResponseLine = 1:numel(parsedResponse)
+            fprintf('\n\tLine-%d: ''%s''', iResponseLine, parsedResponse{iResponseLine});
+        end
+        if (showFullResponse)
+            fprintf('\nFull response: ''%s''.', fullResponse);
+        end
+    elseif (status ~= 0)
+        fprintf(2, 'Command failed!!!. Status = %d!!!', status);
+    end
+end
+
+
+function [parsedResponse, fullResponse] = parseResponse(response, commandID)
+    
+    fullResponse = response;
+
+    % Remove 'OK:0: prefix
+    prefixString = 'OK:0:';
+    response = strrep(response, prefixString, '');
+
+    % Remove commandID which is replicated
+    response = strrep(response, sprintf('%s:',commandID), '');
+
+    % find how many lines is contained in the response
+    indexOfRETURNkeys = find(response == 13);
+
+    iBegin = 1;
+    parsedResponse = {};
+    for responseLine = 1:numel(indexOfRETURNkeys)
+        iEnd = indexOfRETURNkeys(responseLine);
+        parsedResponse{responseLine} = char(response(iBegin:(iEnd-1)));
+        iBegin = iEnd+2;
+    end
+end
+
+
+
+
+    
+%%  COMPILE MEX DRIVER
 function compileMexDriver()
     disp('Compiling CR250 device driver ...');
     currentDir = pwd;
@@ -140,48 +360,6 @@ function compileMexDriver()
     cd(currentDir);
     disp('CR250 device MEX driver compiled sucessfully!');
 end % compileMexDriver()
-
-
-function testToggleEcho()
-    % Toggle the echo state
-    [status, deviceID] = CR250_device('sendCommand', 'E');
-end
-
-
-function testGetDeviceInfo(commandID)
-    % Get the device ID
-    [status, response] = CR250_device('sendCommand', commandID);
-
-    % Remove return character at the end
-    indexOfRETURNkey = find(response == 13);
-    fullResponse = char(response(1:indexOfRETURNkey-1));
-    
-    % Remove 'OK:0: prefix
-    prefixString = 'OK:0:';
-    response = strrep(fullResponse, prefixString, '');
-
-    % Remove commandID which is replicated
-    response = strrep(response, sprintf('%s:',commandID), '');
-
-    if ((status == 0) && (length(response) > 0))
-        fprintf('\n---> DEVICE_RESPONSE to ''%s'' command: \n     ''%s'' (full response: ''%s'')\n', commandID, response, fullResponse);
-    end 
-end
-
-
-
-function testMeasure()
-    % Conduct a measurement
-    [status, response] = CR250_device('sendCommand', 'M');
-    if ((status == 0) && (length(response) > 0))
-        fprintf('DEVICE_RESPONSE to M command:%s (%d chars)\n', char(response), length(response));
-        for k = 1:length(response)
-            fprintf('%d %s\n', k, response(k));
-        end
-    end 
-end
-
-    
 
 
     

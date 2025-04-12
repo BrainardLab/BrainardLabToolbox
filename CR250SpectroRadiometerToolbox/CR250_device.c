@@ -121,12 +121,25 @@ typedef struct {
 
 
 static commandEntry commandDictionary[] = {
-	{ "RC ID",                 "deviceID",          19,   2},
-    { "RC Model",              "deviceModel",       22,   2},
-    { "RC InstrumentType",     "deviceType",        26,   2},
-    { "RC Firmware",           "deviceFirmware",    29,   2},
-    { "E",                     "toggleEcho",        3,   2},
-    { "M",                     "measure",           18,   2},
+	{ "RC ID",                 "deviceID",              19,   2},
+    { "RC Model",              "deviceModel",           22,   2},
+    { "RC InstrumentType",     "deviceType",            26,   2},
+    { "RC Firmware",           "deviceFirmware",        29,   2},
+    { "RC Aperture",           "deviceAperture",        29,   2},
+    { "RS Aperture",           "deviceApertureName",    24,   2},
+    { "RC Accessory",          "deviceAccesories",      42,   2},
+    { "RC Filter",             "deviceFilter",          18,   2},
+    { "RC SyncMode",           "availableSyncModes",    63,   2},
+    { "SM SyncMode 0",         "setSyncMode0",          28,   2},
+    { "SM SyncMode 1",         "setSyncMode1",          39,   2},
+    { "SM SyncMode 2",         "setSyncMode2",          28,   2},
+    { "SM SyncMode 3",         "setSyncMode3",          28,   2},
+    { "SM SyncMode 4",         "setSyncMode4",          28,   2},
+    { "SM SyncMode 5",         "setSyncMode5",          28,   2},
+    { "RS SyncMode",           "getSyncMode",           -1,   2}, 
+    { "E",                     "toggleEcho",            3,   2},
+    { "M",                     "measure",               18,   20},
+    { "RM Spectrum",           "retrieve measurement: spectrum",  1020,   2},
 };
 
 
@@ -436,7 +449,7 @@ void mexFunction(int nlhs,      /* number of output (return) arguments */
              if (timedOut == 1) {
                 mexErrMsgTxt("CR250: Streaming timed out while polling. \n");
              }
-             if (bytesRead != commandResultsBufferLength) {
+             if ((bytesRead != commandResultsBufferLength) && (expectedCharsNum != -1)) {
                 mexPrintf("Expected %d chars, but read %d chars instead\n", commandResultsBufferLength, bytesRead);
                 mexPrintf("Received message: %s\n",commandResultsBuffer);
              }
@@ -552,8 +565,10 @@ int pollCR250Port(int *deviceHandle, int expectedCharsNum, int timeOutSeconds, i
                         }
                     }
             		*bytesRead += inputBufferSize;
-                    if (*bytesRead != expectedCharsNum) {
-            		    mexPrintf("bytesRead:%d (%s) (total:%d, expected:%d)\n", inputBufferSize, inputBuffer, *bytesRead, expectedCharsNum);
+                    if ((*bytesRead != expectedCharsNum) && (expectedCharsNum != -1)) {
+                        if (verbosityLevel >= 5) {
+            		        mexPrintf("bytesRead:%d (%s) (total:%d, expected:%d)\n", inputBufferSize, inputBuffer, *bytesRead, expectedCharsNum);
+                        }
                     }
 
             		/* Check whether more chars are to be received */
@@ -891,7 +906,7 @@ int updateCR250PortSettings(int *deviceHandle, int speed, int wordSize, int pari
     }
 
     //setBlocking(deviceHandle, 0);                // set no blocking
-
+    setBlocking(deviceHandle, 1);                // set yes blocking
     return (0);
 
     	
