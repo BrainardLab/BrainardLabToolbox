@@ -113,17 +113,20 @@ static operandEntry operandDictionary[] = {
 */
 
 typedef struct {
-	char	name[256];						/* command name */
-	char    ID[2];			   				/* command ID, (a 2-character string) */
+	char	ID[128];						/* command ID (128)*/
+	char    description[1024];			   	/* command descriptor string */
 	int     charsNumToBeReturned;       	/* chars expected in result */
 	int     timeOutSeconds;             	/* timeout (in seconds) to wait before reading back the result */
 } commandEntry;
 
 
 static commandEntry commandDictionary[] = {
-	{ "RC ID",      "deviceID",     19,   2},
-    { "E",          "toggleEcho",    3,   2},
-    { "M",          "measure",      18,   2},
+	{ "RC ID",                 "deviceID",          19,   2},
+    { "RC Model",              "deviceModel",       22,   2},
+    { "RC InstrumentType",     "deviceType",        26,   2},
+    { "RC Firmware",           "deviceFirmware",    29,   2},
+    { "E",                     "toggleEcho",        3,   2},
+    { "M",                     "measure",           18,   2},
 };
 
 
@@ -363,7 +366,7 @@ void mexFunction(int nlhs,      /* number of output (return) arguments */
             // Find commandIndex
 			int commandIndex = -1;
 			for (int i = 0; i < sizeof(commandDictionary)/sizeof(commandEntry); i++) {
-				if (strcmp(commandName, commandDictionary[i].name) == 0 ) {
+				if (strcmp(commandName, commandDictionary[i].ID) == 0 ) {
 					commandIndex = i;
 					break;
 				}
@@ -395,7 +398,7 @@ void mexFunction(int nlhs,      /* number of output (return) arguments */
             
             // Check for early termination due to failure to write
 			if (*status == -1) {
-				mexErrMsgTxt("CR250: Failed to write command to serial port device\n");
+				mexErrMsgTxt("CR250: Failed to write command to serial port device. Is the device open?\n");
 			}
 			else if (*status == 0) {
                 if (verbosityLevel >= 10)
@@ -549,7 +552,9 @@ int pollCR250Port(int *deviceHandle, int expectedCharsNum, int timeOutSeconds, i
                         }
                     }
             		*bytesRead += inputBufferSize;
-            		mexPrintf("bytesRead:%d (%s) (total:%d, expected:%d)\n", inputBufferSize, inputBuffer, *bytesRead, expectedCharsNum);
+                    if (*bytesRead != expectedCharsNum) {
+            		    mexPrintf("bytesRead:%d (%s) (total:%d, expected:%d)\n", inputBufferSize, inputBuffer, *bytesRead, expectedCharsNum);
+                    }
 
             		/* Check whether more chars are to be received */
             		if (*bytesRead < expectedCharsNum)
