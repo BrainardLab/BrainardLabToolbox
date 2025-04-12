@@ -4,57 +4,12 @@
 %
 % AVAILABLE COMMANDS:
 %
-% status               = K10A_device('setVerbosityLevel', 1);
-%
-% status               = K10A_device('open', '/dev/tty.usbserial-KU000000');
-%
-% status               = K10A_device('updateSettings', speed, wordSize, parity,timeOut);
-%
-% [status, dataRead]   = K10A_device('readPort');
-%
-% status               = K10A_device('writePort', 'Do you feel lucky, punk?');
-%
-% [status, modelSerNo] = K10A_device('sendCommand', 'Model and SerialNo');
-%
-% [status, response]   = K10A_device('sendCommand', 'FlickerCal & Firmware');
-% 
-% [status]             = K10A_device('sendCommand', 'Lights ON');
-% 
-% [status]             = K10A_device('sendCommand', 'Lights OFF');
-% 
-% [status, response]   = K10A_device('sendCommand', 'EnableAutoRanging');
-% 
-% [status, response]   = K10A_device('sendCommand', 'DisableAutoRanging');
-% 
-% [status, response]   = K10A_device('sendCommand', 'LockInRange1');
-% 
-% [status, response]   = K10A_device('sendCommand', 'LockInRange2');
-% 
-% [status, response]   = K10A_device('sendCommand', 'LockInRange3');
-% 
-% [status, response]   = K10A_device('sendCommand', 'LockInRange4');
-% 
-% [status, response]   = K10A_device('sendCommand', 'LockInRange5');
-% 
-% [status, response]   = K10A_device('sendCommand', 'LockInRange6');
-% 
-% [status, ...
-%     uncorrectedYdata256HzStream, ...
-%     correctedXChroma8HzStream, ...
-%     correctedYChroma8HzStream, ...
-%     correctedYLum8HzStream] = K10A_device('sendCommand', 'Standard Stream', streamDurationInSeconds);
-% 
-% [status, response]   = K10A_device('sendCommand', 'SingleShot XYZ');
-%
-%
 % EXAMPLE USAGE:
-% For a tutorial of how to use this driver from MATLAB, please see K10Ademo.m
 %
 %
 % HISTORY:
-% 1/30/2014   npc    Wrote it.
-% 1/31/2013   npc    Updated 'SingleShot XYZ' command to return both XYZ and xyY.
-%                    Updated 'Standard Stream' command to return an 8Hz stream of the raw corrected XYZ instead of the xyY values.
+% 4/10/2025   npc    Wrote it.
+% 
 */
 
 #include "mex.h"
@@ -137,7 +92,7 @@ static commandEntry commandDictionary[] = {
     { "SM SyncMode 4",         "setSyncMode4",          28,   2},
     { "SM SyncMode 5",         "setSyncMode5",          28,   2},
     { "RS SyncMode",           "getSyncMode",           -1,   2}, 
-    { "E",                     "toggleEcho",            3,   2},
+    { "E",                     "toggleEcho",            -1,   2},
     { "M",                     "measure",               18,   20},
     { "RM Spectrum",           "retrieve measurement: spectrum",  1020,   2},
 };
