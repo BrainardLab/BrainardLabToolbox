@@ -1,4 +1,9 @@
 % Method to open the CR250
+
+%  History:
+%    April 2025  NPC  Wrote it
+
+
 function open(obj)
 
     % ------ SET THE VERBOSITY LEVEL (1=minimum, 5=intermediate, 10=full)--

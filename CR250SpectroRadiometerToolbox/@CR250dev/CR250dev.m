@@ -19,6 +19,10 @@ classdef CR250dev < handle
     %   % Measure a spectrum
     %   myCR250.measure('spectrum');
     %
+    
+    %  History:
+    %    April 2025  NPC  Wrote it
+
     properties (Constant)
         validSyncModes = {...
             'none' ...
@@ -135,22 +139,23 @@ classdef CR250dev < handle
         measure(obj);
 
         % Method to retrieve a measurements
-        retrieveMeasurement(obj);
+        [theSpectralSupport, theSpectrum] = retrieveMeasurement(obj);
 
-    end % Public methods
-
-    methods (Access=private)
         % Method to set the device sync mode
         status = setDeviceSyncMode(obj, val)
-
-        % Method to parse the device response stream
-        [parsedResponse, fullResponse, responseIsOK] = parseResponse(obj, response, commandID);
 
         % Method to query the CR250 for various infos
         retrieveDeviceInfo(obj, commandID, showFullResponse);
 
         % Method to retrieve the current syncMode
         [status, response] = retrieveCurrentSyncMode(obj);
+
+    end % Public methods
+
+    methods (Access=private)
+       
+        % Method to parse the device response stream
+        [parsedResponse, fullResponse, responseIsOK] = parseResponse(obj, response, commandID);
     end
 
     methods (Static)

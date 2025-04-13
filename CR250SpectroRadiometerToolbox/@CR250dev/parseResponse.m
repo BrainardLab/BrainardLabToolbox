@@ -1,3 +1,9 @@
+% Method to parse the device response stream
+
+%  History:
+%    April 2025  NPC  Wrote it
+
+
 function [parsedResponse, fullResponse, responseIsOK] = parseResponse(obj, response, commandID)
     
     fullResponse = response;

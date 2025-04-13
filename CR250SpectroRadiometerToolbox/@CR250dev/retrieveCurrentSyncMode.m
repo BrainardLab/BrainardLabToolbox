@@ -1,4 +1,9 @@
 % Method to retrieve the current syncMode
+
+%  History:
+%    April 2025  NPC  Wrote it
+
+
 function [status, response] = retrieveCurrentSyncMode(obj)
 
     % Retrieve the sync mode

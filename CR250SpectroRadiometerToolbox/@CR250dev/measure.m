@@ -1,4 +1,9 @@
 % Method to conduct a measurement
+
+%  History:
+%    April 2025  NPC  Wrote it
+
+
 function measure(obj)
     Speak('Measuring. Please wait.')
     tic

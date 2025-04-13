@@ -1,3 +1,9 @@
+% Method to retrieve all the info on the CR250
+
+%  History:
+%    April 2025  NPC  Wrote it
+
+
 function deviceConfig(obj)
 
     showFullResponse = ~true;

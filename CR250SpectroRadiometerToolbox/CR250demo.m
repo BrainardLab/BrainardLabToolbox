@@ -8,11 +8,8 @@ function CR250demo(mode, argument)
 % Description:
 % CR250demo demostrates the different commands that can be sent to the CR250_device 
 %
-% Controls:
-% 'q'         - Terminates infinite stream and exits the demo
-%
-% History:
-% 4/9/2025   npc    Wrote it.
+%  History:
+%    April 2025  NPC  Wrote it
 %
 
     validModes = {...

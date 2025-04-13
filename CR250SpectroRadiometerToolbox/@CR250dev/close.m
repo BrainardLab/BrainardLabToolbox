@@ -1,4 +1,8 @@
 % Method to close the CR250
+
+%  History:
+%    April 2025  NPC  Wrote it
+
 function close(obj)
     status = CR250_device('close');
     if (status == 0)

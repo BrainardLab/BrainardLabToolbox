@@ -1,4 +1,8 @@
 % Method to query the CR250 for various infos
+
+%  History:
+%    April 2025  NPC  Wrote it
+
 function retrieveDeviceInfo(obj, commandID, showFullResponse)
     
     % Send the command
@@ -6,7 +10,7 @@ function retrieveDeviceInfo(obj, commandID, showFullResponse)
 
     if ((status == 0) && (~isempty(response) > 0))
         % Parse response
-        [parsedResponse, fullResponse, responseInOK] = obj.parseResponse(response, commandID);
+        [parsedResponse, fullResponse, responseIsOK] = obj.parseResponse(response, commandID);
 
         if (~responseIsOK)
             fprintf(2, 'Device response to retrieving info is NOT OK !!\n')
