@@ -21,7 +21,7 @@ classdef CR250dev < handle
     %
     
     %  History:
-    %    April 2025  NPC  Wrote it
+    %    April 13, 2025  NPC  Wrote it
 
     properties (Constant)
         validSyncModes = {...
