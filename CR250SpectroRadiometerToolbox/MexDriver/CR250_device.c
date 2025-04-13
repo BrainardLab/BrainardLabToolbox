@@ -93,8 +93,8 @@ static commandEntry commandDictionary[] = {
     { "SM SyncMode 5",         "setSyncMode5",          28,   2},
     { "RS SyncMode",           "getSyncMode",           -1,   2}, 
     { "E",                     "toggleEcho",            -1,   2},
-    { "M",                     "measure",               18,   20},
-    { "RM Spectrum",           "retrieve measurement: spectrum",  1020,   2},
+    { "M",                     "measure",               18,   25},
+    { "RM Spectrum",           "retrieve measurement: spectrum",  2249,   3},
 };
 
 
@@ -345,8 +345,6 @@ void mexFunction(int nlhs,      /* number of output (return) arguments */
 				mexErrMsgTxt(errorMessage);
             }
            
-
-
             /* Simply clear the port in case there is stuff from a previous operation */
             *status = readCR250Port(&CR250_devHandle, &inputBuffer[0], &inputBufferSize);
             if (*status == -1) {
@@ -402,30 +400,20 @@ void mexFunction(int nlhs,      /* number of output (return) arguments */
                 mexErrMsgTxt("CR250: Serial port device is not open !\n");
              }
              if (timedOut == 1) {
-                mexErrMsgTxt("CR250: Streaming timed out while polling. \n");
+                //mexErrMsgTxt("CR250: Timed out while polling the port. \n");
+                mexPrintf("CR250: Timed out while polling the port. \n");
              }
              if ((bytesRead != commandResultsBufferLength) && (expectedCharsNum != -1)) {
                 mexPrintf("Expected %d chars, but read %d chars instead\n", commandResultsBufferLength, bytesRead);
-                mexPrintf("Received message: %s\n",commandResultsBuffer);
+                if (verbosityLevel >= 5) {
+                    mexPrintf("Received message: %s\n",commandResultsBuffer);
+                }
              }
 
-             if (strcmp(commandName, "SingleShot XYZ")==0) {
-                    // decode XYZ from the raw data
-                    float xChroma, yChroma, YLum;
-                    float bigX, bigY, bigZ;
-                    int redRange, greenRange, blueRange;
-                    decodeXYZdata(commandResultsBuffer, &bigX, &bigY, &bigZ, &xChroma, &yChroma, &YLum, &redRange, &greenRange, &blueRange);
-                    char *decodedResults;
-                    decodedResults = mxCalloc(256, sizeof(char));
-                    sprintf(decodedResults,"XYZ=[%2.3f, %2.3f, %2.3f], x:%2.3f y:%2.3f Lum:%2.5f (ranges: R=%d, G=%d, B=%d)", bigX, bigY, bigZ, xChroma, yChroma, YLum, redRange, greenRange, blueRange);
-                    plhs[1] = mxCreateString(decodedResults);
-                    mxFree(decodedResults);
-              }
-              else {
-                    // Copy the raw data
-                    plhs[1] = mxCreateString(commandResultsBuffer);
-              }
-                
+             // Copy the raw data
+             plhs[1] = mxCreateString(commandResultsBuffer);
+              
+ 
               // free memory since we copied it to output buffer
               mxFree(commandResultsBuffer);
             

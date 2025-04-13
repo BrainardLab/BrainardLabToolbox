@@ -22,7 +22,6 @@ classdef CR250dev < handle
     properties (Constant)
         validSyncModes = {...
             'none' ...
-            'auto' ...
             'manual' ...
             'NTSC' ...
             'PAL' ...
@@ -34,6 +33,11 @@ classdef CR250dev < handle
             'max' ...
             'default' ...
         };
+
+        validMeasurementTypes = { ...
+            'spectrum' ...
+        };
+
     end
 
     % Public properties
@@ -41,6 +45,8 @@ classdef CR250dev < handle
         name;
         verbosity;
         syncMode;
+        showDeviceFullResponse;
+        measurementType;
     end
 
     % Read-only private properties
@@ -71,6 +77,9 @@ classdef CR250dev < handle
             obj.name = p.Results.name;
             obj.serialDevicePortName = p.Results.serialDevicePortName;
             obj.verbosity = p.Results.verbosity;
+            obj.showDeviceFullResponse = false;
+
+            obj.measurementType = 'spectrum';
 
             obj.open();
             obj.syncMode = p.Results.syncMode;
@@ -116,12 +125,17 @@ classdef CR250dev < handle
         % Method to close the CR250
         close(obj);
 
-        
         % Method to get the device configuration
         deviceConfig(obj);
 
         % Method to toggle the echo
         toggleEcho(obj);
+
+        % Method to conduct a measurement
+        measure(obj);
+
+        % Method to retrieve a measurements
+        retrieveMeasurement(obj);
 
     end % Public methods
 
@@ -130,7 +144,7 @@ classdef CR250dev < handle
         status = setDeviceSyncMode(obj, val)
 
         % Method to parse the device response stream
-        [parsedResponse, fullResponse] = parseResponse(obj, response, commandID);
+        [parsedResponse, fullResponse, responseIsOK] = parseResponse(obj, response, commandID);
 
         % Method to query the CR250 for various infos
         retrieveDeviceInfo(obj, commandID, showFullResponse);

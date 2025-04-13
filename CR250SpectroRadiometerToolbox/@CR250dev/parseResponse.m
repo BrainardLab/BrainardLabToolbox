@@ -1,9 +1,16 @@
-function [parsedResponse, fullResponse] = parseResponse(obj, response, commandID)
+function [parsedResponse, fullResponse, responseIsOK] = parseResponse(obj, response, commandID)
     
     fullResponse = response;
+    responseIsOK = true;
+
+    prefixString = 'OK:0:';
+    if (~contains(response, prefixString))
+        parsedResponse = response;
+        responseIsOK = false;
+        return;
+    end
 
     % Remove 'OK:0: prefix
-    prefixString = 'OK:0:';
     response = strrep(response, prefixString, '');
 
     % Remove commandID which is replicated

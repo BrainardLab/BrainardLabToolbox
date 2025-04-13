@@ -1,26 +1,31 @@
-% Method to query the CR250 for various infos
-function retrieveDeviceInfo(obj, commandID, showFullResponse)
-    
-    % Send the command
+% Method to conduct a measurement
+function measure(obj)
+    Speak('Measuring. Please wait.')
+    tic
+
+    % Conduct a measurement
+    commandID = 'M';
     [status, response] = CR250_device('sendCommand', commandID);
 
+    % Wait for response
     if ((status == 0) && (~isempty(response) > 0))
-        % Parse response
-        [parsedResponse, fullResponse, responseInOK] = obj.parseResponse(response, commandID);
-
-        if (~responseIsOK)
-            fprintf(2, 'Device response to retrieving info is NOT OK !!\n')
-        end
-
+        [parsedResponse, fullResponse] = obj.parseResponse(response, commandID);
         fprintf('\n---> DEVICE_RESPONSE to ''%s'' command has %d lines', commandID, numel(parsedResponse));
         for iResponseLine = 1:numel(parsedResponse)
             fprintf('\n\tLine-%d: ''%s''', iResponseLine, parsedResponse{iResponseLine});
         end
-        if (showFullResponse)
+        if (obj.showDeviceFullResponse)
             fprintf('\nFull response: ''%s''.', fullResponse);
         end
+
     elseif (status ~= 0)
         fprintf(2, 'Command failed!!!. Status = %d!!!', status);
     end
+
+    % Report back
+    doneText = sprintf('\nCompleted after %2.1f seconds\n', toc);
+    Speak(doneText);
+
+    disp(doneText);
 
 end
