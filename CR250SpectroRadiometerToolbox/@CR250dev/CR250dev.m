@@ -1,6 +1,24 @@
 classdef CR250dev < handle
-    % CR250dev
-
+    % Class to manage a CR250 spectroradiometer
+    %
+    % Syntax:
+    %   % Instantiate
+    %   myCR250 = CR250dev();
+    %
+    %   % Instantiate
+    %   myCR250 = CR250dev(...
+    %       'serialDevicePortName', '/dev/someTTY', ...
+    %       'verbosity', 'max');
+    %
+    %   % Get device configuration
+    %   myCR250.deviceConfig();
+    %
+    %   % Set sync mode to manual
+    %   myCR250.syncMode = 'manual'
+    %  
+    %   % Measure a spectrum
+    %   myCR250.measure('spectrum');
+    %
     properties (Constant)
         validSyncModes = {...
             'none' ...
@@ -46,26 +64,33 @@ classdef CR250dev < handle
             p.addParameter('name', 'CR250', @ischar);
             p.addParameter('serialDevicePortName', '/dev/tty.usbmodemA009271', @ischar);
             p.addParameter('verbosity', 'min', @(x)(ismember(x, obj.validVerbosityLevels)));
-            p.addParameter('syncMode', 'auto', @(x)(ismember(x, obj.validSyncModes)));
+            p.addParameter('syncMode', 'manual', @(x)(ismember(x, obj.validSyncModes)));
   
             % Parse input
             p.parse(varargin{:});
             obj.name = p.Results.name;
             obj.serialDevicePortName = p.Results.serialDevicePortName;
             obj.verbosity = p.Results.verbosity;
+
+            obj.open();
             obj.syncMode = p.Results.syncMode;
         end  % Constructor
 
 
         % Setter for syncMode
         function set.syncMode(obj, val)
-            obj.setSyncMode(val);
+            status = obj.setDeviceSyncMode(val);
+            if (status == 0)
+                obj.syncMode = val;
+            else
+                fprintf(2, 'Failed to set the device syncMode to %s\n', val);
+            end
         end % set.syncMode
 
         % Getter for syncMode
         function val = get.syncMode(obj)
-            val = obj.retrieveCurrentSyncMode();
-        end % set.syncMode
+            val = obj.syncMode();
+        end % get.syncMode
 
         % Setter for verbosity
         function set.verbosity(obj, val)
@@ -85,7 +110,6 @@ classdef CR250dev < handle
         end % set.verbosity
 
 
-
         % Method to open the CR250
         open(obj);
 
@@ -102,6 +126,9 @@ classdef CR250dev < handle
     end % Public methods
 
     methods (Access=private)
+        % Method to set the device sync mode
+        status = setDeviceSyncMode(obj, val)
+
         % Method to parse the device response stream
         [parsedResponse, fullResponse] = parseResponse(obj, response, commandID);
 
@@ -109,7 +136,7 @@ classdef CR250dev < handle
         retrieveDeviceInfo(obj, commandID, showFullResponse);
 
         % Method to retrieve the current syncMode
-        val = retrieveCurrentSyncMode(obj);
+        [status, response] = retrieveCurrentSyncMode(obj);
     end
 
     methods (Static)
