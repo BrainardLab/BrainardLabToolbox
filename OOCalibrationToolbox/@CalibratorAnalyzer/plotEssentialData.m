@@ -100,6 +100,13 @@ function plotEssentialData(obj, figureGroupIndex, gridDims)
     %    plotNulPlot(obj, figureGroupIndex, hPanel, pos);
     % end
 
+    % Define the file name and full path for saving
+    jpgFilename = fullfile(obj.plotsExportsFolder, 'Essential_Data.jpg');
+    warning('off', 'MATLAB:print:ExportExcludesUI');   % Turn off the UI warning for export
+
+    % Save the whole figure as a JPG image
+    exportgraphics(hFig, jpgFilename, 'Resolution', 150);
+
 end
 
 function plotRepeatibilityData(obj, figureGroupIndex, lineColors, hPanel, pos)

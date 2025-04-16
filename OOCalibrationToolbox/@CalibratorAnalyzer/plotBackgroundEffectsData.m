@@ -60,6 +60,12 @@ function plotBackgroundEffectsData(obj, figureGroupIndex, gridDims)
         plotSpectra(obj, hPanel, current_pos, spectra, maxAll, obj.newStyleCal.backgroundDependenceSetup.settings(:,settingIndex), figureGroupIndex);
     end
 
+    % Define the file name and full path for saving
+    jpgFilename = fullfile(obj.plotsExportsFolder, 'Background_Effects_Data.jpg');
+
+    % Save the whole figure as a JPG image
+    exportgraphics(hFig, jpgFilename, 'Resolution', 150);
+
 end
 
 function plotSpectra(obj, hPanel, current_pos, spectra, maxAll, settings, figureGroupIndex, settingsIndex, settingsIndicesNum)
@@ -112,8 +118,7 @@ function plotSpectra(obj, hPanel, current_pos, spectra, maxAll, settings, figure
 
     maxSPDdiff = max(maxSPDdiff);
 
-    [hleg, objh,outh,outm] = legend(legendsMatrix, 'Location', 'NorthEast');
-    set(objh,'linewidth',2);
+    hleg = legend(legendsMatrix, 'Location', 'NorthEast');
 
     set(hleg,'FontName', 'Helvetica', 'Fontweight', 'normal', 'FontSize', 12, 'Color', 'none', 'LineWidth', 0.1);
     box on;

@@ -63,16 +63,28 @@ classdef CalibratorAnalyzer < handle
                     calFolder = calDir; % CalDataFolder([],calFilename, calDir);
                     calPlotFolder = fullfile(calFolder,'Plots');
                     if (~exist(calPlotFolder,'dir'))
-                        unix(['mkdir ' calPlotFolder]);
+                        if ii == 1 % Only create the folder for the first file
+                            mkdir(calPlotFolder);
+                        end
+                    else
+                        warning('off', 'MATLAB:MKDIR:DirectoryExists');
                     end
                     calFilePlotFolder = fullfile(calPlotFolder,calFilename);
                     if (~exist(calFilePlotFolder,'dir'))
-                        unix(['mkdir ' calFilePlotFolder]);
+                        if ii == 1 % Only create the folder for the first file
+                            mkdir(calFilePlotFolder);
+                        end
+                    else
+                        warning('off', 'MATLAB:MKDIR:DirectoryExists');
                     end
                     calDate = obj.calStructOBJ.get('date');
                     thePlotFolder = fullfile(calFilePlotFolder,calDate(1:11));
                     if (~exist(thePlotFolder,'dir'))
-                        unix(['mkdir ' thePlotFolder]);
+                        if ii == 1 % Only create the folder for the first file
+                            mkdir(thePlotFolder);
+                        end
+                    else
+                        warning('off', 'MATLAB:MKDIR:DirectoryExists');
                     end
     
                 obj.plotsExportsFolder{ii} = thePlotFolder;

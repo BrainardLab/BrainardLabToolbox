@@ -128,5 +128,11 @@ function plotLuminanceVsChromaticityData(obj, figureGroupIndex, gridDims)
 
     end
 
+    % Define the file name and full path for saving
+    jpgFilename = fullfile(obj.plotsExportsFolder, 'Luminance_vs_Chromaticity_Data.jpg');
+
+    % Save the whole figure as a JPG image
+    exportgraphics(hFig, jpgFilename, 'Resolution', 150);
+
 end
 

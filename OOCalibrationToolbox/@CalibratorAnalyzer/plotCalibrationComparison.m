@@ -90,6 +90,33 @@ function plotCalibrationComparison(obj, figureGroupIndex, gridDims)
     % Gamma functions.
     plotGammaData(obj, figureGroupIndex, lineColors, hPanel, pos);
 
+    if numel(obj.plotsExportsFolder) == 2 % If comparing only two files
+
+        splitParts = strsplit(obj.plotsExportsFolder{2}, '/'); % Extract the second cal file name from the path
+        filenameWithExt = splitParts{end-1};
+        filenameNoExt = erase(filenameWithExt, '.mat'); 
+
+        % Define the file name and full path for saving
+        jpgFilename = fullfile(obj.plotsExportsFolder{1}, ['Compare_with_' filenameNoExt '.jpg']);
+
+        % Save the whole figure as a JPG image
+        exportgraphics(hFig, jpgFilename, 'Resolution', 150);
+
+    else   % If comparing more than two files
+
+        splitParts = strsplit(obj.plotsExportsFolder{2}, '/'); % Extract the second cal file name from the path
+        filenameWithExt = splitParts{end-1};
+        filenameNoExt = erase(filenameWithExt, '.mat'); 
+
+        % Define the file name and full path for saving
+        jpgFilename = fullfile(obj.plotsExportsFolder{1}, ['Compare_with_' filenameNoExt '_plus.jpg']);
+        % 'plus' indicates that we are comparing more than two files
+
+        % Save the whole figure as a JPG image
+        exportgraphics(hFig, jpgFilename, 'Resolution', 150);
+
+    end
+
 end
 
 function plotChromaticityData(obj, figureGroupIndex, lineColors, hPanel, pos)
