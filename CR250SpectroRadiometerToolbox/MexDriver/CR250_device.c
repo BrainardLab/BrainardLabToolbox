@@ -91,7 +91,7 @@ static commandEntry commandDictionary[] = {
     { "SM SyncMode 3",         "setSyncMode3",          28,   2},
     { "SM SyncMode 4",         "setSyncMode4",          28,   2},
     { "SM SyncMode 5",         "setSyncMode5",          28,   2},
-    { "RS SyncMode",           "getSyncMode",           -1,   2}, 
+    { "RS SyncMode",           "getSyncMode",           25,   2}, 
     { "E",                     "toggleEcho",            -1,   2},
     { "M",                     "measure",               18,   25},
     { "RM Spectrum",           "retrieve measurement: spectrum",  2249,   3},
