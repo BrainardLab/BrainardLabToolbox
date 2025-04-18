@@ -1,13 +1,12 @@
 % Method to set the device sync mode
 function status = setDeviceSyncMode(obj, val)
-
     if (ismember(val, obj.validSyncModes))
         switch (val)
-            case 'none'
+            case 'None'
                 syncModeID = 0;
-            case 'auto'
+            case 'Auto'
                 syncModeID = 1;
-            case 'manual'
+            case 'Manual'
                 syncModeID = 2;
             case 'NTSC'
                 syncModeID = 3;

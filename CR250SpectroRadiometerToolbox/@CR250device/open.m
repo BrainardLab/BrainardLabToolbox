@@ -11,7 +11,7 @@ function open(obj)
 
     % ------ OPEN THE CR250 device ----------------------------------------------
     status = CR250_device('close');
-    status = CR250_device('open', obj.serialDevicePortName);
+    status = CR250_device('open', obj.devicePortString);
     if (status == 0)
         disp('Opened CR250 port');
     elseif (status == -1)

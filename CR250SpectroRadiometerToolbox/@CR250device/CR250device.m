@@ -1,13 +1,16 @@
-classdef CR250dev < handle
-    % Class to manage a CR250 spectroradiometer
+classdef CR250device < handle
+    % Class to manage a CR250 spectroradiometer. 
+    % This is a standalone implementation. There is also a @CR250dev
+    % which is a subclass of @Radiometer, for consistency with the other
+    % radiometers
     %
     % Syntax:
     %   % Instantiate
-    %   myCR250 = CR250dev();
+    %   myCR250 = CR250device();
     %
     %   % Instantiate
-    %   myCR250 = CR250dev(...
-    %       'serialDevicePortName', '/dev/someTTY', ...
+    %   myCR250 = CR250device(...
+    %       'devicePortString', '/dev/someTTY', ...
     %       'verbosity', 'max');
     %
     %   % Get device configuration
@@ -25,8 +28,8 @@ classdef CR250dev < handle
 
     properties (Constant)
         validSyncModes = {...
-            'none' ...
-            'manual' ...
+            'None' ...
+            'Manual' ...
             'NTSC' ...
             'PAL' ...
             'CINEMA' ...
@@ -50,12 +53,14 @@ classdef CR250dev < handle
         verbosity;
         syncMode;
         showDeviceFullResponse;
-        measurementType;
+        measurementTypeToRetrieve;
     end
 
     % Read-only private properties
     properties (GetAccess=public, SetAccess=private)
-        serialDevicePortName
+        devicePortString;
+        deviceSerialNum;
+        firmware;
     end
 
     % Private properties
@@ -68,25 +73,32 @@ classdef CR250dev < handle
     methods
         
         % Constructor
-        function obj = CR250dev(varargin)
+        function obj = CR250device(varargin)
             % Parse input
             p = inputParser;
             p.addParameter('name', 'CR250', @ischar);
-            p.addParameter('serialDevicePortName', '/dev/tty.usbmodemA009271', @ischar);
+            p.addParameter('devicePortString', '/dev/tty.usbmodemA009271',  @(x)(isempty(x)||ischar(x)));
             p.addParameter('verbosity', 'min', @(x)(ismember(x, obj.validVerbosityLevels)));
-            p.addParameter('syncMode', 'manual', @(x)(ismember(x, obj.validSyncModes)));
+            p.addParameter('syncMode', 'Manual', @(x)(ismember(x, obj.validSyncModes)));
   
             % Parse input
             p.parse(varargin{:});
             obj.name = p.Results.name;
-            obj.serialDevicePortName = p.Results.serialDevicePortName;
+            obj.devicePortString = p.Results.devicePortString;
             obj.verbosity = p.Results.verbosity;
             obj.showDeviceFullResponse = false;
 
-            obj.measurementType = 'spectrum';
+            if (isempty(obj.devicePortString))
+                obj.devicePortString = '/dev/tty.usbmodemA009271';
+            end
+
+            obj.measurementTypeToRetrieve = 'spectrum';
 
             obj.open();
             obj.syncMode = p.Results.syncMode;
+
+            obj.deviceConfig();
+
         end  % Constructor
 
 
@@ -164,8 +176,8 @@ classdef CR250dev < handle
         function compileMexDriver()
             disp('Compiling CR250 device driver ...');
             currentDir = pwd;
-            f = which('CR250dev');
-            mexDriverDir = strrep(f, '@CR250dev/CR250dev.m', 'MexDriver');
+            f = which('CR250device');
+            mexDriverDir = strrep(f, '@CR250device/CR250device.m', 'MexDriver');
             cd(mexDriverDir);
             mex('CR250_device.c');
             cd(currentDir);

@@ -11,7 +11,7 @@ function [theSpectralSupport, theSpectrum] = retrieveMeasurement(obj)
     Speak('Retrieving data. Please wait.')
     tic
 
-    switch (obj.measurementType)
+    switch (obj.measurementTypeToRetrieve)
         case 'spectrum'
             commandID = 'RM Spectrum';
 
