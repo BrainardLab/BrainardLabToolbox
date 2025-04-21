@@ -11,8 +11,12 @@ function OOC_checkPR670(varargin)
     end
 
     pr670obj = [];
-    devicePortString = '';  % or select from ls -a /dev/cu*, e.g. '/dev/cu.usbmodem1a21'
-    
+    if IsLinux
+        devicePortString = '/dev/ttyACM0';  % or select from ls -a /dev/cu*, e.g. '/dev/cu.usbmodem1a21'
+    else
+        devicePortString = [];
+    end
+
     try
         pr670obj = PR670dev('verbosity', verb, 'devicePortString', devicePortString);
         fprintf('<strong>Hit enter to close device: </strong>');
