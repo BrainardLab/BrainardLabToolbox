@@ -77,7 +77,7 @@ classdef CR250device < handle
             % Parse input
             p = inputParser;
             p.addParameter('name', 'CR250', @ischar);
-            p.addParameter('devicePortString', '/dev/tty.usbmodemA009271',  @(x)(isempty(x)||ischar(x)));
+            p.addParameter('devicePortString', '',  @(x)(isempty(x)||ischar(x)));
             p.addParameter('verbosity', 'min', @(x)(ismember(x, obj.validVerbosityLevels)));
             p.addParameter('syncMode', 'Manual', @(x)(ismember(x, obj.validSyncModes)));
   
@@ -89,9 +89,15 @@ classdef CR250device < handle
             obj.showDeviceFullResponse = false;
 
             if (isempty(obj.devicePortString))
-                obj.devicePortString = '/dev/tty.usbmodemA009271';
+                if (IsLinux)
+                    obj.devicePortString = '/dev/ttyACM0';
+                else
+                    obj.devicePortString = '/dev/tty.usbmodemA009271';
+                end
             end
 
+            obj.devicePortString
+            pause
             obj.measurementTypeToRetrieve = 'spectrum';
 
             obj.open();
