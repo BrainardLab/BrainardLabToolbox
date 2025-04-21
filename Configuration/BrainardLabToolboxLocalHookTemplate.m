@@ -47,6 +47,12 @@ if (exist('GetComputerInfo','file'))
             switch(sysInfo.userShortName)
                 % Could put user specific things in, but at the moment generic
                 % is good enough.
+                case 'brainardlab'
+                    if IsLinux
+                        baseDir = '/home/brainardlab/Aguirre-Brainard Lab Dropbox/Metropsis Experimenter';
+                    else
+                        baseDir = ['/Users/' sysInfo.userShortName '/Dropbox (Aguirre-Brainard Lab)'];
+                    end
                 otherwise
                     baseDir = ['/Users/' sysInfo.userShortName '/Dropbox (Aguirre-Brainard Lab)'];
             end
@@ -57,6 +63,7 @@ if (exist('GetComputerInfo','file'))
     % These preferences have to do with the RadiometerChecks section of the
     % BrainardLabToolbox
     setpref(toolboxName,'RadiometerChecksDir',fullfile(baseDir,'MELA_admin','RadiometerChecks'));
+    
 end
 
 %% ColorMaterialModel preferences

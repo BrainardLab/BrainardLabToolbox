@@ -35,9 +35,9 @@ classdef PR650dev < Radiometer
         function obj = PR650dev(varargin)  
             
             parser = inputParser;
-            parser.addParamValue('verbosity',   1);
-            parser.addParamValue('devicePortString',  []);
-            parser.addParamValue('emulateHardware', false);
+            parser.addParameter('verbosity',   1);
+            parser.addParameter('devicePortString',  []);
+            parser.addParameter('emulateHardware', false);
             % Execute the parser
             parser.parse(varargin{:});
             % Create a standard Matlab structure from the parser results.
