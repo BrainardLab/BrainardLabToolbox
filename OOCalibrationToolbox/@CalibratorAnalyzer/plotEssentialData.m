@@ -101,11 +101,11 @@ function plotEssentialData(obj, figureGroupIndex, gridDims)
     % end
 
     % Define the file name and full path for saving
-    jpgFilename = fullfile(obj.plotsExportsFolder, 'Essential_Data.jpg');
+    pdfFilename = fullfile(obj.plotsExportsFolder, 'Essential_Data.pdf');
     warning('off', 'MATLAB:print:ExportExcludesUI');   % Turn off the UI warning for export
 
     % Save the whole figure as a JPG image
-    exportgraphics(hFig, jpgFilename, 'Resolution', 150);
+    exportgraphics(hFig, pdfFilename, 'ContentType', 'vector');
 
 end
 

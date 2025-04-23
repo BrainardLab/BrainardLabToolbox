@@ -54,10 +54,10 @@ function plotLinearityCheckData(obj, figureGroupIndex, gridDims)
     plotSpectralAditivityData(obj, figureGroupIndex, hPanel, pos);
 
     % Define the file name and full path for saving
-    jpgFilename = fullfile(obj.plotsExportsFolder, 'Linearity_Check_Data.jpg');
+    pdfFilename = fullfile(obj.plotsExportsFolder, 'Linearity_Check_Data.pdf');
 
     % Save the whole figure as a JPG image
-    exportgraphics(hFig, jpgFilename, 'Resolution', 150);
+    exportgraphics(hFig, pdfFilename, 'ContentType', 'vector');
 
 end
 

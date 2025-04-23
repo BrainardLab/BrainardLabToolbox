@@ -77,11 +77,11 @@ if all(nDevices == 3) && numFiles == 3 % Only create this plot if there are 3 ca
     filenameNoExt = erase(filenameWithExt, '.mat');
 
     % Define the file name and full path for saving
-    jpgFilename = fullfile(obj.plotsExportsFolder{1}, ['CompareGamma_with_' filenameNoExt '_plus.jpg']);
+    pdfFilename = fullfile(obj.plotsExportsFolder{1}, ['CompareGamma_with_' filenameNoExt '_plus.pdf']);
     % 'plus' indicates that we are comparing more than two files
 
     % Save the whole figure as a JPG image
-    exportgraphics(hFig, jpgFilename, 'Resolution', 150);
+    exportgraphics(hFig, pdfFilename, 'ContentType', 'vector');
 
 end
 

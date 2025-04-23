@@ -97,10 +97,10 @@ function plotCalibrationComparison(obj, figureGroupIndex, gridDims)
         filenameNoExt = erase(filenameWithExt, '.mat'); 
 
         % Define the file name and full path for saving
-        jpgFilename = fullfile(obj.plotsExportsFolder{1}, ['Compare_with_' filenameNoExt '.jpg']);
+        pdfFilename = fullfile(obj.plotsExportsFolder{1}, ['Compare_with_' filenameNoExt '.pdf']);
 
         % Save the whole figure as a JPG image
-        exportgraphics(hFig, jpgFilename, 'Resolution', 150);
+        exportgraphics(hFig, pdfFilename, 'ContentType', 'vector');
 
     else   % If comparing more than two files
 
@@ -109,11 +109,11 @@ function plotCalibrationComparison(obj, figureGroupIndex, gridDims)
         filenameNoExt = erase(filenameWithExt, '.mat'); 
 
         % Define the file name and full path for saving
-        jpgFilename = fullfile(obj.plotsExportsFolder{1}, ['Compare_with_' filenameNoExt '_plus.jpg']);
+        pdfFilename = fullfile(obj.plotsExportsFolder{1}, ['Compare_with_' filenameNoExt '_plus.pdf']);
         % 'plus' indicates that we are comparing more than two files
 
         % Save the whole figure as a JPG image
-        exportgraphics(hFig, jpgFilename, 'Resolution', 150);
+        exportgraphics(hFig, pdfFilename, 'ContentType', 'vector');
 
     end
 
