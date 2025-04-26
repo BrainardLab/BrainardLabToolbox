@@ -91,7 +91,9 @@ static commandEntry commandDictionary[] = {
     { "SM SyncMode 3",         "setSyncMode3",          28,   2},
     { "SM SyncMode 4",         "setSyncMode4",          28,   2},
     { "SM SyncMode 5",         "setSyncMode5",          28,   2},
-    { "RS SyncMode",           "getSyncMode",           25,   2}, 
+    { "RS SyncMode",           "getSyncMode",           25,   1}, 
+    { "RS SyncFreq",           "getSyncFrequency",      28,   1},
+    { "SM SyncFreq",           "setSyncFrequency",      28,   2},
     { "E",                     "toggleEcho",            -1,   2},
     { "M",                     "measure",               18,   25},
     { "RM Spectrum",           "retrieve measurement: spectrum",  2249,   3},
@@ -112,10 +114,6 @@ int pollCR250PortUsingMethod1(int *deviceHandle, int expectedCharsNum, int timeO
 int pollCR250Port(int *deviceHandle, int expectedCharsNum, int timeOutSeconds, int sleepTimeInMilliseconds, int *timedOut, char  *resultsBuffer, int resultsBufferLength, int *bytesRead);
 
 /* Helper method definitions */
-void formN5command(char *alignedStreamBuffer, int offset, char *N5command);
-void decodeXYZdata(char *response, float *bigX, float *bigY, float *bigZ, float *xChroma, float *yChroma, float *YLum, int *redRange, int *greenRange, int *blueRange);
-float string3ToFloat(char *response, int charIndex);
-void parseRange(unsigned char range, int out[3]);
 int  timeval_subtract(struct timeval *result, struct timeval *t2, struct timeval *t1);
 void timeval_print(struct timeval *tv);
 
@@ -324,7 +322,7 @@ void mexFunction(int nlhs,      /* number of output (return) arguments */
             // Check whether the second input argument is a string
 			char commandName[256];
 			if (mxIsChar(prhs[1]) != 1) {
-        		mexErrMsgTxt("CR250: Command name must be a string, e.g., 'SerialNo and Model'.");
+        		mexErrMsgTxt("CR250: Command name must be a string, e.g., 'RC Model'.");
         	}
             
             // Get the command string (second input argument)
@@ -345,6 +343,14 @@ void mexFunction(int nlhs,      /* number of output (return) arguments */
 				mexErrMsgTxt(errorMessage);
             }
            
+            if (strcmp(commandName, "SM SyncFreq") == 0) {
+                // Get the frequency, in milliHz (third input argument)
+                double syncFrequencyHz;
+    		    syncFrequencyHz = (double)((int) mxGetScalar(prhs[2]))/(double)(1000);
+                sprintf(commandName, "%s %2.2f", commandName, syncFrequencyHz);
+                mexPrintf("Will send command: %s\n", commandName);
+            }
+
             /* Simply clear the port in case there is stuff from a previous operation */
             *status = readCR250Port(&CR250_devHandle, &inputBuffer[0], &inputBufferSize);
             if (*status == -1) {
@@ -424,34 +430,6 @@ void mexFunction(int nlhs,      /* number of output (return) arguments */
            
 }
 
-
-void formN5command(char *alignedStreamBuffer, int offset, char *N5command)
-{
-    N5command[0] = 'N';
-    N5command[1] = '5';
-          
-    int k;
-    k = 2;
-    // X
-    N5command[k] = alignedStreamBuffer[offset+6];  k++;
-    N5command[k] = alignedStreamBuffer[offset+9];  k++;
-    N5command[k] = alignedStreamBuffer[offset+12]; k++;
-    // Y
-    N5command[k] = alignedStreamBuffer[offset+15]; k++;
-    N5command[k] = alignedStreamBuffer[offset+18]; k++;
-    N5command[k] = alignedStreamBuffer[offset+21]; k++;
-    // Z
-    N5command[k] = alignedStreamBuffer[offset+24]; k++;
-    N5command[k] = alignedStreamBuffer[offset+27]; k++;
-    N5command[k] = alignedStreamBuffer[offset+30]; k++;
-    // Range
-    N5command[k] = alignedStreamBuffer[offset+33]; k++;
-    // Error
-    N5command[k] = alignedStreamBuffer[offset+36]; k++;
-    N5command[k] = alignedStreamBuffer[offset+39]; k++;
-    N5command[k] = alignedStreamBuffer[offset+42]; k++;
-                    
-}
 
 
 /* ------------------------------------------------------------------------
@@ -851,113 +829,10 @@ int updateCR250PortSettings(int *deviceHandle, int speed, int wordSize, int pari
     //setBlocking(deviceHandle, 0);                // set no blocking
     setBlocking(deviceHandle, 1);                // set yes blocking
     return (0);
-
-    	
-}
-
-float string3ToFloat(char *response, int charIndex)
-{
-	char subString[3];
-	int i;
-	for (i=charIndex; i < charIndex + 3; i++)
-		subString[i-charIndex] = response[i]; 	
- 		
-	int byte2 = (int)subString[0];
-	int byte1 = (int)subString[1];
-	int byte0 = (int)subString[2];
-    int sign;
-	
-	/* first bit is sign */
-	if (byte2 > 127) { 
-		byte2 = byte2 - 128;
-		sign = -1;
-	}
-	else 
-		sign = 1;
-
-	double fraction = byte2 * 256 + byte1;
-	fraction = sign * fraction / 256;
-	
-	/* correction for the fact that the K_Float was off by a factor of 2, therefire is is 65536, not 32768 */
-	fraction = fraction / 256;
-
-	/* 2's complement exponent */
-	if (byte0 > 128)
-		byte0 = byte0 - 256;
-
-	float kFloat = fraction * pow(2.0, byte0);
-	return(kFloat);	
 }
 
 
-void parseRange(unsigned char range, int out[3]) 
-{
-	int i;
-   	for (i = 0; i < 3; ++i) {
-        	out[i] = ((1 << (7 - i)) & range) ? 1 : 0;
-    }
-    range &= 0x1f;
 
-    for (i = 2; i >= 0; --i) {
-        out[i] += 2 * (range % 3);
-        range /= 3;
-    }
-
-    /* increment to be 1-6 not 0-5 */
-    for (i = 0; i < 3; ++i) {
-        ++out[i];
-    }
-}
-
-void decodeXYZdata(char *response, float *bigX, float *bigY, float *bigZ, float *xChroma, float *yChroma, float *YLum, int *redRange, int *greenRange, int *blueRange)
-{
-	int charIndex;
-
-	/* Decode X */
-	charIndex = 2;
-	*bigX = string3ToFloat(response, charIndex);
-
-	/* Decode Y */
-	charIndex = 5;
-	*bigY = string3ToFloat(response, charIndex);
-
-	/* Decode Z */
-	charIndex = 8;
-	*bigZ = string3ToFloat(response, charIndex);
-
-    float sum = (*bigX) + (*bigY) + (*bigZ);
-	*xChroma = *bigX / sum;
-    *yChroma = *bigY / sum;
-    *YLum    = *bigY;
-
-	/* Decode range */
-    int ranges[3];
-    parseRange((unsigned char)response[11], ranges);
-    *redRange   = ranges[0];
-	*greenRange = ranges[1];
-	*blueRange  = ranges[2];
-
-	/* Decode Error */
-	char errorCode = response[13];	
-	if (strncmp(&errorCode,"L",1) == 0)
-		mexPrintf(">>>>>>>>>>>>>>> error code: AIMING LIGHTS\n");
-	else if (strncmp(&errorCode,"u",1) == 0)
-       	mexPrintf(">>>>>>>>>>>>>>> error code: BOTTOM_UNDER_RANGE\n");
-	else if (strncmp(&errorCode,"v",1) == 0)
-		mexPrintf(">>>>>>>>>>>>>>> error code: TOP_OVER_RANGE\n");
-	else if (strncmp(&errorCode,"w",1) == 0)
-		mexPrintf(">>>>>>>>>>>>>>> error code: OVER_HIGH_RANGE\n");
-	else if (strncmp(&errorCode,"t",1) == 0)
-		mexPrintf(">>>>>>>>>>>>>>> error code: BLACK_ZERO\n");
-	else if (strncmp(&errorCode,"s",1) == 0) 
-		mexPrintf(">>>>>>>>>>>>>>> error code: BLACK_OVERDRIVE\n");
-	else if (strncmp(&errorCode,"b",1) == 0)
-		mexPrintf(">>>>>>>>>>>>>>> error code: BLACK_EXCESSIVE\n");
-	else if (strncmp(&errorCode,"X",1) == 0) 
-		mexPrintf(">>>>>>>>>>>>>>> error code: FIRMWARE\n");
-	else if (strncmp(&errorCode,"B",1) == 0) 
-		mexPrintf(">>>>>>>>>>>>>>> error code: FIRMWARE\n");
-}
 
 /* Return 1 if the difference is negative, otherwise 0.  */
 int timeval_subtract(struct timeval *result, struct timeval *t2, struct timeval *t1)

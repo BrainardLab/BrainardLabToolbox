@@ -97,13 +97,13 @@ classdef CR250device < handle
                 end
             end
 
-            obj.devicePortString
-            pause
-            obj.measurementTypeToRetrieve = 'spectrum';
 
+            % Open the device
             obj.open();
-            obj.syncMode = p.Results.syncMode;
 
+            % Set default properties
+            obj.syncMode = p.Results.syncMode;
+            obj.measurementTypeToRetrieve = 'spectrum';
             obj.deviceConfig();
 
         end  % Constructor

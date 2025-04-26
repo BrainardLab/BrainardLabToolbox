@@ -1,13 +1,13 @@
-% Method to retrieve the current syncMode
+% Method to retrieve the current manual SYNC frequency
 
 %  History:
 %    April 2025  NPC  Wrote it
 
 
-function [status, response] = retrieveCurrentSyncMode(obj, showFullResponse)
+function [status, response] = retrieveCurrentManualSyncFrequency(obj, showFullResponse)
 
     % Retrieve the sync mode
-    commandID = sprintf('RS SyncMode');
+    commandID = sprintf('RS SyncFreq');
     [status, response] = CR250_device('sendCommand', commandID);
 
     if (status == 0)
@@ -16,17 +16,14 @@ function [status, response] = retrieveCurrentSyncMode(obj, showFullResponse)
             [parsedResponse, fullResponse, responseIsOK] = obj.parseResponse(response, commandID);
             
             if (~responseIsOK)
-                fprintf(2, 'Device response to retrieving the SYNC mode is NOT OK !!\n')
+                fprintf(2, 'Device response to retrieving the SYNC frequency is NOT OK !!\n')
             end
 
             fprintf('\n---> DEVICE_RESPONSE to ''%s'' command has %d lines', commandID, numel(parsedResponse));
             for iResponseLine = 1:numel(parsedResponse)
                 fprintf('\n\tLine-%d: ''%s''', iResponseLine, parsedResponse{iResponseLine});
             end
-
-            if (showFullResponse) && (~strcmp(obj.verbosity, 'min'))
-                fprintf('\nFull response: ''%s''.', fullResponse);
-            end
+            fprintf('\n');
         end
     elseif (status ~= 0)
         fprintf(2, 'Command failed!!!. Status = %d!!!', status);

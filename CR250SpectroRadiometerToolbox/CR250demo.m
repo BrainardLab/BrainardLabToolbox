@@ -17,6 +17,7 @@ function CR250demo(mode, argument)
         'testOpen' ...
         'testToggleEcho' ...
         'testGetDeviceInfo' ...
+        'testSetCustomSyncFrequency' ...
         'setMinVerbosity' ...
         'setMaxVerbosity' ...
         'setDefaultVerbosity' ...
@@ -49,18 +50,26 @@ function CR250demo(mode, argument)
 
         case 'testSetSyncMode'
             % Available syncModeNames
-            % - 'none'
-            % - 'auto'
-            % - 'manual'
-            % - 'NTSC'
-            % - 'PAL'
-            % - 'CINEMA'
+            % - 'none'    % ONLY when measuring a constant light source with no AC components. NEVER for displays
+            % - 'auto'    % NOT AVAILABLE in CR250
+            % - 'manual'  % Allows the user to select the frequency of the light signal (in Hz, between 10 Hz and 10 kHz)
+            % - 'NTSC'    % Automatically detect the sync frequency for NSTSC displays (60 Hz)
+            % - 'PAL'     % Automatically detect the sync frequency for PAL displays (50 Hz)
+            % - 'CINEMA'  % Automatically detect the sync frequency for CINEMA displays (48 Hz)
             if (nargin == 2)
                 syncModeName = argument;
             else
                 syncModeName = 'none';
             end
             testSetDeviceSyncMode(syncModeName);
+
+        case 'testSetCustomSyncFrequency'
+            if (nargin == 2)
+                syncFrequencyHz = argument;
+            else
+                error('Must pass a second argument which is the SYNC frequency between 10Hz and 10KHz');
+            end
+            testSetDeviceCustomSyncFrequency(syncFrequencyHz);
 
         case 'testGetSyncMode'
             % This does not return anything for some reason
@@ -154,6 +163,25 @@ function testTakeTheMeasurement(showFullResponse)
     disp(doneText);
 end
 
+function testSetDeviceCustomSyncFrequency(syncFrequencyHz)
+    % Set the sync mode
+    commandID = sprintf('SM SyncFreq');
+    syncFrequencyHzMilliHz = int32((1000*syncFrequencyHz));
+    [status, response] = CR250_device('sendCommand', commandID, syncFrequencyHzMilliHz);
+
+    if ((status == 0) && (~isempty(response) > 0))
+        % Parse response
+        [parsedResponse, fullResponse] = parseResponse(response, commandID);
+        fprintf('\n---> DEVICE_RESPONSE to ''%s %d'' command has %d lines', commandID, syncFrequencyHzMilliHz, numel(parsedResponse));
+        for iResponseLine = 1:numel(parsedResponse)
+            fprintf('\n\tLine-%d: ''%s''', iResponseLine, parsedResponse{iResponseLine});
+        end
+    elseif (status ~= 0)
+        fprintf(2, 'Command failed!!!. Status = %d!!!', status);
+    end
+
+end
+
 function testSetDeviceSyncMode(syncModeName)
     validSyncModeNames = {...
         'none' ...
@@ -197,7 +225,7 @@ function testSetDeviceSyncMode(syncModeName)
         fprintf(2, 'Command failed!!!. Status = %d!!!', status);
     end
 
-    testGetDeviceSyncMode()
+    testGetDeviceSyncMode();
 end
 
 function testGetDeviceSyncMode()

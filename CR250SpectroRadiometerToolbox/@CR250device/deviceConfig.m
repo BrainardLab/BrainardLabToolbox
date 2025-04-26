@@ -22,5 +22,8 @@ function deviceConfig(obj)
     obj.retrieveDeviceInfo('RS Aperture', showFullResponse);
     obj.retrieveDeviceInfo('RS SyncMode', showFullResponse);
 
+    obj.retrieveCurrentSyncMode(showFullResponse);
+    obj.retrieveCurrentManualSyncFrequency(showFullResponse);
+
     obj.verbosity = previousVerbosity;
 end

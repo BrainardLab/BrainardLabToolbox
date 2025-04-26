@@ -4,8 +4,6 @@ function status = setDeviceSyncMode(obj, val)
         switch (val)
             case 'None'
                 syncModeID = 0;
-            case 'Auto'
-                syncModeID = 1;
             case 'Manual'
                 syncModeID = 2;
             case 'NTSC'
