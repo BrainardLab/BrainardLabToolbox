@@ -23,6 +23,10 @@ function [status, response] = retrieveCurrentSyncMode(obj, showFullResponse)
             for iResponseLine = 1:numel(parsedResponse)
                 fprintf('\n\tLine-%d: ''%s''', iResponseLine, parsedResponse{iResponseLine});
             end
+            if (numel(parsedResponse) == 1)
+                    theResponseString = parsedResponse{1};
+                    obj.syncMode = theResponseString;
+            end
 
             if (showFullResponse) && (~strcmp(obj.verbosity, 'min'))
                 fprintf('\nFull response: ''%s''.', fullResponse);

@@ -23,6 +23,11 @@ function [status, response] = retrieveCurrentManualSyncFrequency(obj, showFullRe
             for iResponseLine = 1:numel(parsedResponse)
                 fprintf('\n\tLine-%d: ''%s''', iResponseLine, parsedResponse{iResponseLine});
             end
+
+            if (numel(parsedResponse) == 1)
+                    theResponseString = parsedResponse{1};
+                    obj.manualSyncFrequency = str2num(strrep(theResponseString, 'Hz', ''));
+            end
             fprintf('\n');
         end
     elseif (status ~= 0)

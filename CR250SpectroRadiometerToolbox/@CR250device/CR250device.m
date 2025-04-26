@@ -80,7 +80,7 @@ classdef CR250device < handle
             p.addParameter('name', 'CR250', @ischar);
             p.addParameter('devicePortString', '',  @(x)(isempty(x)||ischar(x)));
             p.addParameter('verbosity', 'min', @(x)(ismember(x, obj.validVerbosityLevels)));
-            p.addParameter('syncMode', 'Manual', @(x)(ismember(x, obj.validSyncModes)));
+            p.addParameter('syncMode', 'None', @(x)(ismember(x, obj.validSyncModes)));
   
             % Parse input
             p.parse(varargin{:});
@@ -124,6 +124,11 @@ classdef CR250device < handle
             end
         end % set.manualSyncFrequency;
 
+        function val = get.manualSyncFrequency(obj)
+            showFullResponse = ~true;
+            obj.retrieveCurrentManualSyncFrequency(showFullResponse);
+            val = obj.manualSyncFrequency;
+        end % get.manualSyncFrequency
 
         % Setter for syncMode
         function set.syncMode(obj, val)
@@ -137,6 +142,8 @@ classdef CR250device < handle
 
         % Getter for syncMode
         function val = get.syncMode(obj)
+            showFullResponse = false;
+            retrieveCurrentSyncMode(obj, showFullResponse);
             val = obj.syncMode();
         end % get.syncMode
 
