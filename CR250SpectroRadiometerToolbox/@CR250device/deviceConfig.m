@@ -18,11 +18,13 @@ function deviceConfig(obj)
     obj.retrieveDeviceInfo('RC Filter', showFullResponse);
     obj.retrieveDeviceInfo('RC SyncMode', showFullResponse);
     
+    
     % Current settings 
     obj.retrieveDeviceInfo('RS Aperture', showFullResponse);
     obj.retrieveDeviceInfo('RS SyncMode', showFullResponse);
 
     obj.retrieveCurrentSyncMode(showFullResponse);
+    obj.retrieveCurrentSpeedMode(showFullResponse);
     obj.retrieveCurrentManualSyncFrequency(showFullResponse);
 
     obj.verbosity = previousVerbosity;

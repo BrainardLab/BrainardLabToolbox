@@ -25,6 +25,10 @@ function [parsedResponse, fullResponse, responseIsOK] = parseResponse(obj, respo
     % find how many lines is contained in the response
     indexOfRETURNkeys = find(response == 13);
 
+    if (isempty(indexOfRETURNkeys))
+        indexOfRETURNkeys = numel(response)+1;
+    end
+
     iBegin = 1;
     parsedResponse = {};
     for responseLine = 1:numel(indexOfRETURNkeys)
