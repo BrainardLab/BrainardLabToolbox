@@ -52,6 +52,7 @@ classdef CR250device < handle
         name;
         verbosity;
         syncMode;
+        manualSyncFrequency;
         showDeviceFullResponse;
         measurementTypeToRetrieve;
     end
@@ -100,6 +101,22 @@ classdef CR250device < handle
             obj.deviceConfig();
 
         end  % Constructor
+
+
+        % Setter for manualSyncFrequency
+        function set.manualSyncFrequency(obj, val)
+            % First set the sync mode to manual
+            status = obj.setDeviceSyncMode('Manual');
+            
+            if (status == 0)
+                status = obj.setDeviceManualSyncFrequency(val);
+                if (status == 0)
+                    obj.manualSyncFrequency = val;
+                else
+                    fprintf(2, 'Failed to set the device manual SYNC frequency to %2.2f\n', val);
+                end
+            end
+        end % set.manualSyncFrequency;
 
 
         % Setter for syncMode
@@ -160,7 +177,10 @@ classdef CR250device < handle
         retrieveDeviceInfo(obj, commandID, showFullResponse);
 
         % Method to retrieve the current syncMode
-        [status, response] = retrieveCurrentSyncMode(obj);
+        [status, response] = retrieveCurrentSyncMode(obj, showFullResponse);
+
+        % Method to retrieve the current manual SYNC frequency
+        [status, response] = retrieveCurrentManualSyncFrequency(obj, showFullResponse);
 
     end % Public methods
 
