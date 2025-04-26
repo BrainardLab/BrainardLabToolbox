@@ -79,6 +79,9 @@ function CR250demo(mode, argument)
             showFullResponse = true;
             testTakeTheMeasurement(showFullResponse);
 
+        case 'testRetrieveRadiometricUnits'
+            testRetrieveRadiometricUnits()
+
         case 'testRetrieveMeasurement'
             if (nargin == 2)
                 measurementType = argument;
@@ -116,6 +119,13 @@ end
 
 %% ----- MEASUREMENT FUNCTIONALITY
 
+function testRetrieveRadiometricUnits()
+    commandID = sprintf('RM Radiometric');
+    [status, response] = CR250_device('sendCommand', commandID);
+    response
+    status
+end
+
 function  testRetrieveTheMeasurement(measurementType)
     validMeasurementTypes = { ...
         'spectrum' ...
@@ -131,7 +141,6 @@ function  testRetrieveTheMeasurement(measurementType)
     end
 
     % Retrieve the measurement
-    showFullResponse = true;
     % Retrieve the data
     [status, response] = CR250_device('sendCommand', retrieveDataCommandID);
     response
@@ -372,16 +381,7 @@ end
     
 %%  COMPILE MEX DRIVER
 function compileMexDriver()
-    disp('Compiling CR250 device driver ...');
-    currentDir = pwd;
-    programName = 'CR250demo.m';
-    d = which(programName);
-    k = findstr(d, programName);
-    d = d(1:k-1);
-    cd(d);
-    mex('CR250_device.c');
-    cd(currentDir);
-    disp('CR250 device MEX driver compiled sucessfully!');
+    CR250device.compileMexDriver()
 end % compileMexDriver()
 
 

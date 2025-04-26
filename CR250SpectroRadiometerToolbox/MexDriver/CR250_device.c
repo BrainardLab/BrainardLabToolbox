@@ -91,11 +91,17 @@ static commandEntry commandDictionary[] = {
     { "SM SyncMode 3",         "setSyncMode3",          28,   2},
     { "SM SyncMode 4",         "setSyncMode4",          28,   2},
     { "SM SyncMode 5",         "setSyncMode5",          28,   2},
-    { "RS SyncMode",           "getSyncMode",           -1,   1}, 
-    { "RS SyncFreq",           "getSyncFrequency",      27,   1},
-    { "SM SyncFreq",           "setSyncFrequency",      28,   2},
+    { "RS SyncMode",           "getCurrentSyncMode",      -1,   1}, 
+    { "RS SyncFreq",           "getCurentSyncFrequency",  27,   1},
+    { "SM SyncFreq",           "setSyncFrequency",       28,   2},
+    { "SM Speed 0",            "setSlowSpeedMode",       25,   2},
+    { "SM Speed 1",            "setNormalSpeedMode",     25,   2},
+    { "SM Speed 2",            "setFastSpeedMode",       25,   2},
+    { "SM Speed 3",            "set2XFastSpeedMode",     25,   2},
+    { "RS Speed",              "getCurentSpeedMode",     25,   2},
     { "E",                     "toggleEcho",            -1,   2},
     { "M",                     "measure",               18,   25},
+    { "RM Radiometric",       "retrieve radiometric units", 43, 2},
     { "RM Spectrum",           "retrieve measurement: spectrum",  2249,   3},
 };
 
@@ -487,7 +493,7 @@ int pollCR250Port(int *deviceHandle, int expectedCharsNum, int timeOutSeconds, i
                     }
             		*bytesRead += inputBufferSize;
                     if ((*bytesRead != expectedCharsNum) && (expectedCharsNum != -1)) {
-                        if (verbosityLevel >= 5) {
+                        if (verbosityLevel >= 10) {
             		        mexPrintf("bytesRead:%d (%s) (total:%d, expected:%d)\n", inputBufferSize, inputBuffer, *bytesRead, expectedCharsNum);
                         }
                     }

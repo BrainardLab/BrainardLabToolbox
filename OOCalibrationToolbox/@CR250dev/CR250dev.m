@@ -1,5 +1,7 @@
-% Subclass of @Radiometer, specific to the CR250
-% There is also a standalone implementation, @CR250device.
+% Subclass of @Radiometer, specific to the CR250.
+% This is the class that is used for all calibrations
+% There is also a standalone implementation, @CR250device, which is used
+% with the CR250interactive.mlapp
 %
     
 %  History:

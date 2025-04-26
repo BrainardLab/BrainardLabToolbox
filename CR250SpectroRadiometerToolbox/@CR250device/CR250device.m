@@ -1,8 +1,10 @@
 classdef CR250device < handle
     % Class to manage a CR250 spectroradiometer. 
-    % This is a standalone implementation. There is also a @CR250dev
-    % which is a subclass of @Radiometer, for consistency with the other
-    % radiometers
+    % This is a standalone implementation. It exposes a lot of
+    % functionality of the CR250, and is used as a testbed for developing
+    % the MEX driver.
+    % There is also a @CR250dev class which is a subclass of @Radiometer, 
+    % which has a less functionality and which is what is used for all calibrations.
     %
     % Syntax:
     %   % Instantiate
@@ -35,6 +37,13 @@ classdef CR250device < handle
             'CINEMA' ...
         };
 
+        validSpeedModes = { ...
+            'Slow'    ... % for measuring very low light levels
+            'Normal'  ... % recommended for most measurements
+            'Fast'    ... % measuring medium light levels
+            '2x Fast'  ... % measuring high light levels
+        };
+
         validVerbosityLevels = {...
             'min' ...
             'max' ...
@@ -52,6 +61,7 @@ classdef CR250device < handle
         name;
         verbosity;
         syncMode;
+        speedMode;
         manualSyncFrequency;
         showDeviceFullResponse;
         measurementTypeToRetrieve;
@@ -81,7 +91,8 @@ classdef CR250device < handle
             p.addParameter('devicePortString', '',  @(x)(isempty(x)||ischar(x)));
             p.addParameter('verbosity', 'min', @(x)(ismember(x, obj.validVerbosityLevels)));
             p.addParameter('syncMode', 'None', @(x)(ismember(x, obj.validSyncModes)));
-  
+            p.addParameter('speedMode', 'Normal', @(x)(ismember(x, obj.validSpeedModes)));
+
             % Parse input
             p.parse(varargin{:});
             obj.name = p.Results.name;
@@ -103,6 +114,7 @@ classdef CR250device < handle
 
             % Set default properties
             obj.syncMode = p.Results.syncMode;
+            obj.speedMode = p.Results.speedMode;
             obj.measurementTypeToRetrieve = 'spectrum';
             obj.deviceConfig();
 
@@ -147,6 +159,24 @@ classdef CR250device < handle
             val = obj.syncMode();
         end % get.syncMode
 
+        % Setter for speedMode
+        function set.speedMode(obj, val)
+            status = obj.setDeviceSpeedMode(val);
+            if (status == 0)
+                obj.speedMode = val;
+            else
+                fprintf(2, 'Failed to set the device speedMode to %s\n', val);
+            end
+        end % set.speedMode
+
+        % Getter for speedMode
+        function val = get.speedMode(obj)
+            showFullResponse = false;
+            retrieveCurrentSpeedMode(obj, showFullResponse);
+            val = obj.speedMode();
+        end % get.speedMode
+
+
         % Setter for verbosity
         function set.verbosity(obj, val)
             if (ismember(val, obj.validVerbosityLevels))
@@ -180,17 +210,26 @@ classdef CR250device < handle
         % Method to conduct a measurement
         measure(obj);
 
+        % Method to retrieve the units of the radiometric data returned
+        retrieveRadiometricUnits(obj);
+
         % Method to retrieve a measurements
         [theSpectralSupport, theSpectrum] = retrieveMeasurement(obj);
 
         % Method to set the device sync mode
         status = setDeviceSyncMode(obj, val)
 
+        % Method to set the device speed mode
+        status = setDeviceSpeedMode(obj, val);
+
         % Method to query the CR250 for various infos
         retrieveDeviceInfo(obj, commandID, showFullResponse);
 
         % Method to retrieve the current syncMode
         [status, response] = retrieveCurrentSyncMode(obj, showFullResponse);
+
+        % Method to retrieve the current speedMode
+        [status, response] = retrieveCurrentSpeedMode(obj, showFullResponse);
 
         % Method to retrieve the current manual SYNC frequency
         [status, response] = retrieveCurrentManualSyncFrequency(obj, showFullResponse);

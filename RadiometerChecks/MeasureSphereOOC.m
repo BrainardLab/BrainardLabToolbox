@@ -23,8 +23,7 @@ if (~ispref('BrainardLabToolbox','RadiometerChecksDir'))
     error('No ''BrainardLabToolbox:RadiometerChecksDir'' preference set.  Probably you need to update your BrainardLabToolbox local hook file.')
 end
 
-radiometerChecksDir = getpref('BrainardLabToolbox','RadiometerChecksDir')
-exist(radiometerChecksDir)
+radiometerChecksDir = getpref('BrainardLabToolbox','RadiometerChecksDir');
 if (~exist(radiometerChecksDir,'dir'))
     error(['Directory ' radiometerChecksDir ' does not exist.  Something is not set up correctly.']);
 end
