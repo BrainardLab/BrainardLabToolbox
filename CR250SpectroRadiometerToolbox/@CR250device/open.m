@@ -11,6 +11,10 @@ function open(obj)
 
     % ------ OPEN THE CR250 device ----------------------------------------------
     status = CR250_device('close');
+
+    % Pause
+    pause(obj.commandTriggerDelay);
+    
     status = CR250_device('open', obj.devicePortString);
     if (status == 0)
         disp('Opened CR250 port');
@@ -21,6 +25,9 @@ function open(obj)
     elseif (status == -99)
         disp('Invalided serial port');
     end
+
+    % Pause
+    pause(obj.commandTriggerDelay);
 
     % ----- SETUP DEFAULT COMMUNICATION PARAMS ----------------------------
     speed     = 115200;

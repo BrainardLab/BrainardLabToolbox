@@ -17,6 +17,10 @@ function status = setDeviceSyncMode(obj, val)
         fprintf(2,'Incorrect sync mode:''%s''. Type CR250device.validSyncModes to see all available modes.', val);
     end
     
+    
+    % Pause
+    pause(obj.commandTriggerDelay);
+    
     % Set the sync mode
     commandID = sprintf('SM SyncMode %d', syncModeID);
     [status, response] = CR250_device('sendCommand', commandID);

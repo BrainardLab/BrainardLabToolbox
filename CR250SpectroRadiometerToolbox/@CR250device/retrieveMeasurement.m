@@ -20,6 +20,10 @@ function [theSpectralSupport, theSpectrum] = retrieveMeasurement(obj)
             fprintf(2, 'Unknown measurement type: ''%s''.', measurementType);
     end
 
+    % Pause
+    pause(obj.commandTriggerDelay);
+
+    
     % Retrieve the measurement
     [status, response] = CR250_device('sendCommand', commandID);
 

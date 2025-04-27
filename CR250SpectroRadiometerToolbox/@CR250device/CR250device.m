@@ -1,28 +1,71 @@
 classdef CR250device < handle
-    % Class to manage a CR250 spectroradiometer. 
-    % This is a standalone implementation. It exposes a lot of
-    % functionality of the CR250, and is used as a testbed for developing
-    % the MEX driver.
-    % There is also a @CR250dev class which is a subclass of @Radiometer, 
-    % which has a less functionality and which is what is used for all calibrations.
-    %
-    % Syntax:
-    %   % Instantiate
-    %   myCR250 = CR250device();
-    %
-    %   % Instantiate
-    %   myCR250 = CR250device(...
-    %       'devicePortString', '/dev/someTTY', ...
-    %       'verbosity', 'max');
-    %
-    %   % Get device configuration
-    %   myCR250.deviceConfig();
-    %
+% Class to manage a CR250 spectroradiometer. 
+% This is a standalone implementation. It exposes a lot of
+% functionality of the CR250, and is used as a testbed for developing
+% the MEX driver.
+% There is also a @CR250dev class which is a subclass of @Radiometer, 
+% which has a less functionality and which is what is used for all calibrations.
+%
 
-    %
-    
-    %  History:
-    %    April 13, 2025  NPC  Wrote it
+%  History:
+%    April 13, 2025  NPC  Wrote it
+
+% Examples:
+%{
+    % Compile the MEX driver
+    CR250device.compileMexDriver();
+%}
+
+%{
+    % Open the CR250
+    theCR250dev = CR250device(...
+        'verbosity', 'min');
+
+    % Set the verbosity to maximum
+    %theCR250dev.verbosity = 'max';
+
+    % Get some info on the device: range of exposureTimes (milliseconds)
+    exposureRangeMilliseconds = theCR250dev.exposureTimeRange
+
+    % See what exposureModes are supported
+    theCR250dev.validExposureModes
+
+    % Set the exposure model to 'fixed' (meaning fixed duration)
+    theCR250dev.exposureMode = 'Fixed';
+
+    % And set the fixed exposure time to 250 msec
+    theCR250dev.fixedExposureTimeMilliseconds = 250;
+
+    % See what syncModes are supported
+    theCR250dev.validSyncModes
+
+    % Set the sync mode to NTSC
+    theCR250dev.syncMode = 'NTSC';
+
+    % Or set it to manual mode with a sync Frequency of 120 Hz;
+    theCR250dev.syncMode = 'Manual';
+    theCR250dev.manualSyncFrequency = 120.00;
+
+    % See what capture speed modes are supported
+    theCR250dev.validSpeedModes
+
+    % Set the capture speed to 'slow' (to measure a dim light source)
+    theCR250dev.speedMode = 'Slow';
+
+    % Conduct an SPD measurement. This will start measuring immediately (no delay)
+    theCR250dev.measure();
+
+    % Retrieve the SPD measurement
+    [theSpectralSupport, theSPD] = theCR250dev.retrieveMeasurement();
+
+    figure(1);
+    bar(theSpectralSupport, theSPD, 1);
+
+    % Close the CR250
+    theCR250dev.close()
+
+%}
+
 
     properties (Constant)
         validSyncModes = {...
@@ -59,6 +102,7 @@ classdef CR250device < handle
 
     % Public properties
     properties  (GetAccess=public, SetAccess=public)
+        commandTriggerDelay;
         name;
         verbosity;
         syncMode;
@@ -92,6 +136,7 @@ classdef CR250device < handle
             % Parse input
             p = inputParser;
             p.addParameter('name', 'CR250', @ischar);
+            p.addParameter('commandTriggerDelay', 0.3, @isnumeric);
             p.addParameter('devicePortString', '',  @(x)(isempty(x)||ischar(x)));
             p.addParameter('verbosity', 'min', @(x)(ismember(x, obj.validVerbosityLevels)));
             p.addParameter('syncMode', 'None', @(x)(ismember(x, obj.validSyncModes)));
@@ -101,6 +146,7 @@ classdef CR250device < handle
             % Parse input
             p.parse(varargin{:});
             obj.name = p.Results.name;
+            obj.commandTriggerDelay = p.Results.commandTriggerDelay;
             obj.devicePortString = p.Results.devicePortString;
             obj.verbosity = p.Results.verbosity;
             obj.showDeviceFullResponse = false;

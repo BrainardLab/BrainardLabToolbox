@@ -4,6 +4,10 @@
 %    April 2025  NPC  Wrote it
 
 function close(obj)
+
+    % Pause
+    pause(obj.commandTriggerDelay);
+
     status = CR250_device('close');
     if (status == 0)
         if (~strcmp(obj.verbosity, 'min'))

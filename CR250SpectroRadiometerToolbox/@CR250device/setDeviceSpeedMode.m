@@ -15,6 +15,9 @@ function status = setDeviceSpeedMode(obj, val)
         fprintf(2,'Incorrect speed mode:''%s''. Type CR250device.validSpeedModes to see all available modes.', val);
     end
     
+    % Pause
+    pause(obj.commandTriggerDelay);
+
     % Set the speed mode
     commandID = sprintf('SM Speed %d', speedModeID);
     [status, response] = CR250_device('sendCommand', commandID);

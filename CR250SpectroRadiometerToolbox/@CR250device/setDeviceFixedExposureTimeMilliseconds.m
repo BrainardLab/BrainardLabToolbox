@@ -5,6 +5,9 @@ function status = setDeviceFixedExposureTimeMilliseconds(obj, val)
     %    fprintf(2,'Manual sync frequency (%2.3f) is out of [10 Hz - 10 kHz] range\n', val);
     %end
     
+    % Pause for 1.5 seconds
+    pause(1.5);
+
     % Set the manual sync frequency mode
     commandID = sprintf('SM Exposure');
     exposureTimeMilliseconds = int32((val));

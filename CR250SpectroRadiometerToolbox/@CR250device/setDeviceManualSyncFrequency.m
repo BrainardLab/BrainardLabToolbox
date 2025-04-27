@@ -5,6 +5,9 @@ function status = setDeviceManualSyncFrequency(obj, val)
         fprintf(2,'Manual sync frequency (%2.3f) is out of [10 Hz - 10 kHz] range\n', val);
     end
     
+     % Pause
+    pause(obj.commandTriggerDelay);
+    
     % Set the manual sync frequency mode
     commandID = sprintf('SM SyncFreq');
     syncFrequencyMilliHz = int32((1000*val));

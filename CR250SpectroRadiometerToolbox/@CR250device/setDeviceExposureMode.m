@@ -11,6 +11,9 @@ function status = setDeviceExposureMode(obj, val)
         fprintf(2,'Incorrect exposure mode:''%s''. Type CR250device.validExposureModes to see all available modes.', val);
     end
     
+    % Pause for 1.5 seconds
+    pause(1.5);
+
     % Set the exposure mode
     commandID = sprintf('SM ExposureMode %d', exposureModeID);
     [status, response] = CR250_device('sendCommand', commandID);
