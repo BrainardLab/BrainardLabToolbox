@@ -14,7 +14,7 @@ function status = setDeviceSyncMode(obj, val)
                 syncModeID = 5;
         end % switch
     else
-        fprintf(2,'Incorrect sync mode:''%s''. Type CR250dev.validSyncModes to see all available modes.', val);
+        fprintf(2,'Incorrect sync mode:''%s''. Type CR250device.validSyncModes to see all available modes.', val);
     end
     
     % Set the sync mode
@@ -26,7 +26,9 @@ function status = setDeviceSyncMode(obj, val)
             % Parse response
             [parsedResponse, fullResponse] = obj.parseResponse(response, commandID);
             if (contains(fullResponse, 'No errors'))
-                fprintf('\nSuccessfully set device sync mode to ''%s''.', val);
+                if (~strcmp(obj.verbosity, 'min'))
+                    fprintf('\nSuccessfully set device sync mode to ''%s''.', val);
+                end
             elseif (contains(fullResponse, 'Invalid Sync Mode'))
                 fprintf(2,'\n-----------------------------------------------------------------');
                 fprintf(2,'\nFailed to set device sync mode to ''%s''.', val);

@@ -1,14 +1,14 @@
-% Method to set the device manual sync frequency
-function status = setDeviceManualSyncFrequency(obj, val)
-    if (val >= 10) && (val <= 10*1000)
-    else
-        fprintf(2,'Manual sync frequency (%2.3f) is out of [10 Hz - 10 kHz] range\n', val);
-    end
+% Method to set the device fixed exposure time (in milliseconds)
+function status = setDeviceFixedExposureTimeMilliseconds(obj, val)
+    %if (val >= 10) && (val <= 10*1000)
+    %else
+    %    fprintf(2,'Manual sync frequency (%2.3f) is out of [10 Hz - 10 kHz] range\n', val);
+    %end
     
     % Set the manual sync frequency mode
-    commandID = sprintf('SM SyncFreq');
-    syncFrequencyMilliHz = int32((1000*val));
-    [status, response] = CR250_device('sendCommand', commandID, syncFrequencyMilliHz);
+    commandID = sprintf('SM Exposure');
+    exposureTimeMilliseconds = int32((val));
+    [status, response] = CR250_device('sendCommand', commandID, exposureTimeMilliseconds);
 
     if (status == 0) 
         if (~isempty(response))
@@ -16,11 +16,11 @@ function status = setDeviceManualSyncFrequency(obj, val)
             [parsedResponse, fullResponse] = obj.parseResponse(response, commandID);
             if (contains(fullResponse, 'No errors'))
                 if (~strcmp(obj.verbosity, 'min'))
-                    fprintf('\nSuccessfully set device sync frequency to %2.3f Hz.', val);
+                    fprintf('\nSuccessfully set device exposure time to %2.0f milliseconds', val);
                 end
-            else %if (contains(fullResponse, 'Invalid Sync Mode'))
+            else  %if (contains(fullResponse, 'Invalid '))
                 fprintf(2,'\n-----------------------------------------------------------------');
-                fprintf(2,'\nFailed to set the SYNC frequency to %2.3f.', val);
+                fprintf(2,'\nFailed to set the device exposute time to %2.0f milliseconds.', val);
                 fprintf(2,'\n---> DEVICE_RESPONSE to ''%s'' command has %d lines', commandID, numel(parsedResponse));
                 for iResponseLine = 1:numel(parsedResponse)
                     fprintf(2,'\n\tLine-%d: ''%s''', iResponseLine, parsedResponse{iResponseLine});

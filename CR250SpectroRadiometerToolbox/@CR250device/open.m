@@ -7,7 +7,7 @@
 function open(obj)
 
     % ------ SET THE VERBOSITY LEVEL (1=minimum, 5=intermediate, 10=full)--
-    status = CR250_device('setVerbosityLevel', 10);
+    %status = CR250_device('setVerbosityLevel', 10);
 
     % ------ OPEN THE CR250 device ----------------------------------------------
     status = CR250_device('close');
@@ -30,7 +30,9 @@ function open(obj)
     
     status = CR250_device('updateSettings', speed, wordSize, parity,timeOut); 
     if (status == 0)
-        disp('Updated communication settings in CR250 port');
+        if (~strcmp(obj.verbosity, 'min'))
+            disp('Updated communication settings in CR250 port');
+        end
     elseif (status == -1)
         disp('Could not update settings in CR250 port');
     elseif (status == 1)

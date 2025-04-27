@@ -18,11 +18,7 @@ classdef CR250device < handle
     %   % Get device configuration
     %   myCR250.deviceConfig();
     %
-    %   % Set sync mode to manual
-    %   myCR250.syncMode = 'manual'
-    %  
-    %   % Measure a spectrum
-    %   myCR250.measure('spectrum');
+
     %
     
     %  History:
@@ -31,7 +27,7 @@ classdef CR250device < handle
     properties (Constant)
         validSyncModes = {...
             'None' ...
-            'Manual' ...
+            'Manual' ...   % Manual frequency: User can set a custom SYNC frequency in the range 10Hz - 10KHz
             'NTSC' ...
             'PAL' ...
             'CINEMA' ...
@@ -43,6 +39,11 @@ classdef CR250device < handle
             'Fast'    ... % measuring medium light levels
             '2x Fast'  ... % measuring high light levels
         };
+
+        validExposureModes = {
+            'Auto' ...    % automatic exposure mode
+            'Fixed' ...   % fixed exposure mode. User can set a custom exposure time in milliseconds
+            }
 
         validVerbosityLevels = {...
             'min' ...
@@ -61,8 +62,10 @@ classdef CR250device < handle
         name;
         verbosity;
         syncMode;
+        exposureMode;
         speedMode;
         manualSyncFrequency;
+        fixedExposureTimeMilliseconds;
         showDeviceFullResponse;
         measurementTypeToRetrieve;
     end
@@ -72,6 +75,7 @@ classdef CR250device < handle
         devicePortString;
         deviceSerialNum;
         firmware;
+        exposureTimeRange;
     end
 
     % Private properties
@@ -92,6 +96,7 @@ classdef CR250device < handle
             p.addParameter('verbosity', 'min', @(x)(ismember(x, obj.validVerbosityLevels)));
             p.addParameter('syncMode', 'None', @(x)(ismember(x, obj.validSyncModes)));
             p.addParameter('speedMode', 'Normal', @(x)(ismember(x, obj.validSpeedModes)));
+            p.addParameter('showInfo', false, @istrue);
 
             % Parse input
             p.parse(varargin{:});
@@ -116,8 +121,10 @@ classdef CR250device < handle
             obj.syncMode = p.Results.syncMode;
             obj.speedMode = p.Results.speedMode;
             obj.measurementTypeToRetrieve = 'spectrum';
-            obj.deviceConfig();
 
+            if (p.Results.showInfo)
+                obj.deviceConfig();
+            end
         end  % Constructor
 
 
@@ -138,9 +145,9 @@ classdef CR250device < handle
 
         function val = get.manualSyncFrequency(obj)
             showFullResponse = ~true;
-            obj.retrieveCurrentManualSyncFrequency(showFullResponse);
-            val = obj.manualSyncFrequency;
+            [~,~,val] = obj.retrieveCurrentManualSyncFrequency(showFullResponse);
         end % get.manualSyncFrequency
+
 
         % Setter for syncMode
         function set.syncMode(obj, val)
@@ -155,8 +162,7 @@ classdef CR250device < handle
         % Getter for syncMode
         function val = get.syncMode(obj)
             showFullResponse = false;
-            retrieveCurrentSyncMode(obj, showFullResponse);
-            val = obj.syncMode();
+            [~,~,val] = retrieveCurrentSyncMode(obj, showFullResponse);
         end % get.syncMode
 
         % Setter for speedMode
@@ -172,9 +178,55 @@ classdef CR250device < handle
         % Getter for speedMode
         function val = get.speedMode(obj)
             showFullResponse = false;
-            retrieveCurrentSpeedMode(obj, showFullResponse);
-            val = obj.speedMode();
+            [~, ~, val] = retrieveCurrentSpeedMode(obj, showFullResponse);
         end % get.speedMode
+
+
+        % Setter for exposureMode
+        function set.exposureMode(obj, val)
+            status = obj.setDeviceExposureMode(val);
+            if (status == 0)
+                obj.exposureMode = val;
+            else
+                fprintf(2, 'Failed to set the device exposure Mode to %s\n', val);
+            end
+        end % set.exposureMode
+
+        % Getter for exposureMode
+        function val = get.exposureMode(obj)
+            showFullResponse = false;
+            [~, ~, val] = retrieveCurrentExposureMode(obj, showFullResponse);
+        end % get.exposureMode
+
+
+        % Setter for fixedExposureTimeMilliseconds
+        function set.fixedExposureTimeMilliseconds(obj, val)
+            % First set the exposure mode to fixed
+            status = obj.setDeviceExposureMode('Fixed');
+
+            if (status == 0)
+                status = obj.setDeviceFixedExposureTimeMilliseconds(val);
+                if (status == 0)
+                    obj.fixedExposureTimeMilliseconds = val;
+                else
+                    fprintf(2, 'Failed to set the device fixed exposure time to %2.0f milliseconds\n', val);
+                end
+            end
+        end % set.fixedExposureTimeMilliseconds;
+
+        % Getter for fixedExposureTimeMilliseconds
+        function val = get.fixedExposureTimeMilliseconds(obj)
+            showFullResponse = ~true;
+            [~,~,val] = obj.retrieveCurrentFixedExposureTime(showFullResponse);
+        end % get.fixedExposureTimeMilliseconds
+
+
+        % Getter for exposureTimeRange
+        function val = get.exposureTimeRange(obj)
+            showFullResponse = ~true;
+            [~,~,minExposure, maxExposure] = obj.retrieveExposureTimeRange(showFullResponse);
+            val = [minExposure maxExposure];
+        end % get.minExposureTime
 
 
         % Setter for verbosity
@@ -219,20 +271,38 @@ classdef CR250device < handle
         % Method to set the device sync mode
         status = setDeviceSyncMode(obj, val)
 
+        % Method to set the device manual sync frequency
+        status = setDeviceManualSyncFrequency(obj, val);
+
         % Method to set the device speed mode
         status = setDeviceSpeedMode(obj, val);
+
+        % Method to set the device exposure mode
+        status = setDeviceExposureMode(obj, val);
+
+        % Method to set the device fixed exposure time (in milliseconds)
+        status = setDeviceFixedExposureTimeMilliseconds(obj, val);
 
         % Method to query the CR250 for various infos
         retrieveDeviceInfo(obj, commandID, showFullResponse);
 
         % Method to retrieve the current syncMode
-        [status, response] = retrieveCurrentSyncMode(obj, showFullResponse);
-
-        % Method to retrieve the current speedMode
-        [status, response] = retrieveCurrentSpeedMode(obj, showFullResponse);
+        [status, response, val] = retrieveCurrentSyncMode(obj, showFullResponse);
 
         % Method to retrieve the current manual SYNC frequency
-        [status, response] = retrieveCurrentManualSyncFrequency(obj, showFullResponse);
+        [status, response, val] = retrieveCurrentManualSyncFrequency(obj, showFullResponse);
+
+        % Method to retrieve the current speedMode
+        [status, response, val] = retrieveCurrentSpeedMode(obj, showFullResponse);
+
+        % Method to retrieve the current exposureMode
+        [status, response, val] = retrieveCurrentExposureMode(obj,showFullResponse);
+
+        % Method to retrieve the current fixed exposure time
+        [status, response, val] = retrieveCurrentFixedExposureTime(obj, showFullResponse);
+
+        % Method to retrieve the min and max exposure times
+        [status, response, minExposure, maxExposure] = retrieveExposureTimeRange(obj, showFullResponse);
 
     end % Public methods
 

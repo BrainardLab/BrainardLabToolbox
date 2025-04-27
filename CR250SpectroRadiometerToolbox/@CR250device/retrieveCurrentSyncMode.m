@@ -4,12 +4,13 @@
 %    April 2025  NPC  Wrote it
 
 
-function [status, response] = retrieveCurrentSyncMode(obj, showFullResponse)
+function [status, response, val] = retrieveCurrentSyncMode(obj, showFullResponse)
 
     % Retrieve the sync mode
     commandID = sprintf('RS SyncMode');
     [status, response] = CR250_device('sendCommand', commandID);
 
+    val = [];
     if (status == 0)
         if (~isempty(response))
             % Parse response
@@ -19,13 +20,15 @@ function [status, response] = retrieveCurrentSyncMode(obj, showFullResponse)
                 fprintf(2, 'Device response to retrieving the SYNC mode is NOT OK !!\n')
             end
 
-            fprintf('\n---> DEVICE_RESPONSE to ''%s'' command has %d lines', commandID, numel(parsedResponse));
-            for iResponseLine = 1:numel(parsedResponse)
-                fprintf('\n\tLine-%d: ''%s''', iResponseLine, parsedResponse{iResponseLine});
+            if (~strcmp(obj.verbosity, 'min'))
+                fprintf('\n---> DEVICE_RESPONSE to ''%s'' command has %d lines', commandID, numel(parsedResponse));
+                for iResponseLine = 1:numel(parsedResponse)
+                    fprintf('\n\tLine-%d: ''%s''', iResponseLine, parsedResponse{iResponseLine});
+                end
             end
             if (numel(parsedResponse) == 1)
                     theResponseString = parsedResponse{1};
-                    obj.syncMode = theResponseString;
+                    val = theResponseString;
             end
 
             if (showFullResponse) && (~strcmp(obj.verbosity, 'min'))

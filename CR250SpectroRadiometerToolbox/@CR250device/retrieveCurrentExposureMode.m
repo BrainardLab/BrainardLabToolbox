@@ -1,24 +1,24 @@
-% Method to retrieve the current speedMode
+% Method to retrieve the current exposureMode
 
 %  History:
 %    April 2025  NPC  Wrote it
 
 
-function [status, response, val] = retrieveCurrentSpeedMode(obj, showFullResponse)
+function [status, response, val] = retrieveCurrentExposureMode(obj, showFullResponse)
 
     % Retrieve the sync mode
-    commandID = sprintf('RS Speed');
+    commandID = sprintf('RS ExposureMode');
     [status, response] = CR250_device('sendCommand', commandID);
 
     val = [];
-    
+
     if (status == 0)
         if (~isempty(response))
             % Parse response
             [parsedResponse, fullResponse, responseIsOK] = obj.parseResponse(response, commandID);
             
             if (~responseIsOK)
-                fprintf(2, 'Device response to retrieving the SPEED mode is NOT OK !!\n')
+                fprintf(2, 'Device response to retrieving the EXPOSURE mode is NOT OK !!\n')
             end
 
             if (~strcmp(obj.verbosity, 'min'))

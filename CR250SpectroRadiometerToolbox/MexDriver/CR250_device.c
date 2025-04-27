@@ -68,43 +68,51 @@ static operandEntry operandDictionary[] = {
 */
 
 typedef struct {
-	char	ID[128];						/* command ID (128)*/
-	char    description[1024];			   	/* command descriptor string */
+	char	ID[128];						/* command ID (64)*/
+	char    description[128];			   	/* command descriptor string */
 	int     charsNumToBeReturned;       	/* chars expected in result */
 	int     timeOutSeconds;             	/* timeout (in seconds) to wait before reading back the result */
 } commandEntry;
 
 
 static commandEntry commandDictionary[] = {
-	{ "RC ID",                 "deviceID",              19,   2},
-    { "RC Model",              "deviceModel",           22,   2},
-    { "RC InstrumentType",     "deviceType",            26,   2},
-    { "RC Firmware",           "deviceFirmware",        29,   2},
-    { "RC Aperture",           "deviceAperture",        29,   2},
-    { "RS Aperture",           "deviceApertureName",    24,   2},
-    { "RC Accessory",          "deviceAccesories",      42,   2},
-    { "RC Filter",             "deviceFilter",          18,   2},
-    { "RC SyncMode",           "availableSyncModes",    63,   2},
-    { "SM SyncMode 0",         "setSyncMode0",          28,   2},
-    { "SM SyncMode 1",         "setSyncMode1",          39,   2},
-    { "SM SyncMode 2",         "setSyncMode2",          28,   2},
-    { "SM SyncMode 3",         "setSyncMode3",          28,   2},
-    { "SM SyncMode 4",         "setSyncMode4",          28,   2},
-    { "SM SyncMode 5",         "setSyncMode5",          28,   2},
-    { "RS SyncMode",           "getCurrentSyncMode",      -1,   1}, 
-    { "RS SyncFreq",           "getCurentSyncFrequency",  27,   1},
-    { "SM SyncFreq",           "setSyncFrequency",       28,   2},
-    { "SM Speed 0",            "setSlowSpeedMode",       25,   2},
-    { "SM Speed 1",            "setNormalSpeedMode",     25,   2},
-    { "SM Speed 2",            "setFastSpeedMode",       25,   2},
-    { "SM Speed 3",            "set2XFastSpeedMode",     25,   2},
-    { "RS Speed",              "getCurentSpeedMode",     25,   2},
-    { "E",                     "toggleEcho",            -1,   2},
-    { "M",                     "measure",               18,   25},
-    { "RM Radiometric",       "retrieve radiometric units", 43, 2},
-    { "RM Spectrum",           "retrieve measurement: spectrum",  2249,   3},
+	{ "RC ID",                 "deviceID",                        19,   2},
+    { "RC Model",              "deviceModel",                     22,   2},
+    { "RC InstrumentType",     "deviceType",                      26,   2},
+    { "RC Firmware",           "deviceFirmware",                  29,   2},
+    { "RC Aperture",           "deviceAperture",                  29,   2},
+    { "RS Aperture",           "deviceApertureName",              24,   2},
+    { "RC Accessory",          "deviceAccesories",                42,   2},
+    { "RC Filter",             "deviceFilter",                    18,   2},
+    { "RC SyncMode",           "availableSyncModes",              63,   2},
+    { "SM SyncMode 0",         "setSyncMode0",                    28,   2},
+    { "SM SyncMode 1",         "setSyncMode1",                    39,   2},
+    { "SM SyncMode 2",         "setSyncMode2",                    28,   2},
+    { "SM SyncMode 3",         "setSyncMode3",                    28,   2},
+    { "SM SyncMode 4",         "setSyncMode4",                    28,   2},
+    { "SM SyncMode 5",         "setSyncMode5",                    28,   2},
+    { "RS SyncMode",           "getCurrentSyncMode",              25,   1},
+    { "RS SyncFreq",           "getCurentSyncFrequency",          28,   1},
+    { "SM SyncFreq",           "setSyncFrequency",                28,   2},
+    { "SM Speed 0",            "setSlowSpeedMode",                25,   2},
+    { "SM Speed 1",            "setNormalSpeedMode",              25,   2},
+    { "SM Speed 2",            "setFastSpeedMode",                25,   2},
+    { "SM Speed 3",            "set2XFastSpeedMode",              25,   2},
+    { "RS Speed",              "getCurentSpeedMode",              25,   2},
+    { "RS ExposureMode",       "getCurentExposureMode",           28,   2},
+    { "SM ExposureMode 0",     "setAutoExposureMode",             32,   2},
+    { "SM ExposureMode 1",     "setFixedExposureMode",            32,   2},
+    { "SM Exposure",           "setExposureTime",                 28,   1},
+    { "RS Exposure",           "getExposureTime",                 35,   1},
+    { "RC MinExposure",        "getMinExposureTime",              31,   1},
+    { "RC MaxExposure",        "getMaxExposureTime",              34,   1},
+    { "E",                     "toggleEcho",                     -1,    2},
+    { "M",                     "measure",                         18,   25},
+    { "RM Radiometric",        "retrieve radiometric units",      43,    2},
+    { "RM Spectrum",           "retrieve measurement: spectrum",  2249,  3},
 };
 
+int dictionaryLength = 34;
 
 /* device handle to the CR250 */
 static int CR250_devHandle = 0;
@@ -337,7 +345,8 @@ void mexFunction(int nlhs,      /* number of output (return) arguments */
         
             // Find commandIndex
 			int commandIndex = -1;
-			for (int i = 0; i < sizeof(commandDictionary)/sizeof(commandEntry); i++) {
+			//for (int i = 0; i < sizeof(commandDictionary)/sizeof(commandEntry); i++) {
+            for (int i = 0; i < dictionaryLength; i++) {
 				if (strcmp(commandName, commandDictionary[i].ID) == 0 ) {
 					commandIndex = i;
 					break;
@@ -349,13 +358,26 @@ void mexFunction(int nlhs,      /* number of output (return) arguments */
 				mexErrMsgTxt(errorMessage);
             }
            
-            if (strcmp(commandName, "SM SyncFreq") == 0) {
+            // COMMANDS THAT EXPECT AN ARGUMENT
+            if (strcmp(commandName,"SM SyncFreq") == 0) {
                 // Get the frequency, in milliHz (third input argument)
                 double syncFrequencyHz;
-    		    syncFrequencyHz = (double)((int) mxGetScalar(prhs[2]))/(double)(1000);
+	            syncFrequencyHz = (double)((int) mxGetScalar(prhs[2]))/(double)(1000);
+
+                // Update the command with the frequency
                 sprintf(commandName, "%s %2.2f", commandName, syncFrequencyHz);
-                mexPrintf("Will send command: %s\n", commandName);
             }
+            else if (strcmp(commandName,"SM Exposure") == 0) {
+               // Get the exposure mode (third input argument)
+                int exposureTime;
+	            exposureTime = (int) mxGetScalar(prhs[2]);
+
+                mexPrintf("Exposure time : %d (ms)\n", exposureTime);
+
+                // Update the command with the exposureMode
+                sprintf(commandName, "%s %d", commandName, exposureTime);
+            }  // else
+
 
             /* Simply clear the port in case there is stuff from a previous operation */
             *status = readCR250Port(&CR250_devHandle, &inputBuffer[0], &inputBufferSize);
@@ -416,8 +438,8 @@ void mexFunction(int nlhs,      /* number of output (return) arguments */
                 mexPrintf("CR250: Timed out while polling the port. \n");
              }
              if ((bytesRead != commandResultsBufferLength) && (expectedCharsNum != -1)) {
-                mexPrintf("Expected %d chars, but read %d chars instead\n", commandResultsBufferLength, bytesRead);
-                if (verbosityLevel >= 5) {
+                 if (verbosityLevel >= 5) {
+                    mexPrintf("Expected %d chars, but read %d chars instead\n", commandResultsBufferLength, bytesRead);
                     mexPrintf("Received message: %s\n",commandResultsBuffer);
                 }
              }

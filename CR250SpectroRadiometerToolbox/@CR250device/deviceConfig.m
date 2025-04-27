@@ -24,8 +24,10 @@ function deviceConfig(obj)
     obj.retrieveDeviceInfo('RS SyncMode', showFullResponse);
 
     obj.retrieveCurrentSyncMode(showFullResponse);
-    obj.retrieveCurrentSpeedMode(showFullResponse);
     obj.retrieveCurrentManualSyncFrequency(showFullResponse);
+
+    obj.retrieveCurrentSpeedMode(showFullResponse);
+    obj.retrieveCurrentExposureMode(showFullResponse);
 
     obj.verbosity = previousVerbosity;
 end
