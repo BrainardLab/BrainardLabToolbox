@@ -18,6 +18,7 @@
 
 function MeasureSphereOOC()
 
+
 % Get directory where stuff is
 if (~ispref('BrainardLabToolbox','RadiometerChecksDir'))
     error('No ''BrainardLabToolbox:RadiometerChecksDir'' preference set.  Probably you need to update your BrainardLabToolbox local hook file.')
@@ -27,6 +28,7 @@ radiometerChecksDir = getpref('BrainardLabToolbox','RadiometerChecksDir');
 if (~exist(radiometerChecksDir,'dir'))
     error(['Directory ' radiometerChecksDir ' does not exist.  Something is not set up correctly.']);
 end
+
 
 % Number of measurements
 nMeasure = 5;
@@ -103,11 +105,6 @@ try
             whichMeter = 'CR-250';
             meterType = 5;
             S = [380 2 201];
-            %spectroRadiometerOBJ = CR250device(...
-            %    'verbosity',        'min', ...   % 'min', 'default', or 'max'
-            %    'devicePortString', [] ...       % empty -> automatic port detection)
-            %    );
-
             spectroRadiometerOBJ = CR250dev(...
                 'verbosity',        1, ...        % 1 -> minimum verbosity
                 'devicePortString', [] ...       % empty -> automatic port detection)
@@ -168,7 +165,7 @@ switch (meter)
             'syncMode',         'OFF', ...      % choose from 'OFF', 'AUTO', [20 400];
             'cyclesToAverage',  1, ...          % choose any integer in range [1 99]
             'sensitivityMode',  'STANDARD', ... % choose between 'STANDARD' and 'EXTENDED'.  'STANDARD': (exposure range: 6 - 6,000 msec, 'EXTENDED': exposure range: 6 - 30,000 msec
-            'exposureTime',     1000, ... % choose between 'ADAPTIVE' (for adaptive exposure), or a value in the range [6 6000] for 'STANDARD' sensitivity mode, or a value in the range [6 30000] for the 'EXTENDED' sensitivity mode
+            'exposureTime',     1000, ...       % choose between 'ADAPTIVE' (for adaptive exposure), or a value in the range [6 6000] for 'STANDARD' sensitivity mode, or a value in the range [6 30000] for the 'EXTENDED' sensitivity mode
             'apertureSize',     '1 DEG' ...   % choose between '1 DEG', '1/2 DEG', '1/4 DEG', '1/8 DEG'
             );
 
@@ -177,9 +174,15 @@ switch (meter)
         if (~strcmp(meterSerialNum,'A00927'))
             error('Serial number read from meter doesn''t match meter entered.\n');
         end
-        spectroRadiometerOBJ.setOptions(...
-            'syncMode',  'None' ...      % choose from 'None', 'Manual', 'NTSC', 'PAL', 'CINEMA';
-        );
+        if (1==2)
+            spectroRadiometerOBJ.setOptions(...
+                'syncMode',  'None', ...                  % choose from 'None', 'Manual', 'NTSC', 'PAL', 'CINEMA';
+                'manualSyncFrequency', 30, ...            % choose between 10 Hz and 10 KHz
+                'speedMode', 'Normal', ...                % choose from 'Slow','Normal','Fast', '2x Fast'
+                'fixedExposureTimeMilliseconds', 1500, ...   % Choose between 10 and 30000
+                'exposureMode', 'Auto' ...             % Choose between 'Auto', and 'Fixed'
+            );
+        end
 
 end
 
