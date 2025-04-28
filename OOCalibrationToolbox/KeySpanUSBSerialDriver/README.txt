@@ -8,7 +8,7 @@ Additional notes:
 
 (2) For OS X >= 10.9,  use the USA-19HSdvr-10.9.10_10.11_v4_signed driver.
 
-(3) Added new driver KeyspanUSAdrvr 4.0b4.pkg
+(3) Added new driver KeyspanUSAdrvr 4.0b4.pkg, which is supposed to work with 10.12-10.15
 
 
 (2a) During installation of the USA-19HSdvr-10.9.10_10.11_v4_signed driver, when you reach the page with the ‘Customize’ button (bottom left), uncheck the USAdriverFolder option before proceeding with the remainder of the installation.
