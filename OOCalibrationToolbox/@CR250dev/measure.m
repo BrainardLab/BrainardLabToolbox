@@ -4,31 +4,8 @@ function result = measure(obj, varargin)
     % initialize to empty result
     result = [];
 
-    % NEED TO IMPLEMENT 
-    if (1==2)
-        % Configure syncMode
-        if (strcmp(obj.syncMode, 'ON'))
-            if (obj.verbosity > 5)
-                disp('Measure with synMode ON');
-            end
-            syncFreq = obj.measureSyncFreq();
-            if (~isempty(syncFreq))
-                obj.setSyncFreq(1);
-            else
-                obj.setSyncFreq(0);
-            end
-        else
-            if (obj.verbosity > 5)
-                disp('Measure with synMode OFF');
-            end
-            obj.setSyncFreq(0);
-        end
-    else
-        fprintf(2,'CR250.measure(): Ignoring sync mode\n');
-    end
-
     
-     % Do the measurement (set the obj.nativeMeasurement). 
+    % Do the measurement (set the obj.nativeMeasurement).
     obj.measureSPD();
 
     % By default, the measurement is the native measurement

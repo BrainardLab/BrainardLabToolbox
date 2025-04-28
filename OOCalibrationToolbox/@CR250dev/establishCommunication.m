@@ -4,17 +4,19 @@ function obj = establishCommunication(obj)
         fprintf('In CR250obj.establishCommunication() method\n');
     end
 
-    openDevice(obj.portString);
+    openDevice(obj.portString, obj.commandTriggerDelay);
 
 end
 
 
-function openDevice(devicePortString)
-    % ------ SET THE VERBOSITY LEVEL (1=minimum, 5=intermediate, 10=full)--
-    status = CR250_device('setVerbosityLevel', 10);
+function openDevice(devicePortString, commandTriggerDelay)
 
     % ------ OPEN THE CR250 device ----------------------------------------------
     status = CR250_device('close');
+
+    % Pause
+    pause(commandTriggerDelay);
+
     status = CR250_device('open', devicePortString);
     if (status == 0)
         disp('Opened CR250 port');

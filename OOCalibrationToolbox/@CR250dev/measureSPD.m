@@ -35,13 +35,13 @@ function doTheMeasurement(obj)
     % Wait for response
     if ((status == 0) && (~isempty(response) > 0))
         [parsedResponse, fullResponse] = obj.parseResponse(response, commandID);
-        if (obj.verbosity > 1)
+        if (obj.verbosityIsNotMinimum)
             fprintf('\n---> DEVICE_RESPONSE to ''%s'' command has %d lines', commandID, numel(parsedResponse));
         
             for iResponseLine = 1:numel(parsedResponse)
                 fprintf('\n\tLine-%d: ''%s''', iResponseLine, parsedResponse{iResponseLine});
             end
-            if (obj.showDeviceFullResponse) && (obj.verbosity > 1)
+            if (obj.showDeviceFullResponse) && (obj.verbosityIsNotMinimum)
                 fprintf('\nFull response: ''%s''.', fullResponse);
             end
         end
@@ -90,7 +90,7 @@ function [theSpectralSupport, theSpectrum] = retrieveTheMeasurement(obj)
             doneText = sprintf('\nSomething is not quite right after retrieving the data\n');
             Speak(doneText);
             disp(doneText);
-            if (obj.verbosity > 1)
+            if (obj.verbosityIsNotMinimum)
                 fprintf('\n---> DEVICE_RESPONSE to ''%s'' command has %d lines', commandID, responseLines);
                 for iResponseLine = 1:numel(parsedResponse)
                     fprintf('\n\tLine-%d: ''%s''', iResponseLine, parsedResponse{iResponseLine});
@@ -98,7 +98,7 @@ function [theSpectralSupport, theSpectrum] = retrieveTheMeasurement(obj)
             end
         end
 
-        if (obj.showDeviceFullResponse) && (obj.verbosity > 1)
+        if (obj.showDeviceFullResponse) && (obj.verbosityIsNotMinimum)
             fprintf('\nFull response: ''%s''.', fullResponse);
         end
 
