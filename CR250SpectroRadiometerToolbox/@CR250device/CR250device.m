@@ -21,6 +21,9 @@ classdef CR250device < handle
     theCR250dev = CR250device(...
         'verbosity', 'max');
 
+    % Current config
+    theCR250dev.deviceConfig();
+
     % Set the verbosity to maximum
     %theCR250dev.verbosity = 'max';
 
