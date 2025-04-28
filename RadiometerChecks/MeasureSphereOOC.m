@@ -15,6 +15,7 @@
 % 31/8/16	npc		Use the PR650/670 spectroradiometer objects, made it into a function
 % 09/05/17  npc     Code cleanup
 % 09/09/17  dhb     Update to use prefs for where data live and go.
+% 04/28/25  npc     Update to add CR-250dev
 
 function MeasureSphereOOC()
 
@@ -174,15 +175,18 @@ switch (meter)
         if (~strcmp(meterSerialNum,'A00927'))
             error('Serial number read from meter doesn''t match meter entered.\n');
         end
+        spectroRadiometerOBJ.syncMode
+        spectroRadiometerOBJ.speedMode
+        spectroRadiometerOBJ.exposureMode
+        
         if (1==2)
-            spectroRadiometerOBJ.setOptions(...
-                'syncMode',  'None', ...                  % choose from 'None', 'Manual', 'NTSC', 'PAL', 'CINEMA';
-                'manualSyncFrequency', 30, ...            % choose between 10 Hz and 10 KHz
+        spectroRadiometerOBJ.setOptions(...
+                'syncMode',  'None', ...                  % choose from 'None', 'Manual', 'NTSC', 'PAL', 'CINEMA'
                 'speedMode', 'Normal', ...                % choose from 'Slow','Normal','Fast', '2x Fast'
-                'fixedExposureTimeMilliseconds', 1500, ...   % Choose between 10 and 30000
                 'exposureMode', 'Auto' ...             % Choose between 'Auto', and 'Fixed'
             );
         end
+
 
 end
 
