@@ -99,13 +99,13 @@ static commandEntry commandDictionary[] = {
     { "SM Speed 2",            "setFastSpeedMode",                25,   2},
     { "SM Speed 3",            "set2XFastSpeedMode",              25,   2},
     { "RS Speed",              "getCurentSpeedMode",              25,   2},
-    { "RS ExposureMode",       "getCurentExposureMode",           28,   2},
-    { "SM ExposureMode 0",     "setAutoExposureMode",             32,   2},
-    { "SM ExposureMode 1",     "setFixedExposureMode",            32,   2},
-    { "SM Exposure",           "setExposureTime",                 28,   1},
-    { "RS Exposure",           "getExposureTime",                 35,   1},
-    { "RC MinExposure",        "getMinExposureTime",              31,   1},
-    { "RC MaxExposure",        "getMaxExposureTime",              34,   1},
+    { "RS ExposureMode",       "getCurentExposureMode",           28,   3},
+    { "SM ExposureMode 0",     "setAutoExposureMode",             32,   3},
+    { "SM ExposureMode 1",     "setFixedExposureMode",            32,   3},
+    { "SM Exposure",           "setExposureTime",                 28,   2},
+    { "RS Exposure",           "getExposureTime",                 40,   2},
+    { "RC MinExposure",        "getMinExposureTime",              31,   2},
+    { "RC MaxExposure",        "getMaxExposureTime",              34,   2},
     { "E",                     "toggleEcho",                     -1,    2},
     { "M",                     "measure",                         18,   25},
     { "RM Radiometric",        "retrieve radiometric units",      43,    2},
@@ -361,18 +361,16 @@ void mexFunction(int nlhs,      /* number of output (return) arguments */
             // COMMANDS THAT EXPECT AN ARGUMENT
             if (strcmp(commandName,"SM SyncFreq") == 0) {
                 // Get the frequency, in milliHz (third input argument)
-                double syncFrequencyHz;
-	            syncFrequencyHz = (double)((int) mxGetScalar(prhs[2]))/(double)(1000);
+                double syncFrequencyHz = *mxGetPr(prhs[2]);
+	            //syncFrequencyHz = (double)((int) mxGetScalar(prhs[2]))/(double)(1000);
 
                 // Update the command with the frequency
                 sprintf(commandName, "%s %2.2f", commandName, syncFrequencyHz);
             }
             else if (strcmp(commandName,"SM Exposure") == 0) {
                // Get the exposure mode (third input argument)
-                int exposureTime;
-	            exposureTime = (int) mxGetScalar(prhs[2]);
-
-                mexPrintf("Exposure time : %d (ms)\n", exposureTime);
+                int exposureTime = (int)*mxGetPr(prhs[2]);
+	            //exposureTime = (int) mxGetScalar(prhs[2]);
 
                 // Update the command with the exposureMode
                 sprintf(commandName, "%s %d", commandName, exposureTime);
@@ -402,7 +400,7 @@ void mexFunction(int nlhs,      /* number of output (return) arguments */
 			}
 			else if (*status == 0) {
                 if (verbosityLevel >= 10)
-				    mexPrintf("KCR250: Succesfully wrote command '%s' to serial port device\n", commandName);
+				    mexPrintf("CR250: Succesfully wrote command '%s' to serial port device\n", commandName);
 			}
 			else if (*status == 1) {
 				mexErrMsgTxt("CR250: Serial port device is not open !\n");
@@ -448,10 +446,18 @@ void mexFunction(int nlhs,      /* number of output (return) arguments */
              plhs[1] = mxCreateString(commandResultsBuffer);
               
  
-              // free memory since we copied it to output buffer
-              mxFree(commandResultsBuffer);
+
+            // The following mxFree gives me trouble. Comment it out
+            if (1==2) {
+                mexPrintf("About to mxFree(commandResultsBuffer) of length: %d\n", commandResultsBufferLength);
+
+                // free memory since we copied it to output buffer
+                mxFree(commandResultsBuffer);
             
-              return;
+                mexPrintf("Done with mxFree\n");
+            }
+
+            return;
             
             
     }  /* switch (operandID) */
@@ -479,6 +485,11 @@ int pollCR250Port(int *deviceHandle, int expectedCharsNum, int timeOutSeconds, i
     	int maxI = timeOutSeconds*1000/sleepTimeInMilliseconds;
         int resultsBufferOverrun = 0;
         
+
+        if (verbosityLevel > 1) {
+            mexPrintf("\n");
+        }
+
         int timeOutPass = 3;
     	while (timeOutPass > 0) {
             
@@ -487,48 +498,55 @@ int pollCR250Port(int *deviceHandle, int expectedCharsNum, int timeOutSeconds, i
 
         	while (i < maxI) {
                 /* sleep  */
-                if (sleepTimeInMilliseconds > 0)
-	            		usleep(sleepTimeInMilliseconds*1000);
-
-            		if (expectedCharsNum <= 0) {
-                		*timedOut = 0;
-                		break;
-            		}
-
-            		/* read new data */
-            		int status = readCR250Port(deviceHandle, &inputBuffer[0], &inputBufferSize);
-            		if (status != 0) {
-                		mexPrintf("CR250: failed to read during polling\n");
-                		return(-1);
-            		}
-            		/* store new data */
-
-					int j;
-            		for (j = 0; j < inputBufferSize; j++) {
-                        if (((*bytesRead)+j < resultsBufferLength)&&(j < MAX_INPUT_BUFFER_SIZE)) {
-                            resultsBuffer[(*bytesRead)+j] = (char)inputBuffer[j];
-                            }
-                        else {
-                            resultsBufferOverrun = 1;
-                            mexPrintf("resultsBuffer over-run !!!! Trying to access element %d in array[%d] \n", (*bytesRead)+j, resultsBufferLength);
-                        }
+                if (sleepTimeInMilliseconds > 0) {
+                    if (verbosityLevel >= 10) {
+                        mexPrintf("CR250: Sleeping for %d ms (pass: %d (%d))\n", sleepTimeInMilliseconds, i, 3-timeOutPass);
                     }
-            		*bytesRead += inputBufferSize;
-                    if ((*bytesRead != expectedCharsNum) && (expectedCharsNum != -1)) {
-                        if (verbosityLevel >= 10) {
-            		        mexPrintf("bytesRead:%d (%s) (total:%d, expected:%d)\n", inputBufferSize, inputBuffer, *bytesRead, expectedCharsNum);
-                        }
-                    }
+	            	usleep(sleepTimeInMilliseconds*1000);
+                }
 
-            		/* Check whether more chars are to be received */
-            		if (*bytesRead < expectedCharsNum)
-                		++i;
-            		else {
-                		/* expected chars have been received. Exit nested while loops */
-                		i = maxI;
-                		timeOutPass = 0;
-                		*timedOut = 0;
-            		}
+        		if (expectedCharsNum <= 0) {
+            		*timedOut = 0;
+            		break;
+        		}
+
+        		/* read new data */
+        		int status = readCR250Port(deviceHandle, &inputBuffer[0], &inputBufferSize);
+        		if (status != 0) {
+            		mexPrintf("CR250: failed to read during polling\n");
+            		return(-1);
+        		}
+        		/* store new data */
+
+				int j;
+        		for (j = 0; j < inputBufferSize; j++) {
+                    if (((*bytesRead)+j < resultsBufferLength)&&(j < MAX_INPUT_BUFFER_SIZE)) {
+                        resultsBuffer[(*bytesRead)+j] = (char)inputBuffer[j];
+                        }
+                    else {
+                        resultsBufferOverrun = 1;
+                        mexPrintf("CR250: Polling: More data that what resultsBuffer can fit. Bytes lost: %d \n", (*bytesRead)+j-resultsBufferLength);
+                    }
+                }
+
+                *bytesRead += inputBufferSize;
+                if ((*bytesRead != expectedCharsNum) && (expectedCharsNum != -1)) {
+                    if (verbosityLevel >= 10) {
+        		        mexPrintf("CR250: Polling: BytesRead:%d (total:%d, expected:%d)\n", inputBufferSize, *bytesRead, expectedCharsNum);
+                    }
+                }
+
+        		/* Check whether more chars are to be received */
+        		if (*bytesRead < expectedCharsNum)
+            		++i;
+        		else {
+            		/* expected chars have been received. Exit nested while loops */
+            		i = maxI;
+            		timeOutPass = 0;
+            		*timedOut = 0;
+                    mexPrintf("CR250: Polling: BytesRead:%d (total:%d, expected:%d)\n", inputBufferSize, *bytesRead, expectedCharsNum);
+        		}
+
         	} /* while (i < maxI) */
     	} /* while (timeOutPass > 0) */
 

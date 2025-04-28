@@ -19,22 +19,10 @@ classdef CR250device < handle
 %{
     % Open the CR250
     theCR250dev = CR250device(...
-        'verbosity', 'min');
+        'verbosity', 'max');
 
     % Set the verbosity to maximum
     %theCR250dev.verbosity = 'max';
-
-    % Get some info on the device: range of exposureTimes (milliseconds)
-    exposureRangeMilliseconds = theCR250dev.exposureTimeRange
-
-    % See what exposureModes are supported
-    theCR250dev.validExposureModes
-
-    % Set the exposure model to 'fixed' (meaning fixed duration)
-    theCR250dev.exposureMode = 'Fixed';
-
-    % And set the fixed exposure time to 250 msec
-    theCR250dev.fixedExposureTimeMilliseconds = 250;
 
     % See what syncModes are supported
     theCR250dev.validSyncModes
@@ -42,15 +30,38 @@ classdef CR250device < handle
     % Set the sync mode to NTSC
     theCR250dev.syncMode = 'NTSC';
 
+    % Set the sync mode to None
+    theCR250dev.syncMode = 'None';
+
     % Or set it to manual mode with a sync Frequency of 120 Hz;
     theCR250dev.syncMode = 'Manual';
-    theCR250dev.manualSyncFrequency = 120.00;
+    theCR250dev.manualSyncFrequency = 120.45;
+
+    % Get some info on the device: range of exposureTimes (milliseconds)
+    exposureRangeMilliseconds = theCR250dev.exposureTimeRange
+
+    % See what exposureModes are supported
+    theCR250dev.validExposureModes
+
+    % Set the exposure model to 'Fixed' (meaning fixed duration)
+    theCR250dev.exposureMode = 'Fixed';
+
+    % And set the fixed exposure time to 2000 msec
+    theCR250dev.fixedExposureTimeMilliseconds = 2000;
+
+    % Set the exposure model to 'Auto' (meaning automatic duration)
+    theCR250dev.exposureMode = 'Auto';
+
+
 
     % See what capture speed modes are supported
     theCR250dev.validSpeedModes
 
-    % Set the capture speed to 'slow' (to measure a dim light source)
+    % Set the capture speed to 'Slow' (to measure a dim light source)
     theCR250dev.speedMode = 'Slow';
+
+    % Set the capture speed to 'Normal' (to measure a medium intensity light source)
+    theCR250dev.speedMode = 'Normal';
 
     % Conduct an SPD measurement. This will start measuring immediately (no delay)
     theCR250dev.measure();

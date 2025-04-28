@@ -24,7 +24,7 @@ function status = setDeviceExposureMode(obj, val)
             [parsedResponse, fullResponse] = obj.parseResponse(response, commandID);
             if (contains(fullResponse, 'No errors'))
                 if (~strcmp(obj.verbosity, 'min'))
-                    fprintf('\nSuccessfully set device exposure mode to ''%s''.', val);
+                    fprintf('\nSuccessfully set device exposure mode to ''%s''.\n', val);
                 end
             elseif (contains(fullResponse, 'Invalid Speed Mode'))
                 fprintf(2,'\n-----------------------------------------------------------------');

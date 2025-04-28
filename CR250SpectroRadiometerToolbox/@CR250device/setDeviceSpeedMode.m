@@ -12,7 +12,7 @@ function status = setDeviceSpeedMode(obj, val)
                 speedModeID = 3;
         end % switch
     else
-        fprintf(2,'Incorrect speed mode:''%s''. Type CR250device.validSpeedModes to see all available modes.', val);
+        fprintf(2,'Incorrect speed mode:''%s''. Type CR250device.validSpeedModes to see all available modes.\n', val);
     end
     
     % Pause
@@ -28,7 +28,7 @@ function status = setDeviceSpeedMode(obj, val)
             [parsedResponse, fullResponse] = obj.parseResponse(response, commandID);
             if (contains(fullResponse, 'No errors'))
                 if (~strcmp(obj.verbosity, 'min'))
-                    fprintf('\nSuccessfully set device speed mode to ''%s''.', val);
+                    fprintf('\nSuccessfully set device speed mode to ''%s''.\n', val);
                 end
             elseif (contains(fullResponse, 'Invalid Speed Mode'))
                 fprintf(2,'\n-----------------------------------------------------------------');

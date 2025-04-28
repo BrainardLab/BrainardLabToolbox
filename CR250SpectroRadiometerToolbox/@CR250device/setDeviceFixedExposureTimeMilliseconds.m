@@ -1,16 +1,29 @@
 % Method to set the device fixed exposure time (in milliseconds)
 function status = setDeviceFixedExposureTimeMilliseconds(obj, val)
-    %if (val >= 10) && (val <= 10*1000)
-    %else
-    %    fprintf(2,'Manual sync frequency (%2.3f) is out of [10 Hz - 10 kHz] range\n', val);
-    %end
-    
+
+    if (~isnumeric(val))
+        error('Exposure time must be a scalar');
+    end
+
+    % Check that we are in the range
+    [status, response, minExposure, maxExposure] = obj.retrieveExposureTimeRange(obj.showDeviceFullResponse);
+    if (status == 0)
+        if (~isempty(response))
+            if (val < minExposure)
+                error('Exposure time (%d) is less than the minimum allowable value (%d)\n', val, minExposure);
+            end
+            if (val > maxExposure)
+                error('Exposure time (%d) is greater than the maximum allowable value (%d)\n', val, maxExposure);
+            end
+        end
+    end
+
     % Pause for 1.5 seconds
     pause(1.5);
 
-    % Set the manual sync frequency mode
+    % Set the fixed exposure mode
     commandID = sprintf('SM Exposure');
-    exposureTimeMilliseconds = int32((val));
+    exposureTimeMilliseconds = val;
     [status, response] = CR250_device('sendCommand', commandID, exposureTimeMilliseconds);
 
     if (status == 0) 
@@ -19,7 +32,7 @@ function status = setDeviceFixedExposureTimeMilliseconds(obj, val)
             [parsedResponse, fullResponse] = obj.parseResponse(response, commandID);
             if (contains(fullResponse, 'No errors'))
                 if (~strcmp(obj.verbosity, 'min'))
-                    fprintf('\nSuccessfully set device exposure time to %2.0f milliseconds', val);
+                    fprintf('\nSuccessfully set device exposure time to %2.0f milliseconds.\n', val);
                 end
             else  %if (contains(fullResponse, 'Invalid '))
                 fprintf(2,'\n-----------------------------------------------------------------');

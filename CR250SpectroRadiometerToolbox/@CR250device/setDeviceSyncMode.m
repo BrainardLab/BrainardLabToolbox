@@ -31,7 +31,7 @@ function status = setDeviceSyncMode(obj, val)
             [parsedResponse, fullResponse] = obj.parseResponse(response, commandID);
             if (contains(fullResponse, 'No errors'))
                 if (~strcmp(obj.verbosity, 'min'))
-                    fprintf('\nSuccessfully set device sync mode to ''%s''.', val);
+                    fprintf('\nSuccessfully set device sync mode to ''%s''.\n', val);
                 end
             elseif (contains(fullResponse, 'Invalid Sync Mode'))
                 fprintf(2,'\n-----------------------------------------------------------------');

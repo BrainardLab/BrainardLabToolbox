@@ -19,6 +19,11 @@ function measure(obj)
         for iResponseLine = 1:numel(parsedResponse)
             fprintf('\n\tLine-%d: ''%s''', iResponseLine, parsedResponse{iResponseLine});
         end
+        theFirstLine = parsedResponse{1};
+        if (~strcmp(theFirstLine, 'No errors'))
+            fprintf(2,'\nError in measurement\n');
+        end
+
         if (obj.showDeviceFullResponse)
             fprintf('\nFull response: ''%s''.', fullResponse);
         end

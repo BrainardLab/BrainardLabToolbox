@@ -1,8 +1,13 @@
 % Method to set the device manual sync frequency
 function status = setDeviceManualSyncFrequency(obj, val)
+
+    if (~isnumeric(val))
+        error('Manual sync frequency must be a scalar');
+    end
+
     if (val >= 10) && (val <= 10*1000)
     else
-        fprintf(2,'Manual sync frequency (%2.3f) is out of [10 Hz - 10 kHz] range\n', val);
+        fprintf(2,'Manual sync frequency (%2.3f) is out of [10 Hz - 10 kHz] range.\n', val);
     end
     
      % Pause
@@ -10,7 +15,7 @@ function status = setDeviceManualSyncFrequency(obj, val)
     
     % Set the manual sync frequency mode
     commandID = sprintf('SM SyncFreq');
-    syncFrequencyMilliHz = int32((1000*val));
+    syncFrequencyMilliHz = val;
     [status, response] = CR250_device('sendCommand', commandID, syncFrequencyMilliHz);
 
     if (status == 0) 
@@ -19,7 +24,7 @@ function status = setDeviceManualSyncFrequency(obj, val)
             [parsedResponse, fullResponse] = obj.parseResponse(response, commandID);
             if (contains(fullResponse, 'No errors'))
                 if (~strcmp(obj.verbosity, 'min'))
-                    fprintf('\nSuccessfully set device sync frequency to %2.3f Hz.', val);
+                    fprintf('\nSuccessfully set device sync frequency to %2.3f Hz.\n', val);
                 end
             else %if (contains(fullResponse, 'Invalid Sync Mode'))
                 fprintf(2,'\n-----------------------------------------------------------------');

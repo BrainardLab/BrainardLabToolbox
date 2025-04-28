@@ -11,6 +11,10 @@ function [status, response, minExposure, maxExposure] = retrieveExposureTimeRang
 end
 
 function [status, response, val] = retrieveExposureTime(obj, whichOne)
+
+    % Pause
+    pause(obj.commandTriggerDelay);
+    
     % Retrieve the  exposure time
     commandID = sprintf('RC %sExposure', whichOne);
     [status, response] = CR250_device('sendCommand', commandID);
