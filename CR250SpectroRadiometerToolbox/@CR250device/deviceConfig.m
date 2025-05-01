@@ -28,6 +28,7 @@ function deviceConfig(obj)
 
     obj.retrieveCurrentSpeedMode(showFullResponse);
     obj.retrieveCurrentExposureMode(showFullResponse);
+    obj.retrieveCurrentFixedExposureTime(showFullResponse);
 
     obj.verbosity = previousVerbosity;
 end

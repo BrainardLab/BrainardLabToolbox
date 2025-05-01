@@ -415,7 +415,7 @@ void mexFunction(int nlhs,      /* number of output (return) arguments */
 
              // Allocate memory for commandResults
              char *commandResultsBuffer;
-             commandResultsBuffer = mxCalloc(commandResultsBufferLength, sizeof(char));
+             commandResultsBuffer = mxCalloc(commandResultsBufferLength+100, sizeof(char));
 
              int expectedCharsNum, timeOutSeconds, sleepTimeInMilliseconds, timedOut, bytesRead;
              expectedCharsNum = commandDictionary[commandIndex].charsNumToBeReturned;
@@ -524,6 +524,10 @@ int pollCR250Port(int *deviceHandle, int expectedCharsNum, int timeOutSeconds, i
                         resultsBuffer[(*bytesRead)+j] = (char)inputBuffer[j];
                         }
                     else {
+                        // read the extra chars
+                        if (j < MAX_INPUT_BUFFER_SIZE) {
+                            resultsBuffer[(*bytesRead)+j] = (char)inputBuffer[j];
+                        }
                         resultsBufferOverrun = 1;
                         mexPrintf("CR250: Polling: More data that what resultsBuffer can fit. Bytes lost: %d \n", (*bytesRead)+j-resultsBufferLength);
                     }
@@ -540,7 +544,7 @@ int pollCR250Port(int *deviceHandle, int expectedCharsNum, int timeOutSeconds, i
         		if (*bytesRead < expectedCharsNum)
             		++i;
         		else {
-            		/* expected chars have been received. Exit nested while loops */
+            		/* expected, or more, chars have been received. Exit nested while loops */
             		i = maxI;
             		timeOutPass = 0;
             		*timedOut = 0;

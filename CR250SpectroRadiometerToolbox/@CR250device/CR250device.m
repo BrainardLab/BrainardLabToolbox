@@ -155,6 +155,7 @@ classdef CR250device < handle
             p.addParameter('verbosity', 'min', @(x)(ismember(x, obj.validVerbosityLevels)));
             p.addParameter('syncMode', 'None', @(x)(ismember(x, obj.validSyncModes)));
             p.addParameter('speedMode', 'Normal', @(x)(ismember(x, obj.validSpeedModes)));
+            p.addParameter('showDeviceFullResponse', true, @islogical);
             p.addParameter('showInfo', false, @istrue);
 
             % Parse input
@@ -163,7 +164,7 @@ classdef CR250device < handle
             obj.commandTriggerDelay = p.Results.commandTriggerDelay;
             obj.devicePortString = p.Results.devicePortString;
             obj.verbosity = p.Results.verbosity;
-            obj.showDeviceFullResponse = false;
+            obj.showDeviceFullResponse = p.Results.showDeviceFullResponse;
 
             if (isempty(obj.devicePortString))
                 if (IsLinux)

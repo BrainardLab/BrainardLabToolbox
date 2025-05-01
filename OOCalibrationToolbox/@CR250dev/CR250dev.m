@@ -131,6 +131,7 @@ classdef CR250dev < Radiometer
             obj.commandTriggerDelay = 0.3;
 
             obj.syncMode            = 'None';
+            
             %obj.manualSyncFrequency = 120;
 
             %obj.speedMode           = 'Normal';

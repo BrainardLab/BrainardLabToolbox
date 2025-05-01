@@ -29,7 +29,7 @@ radiometerChecksDir = getpref('BrainardLabToolbox','RadiometerChecksDir');
 if (~exist(radiometerChecksDir,'dir'))
     error(['Directory ' radiometerChecksDir ' does not exist.  Something is not set up correctly.']);
 end
-
+spectroRadiometerOBJ = [];
 
 % Number of measurements
 nMeasure = 5;
@@ -175,9 +175,16 @@ switch (meter)
         if (~strcmp(meterSerialNum,'A00927'))
             error('Serial number read from meter doesn''t match meter entered.\n');
         end
+
+        spectroRadiometerOBJ.exposureMode = 'Fixed';
+        spectroRadiometerOBJ.fixedExposureTimeMilliseconds = 1500;
+       
+
+        if (1==2)
         spectroRadiometerOBJ.syncMode
         spectroRadiometerOBJ.speedMode
         spectroRadiometerOBJ.exposureMode
+        end
         
         if (1==2)
         spectroRadiometerOBJ.setOptions(...
