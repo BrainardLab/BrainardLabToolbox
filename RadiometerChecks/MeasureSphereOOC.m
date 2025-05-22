@@ -176,9 +176,11 @@ switch (meter)
             error('Serial number read from meter doesn''t match meter entered.\n');
         end
 
-        spectroRadiometerOBJ.exposureMode = 'Fixed';
-        spectroRadiometerOBJ.fixedExposureTimeMilliseconds = 1500;
-       
+        if (1==2)
+            spectroRadiometerOBJ.exposureMode = 'Fixed';
+            spectroRadiometerOBJ.fixedExposureTimeMilliseconds = 1500;
+        end
+        
 
         if (1==2)
         spectroRadiometerOBJ.syncMode
@@ -190,7 +192,7 @@ switch (meter)
         spectroRadiometerOBJ.setOptions(...
                 'syncMode',  'None', ...                  % choose from 'None', 'Manual', 'NTSC', 'PAL', 'CINEMA'
                 'speedMode', 'Normal', ...                % choose from 'Slow','Normal','Fast', '2x Fast'
-                'exposureMode', 'Auto' ...             % Choose between 'Auto', and 'Fixed'
+                'exposureMode', 'Auto' ...                % Choose between 'Auto', and 'Fixed'
             );
         end
 
