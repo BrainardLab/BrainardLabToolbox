@@ -12,7 +12,7 @@
 function OOC_calibrateMonitor
     
     % Select a calibration configuration name
-    AvailableCalibrationConfigs = {  ...
+    AvailableCalibrationConfigs = {...
         'MetropsisCalibration'
         'VirtualWorldCalibration'
         'NaturaImageThresholds'
@@ -628,7 +628,7 @@ function radiometerOBJ = generateRadiometerObject(calibrationConfig)
     
     
     % List of available @Radiometer objects
-    radiometerTypes = {'PR650dev', 'PR670dev', 'SpectroCALdev'};
+    radiometerTypes = {'PR650dev', 'PR670dev', 'SpectroCALdev', 'CR250dev'};
     radiometersNum  = numel(radiometerTypes);
     
     % Ask the user to select a calibrator type
@@ -670,8 +670,31 @@ function radiometerOBJ = generateRadiometerObject(calibrationConfig)
             'apertureSize',     desiredApertureSize, ...
             'exposureTime',     desiredExposureTime ...
         );
+
     elseif (strcmp(selectedRadiometerType, 'SpectroCALdev'))
         radiometerOBJ = SpectroCALdev();
+
+    elseif (strcmp(selectedRadiometerType, 'CR250dev'))
+       radiometerOBJ = CR250dev(...
+                'verbosity',        1, ...        % 1 -> minimum verbosity
+                'devicePortString', [] ...       % empty -> automatic port detection)
+                );
+
+        % Set the sync mode to None
+        syncMode = 'None';
+    
+        % Or set it to manual mode with a sync Frequency of 120 Hz;
+        syncMode = 'Manual';
+        manualSyncFrequency = 60.0;
+
+        % Specify extra properties
+        radiometerOBJ.setOptions(...
+                'syncMode',  syncMode, ...                % choose from 'None', 'Manual', 'NTSC', 'PAL', 'CINEMA'
+                'manualSyncFrequency',manualSyncFrequency, ...
+                'speedMode', 'Normal', ...                % choose from 'Slow','Normal','Fast', '2x Fast'
+                'exposureMode', 'Auto' ...                % Choose between 'Auto', and 'Fixed'
+       );
+
     end
     
 end
