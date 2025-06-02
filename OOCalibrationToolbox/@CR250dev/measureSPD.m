@@ -35,7 +35,7 @@ function doTheMeasurement(obj)
 
     if (contains(response, 'OK:0:M:No errors'))
     else
-        fprintf(2, '>>>> Measure command returned: ''%s'' (a warning).'\n', response);
+        fprintf(2, '>>>> Measure command returned: ''%s'' (a warning).\n', response);
         fprintf(2, '>>>> Check manual for interpretation of this warning message.\n')
     end
 
