@@ -71,6 +71,18 @@ if all(nDevices == 3) && numFiles == 3 % Only create this plot if there are 3 ca
     % Gamma functions.
     plotGammaData(obj, figureGroupIndex, lineColors, hPanel, pos);
 
+    % Saving the plot
+    splitParts = strsplit(obj.plotsExportsFolder{2}, '/'); % Extract the second cal file name from the path
+    filenameWithExt = splitParts{end-1};
+    filenameNoExt = erase(filenameWithExt, '.mat');
+
+    % Define the file name and full path for saving
+    pdfFilename = fullfile(obj.plotsExportsFolder{1}, ['CompareGamma_with_' filenameNoExt '_plus.pdf']);
+    % 'plus' indicates that we are comparing more than two files
+
+    % Save the whole figure as a JPG image
+    exportgraphics(hFig, pdfFilename, 'ContentType', 'vector');
+
 end
 
 end

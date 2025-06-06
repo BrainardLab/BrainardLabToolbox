@@ -52,6 +52,13 @@ function plotLinearityCheckData(obj, figureGroupIndex, gridDims)
     
     % Plot nominal and measured spectra
     plotSpectralAditivityData(obj, figureGroupIndex, hPanel, pos);
+
+    % Define the file name and full path for saving
+    pdfFilename = fullfile(obj.plotsExportsFolder, 'Linearity_Check_Data.pdf');
+
+    % Save the whole figure as a JPG image
+    exportgraphics(hFig, pdfFilename, 'ContentType', 'vector');
+
 end
 
 function plotSpectralAditivityData(obj, figureGroupIndex, hPanel, pos)
