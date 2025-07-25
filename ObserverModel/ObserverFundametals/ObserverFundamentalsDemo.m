@@ -42,7 +42,9 @@ coneParams = DefaultConeParams('cie_asano');
 
 % Set age, pupil size, and field size paramters.  These are part of the CIE
 % model, and we apply the Asano et al. adjustments to these.
-coneParams.fieldSizeDegrees = 2;
+% 
+% Comparisons with Stockman-Sharpe tabulated get made if field size is 2 or 10
+coneParams.fieldSizeDegrees = 10;
 coneParams.ageYears = 32;
 coneParams.pupilDiamMM = 3;
 
@@ -115,11 +117,41 @@ xlabel('Wavelength (nm)');
 ylabel('Number of excitations'); grid on;
 title('Cone fundamental with spectrum in energy units');
 
+%% Load Stockman-Sharpe 2-deg
+load T_cones_ss2
+load T_cones_ss10
+
 %% Plot the normalized energy-unit fundamentals
-fundamentalsFig2 = figure; clf; hold on;
+%
+% Along with Stockman-Sharpe
+fundamentalsFig2 = figure; clf;
+set(fundamentalsFig2,"Position",[10 10 2150 660]);
+subplot(1,2,1); hold on;
 plot(wls,T_energyExcitationProb(1,:)/max(T_energyExcitationProb(1,:)),'r','LineWidth',6);
 plot(wls,T_energyExcitationProb(2,:)/max(T_energyExcitationProb(2,:)),'g','LineWidth',6);
 plot(wls,T_energyExcitationProb(3,:)/max(T_energyExcitationProb(3,:)),'b','LineWidth',6);
+switch (coneParams.fieldSizeDegrees)
+    case 2
+        plot(SToWls(S_cones_ss2),T_cones_ss2,'k:','LineWidth',2);
+    case 10
+        plot(SToWls(S_cones_ss10),T_cones_ss10,'k:','LineWidth',2);
+end
 xlabel('Wavelength (nm)');
 ylabel('Number of excitations'); grid on;
 title('Cone fundamental (normalized) with spectrum in energy units');
+
+subplot(1,2,2); hold on;
+plot(wls,log10(T_energyExcitationProb(1,:)/max(T_energyExcitationProb(1,:))),'r','LineWidth',6);
+plot(wls,log10(T_energyExcitationProb(2,:)/max(T_energyExcitationProb(2,:))),'g','LineWidth',6);
+plot(wls,log10(T_energyExcitationProb(3,:)/max(T_energyExcitationProb(3,:))),'b','LineWidth',6);
+switch (coneParams.fieldSizeDegrees)
+    case 2
+        plot(SToWls(S_cones_ss2),log10(T_cones_ss2),'k:','LineWidth',2);
+    case 10
+        plot(SToWls(S_cones_ss10),log10(T_cones_ss10),'k:','LineWidth',2);
+end
+xlabel('Wavelength (nm)');
+ylabel('Number of excitations'); grid on;
+title('Cone fundamental (normalized) with spectrum in energy units');
+
+
