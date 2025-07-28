@@ -1,4 +1,4 @@
-function [T,T_energy,T_quantal] = ComputeObserverFundamentals(coneParams,S)
+function [T,T_energy,T_quantalIsomerizations,adjIndDiffParams] = ComputeObserverFundamentals(coneParams,S)
 % Compute cone fundamentals from cone parameter structure
 %
 % Syntax:
@@ -56,11 +56,11 @@ switch (coneParams.type)
     case 'cie_asano'
         
         % Get cone spectral sensitivities
-        [~,T_quantal] = ...
+        [~,~,T_quantalIsomerizations,adjIndDiffParams] = ...
             ComputeCIEConeFundamentals(MakeItS(S),coneParams.fieldSizeDegrees,coneParams.ageYears,coneParams.pupilDiamMM, ...
             [],[],[], ...
             [],[],[],coneParams.indDiffParams);
-        T_energy = EnergyToQuanta(S,T_quantal')';
+        T_energy = EnergyToQuanta(S,T_quantalIsomerizations')';
         for ii = 1:3
             T(ii,:) = T_energy(ii,:)/max(T_energy(ii,:));
         end        
