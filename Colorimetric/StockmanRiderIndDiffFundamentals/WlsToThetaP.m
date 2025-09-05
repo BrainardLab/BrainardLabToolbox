@@ -1,0 +1,18 @@
+function thetaP = WlsToThetaP(nm)
+% thetaP = WlsToThetaP(nm)(nm)
+%
+% Get thetap from wavelength in nm, according to
+% Eq 2 of the Stockman-Rider paper.
+%
+% See also StockmanRiderDemo, Lconelog, Mconelog, Sconelog
+
+% History
+%   2025-09-05  dhb  Modularized this little bit.
+
+% This is Eq 2 of the paper, with x representing theta_p.
+%   log10(360) = 2.5563
+%   1/(pi/log10(850/360) = 0.1188
+% This puts in more places than display in Matlab.
+thetaP = (log10(nm)-2.556302500767287267)/0.1187666467581842301;
+
+end

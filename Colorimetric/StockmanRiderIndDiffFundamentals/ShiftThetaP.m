@@ -1,0 +1,15 @@
+function [thetaP,deltaThetaP] =  ShiftThetaP(thetaP,wlShift,templatePeakWl)
+% [thetaP,deltaThetaP] =  ShiftThetaP(thetaP,,wlShift,templatePeakWl)
+%
+% Shift thetaP values for a passed set of thetaP and the wlShift in nm, given template
+% peak wavelength in nm.  This is implementing Equation 9 of the Stockman-Rider
+% paper.
+
+% History
+%   2025-09-05  dhb  Modularize this calculation
+
+% Equation 9 of the paper, once you work through the constant.
+deltaThetaP = log10(templatePeakWl/(templatePeakWl+wlShift))/0.1187666467581842301;
+thetaP= thetaP + deltaThetaP;
+
+end
