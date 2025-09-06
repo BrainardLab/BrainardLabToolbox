@@ -3,7 +3,7 @@ function [thetaP,deltaThetaP] =  ShiftThetaP(thetaP,wlShift,templatePeakWl)
 %
 % Shift thetaP values for a passed set of thetaP and the wlShift in nm, given template
 % peak wavelength in nm.  This is implementing Equation 9 of the Stockman-Rider
-% paper.
+% paper. This applies for photopigment thetaP's, not lens or macular pigment versions.
 
 % History
 %   2025-09-05  dhb  Modularize this calculation
