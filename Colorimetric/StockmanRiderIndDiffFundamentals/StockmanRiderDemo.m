@@ -26,6 +26,9 @@
 %   or the 557.5 in the paper (see text near Figure 4).
 %     But when shifted -2.7 nm using the formule, the peak does end up at 550.4
 %     through the same function.  What is going on?
+%   Lens density.  CIE 2006 had two components whose density shifted differently with age.
+%     Did this go away in the 2012 version? Is that available somewhere without my having
+%     to buy the CIE report?
 
 %% Clear
 clear; close all;
