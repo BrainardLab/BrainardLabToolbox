@@ -19,9 +19,13 @@
 %   2025-09-05  dhb  Matlab first version as described above.
 
 % Q's for Stockman/Rider
-%   M cone absorbance peak, 529.8 (paper and function) or 529.9 (Python code)?
+%   M cone absorbance peak, 529.8 (paper, function) or 529.9 (Python code)?
 %   S cone absorbance peak 416.9 (paper) or 417.0 (function)
 %   Are the extended tabulated absorbances available somewhere?
+%   L ser peak is at 551.1 as computed by function, rather than 553.1 in the code
+%   or the 557.5 in the paper (see text near Figure 4).
+%     But when shifted -2.7 nm using the formule, the peak does end up at 550.4
+%     through the same function.  What is going on?
 
 %% Clear
 clear; close all;
@@ -42,7 +46,7 @@ load T_log10coneabsorbance_ss
 Lshift = 0.0; 
 Mshift = 0.0;
 Sshift = 0.0;
-deltaWlnm = 0.01;
+deltaWlnm = 0.1;
 wls = (360:deltaWlnm:850)';
 SR_LMSabsorbances = LMSconelog(wls,Lshift,Mshift,Sshift,'lin');
 fprintf('Wavelength range: %.0f - %.0f nm\n', min(SR_LMSabsorbances(:,1)), max(SR_LMSabsorbances(:,1)));
@@ -248,3 +252,41 @@ grid on;
 fprintf('Young observer ODs: L=%.2f, M=%.2f, S=%.2f\n', Lod_young, Mod_young, Sod_young);
 fprintf('Older observer ODs: L=%.2f, M=%.2f, S=%.2f\n', Lod_old, Mod_old, Sod_old);
 
+%% Example 4: L cone serine and alanine variants
+%
+% The paper provides a template for the codon 180 serene version of the L cone
+% photopigment, and tells you the shift to put in to get the alanine variant.  I believe
+% the idea is that these are constructed so that their weighted average hits the
+% template for the population average
+fprintf('\nExample 4: Other templates\n');
+fprintf('==================================================\n');
+LserToala_shift = -2.7;
+SR_Lserabsorbance = 10.^Lserconelog(wls,Lshift);
+SR_Lalaabsorbance = 10.^Lserconelog(wls,LserToala_shift);
+fprintf('Peak L serene absorbance at: %.1f nm\n', wls(find(SR_Lserabsorbance == max(SR_Lserabsorbance), 1), 1));
+fprintf('Peak L alanine absorbance at: %.1f nm\n', wls(find(SR_Lalaabsorbance == max(SR_Lalaabsorbance), 1), 1));
+LserAndAlafigure = figure;
+absorbanceFig = figure;
+set(gcf,'Position',[100 100 800 1400]);
+subplot(2,1,1); hold on;
+plot(SR_LMSabsorbances(:,1), log10(SR_LMSabsorbances(:,2)), 'r', 'LineWidth', 2);
+plot(SR_LMSabsorbances(:,1), log10(SR_Lserabsorbance), 'y--', 'LineWidth', 2);
+plot(SR_LMSabsorbances(:,1), log10(SR_Lalaabsorbance), 'b--', 'LineWidth', 2);
+xlim([450 650]);
+ylim([-8 0]);
+xlabel('Wavelength (nm)');
+ylabel('Log10 Sensitivity');
+title('L Variants Absorbance');
+legend('L', 'Ser', 'Ala', 'Location', 'best');
+set(gca,'Color',[0.4 0.4 0.4]);
+
+subplot(2,1,2); hold on;
+plot(SR_LMSabsorbances(:,1), SR_LMSabsorbances(:,2), 'r', 'LineWidth', 2);
+plot(SR_LMSabsorbances(:,1), SR_Lserabsorbance, 'y--', 'LineWidth', 2);
+plot(SR_LMSabsorbances(:,1), SR_Lalaabsorbance, 'b--', 'LineWidth', 2);
+xlim([450 650]);
+xlabel('Wavelength (nm)');
+ylabel('Sensitivity');
+title('L Variants Absorbance');
+legend('L', 'Ser', 'Ala', 'Location', 'best');
+set(gca,'Color',[0.4 0.4 0.4]);

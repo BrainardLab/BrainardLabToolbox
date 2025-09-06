@@ -6,7 +6,7 @@ function y = Lconelog(nm, Lshift)
 %
 % Adopted by Claude AI and DHB from Stockman-Rider paper and Python code.
 %
-% See also StockmanRiderDemo, LMSconelog,
+% See also StockmanRiderDemo, LMSconelog, Lserconelog
 
 % History:
 %   2025-09-05  dhb  Matlab first version as described above.
@@ -39,6 +39,7 @@ c(15) = -0.7113921460;
 c(16) = -0.0793542168;
 c(17) = -0.0729797618;
 c(18) = -0.0016552130;
+c = round(c,6)
 
 % Compute the Fourier polynomial
 y = c(1) + c(2)*cos(thetaP) + c(3)*sin(thetaP) + c(4)*cos(2*thetaP) + c(5)*sin(2*thetaP) + ...
