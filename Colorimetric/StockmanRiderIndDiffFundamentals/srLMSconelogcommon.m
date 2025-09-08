@@ -1,4 +1,4 @@
-function y = LMSconelogcommon(nm, LMS_type, shift)
+function y = srLMSconelogcommon(nm, LMS_type, shift)
     % Best-fitting log-lin 8x2 Fourier Series Polynomial
     
     Lsercommonlmax = 557.5;

@@ -9,9 +9,9 @@ function RGBCMFs = calculateRGBCMFs(LMS_energy, primaries, nm_step, Lshift, Mshi
     nm_primaries = [CMF_Rnm; CMF_Gnm; CMF_Bnm];
     
     % Generate templates for primary wavelengths
-    mac_primaries = macular(nm_primaries);
-    lens_primaries = lens(nm_primaries);
-    coneabs_primaries = LMSconelog(nm_primaries, Lshift, Mshift, 0, 'lin');
+    mac_primaries = srMacular(nm_primaries);
+    lens_primaries = srLens(nm_primaries);
+    coneabs_primaries = srLMSconelog(nm_primaries, Lshift, Mshift, 0, 'lin');
     
     conenewq_retina_primaries = absorptancefromabsorbance(coneabs_primaries, Lod, Mod, Sod, 'lin');
     conenewq_cornea_primaries = corneafromlinabsorptance(conenewq_retina_primaries, mac_primaries, lens_primaries, mac_460, lens_400, 'lin');

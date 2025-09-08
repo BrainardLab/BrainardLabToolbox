@@ -1,21 +1,21 @@
-function y = Lserconelog(nm, Lshift)
-% y = Lserconelog(nm, Lshift)
+function y = srLserconelog(nm, Lshift)
+% y = srLserconelog(nm, Lshift)
 %
 % Returns the codon 180 serine variant L cone photopigment absorbance Fourier fit.
 %
 % Adopted by Claude AI and DHB from Stockman-Rider paper and Python code.
 %
-% See also StockmanRiderDemo, LMSconelog, Lconelog
+% See also StockmanRiderDemo, srLMSconelog, srLconelog
 
 % History:
 %   2025-09-05  dhb  Matlab first version as described above.
 
 % Get Theta_P from wavelengths
-thetaP = WlsToThetaP(nm);
+thetaP = srWlsToThetaPCone(nm);
 
 % Apply Lshift
 Lserlmax_template = 553.1;
-[thetaP,deltaThetaP] =  ShiftThetaP(thetaP,Lshift,Lserlmax_template);
+[thetaP,deltaThetaP] =  srShiftThetaPCone(thetaP,Lshift,Lserlmax_template);
 
 % Table of coefficients.  Extracted from Python code by Claude AI.  In Table 4
 % of the paper.

@@ -1,18 +1,18 @@
-function y = Mconelog(nm, Mshift)
-% y = Mconelog(nm, Mshift)
+function y = srMconelog(nm, Mshift)
+% y = srMconelog(nm, Mshift)
 %
 % This returns the fit to the Stockman-Sharp log10 M absorbance.  Paper
 % Figure 1 and Table 1.
 %
 % Adopted by Claude AI and DHB from Stockman-Rider paper and Python code.
 %
-% See also StockmanRiderDemo, LMSconelog.
+% See also StockmanRiderDemo, srLMSconelog.
 
 % History:
 %   2025-09-05  dhb  Matlab first version as described above.
 
 % Get Theta_P from wavelengths
-thetaP = WlsToThetaP(nm);
+thetaP = srWlsToThetaPCone(nm);
 
 % Apply the wl shift as in Equation.  Mlmax given as 529.8 in the paper,
 % and that matches the polynomial when it is computed for 0 shift at 0.1
@@ -21,7 +21,7 @@ thetaP = WlsToThetaP(nm);
 % has a second order effect when you shift because it determines how
 % the thetaPs get shifted, and it won't be much different.
 Mlmax_template = 529.8;
-[thetaP,deltaThetaP] =  ShiftThetaP(thetaP,Mshift,Mlmax_template);
+[thetaP,deltaThetaP] =  srShiftThetaPCone(thetaP,Mshift,Mlmax_template);
 
 % Table of coefficients.  Table 1 of paper, but more places.
 % Claude snagged these from the python code.

@@ -1,11 +1,11 @@
-function y = macular(nm)
-% y = macular(nm)
+function y = srMacular(nm)
+% y = srMacular(nm)
 %
 % Return Stockman-Rider macular density Fourier fit
 %
 % Adopted by Claude AI and DHB from Stockman-Rider paper and Python code.
 %
-% See also StockmanRiderDemo, LMSconelog.
+% See also StockmanRiderDemo, srLMSconelog.
 
 % History:
 %   2025-09-05  dhb  Matlab first version as described above.

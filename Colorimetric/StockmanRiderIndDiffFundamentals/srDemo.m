@@ -52,7 +52,7 @@ Mshift = 0.0;
 Sshift = 0.0;
 deltaWlnm = 0.1;
 wls = (360:deltaWlnm:850)';
-SR_LMSabsorbances = LMSconelog(wls,Lshift,Mshift,Sshift,'lin');
+SR_LMSabsorbances = srLMSconelog(wls,Lshift,Mshift,Sshift,'lin');
 fprintf('Wavelength range: %.0f - %.0f nm\n', min(SR_LMSabsorbances(:,1)), max(SR_LMSabsorbances(:,1)));
 fprintf('Number of data points: %d\n', size(SR_LMSabsorbances, 1));
 fprintf('Peak L absorbance at: %.1f nm\n', SR_LMSabsorbances(find(SR_LMSabsorbances(:,2) == max(SR_LMSabsorbances(:,2)), 1), 1));
@@ -113,14 +113,14 @@ Mod_2deg = 0.50;
 Sod_2deg = 0.40;
 mac_460_2deg = 0.350; 
 lens_400 = 1.7649;
-[SR_LMS_energyfundamentals_2deg, LMS_quantalfundementals_2deg] = calculateCMFs(deltaWlnm,Lshift,Mshift,Lod_2deg,Mod_2deg,Sod_2deg,mac_460_2deg,lens_400);
+[SR_LMS_energyfundamentals_2deg, LMS_quantalfundementals_2deg] = srCalculateCMFs(deltaWlnm,Lshift,Mshift,Lod_2deg,Mod_2deg,Sod_2deg,mac_460_2deg,lens_400);
 
 % For 10-deg, macular pigment value is 0.095 = 0.271*0.350, lens stays the same, and photopigment ODs are 0.38, 0.38 and 0.30
 Lod_10deg = 0.38;
 Mod_10deg = 0.38;
 Sod_10deg = 0.30;
 mac_460_10deg = 0.095; 
-[SR_LMS_energyfundamentals_10deg, LMS_quantalfundametals_10deg] = calculateCMFs(deltaWlnm,Lshift,Mshift,Lod_10deg,Mod_10deg,Sod_10deg,mac_460_10deg,lens_400);
+[SR_LMS_energyfundamentals_10deg, LMS_quantalfundametals_10deg] = srCalculateCMFs(deltaWlnm,Lshift,Mshift,Lod_10deg,Mod_10deg,Sod_10deg,mac_460_10deg,lens_400);
 
 % Display some key information
 fprintf('Wavelength range: %.0f - %.0f nm\n', min(SR_LMS_energyfundamentals_2deg(:,1)), max(SR_LMS_energyfundamentals_2deg(:,1)));
@@ -202,7 +202,7 @@ fprintf('=============================================\n');
 Lshift = 2.0;  % 2 nm shift in L cone
 Mshift = -1.0; % 1 nm shift in M cone (opposite direction)
 
-[LMS_shifted, ~, RGB_shifted] = calculateCMFs(1.0, Lshift, Mshift);
+[LMS_shifted, ~, RGB_shifted] = srCalculateCMFs(1.0, Lshift, Mshift);
 
 % Compare with normal
 subplot(2,2,3);
@@ -237,8 +237,8 @@ Sod_old = 0.28;
 mac_old = 0.25;
 lens_old = 2.5;
 
-[LMS_young, ~, ~] = calculateCMFs(1.0, 0, 0, Lod_young, Mod_young, Sod_young, mac_young, lens_young);
-[LMS_old, ~, ~] = calculateCMFs(1.0, 0, 0, Lod_old, Mod_old, Sod_old, mac_old, lens_old);
+[LMS_young, ~, ~] = srCalculateCMFs(1.0, 0, 0, Lod_young, Mod_young, Sod_young, mac_young, lens_young);
+[LMS_old, ~, ~] = srCalculateCMFs(1.0, 0, 0, Lod_old, Mod_old, Sod_old, mac_old, lens_old);
 
 subplot(2,2,4);
 plot(LMS_young(:,1), LMS_young(:,2), 'r-', 'LineWidth', 2); hold on;
@@ -265,8 +265,8 @@ fprintf('Older observer ODs: L=%.2f, M=%.2f, S=%.2f\n', Lod_old, Mod_old, Sod_ol
 fprintf('\nExample 4: Other templates\n');
 fprintf('==================================================\n');
 LserToala_shift = -2.7;
-SR_Lserabsorbance = 10.^Lserconelog(wls,Lshift);
-SR_Lalaabsorbance = 10.^Lserconelog(wls,LserToala_shift);
+SR_Lserabsorbance = 10.^srLserconelog(wls,Lshift);
+SR_Lalaabsorbance = 10.^srLserconelog(wls,LserToala_shift);
 fprintf('Peak L serene absorbance at: %.1f nm\n', wls(find(SR_Lserabsorbance == max(SR_Lserabsorbance), 1), 1));
 fprintf('Peak L alanine absorbance at: %.1f nm\n', wls(find(SR_Lalaabsorbance == max(SR_Lalaabsorbance), 1), 1));
 LserAndAlafigure = figure;

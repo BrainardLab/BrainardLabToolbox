@@ -1,10 +1,10 @@
-function thetaP = WlsToThetaP(nm)
-% thetaP = WlsToThetaP(nm)(nm)
+function thetaP = srWlsToThetaPCone(nm)
+% thetaP = srWlsToThetaPCone(nm)(nm)
 %
 % Get thetap from wavelength in nm, according to Eq 2 of the Stockman-Rider paper.  This
 % applies to photopigment thetaPs, not to lens and macular pigment versions.
 %
-% See also StockmanRiderDemo, Lconelog, Mconelog, Sconelog
+% See also StockmanRiderDemo, srLconelog, srMconelog, srSconelog
 
 % History
 %   2025-09-05  dhb  Modularized this little bit.

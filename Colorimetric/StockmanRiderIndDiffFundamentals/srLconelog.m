@@ -1,22 +1,22 @@
-function y = Lconelog(nm, Lshift)
-% y = Lconelog(nm, Lshift)
+function y = srLconelog(nm, Lshift)
+% y = srLconelog(nm, Lshift)
 %
 % This returns the fit to the Stockman-Sharp log10 L absorbance.  Paper
 % Figure 1 and Table 1.
 %
 % Adopted by Claude AI and DHB from Stockman-Rider paper and Python code.
 %
-% See also StockmanRiderDemo, LMSconelog, Lserconelog
+% See also StockmanRiderDemo, srLMSconelog, srLserconelog
 
 % History:
 %   2025-09-05  dhb  Matlab first version as described above.
 
 % Get Theta_P from wavelengths
-thetaP = WlsToThetaP(nm);
+thetaP = srWlsToThetaPCone(nm);
 
 % Apply Lshift
 Llmax_template = 551.9;
-[thetaP,deltaThetaP] =  ShiftThetaP(thetaP,Lshift,Llmax_template);
+[thetaP,deltaThetaP] =  srShiftThetaPCone(thetaP,Lshift,Llmax_template);
 
 % Table of coefficients.  Table 1 of paper, but more places.
 % Extracted from the Python code by DHB because Claude
@@ -39,7 +39,6 @@ c(15) = -0.7113921460;
 c(16) = -0.0793542168;
 c(17) = -0.0729797618;
 c(18) = -0.0016552130;
-c = round(c,6)
 
 % Compute the Fourier polynomial
 y = c(1) + c(2)*cos(thetaP) + c(3)*sin(thetaP) + c(4)*cos(2*thetaP) + c(5)*sin(2*thetaP) + ...

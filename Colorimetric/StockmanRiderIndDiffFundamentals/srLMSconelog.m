@@ -1,5 +1,5 @@
-function LMSout = LMSconelog(nm, Lshift, Mshift, Sshift, loglin)
-% LMSout = LMSconelog(nm, Lshift, Mshift, Sshift, loglin)
+function LMSout = srLMSconelog(nm, Lshift, Mshift, Sshift, loglin)
+% LMSout = srLMSconelog(nm, Lshift, Mshift, Sshift, loglin)
 %
 % This returns the fits to the Stockman-Sharp LMS absorbances.  Paper
 % Figure 1 and Table 1.
@@ -19,9 +19,9 @@ function LMSout = LMSconelog(nm, Lshift, Mshift, Sshift, loglin)
     % Calculate log10 LMS absorbances from individual Fourier templates
     LMSout = zeros(length(nm), 4);
     LMSout(:,1) = nm(:); % 
-    LMSout(:,2) = Lconelog(nm, Lshift);
-    LMSout(:,3) = Mconelog(nm, Mshift);
-    LMSout(:,4) = Sconelog(nm, Sshift);
+    LMSout(:,2) = srLconelog(nm, Lshift);
+    LMSout(:,3) = srMconelog(nm, Mshift);
+    LMSout(:,4) = srSconelog(nm, Sshift);
     
     if strcmp(loglin, 'lin')
         for n = 2:4

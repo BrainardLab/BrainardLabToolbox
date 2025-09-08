@@ -1,4 +1,4 @@
-function [LMS_energy, LMS_quantal, RGBCMFs] = calculateCMFs(nm_step, Lshift, Mshift, Lod, Mod, Sod, mac_460, lens_400)
+function [LMS_energy, LMS_quantal, RGBCMFs] = srCalculateCMFs(nm_step, Lshift, Mshift, Lod, Mod, Sod, mac_460, lens_400)
     % Main function to calculate color matching functions
     
     % Default parameters (Stockman & Sharpe 2-degree standard)
@@ -15,11 +15,11 @@ function [LMS_energy, LMS_quantal, RGBCMFs] = calculateCMFs(nm_step, Lshift, Msh
     nm = (360:nm_step:850)';
     
     % Generate macular and lens templates
-    mac = macular(nm);
-    lens_template = lens(nm);
+    mac = srMacular(nm);
+    lens_template = srLens(nm);
     
     % Calculate cone absorbance templates
-    coneabs_template = LMSconelog(nm, Lshift, Mshift, 0, 'lin');
+    coneabs_template = srLMSconelog(nm, Lshift, Mshift, 0, 'lin');
     
     % Retinal absorptances
     conenewq_retina = absorptancefromabsorbance(coneabs_template, Lod, Mod, Sod, 'lin');

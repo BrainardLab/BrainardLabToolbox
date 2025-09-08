@@ -1,5 +1,5 @@
-function [thetaP,deltaThetaP] =  ShiftThetaP(thetaP,wlShift,templatePeakWl)
-% [thetaP,deltaThetaP] =  ShiftThetaP(thetaP,,wlShift,templatePeakWl)
+function [thetaP,deltaThetaP] =  srShiftThetaPCone(thetaP,wlShift,templatePeakWl)
+% [thetaP,deltaThetaP] =  srShiftThetaPCone(thetaP,,wlShift,templatePeakWl)
 %
 % Shift thetaP values for a passed set of thetaP and the wlShift in nm, given template
 % peak wavelength in nm.  This is implementing Equation 9 of the Stockman-Rider
