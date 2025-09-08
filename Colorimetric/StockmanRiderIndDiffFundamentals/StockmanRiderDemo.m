@@ -28,7 +28,8 @@
 %     through the same function.  What is going on?
 %   Lens density.  CIE 2006 had two components whose density shifted differently with age.
 %     Did this go away in the 2012 version? Is that available somewhere without my having
-%     to buy the CIE report?
+%     to buy the CIE report, along with however it is recommended to adjust lens density
+%     with age.  Does that standard still include a pupil size adjustment?
 
 %% Clear
 clear; close all;
