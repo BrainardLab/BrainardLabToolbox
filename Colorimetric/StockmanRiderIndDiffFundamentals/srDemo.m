@@ -20,16 +20,43 @@
 
 % Q's for Stockman/Rider
 %   M cone absorbance peak, 529.8 (paper, function) or 529.9 (Python code)?
+%
 %   S cone absorbance peak 416.9 (paper) or 417.0 (function)
-%   Are the extended tabulated absorbances available somewhere?
+%
+%   Are the extended tabulated absorbances available somewhere?  Then I
+%   could better reproduce the paper figure.
+%
 %   L ser peak is at 551.1 as computed by function, rather than 553.1 in the code
 %   or the 557.5 in the paper (see text near Figure 4).
-%     But when shifted -2.7 nm using the formule, the peak does end up at 550.4
+%     But when shifted -2.7 nm using the formulae, the peak does end up at 550.4
 %     through the same function.  What is going on?
+%
+%   The paper has the nice Table 3 with the shifts corresponding to each
+%   polymorphism collected up. But, the L codon 180 ser -> alanine shift is
+%   given as -4. nm, rather than the -2.7 in the derived absorbance
+%   functions for these. Why? My hope had been that I could use those
+%   shifts to generate photopigment absorbance for any of the genotypes
+%   listed, in a manner that matches up as closely as possible with CIE
+%   2006 in other regards.  The difference between -4 and -2.7 is not
+%   large, but is at the least confusing to me.
+%
+%   As noted just above, I am interested in getting photopigment absorbance
+%   for various genotyped pigments in a way that matches up with CIE 2006.
+%   Table 3 seems like a resource for this, except a) see query just above
+%   and b) what I'm after is not the shift, but rather the right shift to
+%   apply to one of the Fourier fits for each polymoric variant.  So I'd
+%   like to connect up the shifts to a baseline peak.  As an example,
+%   suppose I have an M cone with serene at codon 180.  How does this shift
+%   relate to the 529.8 (or maybe 529.9) lambda max in Mconelog()?
+%   
 %   Lens density.  CIE 2006 had two components whose density shifted differently with age.
-%     Did this go away in the 2012 version? Is that available somewhere without my having
-%     to buy the CIE report, along with however it is recommended to adjust lens density
-%     with age.  Does that standard still include a pupil size adjustment?
+%     I'm guessing the two component version went away in 2012 version?
+%     Otherwise I don't understand lens() and just adjusting its OD to
+%     handle age. Is the 203:2012 standard available somewhere without my
+%     having to buy the CIE report, along with however it is recommended to
+%     adjust lens density with age. (That is, are the formualae that were
+%     adopted described in a published paper, or only the standard? Does
+%     that standard still include a pupil size adjustment as in CIE 2006?
 
 %% Clear
 clear; close all;
@@ -195,66 +222,66 @@ legend('L', 'M', 'S', 'Location', 'best');
 set(gca,'Color',[0.4 0.4 0.4]);
 
 %% Example 2: Shifted L and M cones (simulating genetic variation)
-fprintf('\nExample 2: Shifted L and M cone sensitivities\n');
-fprintf('=============================================\n');
-
-% Simulate individual with shifted cone sensitivities
-Lshift = 2.0;  % 2 nm shift in L cone
-Mshift = -1.0; % 1 nm shift in M cone (opposite direction)
-
-[LMS_shifted, ~, RGB_shifted] = srCalculateCMFs(1.0, Lshift, Mshift);
-
-% Compare with normal
-subplot(2,2,3);
-plot(SR_LMS_energyfundamentals_2deg(:,1), SR_LMS_energyfundamentals_2deg(:,2), 'r--', 'LineWidth', 1.5); hold on;
-plot(SR_LMS_energyfundamentals_2deg(:,1), SR_LMS_energyfundamentals_2deg(:,3), 'g--', 'LineWidth', 1.5);
-plot(LMS_shifted(:,1), LMS_shifted(:,2), 'r-', 'LineWidth', 2);
-plot(LMS_shifted(:,1), LMS_shifted(:,3), 'g-', 'LineWidth', 2);
-xlabel('Wavelength (nm)');
-ylabel('Sensitivity');
-title('Normal vs Shifted L&M Cones');
-legend('L normal', 'M normal', 'L shifted', 'M shifted', 'Location', 'best');
-grid on;
-
-fprintf('L cone shift: %.1f nm\n', Lshift);
-fprintf('M cone shift: %.1f nm\n', Mshift);
+% fprintf('\nExample 2: Shifted L and M cone sensitivities\n');
+% fprintf('=============================================\n');
+% 
+% % Simulate individual with shifted cone sensitivities
+% Lshift = 2.0;  % 2 nm shift in L cone
+% Mshift = -1.0; % 1 nm shift in M cone (opposite direction)
+% 
+% [LMS_shifted, ~, RGB_shifted] = srCalculateCMFs(1.0, Lshift, Mshift);
+% 
+% % Compare with normal
+% subplot(2,2,3);
+% plot(SR_LMS_energyfundamentals_2deg(:,1), SR_LMS_energyfundamentals_2deg(:,2), 'r--', 'LineWidth', 1.5); hold on;
+% plot(SR_LMS_energyfundamentals_2deg(:,1), SR_LMS_energyfundamentals_2deg(:,3), 'g--', 'LineWidth', 1.5);
+% plot(LMS_shifted(:,1), LMS_shifted(:,2), 'r-', 'LineWidth', 2);
+% plot(LMS_shifted(:,1), LMS_shifted(:,3), 'g-', 'LineWidth', 2);
+% xlabel('Wavelength (nm)');
+% ylabel('Sensitivity');
+% title('Normal vs Shifted L&M Cones');
+% legend('L normal', 'M normal', 'L shifted', 'M shifted', 'Location', 'best');
+% grid on;
+% 
+% fprintf('L cone shift: %.1f nm\n', Lshift);
+% fprintf('M cone shift: %.1f nm\n', Mshift);
 
 %% Example 3: Different optical densities (simulating age effects)
-fprintf('\nExample 3: Age-related changes in optical densities\n');
-fprintf('==================================================\n');
-
-% Young observer (higher optical densities)
-Lod_young = 0.50;
-Mod_young = 0.50;
-Sod_young = 0.40;
-mac_young = 0.35;
-lens_young = 1.76;
-
-% Older observer (lower optical densities, more lens pigment)
-Lod_old = 0.35;
-Mod_old = 0.35;
-Sod_old = 0.28;
-mac_old = 0.25;
-lens_old = 2.5;
-
-[LMS_young, ~, ~] = srCalculateCMFs(1.0, 0, 0, Lod_young, Mod_young, Sod_young, mac_young, lens_young);
-[LMS_old, ~, ~] = srCalculateCMFs(1.0, 0, 0, Lod_old, Mod_old, Sod_old, mac_old, lens_old);
-
-subplot(2,2,4);
-plot(LMS_young(:,1), LMS_young(:,2), 'r-', 'LineWidth', 2); hold on;
-plot(LMS_young(:,1), LMS_young(:,3), 'g-', 'LineWidth', 2);
-plot(LMS_young(:,1), LMS_young(:,4), 'b-', 'LineWidth', 2);
-plot(LMS_old(:,1), LMS_old(:,2), 'r--', 'LineWidth', 1.5);
-plot(LMS_old(:,1), LMS_old(:,3), 'g--', 'LineWidth', 1.5);
-plot(LMS_old(:,1), LMS_old(:,4), 'b--', 'LineWidth', 1.5);
-xlabel('Wavelength (nm)');
-ylabel('Sensitivity');
-title('Young vs Older Observer');
-legend('L young', 'M young', 'S young', 'L old', 'M old', 'S old', 'Location', 'best');
-grid on;
-
-fprintf('Young observer ODs: L=%.2f, M=%.2f, S=%.2f\n', Lod_young, Mod_young, Sod_young);
-fprintf('Older observer ODs: L=%.2f, M=%.2f, S=%.2f\n', Lod_old, Mod_old, Sod_old);
+% fprintf('\nExample 3: Age-related changes in optical densities\n');
+% fprintf('==================================================\n');
+% 
+% % Young observer (higher optical densities)
+% Lod_young = 0.50;
+% Mod_young = 0.50;
+% Sod_young = 0.40;
+% mac_young = 0.35;
+% lens_young = 1.76;
+% 
+% % Older observer (lower optical densities, more lens pigment)
+% Lod_old = 0.35;
+% Mod_old = 0.35;
+% Sod_old = 0.28;
+% mac_old = 0.25;
+% lens_old = 2.5;
+% 
+% [LMS_young, ~, ~] = srCalculateCMFs(1.0, 0, 0, Lod_young, Mod_young, Sod_young, mac_young, lens_young);
+% [LMS_old, ~, ~] = srCalculateCMFs(1.0, 0, 0, Lod_old, Mod_old, Sod_old, mac_old, lens_old);
+% 
+% subplot(2,2,4);
+% plot(LMS_young(:,1), LMS_young(:,2), 'r-', 'LineWidth', 2); hold on;
+% plot(LMS_young(:,1), LMS_young(:,3), 'g-', 'LineWidth', 2);
+% plot(LMS_young(:,1), LMS_young(:,4), 'b-', 'LineWidth', 2);
+% plot(LMS_old(:,1), LMS_old(:,2), 'r--', 'LineWidth', 1.5);
+% plot(LMS_old(:,1), LMS_old(:,3), 'g--', 'LineWidth', 1.5);
+% plot(LMS_old(:,1), LMS_old(:,4), 'b--', 'LineWidth', 1.5);
+% xlabel('Wavelength (nm)');
+% ylabel('Sensitivity');
+% title('Young vs Older Observer');
+% legend('L young', 'M young', 'S young', 'L old', 'M old', 'S old', 'Location', 'best');
+% grid on;
+% 
+% fprintf('Young observer ODs: L=%.2f, M=%.2f, S=%.2f\n', Lod_young, Mod_young, Sod_young);
+% fprintf('Older observer ODs: L=%.2f, M=%.2f, S=%.2f\n', Lod_old, Mod_old, Sod_old);
 
 %% Example 4: L cone serine and alanine variants
 %
@@ -270,7 +297,6 @@ SR_Lalaabsorbance = 10.^srLserconelog(wls,LserToala_shift);
 fprintf('Peak L serene absorbance at: %.1f nm\n', wls(find(SR_Lserabsorbance == max(SR_Lserabsorbance), 1), 1));
 fprintf('Peak L alanine absorbance at: %.1f nm\n', wls(find(SR_Lalaabsorbance == max(SR_Lalaabsorbance), 1), 1));
 LserAndAlafigure = figure;
-absorbanceFig = figure;
 set(gcf,'Position',[100 100 800 1400]);
 subplot(2,1,1); hold on;
 plot(SR_LMSabsorbances(:,1), log10(SR_LMSabsorbances(:,2)), 'r', 'LineWidth', 2);
