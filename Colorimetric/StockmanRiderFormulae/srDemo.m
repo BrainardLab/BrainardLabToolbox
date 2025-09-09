@@ -1,4 +1,4 @@
-%% StockmanRiderDemo
+%% srDemo
 %
 % Demonstrates use of Stockman-Rider cone fundamentals formuale,
 % as implemented here.  The model is described in:
