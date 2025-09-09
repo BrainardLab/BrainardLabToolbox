@@ -14,53 +14,12 @@
 % not sure which version should be considered definitive.
 % 
 % Claude's translation was good but not perfect, so lots of hand checking.
-% The 
 %
 % The python version used to produce this code was downloaded from github
 % on September 2, 2025.
 
 % History:
 %   2025-09-05  dhb  Matlab first version as described above.
-
-% Q's for Stockman/Rider
-%   M cone absorbance peak, 529.8 (paper, function) or 529.9 (Python code)?
-%
-%   S cone absorbance peak 416.9 (paper) or 417.0 (function)
-%
-%   Are the extended tabulated absorbances available somewhere?  Then I
-%   could better reproduce the paper figure.
-%
-%   L ser peak is at 551.1 as computed by function, rather than 553.1 in the code
-%   or the 557.5 in the paper (see text near Figure 4).
-%     But when shifted -2.7 nm using the formulae, the peak does end up at 550.4
-%     through the same function.  What is going on?
-%
-%   The paper has the nice Table 3 with the shifts corresponding to each
-%   polymorphism collected up. But, the L codon 180 ser -> alanine shift is
-%   given as -4. nm, rather than the -2.7 in the derived absorbance
-%   functions for these. Why? My hope had been that I could use those
-%   shifts to generate photopigment absorbance for any of the genotypes
-%   listed, in a manner that matches up as closely as possible with CIE
-%   2006 in other regards.  The difference between -4 and -2.7 is not
-%   large, but is at the least confusing to me.
-%
-%   As noted just above, I am interested in getting photopigment absorbance
-%   for various genotyped pigments in a way that matches up with CIE 2006.
-%   Table 3 seems like a resource for this, except a) see query just above
-%   and b) what I'm after is not the shift, but rather the right shift to
-%   apply to one of the Fourier fits for each polymoric variant.  So I'd
-%   like to connect up the shifts to a baseline peak.  As an example,
-%   suppose I have an M cone with serene at codon 180.  How does this shift
-%   relate to the 529.8 (or maybe 529.9) lambda max in Mconelog()?
-%   
-%   Lens density.  CIE 2006 had two components whose density shifted differently with age.
-%     I'm guessing the two component version went away in 2012 version?
-%     Otherwise I don't understand lens() and just adjusting its OD to
-%     handle age. Is the 203:2012 standard available somewhere without my
-%     having to buy the CIE report, along with however it is recommended to
-%     adjust lens density with age. (That is, are the formualae that were
-%     adopted described in a published paper, or only the standard? Does
-%     that standard still include a pupil size adjustment as in CIE 2006?
 
 %% Clear
 clear; close all;
@@ -74,9 +33,8 @@ load T_log10coneabsorbance_ss
 
 % Compute LMS absorbances
 %
-% Absorbance peaks should be 551.9, 529.8 and 416.9 according to the paper which is where
-% they are in the what the Fourier polynominal produces, if you run it out at 0.1 nm
-% spacing. The peaks only do anyting in the code if you are shifting the absorbance
+% Absorbance peaks should be 551.9, 529.8 and 416.9 according to the paper.
+% The peaks only do anyting in the code if you are shifting the absorbance
 % spectra, as they determine how the argument to the Fourier polynomial gets shifted.
 Lshift = 0.0; 
 Mshift = 0.0;
