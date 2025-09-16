@@ -22,10 +22,10 @@ function [T,T_energy,T_quantalIsomerizations,adjIndDiffParams] = ComputeObserver
 %     T                               - Matrix of fundamentals, PTB matrix
 %                                       format with each fundamental in a
 %                                       row.  Normalized in energy units.
-%     T_energy                        - Matrix of fundamentals, PTB matrix
+%     T_energy                  - Matrix of fundamentals, PTB matrix
 %                                       format with each fundamental in a
 %                                       row.  Not normalized, in energy units.
-%     T_quantal                       - Matrix of fundamentals, PTB matrix
+%     T_quantal                 - Matrix of fundamentals, PTB matrix
 %                                       format with each fundamental in a row.
 %                                       Not normalized, and in quantal
 %                                       units.
