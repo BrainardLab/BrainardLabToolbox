@@ -11,7 +11,7 @@ function coneParams = DefaultConeParams(type)
 %    The input string type allows some flexibility about the description.
 %
 %    Asano et al. give the following population SD's for the individual
-%    difference parameters (their Table 5, Step 2 numbers:
+%    difference parameters (their Table 5, Step 2 numbers):
 %       Lens    - 18.7%
 %       Macular - 36.5%
 %       L Density - 9%

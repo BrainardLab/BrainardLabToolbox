@@ -17,6 +17,7 @@ clear; close all;
 
 % Set wavelength support
 wls = (400:5:700)';
+S = WlsToS(wls);
 
 %% Set the parameters of the Asano et al. model
 %
@@ -44,7 +45,7 @@ coneParams = DefaultConeParams('cie_asano');
 % model, and we apply the Asano et al. adjustments to these.
 % 
 % Comparisons with Stockman-Sharpe tabulated get made if field size is 2 or 10
-coneParams.fieldSizeDegrees = 10;
+coneParams.fieldSizeDegrees = 2;
 coneParams.ageYears = 32;
 coneParams.pupilDiamMM = 3;
 
@@ -74,7 +75,7 @@ coneParams.indDiffParams.lambdaMaxShift = [0 0 0]';
 % spectrum entering the cornea.  We know how to do this, but are not
 % illustrating it here.
 [~,~,T_quantalExcitationProb,adjIndDiffParams,cieConeParams,cieStaticParams] = ...
-    ComputeCIEConeFundamentals(MakeItS(wls),coneParams.fieldSizeDegrees,...
+    ComputeCIEConeFundamentals(S,coneParams.fieldSizeDegrees,...
     coneParams.ageYears,coneParams.pupilDiamMM,[],[],[], ...
     [],[],[],coneParams.indDiffParams);
 
@@ -107,6 +108,16 @@ T_energyExcitationProb = zeros(size(T_quantalExcitationProb));
 for cc = 1:nConeTypes
     T_energyExcitationProb(cc,:) = EnergyToQuanta(wls,T_quantalExcitationProb(cc,:)')';
 end
+
+% This call encapsulates the above and also returns the energy fundamentals normalized to
+% 1
+ [T_energyNormalized,T_energyExcitationProbChk,T_quantalExcitationProbChk] = ComputeObserverFundamentals(coneParams,S);
+ if (any(T_energyExcitationProb(:) ~= T_energyExcitationProbChk(:)))
+     error('Inconsistency in what we think a call does');
+ end
+ if (any(T_quantalExcitationProbChk(:) ~= T_quantalExcitationProbChk(:)))
+     error('Inconsistency in what we think a call does');
+ end
 
 %% Plot the energy-unit fundamentals
 fundamentalsFig1 = figure; clf; hold on;
@@ -154,4 +165,91 @@ xlabel('Wavelength (nm)');
 ylabel('Number of excitations'); grid on;
 title('Cone fundamental (normalized) with spectrum in energy units');
 
+% Generate a distribution of fundamentals
+%
+%   Asano et al. give the following population SD's for the individual
+%   difference parameters (their Table 5, Step 2 numbers):
+%       Lens    - 18.7%
+%       Macular - 36.5%
+%       L Density - 9%
+%       M Density - 9%
+%       S Density - 7.4%
+%       L Shift   - 2 nm
+%       M Shift   - 1.5 nm
+%       S Shift   - 1.3 nm
+nExemplars = 100;
+fundamentalsFig3 = figure; clf;
+set(fundamentalsFig3,"Position",[10 10 2150 660]);
+for ee = 1:10
+    coneParamsRnd{ee} = DefaultConeParams('cie_asano');
 
+    coneParamsRnd{ee}.fieldSizeDegrees = coneParams.fieldSizeDegrees;
+    coneParamsRnd{ee}.ageYears = coneParams.ageYears;
+    coneParamsRnd{ee}.pupilDiamMM = coneParams.pupilDiamMM;
+
+    % Set individual difference parameters. These are the parameters we
+    % implement from the Asano et al. model. Density changes apply to lens,
+    % macular pigment, and L, M, S photopigment. These are expressed as percent
+    % changes from the nominal values. Shifts in photoreceptor wavelength of
+    % peak absorption are in nm.  We take draws based on the Asano et al. 
+    % standard deviations, but truncate at a specified number of sds, to avoid 
+    % crazy outliers.
+    maxZ = 2;
+    lensSd = 18.7; macSd = 36.5;
+    LMDenSd = 9; SDenSd = 7.4;
+    LShiftSd = 2; MShiftSd = 1.5; SShiftSd = 1.3;
+
+    coneParamsRnd{ee}.indDiffParams.dlens = TruncatedZeroMeanNormal(lensSd,maxZ);
+    coneParamsRnd{ee}.indDiffParams.dmac = TruncatedZeroMeanNormal(macSd,maxZ);
+    coneParamsRnd{ee}.indDiffParams.dphotopigment = [ ...
+        TruncatedZeroMeanNormal(LMDenSd,maxZ) ...
+        TruncatedZeroMeanNormal(LMDenSd,maxZ) ...
+        TruncatedZeroMeanNormal(SDenSd,maxZ) ]';
+    coneParamsRnd{ee}.indDiffParams.lambdaMaxShift = [ ...
+        TruncatedZeroMeanNormal(LShiftSd,maxZ) ...
+        TruncatedZeroMeanNormal(MShiftSd,maxZ) ...
+        TruncatedZeroMeanNormal(SShiftSd,maxZ) ]';
+    T_conesRnd{ee} = ComputeObserverFundamentals(coneParamsRnd{ee},S);
+
+    subplot(1,2,1); hold on;
+    plot(wls,T_conesRnd{ee}(1,:),'r','LineWidth',1);
+    plot(wls,T_conesRnd{ee}(2,:),'g','LineWidth',1);
+    plot(wls,T_conesRnd{ee}(3,:),'b','LineWidth',1);
+
+    subplot(1,2,2); hold on;
+    plot(wls,log10(T_conesRnd{ee}(1,:)),'r','LineWidth',1);
+    plot(wls,log10(T_conesRnd{ee}(2,:)),'g','LineWidth',1);
+    plot(wls,log10(T_conesRnd{ee}(3,:)),'b','LineWidth',1);
+end
+
+subplot(1,2,1); hold on;
+switch (coneParams.fieldSizeDegrees)
+    case 2
+        plot(SToWls(S_cones_ss2),T_cones_ss2,'k:','LineWidth',3);
+    case 10
+        plot(SToWls(S_cones_ss10),T_cones_ss10,'k:','LineWidth',3);
+end
+xlabel('Wavelength (nm)');
+ylabel('Number of excitations'); grid on;
+title('Cone fundamental (normalized) with spectrum in energy units');
+
+subplot(1,2,2); hold on;
+switch (coneParams.fieldSizeDegrees)
+    case 2
+        plot(SToWls(S_cones_ss2),log10(T_cones_ss2),'k:','LineWidth',3);
+    case 10
+        plot(SToWls(S_cones_ss10),log10(T_cones_ss10),'k:','LineWidth',3);
+end
+xlabel('Wavelength (nm)');
+ylabel('Number of excitations'); grid on;
+title('Cone fundamental (normalized) with spectrum in energy units');
+
+function val = TruncatedZeroMeanNormal(sd,maxZ)
+val = normrnd(0,sd);
+if (val > maxZ*sd)
+    val = maxZ*sd;
+end
+if (val < -maxZ*sd)
+    val = -maxZ*sd;
+end
+end
