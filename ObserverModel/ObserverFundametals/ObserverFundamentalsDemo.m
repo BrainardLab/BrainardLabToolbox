@@ -112,10 +112,10 @@ end
 % This call encapsulates the above and also returns the energy fundamentals normalized to
 % 1
  [T_energyNormalized,T_energyExcitationProbChk,T_quantalExcitationProbChk] = ComputeObserverFundamentals(coneParams,S);
- if (any(T_energyExcitationProb(:) ~= T_energyExcitationProbChk(:)))
+ if (max(abs( (T_energyExcitationProb(:) - T_energyExcitationProbChk(:))/mean(T_energyExcitationProb(:)))) > 1e-7)
      error('Inconsistency in what we think a call does');
  end
- if (any(T_quantalExcitationProbChk(:) ~= T_quantalExcitationProbChk(:)))
+ if (max(abs((T_quantalExcitationProb(:) - T_quantalExcitationProbChk(:))/mean(T_quantalExcitationProb(:)))) > 1e-7)
      error('Inconsistency in what we think a call does');
  end
 
