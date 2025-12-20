@@ -553,10 +553,16 @@ end
 
 function status = ConfigureK10Adevice
     % ------ SET THE VERBOSITY LEVEL (1=minimum, 5=intermediate, 10=full)--
-    status = K10A_device('setVerbosityLevel', 1);
+    status = K10A_device('setVerbosityLevel', 10);
     
     % ------ OPEN THE DEVICE ----------------------------------------------
-    status = K10A_device('open', '/dev/tty.usbserial-KU000000');
+    if (ismac)
+        portName = '/dev/tty.usbserial-KU000000';
+    else
+        portName = '/dev/ttyUSB0';
+    end
+
+    status = K10A_device('open', portName);
     GUI.deviceStatus = status;
     
     if (status == 0)

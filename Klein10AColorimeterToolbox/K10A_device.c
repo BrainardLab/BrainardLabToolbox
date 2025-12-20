@@ -59,6 +59,7 @@
 
 #include "mex.h"
 #include "matrix.h"
+#include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -210,7 +211,7 @@ void mexFunction(int nlhs,      /* number of output (return) arguments */
 		}
 	}
  
-    char errorMessage[256];
+    char errorMessage[1024];
     unsigned char inputBuffer[MAX_INPUT_BUFFER_SIZE];
     int inputBufferSize;
             
@@ -435,18 +436,20 @@ void mexFunction(int nlhs,      /* number of output (return) arguments */
                 }
                 
                 // Get the value of the scalar input that indicates how many seconds to stream for
-                double streamingSeconds;
+                double streamingSeconds, extraSeconds;
                 streamingSeconds = mxGetScalar(prhs[2]);
+                extraSeconds = 2.0;
                 
                 /* Allocate memory for commandResultsBuffer */
-                int commandResultsBufferLength = (int)(96.0*8.0*streamingSeconds+0.5);
+                int commandResultsBufferLength = (int)(96.0*8.0*(streamingSeconds)+0.5);
+                int commandResultsBufferLengthExtraSeconds = (int)(96.0*8.0*(streamingSeconds+extraSeconds)+0.5);
                 if (commandResultsBufferLength < MINIMUM_STREAMING_BUFFER_SIZE) {
                     commandResultsBufferLength = MINIMUM_STREAMING_BUFFER_SIZE;
                 }
                 mexPrintf("Will stream for %2.2f seconds\n", (float)commandResultsBufferLength/(float)(96*8));
                 
                 char *commandResultsBuffer;
-                commandResultsBuffer = mxCalloc(commandResultsBufferLength, sizeof(char));
+                commandResultsBuffer = mxCalloc(commandResultsBufferLengthExtraSeconds, sizeof(char));
 
                 int timeOutSeconds, sleepTimeInMilliseconds;
                 timeOutSeconds = commandDictionary[commandIndex].timeOutSeconds;
@@ -468,6 +471,9 @@ void mexFunction(int nlhs,      /* number of output (return) arguments */
                     }
                     else if (*status == 1) {
                         mexErrMsgTxt("Klein10A: Serial port device is not open !\n");
+                    }
+                    if (verbosityLevel >= 10) {
+                        mexPrintf("Klein10A: Status while polling: %d (total bytes read: %d/%d)!\n", *status, totalBytesRead, commandResultsBufferLength);
                     }
                     if (timedOut == 1) {
                         mexErrMsgTxt("Streaming timed out while polling.\n");
@@ -534,6 +540,7 @@ void mexFunction(int nlhs,      /* number of output (return) arguments */
                         } // for kk
                     } // if byteIndex ...
                 } /*for k*/
+                
                 
                 // Do not need commandResultsBuffer anymore, so free it
                 mxFree(commandResultsBuffer);
