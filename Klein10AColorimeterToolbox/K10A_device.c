@@ -211,7 +211,8 @@ void mexFunction(int nlhs,      /* number of output (return) arguments */
 		}
 	}
  
-    char errorMessage[1024];
+    //char errorMessage[1024];
+    char errorMessage[256];
     unsigned char inputBuffer[MAX_INPUT_BUFFER_SIZE];
     int inputBufferSize;
             
@@ -438,6 +439,7 @@ void mexFunction(int nlhs,      /* number of output (return) arguments */
                 // Get the value of the scalar input that indicates how many seconds to stream for
                 double streamingSeconds, extraSeconds;
                 streamingSeconds = mxGetScalar(prhs[2]);
+
                 extraSeconds = 2.0;
                 
                 /* Allocate memory for commandResultsBuffer */
@@ -877,7 +879,8 @@ int readKleinPort(int *deviceHandle, unsigned char *inputBuffer, int *inputBuffe
     dataRead = read(*deviceHandle, inputBuffer, dataSize);
     if (dataRead != dataSize)
         mexPrintf("KLEIN10A: Serial port failed to read all available chars: %s (%d %d chars)\n", inputBuffer, dataRead, dataSize);
-    
+    //else
+    //     mexPrintf("KLEIN10A: Serial port read %d chars\n", dataRead);
 	return(0);
 }
 

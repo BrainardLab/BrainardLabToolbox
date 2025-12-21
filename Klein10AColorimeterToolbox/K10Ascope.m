@@ -176,7 +176,7 @@ function CreateGUI
     
 
     % Initialize state
-    InitState();
+    InitState()
     
     % Initialize image plot
     InitPlottingSystem();
