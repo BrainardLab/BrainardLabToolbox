@@ -211,8 +211,7 @@ void mexFunction(int nlhs,      /* number of output (return) arguments */
 		}
 	}
  
-    //char errorMessage[1024];
-    char errorMessage[256];
+    char errorMessage[1024];
     unsigned char inputBuffer[MAX_INPUT_BUFFER_SIZE];
     int inputBufferSize;
             
