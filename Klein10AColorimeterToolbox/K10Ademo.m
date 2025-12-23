@@ -35,7 +35,16 @@ function K10Ademo
     
     
     % ------ OPEN THE DEVICE ----------------------------------------------
-    status = K10A_device('open', '/dev/tty.usbserial-KU000000');
+
+     if (ismac)
+        portName = '/dev/tty.usbserial-KU000000';
+    else
+        portName = '/dev/ttyUSB0';
+     end
+
+    status = K10A_device('open', portName);
+
+
     if (status == 0)
         disp('Opened Klein port');
     elseif (status == -1)
