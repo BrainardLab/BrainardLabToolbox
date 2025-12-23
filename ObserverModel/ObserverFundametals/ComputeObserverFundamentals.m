@@ -54,7 +54,6 @@ function [T,T_energy,T_quantalIsomerizations,adjIndDiffParams] = ComputeObserver
 
 switch (coneParams.type)
     case 'cie_asano'
-        
         % Get cone spectral sensitivities
         [~,~,T_quantalIsomerizations,adjIndDiffParams] = ...
             ComputeCIEConeFundamentals(MakeItS(S),coneParams.fieldSizeDegrees,coneParams.ageYears,coneParams.pupilDiamMM, ...
@@ -63,9 +62,25 @@ switch (coneParams.type)
         T_energy = EnergyToQuanta(S,T_quantalIsomerizations')';
         for ii = 1:3
             T(ii,:) = T_energy(ii,:)/max(T_energy(ii,:));
-        end        
-     
+        end
+
+    case {'cie_govardovskii', 'cie_dawis', 'cie_baylor', 'cie_lamb' 'cie_stockmansharpe'}
+        % Pop in one of the standard photopigment nomograms, along with the other ind
+        % difference parameters.  Might work.
+        useLambdaMax = coneParams.lambdaMax + coneParams.indDiffParams.lambdaMaxShift(:);
+        useIndDiffParams = coneParams.indDiffParams;
+        useIndDiffParams.lambdaMaxShift = zeros(size(coneParams.indDiffParams.lambdaMaxShift(:)));
+        [~,~,T_quantalIsomerizations,adjIndDiffParams] = ...
+            ComputeCIEConeFundamentals(MakeItS(S),coneParams.fieldSizeDegrees,coneParams.ageYears,coneParams.pupilDiamMM, ...
+            useLambdaMax,coneParams.nomogram,[], ...
+            [],[],[],useIndDiffParams);
+        T_energy = EnergyToQuanta(S,T_quantalIsomerizations')';
+        for ii = 1:3
+            T(ii,:) = T_energy(ii,:)/max(T_energy(ii,:));
+        end
+
     otherwise
         error('Unknown cone parameters type passed.');
 end
+
 

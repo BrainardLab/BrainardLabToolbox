@@ -26,9 +26,9 @@ function coneParams = DefaultConeParams(type)
 %
 % Inputs:
 %     type                          - String specifying cone parameterization type.
-%                                     'cie_asano': The CIE fundamentals
-%                                      with Asano et al. individual
-%                                      difference paramters.
+%                                        'cie_asano': The CIE fundamentals
+%                                        with Asano et al. individual
+%                                        difference paramters.
 %
 % Outputs:
 %     coneParams                    - Structure with field for each parameter.
@@ -52,12 +52,96 @@ switch (type)
     case 'cie_asano'
         
         coneParams.type = 'cie_asano';
+        coneParams.nomogram = '';
+        coneParams.lambdaMax = [];
         
         % Basic CIE parameters
         coneParams.fieldSizeDegrees = 10;
         coneParams.ageYears = 32;
         coneParams.pupilDiamMM = 3;
         
+        % Asano individual difference params
+        coneParams.indDiffParams.dlens = 0;
+        coneParams.indDiffParams.dmac = 0;
+        coneParams.indDiffParams.dphotopigment = [0 0 0]';
+        coneParams.indDiffParams.lambdaMaxShift = [0 0 0]';
+        coneParams.indDiffParams.shiftType = 'linear';
+
+    case 'cie_stockmansharpe'
+        coneParams.type = 'cie_stockmansharpe';
+        coneParams.nomogram = 'StockmanSharpe';
+        coneParams.lambdaMax = [558.9 530.3 420.7]';
+        
+        % Basic CIE parameters
+        coneParams.fieldSizeDegrees = 10;
+        coneParams.ageYears = 32;
+        coneParams.pupilDiamMM = 3;
+        
+        % Asano individual difference params
+        coneParams.indDiffParams.dlens = 0;
+        coneParams.indDiffParams.dmac = 0;
+        coneParams.indDiffParams.dphotopigment = [0 0 0]';
+        coneParams.indDiffParams.lambdaMaxShift = [0 0 0]';
+        coneParams.indDiffParams.shiftType = 'linear';
+    case 'cie_baylor'
+        coneParams.type = 'cie_baylor';
+        coneParams.nomogram = 'Baylor';
+        coneParams.lambdaMax = [561 531 420]';
+        
+        % Basic CIE parameters
+        coneParams.fieldSizeDegrees = 10;
+        coneParams.ageYears = 32;
+        coneParams.pupilDiamMM = 3;
+        
+        % Asano individual difference params
+        coneParams.indDiffParams.dlens = 0;
+        coneParams.indDiffParams.dmac = 0;
+        coneParams.indDiffParams.dphotopigment = [0 0 0]';
+        coneParams.indDiffParams.lambdaMaxShift = [0 0 0]';
+        coneParams.indDiffParams.shiftType = 'linear';
+
+    case 'cie_govardovskii'
+        coneParams.type = 'cie_govardovskii';
+        coneParams.nomogram = 'Govardovskii';
+        coneParams.lambdaMax = [561 531 420]';
+
+        % Basic CIE parameters
+        coneParams.fieldSizeDegrees = 10;
+        coneParams.ageYears = 32;
+        coneParams.pupilDiamMM = 3;
+
+        % Asano individual difference params
+        coneParams.indDiffParams.dlens = 0;
+        coneParams.indDiffParams.dmac = 0;
+        coneParams.indDiffParams.dphotopigment = [0 0 0]';
+        coneParams.indDiffParams.lambdaMaxShift = [0 0 0]';
+        coneParams.indDiffParams.shiftType = 'linear';
+
+    case 'cie_dawis'
+        coneParams.type = 'cie_dawis';
+        coneParams.nomogram = 'Dawis';
+
+        % Basic CIE parameters
+        coneParams.fieldSizeDegrees = 10;
+        coneParams.ageYears = 32;
+        coneParams.pupilDiamMM = 3;
+
+        % Asano individual difference params
+        coneParams.indDiffParams.dlens = 0;
+        coneParams.indDiffParams.dmac = 0;
+        coneParams.indDiffParams.dphotopigment = [0 0 0]';
+        coneParams.indDiffParams.lambdaMaxShift = [0 0 0]';
+        coneParams.indDiffParams.shiftType = 'linear';
+
+    case 'cie_lamb'
+        coneParams.type = 'cie_lamb';
+        coneParams.nomogram = 'Lamb';
+
+        % Basic CIE parameters
+        coneParams.fieldSizeDegrees = 10;
+        coneParams.ageYears = 32;
+        coneParams.pupilDiamMM = 3;
+
         % Asano individual difference params
         coneParams.indDiffParams.dlens = 0;
         coneParams.indDiffParams.dmac = 0;
