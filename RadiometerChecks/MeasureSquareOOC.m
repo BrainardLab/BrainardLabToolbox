@@ -1,23 +1,10 @@
 % MeasureSquareOOC.m
 %
-% Measures spectrum of unisphere source.
+% Measures spectrum of the square source.
 %
-% 1/5/96	dhb		Re-wrote from JDT original.
-% 4/14/99   pbe		New/old meter choice.
-% 6/30/00	pbe		Added cd to save to correct folder
-% 4/12/02   dhb, kr Update for Penn
-% 12/01/05          Fixed data save location to ColorShare instead of LabShare
-% 2/19/10   dhb, sm OS/X.
-% 3/11/10   dhb     Read serial number from meter and compare.
-% 3/11/10   dhb     Initialize meter earlier.
-% 8/20/12   dhb, sm PR-670 thread debugged.
-% 11/11/15  dhb, jr, si  Modify for our two PR-670s.
-% 31/8/16	npc		Use the PR650/670 spectroradiometer objects, made it into a function
-% 09/05/17  npc     Code cleanup
-% 09/09/17  dhb     Update to use prefs for where data live and go.
-% 04/28/25  npc     Update to add CR-250dev
+% 01/16/26  npc     Wrote it by modifying MeasureSphereOOC
 
-function MeasureSphereOOC()
+function MeasureSquareOOC()
 
 
 % Get directory where stuff is
@@ -200,8 +187,8 @@ switch (meter)
 end
 
 % Instructions
-fprintf(1,'Point meter at sphere, set to %g nominal luminance.\n',nominalFL);
-fprintf(1,'(Can usually only get sphere to fluctuate between 29/30/31)\n');
+fprintf(1,'Point meter at the square, set to %g nominal luminance.\n',nominalFL);
+fprintf(1,'(Can usually only get square to fluctuate between 29/30/31)\n');
 fprintf(1,'Standard distance is 1 meter.\n');
 fprintf(1,'Hit enter when ready.\n');
 pause;
@@ -210,7 +197,7 @@ wls = SToWls(S);
 figure; clf
 hold off
 theSpectra = {};
-fprintf(1,['\n\nSPHERE MEASUREMENTS - ' whichMeter '\n']);
+fprintf(1,['\n\nSQUARE MEASUREMENTS - ' whichMeter '\n']);
 for i = 1:nMeasure
     % Measure
     fprintf(1, 'Measuring %g...',i);
