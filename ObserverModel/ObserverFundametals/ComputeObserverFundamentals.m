@@ -1,4 +1,4 @@
-function [T,T_energy,T_quantalIsomerizations,adjIndDiffParams] = ComputeObserverFundamentals(coneParams,S)
+function [T,T_energy,T_quantalIsomerizations,adjIndDiffParams,params,staticParams] = ComputeObserverFundamentals(coneParams,S)
 % Compute cone fundamentals from cone parameter structure
 %
 % Syntax:
@@ -29,6 +29,13 @@ function [T,T_energy,T_quantalIsomerizations,adjIndDiffParams] = ComputeObserver
 %                                       format with each fundamental in a row.
 %                                       Not normalized, and in quantal
 %                                       units.
+%     adjIndDiffParams          - The Asano adjusted individual difference
+%                                       parameters returned by
+%                                       CIEComputeConeFundamentals.
+%     params                    - Parameters structure returned by
+%                                       CIEComputeConeFundamentals.
+%     staticParams              - Static parameters structure returned by
+%                                       CIEComputeConeFundamentals.
 %
 % Optional key/value pairs:
 %    None.
@@ -51,11 +58,16 @@ function [T,T_energy,T_quantalIsomerizations,adjIndDiffParams] = ComputeObserver
     xlabel('Wavelength (nm)');
     ylabel('Fundamental');
 %}
+%{
+    coneParams = DefaultConeParams('cie_asano');
+    S = [400 1 301];
+    [~,~,~,adjIndDiffParams,params,staticParams] = ComputeObserverFundamentals(coneParams,S);	
+%}
 
 switch (coneParams.type)
     case 'cie_asano'
         % Get cone spectral sensitivities
-        [~,~,T_quantalIsomerizations,adjIndDiffParams] = ...
+        [~,~,T_quantalIsomerizations,adjIndDiffParams,params,staticParams] = ...
             ComputeCIEConeFundamentals(MakeItS(S),coneParams.fieldSizeDegrees,coneParams.ageYears,coneParams.pupilDiamMM, ...
             [],[],[], ...
             [],[],[],coneParams.indDiffParams);
@@ -70,7 +82,7 @@ switch (coneParams.type)
         useLambdaMax = coneParams.lambdaMax + coneParams.indDiffParams.lambdaMaxShift(:);
         useIndDiffParams = coneParams.indDiffParams;
         useIndDiffParams.lambdaMaxShift = zeros(size(coneParams.indDiffParams.lambdaMaxShift(:)));
-        [~,~,T_quantalIsomerizations,adjIndDiffParams] = ...
+        [~,~,T_quantalIsomerizations,adjIndDiffParams,params,staticParams] = ...
             ComputeCIEConeFundamentals(MakeItS(S),coneParams.fieldSizeDegrees,coneParams.ageYears,coneParams.pupilDiamMM, ...
             useLambdaMax,coneParams.nomogram,[], ...
             [],[],[],useIndDiffParams);
