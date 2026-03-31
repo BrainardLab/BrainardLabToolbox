@@ -120,6 +120,7 @@ switch (type)
     case 'cie_dawis'
         coneParams.type = 'cie_dawis';
         coneParams.nomogram = 'Dawis';
+        coneParams.lambdaMax = [561 531 420]';
 
         % Basic CIE parameters
         coneParams.fieldSizeDegrees = 10;
@@ -136,6 +137,7 @@ switch (type)
     case 'cie_lamb'
         coneParams.type = 'cie_lamb';
         coneParams.nomogram = 'Lamb';
+        coneParams.lambdaMax = [561 531 418.72]';
 
         % Basic CIE parameters
         coneParams.fieldSizeDegrees = 10;
