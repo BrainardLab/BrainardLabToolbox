@@ -59,8 +59,11 @@ switch (type)
         params.coneParams.indDiffParams.dmac = x(2);
         params.coneParams.indDiffParams.dphotopigment = x(3:5)';
         params.coneParams.indDiffParams.lambdaMaxShift = x(6:8)';
+        params.coneParams.indDiffParams.shiftType = params.indDiffParams.shiftType;
         params.colorDiffParams.noiseSd = x(9);
-        params.coneParams.indDiffParams.shiftType = 'linear';
+        
+        % Don't override what came in.
+        % params.coneParams.indDiffParams.shiftType = 'linear';
         
     otherwise
         error('Unknown parameter vector type requested');
