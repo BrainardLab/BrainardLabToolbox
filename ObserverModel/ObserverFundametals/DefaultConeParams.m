@@ -150,7 +150,27 @@ switch (type)
         coneParams.indDiffParams.dphotopigment = [0 0 0]';
         coneParams.indDiffParams.lambdaMaxShift = [0 0 0]';
         coneParams.indDiffParams.shiftType = 'linear';
-        
+
+    case 'cie_stockmanrider'
+        coneParams.type = 'cie_stockmanrider';
+        coneParams.nomogram = 'StockmanRider';
+        % Default lambdaMax are the SR template peaks [L; M; S] (nm).
+        % These correspond to zero shift and reproduce the standard
+        % Stockman-Rider absorbances.
+        coneParams.lambdaMax = [551.9 529.8 416.9]';
+
+        % Basic CIE parameters
+        coneParams.fieldSizeDegrees = 10;
+        coneParams.ageYears = 32;
+        coneParams.pupilDiamMM = 3;
+
+        % Asano individual difference params
+        coneParams.indDiffParams.dlens = 0;
+        coneParams.indDiffParams.dmac = 0;
+        coneParams.indDiffParams.dphotopigment = [0 0 0]';
+        coneParams.indDiffParams.lambdaMaxShift = [0 0 0]';
+        coneParams.indDiffParams.shiftType = 'linear';
+
     otherwise
         error('Unknown cone parameters type passed.');
 end
