@@ -7,8 +7,6 @@ function coneParams = DefaultConeParams(type)
 % Description:
 %    Generate a structure describing and observer's cone fundamentals, with
 %    reasonable defaults.
-%   
-%    The input string type allows some flexibility about the description.
 %
 %    Asano et al. give the following population SD's for the individual
 %    difference parameters (their Table 5, Step 2 numbers):
@@ -29,6 +27,9 @@ function coneParams = DefaultConeParams(type)
 %                                        'cie_asano': The CIE fundamentals
 %                                        with Asano et al. individual
 %                                        difference paramters.
+%                                     Other types allow swapping in of
+%                                     various nomograms for the CIE
+%                                     absorbance.
 %
 % Outputs:
 %     coneParams                    - Structure with field for each parameter.
@@ -49,8 +50,7 @@ function coneParams = DefaultConeParams(type)
 %}
 
 switch (type)
-    case 'cie_asano'
-        
+    case 'cie_asano'      
         coneParams.type = 'cie_asano';
         coneParams.nomogram = '';
         coneParams.lambdaMax = [];
@@ -83,6 +83,7 @@ switch (type)
         coneParams.indDiffParams.dphotopigment = [0 0 0]';
         coneParams.indDiffParams.lambdaMaxShift = [0 0 0]';
         coneParams.indDiffParams.shiftType = 'linear';
+    
     case 'cie_baylor'
         coneParams.type = 'cie_baylor';
         coneParams.nomogram = 'Baylor';
@@ -154,10 +155,28 @@ switch (type)
     case 'cie_stockmanrider'
         coneParams.type = 'cie_stockmanrider';
         coneParams.nomogram = 'StockmanRider';
+
         % Default lambdaMax are the SR template peaks [L; M; S] (nm).
-        % These correspond to zero shift and reproduce the standard
-        % Stockman-Rider absorbances.
         coneParams.lambdaMax = [551.9 529.8 416.9]';
+
+        % Basic CIE parameters
+        coneParams.fieldSizeDegrees = 10;
+        coneParams.ageYears = 32;
+        coneParams.pupilDiamMM = 3;
+
+        % Asano individual difference params
+        coneParams.indDiffParams.dlens = 0;
+        coneParams.indDiffParams.dmac = 0;
+        coneParams.indDiffParams.dphotopigment = [0 0 0]';
+        coneParams.indDiffParams.lambdaMaxShift = [0 0 0]';
+        coneParams.indDiffParams.shiftType = 'linear';
+
+    case 'cie_carrollneitz'
+        coneParams.type = 'cie_carrollneitz';
+        coneParams.nomogram = 'CarrollNeitz';
+
+        % Default lambdaMax are as in CarrollNeitzNomogram header comments.
+        coneParams.lambdaMax = [557.5, 530, 420]';
 
         % Basic CIE parameters
         coneParams.fieldSizeDegrees = 10;

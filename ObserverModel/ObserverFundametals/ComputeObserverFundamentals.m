@@ -76,9 +76,9 @@ switch (coneParams.type)
             T(ii,:) = T_energy(ii,:)/max(T_energy(ii,:));
         end
 
-    case {'cie_govardovskii', 'cie_dawis', 'cie_baylor', 'cie_lamb', 'cie_stockmansharpe', 'cie_stockmanrider'}
+    case {'cie_govardovskii', 'cie_dawis', 'cie_baylor', 'cie_lamb', 'cie_stockmansharpe', 'cie_stockmanrider', 'cie_carrollneitz'}
         % Pop in one of the standard photopigment nomograms, along with the other ind
-        % difference parameters.  Might work.
+        % difference parameters.
         useLambdaMax = coneParams.lambdaMax + coneParams.indDiffParams.lambdaMaxShift(:);
         useIndDiffParams = coneParams.indDiffParams;
         useIndDiffParams.lambdaMaxShift = zeros(size(coneParams.indDiffParams.lambdaMaxShift(:)));
