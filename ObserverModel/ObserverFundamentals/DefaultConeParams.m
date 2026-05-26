@@ -85,6 +85,7 @@ switch (type)
         coneParams.indDiffParams.shiftType = 'linear';
     
     case 'cie_baylor'
+        % It's possible 430 would be a more appropriate S cone lambda max.
         coneParams.type = 'cie_baylor';
         coneParams.nomogram = 'Baylor';
         coneParams.lambdaMax = [561 531 420]';
@@ -193,4 +194,134 @@ switch (type)
     otherwise
         error('Unknown cone parameters type passed.');
 end
+
+%{
+close all;
+
+S = [380 1 401];
+wls = SToWls(S);
+
+% Stockman-Rider, baseline
+coneParams = DefaultConeParams('cie_stockmanrider');
+[T,T_energy,T_quantalIsomerizations,adjIndDiffParams,params,staticParams] = ...
+    ComputeObserverFundamentals(coneParams,S);
+srAborbance = adjIndDiffParams.absorbance;
+
+% Stockman-Sharpe
+coneParams = DefaultConeParams('cie_stockmansharpe');
+[T,T_energy,T_quantalIsomerizations,adjIndDiffParams,params,staticParams] = ...
+    ComputeObserverFundamentals(coneParams,S);
+ssAborbance = adjIndDiffParams.absorbance;
+
+ssFigure = figure; clf; 
+subplot(2,3,1); hold on
+plot(wls,srAborbance(1,:)','r','LineWidth',4);
+title('Stockman-Sharpe/Stockman-Rider');
+subplot(2,3,2); hold on
+plot(wls,srAborbance(2,:)','g','LineWidth',4);
+title('Stockman-Sharpe/Stockman-Rider');
+subplot(2,3,3); hold on
+plot(wls,srAborbance(3,:)','b','LineWidth',4);
+title('Stockman-Sharpe/Stockman-Rider');
+subplot(2,3,1); hold on
+plot(wls,ssAborbance(1,:)','k','LineWidth',2);
+subplot(2,3,2);
+plot(wls,ssAborbance(2,:)','k','LineWidth',2);
+subplot(2,3,3);
+plot(wls,ssAborbance(3,:)','k','LineWidth',2);
+
+subplot(2,3,4); hold on
+plot(wls,log10(srAborbance(1,:)'),'r','LineWidth',4);
+title('Stockman-Sharpe/Stockman-Rider');
+subplot(2,3,5); hold on
+plot(wls,log10(srAborbance(2,:)'),'g','LineWidth',4);
+title('Stockman-Sharpe/Stockman-Rider');
+subplot(2,3,6); hold on
+plot(wls,log10(srAborbance(3,:)'),'b','LineWidth',4);
+title('Stockman-Sharpe/Stockman-Rider');
+subplot(2,3,4); hold on
+plot(wls,log10(ssAborbance(1,:)'),'k','LineWidth',2);
+subplot(2,3,5);
+plot(wls,log10(ssAborbance(2,:)'),'k','LineWidth',2);
+subplot(2,3,6);
+plot(wls,log10(ssAborbance(3,:)'),'k','LineWidth',2);
+
+% Carroll-Neitz
+coneParams = DefaultConeParams('cie_carrollneitz');
+[T,T_energy,T_quantalIsomerizations,adjIndDiffParams,params,staticParams] = ...
+    ComputeObserverFundamentals(coneParams,S);
+cnAborbance = adjIndDiffParams.absorbance;
+
+cnFigure = figure; clf; 
+subplot(2,3,1); hold on
+plot(wls,srAborbance(1,:)','r','LineWidth',4);
+title('Carroll-Neitz/Stockman-Rider');
+subplot(2,3,2); hold on
+plot(wls,srAborbance(2,:)','g','LineWidth',4);
+title('Carroll-Neitz/Stockman-Rider');
+subplot(2,3,3); hold on
+plot(wls,srAborbance(3,:)','b','LineWidth',4);
+title('Carroll-Neitz/Stockman-Rider');
+subplot(2,3,1); hold on
+plot(wls,cnAborbance(1,:)','k','LineWidth',2);
+subplot(2,3,2);
+plot(wls,cnAborbance(2,:)','k','LineWidth',2);
+subplot(2,3,3);
+plot(wls,cnAborbance(3,:)','k','LineWidth',2);
+
+subplot(2,3,4); hold on
+plot(wls,log10(srAborbance(1,:)'),'r','LineWidth',4);
+title('Carroll-Neitz/Stockman-Rider');
+subplot(2,3,5); hold on
+plot(wls,log10(srAborbance(2,:)'),'g','LineWidth',4);
+title('Carroll-Neitz/Stockman-Rider');
+subplot(2,3,6); hold on
+plot(wls,log10(srAborbance(3,:)'),'b','LineWidth',4);
+title('Carroll-Neitz/Stockman-Rider');
+subplot(2,3,4); hold on
+plot(wls,log10(cnAborbance(1,:)'),'k','LineWidth',2);
+subplot(2,3,5);
+plot(wls,log10(cnAborbance(2,:)'),'k','LineWidth',2);
+subplot(2,3,6);
+plot(wls,log10(cnAborbance(3,:)'),'k','LineWidth',2);
+
+% Baylor
+coneParams = DefaultConeParams('cie_baylor');
+[T,T_energy,T_quantalIsomerizations,adjIndDiffParams,params,staticParams] = ...
+    ComputeObserverFundamentals(coneParams,S);
+bAborbance = adjIndDiffParams.absorbance;
+
+bFigure = figure; clf; 
+subplot(2,3,1); hold on
+plot(wls,srAborbance(1,:)','r','LineWidth',4);
+title('Baylor/Stockman-Rider');
+subplot(2,3,2); hold on
+plot(wls,srAborbance(2,:)','g','LineWidth',4);
+title('Baylor/Stockman-Rider');
+subplot(2,3,3); hold on
+plot(wls,srAborbance(3,:)','b','LineWidth',4);
+title('Baylor/Stockman-Rider');
+subplot(2,3,1); hold on
+plot(wls,bAborbance(1,:)','k','LineWidth',2);
+subplot(2,3,2);
+plot(wls,bAborbance(2,:)','k','LineWidth',2);
+subplot(2,3,3);
+plot(wls,bAborbance(3,:)','k','LineWidth',2);
+
+subplot(2,3,4); hold on
+plot(wls,log10(srAborbance(1,:)'),'r','LineWidth',4);
+title('Baylor/Stockman-Rider');
+subplot(2,3,5); hold on
+plot(wls,log10(srAborbance(2,:)'),'g','LineWidth',4);
+title('Baylor/Stockman-Rider');
+subplot(2,3,6); hold on
+plot(wls,log10(srAborbance(3,:)'),'b','LineWidth',4);
+title('Baylor/Stockman-Rider');
+subplot(2,3,4); hold on
+plot(wls,log10(bAborbance(1,:)'),'k','LineWidth',2);
+subplot(2,3,5);
+plot(wls,log10(bAborbance(2,:)'),'k','LineWidth',2);
+subplot(2,3,6);
+plot(wls,log10(bAborbance(3,:)'),'k','LineWidth',2);
+%}
 
