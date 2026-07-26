@@ -1,4 +1,4 @@
-function theFig = CCTplot(fName,varargin)
+function [theFig,u_prime,v_prime] = CCTplot(fName,varargin)
 % Plots discrimination points using data from Cambridge Colour Test text files
 %
 % Syntax:
@@ -66,7 +66,7 @@ end
 
 % Try to fit an ellipse to the data
 
-%We have several ellipse fitting routines.
+% We have several ellipse fitting routines.
 theData = [u_prime-center_u_prime_w v_prime-center_v_prime_w zeros(size(u_prime))]';
 initialFactor = 15;
 ellRanges = max(theData,[],2)-min(theData,[],2);
