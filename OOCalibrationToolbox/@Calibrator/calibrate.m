@@ -52,8 +52,6 @@ function obj = calibrate(obj)
         end  % if (~isempty(calStruct.basicLinearitySetup))
     end
     
-    
-    
     % Follow-up with full specturm gamma curve measurements for each phosphor.
     % Compute range of input gamma values
     delta = 1.0/calStruct.describe.nMeas;    
@@ -67,12 +65,11 @@ function obj = calibrate(obj)
                                             obj.measurementChannelsNum...
                                         );
                                     
-    obj.rawData.gammaCurveSortIndices = zeros(calStruct.describe.nAverage, calStruct.describe.displayPrimariesNum, calStruct.describe.nMeas);
-    
+    obj.rawData.gammaCurveSortIndices = zeros(calStruct.describe.nAverage, calStruct.describe.displayPrimariesNum, calStruct.describe.nMeas);  
     
     % Do the full-gamma measurements 
     for repeatIndex = 1:calStruct.describe.nAverage
-       for currentPrimaryIndex = 1: calStruct.describe.displayPrimariesNum
+       for currentPrimaryIndex = 1:calStruct.describe.displayPrimariesNum
            fprintf('2. Testing display primary: %g (of %g) ...\n',currentPrimaryIndex,calStruct.describe.displayPrimariesNum);
            
            % set color of other (than the currentPrimaryIndex) primaries
@@ -82,6 +79,12 @@ function obj = calibrate(obj)
            
            % set background color
            backgroundSettings = calStruct.describe.bgColor';
+
+           % Could in this section set them all to the fgColor here, then just toggle 
+           % the one we are measuring, measure, and put back.  With a little
+           % delay so that we keep the intertrial primary state as close as possible
+           % to the way we will use the display.  That would be true for both the
+           % measurement of ambient and for each gamma level.
            
            % set target color
            targetSettingsArray                           = zeros(calStruct.describe.displayPrimariesNum, calStruct.describe.nMeas);
