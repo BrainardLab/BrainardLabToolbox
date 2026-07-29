@@ -117,7 +117,7 @@ plot(fitEllipseIn2D(1,:),fitEllipseIn2D(2,:),p.Results.plotColor,'LineWidth',2);
 plot([fitCenter(1)-fitMajorAxisVector(1) fitCenter(1)+fitMajorAxisVector(1)],[fitCenter(2)-fitMajorAxisVector(2) fitCenter(2)+fitMajorAxisVector(2)],p.Results.plotColor,'LineWidth',2);
 plot([fitCenter(1) fitCenter(1)+ 0.678],[fitCenter(2) fitCenter(2)+ 0.501],'r:','LineWidth',1);
 plot([fitCenter(1) fitCenter(1)+ -1.217],[fitCenter(2) fitCenter(2)+ 0.782],'g:','LineWidth',1);
-plot([fitCenter(1) fitCenter(1)+ 0.257],[fitCenter(2) fitCenter(2)+ 0.0],'b:','LineWidth',1);
+%plot([fitCenter(1) fitCenter(1)+ 0.257],[fitCenter(2) fitCenter(2)+ 0.0],'b:','LineWidth',1);
 
 xlim([0.1 0.3]);
 ylim([0.35 0.55]);
