@@ -157,7 +157,8 @@ function obj = calibrate(obj)
         end  % if (~isempty(calStruct.basicLinearitySetup))
     end
 
-    
+   
+
     if (obj.options.skipBackgroundDependenceTest)
         fprintf('4. Skipping background measurements ...\n');
         obj.rawData.backgroundDependenceMeasurements = [];
@@ -182,10 +183,12 @@ function obj = calibrate(obj)
         end
     end
 
+
     if (obj.options.skipAmbientLightMeasurement)
-        fprintf('5. Skipping ambient light measurement ...\n');
+        fprintf('5. Skipping ambient light measurement...\n');
         % Set it to zero, because the ambient is used in the computation
         obj.rawData.ambientMeasurements = zeros(1, obj.rawData.S(3));
+
     else
         % Conclude with the ambient measurements
         % Re-initialize states of the screens
@@ -207,6 +210,7 @@ function obj = calibrate(obj)
         obj.rawData.ambientMeasurements = obj.rawData.ambientMeasurements / calStruct.describe.nAverage;
     end
 
+
     % Report time
     t1 = clock;
     fprintf('\nCalibration measurements took %g minutes\n\n', etime(t1, t0)/60);
@@ -219,6 +223,12 @@ function obj = calibrate(obj)
         obj.rawData.gammaCurveMeanMeasurements(obj.rawData.gammaCurveMeanMeasurements < 0) = 0;
     end
     
+    if (obj.demoMode)
+        fprintf('All done with demo mode. Bye now ...\n');
+        return;
+    end
+
+
     % Process data
     obj.processRawData();
     
