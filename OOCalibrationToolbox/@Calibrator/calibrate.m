@@ -1,20 +1,22 @@
 % Method for executing a standard calibration protocol
 function obj = calibrate(obj)
 %
-    
     % Make a local copy of obj.cal so we do not keep calling it and regenerating it
     calStruct = obj.cal;
     
-    % Generate the calibration rectangle
-    obj.generateCalibrationRect();
+    if (~obj.demoMode)
+        % Generate the calibration rectangle
+        obj.generateCalibrationRect();
+    end
 
     % Prompt user to leave the room
     userPrompt = 1; beepWhenDone = 2;
     obj.promptUserToLeaveTheRoom(userPrompt);
-    
+
     % Set email notification preference
     obj.setNotificationPreferences();
-    
+ 
+
     % Generate a new @CalibratorRawData object to store the measurements
     obj.rawData = CalibratorRawData();
     
@@ -26,6 +28,8 @@ function obj = calibrate(obj)
 
     % Initialize states of the screen to be measured and the other screen
     obj.setDisplaysInitialState(userPrompt);
+    
+
 
     if (obj.options.skipLinearityTest)
          fprintf('1. Skipping basic linearity measurements, pass 1 ... \n');
@@ -45,6 +49,7 @@ function obj = calibrate(obj)
 
             % Measure the SPD for all the settings in the calStruct.basicLinearitySetup
             for settingsIndex = 1:settingsNumToBeMeasured
+                
                 settingsToTest = calStruct.basicLinearitySetup.settings(:,settingsIndex);
                 [obj.rawData.basicLinearityMeasurements1(settingsIndex,:), obj.rawData.S] = ...
                     obj.updateStimulusAndMeasure(backgroundSettings, settingsToTest, calStruct.describe.useBitsPP);

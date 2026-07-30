@@ -15,7 +15,7 @@ classdef Calibrator < handle
     % Public access. All Calibrator subclasses inherit these properties.
     % Subclass users can set these properties, so these are public.
     properties
-        
+       
     end % Public properties
     
     properties (Dependent = true)
@@ -29,6 +29,10 @@ classdef Calibrator < handle
     
     % Public read-only access. % Subclass users can read/write these properties.
     properties (SetAccess = protected)  
+
+        % Demo mode - no radiometer
+        demoMode = false;
+
         % Type of graphics engine used, 'MGL', or 'PTB-3'
         graphicsEngine = 'uspecified';
         
@@ -167,6 +171,7 @@ classdef Calibrator < handle
             parser.addParameter('displayPrimariesNum',             obj.displayPrimariesNum);
             parser.addParameter('displayDeviceName',               obj.displayDeviceName);
             parser.addParameter('comment',                         obj.comment);
+            parser.addParameter('demoMode',                        obj.demoMode);
             % Execute the parser
             parser.parse(initParams{:});
             % Create a standard Matlab structure from the parser results.
