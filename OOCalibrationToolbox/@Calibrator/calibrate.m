@@ -4,32 +4,42 @@ function obj = calibrate(obj)
     % Make a local copy of obj.cal so we do not keep calling it and regenerating it
     calStruct = obj.cal;
     
+    disp('in calibrate - point 1');
     if (~obj.demoMode)
         % Generate the calibration rectangle
         obj.generateCalibrationRect();
     end
 
+    disp('in calibrate - point 2');
     % Prompt user to leave the room
     userPrompt = 1; beepWhenDone = 2;
     obj.promptUserToLeaveTheRoom(userPrompt);
 
+    disp('in calibrate - point 3');
+
     % Set email notification preference
     obj.setNotificationPreferences();
  
+    disp('in calibrate - point 4');
 
     % Generate a new @CalibratorRawData object to store the measurements
     obj.rawData = CalibratorRawData();
     
+    disp('in calibrate - point 5');
+
     % Initialize random number generator
     ClockRandSeed;
  
     % Start timing
     t0 = clock;
 
+    disp('in calibrate - point 6');
+
     % Initialize states of the screen to be measured and the other screen
     obj.setDisplaysInitialState(userPrompt);
     
 
+    disp('in calibrate - point 7');
 
     if (obj.options.skipLinearityTest)
          fprintf('1. Skipping basic linearity measurements, pass 1 ... \n');
