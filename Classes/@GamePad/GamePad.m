@@ -238,10 +238,10 @@ classdef GamePad < handle
             obj.buttonY = buttons(4);
             
             % State of trigger buttons
-            obj.buttonLeftUpperTrigger  = buttons(5);
-            obj.buttonRightUpperTrigger = buttons(6);
-            obj.buttonLeftLowerTrigger  = buttons(7);
-            obj.buttonRightLowerTrigger = buttons(8);
+            obj.buttonLeftUpperTrigger  = buttons(5); % Was 5
+            obj.buttonRightUpperTrigger = buttons(6); % Was 6
+            obj.buttonLeftLowerTrigger  = buttons(7); % Was 7
+            obj.buttonRightLowerTrigger = buttons(8); % Was 8
             
             % State of buttons labeled 'Start' and 'Back'
             obj.buttonBack              = buttons(9);

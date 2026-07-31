@@ -122,8 +122,10 @@ function obj = calibrate(obj)
                fprintf('   Testing gamma point: %g ...\n',randomGammaPointIndex);
                % measure the target
                targetSettings = targetSettingsArray(:,randomGammaPointIndex); 
-               [obj.rawData.gammaCurveMeasurements(repeatIndex, currentPrimaryIndex, randomGammaPointIndex, :), obj.rawData.S] = ...
-                   obj.updateStimulusAndMeasure(backgroundSettings, targetSettings, calStruct.describe.useBitsPP);
+               [theMeasuredSpectrum, obj.rawData.S] = obj.updateStimulusAndMeasure(backgroundSettings, targetSettings, calStruct.describe.useBitsPP);
+               
+               obj.rawData.gammaCurveMeasurements(repeatIndex, currentPrimaryIndex, randomGammaPointIndex, :) = ...
+                   reshape(theMeasuredSpectrum, [1 1 1 numel(theMeasuredSpectrum)]);
            end  % for gammaPointIndex
            
            % take second ambient reading
