@@ -4,28 +4,20 @@ function obj = calibrate(obj)
     % Make a local copy of obj.cal so we do not keep calling it and regenerating it
     calStruct = obj.cal;
     
-    disp('in calibrate - point 1');
     if (~obj.demoMode)
         % Generate the calibration rectangle
         obj.generateCalibrationRect();
     end
 
-    disp('in calibrate - point 2');
     % Prompt user to leave the room
     userPrompt = 1; beepWhenDone = 2;
     obj.promptUserToLeaveTheRoom(userPrompt);
 
-    disp('in calibrate - point 3');
-
     % Set email notification preference
     obj.setNotificationPreferences();
- 
-    disp('in calibrate - point 4');
 
     % Generate a new @CalibratorRawData object to store the measurements
     obj.rawData = CalibratorRawData();
-    
-    disp('in calibrate - point 5');
 
     % Initialize random number generator
     ClockRandSeed;
@@ -33,13 +25,8 @@ function obj = calibrate(obj)
     % Start timing
     t0 = clock;
 
-    disp('in calibrate - point 6');
-
     % Initialize states of the screen to be measured and the other screen
     obj.setDisplaysInitialState(userPrompt);
-    
-
-    disp('in calibrate - point 7');
 
     if (obj.options.skipLinearityTest)
          fprintf('1. Skipping basic linearity measurements, pass 1 ... \n');
@@ -152,7 +139,6 @@ function obj = calibrate(obj)
         % Repeat the basic linearity tests (second pass)
         if (~isempty(calStruct.basicLinearitySetup))
             fprintf('3. Basic linearity measurements, pass 2 ...\n');
-
             % allocate storage for all basic measurements
             settingsNumToBeMeasured = size(calStruct.basicLinearitySetup.settings,2);
             obj.rawData.basicLinearityMeasurements2 = zeros(settingsNumToBeMeasured, obj.measurementChannelsNum);
@@ -169,8 +155,6 @@ function obj = calibrate(obj)
         end  % if (~isempty(calStruct.basicLinearitySetup))
     end
 
-   
-
     if (obj.options.skipBackgroundDependenceTest)
         fprintf('4. Skipping background measurements ...\n');
         obj.rawData.backgroundDependenceMeasurements = [];
@@ -178,7 +162,6 @@ function obj = calibrate(obj)
         % Continue with the dependence of test on background test.
         if (~isempty(calStruct.backgroundDependenceSetup))
             fprintf('4. Effect of background measurements ...\n');
-
             % allocate storage for all dependence measurements
             settingsNumToBeMeasured    = size(calStruct.backgroundDependenceSetup.settings,2);
             backgroundsNumToBeMeasured = size(calStruct.backgroundDependenceSetup.bgSettings,2);
@@ -195,12 +178,10 @@ function obj = calibrate(obj)
         end
     end
 
-
     if (obj.options.skipAmbientLightMeasurement)
         fprintf('5. Skipping ambient light measurement...\n');
         % Set it to zero, because the ambient is used in the computation
         obj.rawData.ambientMeasurements = zeros(1, obj.rawData.S(3));
-
     else
         % Conclude with the ambient measurements
         % Re-initialize states of the screens
@@ -239,7 +220,6 @@ function obj = calibrate(obj)
         fprintf('All done with demo mode. Bye now ...\n');
         return;
     end
-
 
     % Process data
     obj.processRawData();
