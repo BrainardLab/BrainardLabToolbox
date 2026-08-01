@@ -62,7 +62,6 @@ function plotEssentialData(obj, figureGroupIndex, gridDims)
         bottom = 1 - row * (axHeight + verticalPadding); % Adjust for bottom padding
         position = [left, bottom, axWidth, axHeight];
         pos{end + 1} = position;
-
     end
 
     % Gamma functions.
@@ -82,13 +81,17 @@ function plotEssentialData(obj, figureGroupIndex, gridDims)
          plotAmbientData(obj,  figureGroupIndex, hPanel, pos);
         if (nDevices == 3)
             % Full spectral data for all gamma input values (unscaled/scaled)
-            plotFullSpectra(obj,  1, 'Red primary', figureGroupIndex, 'NorthWest', hPanel, pos);
-            plotFullSpectra(obj,  2, 'Green primary', figureGroupIndex, 'NorthEast', hPanel, pos);
-            plotFullSpectra(obj,  3, 'Blue primary', figureGroupIndex, 'NorthEast', hPanel, pos);
+            plotFullSpectra(obj,  1, 'Red primary', figureGroupIndex, 'NorthWest', hPanel, pos, true, true);
+            plotFullSpectra(obj,  2, 'Green primary', figureGroupIndex, 'NorthEast', hPanel, pos, true, true);
+            plotFullSpectra(obj,  3, 'Blue primary', figureGroupIndex, 'NorthEast', hPanel, pos, true, true);
         else
             pIndices = 1:nDevices;  % Create an index vector for all devices
+            showLegend = true;
+            if (nDevices>3)
+                showLegend = false;
+            end
 
-            plotFullSpectraMultiPrimaries(obj, pIndices, figureGroupIndex, lineColors);
+            plotFullSpectraMultiPrimaries(obj, pIndices, figureGroupIndex, lineColors, showLegend);
         end
 
     end
@@ -403,7 +406,7 @@ function plotChromaticityData(obj, figureGroupIndex, lineColors, hPanel, pos)
 
 end
 
-function plotFullSpectraMultiPrimaries(obj, pIndices, figureGroupIndex, lineColors)
+function plotFullSpectraMultiPrimaries(obj, pIndices, figureGroupIndex, lineColors, showLegend)
   
     switch(numel(pIndices))
         case 1
@@ -464,6 +467,17 @@ function plotFullSpectraMultiPrimaries(obj, pIndices, figureGroupIndex, lineColo
         position = [left, bottom, axWidth, axHeight];
         pos{end + 1} = position;
 
+        if (col == 1)
+            showYaxis(i) = true;
+        else
+            showYaxis(i) = ~true;
+        end
+        if (row == numRows)
+            showXaxis(i) = true;
+        else
+            showXaxis(i) = ~true;
+        end
+
     end
     
     % Compute spectral axis
@@ -513,16 +527,28 @@ function plotFullSpectraMultiPrimaries(obj, pIndices, figureGroupIndex, lineColo
                 end
 
                 % Set title and axis properties
-                hleg = legend(legendsMatrix, 'Location', 'northeast');
-                set(hleg,'FontName', 'Helvetica','FontSize', 10);
+                if (showLegend)
+                    hleg = legend(legendsMatrix, 'Location', 'northeast');
+                    set(hleg,'FontName', 'Helvetica','FontSize', 10);
+                end
                 set(ax, 'Color', [1.0 1.0 1.0], 'XColor', 'b', 'YColor', 'b', 'FontName', 'Helvetica', 'FontSize', 14);
-                xlabel(ax, '\it wavelength (nm)', 'FontName', 'Helvetica', 'FontSize', 14);
-                ylabel(ax, '\it power (mWatts)', 'FontName', 'Helvetica', 'FontSize', 14);
+                
+                if (showXaxis(index))
+                    xlabel(ax, '\it wavelength (nm)', 'FontName', 'Helvetica', 'FontSize', 14);
+                end
+                if (showYaxis(index))
+                    ylabel(ax, '\it power (mWatts)', 'FontName', 'Helvetica', 'FontSize', 14);
+                end
                 axis(ax, [380, 780, -Inf, Inf]);
+               
+                if (~isempty(obj.visualizedSPDrangesAbs))
+                    set(ax, 'YLim', [0 obj.visualizedSPDrangesAbs(primaryIndex)]);
+                end
+
                 box(ax, 'on');
 
                 % Set specific titles for each primary
-                t = title(ax, sprintf('Primary %d SPD Stability', primaryIndex));
+                t = title(ax, sprintf('Primary %d SPD Stability', primaryIndex), 'FontSize', 12, 'FontWeight', 'Normal');
                 t.Position(1) = t.Position(1) + 15; % Move horizontally (right)
 
                 ax2 = axes('Parent', hPanel2, 'Position', [pos{index}(1) + pos{index}(3)/2 + 0.01, pos{index}(2) + 0.01, pos{index}(3)/2 * scaleFactor, pos{index}(4) * scaleFactor]);
@@ -536,9 +562,11 @@ function plotFullSpectraMultiPrimaries(obj, pIndices, figureGroupIndex, lineColo
 
                 % Set title and axis properties
                 set(ax2, 'Color', [1.0 1.0 1.0], 'XColor', 'b', 'YColor', 'b', 'FontName', 'Helvetica', 'FontSize', 14);
-                xlabel(ax2, '\it wavelength (nm)', 'FontName', 'Helvetica', 'FontSize', 14);
-                ylabel(ax2, '\it power (mWatts)', 'FontName', 'Helvetica', 'FontSize', 14);
+                
                 axis(ax2, [380, 780, -Inf, Inf]);
+                if (~isempty(obj.visualizedSPDrangesNorm))
+                    set(ax2, 'YLim', [0 obj.visualizedSPDrangesNorm(primaryIndex)])
+                end
                 box(ax2, 'on');
 
             end

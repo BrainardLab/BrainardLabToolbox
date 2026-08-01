@@ -12,6 +12,8 @@ classdef CalibratorAnalyzer < handle
         backgroundEffectsGridDims   = [3 2]; % 3 columns x 2 rows
         luminanceVsChromaticityGridDims = [2 1]; % 2 columns x 1 row
         comparisonGridDims          = [2 2]; % 2 columns x 2 rows
+        visualizedSPDrangesAbs = [];
+        visualizedSPDrangesNorm = [];
     end
     
     properties (SetAccess = private) 

@@ -1,4 +1,36 @@
- function OOC_analyzeCal
+function OOC_analyzeCal(options)
+%{
+
+    Example #1 (default):
+        OOC_analyzeCal()
+
+    
+    Example #2 (set custom visualixedSPDrangesAbs):
+        OOC_analyzeCal(...
+            'visualizedSPDrangesAbs', [...
+                250 1000 1500 1500 ...
+                2000 1000 700 600 ...
+                1500 1200 1500 1500 ...
+                2500 2500 3000 2500 ...
+                ], ...
+            'visualizedSPDrangesNorm', [...
+                0.25 1.0 1.5 1.5 ...
+                2.0 1.0 0.7 0.6 ...
+                1.5 1.2 1.500 1.500 ...
+                2.500 2.500 3.000 2.500 ...
+                ]);
+
+%}
+
+% Set parameters.
+arguments
+    options.visualizedSPDrangesAbs  (1,:) = []
+    options.visualizedSPDrangesNorm (1,:) = []
+end
+
+
+    visualizedSPDrangesAbs = options.visualizedSPDrangesAbs;
+    visualizedSPDrangesNorm = options.visualizedSPDrangesNorm;
 
     close all
 
@@ -45,6 +77,13 @@
         else % If you did not select any more files 
             calAnalyzer = CalibratorAnalyzer(cals, calFilenames, calDirs);
 
+            if (~isempty(visualizedSPDrangesAbs))
+                calAnalyzer.visualizedSPDrangesAbs = visualizedSPDrangesAbs;
+            end
+
+            if (~isempty(visualizedSPDrangesNorm))
+                calAnalyzer.visualizedSPDrangesNorm = visualizedSPDrangesNorm;
+            end
             more = false;
 
         end
