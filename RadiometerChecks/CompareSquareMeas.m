@@ -38,11 +38,11 @@ end
 %% Save current dir
 curDir = pwd;
 
-%% Load new PR-650
-cd(fullfile(radiometerChecksDir,'xNewMeter'));
-if (exist(['NewUCSB_Square_' dateStr '.mat'],'file'))
+%% Load new CR-250
+cd(fullfile(radiometerChecksDir,'xCR-250'));
+if (exist(['CR-250_Square_' dateStr '.mat'],'file'))
     fprintf('Loading NewUCSB PR-650 data\n');
-    newMeterData = load(['NewUCSB_Square_' dateStr],'wls','theSpectra');
+    newMeterData = load(['CR-250_Square_' dateStr],'wls','theSpectra');
     wlsNewMeter = newMeterData.wls;
     spectrumNewMeter = zeros(size(wlsNewMeter));
     for i = 1:length(newMeterData.theSpectra)
@@ -51,7 +51,7 @@ if (exist(['NewUCSB_Square_' dateStr '.mat'],'file'))
     spectrumNewMeter = spectrumNewMeter/length(newMeterData.theSpectra);
     spectrumNewMeter = SplineSpd(wlsNewMeter, spectrumNewMeter, wls);
 else
-    fprintf('No NewUCSB PR-650 data available\n');
+    fprintf('No CR-250 data available\n');
     wlsNewMeter = [];
     spectrumNewMeter = [];
 end
@@ -137,7 +137,7 @@ else
     prefixOtherPR670 = 'PR-670 #1';
 end
 
-%% Figure, normalized to PR_670_1
+%% Figure, normalized to PR_670 of choice (1 or 2)
 figure; clf; hold on
 legendStr = {};
 legendLength = 0;
@@ -162,7 +162,7 @@ if (~isempty(spectrumNewMeter))
     spectrumFactor = spectrumNewMeter\spectrumNormPR670;
     plot(wls,spectrumFactor*spectrumNewMeter,'Color',[0 0 255]/255,'LineWidth',2);
     legendLength = legendLength + 1;
-    legendStr{legendLength} = 'NewUCSB PR-650';
+    legendStr{legendLength} = 'CR-250';
     fprintf('NewUCSB meter PR-650 to %s factor: %0.2f\n', prefixNormPR670, spectrumFactor);
 end
 
@@ -178,7 +178,7 @@ ylabel('Power re PR-670 #1','FontSize',18);
 title(['Relative Spectra Comparison ' dateStr],'FontSize',18);
 legend(legendStr,'Location','NorthWest','FontSize',14);
 xlim([300 800]);
-exportgraphics(gcf, fullfile(radiometerChecksDir,'xComparison',['PRComparison_Relative_' dateStr '.pdf']), 'ContentType', 'vector');
+% exportgraphics(gcf, fullfile(radiometerChecksDir,'xComparison',['PRComparison_Relative_' dateStr '.pdf']), 'ContentType', 'vector');
 
 %FigureSave(fullfile(radiometerChecksDir,'xComparison',['PRComparison_Relative_' dateStr]),gcf,'pdf');
 
@@ -201,7 +201,7 @@ end
 if (~isempty(spectrumNewMeter))
     plot(wls,spectrumNewMeter,'Color',[0 0 255]/255,'LineWidth',2);
     legendLength = legendLength + 1;
-    legendStr{legendLength} = 'NewUCSB PR-650';
+    legendStr{legendLength} = 'CR-250';
 end
 if (~isempty(spectrumPennMeter))
     plot(wls,spectrumPennMeter,'Color', [0 0 0]/255,'LineWidth',2);
@@ -213,7 +213,7 @@ ylabel('Power','FontSize',18);
 title(['Absolute Spectra Comparison ' dateStr],'FontSize',18);
 legend(legendStr,'Location','NorthWest','FontSize',14);
 xlim([300 800]);
-exportgraphics(gcf, fullfile(radiometerChecksDir,'xComparison',['PRComparison_Absolute_' dateStr '.pdf']), 'ContentType', 'vector');
+% exportgraphics(gcf, fullfile(radiometerChecksDir,'xComparison',['PRComparison_Absolute_' dateStr '.pdf']), 'ContentType', 'vector');
 
 %FigureSave(fullfile(radiometerChecksDir,'xComparison',['PRComparison_Absolute_' dateStr]),gcf,'pdf');
 

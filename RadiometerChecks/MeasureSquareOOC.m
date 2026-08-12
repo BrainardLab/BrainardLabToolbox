@@ -12,10 +12,11 @@ if (~ispref('BrainardLabToolbox','RadiometerChecksDir'))
     error('No ''BrainardLabToolbox:RadiometerChecksDir'' preference set.  Probably you need to update your BrainardLabToolbox local hook file.')
 end
 
-radiometerChecksDir = getpref('BrainardLabToolbox','RadiometerChecksDir');
+radiometerChecksDir = '/home/colorlab/Aguirre-Brainard Lab Dropbox/Metropsis Experimenter/MELA_admin/RadiometerChecks'; %getpref('BrainardLabToolbox','RadiometerChecksDir')
 if (~exist(radiometerChecksDir,'dir'))
     error(['Directory ' radiometerChecksDir ' does not exist.  Something is not set up correctly.']);
 end
+
 spectroRadiometerOBJ = [];
 
 % Number of measurements
