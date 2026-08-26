@@ -1,23 +1,24 @@
 % Method for executing a standard calibration protocol
 function obj = calibrate(obj)
 %
-    
     % Make a local copy of obj.cal so we do not keep calling it and regenerating it
     calStruct = obj.cal;
     
-    % Generate the calibration rectangle
-    obj.generateCalibrationRect();
+    if (~obj.demoMode)
+        % Generate the calibration rectangle
+        obj.generateCalibrationRect();
+    end
 
     % Prompt user to leave the room
     userPrompt = 1; beepWhenDone = 2;
-    %obj.promptUserToLeaveTheRoom(userPrompt);
-    
+    obj.promptUserToLeaveTheRoom(userPrompt);
+
     % Set email notification preference
     obj.setNotificationPreferences();
-    
+
     % Generate a new @CalibratorRawData object to store the measurements
     obj.rawData = CalibratorRawData();
-    
+
     % Initialize random number generator
     ClockRandSeed;
  
@@ -45,14 +46,13 @@ function obj = calibrate(obj)
 
             % Measure the SPD for all the settings in the calStruct.basicLinearitySetup
             for settingsIndex = 1:settingsNumToBeMeasured
+                
                 settingsToTest = calStruct.basicLinearitySetup.settings(:,settingsIndex);
                 [obj.rawData.basicLinearityMeasurements1(settingsIndex,:), obj.rawData.S] = ...
                     obj.updateStimulusAndMeasure(backgroundSettings, settingsToTest, calStruct.describe.useBitsPP);
             end % for settingsIndex
         end  % if (~isempty(calStruct.basicLinearitySetup))
     end
-    
-    
     
     % Follow-up with full specturm gamma curve measurements for each phosphor.
     % Compute range of input gamma values
@@ -67,12 +67,11 @@ function obj = calibrate(obj)
                                             obj.measurementChannelsNum...
                                         );
                                     
-    obj.rawData.gammaCurveSortIndices = zeros(calStruct.describe.nAverage, calStruct.describe.displayPrimariesNum, calStruct.describe.nMeas);
-    
+    obj.rawData.gammaCurveSortIndices = zeros(calStruct.describe.nAverage, calStruct.describe.displayPrimariesNum, calStruct.describe.nMeas);  
     
     % Do the full-gamma measurements 
     for repeatIndex = 1:calStruct.describe.nAverage
-       for currentPrimaryIndex = 1: calStruct.describe.displayPrimariesNum
+       for currentPrimaryIndex = 1:calStruct.describe.displayPrimariesNum
            fprintf('2. Testing display primary: %g (of %g) ...\n',currentPrimaryIndex,calStruct.describe.displayPrimariesNum);
            
            % set color of other (than the currentPrimaryIndex) primaries
@@ -82,6 +81,12 @@ function obj = calibrate(obj)
            
            % set background color
            backgroundSettings = calStruct.describe.bgColor';
+
+           % Could in this section set them all to the fgColor here, then just toggle 
+           % the one we are measuring, measure, and put back.  With a little
+           % delay so that we keep the intertrial primary state as close as possible
+           % to the way we will use the display.  That would be true for both the
+           % measurement of ambient and for each gamma level.
            
            % set target color
            targetSettingsArray                           = zeros(calStruct.describe.displayPrimariesNum, calStruct.describe.nMeas);
@@ -104,8 +109,10 @@ function obj = calibrate(obj)
                fprintf('   Testing gamma point: %g ...\n',randomGammaPointIndex);
                % measure the target
                targetSettings = targetSettingsArray(:,randomGammaPointIndex); 
-               [obj.rawData.gammaCurveMeasurements(repeatIndex, currentPrimaryIndex, randomGammaPointIndex, :), obj.rawData.S] = ...
-                   obj.updateStimulusAndMeasure(backgroundSettings, targetSettings, calStruct.describe.useBitsPP);
+               [theMeasuredSpectrum, obj.rawData.S] = obj.updateStimulusAndMeasure(backgroundSettings, targetSettings, calStruct.describe.useBitsPP);
+               
+               obj.rawData.gammaCurveMeasurements(repeatIndex, currentPrimaryIndex, randomGammaPointIndex, :) = ...
+                   reshape(theMeasuredSpectrum, [1 1 1 numel(theMeasuredSpectrum)]);
            end  % for gammaPointIndex
            
            % take second ambient reading
@@ -132,7 +139,6 @@ function obj = calibrate(obj)
         % Repeat the basic linearity tests (second pass)
         if (~isempty(calStruct.basicLinearitySetup))
             fprintf('3. Basic linearity measurements, pass 2 ...\n');
-
             % allocate storage for all basic measurements
             settingsNumToBeMeasured = size(calStruct.basicLinearitySetup.settings,2);
             obj.rawData.basicLinearityMeasurements2 = zeros(settingsNumToBeMeasured, obj.measurementChannelsNum);
@@ -149,7 +155,6 @@ function obj = calibrate(obj)
         end  % if (~isempty(calStruct.basicLinearitySetup))
     end
 
-    
     if (obj.options.skipBackgroundDependenceTest)
         fprintf('4. Skipping background measurements ...\n');
         obj.rawData.backgroundDependenceMeasurements = [];
@@ -157,7 +162,6 @@ function obj = calibrate(obj)
         % Continue with the dependence of test on background test.
         if (~isempty(calStruct.backgroundDependenceSetup))
             fprintf('4. Effect of background measurements ...\n');
-
             % allocate storage for all dependence measurements
             settingsNumToBeMeasured    = size(calStruct.backgroundDependenceSetup.settings,2);
             backgroundsNumToBeMeasured = size(calStruct.backgroundDependenceSetup.bgSettings,2);
@@ -175,7 +179,7 @@ function obj = calibrate(obj)
     end
 
     if (obj.options.skipAmbientLightMeasurement)
-        fprintf('5. Skipping ambient light measurement ...\n');
+        fprintf('5. Skipping ambient light measurement...\n');
         % Set it to zero, because the ambient is used in the computation
         obj.rawData.ambientMeasurements = zeros(1, obj.rawData.S(3));
     else
@@ -199,6 +203,7 @@ function obj = calibrate(obj)
         obj.rawData.ambientMeasurements = obj.rawData.ambientMeasurements / calStruct.describe.nAverage;
     end
 
+
     % Report time
     t1 = clock;
     fprintf('\nCalibration measurements took %g minutes\n\n', etime(t1, t0)/60);
@@ -211,6 +216,11 @@ function obj = calibrate(obj)
         obj.rawData.gammaCurveMeanMeasurements(obj.rawData.gammaCurveMeanMeasurements < 0) = 0;
     end
     
+    if (obj.demoMode)
+        fprintf('All done with demo mode. Bye now ...\n');
+        return;
+    end
+
     % Process data
     obj.processRawData();
     

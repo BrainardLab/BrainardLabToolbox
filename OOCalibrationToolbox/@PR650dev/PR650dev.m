@@ -35,16 +35,17 @@ classdef PR650dev < Radiometer
         function obj = PR650dev(varargin)  
             
             parser = inputParser;
-            parser.addParamValue('verbosity',   1);
-            parser.addParamValue('devicePortString',  []);
-            
+            parser.addParameter('verbosity',   1);
+            parser.addParameter('devicePortString',  []);
+            parser.addParameter('emulateHardware', false);
             % Execute the parser
             parser.parse(varargin{:});
             % Create a standard Matlab structure from the parser results.
             p = parser.Results;
             verbosity       = p.verbosity;
             devPortString   = p.devicePortString;
-            
+            emulateHardware = p.emulateHardware;
+
             % Check BrainardLabToolbox prefs for a customized device port
             % and if there is one use that one
             BLToolboxPrefs = getpref('BrainardLabToolbox');
@@ -55,12 +56,16 @@ classdef PR650dev < Radiometer
             end
             
             % Call the super-class constructor.
-            obj = obj@Radiometer(verbosity, devPortString, false);
+            obj = obj@Radiometer(verbosity, devPortString, emulateHardware);
             
             if (obj.verbosity > 9)
                 fprintf('In PR650dev.constructor() method\n');
             end
     
+            if (obj.emulateHardware)
+                return;
+            end
+
             % Initialize communication
             obj = obj.establishCommunication();
 

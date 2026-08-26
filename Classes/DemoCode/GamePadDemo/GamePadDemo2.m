@@ -28,12 +28,12 @@ function GamePadDemo2
         end
         
         % Read the keyboard
-        keyboardKey = mglGetKeyEvent();
+        %keyboardKey = mglGetKeyEvent();
         
-        if (~isempty(keyboardKey))&&(keyboardKey.charCode == 'q')
-            keepGoing = false;
-            fprintf('User entered ''q''. Exiting loop.\n');
-        end
+        % if (~isempty(keyboardKey))&&(keyboardKey.charCode == 'q')
+        %     keepGoing = false;
+        %     fprintf('User entered ''q''. Exiting loop.\n');
+        % end
         
     end % while keepGoing
     

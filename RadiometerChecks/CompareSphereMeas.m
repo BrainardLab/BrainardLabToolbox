@@ -29,7 +29,8 @@ wls = (380:1:780)';
 if (~ispref('BrainardLabToolbox','RadiometerChecksDir'))
     error('No ''BrainardLabToolbox:RadiometerChecksDir'' preference set.  Probably you need to update your BrainardLabToolbox local hook file.')
 end
-radiometerChecksDir = getpref('BrainardLabToolbox','RadiometerChecksDir');
+% radiometerChecksDir = getpref('BrainardLabToolbox','RadiometerChecksDir');
+radiometerChecksDir = '/home/colorlab/Aguirre-Brainard Lab Dropbox/Metropsis Experimenter/MELA_admin/RadiometerChecks';
 if (~exist(radiometerChecksDir,'dir'))
     error(['Directory ' radiometerChecksDir ' does not exist.  Something is not set up correctly.']);
 end
@@ -177,7 +178,7 @@ ylabel('Power re PR-670 #1','FontSize',18);
 title(['Relative Spectra Comparison ' dateStr],'FontSize',18);
 legend(legendStr,'Location','NorthWest','FontSize',14);
 xlim([300 800]);
-FigureSave(fullfile(radiometerChecksDir,'xComparison',['PRComparison_Relative_' dateStr]),gcf,'pdf');
+% FigureSave(fullfile(radiometerChecksDir,'xComparison',['PRComparison_Relative_' dateStr]),gcf,'pdf');
 
 %% Figure, absolute
 figure; clf; hold on
@@ -210,7 +211,7 @@ ylabel('Power','FontSize',18);
 title(['Absolute Spectra Comparison ' dateStr],'FontSize',18);
 legend(legendStr,'Location','NorthWest','FontSize',14);
 xlim([300 800]);
-FigureSave(fullfile(radiometerChecksDir,'xComparison',['PRComparison_Absolute_' dateStr]),gcf,'pdf');
+% FigureSave(fullfile(radiometerChecksDir,'xComparison',['PRComparison_Absolute_' dateStr]),gcf,'pdf');
 
 % XYZ color matching function
 fprintf('\n');

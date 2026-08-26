@@ -1,4 +1,4 @@
-function info = GetBrainardLabStandardToolboxesSVNInfo
+function info = GetBrainardLabStandardToolboxesSVNInfo(skipSVNchecks)
 % GetBrainardLabStandardSVNInfo - Gets SVN info for installed toolboxes.
 %
 % Syntax:
@@ -14,10 +14,16 @@ function info = GetBrainardLabStandardToolboxesSVNInfo
 %    containing the subversion information for a particular toolbox.
 % info.matlabInfo - The matlabInfo field is what is returned by Matlab's ver command.
 % 
-% 8/16/10  dhb  Add Psychtoolbox to the list
-% 8/16/10  dhb  Also return Matlab version info
-% 12/18/12 dhb  Fix bug that skipped iset.
-% 10/4/17  npc  Look for toolboxes in new directory
+% 8/16/10   dhb   Add Psychtoolbox to the list
+% 8/16/10   dhb   Also return Matlab version info
+% 12/18/12  dhb   Fix bug that skipped iset.
+% 10/4/17   npc   Look for toolboxes in new directory
+% 3/15/2025 NPC   Removed SVN checks
+
+info.svnInfo = [];
+info.matlabInfo = ver;
+return;
+
 
 % Get a list of all directories in /Users/Shared/Matlab/Toolboxes.  We'll
 % consider each of these directories a possible SVN controlled folder.
@@ -47,26 +53,31 @@ numToolboxes = length(toolboxList);
 
 svnInfoIndex = 0;
 
-for i = 1:numToolboxes
-	toolboxPath = fullfile(toolboxDir, toolboxList{i});
-    
-    % Some things that might be on path make this fail, and
-    % we don't need that info.
-    if (isempty(strfind(toolboxPath,'iset')))
-        try
-            si = GetSVNInfo(toolboxPath);
-            
-            if ~isempty(si)
-                svnInfoIndex = svnInfoIndex + 1;
-                svnInfo(svnInfoIndex) = si; %#ok<AGROW>
-            end
-        catch e
-            if ~strcmp(e.message, 'GetSVNInfo: "svn info" failed to run.')
-                rethrow(e);
+if (skipSVNchecks)
+    svnInfo = [];
+else
+    for i = 1:numToolboxes
+	    toolboxPath = fullfile(toolboxDir, toolboxList{i});
+        
+        % Some things that might be on path make this fail, and
+        % we don't need that info.
+        if (isempty(strfind(toolboxPath,'iset')))
+            try
+                si = GetSVNInfo(toolboxPath);
+                
+                if ~isempty(si)
+                    svnInfoIndex = svnInfoIndex + 1;
+                    svnInfo(svnInfoIndex) = si; %#ok<AGROW>
+                end
+            catch e
+                if ~strcmp(e.message, 'GetSVNInfo: "svn info" failed to run.')
+                    rethrow(e);
+                end
             end
         end
     end
 end
+
 
 % Tuck svnInfo into info structure, and also put Matlab info there.
 if exist('svnInfo', 'var')

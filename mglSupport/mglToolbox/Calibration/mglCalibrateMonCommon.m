@@ -30,7 +30,8 @@ else
 end
 
 % Get Brainard Lab standard toolboxes info.
-cal.describe.svnInfo = GetBrainardLabStandardToolboxesSVNInfo;
+skipSVNchecks = true;
+cal.describe.svnInfo = GetBrainardLabStandardToolboxesSVNInfo(skipSVNchecks);
 
 % Fill in descriptive information
 computerInfo = GetComputerInfo;
@@ -54,7 +55,9 @@ if (~isempty(desired.hz))
     end
 end
 if (~isempty(desired.screenSizePixel))
-    if (cal.describe.screenSizePixel(1) ~= desired.screenSizePixel(1) || cal.describe.screenSizePixel(1) ~= desired.screenSizePixel(1))
+    if (any(cal.describe.screenSizePixel ~= desired.screenSizePixel))
+        cal.describe.screenSizePixel
+        desired.screenSizePixel
         error('Current resolution does not match that specified for this calibration');
     end
 end

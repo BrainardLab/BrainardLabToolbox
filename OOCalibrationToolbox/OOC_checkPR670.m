@@ -11,14 +11,11 @@ function OOC_checkPR670(varargin)
     end
 
     pr670obj = [];
-
-   
-    % Device Port String setting:
-    % Empty or select the right device from ls -a /dev/cu*, e.g. '/dev/cu.usbmodem1a21' (Mac/Linux)
-    % For windows computers, the 'devicePortString' must be set to 'COM1', 'COM2', 'COM3' etc
-    % To find out which one, open DeviceManager and look under Ports(COM&LPT)
-    % --Nicolas Jun 17,2024
-    devicePortString = 'COM7';
+    if IsLinux
+        devicePortString = '/dev/ttyACM0';  % or select from ls -a /dev/cu*, e.g. '/dev/cu.usbmodem1a21'
+    else
+        devicePortString = [];
+    end
 
     try
         pr670obj = PR670dev('verbosity', verb, 'devicePortString', devicePortString);

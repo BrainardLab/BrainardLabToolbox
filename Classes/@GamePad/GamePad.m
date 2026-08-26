@@ -56,7 +56,7 @@ classdef GamePad < handle
     % Private properties
     properties (Access = private)
         devHandle;      % handle to joystick device
-        lastSecs;       % last results of mglGetSecs
+        lastSecs;       % last results of tic
        
     end  % private properties
     
@@ -155,18 +155,18 @@ classdef GamePad < handle
         % Constructor
         function obj = GamePad()
             obj.devHandle = vrjoystick(1);
-            obj.lastSecs = mglGetSecs;
+            obj.lastSecs = tic;
             obj.lastKeyCharCode = '';
         end
         
         function time = getTime(obj)
-            time = GetSecs;
+            time = toc(obj.lastSecs);
         end
         
         function key = getKeyEvent(obj)
             % Do not report buttons pressed too often
             
-            currentSecs = mglGetSecs;
+            currentSecs = toc(obj.lastSecs);
             minInterKeyDelaySecs = 0.1;
 
             [action, time, timeString] = read(obj);
@@ -182,8 +182,8 @@ classdef GamePad < handle
             end
             
             obj.lastKeyCharCode = key.charCode;
-            latency = currentSecs-obj.lastSecs;
-            obj.lastSecs = currentSecs;
+            latency = toc(obj.lastSecs);
+            obj.lastSecs = tic;
             
             if (strcmp(key.charCode, 'GP:LeftJoystick')) || (strcmp(key.charCode, 'GP:RightJoystick'))
                 % no min delay requirement here
@@ -201,7 +201,7 @@ classdef GamePad < handle
             [axes, buttons, povs] = read(obj.devHandle);
             
             % Get Secs
-            time = GetSecs;
+            time = toc(obj.lastSecs);
 
             % Get time as string
             a = clock();
@@ -238,10 +238,10 @@ classdef GamePad < handle
             obj.buttonY = buttons(4);
             
             % State of trigger buttons
-            obj.buttonLeftUpperTrigger  = buttons(5);
-            obj.buttonRightUpperTrigger = buttons(6);
-            obj.buttonLeftLowerTrigger  = buttons(7);
-            obj.buttonRightLowerTrigger = buttons(8);
+            obj.buttonLeftUpperTrigger  = buttons(5); % Was 5
+            obj.buttonRightUpperTrigger = buttons(6); % Was 6
+            obj.buttonLeftLowerTrigger  = buttons(7); % Was 7
+            obj.buttonRightLowerTrigger = buttons(8); % Was 8
             
             % State of buttons labeled 'Start' and 'Back'
             obj.buttonBack              = buttons(9);
