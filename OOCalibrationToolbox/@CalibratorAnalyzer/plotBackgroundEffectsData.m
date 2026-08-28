@@ -100,7 +100,7 @@ function plotSpectra(obj, hPanel, current_pos, spectra, maxAll, settings, figure
 
         plot(h_axes, spectralAxis, spdDiff*1000, '-', 'Color', edgeColor, 'LineWidth', 2.0);
         if (numel(settings) == 3)
-            title(sprintf('Effects of background on RGB =(%d %d %d)e-2', round(100*settings(1)), round(100*settings(2)), round(100*settings(3))), 'Visible', 'on');
+            title(sprintf('Effects of background on RGB =(%0.1f %0.1f %0.1f)', settings(1), settings(2), settings(3)), 'Visible', 'on');
         else
             title(sprintf('Effects of background on target %d/%d', settingsIndex, settingsIndicesNum),'Visible', 'on');
         end

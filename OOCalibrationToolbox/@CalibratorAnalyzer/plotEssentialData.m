@@ -81,9 +81,9 @@ function plotEssentialData(obj, figureGroupIndex, gridDims)
          plotAmbientData(obj,  figureGroupIndex, hPanel, pos);
         if (nDevices == 3)
             % Full spectral data for all gamma input values (unscaled/scaled)
-            plotFullSpectra(obj,  1, 'Red primary', figureGroupIndex, 'NorthWest', hPanel, pos, true, true);
-            plotFullSpectra(obj,  2, 'Green primary', figureGroupIndex, 'NorthEast', hPanel, pos, true, true);
-            plotFullSpectra(obj,  3, 'Blue primary', figureGroupIndex, 'NorthEast', hPanel, pos, true, true);
+            plotFullSpectra(obj,  1, 'Red primary', figureGroupIndex, 'NorthWest', hPanel, pos);
+            plotFullSpectra(obj,  2, 'Green primary', figureGroupIndex, 'NorthEast', hPanel, pos);
+            plotFullSpectra(obj,  3, 'Blue primary', figureGroupIndex, 'NorthEast', hPanel, pos);
         else
             pIndices = 1:nDevices;  % Create an index vector for all devices
             showLegend = true;
@@ -218,13 +218,20 @@ function plotRepeatibilityData(obj, figureGroupIndex, lineColors, hPanel, pos)
             
 end
 
-function makeShadedPlot(x,y, faceColor, edgeColor, ax)
-    px = reshape(x, [1 numel(x)]);
-    py = reshape(y, [1 numel(y)]);
-    px = [px(1) px px(end)];
-    py = [1*eps py 2*eps];
-    pz = -10*eps*ones(size(py)); 
-    patch(ax,px,py,pz,'FaceColor',faceColor,'EdgeColor',edgeColor, 'FaceAlpha', 0.5);
+function makeShadedStripPlot(x,y, faceColor, edgeColor, ax)
+    x = x(:);
+    y = y(:);
+    nPoints = numel(x);
+    validSegments = find(isfinite(x(1:end-1)) & isfinite(x(2:end)) & ...
+        isfinite(y(1:end-1)) & isfinite(y(2:end)));
+    vertices = [x zeros(nPoints,1); x y];
+    faces = [validSegments validSegments+1 ...
+        validSegments+nPoints+1 validSegments+nPoints];
+    patch(ax, 'Vertices', vertices, 'Faces', faces, 'FaceColor', faceColor, ...
+        'EdgeColor', 'none', 'FaceAlpha', 0.5);
+    if ~(ischar(edgeColor) && strcmp(edgeColor, 'none'))
+        plot(ax, x, y, 'Color', edgeColor);
+    end
 end
 
 function plotNulPlot(obj, figureGroupIndex, hPanel, pos)
@@ -612,31 +619,17 @@ function plotFullSpectra(obj, primaryIndex, primaryName, figureGroupIndex, legen
         ax1 = axes('Parent', hPanel, 'Position', [pos{6}(1), pos{6}(2) + 0.01, pos{6}(3)/2 * scaleFactor, pos{6}(4) * scaleFactor]);
     end
 
+    hold(ax1, 'on');
     for k = size(fullSpectra,1):-1:1
         if (primaryIndex == 1)
             faceColor = [1.0 1.0 1.0] - (k/size(fullSpectra,1)*[0.2 1.0 1.0]);  
-            if (mod(k,3) == 0) 
-                edgeColor = 'none'; %[0.0 0.0 0.0]; 
-            else
-                edgeColor = 'none'; 
-            end     
         elseif (primaryIndex == 2)
             faceColor = [1.0 1.0 1.0] - (k/size(fullSpectra,1)*[1.0 0.1 1.0]);  
-            if (mod(k,3) == 0) 
-                edgeColor = 'none'; %[0.0 0.0 0.0]; 
-            else
-                edgeColor = 'none'; 
-            end         
         elseif (primaryIndex == 3)
             faceColor = [1.0 1.0 1.0] - (k/size(fullSpectra,1)*[1.0 1.0 0.1]);  
-            if (mod(k,3) == 0) 
-                edgeColor = 'none'; %[0.0 0.0 0.0]; 
-            else
-                edgeColor = 'none';
-            end         
         end
         y = squeeze(fullSpectra(k,:))*1000;
-        obj.makeShadedPlot(x, y, faceColor, edgeColor, ax1);
+        makeShadedStripPlot(x, y, faceColor, 'none', ax1);
         legendsMatrix{k} = sprintf('%0.2f', rawGammaInput(size(fullSpectra,1)-k+1));
     end
 
@@ -673,7 +666,8 @@ function plotFullSpectra(obj, primaryIndex, primaryName, figureGroupIndex, legen
     elseif (primaryIndex == 3)
         title('Blue Primary SPD Stability')
     end
-    box on;
+    box(ax1, 'on');
+    set(ax1, 'Layer', 'top');
     
     % scaled spectra
     subplot();
@@ -794,7 +788,7 @@ function plotSpectralData(obj, figureGroupIndex, lineColors, hPanel, pos)
         y = squeeze(P_device(:,primaryIndex))*1000;
         faceColor = lineColors(primaryIndex,:); 
         edgeColor = faceColor*0.5;
-        obj.makeShadedPlot(x, y, faceColor, edgeColor, ax);
+        makeShadedStripPlot(x, y, faceColor, edgeColor, ax);
     end
     
     set(gca, 'Color', [1.0 1.0 1.0], 'XColor', 'b', 'YColor', 'b');
@@ -967,4 +961,3 @@ function plotGammaData(obj, figureGroupIndex, lineColors, hPanel, pos)
     drawnow;
 
 end
-
