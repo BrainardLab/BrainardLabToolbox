@@ -1,9 +1,35 @@
-% Subclass of @Calibrator based on Unity graphics.
-%
-% 7/08/2024  fh   Wrote it.
-%
-
 classdef UnityImagingCalibrator < Calibrator  
+    % UNITYIMAGINGCALIBRATOR Calibrator subclass for Unity-based display control.
+    %
+    % This class has a specialized purpose and requires a dual-computer
+    % calibration setup. MATLAB runs this class on the conductor computer,
+    % which issues calibration commands and controls the radiometer. A separate
+    % display computer receives the commands and presents the requested stimuli
+    % in Unity; this class does not render those stimuli locally.
+    %
+    % The conductor and display computers communicate through a text file on a
+    % shared network disk that must be accessible to both computers. Set
+    % dropbox_filePath to that file before starting calibration. MATLAB appends
+    % commands to the file and polls it for acknowledgements written by Unity.
+    %
+    % Class structure and communication sequence:
+    %   1. The constructor initializes the Calibrator superclass, identifies
+    %      UnityImaging as the graphics engine, and validates display settings.
+    %   2. setDisplaysInitialState writes Initialize_Unity and waits for Unity
+    %      to report Finished_Screen_Setup.
+    %   3. updateBackgroundAndTarget writes the requested background and target
+    %      RGB settings and waits for Image_Successfully_Displayed.
+    %   4. updateStimulusAndMeasure triggers the radiometer measurement and
+    %      reports measurement completion through the shared file.
+    %   5. shutDown writes Done to terminate the display-side sequence.
+    %
+    % Public methods implement the abstract Calibrator display interface.
+    % Private methods format commands, append them to the communication file,
+    % and poll the file for Unity acknowledgements.
+    %
+    % 7/08/2024  fh   Wrote it.
+    %
+
     % Public properties (specific to the @UnityImagingCalibrator class) 
     properties
         dropbox_filePath;
