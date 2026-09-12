@@ -154,7 +154,11 @@ classdef GamePad < handle
     methods
         % Constructor
         function obj = GamePad()
-            obj.devHandle = vrjoystick(1);
+            if (exist('vrjoystick','file'))
+                obj.devHandle = vrjoystick(1);
+            else
+                obj.devHandle = sim3d.io.Joystick(ID = 1);
+            end
             obj.lastSecs = tic;
             obj.lastKeyCharCode = '';
         end
